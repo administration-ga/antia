@@ -23,7 +23,7 @@ dependances:
 >
 > | Prompt | Clos le | Commit(s) |
 > |---|---|---|
-> | PA0 — scaffold du monorepo | 2026-10-14 | voir l'historique de `main` (commit « PA0 ») |
+> | PA0 — scaffold du monorepo | 2026-10-14 | `9367243` |
 > | PA1 — owner map | — | — |
 > | PA2 — fondations multi-réseaux | — | — |
 > | PA3 — duplication du backend | — | — |
