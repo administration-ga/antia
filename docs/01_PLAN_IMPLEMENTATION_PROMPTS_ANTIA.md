@@ -2,13 +2,13 @@
 title: "ANTIA — Plan d'implémentation en prompts : le moteur social national, puis le réseau public"
 version: "1.0"
 date: "2026-10-14"
-statut: "Plan d'exécution — prompts Claude Code (Opus) ; PA0 → PA7 sont le préalable de DIASPOGAB"
+statut: "Plan d'exécution — prompts Claude Code (Opus) ; PA0 → PA7 sont le préalable de DIASPORALE"
 projet: "ANTIA"
 reference: "NTSAGUI/ANTIA/PI/2026/001"
 dependances:
   - "ECOSYSTEMES/ANTIA/docs/00_CAHIER_DES_CHARGES_ANTIA.md (exigences EXF-AN / EXT-AN)"
-  - "ECOSYSTEMES/DIASPOGAB/docs/01_PLAN_IMPLEMENTATION_PROMPTS_DIASPOGAB.md (s'exécute entre PA7 et PA8)"
-  - "Documentation/RESEAUX_SOCIAUX/00_PLAN_RESEAUX_DANS_LE_RESEAU_DIASPOGAB_ANTIA_2026-10-14.md"
+  - "ECOSYSTEMES/DIASPORALE/docs/01_PLAN_IMPLEMENTATION_PROMPTS_DIASPORALE.md (s'exécute entre PA7 et PA8)"
+  - "Documentation/RESEAUX_SOCIAUX/00_PLAN_RESEAUX_DANS_LE_RESEAU_DIASPORALE_ANTIA_2026-10-14.md"
   - "PRO_GA/docs/11_PLAN_IMPLEMENTATION_PROMPTS_PRO_GA.md (le protocole de duplication, éprouvé)"
 ---
 
@@ -21,7 +21,7 @@ Ce plan construit **le moteur social national** (PA0 → PA7), puis **le réseau
 colle **tel quel, un à la fois**, dans Claude Code ouvert à la racine
 `Digital GABON/DIGITAL_GOUV/`, précédé du **préambule commun** (§2). Chaque prompt se termine
 par un état **vert** (typecheck, tests, lint du périmètre), un commit et un rapport de fin.
-L'ordre est obligatoire ; **DIASPOGAB PD0 → PD6 s'exécute après PA7 et avant PA8** (le
+L'ordre est obligatoire ; **DIASPORALE PD0 → PD6 s'exécute après PA7 et avant PA8** (le
 premier réseau réel du moteur est la diaspora).
 
 Règles d'exécution héritées du programme :
@@ -48,7 +48,7 @@ Règles d'exécution héritées du programme :
       initialisé dessus.
 - [ ] Projet Convex `antia` créé par le propriétaire (déploiement dev ; prod plus tard) ;
       équipe et budget décidés ; variables d'environnement posées par lui.
-- [ ] Clients OIDC `antia` (et `diaspogab`) créés au portail développeur d'identite.ga en
+- [ ] Clients OIDC `antia` (et `diasporale`) créés au portail développeur d'identite.ga en
       sandbox.
 - [ ] Dossier APDPVP et analyse d'impact lancés.
 - [ ] LiveKit du programme accessible en dev (clés posées par le propriétaire) ; Resend et
@@ -61,7 +61,7 @@ Règles d'exécution héritées du programme :
 Tu travailles dans « Digital GABON/DIGITAL_GOUV/ ». Lis d'abord ECOSYSTEMES/ANTIA/docs/00_CAHIER_DES_CHARGES_ANTIA.md,
 ECOSYSTEMES/ANTIA/CLAUDE.md et, pour la duplication, Documentation/RESEAUX_SOCIAUX/annexes/A_*.md et B_*.md.
 Le moteur social national vit dans ECOSYSTEMES/ANTIA : backend Convex `antia`, paquets social-domain,
-social-contracts, social-features, ui, api ; applications antia_ga et admin_antia_ga ; DIASPOGAB en est
+social-contracts, social-features, ui, api ; applications antia_ga et admin_antia_ga ; DIASPORALE en est
 une application (espace de travail externe). Règles non négociables :
 - dix règles de duplication (copier d'abord depuis le socle sur origin/main, en-tête de provenance
   « // Dupliqué de <chemin> @ <commit> — adaptations : … », périmètre d'adaptation fermé, aucun import
@@ -101,7 +101,7 @@ une application (espace de travail externe). Règles non négociables :
 | `socle/packages/agent-features/src/features/{reseau-personnel,reseau-albums,stories,notifications,messagerie,iappel,direct}` | `packages/social-features/src/features/*` | 49 % tel quel, 42 % à adapter, 9 % retiré | PA6 |
 | `socle/packages/{ui-v2 (tokens, fonts, charpente élagués), ui (bloc espace-personnel, mobile.css), api (hooks), routing, livekit, chat}` | `packages/{ui,api}` | à élaguer, consommés par copie versionnée | PA6 |
 | `AF/components/{espace-kit,floating-surface,EspaceFloatingCard,ImmersiveOverlay}`, `shell/global-call-surface-host`, `direct-session-host`, providers de l'app espace | coque légère `packages/social-features/src/shell` | reprenables ; AppShell réécrit | PA6 |
-| Spécifications : annexes A et B, cahier ANTIA, cahier DIASPOGAB | — | — | tous |
+| Spécifications : annexes A et B, cahier ANTIA, cahier DIASPORALE | — | — | tous |
 
 ## 4. Les prompts
 
@@ -121,8 +121,8 @@ mapping).
 > Vérifie les préalables du §1 ; si l'un manque, arrête-toi et liste.
 > 1. Dans `ECOSYSTEMES/ANTIA/` (déjà ouvert : README, CLAUDE.md, docs/) : `package.json`
 >    racine `antia-platform` (bun, workspaces `apps/*`, `packages/*`, et déjà
->    `../DIASPOGAB/apps/*`, `../DIASPOGAB/packages/*` en commentaire documenté, activés par
->    DIASPOGAB PD0), `turbo.json`, `convex/` (`schema.ts` vide avec `schemaValidation: true`,
+>    `../DIASPORALE/apps/*`, `../DIASPORALE/packages/*` en commentaire documenté, activés par
+>    DIASPORALE PD0), `turbo.json`, `convex/` (`schema.ts` vide avec `schemaValidation: true`,
 >    `convex.config.ts` avec better-auth, rate-limiter, migrations, aggregate, resend ;
 >    `auth.config.ts` IDN par variables), `apps/antia_ga` (Next 16, port 3030, `/` et
 >    `/sante-fonctionnelle`), `apps/admin_antia_ga` (port 3032), `packages/{social-domain,
@@ -295,7 +295,7 @@ l'identité IDN prime sur l'e-mail ; ne jamais créer de profil d'office.
 >    (révocation serveur puis purge locale) ; cliquet « aucune déconnexion partielle ».
 > 3. `packages/api` : client Convex + TanStack, `useAuthenticatedQuery`, `usePaginated`,
 >    `NetworkProvider` / `useNetwork`, `useSsoNavigate` (jeton à usage unique entre
->    `antia.ga`, `diaspogab.com`, console), `signOutEverywhere`.
+>    `antia.ga`, `diasporale.com`, console), `signOutEverywhere`.
 > 4. Onboarding dans `social-features` : portes (IDN en premier), handle (suggestions,
 >    aucun présélectionné), nom affiché, consentements non précochés, préférences ; bannière
 >    d'élévation IDN.
@@ -340,7 +340,7 @@ rejeu, `crons/notificationsRetention.ts`, `dataSubjectErasure.ts`.
 >    réseau (cron), aucun contenu dans la notification (cliquet).
 > 5. `convex/modules/federation` : `federationEmitters` (clé par émetteur et environnement),
 >    inbox HTTP signée (`httpAction`), reçus idempotents, lettres mortes, rejeu audité,
->    `mirrors` (objet distant → objet local) ; aucun contrat branché encore (PA9, DIASPOGAB
+>    `mirrors` (objet distant → objet local) ; aucun contrat branché encore (PA9, DIASPORALE
 >    PD3/PD5).
 > 6. Tests : chaque sanction ; recours ; relecture ; limitation (refus au-delà du seuil) ;
 >    effacement complet ; rétention ; signature invalide refusée ; idempotence de l'inbox.
@@ -385,7 +385,7 @@ provisoires ; deux formats téléphone ; cycle `espace-personnel ↔ reseau-pers
 >    des pièces de marque ; bloc `[data-charte]` générique dérivé de la charte Personnel
 >    (surfaces, rayons, états, sombre) ; `mobile.css` ; espace-kit ; `EspaceFloatingCard`,
 >    `ImmersiveOverlay`, `floating-surface` ; aucune couleur littérale hors des fichiers de
->    jetons (cliquet) ; thèmes `antia`, `diaspogab`, `admin` comme fichiers de jetons vides à
+>    jetons (cliquet) ; thèmes `antia`, `diasporale`, `admin` comme fichiers de jetons vides à
 >    remplir par les passes `frontend-design`.
 > 5. Une application de démonstration interne (`apps/antia_ga` en mode `test-closed`) monte
 >    le fil, un profil, les relations, un groupe, la messagerie et un appel, pour la recette.
@@ -421,14 +421,14 @@ IDN `loa ≥ 2` ; double validation des actes irréversibles ; patrons de la con
 > 3. Tests : un opérateur sans `loa 2` est refusé ; archiver un réseau exige une double
 >    validation ; créer un réseau le rend joignable par une application sans déploiement
 >    (test d'intégration avec `antia_ga` en mode test).
-> Critère de sortie : la console crée `diaspogab` en recette sans aucune ligne de code ;
+> Critère de sortie : la console crée `diasporale` en recette sans aucune ligne de code ;
 > `verify` vert.
 
 **Critères de done.** Console opérationnelle.
 **Vérification.** Création d'un réseau de bout en bout ; tests.
 **Couvre.** EXF-AN-39, 40 ; EXT-AN-10.
 
-> **Ici s'exécute DIASPOGAB PD0 → PD6** (premier réseau réel). PA8 reprend ensuite.
+> **Ici s'exécute DIASPORALE PD0 → PD6** (premier réseau réel). PA8 reprend ensuite.
 
 ---
 
@@ -438,7 +438,7 @@ IDN `loa ≥ 2` ; double validation des actes irréversibles ; patrons de la con
 modération nationale, textes légaux ; lecture anonyme des projections décidées.
 
 **Contexte.** Décisions A3 (ouverture), A4 (lecture anonyme), A8 (direction artistique).
-`social-features` et la coque légère (PA6) ; DIASPOGAB fournit déjà des membres dérivés et
+`social-features` et la coque légère (PA6) ; DIASPORALE fournit déjà des membres dérivés et
 des contenus `root`.
 
 > 0. Passe `frontend-design` : `ANTIA/docs/05_CHARTE_ANTIA.md` et `packages/ui/src/themes/antia.css`
@@ -451,7 +451,7 @@ des contenus `root`.
 >    leurs publications `root`, les profils publics réduits et les contenus `root` publics ;
 >    rendu serveur, métadonnées de partage ; tout le reste exige une adhésion ; test « un
 >    anonyme ne lit jamais un contenu `network` ni un profil privé ».
-> 3. « Publier aussi sur ANTIA » : lecture des contenus `root` venus de DIASPOGAB ; retrait
+> 3. « Publier aussi sur ANTIA » : lecture des contenus `root` venus de DIASPORALE ; retrait
 >    propagé ; l'auteur voit « lu dans ANTIA » depuis son réseau.
 > 4. Modération nationale : équipe `antia`, équipes thématiques, `/moderation`, rapport de
 >    transparence agrégé `/transparence`.
@@ -462,7 +462,7 @@ des contenus `root`.
 > 7. Mise en ligne seulement si A5 et les textes légaux sont validés : backend puis front ;
 >    preuve par révision servie et parcours réel ; sinon recette seule, et le dire.
 > Critère de sortie : antia.ga servi (recette ou production), fil racine qui montre un
-> contenu DIASPOGAB marqué `root` et jamais un contenu `network`.
+> contenu DIASPORALE marqué `root` et jamais un contenu `network`.
 
 **Critères de done.** Application publique livrée ; lecture anonyme bornée ; modération.
 **Vérification.** Recette ; tests d'anonymat ; révision servie.
@@ -552,7 +552,7 @@ propriétaire (backend avant fronts, copie propre).
 | EXF-AN-10, 11 | PA3 | EXF-AN-32 à 34 | PA5 |
 | EXF-AN-12, 13 | PA3, PA8, PA10 | EXF-AN-35 | PA8 |
 | EXF-AN-14, 15 | PA3 | EXF-AN-36, 37 | PA5, PA9 |
-| EXF-AN-16 à 18 | PA3 | EXF-AN-38 | DIASPOGAB PD3, PD5 |
+| EXF-AN-16 à 18 | PA3 | EXF-AN-38 | DIASPORALE PD3, PD5 |
 | EXF-AN-19 à 21 | PA3 | EXF-AN-39, 40 | PA7 |
 | EXF-AN-22 à 25 | PA3, PA6 | EXF-AN-41 à 43 | PA0, PA6 |
 | EXF-AN-26, 27 | PA5 | EXF-AN-44 à 51 | PA8 |
@@ -569,8 +569,8 @@ propriétaire (backend avant fronts, copie propre).
       active.
 - [ ] Les verrous « agent » du socle (appels, présence, groupes ad hoc) sont levés et testés
       dans le moteur.
-- [ ] DIASPOGAB D1 a tourné sur le moteur avant PA8 ; ANTIA public lit un contenu `root` de
-      DIASPOGAB et jamais un contenu `network`.
+- [ ] DIASPORALE D1 a tourné sur le moteur avant PA8 ; ANTIA public lit un contenu `root` de
+      DIASPORALE et jamais un contenu `network`.
 - [ ] La fédération du socle n'a transporté ni note de service, ni e-mail, ni identifiant
       interne ; la publication du socle en production a été décidée par le propriétaire.
 - [ ] Textes légaux validés ; dossier APDPVP déposé ; aucun chiffre public non mesuré.

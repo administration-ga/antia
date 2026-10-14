@@ -4,15 +4,15 @@
 > code**. Avant tout travail, lire dans l'ordre :
 > 1. `docs/00_CAHIER_DES_CHARGES_ANTIA.md` (le moteur et le réseau public : invariants, tables, lots) ;
 > 2. `docs/01_PLAN_IMPLEMENTATION_PROMPTS_ANTIA.md` (le prompt à exécuter, un à la fois, avec son préambule commun) ;
-> 3. `../../../Documentation/RESEAUX_SOCIAUX/00_PLAN_RESEAUX_DANS_LE_RESEAU_DIASPOGAB_ANTIA_2026-10-14.md`
+> 3. `../../../Documentation/RESEAUX_SOCIAUX/00_PLAN_RESEAUX_DANS_LE_RESEAU_DIASPORALE_ANTIA_2026-10-14.md`
 >    et ses annexes A (backend du socle) et B (front du socle), qui sont la carte de duplication ;
-> 4. `../DIASPOGAB/docs/00_CAHIER_DES_CHARGES_DIASPOGAB.md` (le premier réseau servi).
+> 4. `../DIASPORALE/docs/00_CAHIER_DES_CHARGES_DIASPORALE.md` (le premier réseau servi).
 
 ## Ce qu'est ce dépôt
 
 - **Le moteur social national** (backend Convex `antia` + paquets) et **le réseau public
-  ANTIA** (`apps/antia_ga`) et sa **console** (`apps/admin_antia_ga`). DIASPOGAB
-  (`../DIASPOGAB`) est une application externe de ce moteur ; sa tranche backend
+  ANTIA** (`apps/antia_ga`) et sa **console** (`apps/admin_antia_ga`). DIASPORALE
+  (`../DIASPORALE`) est une application externe de ce moteur ; sa tranche backend
   `convex/modules/diaspora/` vit ici.
 - Le code vient du **socle administration.ga sur `origin/main`** (jamais de l'arbre de
   travail partagé, en retard), dupliqué selon les dix règles de PRO.GA (`PRO_GA/docs/11` §2) :
