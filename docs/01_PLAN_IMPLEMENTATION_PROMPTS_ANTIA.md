@@ -510,7 +510,7 @@ propriétaire (backend avant fronts, copie propre).
 > 5. Tests : une note de service n'arrive jamais (test du contrat côté socle et refus côté
 >    moteur) ; un reflet n'est pas éditable ; `optout` efface ; signature invalide refusée.
 > Critère de sortie : recette croisée **en dev** (déploiement dev du socle
-> `shocking-jackal-301` ou copie, et dev du moteur) : R5 et R6 joués ; PR socle verte (suite
+> ou une copie, et dev du moteur) : R5 et R6 joués ; PR socle verte (suite
 > Convex complète, cliquets) ; publication du socle en production **sur décision du
 > propriétaire seulement**.
 

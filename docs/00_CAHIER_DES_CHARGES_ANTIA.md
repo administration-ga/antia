@@ -724,7 +724,7 @@ téléphone.
 | A2 | Le moteur vit dans le dépôt ANTIA ; DIASPORALE en est une application | oui |
 | A3 | Ouverture d'ANTIA | toute personne, badges visibles ; politique modifiable sans code |
 | A4 | Lecture anonyme | pages Officiel, leurs publications `root`, profils publics réduits, contenus `root` publics ; tout le reste exige une adhésion |
-| A5 | Équipe Convex, hébergement, budget | à décider par le propriétaire (`admin-06593` ou `okatech` ; Cloud Run ou Vercel) |
+| A5 | Équipe Convex, hébergement, budget | à décider par le propriétaire (équipe Convex du programme ; Cloud Run ou Vercel) |
 | A6 | Format téléphone | 440 × 956, plancher 375 |
 | A7 | Fédération du socle : qui marque « aussi sur ANTIA » | le signataire de la page, au moment de publier ; jamais par défaut |
 | A8 | Direction artistique ANTIA | passe `frontend-design` ; candidates `vert-souverain`, « parchemin », déclinaison propre |
