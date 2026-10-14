@@ -1,7 +1,8 @@
 # ADR-0001 : Un moteur, trois réseaux, deux dépôts ; une clé de réseau sur tout contenu
 
-- **Statut** : Proposé
+- **Statut** : Accepté
 - **Date** : 2026-10-14
+- **Acceptation** : Accepté le 2026-10-14 à la clôture de PA2 : tables `networks`, `networkMemberships`, garde `requireMembership` et cliquet `network-scoped-functions` en place et testés.
 
 ## Contexte
 

@@ -1,0 +1,51 @@
+/**
+ * Tables du module `networks` (cahier §7, §11) : un réseau = une ligne. Aucune
+ * suppression : un réseau s'archive. Chaque changement de réglage laisse une
+ * trace dans `networkSettingsHistory`.
+ */
+import { defineTable } from "convex/server"
+import { v } from "convex/values"
+
+import {
+  contentVisibilityValidator,
+  facetSchemaValidator,
+  membershipPolicyValidator,
+  networkKindValidator,
+  networkStatusValidator,
+} from "../../lib/validators"
+
+/** Réglages d'un réseau — ce que la console modifie et ce que l'historique fige. */
+export const networkSettingsFields = {
+  name: v.string(),
+  membershipPolicy: membershipPolicyValidator,
+  defaultVisibility: contentVisibilityValidator,
+  facetSchema: v.optional(facetSchemaValidator),
+  reachValues: v.array(v.string()),
+  openCountries: v.optional(v.array(v.string())),
+  theme: v.string(),
+}
+
+export const networksTables = {
+  networks: defineTable({
+    slug: v.string(),
+    kind: networkKindValidator,
+    parentId: v.optional(v.id("networks")),
+    ...networkSettingsFields,
+    status: networkStatusValidator,
+    createdAt: v.number(),
+    updatedAt: v.number(),
+    archivedAt: v.optional(v.number()),
+  })
+    .index("by_slug", ["slug"])
+    .index("by_kind_and_status", ["kind", "status"])
+    .index("by_parent_and_status", ["parentId", "status"]),
+
+  networkSettingsHistory: defineTable({
+    networkId: v.id("networks"),
+    actorPersonId: v.optional(v.id("persons")),
+    kind: v.union(v.literal("created"), v.literal("updated"), v.literal("archived")),
+    settings: v.object({ ...networkSettingsFields, status: networkStatusValidator }),
+    reason: v.optional(v.string()),
+    at: v.number(),
+  }).index("by_network_and_at", ["networkId", "at"]),
+}

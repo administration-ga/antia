@@ -1,5 +1,14 @@
 {
-  "notFound": "Cette ressource est introuvable ou n'est pas accessible.",
   "unauthenticated": "Connectez-vous pour continuer.",
-  "rateLimited": "Trop de tentatives. Réessayez dans quelques instants."
+  "notFound": "Cette ressource est introuvable ou n'est pas accessible.",
+  "rateLimited": "Trop de tentatives. Réessayez dans quelques instants.",
+  "invalidArgument": "Une information saisie n'est pas valable.",
+  "conflict": "Cette action a déjà été faite ou entre en conflit avec une autre.",
+  "handleUnavailable": "Cet identifiant n'est pas disponible.",
+  "membershipSuspended": "Votre participation à ce réseau est suspendue.",
+  "statusInsufficient": "Votre adhésion ne permet pas encore cette action.",
+  "operatorRequired": "Cette action est réservée aux opérateurs de la plateforme.",
+  "policyRefused": "La politique de ce réseau ne permet pas cette adhésion.",
+  "consentRequired": "Votre consentement est nécessaire pour continuer.",
+  "profileRequired": "Choisissez d'abord votre identifiant et votre nom affiché."
 }

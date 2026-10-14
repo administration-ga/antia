@@ -1,0 +1,359 @@
+// Dupliqué de socle/convex/modules/reseauPersonnel/domain.test.ts (l. 64-643 et 733-738 ; plus stories.domain.test.ts, l. 286-345) @ ad2e7fdc2 — adaptations : `ReseauPersonnelViolation` → `DomainViolation` (codes au lieu des phrases) ; cas de l'audience « organisation » et de la portée « mon_administration » retirés avec elles ; le test d'alignement avec le validateur Convex passe côté backend (PA3) ; la forme d'une publication de page n'admet que `public`.
+/**
+ * Domaine pur des publications — LE test qui tient la règle de fond : un abonné
+ * n'est pas une connexion.
+ */
+import { describe, expect, it } from "vitest"
+
+import {
+  assertAvatarUpload,
+  assertGroupAudienceShape,
+  assertHandle,
+  assertHeadline,
+  assertPageAudienceShape,
+  assertPersonalCommentBody,
+  assertPersonalPostBody,
+  assertPostContent,
+  assertPostMedia,
+  assertShareable,
+  FEED_SCOPE_DEFAULT,
+  FEED_SCOPES,
+  feedAdmissionFor,
+  feedReasonFor,
+  groupViewingReasonFor,
+  isPersonalPostVisibleTo,
+  isPersonalReactionKind,
+  isProfileDiscoverable,
+  isProfilePublished,
+  normalizeHandle,
+  PERSONAL_COMMENT_MAX_LENGTH,
+  PERSONAL_POST_AUDIENCES,
+  PERSONAL_POST_MAX_LENGTH,
+  PERSONAL_REACH_AUDIENCES,
+  PERSONAL_REACTION_KINDS,
+  POST_IMAGE_MAX_BYTES,
+} from "./content"
+import { DomainViolation } from "./violation"
+
+function violationOf(run: () => unknown): DomainViolation | null {
+  try {
+    run()
+    return null
+  } catch (error) {
+    return error instanceof DomainViolation ? error : null
+  }
+}
+
+describe("visibilité d'une publication, par audience", () => {
+  const base = {
+    audience: "connections" as const,
+    status: "published" as const,
+    isAuthor: false,
+    isConnected: false,
+    isGroupMember: false,
+    isBlockedWithAuthor: false,
+  }
+
+  it("le public est lisible sans aucun lien", () => {
+    expect(isPersonalPostVisibleTo({ ...base, audience: "public" })).toBe(true)
+  })
+
+  it("l'audience `connections` exige une connexion ACCEPTÉE", () => {
+    expect(isPersonalPostVisibleTo(base)).toBe(false)
+    expect(isPersonalPostVisibleTo({ ...base, isConnected: true })).toBe(true)
+  })
+
+  it("une publication retirée ne reste lisible que par son auteur", () => {
+    const removed = { ...base, status: "removed" as const, audience: "public" as const }
+    expect(isPersonalPostVisibleTo(removed)).toBe(false)
+    expect(isPersonalPostVisibleTo({ ...removed, isConnected: true })).toBe(false)
+    expect(isPersonalPostVisibleTo({ ...removed, isAuthor: true })).toBe(true)
+  })
+
+  it("l'auteur voit toujours la sienne", () => {
+    expect(isPersonalPostVisibleTo({ ...base, isAuthor: true })).toBe(true)
+  })
+
+  describe("audience `group`", () => {
+    const groupPost = { ...base, audience: "group" as const }
+
+    it("réservée aux membres vivants — ni le public, ni une connexion", () => {
+      expect(isPersonalPostVisibleTo(groupPost)).toBe(false)
+      // ⚠️ LA garde à ne pas relâcher : être CONNECTÉ à l'auteur n'ouvre pas son groupe.
+      expect(isPersonalPostVisibleTo({ ...groupPost, isConnected: true })).toBe(false)
+      expect(isPersonalPostVisibleTo({ ...groupPost, isGroupMember: true })).toBe(true)
+    })
+
+    it("un blocage ferme la publication même entre co-membres", () => {
+      expect(isPersonalPostVisibleTo({ ...groupPost, isGroupMember: true, isBlockedWithAuthor: true })).toBe(false)
+    })
+
+    it("l'auteur voit la sienne, retirée comprise", () => {
+      expect(isPersonalPostVisibleTo({ ...groupPost, isAuthor: true })).toBe(true)
+      expect(isPersonalPostVisibleTo({ ...groupPost, status: "removed", isAuthor: true })).toBe(true)
+    })
+  })
+})
+
+describe("un abonnement n'ouvre jamais le cercle des connexions", () => {
+  // LE test de la règle : si celui-ci tombe, quelqu'un a écrit `isConnected || isFollowing`.
+  it("un abonné n'entre pas dans une publication réservée aux connexions", () => {
+    expect(feedReasonFor({ isAuthor: false, isConnected: false, isFollowing: true, audience: "connections" })).toBeNull()
+  })
+
+  it("un abonné entre dans le public", () => {
+    expect(feedReasonFor({ isAuthor: false, isConnected: false, isFollowing: true, audience: "public" })).toBe("follow")
+  })
+
+  it("le titre d'entrée le plus fort gagne", () => {
+    const all = { isConnected: true, isFollowing: true, audience: "public" as const }
+    expect(feedReasonFor({ ...all, isAuthor: true })).toBe("own")
+    expect(feedReasonFor({ ...all, isAuthor: false })).toBe("connection")
+  })
+
+  it("sans aucun lien, rien n'entre — même du public", () => {
+    expect(feedReasonFor({ isAuthor: false, isConnected: false, isFollowing: false, audience: "public" })).toBeNull()
+  })
+})
+
+describe("bornes de saisie", () => {
+  it("refuse une publication vide ou trop longue", () => {
+    expect(() => assertPersonalPostBody("   ")).toThrow(DomainViolation)
+    expect(() => assertPersonalPostBody("a".repeat(PERSONAL_POST_MAX_LENGTH + 1))).toThrow(DomainViolation)
+    expect(assertPersonalPostBody("  bonjour  ")).toBe("bonjour")
+  })
+
+  it("un commentaire est plus court qu'une publication", () => {
+    expect(PERSONAL_COMMENT_MAX_LENGTH).toBeLessThan(PERSONAL_POST_MAX_LENGTH)
+    expect(() => assertPersonalCommentBody("a".repeat(PERSONAL_COMMENT_MAX_LENGTH + 1))).toThrow(DomainViolation)
+  })
+
+  it("une accroche vide vaut absence, pas chaîne vide", () => {
+    expect(assertHeadline("   ")).toBeUndefined()
+    expect(assertHeadline(undefined)).toBeUndefined()
+    expect(assertHeadline(" Chargée d'études ")).toBe("Chargée d'études")
+  })
+
+  it("une violation porte un code de règle et ses bornes, jamais du texte ni la valeur saisie", () => {
+    const violation = violationOf(() => assertPersonalPostBody("a".repeat(PERSONAL_POST_MAX_LENGTH + 1)))
+    expect(violation?.code).toBe("POST_TOO_LONG")
+    expect(violation?.params).toEqual({ max: PERSONAL_POST_MAX_LENGTH })
+    expect(violation?.message).toBe("POST_TOO_LONG")
+  })
+})
+
+describe("handle — une adresse, pas un nom", () => {
+  it("normalise la casse et les espaces", () => {
+    expect(normalizeHandle("  A.Ndong  ")).toBe("a.ndong")
+    expect(assertHandle("A.Ndong")).toBe("a.ndong")
+  })
+
+  it("refuse les longueurs hors bornes", () => {
+    expect(() => assertHandle("ab")).toThrow(DomainViolation)
+    expect(() => assertHandle("a".repeat(31))).toThrow(DomainViolation)
+  })
+
+  it("refuse ce qui n'est pas une adresse", () => {
+    // Les homoglyphes Unicode fabriquent des adresses qui se ressemblent sans
+    // être les mêmes : le jeu de caractères reste ASCII.
+    expect(() => assertHandle("a ndong")).toThrow(DomainViolation)
+    expect(() => assertHandle("ndоng")).toThrow(DomainViolation) // « о » cyrillique
+    expect(() => assertHandle(".ndong")).toThrow(DomainViolation)
+    expect(() => assertHandle("ndong.")).toThrow(DomainViolation)
+    expect(assertHandle("a_n-d.o1")).toBe("a_n-d.o1")
+  })
+})
+
+describe("profil publié, profil découvrable", () => {
+  it("publié tant qu'il n'est pas retiré ; découvrable s'il est aussi non privé", () => {
+    expect(isProfilePublished({})).toBe(true)
+    expect(isProfilePublished({ withdrawnAt: 1 })).toBe(false)
+    expect(isProfileDiscoverable({})).toBe(true)
+    expect(isProfileDiscoverable({ privateAt: 1 })).toBe(false)
+    expect(isProfileDiscoverable({ withdrawnAt: 1 })).toBe(false)
+  })
+})
+
+describe("réactions", () => {
+  it("reconnaît les genres du domaine, et eux seuls", () => {
+    for (const kind of PERSONAL_REACTION_KINDS) expect(isPersonalReactionKind(kind)).toBe(true)
+    expect(isPersonalReactionKind("colere")).toBe(false)
+  })
+})
+
+describe("médias", () => {
+  const image = { kind: "image" as const, mimeType: "image/png", sizeBytes: 1000 }
+  const video = { kind: "video" as const, mimeType: "video/mp4", sizeBytes: 1000 }
+
+  it("accepte jusqu'à quatre images", () => {
+    expect(() => assertPostMedia([image, image, image, image])).not.toThrow()
+    expect(() => assertPostMedia([image, image, image, image, image])).toThrow(DomainViolation)
+  })
+
+  it("une vidéo est SEULE dans sa publication", () => {
+    expect(() => assertPostMedia([video])).not.toThrow()
+    expect(() => assertPostMedia([video, image])).toThrow(DomainViolation)
+    expect(() => assertPostMedia([video, video])).toThrow(DomainViolation)
+  })
+
+  it("refuse un type qui n'est pas celui annoncé", () => {
+    expect(() => assertPostMedia([{ ...image, mimeType: "text/plain" }])).toThrow(DomainViolation)
+    // Une image envoyée sous le genre « vidéo » ne passe pas davantage.
+    expect(() => assertPostMedia([{ ...video, mimeType: "image/png" }])).toThrow(DomainViolation)
+  })
+
+  it("refuse au-delà des bornes de poids", () => {
+    expect(() => assertPostMedia([{ ...image, sizeBytes: POST_IMAGE_MAX_BYTES + 1 }])).toThrow(DomainViolation)
+    expect(() => assertPostMedia([{ ...image, sizeBytes: 0 }])).toThrow(DomainViolation)
+    expect(violationOf(() => assertPostMedia([{ ...image, sizeBytes: POST_IMAGE_MAX_BYTES + 1 }]))?.params).toEqual({ maxMegabytes: 20 })
+  })
+
+  it("borne le texte alternatif", () => {
+    expect(() => assertPostMedia([{ ...image, altText: "a".repeat(301) }])).toThrow(DomainViolation)
+  })
+})
+
+describe("contenu d'une publication, dans son ensemble", () => {
+  it("une photo sans légende est une publication légitime", () => {
+    expect(assertPostContent({ body: "  ", mediaCount: 1, isShare: false })).toBe("")
+  })
+
+  it("un partage sans mot en est une aussi", () => {
+    expect(assertPostContent({ body: "", mediaCount: 0, isShare: true })).toBe("")
+  })
+
+  it("mais un texte vide sans rien d'autre n'en est pas une", () => {
+    expect(() => assertPostContent({ body: "   ", mediaCount: 0, isShare: false })).toThrow(DomainViolation)
+  })
+
+  it("un partage n'embarque JAMAIS ses propres médias", () => {
+    expect(() => assertPostContent({ body: "mon avis", mediaCount: 1, isShare: true })).toThrow(DomainViolation)
+  })
+})
+
+describe("partage", () => {
+  it("seule une publication ouverte à tous les membres se partage", () => {
+    expect(() => assertShareable({ audience: "public", status: "published" })).not.toThrow()
+    expect(() => assertShareable({ audience: "connections", status: "published" })).toThrow(DomainViolation)
+    expect(() => assertShareable({ audience: "public", status: "removed" })).toThrow(DomainViolation)
+  })
+
+  it("une publication de groupe ne se partage jamais", () => {
+    expect(() => assertShareable({ audience: "group", status: "published" })).toThrow(DomainViolation)
+  })
+})
+
+describe("photo de profil", () => {
+  it("accepte JPEG, PNG et WebP sous 5 Mo", () => {
+    expect(() => assertAvatarUpload({ mimeType: "image/png", sizeBytes: 1000 })).not.toThrow()
+    expect(() => assertAvatarUpload({ mimeType: "image/gif", sizeBytes: 1000 })).toThrow(DomainViolation)
+    expect(() => assertAvatarUpload({ mimeType: "image/png", sizeBytes: 6 * 1024 * 1024 })).toThrow(DomainViolation)
+  })
+})
+
+describe("feedAdmissionFor — la garde d'audience ne se relâche jamais", () => {
+  const AUCUN_LIEN = { isAuthor: false, isConnected: false, isFollowing: false } as const
+
+  it("REFUSE une publication `connections` à qui n'est pas connecté — dans TOUTES les portées", () => {
+    for (const scope of FEED_SCOPES) {
+      expect(feedAdmissionFor({ ...AUCUN_LIEN, scope, isFollowing: true, audience: "connections" })).toBeNull()
+    }
+  })
+
+  it("REFUSE une publication de GROUPE dans toutes les portées — l'auteur compris", () => {
+    for (const scope of FEED_SCOPES) {
+      expect(feedAdmissionFor({ isAuthor: true, isConnected: true, isFollowing: true, scope, audience: "group" })).toBeNull()
+    }
+  })
+
+  it("laisse passer une `connections` à une connexion acceptée", () => {
+    for (const scope of FEED_SCOPES) {
+      expect(feedAdmissionFor({ ...AUCUN_LIEN, scope, isConnected: true, audience: "connections" })).toBe("connection")
+    }
+  })
+
+  it("laisse toujours passer l'auteur sur ses propres publications", () => {
+    for (const scope of FEED_SCOPES) {
+      expect(feedAdmissionFor({ ...AUCUN_LIEN, scope, isAuthor: true, audience: "connections" })).toBe("own")
+    }
+  })
+
+  it("« Pour vous » rend EXACTEMENT ce que rend feedReasonFor", () => {
+    for (const isAuthor of [false, true]) {
+      for (const isConnected of [false, true]) {
+        for (const isFollowing of [false, true]) {
+          for (const audience of ["public", "connections"] as const) {
+            const input = { isAuthor, isConnected, isFollowing, audience }
+            expect(feedAdmissionFor({ ...input, scope: "pour_vous" })).toBe(feedReasonFor(input))
+          }
+        }
+      }
+    }
+  })
+
+  it("« Récents » ouvre le public d'un inconnu, là où « Pour vous » le refuse", () => {
+    const inconnu = { ...AUCUN_LIEN, audience: "public" } as const
+    expect(feedAdmissionFor({ ...inconnu, scope: "pour_vous" })).toBeNull()
+    expect(feedAdmissionFor({ ...inconnu, scope: "recents" })).toBe("public")
+  })
+
+  it("déclare EXACTEMENT deux portées, et « pour_vous » par défaut", () => {
+    expect([...FEED_SCOPES]).toEqual(["pour_vous", "recents"])
+    expect(FEED_SCOPE_DEFAULT).toBe("pour_vous")
+  })
+})
+
+describe("audiences — le vocabulaire reste séparé", () => {
+  it("la PORTÉE ne connaît pas `group`, les PUBLICATIONS si", () => {
+    expect([...PERSONAL_REACH_AUDIENCES]).toEqual(["public", "connections"])
+    expect([...PERSONAL_POST_AUDIENCES]).toEqual(["public", "connections", "group"])
+  })
+})
+
+describe("invariant de forme d'une publication de groupe", () => {
+  it("groupId présent SI ET SEULEMENT SI audience `group`", () => {
+    expect(() => assertGroupAudienceShape({ audience: "group", hasGroup: true })).not.toThrow()
+    expect(() => assertGroupAudienceShape({ audience: "public", hasGroup: false })).not.toThrow()
+    expect(() => assertGroupAudienceShape({ audience: "group", hasGroup: false })).toThrow(DomainViolation)
+    expect(() => assertGroupAudienceShape({ audience: "connections", hasGroup: true })).toThrow(DomainViolation)
+  })
+})
+
+describe("titre de lecture d'une publication de groupe", () => {
+  it("la sienne ou celle d'un membre — jamais un lien maquillé", () => {
+    expect(groupViewingReasonFor({ isAuthor: true })).toBe("own")
+    expect(groupViewingReasonFor({ isAuthor: false })).toBe("group")
+  })
+})
+
+describe("assertPageAudienceShape", () => {
+  const page = { audience: "public" as const, hasPage: true, hasGroup: false, hasShare: false }
+
+  it("accepte une publication de page publique, hors groupe, hors partage", () => {
+    expect(() => assertPageAudienceShape(page)).not.toThrow()
+  })
+
+  it("n'impose rien à une publication SANS page", () => {
+    expect(() => assertPageAudienceShape({ audience: "connections", hasPage: false, hasGroup: false, hasShare: true })).not.toThrow()
+  })
+
+  it("refuse une page qui publierait pour ses connexions", () => {
+    expect(violationOf(() => assertPageAudienceShape({ ...page, audience: "connections" }))?.code).toBe("PAGE_POST_AUDIENCE_INVALID")
+  })
+
+  it("refuse une publication de page dans un groupe", () => {
+    expect(violationOf(() => assertPageAudienceShape({ ...page, hasGroup: true }))?.code).toBe("PAGE_POST_FORBIDS_GROUP")
+  })
+
+  it("refuse qu'une page partage la publication d'un tiers", () => {
+    expect(violationOf(() => assertPageAudienceShape({ ...page, hasShare: true }))?.code).toBe("PAGE_POST_FORBIDS_SHARE")
+  })
+
+  it("porte un code de violation distinct par interdit", () => {
+    const codes = [{ ...page, audience: "connections" as const }, { ...page, hasGroup: true }, { ...page, hasShare: true }].map(
+      (input) => violationOf(() => assertPageAudienceShape(input))?.code ?? null,
+    )
+    expect(new Set(codes).size).toBe(3)
+    expect(codes).not.toContain(null)
+  })
+})

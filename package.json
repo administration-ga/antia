@@ -84,6 +84,8 @@
     "deploy:admin": "node scripts/deploy-app.mjs admin_antia_ga"
   },
   "dependencies": {
+    "@antia/social-contracts": "workspace:*",
+    "@antia/social-domain": "workspace:*",
     "@convex-dev/aggregate": "catalog:",
     "@convex-dev/better-auth": "catalog:",
     "@convex-dev/migrations": "catalog:",

@@ -1,5 +1,14 @@
 {
-  "notFound": "This resource cannot be found or is not available to you.",
   "unauthenticated": "Sign in to continue.",
-  "rateLimited": "Too many attempts. Please try again in a moment."
+  "notFound": "This resource cannot be found or is not available to you.",
+  "rateLimited": "Too many attempts. Please try again in a moment.",
+  "invalidArgument": "Some of the information entered is not valid.",
+  "conflict": "This action was already done or conflicts with another one.",
+  "handleUnavailable": "This handle is not available.",
+  "membershipSuspended": "Your participation in this network is suspended.",
+  "statusInsufficient": "Your membership does not allow this action yet.",
+  "operatorRequired": "This action is reserved for platform operators.",
+  "policyRefused": "This network's policy does not allow this membership.",
+  "consentRequired": "Your consent is required to continue.",
+  "profileRequired": "First choose your handle and display name."
 }

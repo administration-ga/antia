@@ -1,7 +1,8 @@
 # ADR-0002 : Identité — IDN fournisseur unique, comptes légers, attestations externes, badges calculés côté serveur
 
-- **Statut** : Proposé
+- **Statut** : Accepté
 - **Date** : 2026-10-14
+- **Acceptation** : Accepté le 2026-10-14 à la clôture de PA2 : `persons`, `identityLinks` et badges calculés (`computePersonBadges`) en place et testés ; l'entrée IDN et les comptes légers arrivent en PA4.
 
 ## Contexte
 

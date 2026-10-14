@@ -6,4 +6,5 @@
  * socle (annexe B) : le front ne doit plus importer de module serveur.
  */
 export { BRAND_NAME } from "./brand"
+export { ENGINE_ERROR_CODES, type EngineErrorCode, type EngineErrorData, engineErrorCode, engineErrorRule, isEngineErrorCode } from "./errors"
 export { SOCIAL_DOMAIN_VERSION } from "@antia/social-domain"

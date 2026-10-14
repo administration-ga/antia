@@ -6,7 +6,7 @@ réservent contre `origin/main` et les PR ouvertes de ce dépôt.
 
 | ADR | Titre | Statut |
 |---|---|---|
-| [0001](0001-un-moteur-trois-reseaux-deux-depots.md) | Un moteur, trois réseaux, deux dépôts ; une clé de réseau sur tout contenu | Proposé |
-| [0002](0002-identite-idn-unique-comptes-legers-badges-calcules.md) | Identité : IDN fournisseur unique, comptes légers, attestations externes, badges calculés côté serveur | Proposé |
+| [0001](0001-un-moteur-trois-reseaux-deux-depots.md) | Un moteur, trois réseaux, deux dépôts ; une clé de réseau sur tout contenu | Accepté |
+| [0002](0002-identite-idn-unique-comptes-legers-badges-calcules.md) | Identité : IDN fournisseur unique, comptes légers, attestations externes, badges calculés côté serveur | Accepté |
 | [0003](0003-federation-entrante-par-contrats-signes.md) | Fédération entrante par contrats signés ; aucune lecture de base externe | Proposé |
 | [0004](0004-duplication-depuis-le-socle-dix-regles.md) | Duplication depuis le socle : dix règles, provenance, parité prouvée | Proposé |

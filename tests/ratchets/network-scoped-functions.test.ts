@@ -9,14 +9,14 @@ import { type Finding, formatFindings, isTestFile, listFiles, readRepoFile } fro
  * `requireMembership(ctx, args.networkId, …)` explicite avec `networkId` en
  * argument, ou projection publique allowlistée (`@publicProjection <raison>`).
  *
- * VIDE au prompt PA0 (aucun module social) ; la liste s'étend à chaque module
- * posé (PA2 : networks, people ; PA3 : tous les modules dupliqués). Un module
- * social absent de cette liste est lui-même un défaut (test ci-dessous).
+ * Actif depuis PA2 (networks, people) ; la liste s'étend à chaque module posé
+ * (PA3 : tous les modules dupliqués). Un module absent des deux listes est
+ * lui-même un défaut (test ci-dessous).
  */
-export const SOCIAL_MODULE_DIRECTORIES: readonly string[] = []
+export const SOCIAL_MODULE_DIRECTORIES: readonly string[] = ["convex/modules/networks", "convex/modules/people"]
 
 /** Modules du moteur qui ne sont PAS sociaux (aucun contenu, aucune adhésion). */
-export const NON_SOCIAL_MODULE_DIRECTORIES: readonly string[] = []
+export const NON_SOCIAL_MODULE_DIRECTORIES: readonly string[] = ["convex/modules/platform"]
 
 describe("network-scoped-functions — toute fonction sociale est bornée par le réseau (R10)", () => {
   it("chaque fonction publique des modules sociaux exige un réseau et une adhésion", () => {
@@ -45,8 +45,13 @@ describe("network-scoped-functions — toute fonction sociale est bornée par le
       "export const hidden = internalQuery({ args: {}, handler: async () => null })",
       "/** @publicProjection page Officiel lisible sans compte (arbitrage A4) */",
       "export const officialPage = query({ args: {}, handler: async () => null })",
+      "/** @selfScoped la personne appelante règle ses propres consentements */",
+      "export const mine = personMutation({ args: {}, handler: async () => null })",
+      "/** @selfScoped trop court */",
+      "export const shortReason = personQuery({ args: {}, handler: async () => null })",
+      "export const console = operatorMutation({ args: {}, handler: async () => null })",
     ].join("\n")
     const findings = detectUnscopedFunctions("convex/modules/posts/posts.ts", source)
-    expect(findings.map((finding) => finding.line)).toEqual([1])
+    expect(findings.map((finding) => finding.line)).toEqual([1, 13])
   })
 })

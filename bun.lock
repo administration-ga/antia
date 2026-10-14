@@ -5,6 +5,8 @@
     "": {
       "name": "antia-platform",
       "dependencies": {
+        "@antia/social-contracts": "workspace:*",
+        "@antia/social-domain": "workspace:*",
         "@convex-dev/aggregate": "catalog:",
         "@convex-dev/better-auth": "catalog:",
         "@convex-dev/migrations": "catalog:",

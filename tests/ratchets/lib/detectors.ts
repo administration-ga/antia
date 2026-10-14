@@ -223,12 +223,30 @@ export function detectHardcodedUrls(file: string, text: string, options: { route
 // network-scoped-functions
 // ─────────────────────────────────────────────────────────────────────────────
 
-/** Constructeurs qui posent EUX-MÊMES `networkId` et `requireMembership` (PA2). */
-export const NETWORK_SCOPED_BUILDERS = new Set(["networkQuery", "networkMutation", "networkAction"])
-/** Constructeurs PUBLICS qu'une fonction sociale doit borner elle-même. */
-export const PUBLIC_BUILDERS = new Set(["query", "mutation", "action", "authQuery", "authMutation", "authAction", "httpAction"])
-/** Marqueur d'une projection publique allowlistée : `@publicProjection <justification>`. */
-export const PUBLIC_PROJECTION_TAG = /@publicProjection\s+\S.{9,}/
+/**
+ * Constructeurs qui portent EUX-MÊMES leur garde : `networkId` consommé et
+ * `requireMembership` (réseau), ou opérateur de plateforme vivant (console).
+ */
+export const NETWORK_SCOPED_BUILDERS = new Set(["networkQuery", "networkMutation", "networkAction", "operatorQuery", "operatorMutation"])
+/** Constructeurs PUBLICS qu'une fonction sociale doit borner elle-même ou justifier. */
+export const PUBLIC_BUILDERS = new Set([
+  "query",
+  "mutation",
+  "action",
+  "authQuery",
+  "authMutation",
+  "authAction",
+  "personQuery",
+  "personMutation",
+  "httpAction",
+])
+/**
+ * Exceptions JUSTIFIÉES (au moins quinze caractères de raison, marqueurs de commentaire ôtés) :
+ * - `@publicProjection` : projection publique allowlistée, lisible sans compte (arbitrage A4) ;
+ * - `@selfScoped` : la seule personne appelante agit sur elle-même (réglages, adhésion,
+ *   consentements) — aucun contenu d'un réseau n'est lu ni écrit.
+ */
+export const PUBLIC_PROJECTION_TAG = /@(?:publicProjection|selfScoped)\s+\S.{14,}/
 
 export function detectUnscopedFunctions(file: string, text: string): Finding[] {
   const findings: Finding[] = []
@@ -245,6 +263,8 @@ export function detectUnscopedFunctions(file: string, text: string): Finding[] {
       const name = declaration.name.getText(source)
       const line = lineOf(source, declaration.getStart(source))
       const docs = leadingCommentText(source, statement)
+        .replace(/\/\*\*?|\*\/|^\s*\*|\/\//gm, " ")
+        .replace(/\s+/g, " ")
       if (PUBLIC_PROJECTION_TAG.test(docs)) continue
       const body = initializer.getText(source)
       const callsGuard = /\brequireMembership\s*\(/.test(body)
@@ -263,7 +283,7 @@ export function detectUnscopedFunctions(file: string, text: string): Finding[] {
         findings.push({
           file,
           line,
-          message: `fonction publique « ${name} » (${builder}) sans ${!declaresNetwork ? "argument networkId" : ""}${!declaresNetwork && !callsGuard ? " ni " : ""}${!callsGuard ? "requireMembership" : ""} — utiliser networkQuery/networkMutation, ou marquer @publicProjection avec sa justification`,
+          message: `fonction publique « ${name} » (${builder}) sans ${!declaresNetwork ? "argument networkId" : ""}${!declaresNetwork && !callsGuard ? " ni " : ""}${!callsGuard ? "requireMembership" : ""} — utiliser networkQuery/networkMutation, ou justifier par @publicProjection / @selfScoped`,
         })
       }
     }

@@ -1,0 +1,117 @@
+/**
+ * Tables du module `people` (cahier §6, §11) : la personne unique, ses liens
+ * d'identité, ses adhésions par réseau, ses facettes, ses consentements et
+ * l'historique de ses identifiants.
+ *
+ * - `persons` : UNE ligne par être humain, quel que soit le nombre de réseaux
+ *   (invariant 2). Créée à la première session SANS identifiant ni nom : rien
+ *   n'est recopié d'un état civil, rien n'est publié avant le geste de la
+ *   personne (invariant 7). Les champs de profil reprennent les noms du profil
+ *   du socle (`reseauPersonnel_profiles`) pour la duplication de PA3.
+ * - Aucun badge n'est stocké : il se calcule (invariant 5, test de schéma).
+ */
+import { defineTable } from "convex/server"
+import { v } from "convex/values"
+
+import {
+  activeMembershipStatusValidator,
+  consentOriginValidator,
+  consentPurposeValidator,
+  facetValueValidator,
+  facetVisibilityValidator,
+  identityProviderValidator,
+  localeValidator,
+  membershipRoleValidator,
+  membershipStatusValidator,
+  verificationSourceValidator,
+} from "../../lib/validators"
+
+export const peopleTables = {
+  persons: defineTable({
+    /** Sujet du jeton Better Auth (`identity.subject`) : le lien session → personne. */
+    authUserId: v.string(),
+    /** Identifiant public unique (minuscules, 3 à 30 caractères), choisi par la personne. */
+    handle: v.optional(v.string()),
+    /** Nom affiché, choisi par la personne — jamais recopié d'un état civil sans geste. */
+    displayName: v.optional(v.string()),
+    headline: v.optional(v.string()),
+    avatarStorageId: v.optional(v.id("_storage")),
+    coverStorageId: v.optional(v.id("_storage")),
+    /** Profil publié (fin de l'accueil) ; absent tant que la personne n'a pas choisi. */
+    publishedAt: v.optional(v.number()),
+    withdrawnAt: v.optional(v.number()),
+    privateAt: v.optional(v.number()),
+    locale: v.optional(localeValidator),
+    timeZone: v.optional(v.string()),
+    deletionRequestedAt: v.optional(v.number()),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_authUserId", ["authUserId"])
+    .index("by_handle", ["handle"]),
+
+  identityLinks: defineTable({
+    personId: v.id("persons"),
+    provider: identityProviderValidator,
+    /** `idn` : sub ; `local` : empreinte de l'adresse ou du numéro ; `administration` : sub IDN confirmé ; attestation : empreinte. */
+    subject: v.string(),
+    loa: v.optional(v.number()),
+    nationality: v.optional(v.string()),
+    profileType: v.optional(v.union(v.literal("citizen"), v.literal("resident"), v.literal("visitor"), v.literal("developer"))),
+    channel: v.optional(v.union(v.literal("email"), v.literal("phone"))),
+    orgRef: v.optional(v.string()),
+    country: v.optional(v.string()),
+    postSlug: v.optional(v.string()),
+    linkedAt: v.number(),
+    revokedAt: v.optional(v.number()),
+  })
+    .index("by_person_and_provider", ["personId", "provider"])
+    .index("by_provider_and_subject", ["provider", "subject"]),
+
+  networkMemberships: defineTable({
+    networkId: v.id("networks"),
+    personId: v.id("persons"),
+    status: membershipStatusValidator,
+    role: membershipRoleValidator,
+    /** Adhésion DÉRIVÉE : le réseau enfant qui l'a fait naître (invariant 3). */
+    derivedFrom: v.optional(v.id("networks")),
+    verifiedBy: v.optional(verificationSourceValidator),
+    sponsorPersonId: v.optional(v.id("persons")),
+    /** Statut à rendre à la levée d'une suspension. */
+    statusBeforeSuspension: v.optional(activeMembershipStatusValidator),
+    suspendedUntil: v.optional(v.number()),
+    joinedAt: v.number(),
+    statusChangedAt: v.number(),
+    leftAt: v.optional(v.number()),
+  })
+    .index("by_network_and_person", ["networkId", "personId"])
+    .index("by_person_and_status", ["personId", "status"])
+    .index("by_network_and_status", ["networkId", "status"]),
+
+  personFacets: defineTable({
+    networkId: v.id("networks"),
+    personId: v.id("persons"),
+    values: v.record(v.string(), facetValueValidator),
+    visibilities: v.record(v.string(), facetVisibilityValidator),
+    updatedAt: v.number(),
+  }).index("by_network_and_person", ["networkId", "personId"]),
+
+  consents: defineTable({
+    personId: v.id("persons"),
+    networkId: v.optional(v.id("networks")),
+    purpose: consentPurposeValidator,
+    textVersion: v.string(),
+    origin: consentOriginValidator,
+    grantedAt: v.number(),
+    revokedAt: v.optional(v.number()),
+  }).index("by_person_and_purpose", ["personId", "purpose"]),
+
+  handleHistory: defineTable({
+    personId: v.id("persons"),
+    handle: v.string(),
+    from: v.number(),
+    until: v.optional(v.number()),
+  })
+    .index("by_handle", ["handle"])
+    .index("by_person", ["personId"]),
+}

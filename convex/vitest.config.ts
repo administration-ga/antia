@@ -17,11 +17,12 @@ export default defineConfig({
     // (environnement proche du sandbox Convex) ; `node` par défaut pour les
     // tests de modules purs, comme au socle (ADR-0003 du socle).
     environment: "node",
-    server: { deps: { inline: ["convex-test"] } },
+    // Les composants montés dans les tests (limiteur de débit) chargent leurs
+    // modules par `import.meta.glob` : ils doivent passer par Vite.
+    server: { deps: { inline: ["convex-test", "@convex-dev/rate-limiter"] } },
     env: {
-      // convex-test ne monte pas les composants : les limiteurs de débit
-      // passent en mode neutre dans la suite (patron PRO.GA, PA2).
-      ANTIA_TEST_DISABLE_RATE_LIMITS: "1",
+      // Les graines s'exécutent dans la suite (déploiement simulé, jamais la production).
+      ANTIA_SEEDS_ALLOWED: "true",
     },
   },
 })
