@@ -24,7 +24,7 @@ dependances:
 > | Prompt | Clos le | Commit(s) |
 > |---|---|---|
 > | PA0 — scaffold du monorepo | 2026-10-14 | `9367243` |
-> | PA1 — owner map | — | — |
+> | PA1 — owner map | 2026-10-14 | `9a8fbb3` |
 > | PA2 — fondations multi-réseaux | — | — |
 > | PA3 — duplication du backend | — | — |
 > | PA4 — identité | — | — |
@@ -52,6 +52,19 @@ dependances:
 >   leurs imports) ; `bun test` sert aux scripts ;
 > - licence AGPL-3.0 héritée du socle (le code dupliqué l'impose dans un dépôt public), à
 >   confirmer par le propriétaire.
+>
+> **Ce que PA1 corrige du plan** (détail : `docs/02_OWNER_MAP_DUPLICATION.md` §1 et §9 ; socle lu :
+> `origin/main` = `ad2e7fdc2`, inchangé au 14/10 au soir) :
+> - la table du §3 ci-dessous est **remplacée par le document 02** là où elle diffère : domaine pur réduit
+>   à cinq modules (`validators`, `counters`, `contentRemoval` restent côté backend) ; `reseau/connections`
+>   et `reseauAlbums` ne sont pas « tel quel » (à réécrire, à adapter) ; la garde des fichiers du socle est
+>   fail-open et doit être inversée ;
+> - la liste fermée des corrections de dette de PA3 s'allonge des dettes qui touchent un invariant (D05,
+>   D06, D12 à D17 du document 02 : délivrance, refus indistinct, blocage, débit, adhésion, isolation) ;
+> - décisions par défaut : pages génériques réécrites (backend en PA3, écrans en PA6/PA8, non copiés) ;
+>   iCal différé ; format téléphone unique 440×956 ; branches « poste » élaguées à la copie ; une seule
+>   table de notifications sociales ; iRéunion, Standard, iAsted, centre d'appels, priorité et routage de
+>   poste exclus.
 
 ---
 
