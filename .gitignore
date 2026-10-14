@@ -1,0 +1,16 @@
+# Dépendances et sorties
+node_modules/
+.turbo/
+.next/
+dist/
+out/
+coverage/
+# Environnement et secrets — jamais versionnés
+.env
+.env.*
+!.env.example
+# Convex local
+.convex/
+# Système
+.DS_Store
+*.log
