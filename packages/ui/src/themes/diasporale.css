@@ -1,0 +1,339 @@
+/*
+ * Thème DIASPORALE (`DIASPORALE/apps/diasporale_com`, `data-charte="diasporale"`) —
+ * charte « Sable de la diaspora », arbitrage A7 pris par défaut (famille
+ * Consulaire / Sable sur le squelette de l'espace agent). Référence :
+ * DIASPORALE/docs/03_CHARTE_DIASPORALE.md. Fichier écrit par la session DIASPORALE.
+ *
+ * Règles (cliquet `theme-contract`) : uniquement des jetons du contrat de la
+ * charte de base, uniquement sous [data-charte="diasporale"]. Les rôles propres à
+ * DIASPORALE (étiquette pays, badges, bandeaux) vivent dans
+ * `@diasporale/features/styles/extras.css` et ne lisent QUE des jetons d'ici.
+ *
+ * Deux blocs :
+ *   1. clair — les primitives du contrat réaccordées à la palette Sable (bleu
+ *      Gabon #0072B9, grès chauds, encre brune), puis tous les rôles ;
+ *   2. sombre « nuit brune » — redéclare CHAQUE rôle que le bloc sombre de la
+ *      base déclare : à spécificité 0,2,0, ce bloc l'emporterait sinon sur le
+ *      bloc clair de ce thème (0,1,0) et le bleu du moteur réapparaîtrait.
+ * Les contrastes (texte ≥ 4,5:1, contours et focus ≥ 3:1) sont recalculés dans les
+ * deux thèmes, à travers la cascade complète base + thème, par le cliquet
+ * `engine-theme-contrast.test.ts` de DIASPORALE.
+ */
+
+[data-charte="diasporale"] {
+  color-scheme: light;
+
+  /* ── 1. Primitives du contrat, réaccordées ── */
+
+  /* Bleu Gabon — le barreau 500 est le bleu d'action, comme dans la base. */
+  --esp-blue-50: #eef7ff;
+  --esp-blue-100: #d7ecff;
+  --esp-blue-200: #b4dbff;
+  --esp-blue-300: #7ec2ff;
+  --esp-blue-400: #449fe9;
+  --esp-blue-500: #0072b9;
+  --esp-blue-600: #005d98;
+  --esp-blue-700: #004c7d;
+  --esp-blue-800: #003458;
+  --esp-blue-900: #17293f;
+  --esp-blue-950: #001d35;
+  /* Encre posée sur le bleu éclairci du thème sombre (6,53:1). */
+  --esp-on-blue: #14130f;
+
+  /* Sable, papier, grès, encre. 400 et le champ sont non textuels (3,26:1). */
+  --esp-neutral-0: #ffffff;
+  --esp-neutral-50: #fbfaf6;
+  --esp-neutral-100: #f7f6f2;
+  --esp-neutral-150: #f3efe4;
+  --esp-neutral-200: #efebe0;
+  --esp-neutral-300: #d2cdbf;
+  --esp-neutral-400: #918e89;
+  --esp-neutral-500: #736e61;
+  --esp-neutral-600: #66635d;
+  --esp-neutral-700: #3a3833;
+  --esp-neutral-800: #26241f;
+  --esp-neutral-900: #14130f;
+  --esp-neutral-rule: #e6e2d8;
+  --esp-neutral-field: #918e89;
+  --esp-neutral-chip: #efebe0;
+  --esp-neutral-hover: #f3efe4;
+  --esp-neutral-mute: #736e61;
+  --esp-neutral-faint: #918e89;
+
+  /* Nuit brune — fond < section < carte < puce. */
+  --esp-night-bg: #14130f;
+  --esp-night-sidebar: #1c1a15;
+  --esp-night-section: #1c1a15;
+  --esp-night-card: #201d18;
+  --esp-night-chip: #2a2620;
+  --esp-night-hover: #2a2620;
+  --esp-night-border: #3d3729;
+  --esp-night-input: #7d7666;
+  --esp-night-faint: #8c8676;
+  --esp-night-soft: #a8a291;
+  --esp-night-accent-soft: #17293f;
+  --esp-night-accent-deep: #b4dbff;
+
+  /* Tons — paires texte / fond mesurées. */
+  --esp-blue: #004c7d;
+  --esp-blue-bg: #eef7ff;
+  --esp-blue-dark: #7ec2ff;
+  --esp-blue-bg-dark: #17293f;
+  --esp-amber: #8a5e00;
+  --esp-amber-bg: #faedca;
+  --esp-amber-border: #f3dfa6;
+  --esp-amber-point: #a16e00;
+  --esp-amber-dark: #d8a53c;
+  --esp-amber-bg-dark: #322813;
+  --esp-rose: #b3261e;
+  --esp-rose-bg: #fdecea;
+  --esp-rose-dark: #e58079;
+  --esp-rose-bg-dark: #331917;
+  --esp-green: #0f5f2f;
+  --esp-green-bg: #e3f1e8;
+  --esp-green-dark: #4cbb75;
+  --esp-green-bg-dark: #143021;
+  --esp-green-strong: #157a3d;
+
+  /* Avatars — mêmes teintes et même ordre que la base ; trois barreaux
+     assombris dans leur teinte (blanc ≥ 5,07:1 sous des initiales de 13 px). */
+  --esp-on-avatar: #ffffff;
+  --esp-ava-1: #2f6fbf;
+  --esp-ava-2: #0c7a44;
+  --esp-ava-3: #a35a09;
+  --esp-ava-4: #7a4fc9;
+  --esp-ava-5: #c2413b;
+  --esp-ava-6: #167580;
+
+  /* Navigation active, segments, reliefs teintés d'encre. */
+  --esp-accent-soft: #eef7ff;
+  --esp-accent-deep: #004c7d;
+  --esp-seg-on: #14130f;
+  --esp-seg-on-fg: #f7f6f2;
+  --esp-night-seg-on: #f4f1e8;
+  --esp-night-seg-on-fg: #14130f;
+  --esp-shadow: 0 1px 0 rgb(20 19 15 / 0.04), 0 1px 3px rgb(20 19 15 / 0.07);
+  --esp-night-shadow: 0 1px 2px rgb(0 0 0 / 0.45);
+  --esp-shadow-float: 0 6px 18px rgb(20 19 15 / 0.1);
+  --esp-night-shadow-float: 0 6px 18px rgb(0 0 0 / 0.5);
+  --esp-shadow-card-hover: 0 10px 26px rgb(20 19 15 / 0.08);
+
+  /* ── 2. Rôles — thème clair ── */
+
+  --background: var(--esp-neutral-100);
+  --background-dashboard: var(--esp-neutral-100);
+  --foreground: var(--esp-neutral-900);
+  --card: var(--esp-neutral-0);
+  --card-foreground: var(--esp-neutral-900);
+  --popover: var(--esp-neutral-0);
+  --popover-foreground: var(--esp-neutral-900);
+  --primary: var(--esp-blue-500);
+  --primary-foreground: var(--esp-neutral-0);
+  --primary-light: var(--esp-blue-50);
+  --secondary: var(--esp-neutral-0);
+  --secondary-foreground: var(--esp-neutral-600);
+  --esp-surface-card: var(--esp-neutral-0);
+  --muted: var(--esp-neutral-150);
+  --muted-foreground: var(--esp-neutral-600);
+  --accent: var(--esp-neutral-200);
+  --accent-foreground: var(--esp-neutral-900);
+  --accent-orange: var(--esp-amber);
+  --accent-blue: var(--esp-blue-500);
+  --accent-purple: var(--esp-blue-700);
+  --accent-yellow: var(--esp-amber);
+  --success: var(--esp-green-strong);
+  --success-light: var(--esp-green-bg);
+  --warning: var(--esp-amber);
+  --warning-light: var(--esp-amber-bg);
+  --destructive: var(--esp-rose);
+  --destructive-light: var(--esp-rose-bg);
+  --border: var(--esp-neutral-rule);
+  --border-light: var(--esp-neutral-200);
+  --input: var(--esp-neutral-field);
+  --ring: var(--esp-blue-500);
+  --chart-1: var(--esp-blue-500);
+  --chart-2: var(--esp-blue-300);
+  --chart-3: var(--esp-amber-point);
+  --chart-4: var(--esp-rose);
+  --chart-5: var(--esp-neutral-500);
+  --sidebar: var(--esp-neutral-0);
+  --sidebar-foreground: var(--esp-neutral-900);
+  --sidebar-primary: var(--esp-blue-500);
+  --sidebar-primary-foreground: var(--esp-neutral-0);
+  --sidebar-accent: var(--esp-accent-soft);
+  --sidebar-accent-foreground: var(--esp-accent-deep);
+  --sidebar-border: var(--esp-neutral-rule);
+  --sidebar-ring: var(--esp-blue-500);
+  --sidebar-muted: var(--esp-neutral-500);
+  --shadow-focus: 0 0 0 3px color-mix(in srgb, var(--esp-blue-500) 35%, transparent);
+
+  --primary-50: var(--esp-blue-50);
+  --primary-100: var(--esp-blue-100);
+  --primary-200: var(--esp-blue-200);
+  --primary-300: var(--esp-blue-300);
+  --primary-400: var(--esp-blue-400);
+  --primary-500: var(--esp-blue-500);
+  --primary-600: var(--esp-blue-600);
+  --primary-700: var(--esp-blue-700);
+  --primary-800: var(--esp-blue-800);
+  --primary-fill: var(--esp-blue-500);
+  --primary-fill-hover: var(--esp-blue-600);
+  --on-fill: var(--esp-neutral-0);
+  --ink-0: var(--esp-neutral-0);
+  --ink-50: var(--esp-neutral-50);
+  --ink-100: var(--esp-neutral-100);
+  --ink-150: var(--esp-neutral-150);
+  --ink-200: var(--esp-neutral-rule);
+  --ink-300: var(--esp-neutral-300);
+  --ink-400: var(--esp-neutral-400);
+  --ink-500: var(--esp-neutral-500);
+  --ink-600: var(--esp-neutral-600);
+  --ink-700: var(--esp-neutral-700);
+  --ink-800: var(--esp-neutral-800);
+  --ink-900: var(--esp-neutral-900);
+  --info-50: var(--esp-blue-50);
+  --info-100: var(--esp-blue-100);
+  --info-500: var(--esp-blue-500);
+  --info-600: var(--esp-blue-700);
+  --status-active: var(--esp-blue-500);
+  --status-active-bg: var(--esp-blue-50);
+
+  /* Géométrie — rayon de base 10 px (A7). */
+  --radius: 10px;
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 16px;
+  --radius-2xl: 20px;
+  --radius-3xl: 24px;
+  --radius-4xl: 28px;
+
+  /* IBM Plex en trois largeurs — polices importées par l'application (fontsource). */
+  --font-sans: "IBM Plex Sans Variable", "IBM Plex Sans", "Inter", system-ui, -apple-system, sans-serif;
+  --font-display: "IBM Plex Sans Condensed", "IBM Plex Sans Variable", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+
+  --esp-shadow-card: var(--esp-shadow);
+  --esp-mobilebar-bg: color-mix(in srgb, var(--esp-neutral-0) 94%, transparent);
+  --esp-mobilebar-border: var(--esp-neutral-rule);
+  --esp-mobilebar-shadow: var(--esp-shadow-float);
+  --esp-segment-on: var(--esp-seg-on);
+  --esp-segment-on-fg: var(--esp-seg-on-fg);
+  --esp-tone-blue: var(--esp-blue);
+  --esp-tone-blue-bg: var(--esp-blue-bg);
+  --esp-tone-amber: var(--esp-amber);
+  --esp-tone-amber-bg: var(--esp-amber-bg);
+  --esp-tone-rose: var(--esp-rose);
+  --esp-tone-rose-bg: var(--esp-rose-bg);
+  --esp-tone-green: var(--esp-green);
+  --esp-tone-green-bg: var(--esp-green-bg);
+  --esp-banner: linear-gradient(135deg, var(--esp-blue-700) 0%, var(--esp-blue-800) 100%);
+  --esp-on-banner: var(--esp-neutral-0);
+  --esp-on-banner-muted: var(--esp-blue-100);
+}
+
+.dark[data-charte="diasporale"],
+.dark [data-charte="diasporale"] {
+  color-scheme: dark;
+
+  --background: var(--esp-night-bg);
+  --background-dashboard: var(--esp-night-bg);
+  --foreground: var(--esp-neutral-100);
+  --card: var(--esp-night-card);
+  --card-foreground: var(--esp-neutral-100);
+  --popover: var(--esp-night-card);
+  --popover-foreground: var(--esp-neutral-100);
+  /* Le bleu s'éclaircit et l'encre se pose dessus : jamais de blanc sur le bleu. */
+  --primary: var(--esp-blue-400);
+  --primary-foreground: var(--esp-on-blue);
+  --primary-light: var(--esp-blue-900);
+  --secondary: var(--esp-night-card);
+  --secondary-foreground: var(--esp-night-soft);
+  --esp-surface-card: var(--esp-night-card);
+  --muted: var(--esp-night-section);
+  --muted-foreground: var(--esp-night-soft);
+  --accent: var(--esp-night-chip);
+  --accent-foreground: var(--esp-neutral-100);
+  --accent-orange: var(--esp-amber-dark);
+  --accent-blue: var(--esp-blue-400);
+  --accent-purple: var(--esp-blue-300);
+  --accent-yellow: var(--esp-amber-dark);
+  --success: var(--esp-green-dark);
+  --success-light: var(--esp-green-bg-dark);
+  --warning: var(--esp-amber-dark);
+  --warning-light: var(--esp-amber-bg-dark);
+  --destructive: var(--esp-rose-dark);
+  --destructive-light: var(--esp-rose-bg-dark);
+  --border: var(--esp-night-border);
+  --border-light: var(--esp-night-hover);
+  --input: var(--esp-night-input);
+  --ring: var(--esp-blue-400);
+  --chart-1: var(--esp-blue-400);
+  --chart-2: var(--esp-blue-300);
+  --chart-3: var(--esp-amber-dark);
+  --chart-4: var(--esp-rose-dark);
+  --chart-5: var(--esp-night-faint);
+  --sidebar: var(--esp-night-section);
+  --sidebar-foreground: var(--esp-neutral-100);
+  --sidebar-primary: var(--esp-blue-400);
+  --sidebar-primary-foreground: var(--esp-on-blue);
+  --sidebar-accent: var(--esp-night-accent-soft);
+  --sidebar-accent-foreground: var(--esp-night-accent-deep);
+  --sidebar-border: var(--esp-night-border);
+  --sidebar-ring: var(--esp-blue-400);
+  --sidebar-muted: var(--esp-night-faint);
+  --shadow-focus: 0 0 0 3px color-mix(in srgb, var(--esp-blue-400) 50%, transparent);
+
+  --primary-50: var(--esp-blue-950);
+  --primary-100: var(--esp-blue-900);
+  --primary-200: var(--esp-blue-800);
+  --primary-300: var(--esp-blue-700);
+  --primary-400: var(--esp-blue-500);
+  --primary-500: var(--esp-blue-400);
+  --primary-600: var(--esp-blue-300);
+  --primary-700: var(--esp-blue-200);
+  --primary-800: var(--esp-blue-100);
+  --primary-fill: var(--esp-blue-400);
+  --primary-fill-hover: var(--esp-blue-300);
+  --on-fill: var(--esp-on-blue);
+  --ink-0: var(--esp-night-card);
+  --ink-50: var(--esp-night-chip);
+  --ink-100: var(--esp-night-bg);
+  --ink-150: var(--esp-night-chip);
+  --ink-200: var(--esp-night-border);
+  --ink-300: var(--esp-night-border);
+  --ink-400: var(--esp-night-input);
+  --ink-500: var(--esp-night-faint);
+  --ink-600: var(--esp-night-soft);
+  --ink-700: var(--esp-neutral-300);
+  --ink-800: var(--esp-neutral-200);
+  --ink-900: var(--esp-neutral-100);
+  --info-50: var(--esp-blue-950);
+  --info-100: var(--esp-blue-900);
+  --info-500: var(--esp-blue-400);
+  --info-600: var(--esp-blue-300);
+  --status-active: var(--esp-blue-300);
+  --status-active-bg: var(--esp-blue-900);
+
+  --esp-shadow-card: var(--esp-night-shadow);
+  --esp-segment-on: var(--esp-night-seg-on);
+  --esp-segment-on-fg: var(--esp-night-seg-on-fg);
+  /* Opaque en sombre : un libellé de 10 px ne se lit pas sur un fil qui défile dessous. */
+  --esp-mobilebar-bg: var(--esp-night-card);
+  --esp-mobilebar-border: var(--esp-night-border);
+  --esp-mobilebar-shadow: var(--esp-night-shadow-float);
+  --esp-tone-blue: var(--esp-blue-dark);
+  --esp-tone-blue-bg: var(--esp-blue-bg-dark);
+  --esp-tone-amber: var(--esp-amber-dark);
+  --esp-tone-amber-bg: var(--esp-amber-bg-dark);
+  --esp-tone-rose: var(--esp-rose-dark);
+  --esp-tone-rose-bg: var(--esp-rose-bg-dark);
+  --esp-tone-green: var(--esp-green-dark);
+  --esp-tone-green-bg: var(--esp-green-bg-dark);
+  --esp-neutral-chip: var(--esp-night-chip);
+  --esp-neutral-hover: var(--esp-night-hover);
+  --esp-banner: linear-gradient(135deg, var(--esp-blue-800) 0%, var(--esp-blue-950) 100%);
+  --esp-on-banner: var(--esp-neutral-100);
+  --esp-on-banner-muted: var(--esp-blue-200);
+}
