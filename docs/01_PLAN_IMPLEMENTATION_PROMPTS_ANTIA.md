@@ -25,7 +25,7 @@ dependances:
 > |---|---|---|
 > | PA0 — scaffold du monorepo | 2026-10-14 | `9367243` |
 > | PA1 — owner map | 2026-10-14 | `9a8fbb3` |
-> | PA2 — fondations multi-réseaux | — | — |
+> | PA2 — fondations multi-réseaux | 2026-10-14 | `f1851fd` |
 > | PA3 — duplication du backend | — | — |
 > | PA4 — identité | — | — |
 > | PA5 — modération, débit, données, notifications, fédération | — | — |
@@ -65,6 +65,16 @@ dependances:
 >   iCal différé ; format téléphone unique 440×956 ; branches « poste » élaguées à la copie ; une seule
 >   table de notifications sociales ; iRéunion, Standard, iAsted, centre d'appels, priorité et routage de
 >   poste exclus.
+>
+> **Écarts assumés à l'exécution de PA2** :
+> - le domaine du socle est **scindé** en modules (`content`, `richText`, `thematicGroups`, `events`,
+>   `stories`, `groupThreads`) ; `visibility.ts` ajoute la garde du réseau avant la règle d'audience ;
+> - les violations de règle portent un **code et des bornes**, plus de phrase : le texte vit dans l'espace de
+>   noms i18n `rules` de `social-contracts` (fr, en), et le serveur les rend en `invalidArgument` ;
+> - stories : une seule borne vidéo, la plus stricte du socle (50 Mo, 5 minutes) ; les surfaces
+>   `reseau`/`icom` disparaissent ;
+> - `validators`, `counters`, `contentRemoval` du socle restent côté backend (PA3), `searchText` et
+>   `connectionState` reçoivent les tests qu'ils n'avaient pas au socle.
 
 ---
 
