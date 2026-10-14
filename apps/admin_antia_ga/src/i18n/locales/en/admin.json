@@ -1,0 +1,23 @@
+{
+  "meta": {
+    "title": "{{brand}} engine console",
+    "description": "Console for the operators of the {{brand}} social engine: networks, moderation teams, federation and audit log."
+  },
+  "skipToContent": "Skip to content",
+  "home": {
+    "eyebrow": "Restricted access",
+    "title": "{{brand}} engine console",
+    "lead": "Platform operators create networks, appoint moderation teams, follow appeal queues and federation, and read the log of sensitive actions.",
+    "access": "Sign-in uses the IDN digital identity, with a sufficient assurance level. It will open with the full console.",
+    "healthLink": "Service status"
+  },
+  "health": {
+    "title": "Service status",
+    "application": "Application",
+    "backend": "Engine",
+    "configured": "configured",
+    "missing": "not configured",
+    "version": "Version",
+    "backHome": "Back to home"
+  }
+}

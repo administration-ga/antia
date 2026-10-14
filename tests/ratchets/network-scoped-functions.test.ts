@@ -1,0 +1,52 @@
+import { describe, expect, it } from "vitest"
+
+import { detectUnscopedFunctions } from "./lib/detectors"
+import { type Finding, formatFindings, isTestFile, listFiles, readRepoFile } from "./lib/source-files"
+
+/**
+ * Dossiers des MODULES SOCIAUX du moteur. Toute fonction publique qui y vit doit
+ * être bornée par le réseau : constructeur `networkQuery`/`networkMutation`, ou
+ * `requireMembership(ctx, args.networkId, …)` explicite avec `networkId` en
+ * argument, ou projection publique allowlistée (`@publicProjection <raison>`).
+ *
+ * VIDE au prompt PA0 (aucun module social) ; la liste s'étend à chaque module
+ * posé (PA2 : networks, people ; PA3 : tous les modules dupliqués). Un module
+ * social absent de cette liste est lui-même un défaut (test ci-dessous).
+ */
+export const SOCIAL_MODULE_DIRECTORIES: readonly string[] = []
+
+/** Modules du moteur qui ne sont PAS sociaux (aucun contenu, aucune adhésion). */
+export const NON_SOCIAL_MODULE_DIRECTORIES: readonly string[] = []
+
+describe("network-scoped-functions — toute fonction sociale est bornée par le réseau (R10)", () => {
+  it("chaque fonction publique des modules sociaux exige un réseau et une adhésion", () => {
+    const findings: Finding[] = []
+    for (const file of listFiles([...SOCIAL_MODULE_DIRECTORIES], [".ts"])) {
+      if (isTestFile(file)) continue
+      findings.push(...detectUnscopedFunctions(file, readRepoFile(file)))
+    }
+    expect(findings, formatFindings(findings)).toEqual([])
+  })
+
+  it("chaque module du moteur est classé (social ou non) : aucun n'échappe au cliquet", () => {
+    const modules = new Set(listFiles(["convex/modules"], [".ts"]).map((file) => file.split("/").slice(0, 3).join("/")))
+    const classified = new Set([...SOCIAL_MODULE_DIRECTORIES, ...NON_SOCIAL_MODULE_DIRECTORIES])
+    expect([...modules].filter((module) => !classified.has(module))).toEqual([])
+  })
+
+  it("test du test : une fonction publique non bornée est refusée, une bornée passe", () => {
+    const source = [
+      'export const leak = query({ args: { postId: v.id("posts") }, handler: async (ctx, args) => ctx.db.get(args.postId) })',
+      "export const ok = query({",
+      '  args: { networkId: v.id("networks") },',
+      "  handler: async (ctx, args) => { await requireMembership(ctx, args.networkId, \"declaree\"); return null },",
+      "})",
+      "export const scoped = networkQuery({ args: {}, handler: async () => null })",
+      "export const hidden = internalQuery({ args: {}, handler: async () => null })",
+      "/** @publicProjection page Officiel lisible sans compte (arbitrage A4) */",
+      "export const officialPage = query({ args: {}, handler: async () => null })",
+    ].join("\n")
+    const findings = detectUnscopedFunctions("convex/modules/posts/posts.ts", source)
+    expect(findings.map((finding) => finding.line)).toEqual([1])
+  })
+})

@@ -1,0 +1,5 @@
+{
+  "notFound": "This resource cannot be found or is not available to you.",
+  "unauthenticated": "Sign in to continue.",
+  "rateLimited": "Too many attempts. Please try again in a moment."
+}

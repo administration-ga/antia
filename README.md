@@ -2,7 +2,8 @@
 
 > Nom à confirmer par le propriétaire (« ANTIA » saisi, « A-N-T-S-A » épelé). Le nom
 > `antia.ga` figure déjà au registre de ses dépôts GitHub ; ce dossier retient **ANTIA** et le
-> domaine `antia.ga`. Dans le code, le nom est un jeton de marque unique.
+> domaine `antia.ga`. Dans le code, le nom est un jeton de marque unique
+> (`packages/social-contracts/src/brand.ts`).
 
 Deux objets dans un dépôt :
 
@@ -19,52 +20,81 @@ Deux objets dans un dépôt :
   pages vérifiées et des publications déclarées publiques).
 
 Édité par **NTSAGUI Digital** ; identité fédérée par **identite.ga** (IDN), fournisseur
-d'identité unique du programme.
+d'identité unique du programme. Licence : voir `LICENSE` et `NOTICE` (AGPL-3.0, héritée du socle
+dont le code est dupliqué — à confirmer par le propriétaire).
 
-## État du dossier (14 octobre 2026)
+## État (14 octobre 2026)
 
-**Ouvert le 14/10/2026 : cahier des charges et plan d'implémentation. Aucun code encore.**
-Dépôt GitHub cible : `administration-ga/antia` (à créer par le propriétaire).
+Scaffold du monorepo posé (prompt **PA0**) : backend Convex vide (`schemaValidation: true`),
+deux applications servies, sept paquets câblés, cliquets en place, ADR 0001–0004 proposés.
+L'avancement prompt par prompt est tenu dans l'encart « État » de
+[`docs/01_PLAN_IMPLEMENTATION_PROMPTS_ANTIA.md`](docs/01_PLAN_IMPLEMENTATION_PROMPTS_ANTIA.md).
 
 | Document | Rôle |
 |---|---|
 | [`docs/00_CAHIER_DES_CHARGES_ANTIA.md`](docs/00_CAHIER_DES_CHARGES_ANTIA.md) | cahier des charges du moteur (partie A) et du réseau public (partie B) : exigences `EXF-AN` / `EXT-AN`, lots A0–A6, parcours R1–R10, arbitrages A1–A10 |
-| [`docs/01_PLAN_IMPLEMENTATION_PROMPTS_ANTIA.md`](docs/01_PLAN_IMPLEMENTATION_PROMPTS_ANTIA.md) | onze prompts PA0 → PA10 ; **DIASPORALE PD0 → PD6 s'exécute entre PA7 et PA8** |
-| `../../../Documentation/RESEAUX_SOCIAUX/` | plan de pilotage « réseaux dans le réseau » et annexes A (backend du socle), B (front du socle), C (comptes consulat.ga), D (conventions, ADR, gabarit, identité) |
+| [`docs/01_PLAN_IMPLEMENTATION_PROMPTS_ANTIA.md`](docs/01_PLAN_IMPLEMENTATION_PROMPTS_ANTIA.md) | onze prompts PA0 → PA10 et leur état ; **DIASPORALE PD0 → PD6 s'exécute entre PA7 et PA8** |
+| [`docs/adr/`](docs/adr/) | décisions d'architecture du moteur |
+| `../../../Documentation/RESEAUX_SOCIAUX/` | plan de pilotage « réseaux dans le réseau » et annexes A–D |
 | `../DIASPORALE/docs/00_CAHIER_DES_CHARGES_DIASPORALE.md` | le premier réseau servi par le moteur |
 
-## Ce que sera le dépôt (cible, après PA0)
+## Le dépôt
 
 ```text
 ANTIA/
 ├── apps/
 │   ├── antia_ga             # antia.ga — réseau public (Next.js 16, port 3030)
-│   └── admin_antia_ga       # console du moteur : réseaux, équipes, fédération, journal (port 3032)
+│   └── admin_antia_ga       # console du moteur (Next.js 16, port 3032)
 ├── packages/
-│   ├── social-domain        # SSOT : visibilité, éligibilité, badges, validation (TS pur, dupliqué du socle)
-│   ├── social-contracts     # types et modules purs partagés front/back
-│   ├── social-features      # surfaces dupliquées : fil, profil, relations, groupes, évènements, pages, albums, stories, notifications, messagerie, appels, direct, modération ; coque légère
-│   ├── ui                   # jetons (data-charte par application) et primitives
-│   └── api                  # client Convex + TanStack, NetworkProvider, routage, SSO
-├── convex/                  # LE MOTEUR : modules en tranches (networks, people, posts, engagement, graph, pages, groups, events, messaging, calls, live, files, notifications, moderation, federation, diaspora…)
-├── docs/                    # cahiers, prompts, owner map, parité, charte, contrats, ADR
-└── deploy/                  # catalogue des applications (Dockerfiles en contexte ECOSYSTEMES)
+│   ├── social-domain        # SSOT : règles pures (TS pur, zéro dépendance)
+│   ├── social-contracts     # types, modules purs et codes serveur partagés front/back (+ leurs traductions)
+│   ├── social-features      # surfaces dupliquées du front de l'espace agent, coque légère, i18n
+│   ├── ui                   # charte de base (dupliquée de la charte Personnel), thèmes d'application, primitives
+│   ├── api                  # accès au moteur : client, session, réseau courant, CSP, config Next commune
+│   ├── tsconfig             # bases TypeScript
+│   └── eslint-config        # préréglages ESLint (next, react, library)
+├── convex/                  # LE MOTEUR (modules en tranches verticales, à partir de PA2)
+├── tests/ratchets/          # cliquets : tests qui relisent le code
+├── scripts/                 # lanceur d'espaces de travail (dupliqué du socle), publication
+├── deploy/                  # catalogue des applications, Cloud Build, liste blanche du contexte
+└── docs/                    # cahiers, prompts, ADR (owner map, parité, charte, contrats à venir)
 ```
 
-Espaces de travail bun : `apps/*`, `packages/*`, et les applications externes
-`../DIASPORALE/apps/*`, `../DIASPORALE/packages/*` (une seule installation, ici).
+Espaces de travail bun : `apps/*`, `packages/*` — et, dès le prompt DIASPORALE PD0,
+`../DIASPORALE/apps/*`, `../DIASPORALE/packages/*` (une seule installation, ici). Les versions
+vivent une fois dans le **catalogue** du `package.json` racine (`"catalog:"`). Les tâches
+transverses passent par `scripts/workspace-run.mjs` (turbo refuse les espaces de travail hors
+racine).
 
-## Commandes (cibles, posées par PA0)
+## Commandes
 
 ```bash
 bun install
-bun run codegen            # TOUJOURS avant typecheck et tests
-bun run verify             # codegen + typecheck:convex + tests + turbo typecheck test lint
-bun run dev:convex         # déploiement dev du projet Convex `antia`
+bun run dev:convex         # backend Convex de développement (garder ouvert)
 bun run dev:antia          # http://localhost:3030
 bun run dev:admin          # http://localhost:3032
-bun run dev:diasporale      # http://localhost:3031 (après DIASPORALE PD0)
+bun run verify             # OBLIGATOIRE avant tout commit
 ```
+
+`bun run verify` = `codegen` + typage du backend (tsgo) + typage des cliquets + tests convex-test +
+cliquets + tests des scripts + typage, tests et lint de chaque espace de travail. Autres
+commandes : `bun run test:domain`, `bun run test:ratchets`, `bun run deploy:check` (contrôle du
+catalogue, sans réseau), `bun run deploy:antia` (affiche le plan de publication ; rien ne part
+sans `--execute` et la décision du propriétaire).
+
+### Déploiement Convex de développement
+
+Tant que le projet Convex `antia` du propriétaire n'existe pas, le moteur tourne sur un
+**déploiement local anonyme** (backend Convex sur cette machine, port 3210, aucun compte, aucun
+nuage). Première fois :
+
+```bash
+CONVEX_AGENT_MODE=anonymous bun run dev:convex
+```
+
+Le CLI écrit `ANTIA/.env.local` (non versionné) ; les applications le lisent d'elles-mêmes en
+développement. Quand le projet `antia` existera : `bunx convex dev --configure` pour s'y
+rattacher, puis `bunx convex env set …` pour ses variables (voir `.env.example`).
 
 ## Invariants non négociables
 

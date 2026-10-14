@@ -1,0 +1,5 @@
+{
+  "notFound": "Cette ressource est introuvable ou n'est pas accessible.",
+  "unauthenticated": "Connectez-vous pour continuer.",
+  "rateLimited": "Trop de tentatives. Réessayez dans quelques instants."
+}

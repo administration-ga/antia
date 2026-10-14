@@ -1,0 +1,48 @@
+{
+  "name": "@antia/social-features",
+  "version": "0.0.0",
+  "private": true,
+  "license": "AGPL-3.0-or-later",
+  "type": "module",
+  "description": "Surfaces du réseau social (fil, profil, relations, groupes, évènements, pages, albums, stories, notifications, messagerie, appels, direct, modération) et coque légère, dupliquées du front de l'espace agent et paramétrées par réseau.",
+  "exports": {
+    ".": "./src/index.ts",
+    "./i18n": "./src/i18n/index.ts",
+    "./i18n/client": "./src/i18n/client.tsx",
+    "./*": "./src/*.ts"
+  },
+  "scripts": {
+    "typecheck": "tsgo --noEmit -p tsconfig.json",
+    "test": "vitest run --passWithNoTests",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "@antia/api": "workspace:*",
+    "@antia/social-contracts": "workspace:*",
+    "@antia/social-domain": "workspace:*",
+    "@antia/ui": "workspace:*",
+    "i18next": "catalog:",
+    "react-i18next": "catalog:"
+  },
+  "peerDependencies": {
+    "react": "catalog:",
+    "react-dom": "catalog:"
+  },
+  "devDependencies": {
+    "@antia/eslint-config": "workspace:*",
+    "@antia/tsconfig": "workspace:*",
+    "@testing-library/dom": "catalog:",
+    "@testing-library/jest-dom": "catalog:",
+    "@testing-library/react": "catalog:",
+    "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "@typescript/native-preview": "catalog:",
+    "eslint": "catalog:",
+    "jsdom": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

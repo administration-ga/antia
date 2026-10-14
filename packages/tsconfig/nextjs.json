@@ -1,0 +1,13 @@
+// Applications Next.js 16 du moteur (antia_ga, admin_antia_ga, et les applications
+// externes comme diasporale_com). `jsx` reste celui de la base (react-jsx), comme
+// les applications du socle : Next 16 l'accepte sans réécrire le fichier.
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "extends": "./base.json",
+  "compilerOptions": {
+    "allowJs": true,
+    "noEmit": true,
+    "incremental": true,
+    "plugins": [{ "name": "next" }]
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "//": "Catalogue des applications du moteur ANTIA. Une entrée par application servie : service d'hébergement (identifiant stable, jamais renommé), Dockerfile construit en contexte ECOSYSTEMES (le dossier qui contient ANTIA et DIASPORALE), origine publique, port de développement, variables NEXT_PUBLIC_* inscrites au build (chacune doit être déclarée en ARG dans le Dockerfile : c'est le deuxième des « quatre câblages invisibles »), variables d'exécution. Les domaines sont des hypothèses du cahier (arbitrage A1) ; l'hébergement (Cloud Run ou Vercel) est l'arbitrage A5, non tranché : aucune publication sans décision du propriétaire. Fichier partagé avec la session DIASPORALE : modifié par la session ANTIA seulement.",
+  "contextDir": "ECOSYSTEMES",
+  "applications": {
+    "antia_ga": {
+      "package": "antia-ga",
+      "path": "apps/antia_ga",
+      "service": "antia-ga",
+      "dockerfile": "ANTIA/apps/antia_ga/Dockerfile",
+      "site_url": "https://antia.ga",
+      "dev_port": 3030,
+      "build_args": ["NEXT_PUBLIC_CONVEX_URL", "NEXT_PUBLIC_SITE_URL", "NEXT_PUBLIC_BUILD_SHA"],
+      "runtime_env": ["CONVEX_SITE_URL"]
+    },
+    "admin_antia_ga": {
+      "package": "admin-antia-ga",
+      "path": "apps/admin_antia_ga",
+      "service": "admin-antia-ga",
+      "dockerfile": "ANTIA/apps/admin_antia_ga/Dockerfile",
+      "site_url": "https://admin.antia.ga",
+      "dev_port": 3032,
+      "build_args": ["NEXT_PUBLIC_CONVEX_URL", "NEXT_PUBLIC_SITE_URL", "NEXT_PUBLIC_BUILD_SHA"],
+      "runtime_env": ["CONVEX_SITE_URL"]
+    }
+  }
+}

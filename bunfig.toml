@@ -1,0 +1,12 @@
+# Installation : linker ISOLÉ (magasin façon pnpm dans node_modules/.bun, une copie
+# réelle de chaque paquet, liens symboliques internes seulement).
+#
+# Repris du gabarit d'application du programme (CONTRATS/gabarit-application,
+# preuve APP-01 mesurée avec bun 1.4.2) : avec le linker « hoisted », une
+# dépendance hors racine est matérialisée fichier par fichier et Turbopack refuse
+# alors de lire son package.json. Ici, il garantit aussi qu'un paquet ne voit que
+# ce qu'il déclare — d'où le catalogue de versions du package.json racine, seul
+# moyen d'avoir UNE instance de React et de Convex pour tous les espaces de travail
+# (y compris les applications externes de DIASPORALE).
+[install]
+linker = "isolated"

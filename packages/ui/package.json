@@ -1,0 +1,39 @@
+{
+  "name": "@antia/ui",
+  "version": "0.0.0",
+  "private": true,
+  "license": "AGPL-3.0-or-later",
+  "type": "module",
+  "description": "Jetons, charte de base (dupliquée de la charte Personnel du socle), thèmes d'application et primitives du moteur ANTIA.",
+  "exports": {
+    ".": "./src/index.ts",
+    "./styles.css": "./src/styles.css",
+    "./themes/*.css": "./src/themes/*.css",
+    "./lib/*": "./src/lib/*.ts"
+  },
+  "scripts": {
+    "typecheck": "tsgo --noEmit -p tsconfig.json",
+    "test": "vitest run --passWithNoTests",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "@fontsource-variable/familjen-grotesk": "catalog:",
+    "@fontsource/dm-mono": "catalog:",
+    "clsx": "catalog:",
+    "tailwind-merge": "catalog:"
+  },
+  "peerDependencies": {
+    "react": "catalog:"
+  },
+  "devDependencies": {
+    "@antia/eslint-config": "workspace:*",
+    "@antia/tsconfig": "workspace:*",
+    "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "@typescript/native-preview": "catalog:",
+    "eslint": "catalog:",
+    "react": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

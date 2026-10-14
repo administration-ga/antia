@@ -1,0 +1,15 @@
+# Contexte = ECOSYSTEMES : LISTE BLANCHE. Les écosystèmes voisins (PRO_GA,
+# SANTE_GA, GABON_DIPLOMATIE…) et leurs node_modules ne doivent jamais partir
+# dans le contexte de construction.
+*
+!ANTIA
+ANTIA/.git
+ANTIA/.convex
+ANTIA/**/node_modules
+ANTIA/**/.next
+ANTIA/**/.turbo
+ANTIA/**/coverage
+ANTIA/**/.env
+ANTIA/**/.env.*
+!ANTIA/**/.env.example
+ANTIA/**/.DS_Store

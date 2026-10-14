@@ -1,0 +1,38 @@
+{
+  "name": "@antia/api",
+  "version": "0.0.0",
+  "private": true,
+  "license": "AGPL-3.0-or-later",
+  "type": "module",
+  "description": "Accès des applications au moteur : client Convex + TanStack, session Better Auth, NetworkProvider (réseau courant), adaptateur de routage, passage entre applications.",
+  "exports": {
+    ".": "./src/index.ts",
+    "./csp": "./csp.mjs",
+    "./next-config": "./next-config.mjs",
+    "./*": "./src/*.ts"
+  },
+  "scripts": {
+    "typecheck": "tsgo --noEmit -p tsconfig.json",
+    "test": "vitest run --passWithNoTests",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "@antia/social-contracts": "workspace:*"
+  },
+  "peerDependencies": {
+    "react": "catalog:",
+    "next": "catalog:"
+  },
+  "devDependencies": {
+    "@antia/eslint-config": "workspace:*",
+    "@antia/tsconfig": "workspace:*",
+    "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "@typescript/native-preview": "catalog:",
+    "eslint": "catalog:",
+    "react": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:",
+    "next": "catalog:"
+  }
+}

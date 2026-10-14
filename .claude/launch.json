@@ -1,0 +1,23 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "antia-convex",
+      "runtimeExecutable": "bun",
+      "runtimeArgs": ["run", "dev:convex"],
+      "port": 3210
+    },
+    {
+      "name": "antia-ga",
+      "runtimeExecutable": "bun",
+      "runtimeArgs": ["run", "dev:antia"],
+      "port": 3030
+    },
+    {
+      "name": "admin-antia-ga",
+      "runtimeExecutable": "bun",
+      "runtimeArgs": ["run", "dev:admin"],
+      "port": 3032
+    }
+  ]
+}

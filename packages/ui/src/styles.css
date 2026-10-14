@@ -1,0 +1,17 @@
+/*
+ * Point d'entrée CSS du moteur ANTIA — à importer par chaque application,
+ * APRÈS `@import "tailwindcss"` :
+ *
+ *   @import "tailwindcss";
+ *   @import "@antia/ui/styles.css";
+ *   @import "@antia/ui/themes/antia.css";   ← le thème de l'application
+ *
+ * L'ordre compte : la charte de base déclare tous les jetons sur
+ * `[data-charte]`, le thème les surcharge sur `[data-charte="<thème>"]`
+ * (même spécificité : c'est l'ordre d'import qui tranche).
+ */
+@import "@fontsource-variable/familjen-grotesk";
+@import "@fontsource/dm-mono/400.css";
+@import "@fontsource/dm-mono/500.css";
+@import "./styles/theme.css";
+@import "./styles/charte.css";

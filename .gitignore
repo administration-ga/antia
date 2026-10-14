@@ -1,16 +1,26 @@
 # Dépendances et sorties
 node_modules/
+**/node_modules/
 .turbo/
+**/.turbo/
 .next/
+**/.next/
 dist/
 out/
 coverage/
-# Environnement et secrets — jamais versionnés
+.coverage/
+*.tsbuildinfo
+# Environnement et secrets — jamais versionnés (le dépôt est PUBLIC)
 .env
 .env.*
 !.env.example
-# Convex local
+**/.env
+**/.env.*
+!**/.env.example
+# Convex local (déploiement anonyme de développement, journaux)
 .convex/
+# Claude Code : réglages locaux seulement
+.claude/settings.local.json
 # Système
 .DS_Store
 *.log

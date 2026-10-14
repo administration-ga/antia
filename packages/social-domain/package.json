@@ -1,0 +1,26 @@
+{
+  "name": "@antia/social-domain",
+  "version": "0.0.0",
+  "private": true,
+  "license": "AGPL-3.0-or-later",
+  "type": "module",
+  "description": "SSOT du moteur social : règles pures (réseaux, adhésions, visibilité, badges, validation des contenus). TypeScript pur, zéro dépendance d'exécution.",
+  "exports": {
+    ".": "./src/index.ts",
+    "./*": "./src/*.ts"
+  },
+  "scripts": {
+    "typecheck": "tsgo --noEmit -p tsconfig.json",
+    "test": "vitest run --passWithNoTests",
+    "lint": "eslint ."
+  },
+  "devDependencies": {
+    "@antia/eslint-config": "workspace:*",
+    "@antia/tsconfig": "workspace:*",
+    "@types/node": "catalog:",
+    "@typescript/native-preview": "catalog:",
+    "eslint": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

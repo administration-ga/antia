@@ -1,0 +1,15 @@
+# Liste blanche du contexte ECOSYSTEMES pour Cloud Build (`gcloud builds submit
+# --ignore-file`), identique au Dockerfile.dockerignore des applications : seul
+# ANTIA part, sans node_modules, sans sorties, sans secrets.
+*
+!ANTIA
+ANTIA/.git
+ANTIA/.convex
+ANTIA/**/node_modules
+ANTIA/**/.next
+ANTIA/**/.turbo
+ANTIA/**/coverage
+ANTIA/**/.env
+ANTIA/**/.env.*
+!ANTIA/**/.env.example
+ANTIA/**/.DS_Store

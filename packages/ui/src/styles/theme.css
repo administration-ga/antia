@@ -1,0 +1,205 @@
+/* Dupliqué de socle/packages/ui/src/styles/globals.css (l. 33-76 : jetons de fenêtre ; l. 2223-2297 : `@theme inline` ; l. 2299-2416 : `@layer base`) @ ad2e7fdc2 — adaptations : polices lues sur la charte (`var(--font-*)`) au lieu des littéraux Inter ; couleurs de la barre de défilement lues sur les jetons (`--ink-300`, `--primary`) au lieu de littéraux ; rayons dérivés de la charte (`var(--radius-*)`) pour que les utilitaires suivent un thème (piège documenté au socle l. 1943-1975) ; transition globale des couleurs retirée (coût de rendu sur un fil long, et `prefers-reduced-motion`).
+ *
+ * Couche Tailwind v4 du moteur : relie les utilitaires (`bg-card`,
+ * `text-muted-foreground`, `rounded-xl`…) aux jetons de la charte. Importée par
+ * chaque application APRÈS `@import "tailwindcss"`.
+ */
+
+:root {
+  /* Fenêtre VISUELLE — surchargés en ligne par `useVisualViewport` pendant
+     qu'une surface immersive est montée (voir la note d'origine au socle). */
+  --vv-height: 100dvh;
+  --kb-inset: 0px;
+  /* Réserve basse de la couche d'appel (pilule d'appel réduit). */
+  --iappel-bottom-inset: 0px;
+}
+
+@custom-variant dark (&:is(.dark *, .dark));
+
+@theme inline {
+  /* Polices — portées par la charte (`--font-sans`, `--font-display`,
+     `--font-mono` sont déclarées sur le nœud `[data-charte]`). */
+  --font-sans: var(--font-sans);
+  --font-display: var(--font-display);
+  --font-mono: var(--font-mono);
+
+  /* Colors mapping */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-background-dashboard: var(--background-dashboard);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  /* Accent colors */
+  --color-accent-orange: var(--accent-orange);
+  --color-accent-blue: var(--accent-blue);
+  --color-accent-purple: var(--accent-purple);
+  --color-accent-yellow: var(--accent-yellow);
+
+  /* Status colors */
+  --color-success: var(--success);
+  --color-success-light: var(--success-light);
+  --color-warning: var(--warning);
+  --color-warning-light: var(--warning-light);
+  --color-destructive-light: var(--destructive-light);
+
+  /* Charts */
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+
+  /* Sidebar */
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-muted: var(--sidebar-muted);
+
+  /* Rayons — lus sur la charte : chaque thème redéclare `--radius-*` sur son
+     nœud, et l'utilitaire suit (au socle, `calc(var(--radius) …)` inliné au
+     build ne suivait pas la charte). */
+  --radius-xs: var(--radius-xs);
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+  --radius-xl: var(--radius-xl);
+  --radius-2xl: var(--radius-2xl);
+  --radius-3xl: var(--radius-3xl);
+  --radius-4xl: var(--radius-4xl);
+
+  /* Container padding responsive */
+  --container-padding: 1rem;
+  --container-padding-sm: 2rem;
+  --container-padding-lg: 4rem;
+  --container-padding-xl: 5rem;
+  --container-padding-2xl: 6rem;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: var(--font-sans);
+    font-size: 15px;
+    line-height: 1.5;
+    text-rendering: optimizeLegibility;
+  }
+
+  html {
+    font-family: var(--font-sans);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      scroll-behavior: smooth;
+    }
+  }
+
+  /* Headings use display font */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    line-height: 1.2;
+    color: var(--foreground);
+    @apply tracking-tight;
+  }
+
+  a {
+    color: var(--primary);
+    text-decoration: none;
+  }
+  a:hover {
+    text-decoration: underline;
+  }
+
+  button,
+  a {
+    cursor: pointer;
+  }
+
+  input,
+  textarea,
+  select {
+    font-family: inherit;
+  }
+
+  /* ── Mobile native feel ── */
+  html {
+    overscroll-behavior: none;
+  }
+
+  button,
+  a,
+  [role="button"],
+  input,
+  select,
+  textarea {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  button,
+  a,
+  [role="button"] {
+    -webkit-user-select: none;
+    user-select: none;
+    touch-action: manipulation;
+  }
+
+  /* Barre de défilement — lue sur les jetons de la charte. */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--ink-300) transparent;
+  }
+
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background-color: var(--ink-300);
+    background-clip: content-box;
+    border: 2px solid transparent;
+    border-radius: 999px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: var(--primary);
+  }
+
+  ::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+}

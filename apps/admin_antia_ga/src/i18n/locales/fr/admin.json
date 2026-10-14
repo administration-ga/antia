@@ -1,0 +1,23 @@
+{
+  "meta": {
+    "title": "Console du moteur {{brand}}",
+    "description": "Console des opérateurs du moteur social {{brand}} : réseaux, équipes de modération, fédération et journal."
+  },
+  "skipToContent": "Aller au contenu",
+  "home": {
+    "eyebrow": "Accès réservé",
+    "title": "Console du moteur {{brand}}",
+    "lead": "Les opérateurs de la plateforme y créent les réseaux, nomment les équipes de modération, suivent les files d'appel et la fédération, et lisent le journal des actes sensibles.",
+    "access": "La connexion se fait par l'identité numérique IDN, avec un niveau de garantie suffisant. Elle sera ouverte avec la console complète.",
+    "healthLink": "État du service"
+  },
+  "health": {
+    "title": "État du service",
+    "application": "Application",
+    "backend": "Moteur",
+    "configured": "configuré",
+    "missing": "non configuré",
+    "version": "Version",
+    "backHome": "Retour à l'accueil"
+  }
+}

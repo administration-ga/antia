@@ -1,0 +1,25 @@
+{
+  /* Environnement d'exécution des fonctions Convex du moteur, et de leurs tests
+   * (convex-test). Réglages exigés par Convex en bas de liste. */
+  "compilerOptions": {
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "moduleResolution": "Bundler",
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "allowSyntheticDefaultImports": true,
+    "jsx": "react-jsx",
+    "types": ["node"],
+
+    /* Exigés par Convex */
+    "target": "ESNext",
+    "lib": ["ES2021", "DOM"],
+    "forceConsistentCasingInFileNames": true,
+    "module": "ESNext",
+    "isolatedModules": true,
+    "noEmit": true
+  },
+  "include": ["./**/*"],
+  "exclude": ["./_generated"]
+}

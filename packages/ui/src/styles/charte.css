@@ -1,0 +1,635 @@
+/* Dupliqué de socle/packages/ui/src/styles/globals.css (l. 444-908 et 1061-1210) @ ad2e7fdc2 — adaptations : sélecteurs `[data-charte="espace-personnel"], [data-charte="espace-structure"]` → `[data-charte]` (toute charte d'application du moteur hérite de cette base, qu'un fichier de thème surcharge ensuite) ; bloc sombre `.dark [data-charte=…]` → `.dark[data-charte], .dark [data-charte]` (la charte est posée sur <html>, qui porte aussi `.dark`) ; la charte du compte « Poste » (l. 909-1059) et le contrat `.dash-v2` ne sont pas repris (administration).
+
+   ═════════════════════════════════════════════════════════════════════════
+   BASE DES CHARTES DU MOTEUR ANTIA
+   ─────────────────────────────────────────────────────────────────────────
+   Cette feuille est la charte « Personnel » (parchemin) de l'espace agent
+   d'administration.ga, devenue la BASE de toute application du moteur. Les
+   composants dupliqués du socle lisent ses trois familles de jetons telles
+   quelles (règle 7 de duplication : jetons, jamais de fork) :
+     (a) les échelles ui-v2 (`--primary-*`, `--ink-*`, `--info-*`,
+         `--primary-fill`, `--on-fill`, `--shadow-focus`, `--radius-*`,
+         `--font-*`) ;
+     (b) les noms sémantiques shadcn (`--background`, `--foreground`,
+         `--card`, `--primary`, `--muted`, `--border`, `--ring`…) ;
+     (c) les surfaces et primitives `--esp-*`.
+   Un réseau change d'habit par un fichier de `packages/ui/src/themes/`
+   (`[data-charte="<thème>"]`), qui ne redéclare QUE des jetons déclarés ici
+   (cliquet `theme-contract`).
+   ═════════════════════════════════════════════════════════════════════════ */
+
+/* ════════════════════════════════════════════════════════════════════════
+   ESPACE PERSONNEL — design system de l'espace utilisateur de `citizen-web`
+   ------------------------------------------------------------------------
+   SOURCE : `gabon-diplomatie/apps/citizen-web`, route `/my-space`. On en
+   reprend les deux moitiés — le design system (surfaces beige
+   chaud, cartes blanches, bleu Gabon) ET l'architecture
+   (barre latérale FLOTTANTE en carte détachée, état actif en pastille
+   teintée, `citizen-scrollbar`), cette dernière dans `PersonalSpaceLanding`.
+
+   ⚠️ Remplace la charte teal « Espace Citoyen » de la première implémentation.
+   Le teal n'appartenait ni à ce dépôt ni à `citizen-web` ; la MÉCANIQUE de
+   cette charte (remappage de jetons scopé, ci-dessous) est en revanche
+   conservée telle quelle — c'était la bonne moitié.
+
+   Charte SCOPÉE, appliquée par `[data-charte="espace-personnel"]` que pose
+   `PersonalSpaceLanding` (packages/agent-features/src/features/espace-personnel).
+   Elle ne fuit JAMAIS vers les espaces institutionnels : hors de ce nœud,
+   la charte Gabon Connect (bleu institutionnel) reste seule en vigueur.
+
+   MÉCANIQUE — même patron que `.dash-v2` (dashboard-v2.css:29-33), le seul
+   déjà en place dans ce dépôt : on ne réécrit pas les écrans, on REMAPPE la
+   VALEUR des jetons. Les 7 900 lignes de `features/espace-personnel` et
+   `features/reseau-personnel` continuent d'écrire `bg-card`, `text-primary`,
+   `var(--ink-600)` — seule leur résolution change ici. Aucune classe de
+   couleur en dur n'est introduite dans un composant (cliquet de charte,
+   `convex/tests/charteRatchet.test.ts`).
+
+   Les DEUX familles sont remappées, parce que l'espace personnel les mélange
+   déjà (ADR-0030) : `IBoitePersonnellePage` et `MonReseauCard` sont écrits en
+   `@workspace/ui-v2` (`--ink-*`, `--primary-*`), le reste en famille de
+   compatibilité shadcn (`--card`, `--muted-foreground`). Ne remapper qu'une
+   des deux laisserait la moitié de l'espace en bleu institutionnel.
+
+   ── Écarts ASSUMÉS aux valeurs de `citizen-web`, tous pour WCAG 2.1 AA ──
+   1. Bleu de TEXTE en thème sombre : le barreau 400 (6,22:1 sur
+      la carte sombre) et non le `--primary` de
+      `citizen-web`, qui n'y mesure que 3,75:1 — sous le seuil 4,5:1 dès
+      qu'il porte du texte ou une icône d'action. Ce bleu-là reste dans
+      l'échelle (barreau 500) comme teinte de REMPLISSAGE.
+      En thème clair, le bleu de `citizen-web` est repris tel quel :
+      mesuré 5,11:1 sur blanc, il passe.
+   2. Texte discret : neutre 500 en clair et gris relevé en sombre
+      (--esp-night-faint). Le même neutre dans les deux thèmes tomberait
+      sous le seuil en sombre.
+   ════════════════════════════════════════════════════════════════════════ */
+
+[data-charte] {
+  /* ─────────────────────────────────────────────────────────────────────
+     1. ÉCHELLE PRIMITIVE — les SEULES valeurs littérales de la charte.
+     Déclarée une fois, dans le bloc clair : les propriétés personnalisées
+     d'une règle de moindre spécificité s'appliquent toujours au même
+     élément, le bloc sombre plus bas n'a donc qu'à ré-router des RÔLES vers
+     d'autres primitives, sans redéclarer une seule couleur.
+     ───────────────────────────────────────────────────────────────────── */
+
+  /* Bleu Gabon — signature de l'espace utilisateur de `citizen-web`
+     (gabon-diplomatie), dont cette charte reprend le design system :
+     barreau 600 en clair, barreau 500 en sombre, sur des surfaces
+     chaudes. Le teal de la version précédente est retiré : il n'appartenait
+     à aucun des deux produits.
+
+     ⚠️ Les barreaux ne sont PAS recopiés tels quels de `citizen-web` —
+     mesuré, son bleu de thème sombre ne donne que 3,75:1 sur la carte,
+     sous le seuil AA texte. Le barreau 400 ci-dessous (6,22:1 sur cette même
+     carte) porte donc le texte et les icônes d'action en thème sombre, et
+     le barreau 500 reste une teinte de REMPLISSAGE. Même discipline que la version
+     teal qu'elle remplace : on garde le design system, pas ses défauts de
+     contraste. */
+  --esp-blue-50: #e7eff9;
+  --esp-blue-100: #e7eff9;
+  --esp-blue-200: #e7eff9;
+  --esp-blue-300: #a8cdf2;
+  --esp-blue-400: #5b9bdf;
+  --esp-blue-500: #0b4f9c;
+  --esp-blue-600: #073871;
+  --esp-blue-700: #0a3a6e;
+  --esp-blue-800: #1e2c3d;
+  --esp-blue-900: #1e2c3d;
+  --esp-blue-950: #1c1a14;
+  /* Encre posée SUR un remplissage bleu clair (thème sombre) — le blanc y
+     tombe sous le seuil, un bleu très sombre y remonte.
+     ⚠️ Cette valeur a CONTREDIT son propre commentaire jusqu'au 2026-08-20 :
+     elle portait un bleu PÂLE (le barreau 300 environ), soit 2,21:1 sur
+     `--esp-blue-400` — moins bien que le blanc pur (2,92:1) qu'elle
+     prétendait corriger. Tout aplat primaire du thème sombre en héritait
+     (logo du rail, avatars, `<Button>` par défaut, item actif de sidebar),
+     le texte y étant presque invisible. Mesuré depuis : 5,96:1 sur
+     `--esp-blue-400`. */
+  --esp-on-blue: #0d1b2a;
+
+  /* Neutres CHAUDS — l'échelle de `citizen-web` (beige en fond, carte
+     blanche), et non la « slate » froide de la version précédente : c'est ce
+     qui donne au fond sa teinte beige et aux cartes leur détachement. */
+  --esp-neutral-0: #ffffff;
+  --esp-neutral-50: #fbfaf6;
+  --esp-neutral-100: #f7f6f2;
+  --esp-neutral-150: #f3efe4;
+  --esp-neutral-200: #efebe0;
+  --esp-neutral-300: #e6e0d0;
+  --esp-neutral-400: #a3a3a3;
+  --esp-neutral-500: #5c5c5c;
+  --esp-neutral-600: #5c5c5c;
+  --esp-neutral-700: #3a3a3a;
+  --esp-neutral-800: #0a0907;
+  --esp-neutral-900: #1a1a1a;
+  --esp-neutral-rule: #efebe0;
+  --esp-neutral-field: #d2cdbf;
+  --esp-neutral-chip: #f3efe4;
+  --esp-neutral-hover: #f3efe4;
+  --esp-neutral-mute: #838383;
+  /* Même barreau que `--esp-neutral-400`, sous son nom d'emploi (gris chaud
+     réservé au NON-textuel — il mesure 2,03:1 et ne peut pas porter de
+     texte). Déclaré par référence et non par valeur : deux littéraux
+     identiques dériveraient un jour l'un de l'autre. */
+  --esp-neutral-faint: #a3a3a3;
+  /* Neutres propres au thème sombre — les valeurs de `citizen-web` :
+     fond très sombre chaud, cartes légèrement plus claires. */
+  --esp-night-bg: #14130f;
+  --esp-night-sidebar: #1c1a14;
+  --esp-night-border: #2c2820;
+  --esp-night-hover: #2c2820;
+  /* Bordure de champ en thème sombre. Volontairement BEAUCOUP plus claire
+     que la carte : mesuré dans le navigateur, une valeur proche du fond de
+     carte donne 1,17:1 — le contour d'un champ de saisie devient alors
+     invisible, alors que WCAG 2.1 (1.4.11, contraste non-textuel) demande
+     3:1 pour la limite d'une commande. Celle-ci mesure 3,26:1 sur la carte.
+     ⚠️ Ce jeton ne sert QU'À `--input` (une bordure) : l'éclaircir ne
+     remplit aucune surface. */
+  --esp-night-input: #3a3528;
+  /* Gris clair du thème sombre, relevé par rapport à la charte fournie :
+     le neutre 500 ne mesure que 3,07:1 sur la carte (cf. écart 3). */
+  --esp-night-faint: #5f5c55;
+  --esp-night-soft: #a0a0a0;
+
+  /* Quatre tons de compteur (§5.4) — paires texte/fond, mesurées ≥ 4,5:1
+     dans les deux thèmes. Fonds PLEINS et non `rgba()` : une opacité donne
+     un contraste qui dépend de la surface sous-jacente, donc invérifiable. */
+  --esp-blue: #0b4f9c;
+  --esp-blue-bg: #e7eff9;
+  --esp-blue-dark: #5b9bdf;
+  --esp-blue-bg-dark: #1e2c3d;
+  --esp-amber: #a16e00;
+  --esp-amber-bg: #faedca;
+  --esp-amber-border: #f0dfa8;
+  --esp-amber-point: #d08b12;
+  --esp-amber-dark: #e8b450;
+  --esp-amber-bg-dark: #2a2418;
+  --esp-rose: #b3261e;
+  --esp-rose-bg: #fdecea;
+  --esp-rose-dark: #e88577;
+  --esp-rose-bg-dark: #42201f;
+  /* Un cran plus sombre que --esp-green-strong : sur son propre fond teinté,
+     --esp-green-strong ne mesure que 4,48:1, juste sous le seuil. */
+  --esp-green: #0f5f2f;
+  --esp-green-bg: #e3f1e8;
+  --esp-green-dark: #5bbe7f;
+  --esp-green-bg-dark: #18281e;
+  /* Vert « succès » plein, sur surface de carte (5,02:1 sur blanc). */
+  --esp-green-strong: #157a3d;
+
+  /* Dégradé de la bannière — pris sur les barreaux SOMBRES du bleu : c'est
+     ce qui garde le titre blanc lisible d'un bout à l'autre du dégradé. */
+  --esp-banner: linear-gradient(
+    135deg,
+    var(--esp-blue-700) 0%,
+    var(--esp-blue-600) 100%
+  );
+  --esp-on-banner: var(--esp-neutral-0);
+  --esp-on-banner-muted: #d9f2ef;
+
+  /* Carte sombre de l'ESPACE STRUCTURE (§2 « Accents ponctuels » du design
+     système) — un brun chaud, et non le bleu de `--esp-banner` : c'est le seul
+     aplat sombre d'un espace clair, et il appartient à la famille des neutres
+     chauds, pas à l'action. La distinguer de la bannière est délibéré : deux
+     surfaces sombres de rôles différents ne doivent pas se confondre. */
+  --esp-structure-card: linear-gradient(150deg, #241a10, #3a2a18);
+  /* Contour d'un bouton posé SUR cette carte — le seul endroit de la charte où
+     une bordure doit se lire sur un aplat sombre. Une valeur de l'échelle
+     chaude y disparaîtrait ; c'est l'encre de la carte, atténuée.
+     ⚠️ ÉCART ASSUMÉ au design (qui pose .30), pour WCAG 2.1 AA 1.4.11 : mesuré
+     sur l'extrémité claire du dégradé, .30 ne donne que 2,7:1 — sous le seuil
+     3:1 exigé pour la limite d'une commande. .45 y tient 3,9:1. Même discipline
+     que les cinq écarts déjà documentés : on garde le design, pas ses défauts
+     de contraste. */
+  --esp-on-banner-border: rgb(255 255 255 / 0.45);
+  /* Chip de TENDANCE sur la carte sombre — vert clair sur vert très sombre.
+     Composé (translucide sur un aplat sombre), donc déclaré ici. */
+  --esp-on-banner-trend: #8fe0ac;
+  --esp-on-banner-trend-bg: rgb(120 220 150 / 0.18);
+
+  /* Ombre de survol des cartes personne/organisation — la SEULE ombre de la
+     charte (§3 du design système : « quasi aucune », le relief vient des fonds
+     et des filets). Valeur COMPOSÉE, donc déclarée ici comme `--esp-banner` :
+     un composant ne porte que le nom d'emploi. Exprimée en `rgb(... / …)` sur
+     l'encre principale plutôt qu'en littéral, pour qu'elle suive le barreau si
+     l'encre bouge. */
+  --esp-shadow-card-hover: 0 10px 26px rgb(27 26 21 / 0.08);
+
+  /* ─────────────────────────────────────────────────────────────────────
+     2. RÔLES — thème clair. Aucune valeur littérale au-delà de ce point :
+     uniquement des renvois vers l'échelle ci-dessus.
+     ───────────────────────────────────────────────────────────────────── */
+
+  /* ── Famille de compatibilité (shadcn / Tailwind) ──
+     ÉCART 4 à la charte fournie : le fond de page prend le neutre 100 et non
+     le 50. `FlatCard` — la carte de tout l'espace personnel — est « zero
+     shadow, zero border » par construction (Citizen Design System v3.0) ;
+     posée en blanc sur le fond quasi blanc du document (§2.2), elle
+     disparaissait purement et simplement, mesuré à l'écran. La charte compte
+     sur une bordure de carte (§5) que ce composant partagé n'a pas et qu'on
+     ne lui ajoute pas ici : il sert bien au-delà de l'espace personnel.
+     Descendre le FOND d'un barreau rétablit la lecture « carte posée sur une
+     page » sans toucher à un composant commun. */
+  --background: var(--esp-neutral-0);
+  --background-dashboard: var(--esp-neutral-0);
+  --foreground: var(--esp-neutral-900);
+
+  --card: var(--esp-neutral-0);
+  --card-foreground: var(--esp-neutral-900);
+  --popover: var(--esp-neutral-0);
+  --popover-foreground: var(--esp-neutral-900);
+
+  /* `--primary` porte À LA FOIS le remplissage (`bg-primary`) et le texte
+     (`text-primary`) dans cette famille : une seule valeur doit donc
+     satisfaire les deux usages, d'où le bleu 600 (celui de
+     `citizen-web`) et non le 500. */
+  --primary: var(--esp-blue-500);
+  --primary-foreground: var(--esp-neutral-0);
+  --primary-light: var(--esp-blue-100);
+
+  /* `--secondary` EST la surface de `FlatCard`
+     (agent-features/src/components/my-space/flat-card.tsx) : elle doit valoir
+     la surface de carte, pas un gris de second plan. */
+  --secondary: var(--esp-neutral-0);
+  --secondary-foreground: var(--esp-neutral-600);
+
+  /* La SURFACE DE CARTE de l'espace — LE rôle que toutes les grammaires de
+     carte partagent (kit espace-kit, iRéseau, iProfil, paramètres, iBoîte).
+     Né le 2026-08-20 : deux architectures divergeaient, chacune juste dans UN
+     thème — `--ink-100` (iProfil) donnait le parchemin voulu en clair mais se
+     fondait dans le fond de page en sombre ; `--secondary` (kit/réseau)
+     donnait une carte relevée en sombre mais du blanc sur blanc en clair.
+     Ce rôle porte la paire croisée : parchemin en clair, relevée en sombre. */
+  --esp-surface-card: var(--esp-neutral-100);
+
+  --muted: var(--esp-neutral-100);
+  --muted-foreground: var(--esp-neutral-600);
+
+  --accent: var(--esp-blue-500);
+  --accent-foreground: var(--esp-neutral-0);
+
+  --accent-orange: var(--esp-amber);
+  --accent-blue: var(--esp-blue);
+  --accent-purple: var(--esp-blue-600);
+  --accent-yellow: var(--esp-amber);
+
+  --success: var(--esp-green-strong);
+  --success-light: var(--esp-green-bg);
+  --warning: var(--esp-amber);
+  --warning-light: var(--esp-amber-bg);
+  --destructive: var(--esp-rose);
+  --destructive-light: var(--esp-rose-bg);
+
+  --border: var(--esp-neutral-rule);
+  --border-light: var(--esp-neutral-150);
+  --input: var(--esp-neutral-field);
+  --ring: var(--esp-blue-500);
+
+  --chart-1: var(--esp-blue-600);
+  --chart-2: var(--esp-blue);
+  --chart-3: var(--esp-amber);
+  --chart-4: var(--esp-rose);
+  --chart-5: var(--esp-neutral-500);
+
+  --sidebar: var(--esp-neutral-100);
+  --sidebar-foreground: var(--esp-neutral-900);
+  --sidebar-primary: var(--esp-blue-500);
+  --sidebar-primary-foreground: var(--esp-neutral-0);
+  --sidebar-accent: var(--esp-accent-soft);
+  /* Un barreau PLUS SOMBRE que `--primary` : ce rôle ne se lit jamais sur la
+     carte nue, toujours sur `--sidebar-accent` (la pastille de l'élément de
+     nav actif), qui éclaircit le fond. Mesuré, le barreau 600 y tombe à
+     4,31:1 ; celui-ci tient 5,88:1. */
+  --sidebar-accent-foreground: var(--esp-accent-deep);
+  --sidebar-border: var(--esp-neutral-200);
+  --sidebar-ring: var(--esp-blue-500);
+  --sidebar-muted: var(--esp-neutral-500);
+
+  --shadow-focus: 0 0 0 3px
+    color-mix(in srgb, var(--esp-blue-600) 35%, transparent);
+
+  /* Palette des AVATARS — six teintes, identiques dans les deux comptes : une
+     personne garde sa couleur qu'on la croise dans l'espace personnel ou dans
+     celui de la structure. Ce sont les seules couleurs de la charte qui ne
+     dépendent NI du compte NI du thème : elles identifient quelqu'un, elles ne
+     décorent pas une surface. */
+  /* Encre posée SUR un avatar teinté : les six teintes sont des moyens
+     saturés, le blanc y tient dans les six cas. Un jeton et non `#fff` en dur —
+     c'est la règle du dossier, sans exception. */
+  --esp-on-avatar: #ffffff;
+  --esp-ava-1: #2f6fbf;
+  --esp-ava-2: #0e8a4d;
+  --esp-ava-3: #df7f0a;
+  --esp-ava-4: #7a4fc9;
+  --esp-ava-5: #c2413b;
+  --esp-ava-6: #1d8b96;
+
+  /* Surfaces du thème SOMBRE — §2.5 du dossier : dans l'espace personnel, le
+     fond du shell est PLUS FONCÉ que les cartes (shell #14130F < section
+     #1C1A14 < carte #24211A). Sans ces trois barreaux, le rôle `--card`
+     retombait sur `--esp-neutral-800`, qui vaut l'encre des boutons pleins :
+     les cartes sortaient quasi noires. */
+  --esp-night-section: #1c1a14;
+  --esp-night-card: #24211a;
+  --esp-night-chip: #332f26;
+
+  /* Élément ACTIF du menu latéral — §5 : fond `accentSoft`, texte
+     `accentDeep`, aucun contour. Distincts du bleu de remplissage : un actif
+     de navigation n'est pas un bouton d'action. */
+  --esp-accent-soft: #e7eff9;
+  --esp-accent-deep: #073871;
+  --esp-night-accent-soft: #1e2c3d;
+  --esp-night-accent-deep: #a8cdf2;
+
+  /* Profondeur — §4 : « aucun border sur les cartes, boutons ou éléments de
+     menu », la hiérarchie vient de l'ombre (personnel) et du contraste de
+     surface (structure). */
+  --esp-shadow: 0 1px 0 rgb(20 19 15 / 0.04), 0 1px 2px rgb(20 19 15 / 0.06);
+  --esp-night-shadow: 0 1px 2px rgb(0 0 0 / 0.45);
+
+  /* Relief d'un chrome FLOTTANT — barre basse mobile. Distinct de l'ombre de
+     carte : la barre ne se pose pas sur la page, elle passe DEVANT elle, et
+     l'ombre de carte (2 px) ne la détacherait pas d'un fil de liste qui défile
+     dessous. Mesurée dans la maquette : `0 6px 18px rgb(20 19 15/.08)`. Côté
+     structure, ce barreau retombe à `none` comme `--esp-shadow`. */
+  --esp-shadow-float: 0 6px 18px rgb(20 19 15 / 0.08);
+  --esp-night-shadow-float: 0 6px 18px rgb(0 0 0 / 0.5);
+
+  /* Segment ACTIF du sélecteur de comptes — une encre pleine, inversée.
+     `sb.dark` / `sb.darkFg` du dossier de design. Deux barreaux propres et non
+     `--esp-neutral-800` : celui-ci ne bascule pas en thème sombre (le bloc
+     sombre ne redéclare aucune primitive), et un segment quasi noir sur un
+     fond nuit ne se voit plus. */
+  --esp-seg-on: #0a0907;
+  --esp-seg-on-fg: #ffffff;
+  --esp-night-seg-on: #f4f1e8;
+  --esp-night-seg-on-fg: #14130f;
+
+  /* Rayon du CHROME (piste du sélecteur, tuiles d'action du rail) — pilule
+     côté personnel, quasi droit côté poste. Distinct de l'échelle
+     `--radius-*` : la pilule ne se dérive pas d'un pas de 2 px. */
+  --esp-r-chrome: 999px;
+
+  /* ── GÉOMÉTRIE — le marqueur qui sépare les deux comptes ──
+     Compte PERSONNEL : arrondi. Mesuré dans la maquette (écran « iRéseau —
+     fil ») : 999 px ×17, 10 px ×10, 8 px, 9 px. L'échelle Tailwind DÉRIVE de
+     `--radius` par `calc()` (cf. @theme plus bas), mais les sept barreaux sont
+     posés à la main ici : la dérivation par pas de 2 px produisait un
+     `rounded-xl` à 18 px là où le design en veut 10. Les redéclarer sur le
+     nœud de charte suffit — chaque `rounded-*` de l'espace les suit. */
+  --radius: 12px;
+  --radius-xs: 4px;
+  --radius-sm: 10px;
+  --radius-md: 12px;
+  --radius-lg: 12px;
+  --radius-xl: 14px;
+  --radius-2xl: 16px;
+  --radius-3xl: 16px;
+  --radius-4xl: 16px;
+
+  /* ── Famille cible ui-v2 ──
+     `IBoitePersonnellePage` et `MonReseauCard` sont écrits en
+     `@workspace/ui-v2` : ne remapper que la famille de compatibilité
+     laisserait la moitié de l'espace en bleu institutionnel. */
+  --primary-50: var(--esp-blue-50);
+  --primary-100: var(--esp-blue-100);
+  --primary-200: var(--esp-blue-200);
+  --primary-300: var(--esp-blue-300);
+  --primary-400: var(--esp-blue-400);
+  --primary-500: var(--esp-blue-500);
+  --primary-600: var(--esp-blue-600);
+  --primary-700: var(--esp-blue-800);
+  --primary-800: var(--esp-blue-900);
+  --primary-fill: var(--esp-blue-500);
+  --primary-fill-hover: var(--esp-blue-600);
+  --on-fill: var(--esp-neutral-0);
+
+  --ink-900: var(--esp-neutral-900);
+  --ink-800: var(--esp-neutral-800);
+  --ink-700: var(--esp-neutral-700);
+  --ink-600: var(--esp-neutral-600);
+  --ink-500: var(--esp-neutral-500);
+  --ink-400: var(--esp-neutral-400);
+  --ink-300: var(--esp-neutral-300);
+  --ink-200: var(--esp-neutral-200);
+  --ink-150: var(--esp-neutral-150);
+  --ink-100: var(--esp-neutral-100);
+  --ink-50: var(--esp-neutral-50);
+  --ink-0: var(--esp-neutral-0);
+
+  --info-50: var(--esp-blue-50);
+  --info-100: var(--esp-blue-100);
+  --info-500: var(--esp-blue-500);
+  --info-600: var(--esp-blue-600);
+
+  --status-active: var(--esp-blue-500);
+  --status-active-bg: var(--esp-blue-100);
+
+  /* La charte Espace fournie impose ces deux familles uniquement dans le
+     produit authentifié. Elles restent volontairement scoppées afin de ne
+     pas modifier les pages publiques déjà validées. */
+  --font-sans: var(--font-familjen-grotesk, "Familjen Grotesk"), "Inter", system-ui, sans-serif;
+  --font-display: var(--font-familjen-grotesk, "Familjen Grotesk"), "Inter", system-ui, sans-serif;
+  --font-mono: var(--font-dm-mono, "DM Mono"), ui-monospace, "SFMono-Regular", monospace;
+  font-family: var(--font-sans);
+
+  /* Ombre de surface — le seul relief autorisé (§4). */
+  --esp-shadow-card: var(--esp-shadow);
+
+  /* ── Barre basse mobile — le chrome où la GÉOMÉTRIE marque le compte ──
+     Le dossier de design mobile pose le même composant dans les deux comptes,
+     et compte sur la charte pour le distinguer : « un agent doit savoir au
+     titre de quoi il agit sans lire un mot ». Côté personnel une barre
+     flottante en parchemin translucide, angles arrondis, détachée par une
+     ombre ; côté poste une barre blanche à angles quasi droits, cernée d'un
+     filet, sans la moindre ombre — sa profondeur vient du contraste de
+     surface (§4).
+
+     Le RAYON n'a pas de jeton dédié : `.esp-mobile-bar` lit directement
+     `--radius-2xl`, que le bloc GÉOMÉTRIE de chaque charte redéclare déjà
+     (16 px / 8 px). Un jeton de plus créerait une seconde source de vérité
+     pour la même décision. ⚠️ Il le lit en `var()` et NON par l'utilitaire
+     `rounded-2xl`, qui inline sa valeur au build — voir la note de la classe. */
+  --esp-mobilebar-bg: color-mix(
+    in srgb,
+    var(--esp-neutral-100) 96%,
+    transparent
+  );
+  --esp-mobilebar-border: var(--esp-neutral-rule);
+  --esp-mobilebar-shadow: var(--esp-shadow-float);
+
+  /* Réserve basse de la barre d'onglets d'iRÉSEAU (`.pb-reseau-tabbar`,
+     `mobile.css`). Somme : barre de 64 px + marge basse de 12 px + une
+     respiration de 4 px = 4,5 rem. Un rem de moins que `--mobile-nav-inset`
+     parce que cette barre n'a pas de bouton central en pilule remontée.
+     ⚠️ Un JETON, et non une valeur recopiée : la barre elle-même, la réserve
+     du contenu défilant et tout élément flottant qui doit se poser au-dessus
+     doivent s'accorder dessus — recopiée, la valeur dérive. */
+  --esp-reseau-tabbar-inset: 4.5rem;
+
+  /* ── Sélecteur de comptes ── */
+  --esp-segment-on: var(--esp-seg-on);
+  --esp-segment-on-fg: var(--esp-seg-on-fg);
+
+  /* ── Tons de compteur, exposés aux composants (`CounterCard`) ── */
+  --esp-tone-blue: var(--esp-blue);
+  --esp-tone-blue-bg: var(--esp-blue-bg);
+  --esp-tone-amber: var(--esp-amber);
+  --esp-tone-amber-bg: var(--esp-amber-bg);
+  --esp-tone-rose: var(--esp-rose);
+  --esp-tone-rose-bg: var(--esp-rose-bg);
+  --esp-tone-green: var(--esp-green);
+  --esp-tone-green-bg: var(--esp-green-bg);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   3. RÔLES — thème sombre. Aucune primitive n'est redéclarée : ce bloc ne
+   fait que ré-router les mêmes rôles vers d'autres barreaux de l'échelle.
+   ───────────────────────────────────────────────────────────────────────── */
+.dark[data-charte],
+.dark [data-charte] {
+  --background: var(--esp-night-bg);
+  --background-dashboard: var(--esp-night-bg);
+  --foreground: var(--esp-neutral-100);
+
+  --card: var(--esp-night-card);
+  --card-foreground: var(--esp-neutral-100);
+  --popover: var(--esp-night-card);
+  --popover-foreground: var(--esp-neutral-100);
+
+  /* Le bleu s'ÉCLAIRCIT en sombre (barreau 400, 6,22:1 sur la carte) et le
+     texte posé dessus s'assombrit : la lisibilité est portée par la PAIRE,
+     jamais par une seule teinte — même stratégie que `--primary-fill`
+     d'ui-v2. */
+  --primary: var(--esp-blue-400);
+  --primary-foreground: var(--esp-on-blue);
+  --primary-light: var(--esp-blue-900);
+
+  --secondary: var(--esp-night-card);
+  --secondary-foreground: var(--esp-neutral-300);
+
+  /* Voir le bloc clair : la surface de carte unifiée de l'espace. En sombre,
+     la carte se RELÈVE au-dessus du fond (`--esp-night-card`), jamais fondue
+     dedans — c'était le défaut d'iProfil avant ce rôle. */
+  --esp-surface-card: var(--esp-night-card);
+
+  --muted: var(--esp-night-section);
+  --muted-foreground: var(--esp-neutral-400);
+
+  --accent: var(--esp-blue-400);
+  --accent-foreground: var(--esp-on-blue);
+
+  --accent-orange: var(--esp-amber-dark);
+  --accent-blue: var(--esp-blue-dark);
+  --accent-purple: var(--esp-blue-300);
+  --accent-yellow: var(--esp-amber-dark);
+
+  --success: var(--esp-green-dark);
+  --success-light: var(--esp-green-bg-dark);
+  --warning: var(--esp-amber-dark);
+  --warning-light: var(--esp-amber-bg-dark);
+  --destructive: var(--esp-rose-dark);
+  --destructive-light: var(--esp-rose-bg-dark);
+
+  --border: var(--esp-night-border);
+  --border-light: var(--esp-night-border);
+  --input: var(--esp-night-input);
+  --ring: var(--esp-blue-400);
+
+  --chart-1: var(--esp-blue-400);
+  --chart-2: var(--esp-blue-dark);
+  --chart-3: var(--esp-amber-dark);
+  --chart-4: var(--esp-rose-dark);
+  --chart-5: var(--esp-night-faint);
+
+  --sidebar: var(--esp-night-section);
+  --sidebar-foreground: var(--esp-neutral-100);
+  --sidebar-primary: var(--esp-blue-400);
+  --sidebar-primary-foreground: var(--esp-on-blue);
+  --sidebar-accent: var(--esp-night-accent-soft);
+  --sidebar-accent-foreground: var(--esp-night-accent-deep);
+  --sidebar-border: var(--esp-night-border);
+  --sidebar-ring: var(--esp-blue-400);
+  --sidebar-muted: var(--esp-night-faint);
+
+  --shadow-focus: 0 0 0 3px
+    color-mix(in srgb, var(--esp-blue-400) 50%, transparent);
+
+  /* ── Famille cible ui-v2 — échelles inversées, comme le fait `tokens.css`
+     en sombre : les barreaux bas deviennent des surfaces, les barreaux hauts
+     du premier plan clair. ── */
+  --primary-50: var(--esp-blue-950);
+  --primary-100: var(--esp-blue-900);
+  --primary-200: var(--esp-blue-800);
+  --primary-300: var(--esp-blue-600);
+  --primary-400: var(--esp-blue-400);
+  --primary-500: var(--esp-blue-400);
+  --primary-600: var(--esp-blue-300);
+  --primary-700: var(--esp-blue-200);
+  --primary-800: var(--esp-blue-100);
+  --primary-fill: var(--esp-blue-600);
+  --primary-fill-hover: var(--esp-blue-700);
+  --on-fill: var(--esp-neutral-0);
+
+  --ink-900: var(--esp-neutral-100);
+  --ink-800: var(--esp-neutral-200);
+  --ink-700: var(--esp-neutral-300);
+  --ink-600: var(--esp-night-soft);
+  --ink-500: var(--esp-neutral-400);
+  --ink-400: var(--esp-night-faint);
+  --ink-300: var(--esp-neutral-700);
+  --ink-200: var(--esp-night-border);
+  --ink-150: var(--esp-night-hover);
+  --ink-100: var(--esp-night-bg);
+  --ink-50: var(--esp-night-hover);
+  --ink-0: var(--esp-night-card);
+
+  --info-50: var(--esp-blue-950);
+  --info-100: var(--esp-blue-900);
+  --info-500: var(--esp-blue-400);
+  --info-600: var(--esp-blue-300);
+
+  --status-active: var(--esp-blue-300);
+  --status-active-bg: var(--esp-blue-950);
+
+  --esp-shadow-card: var(--esp-night-shadow);
+  --esp-segment-on: var(--esp-night-seg-on);
+  --esp-segment-on-fg: var(--esp-night-seg-on-fg);
+
+  /* Barre basse mobile — la carte de nuit, OPAQUE dans les deux comptes.
+     Le fond translucide du thème clair laisse passer du parchemin, ce qui est
+     joli sur une page claire ; en sombre il laisserait passer le fil qui
+     défile dessous, et un libellé de 10 px sur du texte en mouvement ne se lit
+     plus. Le fond de statut de nuit est plein, jamais `rgba()` — même règle
+     que partout ailleurs dans ce bloc : une opacité donne un contraste qui
+     dépend de la surface sous-jacente, donc invérifiable. */
+  --esp-mobilebar-bg: var(--esp-night-card);
+  --esp-mobilebar-border: var(--esp-night-border);
+  --esp-mobilebar-shadow: var(--esp-night-shadow-float);
+
+  --esp-tone-blue: var(--esp-blue-dark);
+  --esp-tone-blue-bg: var(--esp-blue-bg-dark);
+  --esp-tone-amber: var(--esp-amber-dark);
+  --esp-tone-amber-bg: var(--esp-amber-bg-dark);
+  --esp-tone-rose: var(--esp-rose-dark);
+  --esp-tone-rose-bg: var(--esp-rose-bg-dark);
+  --esp-tone-green: var(--esp-green-dark);
+  --esp-tone-green-bg: var(--esp-green-bg-dark);
+
+  /* Deux primitives CLAIRES que des composants partagés lisent en direct, au
+     lieu de passer par un rôle — `EspaceTopBar` (pastille de matricule,
+     boutons d'icône, piste du sélecteur de thème) et `EspaceAccountSwitcher`
+     (piste du sélecteur Personnel/Poste), sous la forme
+     `var(--poste-chip,var(--esp-neutral-chip))`.
+     Le compte POSTE les réoriente depuis toujours (bloc
+     `.dark .dash-v2.poste-workspace[data-charte="espace-structure"]`) ; le
+     compte PERSONNEL, lui, n'a jamais eu ce ré-routage — son repli restait
+     donc le barreau de parchemin CLAIR, jusqu'au 2026-08-20. À l'écran :
+     deux plaques beiges en plein thème sombre (le sélecteur Agent/Poste du
+     rail et la bascule Clair/Sombre de la barre haute), avec un libellé
+     inactif mesuré à 2,20:1. La table de rôles était saine — ce sont ces deux
+     court-circuits qui échappaient à la bascule. */
+  --esp-neutral-chip: var(--esp-night-chip);
+  --esp-neutral-hover: var(--esp-night-hover);
+}

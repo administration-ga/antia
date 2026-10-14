@@ -1,0 +1,10 @@
+{
+  // Typage des cliquets (tests/) : node + vitest, TypeScript strict.
+  "extends": "./packages/tsconfig/base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "lib": ["ES2022"],
+    "types": ["node"]
+  },
+  "include": ["tests/**/*.ts"]
+}

@@ -14,6 +14,47 @@ dependances:
 
 # ANTIA — Plan d'implémentation en prompts
 
+---
+
+> ## État d'exécution (tenu à jour à chaque prompt)
+>
+> Ce document reste **l'énoncé du plan** tel qu'il a été écrit le 14/10/2026. Ce qui a été
+> exécuté, et ce que l'exécution a corrigé, se lit ici et dans le rapport de chaque prompt.
+>
+> | Prompt | Clos le | Commit(s) |
+> |---|---|---|
+> | PA0 — scaffold du monorepo | 2026-10-14 | voir l'historique de `main` (commit « PA0 ») |
+> | PA1 — owner map | — | — |
+> | PA2 — fondations multi-réseaux | — | — |
+> | PA3 — duplication du backend | — | — |
+> | PA4 — identité | — | — |
+> | PA5 — modération, débit, données, notifications, fédération | — | — |
+> | PA6 — frontend `social-features` | — | — |
+> | PA7 — console | — | — |
+> | PA8 — antia.ga public | — | — |
+> | PA9 — fédération de l'administration | — | — |
+> | PA10 — échelle et lancement | — | — |
+>
+> **Préalables externes manquants au 14/10/2026** (aucun ne bloque le code, tous bloquent une
+> mise en ligne) : projet Convex `antia` (le développement tourne sur un déploiement Convex
+> **local anonyme**, sans compte ni nuage) ; clients OIDC IDN `antia` et `diasporale` en sandbox ;
+> hébergement (A5) ; clés Resend, SMS, LiveKit, VAPID ; dossier APDPVP et analyse d'impact ;
+> décisions A1–A10 (les recommandations du cahier sont appliquées **par défaut**, cahier §20).
+>
+> **Écarts au plan assumés à l'exécution de PA0** :
+> - turbo est remplacé par le lanceur `scripts/workspace-run.mjs` dupliqué du socle (ADR-0165 du
+>   socle) : turbo refuse tout le graphe dès qu'un espace de travail sort de la racine, ce que
+>   seront les applications de DIASPORALE ; `turbo.json` n'est donc pas posé ;
+> - `convex/auth.config.ts` déclare Better Auth comme émetteur UNIQUE ; IDN y entre par Better
+>   Auth (PA4), configuré par variables — un second émetteur donnerait deux identités pour une
+>   même personne (ADR-0002) ;
+> - le domaine pur et les paquets testent avec vitest (tests portés du socle sans réécriture de
+>   leurs imports) ; `bun test` sert aux scripts ;
+> - licence AGPL-3.0 héritée du socle (le code dupliqué l'impose dans un dépôt public), à
+>   confirmer par le propriétaire.
+
+---
+
 ## 0. Objet et mode d'emploi
 
 Ce plan construit **le moteur social national** (PA0 → PA7), puis **le réseau public ANTIA**

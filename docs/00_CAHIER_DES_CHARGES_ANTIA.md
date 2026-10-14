@@ -718,18 +718,18 @@ téléphone.
 
 ## 20. Décisions à valider (arbitrages)
 
-| # | Question | Recommandation |
-|---|---|---|
-| A1 | Nom (ANTIA / ANTSA) et domaine | ANTIA, `antia.ga` |
-| A2 | Le moteur vit dans le dépôt ANTIA ; DIASPORALE en est une application | oui |
-| A3 | Ouverture d'ANTIA | toute personne, badges visibles ; politique modifiable sans code |
-| A4 | Lecture anonyme | pages Officiel, leurs publications `root`, profils publics réduits, contenus `root` publics ; tout le reste exige une adhésion |
-| A5 | Équipe Convex, hébergement, budget | à décider par le propriétaire (équipe Convex du programme ; Cloud Run ou Vercel) |
-| A6 | Format téléphone | 440 × 956, plancher 375 |
-| A7 | Fédération du socle : qui marque « aussi sur ANTIA » | le signataire de la page, au moment de publier ; jamais par défaut |
-| A8 | Direction artistique ANTIA | passe `frontend-design` ; candidates `vert-souverain`, « parchemin », déclinaison propre |
-| A9 | Monétisation | aucune en A3 ; A6 B2B étiqueté ; Gabaos à décider |
-| A10 | Formalités | dossier APDPVP et analyse d'impact dès A0 ; textes légaux par un juriste |
+| # | Question | Recommandation | Appliqué par défaut à l'exécution (14/10/2026, en attente de décision) |
+|---|---|---|---|
+| A1 | Nom (ANTIA / ANTSA) et domaine | ANTIA, `antia.ga` | ANTIA (jeton unique `BRAND_NAME`), `antia.ga` au catalogue |
+| A2 | Le moteur vit dans le dépôt ANTIA ; DIASPORALE en est une application | oui | oui (ADR-0001 proposé) |
+| A3 | Ouverture d'ANTIA | toute personne, badges visibles ; politique modifiable sans code | politique `open` du réseau racine |
+| A4 | Lecture anonyme | pages Officiel, leurs publications `root`, profils publics réduits, contenus `root` publics ; tout le reste exige une adhésion | la recommandation (PA8) |
+| A5 | Équipe Convex, hébergement, budget | à décider par le propriétaire (équipe Convex du programme ; Cloud Run ou Vercel) | **non tranché** : développement sur déploiement Convex local anonyme ; aucune publication |
+| A6 | Format téléphone | 440 × 956, plancher 375 | 440 × 956 (PA6) |
+| A7 | Fédération du socle : qui marque « aussi sur ANTIA » | le signataire de la page, au moment de publier ; jamais par défaut | la recommandation (PA9) |
+| A8 | Direction artistique ANTIA | passe `frontend-design` ; candidates `vert-souverain`, « parchemin », déclinaison propre | charte de base « parchemin » jusqu'à la passe `frontend-design` (PA8) |
+| A9 | Monétisation | aucune en A3 ; A6 B2B étiqueté ; Gabaos à décider | aucune |
+| A10 | Formalités | dossier APDPVP et analyse d'impact dès A0 ; textes légaux par un juriste | **non tranché** : aucune mise en ligne publique sans eux |
 
 ## 21. Références
 

@@ -1,0 +1,10 @@
+// Paquets du moteur consommés EN SOURCES par les applications (transpilePackages) :
+// aucun artefact compilé, le typage seul est vérifié ici.
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "extends": "./base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "types": ["node"]
+  }
+}

@@ -1,0 +1,19 @@
+ANTIA — moteur social national et réseau social public gabonais.
+
+Ce dépôt contient du code DUPLIQUÉ du socle administration.ga (dépôt
+administration-ga/administration.ga, commit ad2e7fdc2 et suivants), distribué
+sous la GNU Affero General Public License, version 3 ou (à votre choix) toute
+version ultérieure — « Copyright (C) 2026 République Gabonaise » selon le NOTICE
+du socle. Chaque fichier dupliqué porte un en-tête « Dupliqué de <chemin> @
+<commit> — adaptations : … ».
+
+Le régime de licence d'ANTIA SUIT, par défaut, celui de sa source : le texte
+intégral de l'AGPL-3.0 est dans le fichier LICENSE. Ce choix et le titulaire des
+droits sur le code propre au moteur (le cahier des charges désigne NTSAGUI
+Digital comme maître d'ouvrage) sont À CONFIRMER par le propriétaire (lot A0).
+
+Ce que la licence ne couvre pas : les DONNÉES (contenus des membres, données à
+caractère personnel — régies par la loi gabonaise n° 001/2011 modifiée par la
+loi n° 025/2023), les MARQUES et emblèmes (« ANTIA », « DIASPORALE », noms et
+logos des institutions), et les DÉPENDANCES tierces, qui gardent chacune leur
+propre licence.

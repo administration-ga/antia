@@ -1,0 +1,29 @@
+{
+  "meta": {
+    "title": "{{brand}} — the Gabonese public social network",
+    "description": "{{brand}} brings the networks of the Gabonese digital ecosystem together in one public network where everyone knows who they are talking to."
+  },
+  "skipToContent": "Skip to content",
+  "home": {
+    "eyebrow": "Under construction",
+    "title": "{{brand}}, the Gabonese public social network",
+    "lead": "A network open to everyone and built on trust: every profile and every page carries a badge computed by the service, never self-declared.",
+    "badgesTitle": "Four badges, never confused",
+    "networksTitle": "Networks within the network",
+    "networks": {
+      "diaspora": "The Gabonese diaspora, on its own network, whose members are also part of {{brand}}.",
+      "administration": "The pages of verified public administrations, mirrored from their own space, read-only."
+    },
+    "status": "The service will open in stages. Sign-ups are not open yet.",
+    "healthLink": "Service status"
+  },
+  "health": {
+    "title": "Service status",
+    "application": "Application",
+    "backend": "Engine",
+    "configured": "configured",
+    "missing": "not configured",
+    "version": "Version",
+    "backHome": "Back to home"
+  }
+}

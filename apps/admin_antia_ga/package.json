@@ -1,0 +1,40 @@
+{
+  "name": "admin-antia-ga",
+  "version": "0.1.0",
+  "private": true,
+  "license": "AGPL-3.0-or-later",
+  "type": "module",
+  "description": "Console du moteur ANTIA : réseaux, équipes de modération, fédération, journal (opérateurs IDN loa ≥ 2).",
+  "scripts": {
+    "dev": "next dev --port 3032",
+    "build": "next build",
+    "start": "next start -p 3032",
+    "lint": "eslint .",
+    "typecheck": "tsgo --noEmit -p tsconfig.json",
+    "test": "vitest run --passWithNoTests"
+  },
+  "dependencies": {
+    "@antia/api": "workspace:*",
+    "@antia/social-contracts": "workspace:*",
+    "@antia/social-features": "workspace:*",
+    "@antia/ui": "workspace:*",
+    "i18next": "catalog:",
+    "next": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "react-i18next": "catalog:"
+  },
+  "devDependencies": {
+    "@antia/eslint-config": "workspace:*",
+    "@antia/tsconfig": "workspace:*",
+    "@tailwindcss/postcss": "catalog:",
+    "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "@typescript/native-preview": "catalog:",
+    "eslint": "catalog:",
+    "tailwindcss": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

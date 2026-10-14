@@ -1,0 +1,29 @@
+{
+  "meta": {
+    "title": "{{brand}} — le réseau social public gabonais",
+    "description": "{{brand}} réunit les réseaux de l'écosystème numérique gabonais dans un réseau public où chacun sait à qui il parle."
+  },
+  "skipToContent": "Aller au contenu",
+  "home": {
+    "eyebrow": "En construction",
+    "title": "{{brand}}, le réseau social public gabonais",
+    "lead": "Un réseau ouvert à toute personne et structuré par la confiance : chaque profil et chaque page porte un badge calculé par le service, jamais déclaré.",
+    "badgesTitle": "Quatre badges, jamais confondus",
+    "networksTitle": "Des réseaux dans le réseau",
+    "networks": {
+      "diaspora": "La diaspora gabonaise, sur son propre réseau, dont les membres font aussi partie de {{brand}}.",
+      "administration": "Les pages des administrations vérifiées, reflétées depuis leur espace, en lecture seule."
+    },
+    "status": "Le service ouvrira par étapes. Les inscriptions ne sont pas encore ouvertes.",
+    "healthLink": "État du service"
+  },
+  "health": {
+    "title": "État du service",
+    "application": "Application",
+    "backend": "Moteur",
+    "configured": "configuré",
+    "missing": "non configuré",
+    "version": "Version",
+    "backHome": "Retour à l'accueil"
+  }
+}
