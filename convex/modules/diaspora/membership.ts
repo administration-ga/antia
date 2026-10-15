@@ -10,6 +10,7 @@
  * naît avec l'entrée (invariant 3) ; aucune adhésion n'est créée sans geste.
  */
 import { CONSENT_TEXT_VERSIONS as ENGINE_CONSENT_TEXT_VERSIONS, isConsentInForce, missingConsentsToJoin } from "@antia/social-domain/consent"
+import { assertDecisionReason } from "@antia/social-domain/audit"
 import { isActiveStatus } from "@antia/social-domain/membership"
 import {
   capabilitiesOf,
@@ -38,13 +39,14 @@ import { v } from "convex/values"
 import type { Doc, Id } from "../../_generated/dataModel"
 import { query, type QueryCtx } from "../../_generated/server"
 import { getCurrentPerson, getMembership, getRootNetwork } from "../../lib/access"
-import { fail, failAppRule, notFound } from "../../lib/errors"
+import { checked, fail, failAppRule, notFound } from "../../lib/errors"
 import { networkMutation, networkQuery, personMutation } from "../../lib/functions"
 import { enforceRateLimit } from "../../lib/rateLimit"
 import { membershipRoleValidator, membershipStatusValidator } from "../../lib/validators"
 import { isBlockedBetween } from "../graph/graph"
 import { admitToNetwork, setMembershipStatus, writeNetworkFacet } from "../people/admission"
 import { notifyPerson } from "../notifications/notify"
+import { appendAudit, networkRoleCapacity } from "../platform/audit"
 import { findPublishedPersonByHandle } from "../people/miniProfile"
 import { hasStrongIdentityFor, liveIdentityLinks } from "../people/persons"
 import {
@@ -233,16 +235,20 @@ export const sponsor = networkMutation({
   },
 })
 
+/** Plancher du motif d'un retrait par la modération (règle `DECISION_REASON_LENGTH`). */
+export const MODERATION_REASON_MIN = 10
+
 /**
- * Retirer un parrainage : le parrain, ou la modération du réseau. Le journal
- * garde l'acte et son retrait ; le statut de la personne parrainée retombe selon
- * ses faits restants. Pour tout autre membre, le parrainage n'existe pas.
+ * Retirer un parrainage : le parrain (un geste), ou la modération du réseau (une
+ * DÉCISION : motif exigé, inscrite au journal du moteur). Le journal des
+ * parrainages garde l'acte et son retrait ; le statut de la personne parrainée
+ * retombe selon ses faits restants. Pour tout autre membre, le parrainage n'existe pas.
  */
 export const revokeSponsorship = networkMutation({
   minStatus: "en_attente",
-  args: { sponsorshipId: v.id("sponsorships") },
+  args: { sponsorshipId: v.id("sponsorships"), reason: v.optional(v.string()) },
   returns: v.null(),
-  handler: async (ctx, { sponsorshipId }) => {
+  handler: async (ctx, { sponsorshipId, reason: rawReason }) => {
     assertDiasporaNetwork(ctx.network)
     await enforceRateLimit(ctx, "diaspora.sponsor.revoke", ctx.person._id)
     const sponsorship = await ctx.db.get(sponsorshipId)
@@ -256,6 +262,7 @@ export const revokeSponsorship = networkMutation({
     if (actor === "other") return notFound()
     const check = checkSponsorshipRevocation({ actor, revokedAt: sponsorship.revokedAt ?? null })
     if (!check.ok) return failAppRule(check.code, {}, "conflict")
+    const reason = actor === "moderator" ? checked(() => assertDecisionReason(rawReason ?? "", MODERATION_REASON_MIN)) : null
 
     const now = Date.now()
     await ctx.db.patch(sponsorship._id, { revokedAt: now, revokedBy: actor })
@@ -263,6 +270,18 @@ export const revokeSponsorship = networkMutation({
     if (target) {
       const grounds = await membershipGrounds(ctx, ctx.networkId, sponsorship.sponsoredPersonId, target)
       await applyDerivedStatus(ctx, target, grounds, null, now)
+    }
+    // La décision de la modération entre au journal du moteur, dans la même transaction.
+    const capacity = networkRoleCapacity(ctx.membership.role)
+    if (reason !== null && capacity !== null) {
+      await appendAudit(ctx, {
+        action: "diaspora.sponsorship_revoke",
+        capacity,
+        actorPersonId: ctx.person._id,
+        networkId: ctx.networkId,
+        subject: { table: "persons", id: sponsorship.sponsoredPersonId },
+        details: { sponsorPersonId: sponsorship.sponsorPersonId, reason },
+      })
     }
     // La cloche de la personne parrainée ; une modération ne se désigne pas.
     await notifyPerson(ctx, {

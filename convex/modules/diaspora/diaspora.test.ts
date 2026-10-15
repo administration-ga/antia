@@ -347,8 +347,20 @@ describe("parrainage (EXF-DG-04, arbitrage A3)", () => {
     await t.run(async (ctx) => {
       if (strangerRow) await ctx.db.patch(strangerRow._id, { role: "network_moderator" })
     })
-    await stranger.as.mutation(api.modules.diaspora.membership.revokeSponsorship, { networkId: diasporale, sponsorshipId: second.sponsorshipId })
+    // Une décision de la modération exige son motif, et entre au journal du moteur.
+    const noReason = await refusal(stranger.as.mutation(api.modules.diaspora.membership.revokeSponsorship, { networkId: diasporale, sponsorshipId: second.sponsorshipId }))
+    expect(noReason.code).toBe("invalidArgument")
+    await stranger.as.mutation(api.modules.diaspora.membership.revokeSponsorship, {
+      networkId: diasporale,
+      sponsorshipId: second.sponsorshipId,
+      reason: "Parrainage de complaisance signalé",
+    })
     expect(await t.run(async (ctx) => ctx.db.get(second.sponsorshipId))).toMatchObject({ revokedBy: "moderator" })
+    const audit = await t.run(async (ctx) => ctx.db.query("engineAudit").take(10))
+    expect(audit.map((row) => [row.action, row.capacity, row.actorPersonId, row.subjectTable, row.subjectId])).toEqual([
+      ["diaspora.sponsorship_revoke", "network_moderator", stranger.personId, "persons", light.personId],
+    ])
+    expect(audit[0]?.details).toEqual({ sponsorPersonId: sponsor.personId, reason: "Parrainage de complaisance signalé" })
   })
 
   it("un départ éteint le parrainage ; au retour, la personne repart « en attente »", async () => {
@@ -841,7 +853,11 @@ describe("cloche DIASPORALE (genres de la tranche)", () => {
       if (moderatorRow) await ctx.db.patch(moderatorRow._id, { role: "network_moderator" })
     })
     const second = await sponsor.as.mutation(api.modules.diaspora.membership.sponsor, { networkId: diasporale, handle: "compte.leger" })
-    await moderator.as.mutation(api.modules.diaspora.membership.revokeSponsorship, { networkId: diasporale, sponsorshipId: second.sponsorshipId })
+    await moderator.as.mutation(api.modules.diaspora.membership.revokeSponsorship, {
+      networkId: diasporale,
+      sponsorshipId: second.sponsorshipId,
+      reason: "Retrait décidé par la modération",
+    })
     expect(await bells(t, diasporale, light.personId)).toContainEqual({ kind: "sponsorship_withdrawn", actor: null })
     expect((await bells(t, diasporale, light.personId)).some((bell) => bell.actor === moderator.personId)).toBe(false)
   })
