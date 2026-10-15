@@ -1,5 +1,5 @@
 // @vitest-environment edge-runtime
-// Dupliqué de socle/convex/modules/fileGuard/fileGuard.test.ts @ ad2e7fdc2 — adaptations : personnes et réseaux (graine des fondations) au lieu des organisations et des comptes ; cas fail-open INVERSÉS (un fichier sans ligne est retenu) ; coupe-circuit qui SUSPEND ; quarantaine iDocument et avis du DSI retirés (le statut bloquant est la retenue ; l'avis arrive avec le module notifications) ; libération par un modérateur du réseau, relance par un opérateur ; tests neufs : fraîcheur du dépôt, purge sans famine (D31), fichier généré, pièces posées, lecture bornée au réseau.
+// Dupliqué de socle/convex/modules/fileGuard/fileGuard.test.ts @ ad2e7fdc2 — adaptations : personnes et réseaux (graine des fondations) au lieu des organisations et des comptes ; cas fail-open INVERSÉS (un fichier sans ligne est retenu) ; coupe-circuit qui SUSPEND ; quarantaine iDocument et avis du DSI retirés (le statut bloquant est la retenue ; l'avis arrive avec le module notifications) ; libération par un modérateur du réseau, relance par un opérateur ; tests neufs : fraîcheur du dépôt, purge sans famine (D31), fichier généré, pièces posées, lecture bornée au réseau, journal des décisions (libération, relance, purge).
 /**
  * Garde des fichiers — la chaîne complète sur le harnais convex-test :
  * admission → analyse → verdict → retenue → libération.
@@ -65,6 +65,16 @@ async function member(t: T, rootId: Id<"networks">, subject: string, role?: Doc<
     })
   }
   return { as, personId }
+}
+
+/** Les lignes du journal des décisions qui visent cette analyse, des plus anciennes aux plus récentes. */
+async function auditOf(t: T, scanId: Id<"fileScans">): Promise<Doc<"engineAudit">[]> {
+  return await t.run(async (ctx) =>
+    ctx.db
+      .query("engineAudit")
+      .withIndex("by_subject_at", (q) => q.eq("subjectTable", "fileScans").eq("subjectId", scanId))
+      .take(20),
+  )
 }
 
 async function operator(t: T, rootId: Id<"networks">, subject: string) {
@@ -291,6 +301,10 @@ describe("libération par un modérateur, relance par un opérateur", () => {
     const { storageId, scanId } = await suspiciousScan(t, rootId, uploader.personId)
     expect(await moderator.as.mutation(api.modules.files.mutations.releaseScan, { scanId, reason: "Faux positif : capture renommée" })).toEqual({ status: "clean" })
     expect(await scanOf(t, storageId)).toMatchObject({ status: "clean", releasedByPersonId: moderator.personId })
+    // La décision laisse sa ligne : qui, à quel titre, dans quel réseau, pourquoi.
+    expect(await auditOf(t, scanId)).toMatchObject([
+      { action: "file.release", capacity: "network_moderator", actorPersonId: moderator.personId, networkId: rootId, details: { reason: "Faux positif : capture renommée", from: "suspicious" } },
+    ])
     expect((await t.run(async (ctx) => resolveFileDelivery(ctx as unknown as MutationCtx, storageId))).url).toBeTruthy()
   })
 
@@ -302,6 +316,8 @@ describe("libération par un modérateur, relance par un opérateur", () => {
     const { scanId } = await suspiciousScan(t, rootId, plain.personId)
     expect(engineErrorCode(await caught(plain.as.mutation(api.modules.files.mutations.releaseScan, { scanId, reason: "parce que" })))).toBe("notFound")
     expect(engineErrorCode(await caught(moderator.as.mutation(api.modules.files.mutations.releaseScan, { scanId, reason: " " })))).toBe("invalidArgument")
+    // Une décision refusée n'a pas de ligne.
+    expect(await auditOf(t, scanId)).toEqual([])
   })
 
   it("un fichier de profil (sans réseau) ne se libère que par un opérateur", async () => {
@@ -312,6 +328,9 @@ describe("libération par un modérateur, relance par un opérateur", () => {
     const { scanId } = await suspiciousScan(t, undefined, moderator.personId)
     expect(engineErrorCode(await caught(moderator.as.mutation(api.modules.files.mutations.releaseScan, { scanId, reason: "c'est mon fichier" })))).toBe("notFound")
     expect(await op.as.mutation(api.modules.files.mutations.releaseScan, { scanId, reason: "Vérifié à la main" })).toEqual({ status: "clean" })
+    const [line] = await auditOf(t, scanId)
+    expect(line).toMatchObject({ action: "file.release", capacity: "platform_operator", actorPersonId: op.personId })
+    expect(line?.networkId).toBeUndefined()
   })
 
   it("un `infected` ne se libère jamais ; seule une relance d'opérateur le remet en analyse", async () => {
@@ -328,6 +347,7 @@ describe("libération par un modérateur, relance par un opérateur", () => {
     vi.useFakeTimers()
     await op.as.mutation(api.modules.files.mutations.requeueScan, { scanId })
     expect(await scanOf(t, storageId)).toMatchObject({ status: "pending", attempts: 0 })
+    expect(await auditOf(t, scanId)).toMatchObject([{ action: "file.requeue", capacity: "platform_operator", actorPersonId: op.personId, details: { from: "infected" } }])
   })
 })
 
@@ -365,6 +385,10 @@ describe("balayeur et purge", () => {
     expect((await scanOf(t, storageId))?.blobPurgedAt).toBeDefined()
     expect(await t.run(async (ctx) => ctx.storage.getUrl(storageId))).toBeNull()
     expect(await t.mutation(internal.modules.files.mutations.purgeQuarantinedBlobs, {})).toBe(0)
+    // Acte du SYSTÈME : une ligne, sans acteur ; le rejeu n'en ajoute pas.
+    const lines = await auditOf(t, scanId)
+    expect(lines).toMatchObject([{ action: "file.purge_blob", capacity: "system" }])
+    expect(lines[0]?.actorPersonId).toBeUndefined()
   })
 
   it("D31 — cinquante lignes déjà purgées ne bouchent plus la file : la suivante est purgée", async () => {

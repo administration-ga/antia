@@ -57,6 +57,8 @@ export const DOMAIN_RULES = [
   "UPLOAD_TYPE_NOT_ALLOWED",
   "UPLOAD_SIZE_OUT_OF_RANGE",
   "UPLOAD_MISMATCH",
+  // Décisions (console, modération) : le motif
+  "DECISION_REASON_LENGTH",
 ] as const
 export type DomainRule = (typeof DOMAIN_RULES)[number]
 

@@ -25,6 +25,7 @@ import type * as modules_diaspora_facts from "../modules/diaspora/facts.js";
 import type * as modules_diaspora_hubs from "../modules/diaspora/hubs.js";
 import type * as modules_diaspora_manifest from "../modules/diaspora/manifest.js";
 import type * as modules_diaspora_membership from "../modules/diaspora/membership.js";
+import type * as modules_diaspora_profile from "../modules/diaspora/profile.js";
 import type * as modules_diaspora_seed from "../modules/diaspora/seed.js";
 import type * as modules_diaspora_tables from "../modules/diaspora/tables.js";
 import type * as modules_diaspora_validators from "../modules/diaspora/validators.js";
@@ -62,6 +63,7 @@ import type * as modules_people_miniProfile from "../modules/people/miniProfile.
 import type * as modules_people_persons from "../modules/people/persons.js";
 import type * as modules_people_profile from "../modules/people/profile.js";
 import type * as modules_people_tables from "../modules/people/tables.js";
+import type * as modules_platform_audit from "../modules/platform/audit.js";
 import type * as modules_platform_authRateLimit from "../modules/platform/authRateLimit.js";
 import type * as modules_platform_devTools from "../modules/platform/devTools.js";
 import type * as modules_platform_tables from "../modules/platform/tables.js";
@@ -95,6 +97,7 @@ declare const fullApi: ApiFromModules<{
   "modules/diaspora/hubs": typeof modules_diaspora_hubs;
   "modules/diaspora/manifest": typeof modules_diaspora_manifest;
   "modules/diaspora/membership": typeof modules_diaspora_membership;
+  "modules/diaspora/profile": typeof modules_diaspora_profile;
   "modules/diaspora/seed": typeof modules_diaspora_seed;
   "modules/diaspora/tables": typeof modules_diaspora_tables;
   "modules/diaspora/validators": typeof modules_diaspora_validators;
@@ -132,6 +135,7 @@ declare const fullApi: ApiFromModules<{
   "modules/people/persons": typeof modules_people_persons;
   "modules/people/profile": typeof modules_people_profile;
   "modules/people/tables": typeof modules_people_tables;
+  "modules/platform/audit": typeof modules_platform_audit;
   "modules/platform/authRateLimit": typeof modules_platform_authRateLimit;
   "modules/platform/devTools": typeof modules_platform_devTools;
   "modules/platform/tables": typeof modules_platform_tables;

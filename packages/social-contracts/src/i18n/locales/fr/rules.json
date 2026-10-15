@@ -36,5 +36,6 @@
   "STORY_CAPTION_TOO_LONG": "Une légende est limitée à {{max}} caractères.",
   "UPLOAD_TYPE_NOT_ALLOWED": "Ce type de fichier n'est pas accepté ici.",
   "UPLOAD_SIZE_OUT_OF_RANGE": "Ce fichier est vide ou dépasse la taille autorisée ({{maxMegabytes}} Mo).",
-  "UPLOAD_MISMATCH": "Le fichier reçu ne correspond pas à celui annoncé. Réessayez le dépôt."
+  "UPLOAD_MISMATCH": "Le fichier reçu ne correspond pas à celui annoncé. Réessayez le dépôt.",
+  "DECISION_REASON_LENGTH": "Le motif doit compter entre {{min}} et {{max}} caractères."
 }

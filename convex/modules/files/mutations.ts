@@ -1,4 +1,4 @@
-// Dupliqué de socle/convex/modules/fileGuard/mutations.ts @ ad2e7fdc2 — adaptations : table `fileScans` ; quarantaine iDocument et triage IA retirés (le statut bloquant EST la retenue ; l'avis part par la cloche sociale, `notify.ts`) ; libération par un MODÉRATEUR du réseau du fichier ou un opérateur (au lieu de `settings.manage` d'une administration), relance par un opérateur (au lieu du superadmin) ; débit sur les gestes humains ; coupe-circuit respecté par l'analyse et le balayeur (fail-closed) ; purge indexée sur `blobPurgedAt` (D31 : une ligne purgée ne bloque plus la file) ; `_ageScanForTests` non recopiée (les tests vieillissent la ligne eux-mêmes) ; refus à code du moteur.
+// Dupliqué de socle/convex/modules/fileGuard/mutations.ts @ ad2e7fdc2 — adaptations : table `fileScans` ; quarantaine iDocument et triage IA retirés (le statut bloquant EST la retenue ; l'avis part par la cloche sociale, `notify.ts`) ; libération par un MODÉRATEUR du réseau du fichier ou un opérateur (au lieu de `settings.manage` d'une administration), relance par un opérateur (au lieu du superadmin) ; `logAudit` (journal de l'archive iDocument) remplacé par le journal du moteur (`appendAudit` : libération, relance, purge, avec la qualité de l'acteur) ; débit sur les gestes humains ; coupe-circuit respecté par l'analyse et le balayeur (fail-closed) ; purge indexée sur `blobPurgedAt` (D31 : une ligne purgée ne bloque plus la file) ; `_ageScanForTests` non recopiée (les tests vieillissent la ligne eux-mêmes) ; refus à code du moteur.
 /**
  * Garde des fichiers — MUTATIONS.
  *
@@ -13,15 +13,17 @@
  * d'analyse ; tout échec après `_markRunning` finit dans `_record`. Le balayeur
  * `retryStale` rattrape le crash pur du runtime.
  */
+import { type AuditCapacity, assertDecisionReason } from "@antia/social-domain/audit"
 import { v } from "convex/values"
 
 import { internal } from "../../_generated/api"
 import type { Doc } from "../../_generated/dataModel"
 import { internalMutation, type MutationCtx } from "../../_generated/server"
 import { getMembership } from "../../lib/access"
-import { fail, notFound } from "../../lib/errors"
+import { checked, fail, notFound } from "../../lib/errors"
 import { operatorMutation, personMutation } from "../../lib/functions"
 import { enforceRateLimit } from "../../lib/rateLimit"
+import { appendAudit, networkRoleCapacity, operatorCapacity } from "../platform/audit"
 import { deliverVerdictNotice } from "./notify"
 import {
   FILE_GUARD_MAX_ATTEMPTS,
@@ -143,16 +145,20 @@ export const _record = internalMutation({
   },
 })
 
-/** Un modérateur du réseau du fichier, ou un opérateur de plateforme. */
-async function canModerateScan(ctx: MutationCtx, scan: Doc<"fileScans">, personId: Doc<"persons">["_id"]): Promise<boolean> {
+/**
+ * La qualité qui autorise une personne à trancher sur ce fichier : opérateur de
+ * plateforme, ou modérateur (administrateur) du réseau du fichier ; `null` sinon.
+ */
+async function moderationCapacityFor(ctx: MutationCtx, scan: Doc<"fileScans">, personId: Doc<"persons">["_id"]): Promise<AuditCapacity | null> {
   const operator = await ctx.db
     .query("operators")
     .withIndex("by_person", (q) => q.eq("personId", personId))
     .unique()
-  if (operator && operator.revokedAt === undefined) return true
-  if (!scan.networkId) return false
+  if (operator && operator.revokedAt === undefined) return operatorCapacity(operator)
+  if (!scan.networkId) return null
   const membership = await getMembership(ctx, scan.networkId, personId)
-  return membership !== null && (membership.status === "declaree" || membership.status === "verifiee") && (membership.role === "network_moderator" || membership.role === "network_admin")
+  if (!membership || (membership.status !== "declaree" && membership.status !== "verifiee")) return null
+  return networkRoleCapacity(membership.role)
 }
 
 /**
@@ -166,10 +172,10 @@ export const releaseScan = personMutation({
   returns: v.object({ status: fileScanStatusValidator }),
   handler: async (ctx, args) => {
     const scan = await ctx.db.get(args.scanId)
-    if (!scan || !(await canModerateScan(ctx, scan, ctx.person._id))) return notFound()
+    const capacity = scan ? await moderationCapacityFor(ctx, scan, ctx.person._id) : null
+    if (!scan || !capacity) return notFound()
     await enforceRateLimit(ctx, "file.moderate", ctx.person._id)
-    const reason = args.reason.trim()
-    if (reason.length < MIN_RELEASE_REASON_CHARS) return fail("invalidArgument", { field: "reason" })
+    const reason = checked(() => assertDecisionReason(args.reason, MIN_RELEASE_REASON_CHARS))
     if (!isReleasableStatus(scan.status)) return fail("conflict")
     const now = Date.now()
     await ctx.db.patch(scan._id, {
@@ -179,6 +185,15 @@ export const releaseScan = personMutation({
       releaseReason: reason,
       verdictReason: `${scan.verdictReason ?? scan.status} → RELEASED`,
       updatedAt: now,
+    })
+    await appendAudit(ctx, {
+      action: "file.release",
+      capacity,
+      actorPersonId: ctx.person._id,
+      ...(scan.networkId ? { networkId: scan.networkId } : {}),
+      subject: { table: "fileScans", id: scan._id },
+      details: { reason, from: scan.status },
+      at: now,
     })
     return { status: "clean" as const }
   },
@@ -193,6 +208,7 @@ export const requeueScan = operatorMutation({
     const scan = await ctx.db.get(args.scanId)
     if (!scan) return notFound()
     if (scan.blobPurgedAt !== undefined) return fail("conflict")
+    const now = Date.now()
     await ctx.db.patch(scan._id, {
       status: "pending",
       attempts: 0,
@@ -201,9 +217,18 @@ export const requeueScan = operatorMutation({
       verdictReason: undefined,
       skipReason: undefined,
       completedAt: undefined,
-      updatedAt: Date.now(),
+      updatedAt: now,
     })
     if (!isKillSwitched(process.env)) await ctx.scheduler.runAfter(0, internal.modules.files.scan.runScan, { scanId: scan._id })
+    await appendAudit(ctx, {
+      action: "file.requeue",
+      capacity: operatorCapacity(ctx.operator),
+      actorPersonId: ctx.person._id,
+      ...(scan.networkId ? { networkId: scan.networkId } : {}),
+      subject: { table: "fileScans", id: scan._id },
+      details: { from: scan.status },
+      at: now,
+    })
     return null
   },
 })
@@ -263,7 +288,16 @@ export const purgeQuarantinedBlobs = internalMutation({
       } catch {
         // Fichier déjà absent : la purge est acquise.
       }
-      await ctx.db.patch(scan._id, { blobPurgedAt: Date.now() })
+      const now = Date.now()
+      await ctx.db.patch(scan._id, { blobPurgedAt: now })
+      // Acte du SYSTÈME : la trace dit qu'un contenu retenu a quitté le stockage, et quand.
+      await appendAudit(ctx, {
+        action: "file.purge_blob",
+        capacity: "system",
+        ...(scan.networkId ? { networkId: scan.networkId } : {}),
+        subject: { table: "fileScans", id: scan._id },
+        at: now,
+      })
     }
     return candidates.length
   },

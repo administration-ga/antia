@@ -131,7 +131,7 @@ describe("annuaire du réseau", () => {
     await operator.as.mutation(api.modules.people.memberships.suspendEverywhere, { personId: paul.personId, reason: "Signalements répétés et confirmés." })
     expect(await lynda.as.query(api.modules.people.directory.searchPeople, { networkId: root, query: "paul" })).toEqual([])
     expect(await lynda.as.query(api.modules.people.directory.searchPeople, { networkId: testClosed, query: "paul" })).toEqual([])
-    await operator.as.mutation(api.modules.people.memberships.liftSuspension, { personId: paul.personId })
+    await operator.as.mutation(api.modules.people.memberships.liftSuspension, { personId: paul.personId, reason: "Recours accueilli (test)." })
     expect((await lynda.as.query(api.modules.people.directory.searchPeople, { networkId: testClosed, query: "paul" })).length).toBe(1)
   })
 

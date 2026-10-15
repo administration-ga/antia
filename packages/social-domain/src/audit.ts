@@ -1,0 +1,89 @@
+// Dupliqué de socle/convex/lib/contextAudit.ts (types de l'acte et du détail) @ ad2e7fdc2 — adaptations : règles PURES sorties du backend ; actions, qualités (« à quel titre ») et sujets en listes FERMÉES qui s'allongent avec les modules ; détail PLAT et borné (le socle acceptait `v.any()`) ; motif de décision borné par une règle du domaine ; contexte institutionnel (organisation, rattachement, affectation, poste) remplacé par la QUALITÉ de l'acteur dans le moteur.
+/**
+ * Le journal des décisions du moteur — ce que dit une ligne d'audit.
+ *
+ * QUI a agi (`actorPersonId`, absent pour le système), À QUEL TITRE
+ * (`capacity` : opérateur de plateforme, administrateur ou modérateur du
+ * réseau, système), QUOI (`action`, verbe canonique `domaine.verbe`), SUR QUOI
+ * (`subject`), DANS QUEL RÉSEAU (absent pour un acte de plateforme), POURQUOI
+ * (`details.reason` quand la décision exige un motif).
+ *
+ * Le détail est PLAT et BORNÉ : des scalaires, jamais un contenu publié,
+ * jamais une adresse ni un secret. Une décision se relit dans son sujet ;
+ * l'audit dit qu'elle a eu lieu, par qui et pourquoi.
+ */
+import { DomainViolation } from "./violation"
+
+export const AUDIT_ACTIONS = [
+  // Console : réseaux
+  "network.create",
+  "network.update",
+  "network.archive",
+  // Console : adhésions (suspension à la racine, qui vaut partout)
+  "membership.suspend_everywhere",
+  "membership.lift_suspension",
+  // Garde des fichiers
+  "file.release",
+  "file.requeue",
+  "file.purge_blob",
+  // Tranche `diaspora` (émis par `convex/modules/diaspora/`)
+  /** Un parrainage retiré par la MODÉRATION du réseau (le retrait par le parrain n'est pas une décision). */
+  "diaspora.sponsorship_revoke",
+] as const
+export type AuditAction = (typeof AUDIT_ACTIONS)[number]
+
+/** À quel titre l'acte a été posé : la qualité qui l'AUTORISAIT au moment de l'acte. */
+export const AUDIT_CAPACITIES = ["platform_admin", "platform_operator", "network_admin", "network_moderator", "system"] as const
+export type AuditCapacity = (typeof AUDIT_CAPACITIES)[number]
+
+/** Les tables qu'une décision peut viser — une référence, jamais un contenu. */
+export const AUDIT_SUBJECT_TABLES = ["networks", "persons", "fileScans"] as const
+export type AuditSubjectTable = (typeof AUDIT_SUBJECT_TABLES)[number]
+
+export type AuditSubject = { table: AuditSubjectTable; id: string }
+
+/** Une valeur du détail : un scalaire, rien d'autre. */
+export type AuditDetailValue = string | number | boolean | null
+export type AuditDetails = Readonly<Record<string, AuditDetailValue>>
+
+export const AUDIT_DETAILS_MAX_KEYS = 12
+export const AUDIT_DETAIL_STRING_MAX = 500
+const AUDIT_DETAIL_KEY = /^[a-z][a-zA-Z0-9]{0,39}$/
+
+/**
+ * Les défauts d'un détail d'audit (liste vide : conforme). Une faute ici est
+ * une faute de PROGRAMMATION — les motifs saisis sont bornés avant, par
+ * `assertDecisionReason`.
+ */
+export function auditDetailsProblems(details: AuditDetails): string[] {
+  const problems: string[] = []
+  const entries = Object.entries(details)
+  if (entries.length > AUDIT_DETAILS_MAX_KEYS) problems.push(`trop de clés (${entries.length} > ${AUDIT_DETAILS_MAX_KEYS})`)
+  for (const [key, value] of entries) {
+    if (!AUDIT_DETAIL_KEY.test(key)) problems.push(`clé mal formée : ${key}`)
+    if (typeof value === "string" && value.length > AUDIT_DETAIL_STRING_MAX) problems.push(`valeur trop longue : ${key}`)
+    if (typeof value === "number" && !Number.isFinite(value)) problems.push(`nombre non fini : ${key}`)
+  }
+  return problems
+}
+
+/** Un acte du système (cron, balayeur) n'a pas d'acteur ; un acte humain en a un. */
+export function isSystemCapacity(capacity: AuditCapacity): capacity is "system" {
+  return capacity === "system"
+}
+
+/** Borne haute commune à tous les motifs de décision. */
+export const DECISION_REASON_MAX = AUDIT_DETAIL_STRING_MAX
+
+/**
+ * Le motif d'une décision, nettoyé : entre `min` et `DECISION_REASON_MAX`
+ * caractères une fois les espaces retirés aux bords, sinon la règle
+ * `DECISION_REASON_LENGTH` (le seuil bas dépend de la décision).
+ */
+export function assertDecisionReason(reason: string, min: number): string {
+  const trimmed = reason.trim()
+  if (trimmed.length < min || trimmed.length > DECISION_REASON_MAX) {
+    throw new DomainViolation("DECISION_REASON_LENGTH", { min, max: DECISION_REASON_MAX })
+  }
+  return trimmed
+}

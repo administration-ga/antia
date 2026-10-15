@@ -16,6 +16,7 @@
  */
 export const SOCIAL_DOMAIN_VERSION = "0.0.0" as const
 
+export * from "./audit"
 export * from "./badges"
 export * from "./connectionState"
 export * from "./consent"

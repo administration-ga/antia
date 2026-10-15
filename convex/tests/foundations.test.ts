@@ -188,7 +188,7 @@ describe("suspension à la racine = partout (invariant 3, R7)", () => {
     expect((await membershipOf(t, testClosed, personId))?.status).toBe("en_attente")
     expect(await errorCode(as.mutation(api.modules.people.memberships.leaveNetwork, { networkId: root }))).toBe("membershipSuspended")
 
-    await operator.as.mutation(api.modules.people.memberships.liftSuspension, { personId })
+    await operator.as.mutation(api.modules.people.memberships.liftSuspension, { personId, reason: "Recours accueilli (test)." })
     expect((await membershipOf(t, root, personId))?.status).toBe("declaree")
   })
 })

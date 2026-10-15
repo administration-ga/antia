@@ -94,7 +94,8 @@ Cliquets en place (`tests/ratchets/`) : `no-cross-product-imports`, `no-any-vali
 `public-communication`, `i18n-locales`, `theme-contract`, `provenance-headers`,
 `deploy-catalog`, et pour la garde des fichiers (PA3) `file-delivery-gate`, `upload-policy`,
 `fresh-upload`, `storage-arg-freshness`, et pour la cloche `notifications-writer` (seule
-`convex/modules/notifications/notify.ts` écrit dans `notifications`). À venir : `rate-limited-writes` (PA5), `sign-out-everywhere` (PA4).
+`convex/modules/notifications/notify.ts` écrit dans `notifications`), et pour le journal des décisions
+`operator-audit` (toute `operatorMutation` appelle `appendAudit`). À venir : `rate-limited-writes` (PA5), `sign-out-everywhere` (PA4).
 
 ## Pièges déjà payés
 

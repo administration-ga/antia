@@ -1,12 +1,21 @@
 /**
- * Tables de la plateforme : les opérateurs de la console et, en développement
- * local seulement, les codes à usage unique lisibles à l'écran. Socle minimal
- * posé en PA2 pour garder les fonctions de console ; la console complète
- * (IDN `loa ≥ 2` obligatoire, journal `operatorAudit`, double validation des
- * actes irréversibles) arrive au prompt PA7.
+ * Tables de la plateforme : les opérateurs de la console, le JOURNAL des
+ * décisions du moteur (`engineAudit`, PA3 lot 6) et, en développement local
+ * seulement, les codes à usage unique lisibles à l'écran. La console complète
+ * (IDN `loa ≥ 2` obligatoire, double validation des actes irréversibles)
+ * arrive au prompt PA7 ; son journal est la lecture de `engineAudit`.
  */
+import { AUDIT_ACTIONS, AUDIT_CAPACITIES, AUDIT_SUBJECT_TABLES } from "@antia/social-domain/audit"
 import { defineTable } from "convex/server"
 import { v } from "convex/values"
+
+import { literals } from "../../lib/validators"
+
+export const auditActionValidator = literals(AUDIT_ACTIONS)
+export const auditCapacityValidator = literals(AUDIT_CAPACITIES)
+export const auditSubjectTableValidator = literals(AUDIT_SUBJECT_TABLES)
+/** Le détail d'une ligne : plat, des scalaires (bornes : `auditDetailsProblems`). */
+export const auditDetailsValidator = v.record(v.string(), v.union(v.string(), v.number(), v.boolean(), v.null()))
 
 export const platformTables = {
   operators: defineTable({
@@ -29,4 +38,28 @@ export const platformTables = {
     expiresAt: v.number(),
     createdAt: v.number(),
   }).index("by_email", ["email"]),
+
+  /**
+   * Le journal des décisions du moteur (E9) : une ligne par décision de
+   * console, de modération ou de page, AJOUTÉE dans la transaction de la
+   * décision par `appendAudit` (`./audit.ts`), jamais modifiée. Remplace
+   * `auditLog` et `archiveAuditLog` du socle (les tables `operatorAudit` et
+   * `moderationAudit` du cahier en sont deux lectures).
+   */
+  engineAudit: defineTable({
+    action: auditActionValidator,
+    /** À quel titre l'acte a été posé (la qualité qui l'autorisait). */
+    capacity: auditCapacityValidator,
+    /** Absent : acte du système (cron, balayeur). */
+    actorPersonId: v.optional(v.id("persons")),
+    /** Le réseau de l'acte ; absent pour un acte de plateforme hors réseau. */
+    networkId: v.optional(v.id("networks")),
+    subjectTable: auditSubjectTableValidator,
+    subjectId: v.string(),
+    details: v.optional(auditDetailsValidator),
+    at: v.number(),
+  })
+    .index("by_at", ["at"])
+    .index("by_network_at", ["networkId", "at"])
+    .index("by_subject_at", ["subjectTable", "subjectId", "at"]),
 }

@@ -10,6 +10,7 @@
  * - Un réseau gouverné par une tranche (`networks.managedBy`) n'entre que par
  *   elle (aides partagées : `./admission`) ; le quitter reste toujours possible.
  */
+import { assertDecisionReason } from "@antia/social-domain/audit"
 import { missingConsentsToJoin } from "@antia/social-domain/consent"
 import { type EntryEvidence, entryStatusFor, leaveCascades, nextMembershipStatus } from "@antia/social-domain/membership"
 import { v } from "convex/values"
@@ -17,7 +18,7 @@ import { v } from "convex/values"
 import type { Doc } from "../../_generated/dataModel"
 import { query } from "../../_generated/server"
 import { getCurrentPerson, getMembership, getRootNetwork } from "../../lib/access"
-import { fail, notFound } from "../../lib/errors"
+import { checked, fail, notFound } from "../../lib/errors"
 import { operatorMutation, personMutation } from "../../lib/functions"
 import { enforceRateLimit } from "../../lib/rateLimit"
 import {
@@ -27,6 +28,7 @@ import {
   membershipStatusValidator,
   networkKindValidator,
 } from "../../lib/validators"
+import { appendAudit, operatorCapacity } from "../platform/audit"
 import { admitToNetwork, setMembershipStatus, writeNetworkFacet } from "./admission"
 import { hasStrongIdentityFor } from "./persons"
 
@@ -112,7 +114,8 @@ export const suspendEverywhere = operatorMutation({
   args: { personId: v.id("persons"), until: v.optional(v.number()), reason: v.string() },
   returns: v.null(),
   handler: async (ctx, { personId, until, reason }) => {
-    if (reason.trim().length < 10) fail("invalidArgument", { field: "reason" })
+    await enforceRateLimit(ctx, "operator.membership", ctx.person._id)
+    const motive = checked(() => assertDecisionReason(reason, 10))
     const root = await getRootNetwork(ctx)
     if (!root) return notFound()
     const membership = await getMembership(ctx, root._id, personId)
@@ -124,21 +127,39 @@ export const suspendEverywhere = operatorMutation({
       ...(before ? { statusBeforeSuspension: before } : {}),
       ...(until !== undefined ? { suspendedUntil: until } : {}),
     })
+    await appendAudit(ctx, {
+      action: "membership.suspend_everywhere",
+      capacity: operatorCapacity(ctx.operator),
+      actorPersonId: ctx.person._id,
+      networkId: root._id,
+      subject: { table: "persons", id: personId },
+      details: { reason: motive, from: membership.status, ...(until !== undefined ? { until } : {}) },
+    })
     return null
   },
 })
 
-/** Console : lever une suspension à la racine (rend le statut d'avant). */
+/** Console : lever une suspension à la racine (rend le statut d'avant), motif à l'appui. */
 export const liftSuspension = operatorMutation({
-  args: { personId: v.id("persons") },
+  args: { personId: v.id("persons"), reason: v.string() },
   returns: v.null(),
-  handler: async (ctx, { personId }) => {
+  handler: async (ctx, { personId, reason }) => {
+    await enforceRateLimit(ctx, "operator.membership", ctx.person._id)
+    const motive = checked(() => assertDecisionReason(reason, 10))
     const root = await getRootNetwork(ctx)
     if (!root) return notFound()
     const membership = await getMembership(ctx, root._id, personId)
     if (!membership || membership.status !== "suspendue") return notFound()
     const restoreTo = membership.statusBeforeSuspension ?? "declaree"
     await setMembershipStatus(ctx, membership, restoreTo, { statusBeforeSuspension: undefined, suspendedUntil: undefined })
+    await appendAudit(ctx, {
+      action: "membership.lift_suspension",
+      capacity: operatorCapacity(ctx.operator),
+      actorPersonId: ctx.person._id,
+      networkId: root._id,
+      subject: { table: "persons", id: personId },
+      details: { reason: motive, to: restoreTo },
+    })
     return null
   },
 })

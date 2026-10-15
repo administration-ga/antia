@@ -2,15 +2,17 @@
  * Réseaux — lecture publique et gestion par la console du moteur (cahier
  * EXF-AN-01). Un réseau se crée, se règle et s'archive SANS déploiement ;
  * jamais il ne se supprime. Chaque geste de console laisse sa trace dans
- * `networkSettingsHistory`.
+ * `networkSettingsHistory` (les réglages figés) et dans le journal des
+ * décisions du moteur (`engineAudit` : qui, à quel titre, pourquoi).
  */
+import { assertDecisionReason } from "@antia/social-domain/audit"
 import { validateFacetSchema } from "@antia/social-domain/facets"
 import { isValidNetworkSlug, validateNetworkShape } from "@antia/social-domain/network"
 import { v } from "convex/values"
 
 import type { Doc, Id } from "../../_generated/dataModel"
 import { type MutationCtx, query } from "../../_generated/server"
-import { fail } from "../../lib/errors"
+import { checked, fail } from "../../lib/errors"
 import { operatorMutation, operatorQuery } from "../../lib/functions"
 import { enforceRateLimit } from "../../lib/rateLimit"
 import {
@@ -21,6 +23,7 @@ import {
   networkSliceValidator,
   networkStatusValidator,
 } from "../../lib/validators"
+import { appendAudit, operatorCapacity } from "../platform/audit"
 
 /** Projection PUBLIQUE d'un réseau : ce qu'une application doit savoir pour le servir. */
 const publicNetworkValidator = v.object({
@@ -167,6 +170,14 @@ export const create = operatorMutation({
     })
     const created = await ctx.db.get(networkId)
     if (created) await recordHistory(ctx, created, "created", ctx.person._id)
+    await appendAudit(ctx, {
+      action: "network.create",
+      capacity: operatorCapacity(ctx.operator),
+      actorPersonId: ctx.person._id,
+      networkId,
+      subject: { table: "networks", id: networkId },
+      details: { slug: args.slug, kind: args.kind, ...(args.managedBy ? { managedBy: args.managedBy } : {}) },
+    })
     return networkId
   },
 })
@@ -187,9 +198,19 @@ export const update = operatorMutation({
       defaultVisibility: settings.defaultVisibility,
     })
     if (shapeErrors.length > 0) fail("invalidArgument", { field: shapeErrors[0] })
+    // Motif facultatif pour un réglage ; donné, il est borné comme tout motif.
+    const motive = reason === undefined || reason.trim() === "" ? undefined : checked(() => assertDecisionReason(reason, 1))
     await ctx.db.patch(networkId, { ...settings, name: settings.name.trim(), updatedAt: Date.now() })
     const updated = await ctx.db.get(networkId)
-    if (updated) await recordHistory(ctx, updated, "updated", ctx.person._id, reason)
+    if (updated) await recordHistory(ctx, updated, "updated", ctx.person._id, motive)
+    await appendAudit(ctx, {
+      action: "network.update",
+      capacity: operatorCapacity(ctx.operator),
+      actorPersonId: ctx.person._id,
+      networkId,
+      subject: { table: "networks", id: networkId },
+      ...(motive ? { details: { reason: motive } } : {}),
+    })
     return null
   },
 })
@@ -203,11 +224,20 @@ export const archive = operatorMutation({
     const network = await ctx.db.get(networkId)
     if (!network || network.status !== "active") fail("notFound")
     if (network.kind === "root") fail("invalidArgument", { field: "kind" })
-    if (reason.trim().length < 10) fail("invalidArgument", { field: "reason" })
+    const motive = checked(() => assertDecisionReason(reason, 10))
     const now = Date.now()
     await ctx.db.patch(networkId, { status: "archived", archivedAt: now, updatedAt: now })
     const archived = await ctx.db.get(networkId)
-    if (archived) await recordHistory(ctx, archived, "archived", ctx.person._id, reason.trim())
+    if (archived) await recordHistory(ctx, archived, "archived", ctx.person._id, motive)
+    await appendAudit(ctx, {
+      action: "network.archive",
+      capacity: operatorCapacity(ctx.operator),
+      actorPersonId: ctx.person._id,
+      networkId,
+      subject: { table: "networks", id: networkId },
+      details: { reason: motive },
+      at: now,
+    })
     return null
   },
 })

@@ -40,6 +40,7 @@ const RATE_LIMITS = {
   "file.moderate": { kind: "token bucket", rate: 60, period: HOUR, capacity: 20 },
   // Console (PA7)
   "operator.network": { kind: "token bucket", rate: 30, period: HOUR, capacity: 10 },
+  "operator.membership": { kind: "token bucket", rate: 60, period: HOUR, capacity: 20 },
   // Tranche DIASPORALE (`convex/modules/diaspora`, PD1). Entrer et régler sa
   // facette consomment « network.join » et « person.facet » : une personne n'a
   // qu'un budget, quel que soit le chemin. Les quotas MÉTIER (10 parrainages

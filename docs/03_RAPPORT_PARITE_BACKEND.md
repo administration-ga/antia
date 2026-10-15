@@ -19,6 +19,7 @@ l'owner map), les tests portés et neufs, les écarts assumés. Un module n'entr
 | 3 | `people` (profil, annuaire, images, mentions) et `media` | `6ef11f7` | 2 fichiers convex + 1 cas domaine | D05, D14, D36 |
 | 4 | `graph` (connexions, blocages, abonnements) | `bfb2db9` | 1 fichier convex (15 cas) + 4 cas domaine | D04, D05, D12, D14, D17, D19 |
 | 5 | `notifications` (cloche sociale, diffusion par lots) et avis de verdict des fichiers | `9f2f12b` | 1 fichier convex (10 cas) + 1 fichier domaine + 1 cliquet | D07, D18, D19 |
+| 6 | `platform/audit` (journal des décisions du moteur) | voir journal git (`feat(audit)`) | 1 fichier convex (5 cas) + 4 cas fichiers + 1 fichier domaine + 1 cliquet | D14, D35 |
 
 Ordre suivi (owner map §4.2), avec un écart : le lot 1 (modules purs) est porté avec chaque module qui le
 consomme ; l'avis de verdict des fichiers (`files/notify`) est arrivé avec le module `notifications` (lot 5), dont il
@@ -291,3 +292,58 @@ dépend.
 - Quatre genres de la tranche `diaspora`, sans sujet, à la demande de DIASPORALE : `sponsorship_received`,
   `sponsorship_withdrawn` (sans acteur si la modération retire), `attestation_verified`, `attestation_not_confirmed`
   (aucune raison consulaire) ; émis par `convex/modules/diaspora/` via `notifyPerson`.
+
+---
+
+## Lot 6 — `platform/audit` (journal des décisions du moteur)
+
+### Parité, fichier par fichier
+
+| Source (`socle/convex/…`) | Cible | Sort | État |
+|---|---|---|---|
+| `lib/contextAudit.ts` | `convex/modules/platform/audit.ts` (`appendAudit`, lectures) et `packages/social-domain/src/audit.ts` (actions, qualités, sujets, détail, motif) | à adapter | ✅ |
+| `schemas/auditLog.ts` | `convex/modules/platform/tables.ts` (`engineAudit`) | à adapter | ✅ |
+| `functions/archive.ts` — `logAudit` (`archiveAuditLog`) | `appendAudit` | remplacé | ✅ (garde des fichiers : libération, relance, purge) |
+| `triggers/index.ts` (audit automatique, l. 568-643) | — | exclu | — (le moteur trace des DÉCISIONS, pas chaque écriture) |
+| `tests/reseauPlatformActsAudit.test.ts` | `convex/modules/platform/audit.test.ts` | patron | ✅ |
+
+### Adaptations (liste fermée)
+
+- **Une seule table** `engineAudit`, AJOUT SEUL, écrite dans la transaction de la décision : une décision refusée
+  n'a pas de ligne. Les tables `operatorAudit` et `moderationAudit` du cahier (§11) en sont deux lectures.
+- **Qualité de l'acteur** (`capacity` : `platform_admin`, `platform_operator`, `network_admin`, `network_moderator`,
+  `system`) : la qualité qui AUTORISAIT l'acte, au lieu du contexte institutionnel (organisation, rattachement,
+  affectation, poste). Un acte du système n'a pas d'acteur, un acte humain en a un (vérifié à l'écriture).
+- **Sujet typé** (table d'une liste fermée et identifiant) et réseau de l'acte ; **détail plat et borné** (12 clés,
+  500 caractères, des scalaires) au lieu de `changes: v.any()` ; `operation` retiré (le verbe canonique la dit).
+- **Motif de décision** : règle du domaine `DECISION_REASON_LENGTH` (seuil bas propre à la décision : 10 en console,
+  3 pour libérer un fichier ; seuil haut commun : 500), traduite en fr et en.
+- **Décisions branchées** : réseaux (créer, régler, archiver) ; suspension partout et levée (motif désormais exigé
+  pour lever) ; garde des fichiers (libération par un modérateur du réseau ou un opérateur, avec sa qualité ;
+  relance par un opérateur ; purge par le système).
+- **Lectures** : la console lit tout (`paginateAudit`, par réseau ou entier ; `paginateSubjectAudit`) ; un
+  administrateur ou un modérateur lit le journal de SON réseau (`paginateNetworkAudit`), tout autre membre reçoit
+  le refus indistinct ; l'acteur est rendu par son mini-profil publié.
+- **Cliquet `operator-audit`** : toute `operatorMutation` appelle `appendAudit` dans sa définition même.
+
+### Corrections de dette
+
+- **D14** : débit sur `suspendEverywhere` et `liftSuspension` (seau `operator.membership`).
+- **D35** : trois index, tous lus (`by_at`, `by_network_at`, `by_subject_at`) ; l'index par acteur viendra avec son
+  lecteur (effacement, PA5).
+- Le validateur permissif du socle (`changes: v.any()`) n'est pas recopié.
+
+### Tests
+
+- Patron porté : une décision écrit sa ligne, une décision refusée n'en écrit pas (suspension, levée, réseaux).
+- Neufs : qualité de l'acteur (administrateur et opérateur de plateforme, modérateur du réseau, système), motif
+  nettoyé et borné, lectures et refus indistinct, cohérence d'une ligne ; journal de la garde des fichiers (quatre cas
+  dans `files.test.ts`) ; domaine (`audit.test.ts`) ; cliquet `operator-audit` (avec son test du détecteur).
+
+### Écarts assumés
+
+- **`operatorAudit` et `moderationAudit`** (cahier §11) : une table, deux lectures (owner map, E9).
+- **Effacement d'une personne** (PA5) : l'acte reste au journal, l'acteur sera pseudonymisé.
+- **Tranche diaspora** : l'action `diaspora.sponsorship_revoke` (retrait d'un parrainage par la modération) est
+  déclarée ; DIASPORALE l'émet depuis sa tranche.
+- **Double validation des actes irréversibles** (EXF-AN-40) : avec la console (PA7).
