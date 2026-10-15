@@ -19,7 +19,8 @@ l'owner map), les tests portés et neufs, les écarts assumés. Un module n'entr
 | 3 | `people` (profil, annuaire, images, mentions) et `media` | `6ef11f7` | 2 fichiers convex + 1 cas domaine | D05, D14, D36 |
 | 4 | `graph` (connexions, blocages, abonnements) | `bfb2db9` | 1 fichier convex (15 cas) + 4 cas domaine | D04, D05, D12, D14, D17, D19 |
 | 5 | `notifications` (cloche sociale, diffusion par lots) et avis de verdict des fichiers | `9f2f12b` | 1 fichier convex (10 cas) + 1 fichier domaine + 1 cliquet | D07, D18, D19 |
-| 6 | `platform/audit` (journal des décisions du moteur) | voir journal git (`feat(audit)`) | 1 fichier convex (5 cas) + 4 cas fichiers + 1 fichier domaine + 1 cliquet | D14, D35 |
+| 6 | `platform/audit` (journal des décisions du moteur) | `75e4b26` | 1 fichier convex (5 cas) + 4 cas fichiers + 1 fichier domaine + 1 cliquet | D14, D35 |
+| 7 | `thematicGroups/access`, `posts` (accès, retrait, compteurs, écriture, fil, mur, recherche) et `marks` | voir journal git (`feat(posts)`) | 2 fichiers convex (32 + 8 cas) + cas domaine | D01, D14, D18, D19, D24, D25, D35 |
 
 Ordre suivi (owner map §4.2), avec un écart : le lot 1 (modules purs) est porté avec chaque module qui le
 consomme ; l'avis de verdict des fichiers (`files/notify`) est arrivé avec le module `notifications` (lot 5), dont il
@@ -347,3 +348,75 @@ dépend.
 - **Tranche diaspora** : l'action `diaspora.sponsorship_revoke` (retrait d'un parrainage par la modération) est
   déclarée ; DIASPORALE l'émet depuis sa tranche.
 - **Double validation des actes irréversibles** (EXF-AN-40) : avec la console (PA7).
+
+---
+
+## Lot 7 — `thematicGroups/access`, `posts` et `marks`
+
+### Parité, fichier par fichier
+
+| Source (`socle/convex/modules/reseauPersonnel/…`) | Cible | Sort | État |
+|---|---|---|---|
+| `groupesThematiquesAccess.ts` | `convex/modules/thematicGroups/access.ts` | tel quel | ✅ (codes au lieu des libellés, réseau de l'acte) |
+| `tables.ts` (l. 922-990, groupes et membres) | `convex/modules/thematicGroups/tables.ts` | à adapter | ✅ partiel : invitations, découverte, décompte des membres au lot 9 |
+| `access.ts` | `convex/modules/posts/access.ts` | à adapter | ✅ |
+| `contentRemoval.ts` | `convex/modules/posts/contentRemoval.ts` | à adapter | ✅ (retrait d'un commentaire : lot 8) |
+| `counters.ts` | `convex/modules/posts/counters.ts` | à adapter | ✅ |
+| `postWrite.ts` | `convex/modules/posts/postWrite.ts` | à adapter | ✅ |
+| `posts.ts` | `convex/modules/posts/posts.ts` | à adapter (lourd) | ✅ (pages : lot 13 ; direct et évènements : leurs lots) |
+| `tables.ts` (l. 137-300, publications) | `convex/modules/posts/tables.ts` | à réécrire | ✅ |
+| `marks.ts` | `convex/modules/marks/marks.ts` | à adapter | ✅ |
+| `tables.ts` (l. 465-500, marques et sourdines) | `convex/modules/marks/tables.ts` | à adapter | ✅ |
+| `tests/backfillReseauPersonnelPostAggregates.test.ts` | `convex/migrations.ts` (`setPostsOnRoot`) | patron | ✅ |
+
+### Adaptations (liste fermée)
+
+- **Contexte de lecture** : une publication se lit DEPUIS le réseau de la fonction appelée — le sien, ou la racine
+  si elle est `root`. Une publication `network` d'un réseau fermé n'est rendue par aucune lecture de la racine (R4) ;
+  la racine lit ses natives et les `root` de tous les réseaux, avec leur ORIGINE (`origin`, pastille du fil).
+  `onRoot` est dénormalisé à l'écriture (un index pour le fil, le mur et la recherche de la racine) ; migration
+  `setPostsOnRoot` pour les lignes d'avant.
+- **Blocage** : il l'emporte sur toute audience, `public` compris (cahier §12.3) — lecture, fil, recherche, mur,
+  réaction, marque ; au socle, il ne restreignait que l'audience `group`. Un ensemble de blocages tronqué fait relire
+  la paire : le blocage n'est jamais une lacune.
+- **Fil** : fenêtres par auteur, fusion k-voies, curseur composite et deux phases gardés ; lecteurs de fenêtre
+  factorisés (réseau, racine, auteur) ; portée « mon_administration », collègues, organisations et notes de service
+  retirés ; `lacunar` rendu à l'écran.
+- **Publier** : groupe (appartenance vivante, forme, pas de partage), médias sous la garde des fichiers, partage aplati
+  sur l'original, portée et pays jugés contre le réseau (`assertPostReach`), « aussi sur ANTIA » ; idempotence par
+  auteur (une clé rejouée dans un autre réseau est refusée) ; cloches du partage et des citations par la porte unique.
+- **Épingle** par réseau, posée sur l'adhésion, rendue à part en première page du mur.
+- **Marques et sourdines par réseau** (celui où elles sont posées) ; listes paginées seules.
+- **`feed`** (fil « Récents » à curseur natif de la tranche verticale) gardé pour les écrans existants (antia.ga,
+  DIASPORALE), DTO étendu sans retrait.
+- **Réaction** sous la même garde (`assertVisiblePost`).
+- Débit : `post.edit`, `post.remove`, `mark.toggle`, `mute.toggle`.
+
+### Corrections de dette
+
+- **D01** : aucun compteur sur la publication ; partages (et commentaires au lot 8) dans l'agrégat `engineCounters`.
+- **D18** : `myBookmarks` et `myHiddenPosts` (qui levaient au-delà de 50) non recopiées.
+- **D19** : masquages, sourdines, connexions et abonnements bornés AVEC leur lacune ; `myMutes` et `myPosts` paginées.
+- **D24** : bornes et fusion conservées, portée réseau, collègues retirés, lacune exposée.
+- **D25** : une seule garde dans la recherche.
+- **D35** : `by_directSessionId`, `by_eventId`, `by_sharedPostId` non recopiés.
+- **D14** : débit sur les gestes de publication et de marque.
+
+### Tests
+
+- Portés (`reseauPersonnel.test`, `feedScale.test`, `marks.test`) : audience, rupture, retrait, abonné hors du
+  cercle, pagination du fil (sans trou, ex æquo, au-delà de 50 et de 200), idempotence, profil retiré, médias (URL ou
+  retenue, poids réel, vidéo seule, cinq images), partage (garde du lecteur, aplatissement, décompte), recherche
+  (accents, inconnu, garde, retrait, requête courte, partage sans corps), citations, mur (audiences, retirées, refus
+  indistinct, continuation de 75 publications), masquer, enregistrer, suivre, sourdine, pagination de plus de 50 marques.
+- Neufs : contexte de lecture (R4, « aussi sur ANTIA » avec origine, natif de la racine), blocage qui l'emporte sur
+  `public`, portée et pays, groupe (forme, appartenance, départ), édition, épingle, lacune, fil natif compatible,
+  marque par réseau ; domaine : `assertPostReach`, blocage dans `isVisibleTo`.
+
+### Écarts assumés
+
+- **Fil d'un hub pays** (DIASPORALE, EXF-DG-15/16) : la portée et le pays sont posés et validés ; la lecture par pays
+  attend la demande précise de DIASPORALE.
+- **Commentaires, cloche des réactions, abonnés d'une publication** : lot 8 (`engagement`).
+- **Groupes thématiques** (créer, rejoindre, mur) : lot 9 ; les publications de groupe sont testées sur des lignes posées.
+- **Seau renforcé** `post.publish.reinforced` (déclarée sans badge) : avec la modération à l'échelle (PA5).

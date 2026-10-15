@@ -37,5 +37,10 @@
   "UPLOAD_TYPE_NOT_ALLOWED": "Ce type de fichier n'est pas accepté ici.",
   "UPLOAD_SIZE_OUT_OF_RANGE": "Ce fichier est vide ou dépasse la taille autorisée ({{maxMegabytes}} Mo).",
   "UPLOAD_MISMATCH": "Le fichier reçu ne correspond pas à celui annoncé. Réessayez le dépôt.",
-  "DECISION_REASON_LENGTH": "Le motif doit compter entre {{min}} et {{max}} caractères."
+  "DECISION_REASON_LENGTH": "Le motif doit compter entre {{min}} et {{max}} caractères.",
+  "POST_SHARE_IN_GROUP": "Un partage ne se publie pas dans un groupe.",
+  "POST_PIN_GROUP": "Une publication de groupe s'épingle dans son groupe.",
+  "POST_REACH_INVALID": "Cette portée n'existe pas dans ce réseau.",
+  "POST_COUNTRY_INVALID": "Le pays doit être un code à deux lettres, par exemple FR.",
+  "POST_COUNTRY_REQUIRED": "Une publication locale précise son pays."
 }

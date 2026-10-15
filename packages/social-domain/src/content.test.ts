@@ -10,6 +10,7 @@ import {
   assertAvatarUpload,
   assertDisplayName,
   assertGroupAudienceShape,
+  assertPostReach,
   assertHandle,
   assertHeadline,
   assertPageAudienceShape,
@@ -371,5 +372,30 @@ describe("addedMentionedIds — les seules personnes à notifier lors d'une édi
     expect(addedMentionedIds(["a", "b"], ["c", "a", "d"])).toEqual(["c", "d"])
     expect(addedMentionedIds(undefined, ["a"])).toEqual(["a"])
     expect(addedMentionedIds(["a"], [])).toEqual([])
+  })
+})
+
+describe("portée et pays d'une publication (réseaux à portées)", () => {
+  const reachValues = ["local", "diaspora"] as const
+  const ruleOf = (run: () => unknown): string | null => {
+    try {
+      run()
+      return null
+    } catch (error) {
+      return (error as { code?: string }).code ?? "inconnu"
+    }
+  }
+
+  it("une portée déclarée par le réseau passe ; le pays est rendu en majuscules", () => {
+    expect(assertPostReach({ reach: "diaspora", reachValues })).toEqual({ reach: "diaspora" })
+    expect(assertPostReach({ reach: "local", country: " fr ", reachValues })).toEqual({ reach: "local", country: "FR" })
+    expect(assertPostReach({ reachValues })).toEqual({})
+  })
+
+  it("une portée inconnue, un pays mal formé, une portée locale sans pays sont refusés", () => {
+    expect(ruleOf(() => assertPostReach({ reach: "monde", reachValues }))).toBe("POST_REACH_INVALID")
+    expect(ruleOf(() => assertPostReach({ reach: "diaspora", reachValues: [] }))).toBe("POST_REACH_INVALID")
+    expect(ruleOf(() => assertPostReach({ country: "FRA", reachValues }))).toBe("POST_COUNTRY_INVALID")
+    expect(ruleOf(() => assertPostReach({ reach: "local", reachValues }))).toBe("POST_COUNTRY_REQUIRED")
   })
 })

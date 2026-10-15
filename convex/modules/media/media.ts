@@ -63,6 +63,18 @@ export const declaredMediaValidator = v.object({
 
 export type DeclaredMedia = Infer<typeof declaredMediaValidator>
 
+/** Le DTO d'un média (`PostMediaDto`) : URL par la garde, ou la retenue nommée. */
+export const postMediaDtoValidator = v.object({
+  url: v.union(v.string(), v.null()),
+  withheld: v.union(v.literal("fileScanPending"), v.literal("fileQuarantined"), v.null()),
+  kind: mediaKindValidator,
+  mimeType: v.string(),
+  width: v.optional(v.number()),
+  height: v.optional(v.number()),
+  durationMs: v.optional(v.number()),
+  altText: v.optional(v.string()),
+})
+
 /** Usages de dépôt d'un média de réseau (les images de profil passent par `people/profile`). */
 export const NETWORK_MEDIA_USAGES = ["media_social", "story_media", "album_image"] as const satisfies readonly UploadUsage[]
 

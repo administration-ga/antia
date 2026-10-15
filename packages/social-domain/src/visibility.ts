@@ -32,7 +32,13 @@ export function passesNetworkGate(visibility: ContentVisibility, reader: Network
   return visibility === "root" && reader.isMemberOfRoot
 }
 
-/** Une publication est-elle visible par ce lecteur ? Réseau d'abord, audience ensuite. */
+/**
+ * Une publication est-elle visible par ce lecteur ? Réseau d'abord, BLOCAGE
+ * ensuite — il l'emporte sur toute audience, `public` compris (cahier §12.3),
+ * l'auteur excepté —, audience enfin. Au socle, le blocage ne restreignait que
+ * l'audience `group` (les murs refusaient plus haut) ; ici, le lecteur bloqué ne
+ * lit rien de l'auteur, par aucun chemin.
+ */
 export function isVisibleTo(
   input: {
     audience: PersonalPostAudience
@@ -42,5 +48,6 @@ export function isVisibleTo(
     NetworkReadContext,
 ): boolean {
   if (!passesNetworkGate(input.visibility, input)) return false
+  if (!input.isAuthor && input.isBlockedWithAuthor) return false
   return isPersonalPostVisibleTo(input)
 }

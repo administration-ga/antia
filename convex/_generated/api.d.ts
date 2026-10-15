@@ -19,6 +19,7 @@ import type * as lib_functions from "../lib/functions.js";
 import type * as lib_rateLimit from "../lib/rateLimit.js";
 import type * as lib_uploadPolicy from "../lib/uploadPolicy.js";
 import type * as lib_validators from "../lib/validators.js";
+import type * as migrations from "../migrations.js";
 import type * as modules_diaspora_attestation from "../modules/diaspora/attestation.js";
 import type * as modules_diaspora_facet from "../modules/diaspora/facet.js";
 import type * as modules_diaspora_facts from "../modules/diaspora/facts.js";
@@ -47,6 +48,8 @@ import type * as modules_graph_connections from "../modules/graph/connections.js
 import type * as modules_graph_follows from "../modules/graph/follows.js";
 import type * as modules_graph_graph from "../modules/graph/graph.js";
 import type * as modules_graph_tables from "../modules/graph/tables.js";
+import type * as modules_marks_marks from "../modules/marks/marks.js";
+import type * as modules_marks_tables from "../modules/marks/tables.js";
 import type * as modules_media_media from "../modules/media/media.js";
 import type * as modules_networks_networks from "../modules/networks/networks.js";
 import type * as modules_networks_tables from "../modules/networks/tables.js";
@@ -67,10 +70,14 @@ import type * as modules_platform_audit from "../modules/platform/audit.js";
 import type * as modules_platform_authRateLimit from "../modules/platform/authRateLimit.js";
 import type * as modules_platform_devTools from "../modules/platform/devTools.js";
 import type * as modules_platform_tables from "../modules/platform/tables.js";
+import type * as modules_posts_access from "../modules/posts/access.js";
+import type * as modules_posts_contentRemoval from "../modules/posts/contentRemoval.js";
 import type * as modules_posts_counters from "../modules/posts/counters.js";
 import type * as modules_posts_postWrite from "../modules/posts/postWrite.js";
 import type * as modules_posts_posts from "../modules/posts/posts.js";
 import type * as modules_posts_tables from "../modules/posts/tables.js";
+import type * as modules_thematicGroups_access from "../modules/thematicGroups/access.js";
+import type * as modules_thematicGroups_tables from "../modules/thematicGroups/tables.js";
 import type * as seeds_foundations from "../seeds/foundations.js";
 
 import type {
@@ -91,6 +98,7 @@ declare const fullApi: ApiFromModules<{
   "lib/rateLimit": typeof lib_rateLimit;
   "lib/uploadPolicy": typeof lib_uploadPolicy;
   "lib/validators": typeof lib_validators;
+  migrations: typeof migrations;
   "modules/diaspora/attestation": typeof modules_diaspora_attestation;
   "modules/diaspora/facet": typeof modules_diaspora_facet;
   "modules/diaspora/facts": typeof modules_diaspora_facts;
@@ -119,6 +127,8 @@ declare const fullApi: ApiFromModules<{
   "modules/graph/follows": typeof modules_graph_follows;
   "modules/graph/graph": typeof modules_graph_graph;
   "modules/graph/tables": typeof modules_graph_tables;
+  "modules/marks/marks": typeof modules_marks_marks;
+  "modules/marks/tables": typeof modules_marks_tables;
   "modules/media/media": typeof modules_media_media;
   "modules/networks/networks": typeof modules_networks_networks;
   "modules/networks/tables": typeof modules_networks_tables;
@@ -139,10 +149,14 @@ declare const fullApi: ApiFromModules<{
   "modules/platform/authRateLimit": typeof modules_platform_authRateLimit;
   "modules/platform/devTools": typeof modules_platform_devTools;
   "modules/platform/tables": typeof modules_platform_tables;
+  "modules/posts/access": typeof modules_posts_access;
+  "modules/posts/contentRemoval": typeof modules_posts_contentRemoval;
   "modules/posts/counters": typeof modules_posts_counters;
   "modules/posts/postWrite": typeof modules_posts_postWrite;
   "modules/posts/posts": typeof modules_posts_posts;
   "modules/posts/tables": typeof modules_posts_tables;
+  "modules/thematicGroups/access": typeof modules_thematicGroups_access;
+  "modules/thematicGroups/tables": typeof modules_thematicGroups_tables;
   "seeds/foundations": typeof seeds_foundations;
 }>;
 

@@ -44,5 +44,6 @@ export function testConvex() {
   const t = convexTest(schema, modules)
   rateLimiterTest.register(t, "rateLimiter")
   aggregateTest.register(t, "followerCounts")
+  aggregateTest.register(t, "engineCounters")
   return t
 }

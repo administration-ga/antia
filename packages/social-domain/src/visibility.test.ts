@@ -60,6 +60,15 @@ describe("isVisibleTo — réseau d'abord, audience ensuite", () => {
     }
   })
 
+  it("le blocage l'emporte sur toute audience, `public` compris — jamais sur l'auteur", () => {
+    const member = { ...reader, isMemberOfPostNetwork: true }
+    for (const visibility of CONTENT_VISIBILITIES) {
+      expect(isVisibleTo({ ...post, visibility, ...member, isBlockedWithAuthor: true })).toBe(false)
+      expect(isVisibleTo({ ...post, audience: "connections", visibility, ...member, isConnected: true, isBlockedWithAuthor: true })).toBe(false)
+    }
+    expect(isVisibleTo({ ...post, ...member, isAuthor: true, isBlockedWithAuthor: true })).toBe(true)
+  })
+
   it("une publication retirée reste réservée à son auteur, membre du réseau", () => {
     const removed = { ...post, status: "removed" as const, visibility: "root" as const }
     expect(isVisibleTo({ ...removed, ...reader })).toBe(false)

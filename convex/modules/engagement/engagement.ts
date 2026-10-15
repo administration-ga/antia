@@ -1,15 +1,15 @@
-// Dupliqué de socle/convex/modules/reseauPersonnel/engagement.ts (l. 30-138) @ ad2e7fdc2 — adaptations : réagir dans un réseau (`networkMutation`, adhésion déclarée) ; publication hors réseau, retirée ou invisible = refus indistinct ; compteur FRAGMENTÉ au lieu des champs de la publication (dette D01) ; limitation de débit ; la cloche de l'auteur arrive avec le module notifications (PA3). Commentaires (paginés, dette D03) : PA3.
+// Dupliqué de socle/convex/modules/reseauPersonnel/engagement.ts (l. 30-138) @ ad2e7fdc2 — adaptations : réagir dans un réseau (`networkMutation`, adhésion déclarée) ; LA garde de visibilité du moteur (`assertVisiblePost` : contexte de lecture, blocage, audience) — publication hors réseau, retirée ou invisible = refus indistinct ; compteur FRAGMENTÉ au lieu des champs de la publication (dette D01) ; limitation de débit ; la cloche de l'auteur et les commentaires (paginés, D03) arrivent avec le lot 8.
 /**
  * Réactions : UNE par (publication, personne) ; changer de genre remplace,
  * rejouer le même genre retire.
  */
-import { isVisibleTo } from "@antia/social-domain/visibility"
 import { v } from "convex/values"
 
 import { notFound } from "../../lib/errors"
 import { networkMutation } from "../../lib/functions"
 import { enforceRateLimit } from "../../lib/rateLimit"
 import { reactionKindValidator } from "../../lib/validators"
+import { assertVisiblePost } from "../posts/access"
 import { applyReactionDelta } from "../posts/counters"
 
 export const toggleReaction = networkMutation({
@@ -18,20 +18,9 @@ export const toggleReaction = networkMutation({
   returns: v.object({ mine: v.union(reactionKindValidator, v.null()) }),
   handler: async (ctx, { postId, kind }) => {
     await enforceRateLimit(ctx, "reaction.toggle", ctx.person._id)
-    const post = await ctx.db.get(postId)
-    if (!post || post.networkId !== ctx.networkId || post.status !== "published") return notFound()
-    const visible = isVisibleTo({
-      audience: post.audience,
-      status: post.status,
-      visibility: post.visibility,
-      isAuthor: post.authorPersonId === ctx.person._id,
-      isConnected: false,
-      isGroupMember: false,
-      isBlockedWithAuthor: false,
-      isMemberOfPostNetwork: true,
-      isMemberOfRoot: true,
-    })
-    if (!visible) return notFound()
+    const post = await assertVisiblePost(ctx, { personId: ctx.person._id, network: ctx.network }, postId)
+    // On ne réagit qu'à une publication EN LIGNE — l'auteur voit encore la sienne retirée, sans pouvoir y réagir.
+    if (post.status !== "published") return notFound()
 
     const existing = await ctx.db
       .query("postReactions")

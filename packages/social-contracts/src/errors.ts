@@ -25,6 +25,8 @@ export const ENGINE_ERROR_CODES = [
   // Garde des fichiers : un fichier RETENU (analyse en cours, ou bloqué).
   "fileScanPending",
   "fileQuarantined",
+  // Groupe thématique : la fiche est découvrable, agir y exige d'en être membre.
+  "groupMembershipRequired",
 ] as const
 export type EngineErrorCode = (typeof ENGINE_ERROR_CODES)[number]
 

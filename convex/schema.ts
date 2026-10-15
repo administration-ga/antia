@@ -4,11 +4,13 @@ import { diasporaTables } from "./modules/diaspora/tables"
 import { engagementTables } from "./modules/engagement/tables"
 import { filesTables } from "./modules/files/tables"
 import { graphTables } from "./modules/graph/tables"
+import { marksTables } from "./modules/marks/tables"
 import { networksTables } from "./modules/networks/tables"
 import { notificationsTables } from "./modules/notifications/tables"
 import { peopleTables } from "./modules/people/tables"
 import { platformTables } from "./modules/platform/tables"
 import { postsTables } from "./modules/posts/tables"
+import { thematicGroupsTables } from "./modules/thematicGroups/tables"
 
 /**
  * Schéma du moteur social national ANTIA — agrégat des tranches verticales
@@ -35,6 +37,8 @@ export default defineSchema(
     ...filesTables,
     ...graphTables,
     ...notificationsTables,
+    ...thematicGroupsTables,
+    ...marksTables,
     ...diasporaTables,
   },
   { schemaValidation: true },

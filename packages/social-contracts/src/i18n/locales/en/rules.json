@@ -37,5 +37,10 @@
   "UPLOAD_TYPE_NOT_ALLOWED": "This file type is not accepted here.",
   "UPLOAD_SIZE_OUT_OF_RANGE": "This file is empty or exceeds the allowed size ({{maxMegabytes}} MB).",
   "UPLOAD_MISMATCH": "The file received does not match the one announced. Please upload it again.",
-  "DECISION_REASON_LENGTH": "The reason must be between {{min}} and {{max}} characters long."
+  "DECISION_REASON_LENGTH": "The reason must be between {{min}} and {{max}} characters long.",
+  "POST_SHARE_IN_GROUP": "A share cannot be posted in a group.",
+  "POST_PIN_GROUP": "A group post is pinned in its group.",
+  "POST_REACH_INVALID": "This reach does not exist in this network.",
+  "POST_COUNTRY_INVALID": "The country must be a two-letter code, for example FR.",
+  "POST_COUNTRY_REQUIRED": "A local post must state its country."
 }

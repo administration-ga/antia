@@ -88,6 +88,8 @@ export const peopleTables = {
      * Sans effet pour un réseau générique (le profil découvrable y suffit).
      */
     directoryListed: v.optional(v.boolean()),
+    /** La publication ÉPINGLÉE en tête de mon mur DANS CE RÉSEAU (relue avec sa garde à chaque lecture). */
+    pinnedPostId: v.optional(v.id("posts")),
     joinedAt: v.number(),
     statusChangedAt: v.number(),
     leftAt: v.optional(v.number()),

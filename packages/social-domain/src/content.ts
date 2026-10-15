@@ -183,6 +183,30 @@ export function assertShareable(input: { audience: PersonalPostAudience; status:
   }
 }
 
+// ═══════════════════════════════════════════════════════════════
+// Portée et pays d'une publication (réseaux à portées, ex. DIASPORALE)
+// ═══════════════════════════════════════════════════════════════
+
+/** La portée qui restreint une publication à un PAYS : elle seule exige le pays. */
+export const REACH_REQUIRING_COUNTRY = "local"
+
+const COUNTRY_CODE = /^[A-Z]{2}$/
+
+/**
+ * La portée (`reach`) et le pays (`country`) d'une publication, jugés contre les
+ * portées que le RÉSEAU déclare (`networks.reachValues`) : une portée hors de la
+ * liste est refusée (un réseau sans portée n'en accepte aucune) ; le pays est un
+ * code ISO 3166-1 alpha-2, rendu en majuscules ; la portée locale exige un pays.
+ * Les deux restent facultatifs : le réseau ne les impose pas.
+ */
+export function assertPostReach(input: { reach?: string; country?: string; reachValues: readonly string[] }): { reach?: string; country?: string } {
+  const country = input.country?.trim().toUpperCase()
+  if (country !== undefined && !COUNTRY_CODE.test(country)) throw new DomainViolation("POST_COUNTRY_INVALID")
+  if (input.reach !== undefined && !input.reachValues.includes(input.reach)) throw new DomainViolation("POST_REACH_INVALID")
+  if (input.reach === REACH_REQUIRING_COUNTRY && country === undefined) throw new DomainViolation("POST_COUNTRY_REQUIRED")
+  return { ...(input.reach !== undefined ? { reach: input.reach } : {}), ...(country !== undefined ? { country } : {}) }
+}
+
 /**
  * Une publication vide ou trop longue n'est pas une publication.
  *
@@ -371,6 +395,9 @@ export type FeedReason =
    */
   | "page"
 
+/** Les titres, en liste — pour le validateur du DTO côté serveur. */
+export const FEED_REASONS = ["own", "connection", "follow", "public", "group", "page"] as const satisfies readonly FeedReason[]
+
 /**
  * Pourquoi cette ligne entre-t-elle dans MON fil ? Un seul ordre de priorité —
  * le plus fort gagne. `null` : la publication n'entre pas.
@@ -481,6 +508,20 @@ export function assertGroupAudienceShape(input: { audience: PersonalPostAudience
   if (input.audience !== "group" && input.hasGroup) {
     throw new DomainViolation("POST_GROUP_FORBIDDEN")
   }
+}
+
+/**
+ * Un PARTAGE ne se publie pas dans un groupe : le mur d'un groupe porte des
+ * contributions, et y republier le fil général n'aurait d'autre effet que de
+ * l'y dupliquer.
+ */
+export function assertShareOutsideGroup(input: { hasGroup: boolean; hasShare: boolean }): void {
+  if (input.hasGroup && input.hasShare) throw new DomainViolation("POST_SHARE_IN_GROUP")
+}
+
+/** Une publication de GROUPE s'épingle dans son groupe, jamais sur un mur personnel qu'elle ne peut pas habiter. */
+export function assertPinnableOnWall(input: { audience: PersonalPostAudience }): void {
+  if (input.audience === "group") throw new DomainViolation("POST_PIN_GROUP")
 }
 
 /**

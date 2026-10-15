@@ -33,6 +33,10 @@ const RATE_LIMITS = {
   "connection.respond": { kind: "token bucket", rate: 60, period: HOUR, capacity: 20 },
   "connection.block": { kind: "token bucket", rate: 30, period: HOUR, capacity: 10 },
   "follow.toggle": { kind: "token bucket", rate: 60, period: HOUR, capacity: 20 },
+  "mark.toggle": { kind: "token bucket", rate: 240, period: HOUR, capacity: 60 },
+  "mute.toggle": { kind: "token bucket", rate: 60, period: HOUR, capacity: 20 },
+  "post.edit": { kind: "token bucket", rate: 60, period: HOUR, capacity: 20 },
+  "post.remove": { kind: "token bucket", rate: 60, period: HOUR, capacity: 20 },
   // Cloche (PA3 lot 5)
   "notification.read": { kind: "token bucket", rate: 300, period: HOUR, capacity: 60 },
   "notification.readAll": { kind: "token bucket", rate: 30, period: HOUR, capacity: 10 },
