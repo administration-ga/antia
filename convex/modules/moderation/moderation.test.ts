@@ -117,7 +117,7 @@ describe("file et décisions", () => {
     expect(await codeOf(decide("actioned", "Changement d'avis."))).toBe("conflict")
   })
 
-  it("un retrait modéré retire le contenu, décompte partages et commentaires, et écrit sa ligne de journal", async () => {
+  it("un retrait modéré retire le contenu (une racine avec ses réponses), décompte partages et commentaires, et écrit sa ligne de journal", async () => {
     const t = testConvex()
     const { root } = await seed(t)
     const alice = await enter(t, root, "alice")
@@ -127,8 +127,10 @@ describe("file et décisions", () => {
     const original = await alice.as.mutation(api.modules.posts.posts.publish, { networkId: root, body: "Original" })
     const share = await bob.as.mutation(api.modules.posts.posts.publish, { networkId: root, body: "", sharedPostId: original.postId })
     const { commentId } = await bob.as.mutation(api.modules.engagement.engagement.comment, { networkId: root, postId: original.postId, body: "Commentaire fautif" })
+    // Une réponse sous la racine fautive : elle part avec elle, le compte reste égal à ce qui se lit.
+    await carol.as.mutation(api.modules.engagement.engagement.comment, { networkId: root, postId: original.postId, body: "Réponse", parentCommentId: commentId })
     const read = async () => await alice.as.query(api.modules.posts.posts.getPost, { networkId: root, postId: original.postId })
-    expect(await read()).toMatchObject({ shareCount: 1, commentCount: 1 })
+    expect(await read()).toMatchObject({ shareCount: 1, commentCount: 2 })
 
     const onShare = await carol.as.mutation(api.modules.moderation.moderation.reportPost, { networkId: root, postId: share.postId, reason: "other" })
     const onComment = await carol.as.mutation(api.modules.moderation.moderation.reportComment, { networkId: root, commentId, reason: "harassment" })

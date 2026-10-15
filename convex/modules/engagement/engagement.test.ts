@@ -127,6 +127,48 @@ describe("commentaires", () => {
     expect(await codeOf(carol.as.mutation(api.modules.engagement.engagement.comment, { networkId: root, postId, body: "Trop tard", parentCommentId: commentId }))).toBe("notFound")
   })
 
+  it("retirer une racine retire ses réponses : le compte reste égal à ce qui se lit", async () => {
+    const t = testConvex()
+    const { root } = await seed(t)
+    const alice = await enter(t, root, "alice")
+    const bob = await enter(t, root, "bob")
+    const carol = await enter(t, root, "carol")
+    const { postId } = await alice.as.mutation(api.modules.posts.posts.publish, { networkId: root, body: "Fil" })
+    const head = await bob.as.mutation(api.modules.engagement.engagement.comment, { networkId: root, postId, body: "Racine" })
+    const reply = await carol.as.mutation(api.modules.engagement.engagement.comment, { networkId: root, postId, body: "Réponse", parentCommentId: head.commentId })
+    const other = await carol.as.mutation(api.modules.engagement.engagement.comment, { networkId: root, postId, body: "Autre racine" })
+    expect((await alice.as.query(api.modules.posts.posts.getPost, { networkId: root, postId })).commentCount).toBe(3)
+    await bob.as.mutation(api.modules.engagement.engagement.removeComment, { networkId: root, commentId: head.commentId })
+    expect((await comments(alice, root, postId)).page.map((row) => row.commentId)).toEqual([other.commentId])
+    expect((await alice.as.query(api.modules.posts.posts.getPost, { networkId: root, postId })).commentCount).toBe(1)
+    expect(await t.run(async (ctx) => (await ctx.db.get(reply.commentId))?.status)).toBe("removed")
+    // La réponse survivante ne rouvre pas la conversation : répondre sous une racine retirée se refuse.
+    expect(await codeOf(alice.as.mutation(api.modules.engagement.engagement.comment, { networkId: root, postId, body: "Encore", parentCommentId: reply.commentId }))).toBe("notFound")
+  })
+
+  it("une racine aux réponses nombreuses les retire par lots, et nul ne répond sous elle entre deux lots", async () => {
+    vi.useFakeTimers()
+    const t = testConvex()
+    const { root } = await seed(t)
+    const alice = await enter(t, root, "alice")
+    const bob = await enter(t, root, "bob")
+    const { postId } = await alice.as.mutation(api.modules.posts.posts.publish, { networkId: root, body: "Fil animé" })
+    const head = await bob.as.mutation(api.modules.engagement.engagement.comment, { networkId: root, postId, body: "Racine" })
+    const replyIds = await t.run(async (ctx) => {
+      const ids: Id<"postComments">[] = []
+      for (let i = 0; i < 230; i += 1) {
+        ids.push(await ctx.db.insert("postComments", { networkId: root, postId, authorPersonId: bob.personId, body: `Réponse ${i}`, parentCommentId: head.commentId, status: "published", createdAt: 1_800_000_000_000 + i, updatedAt: 1 }))
+      }
+      return ids
+    })
+    await alice.as.mutation(api.modules.engagement.engagement.removeComment, { networkId: root, commentId: head.commentId })
+    const live = async () => await t.run(async (ctx) => (await ctx.db.query("postComments").withIndex("by_post_parent_status_createdAt", (q) => q.eq("postId", postId).eq("parentCommentId", head.commentId).eq("status", "published")).take(300)).length)
+    expect(await live()).toBe(130)
+    expect(await codeOf(alice.as.mutation(api.modules.engagement.engagement.comment, { networkId: root, postId, body: "Entre deux lots", parentCommentId: replyIds[229]! }))).toBe("notFound")
+    await t.finishAllScheduledFunctions(vi.runAllTimers)
+    expect(await live()).toBe(0)
+  })
+
   it("lister les commentaires exige de voir la publication ; 150 racines se paginent sans perte (D03)", async () => {
     const t = testConvex()
     const { root } = await seed(t)

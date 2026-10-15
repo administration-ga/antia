@@ -471,6 +471,11 @@ dépend.
 - **D08** : abonnés d'une publication par la diffusion par lots, hors de la transaction du commentaire.
 - **D14** : débit sur chaque geste d'engagement et de modération.
 - **D35** : `by_parent_and_createdAt`, `contentReports.by_post` et `by_comment` non recopiés.
+- **Écart du socle corrigé (15/10, signalé par DIASPORALE)** : retirer une racine de commentaires laissait ses réponses
+  `published` et comptées, alors qu'aucune lecture ne les rendait plus (« 1 commentaire » sur une liste vide).
+  `markCommentRemoved` retire désormais les réponses avec leur racine (100 par transaction, suite planifiée
+  `continueRepliesRemoval`) — par l'auteur, l'auteur de la publication ou la modération ; répondre sous une racine
+  retirée se refuse, même par l'une de ses réponses encore en attente du lot suivant.
 
 ### Tests
 
@@ -480,7 +485,8 @@ dépend.
   anonymisée, dossier en examen jusqu'à la décision terminale, retrait modéré qui décompte (`moderation.test`) ;
   patron `reseauPlatformActsAudit` (la décision écrit sa ligne).
 - Neufs : la publication n'est jamais réécrite par une réaction, 150 racines paginées sans perte, réponses paginées et
-  décomptées, commentaires d'un auteur bloqué écartés, opérateur en dernier ressort ; domaine (`moderation.test.ts`).
+  décomptées, commentaires d'un auteur bloqué écartés, opérateur en dernier ressort ; domaine (`moderation.test.ts`) ; une racine retirée
+  emporte ses réponses (compte égal à ce qui se lit, 230 réponses par lots, retrait modéré compris).
 
 ### Écarts assumés
 

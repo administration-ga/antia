@@ -1,4 +1,4 @@
-// Dupliqué de socle/convex/modules/reseauPersonnel/engagement.ts @ ad2e7fdc2 — adaptations : réagir et commenter dans un réseau (`networkMutation`, adhésion déclarée) ; LA garde de visibilité du moteur (`assertVisiblePost` : contexte de lecture, blocage, audience) ; réactions par FRAGMENTS et commentaires par l'AGRÉGAT — l'engagement n'écrit plus la publication (D01) ; `listComments` (100 lignes, 10 réponses, sans curseur) remplacée par `paginateComments` (racines paginées, aperçu des réponses et leur nombre) et `paginateReplies` (D03) ; commentaires d'un auteur bloqué écartés ; cloches par la porte unique, dans le réseau d'où le destinataire peut ouvrir la publication ; abonnés de la publication servis par la DIFFUSION PAR LOTS, re-gardés au moment de sonner (D08, au lieu d'une boucle de 100 dans la transaction) ; débit sur chaque geste.
+// Dupliqué de socle/convex/modules/reseauPersonnel/engagement.ts @ ad2e7fdc2 — adaptations : réagir et commenter dans un réseau (`networkMutation`, adhésion déclarée) ; LA garde de visibilité du moteur (`assertVisiblePost` : contexte de lecture, blocage, audience) ; réactions par FRAGMENTS et commentaires par l'AGRÉGAT — l'engagement n'écrit plus la publication (D01) ; `listComments` (100 lignes, 10 réponses, sans curseur) remplacée par `paginateComments` (racines paginées, aperçu des réponses et leur nombre) et `paginateReplies` (D03) ; commentaires d'un auteur bloqué écartés ; cloches par la porte unique, dans le réseau d'où le destinataire peut ouvrir la publication ; abonnés de la publication servis par la DIFFUSION PAR LOTS, re-gardés au moment de sonner (D08, au lieu d'une boucle de 100 dans la transaction) ; débit sur chaque geste ; une racine retirée emporte ses réponses et n'en reçoit plus, pas même par l'une d'elles (le socle laissait des réponses comptées que plus rien ne lisait).
 /**
  * Réagir et commenter.
  *
@@ -97,6 +97,11 @@ export const comment = networkMutation({
     if (args.parentCommentId !== undefined) {
       const parent = await ctx.db.get(args.parentCommentId)
       if (!parent || parent.postId !== post._id || parent.status !== "published") return notFound()
+      // Répondre à une réponse range sous SA racine : une racine retirée (dont les réponses partent par lots) n'en reçoit plus.
+      if (parent.parentCommentId !== undefined) {
+        const head = await ctx.db.get(parent.parentCommentId)
+        if (!head || head.status !== "published") return notFound()
+      }
       answeredPersonId = parent.authorPersonId
       parentCommentId = parent.parentCommentId ?? parent._id
     }
@@ -131,6 +136,7 @@ export const comment = networkMutation({
 /**
  * Retirer un commentaire — son AUTEUR, ou l'auteur de la publication (chez soi,
  * on garde la main sur ce qui s'affiche). Retiré, pas supprimé. Idempotent.
+ * Une racine retirée emporte ses réponses (`markCommentRemoved`).
  */
 export const removeComment = networkMutation({
   minStatus: "en_attente",
