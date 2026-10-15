@@ -25,6 +25,13 @@
  * olive ; contraste du texte principal ramené dans la zone de confort (15,7:1 en
  * clair, 15:1 en sombre au lieu de 18,6 et 17,2), papier légèrement adouci ;
  * bleu et tons du sombre moins saturés.
+ * Version 3.2 (même jour, décision du propriétaire) : bleu Gabon légèrement foncé
+ * (#0072B9 → #0167A8, même teinte : le lien tient 5,2:1 sur le sable au lieu de
+ * 4,57) ; sable un cran plus posé (la carte s'en détache à 1,13:1 au lieu de
+ * 1,10) ; textes secondaires plus fermes dans les deux thèmes ; nuit requantifiée
+ * à teinte constante. Une sélection ne porte plus jamais de contour ni de bleu
+ * nuit : en sombre, sa teinte se LÈVE au-dessus de la carte (`--primary-50`,
+ * `--esp-accent-soft`), comme toute surface qui monte.
  * Les contrastes (texte ≥ 4,5:1, contours et focus ≥ 3:1) sont recalculés dans les
  * deux thèmes, à travers la cascade complète base + thème, par le cliquet
  * `engine-theme-contrast.test.ts` de DIASPORALE.
@@ -35,14 +42,17 @@
 
   /* ── 1. Primitives du contrat, réaccordées ── */
 
-  /* Bleu Gabon — le barreau 500 est le bleu d'action, comme dans la base. */
+  /* Bleu Gabon — le barreau 500 est le bleu d'action, comme dans la base. v3.2 :
+     légèrement foncé à teinte égale (OKLCH h 246,6, L 53,6 → 49,9 %), sur décision
+     du propriétaire : 5,21:1 sur le sable, 5,88:1 sur le papier, 4,98:1 sur le
+     creux (4,57, 5,02 et 4,33 avant). Survol 600 un cran plus bas, lui aussi. */
   --esp-blue-50: #eef7ff;
   --esp-blue-100: #d7ecff;
   --esp-blue-200: #b4dbff;
   --esp-blue-300: #7ec2ff;
   --esp-blue-400: #5ba5e5;
-  --esp-blue-500: #0072b9;
-  --esp-blue-600: #005d98;
+  --esp-blue-500: #0167a8;
+  --esp-blue-600: #005791;
   --esp-blue-700: #004c7d;
   --esp-blue-800: #003458;
   --esp-blue-900: #17293f;
@@ -50,47 +60,54 @@
   /* Encre posée sur le bleu éclairci du thème sombre (7,02:1). */
   --esp-on-blue: #151311;
 
-  /* Sable, papier, grès, encre (v3) : une seule teinte chaude (OKLCH h 85), chroma
-     basse et graduée — le creux, la puce et le filet ne virent plus au beige.
-     Papier adouci (#fdfdfb, pas de blanc pur) ; encre #25211e : 15,68:1 sur le
-     papier, 14,28:1 sur le sable. Grès 6,12:1 sur le sable, texte discret 4,73:1.
-     400 et le champ sont non textuels (3,16:1 sur le sable). */
+  /* Sable, papier, grès, encre : une seule teinte chaude (OKLCH h 85), chroma
+     basse et graduée — le creux, la puce et le filet ne virent pas au beige.
+     Papier adouci (#fdfdfb, pas de blanc pur). v3.2 : sable un cran plus posé
+     (L 96,2 → 95,3 %) — la carte s'en détache à 1,13:1 (1,10 avant), la puce à
+     1,25:1 sur le papier ; creux, puce et filet suivent d'un même pas. Encre
+     #25211e : 15,68:1 sur le papier, 13,91:1 sur le sable. Grès 6,44:1 sur le sable
+     (7,26 sur le papier), discret 4,89:1 (4,67 sur le creux, qui échouait à 4,48).
+     400 et le champ sont non textuels (3,08:1 sur le sable). */
   --esp-neutral-0: #fdfdfb;
   --esp-neutral-50: #f9f8f5;
-  --esp-neutral-100: #f4f2ee;
-  --esp-neutral-150: #eeece7;
-  --esp-neutral-200: #e9e7e1;
+  --esp-neutral-100: #f1efeb;
+  --esp-neutral-150: #eceae5;
+  --esp-neutral-200: #e7e4de;
   --esp-neutral-300: #cdcac4;
   --esp-neutral-400: #8b8882;
-  --esp-neutral-500: #6f6b65;
-  --esp-neutral-600: #5e5a55;
+  --esp-neutral-500: #6b6761;
+  --esp-neutral-600: #595550;
   --esp-neutral-700: #3f3b37;
   --esp-neutral-800: #312d29;
   --esp-neutral-900: #25211e;
-  --esp-neutral-rule: #e0ded8;
+  --esp-neutral-rule: #dddad4;
   --esp-neutral-field: #8b8882;
-  --esp-neutral-chip: #e9e7e1;
-  --esp-neutral-hover: #eeece7;
-  --esp-neutral-mute: #6f6b65;
+  --esp-neutral-chip: #e7e4de;
+  --esp-neutral-hover: #eceae5;
+  --esp-neutral-mute: #6b6761;
   --esp-neutral-faint: #8b8882;
 
-  /* Nuit chaude, en couches (v3) — une seule teinte (OKLCH h 75), chroma basse :
-     plus de brun olive. Du plus sombre au plus clair : fond < carte < aplats
-     (survol, étiquettes, squelettes — v3.1 : ils éclaircissent au lieu de creuser)
-     < puce et carte flottante < survol fort ; carte 1,16:1 sur le fond, flottant
-     1,15:1 sur la carte. Texte #e9e7e1 : 14,99:1 sur le fond, 12,94:1 sur la carte (sans halo) ;
-     grès clair 7,32:1 sur la carte, discret 5,12:1. */
+  /* Nuit chaude, en couches — une seule teinte (OKLCH h 75), chroma basse : plus
+     de brun olive. Du plus sombre au plus clair : fond < carte < aplats (survol,
+     étiquettes, squelettes : ils éclaircissent au lieu de creuser) < puce et carte
+     flottante < survol fort. v3.2 : couches requantifiées à teinte constante (la
+     carte virait au rouge, h 56), marches un peu plus nettes — carte 1,17:1 sur le
+     fond, flottant 1,17:1 sur la carte. Texte #e9e7e1 : 14,99:1 sur le fond, 12,83:1
+     sur la carte (sans halo) ; grès clair 7,68:1 sur la carte, discret 5,47:1 sur la
+     carte et 4,67:1 sur ce qui flotte (4,45 avant : sous le seuil). La sélection
+     (`accent-soft`) est une ardoise bleutée LEVÉE au-dessus de la carte (1,31:1), plus
+     jamais un bleu nuit qui creuse. */
   --esp-night-bg: #151311;
   --esp-night-sidebar: #151311;
-  --esp-night-section: #2b2825;
-  --esp-night-card: #24211f;
-  --esp-night-chip: #2e2c28;
-  --esp-night-hover: #393632;
-  --esp-night-border: #3a3733;
+  --esp-night-section: #2b2926;
+  --esp-night-card: #24221f;
+  --esp-night-chip: #302e2a;
+  --esp-night-hover: #3b3834;
+  --esp-night-border: #3c3935;
   --esp-night-input: #78746e;
-  --esp-night-faint: #96918a;
-  --esp-night-soft: #b3afa7;
-  --esp-night-accent-soft: #17293f;
+  --esp-night-faint: #9c9790;
+  --esp-night-soft: #b8b4ac;
+  --esp-night-accent-soft: #243849;
   --esp-night-accent-deep: #b4dbff;
 
   /* Tons — paires texte / fond mesurées. Teintes harmonisées (v3.1) : même clarté et
@@ -129,11 +146,12 @@
   --esp-ava-5: #c94050;
   --esp-ava-6: #238090;
 
-  /* Navigation active, segments, reliefs teintés d'encre. */
+  /* Navigation active, segments, reliefs teintés d'encre. La pilule choisie (filtre)
+     est l'encre inversée, sans contour : 15,04:1 en clair, 14,99:1 en sombre. */
   --esp-accent-soft: #eef7ff;
   --esp-accent-deep: #004c7d;
   --esp-seg-on: #25211e;
-  --esp-seg-on-fg: #f4f2ee;
+  --esp-seg-on-fg: #f9f8f5;
   --esp-night-seg-on: #e9e7e1;
   --esp-night-seg-on-fg: #151311;
   /* Reliefs v2 : presque rien. La carte se détache par la clarté (papier sur
@@ -220,7 +238,9 @@
   --ink-700: var(--esp-neutral-700);
   --ink-800: var(--esp-neutral-800);
   --ink-900: var(--esp-neutral-900);
-  --info-50: var(--esp-blue-50);
+  /* L'information prend la teinte de statut bleue (v3.2) : même clarté et même
+     chroma que l'ambre, le vert et le rose de ses voisines. */
+  --info-50: var(--esp-blue-bg);
   --info-100: var(--esp-blue-100);
   --info-500: var(--esp-blue-500);
   --info-600: var(--esp-blue-700);
@@ -322,7 +342,9 @@
      clair, 6,06:1 en sombre (le halo à 35 % / 50 % ne tenait que 1,67 et 2,53:1). */
   --shadow-focus: 0 0 0 2px var(--background), 0 0 0 4px var(--ring);
 
-  --primary-50: var(--esp-blue-950);
+  /* La teinte de sélection (puce de pays choisie, option choisie, ligne non lue) se
+     lève au-dessus de la carte et de ce qui flotte : plus de bleu 950 qui creusait. */
+  --primary-50: var(--esp-night-accent-soft);
   --primary-100: var(--esp-blue-900);
   --primary-200: var(--esp-blue-800);
   --primary-300: var(--esp-blue-700);
@@ -346,12 +368,17 @@
   --ink-700: var(--esp-neutral-300);
   --ink-800: var(--esp-neutral-300);
   --ink-900: var(--esp-neutral-200);
-  --info-50: var(--esp-blue-950);
+  --info-50: var(--esp-blue-bg-dark);
   --info-100: var(--esp-blue-900);
   --info-500: var(--esp-blue-400);
   --info-600: var(--esp-blue-300);
   --status-active: var(--esp-blue-300);
   --status-active-bg: var(--esp-blue-900);
+  /* La navigation active lit `--esp-accent-*` directement : en sombre, l'ardoise
+     levée et le bleu clair (la pastille claire du thème clair éblouissait, et son
+     bleu profond tombait à 1,8:1 sur la barre basse). */
+  --esp-accent-soft: var(--esp-night-accent-soft);
+  --esp-accent-deep: var(--esp-night-accent-deep);
 
   --esp-shadow-card: var(--esp-night-shadow);
   --esp-segment-on: var(--esp-night-seg-on);
