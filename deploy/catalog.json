@@ -1,5 +1,5 @@
 {
-  "//": "Catalogue des applications du moteur ANTIA. Une entrée par application servie : service d'hébergement (identifiant stable, jamais renommé), Dockerfile construit en contexte ECOSYSTEMES (le dossier qui contient ANTIA et DIASPORALE), origine publique, port de développement, variables NEXT_PUBLIC_* inscrites au build (chacune doit être déclarée en ARG dans le Dockerfile : c'est le deuxième des « quatre câblages invisibles »), variables d'exécution. Les domaines sont des hypothèses du cahier (arbitrage A1) ; l'hébergement (Cloud Run ou Vercel) est l'arbitrage A5, non tranché : aucune publication sans décision du propriétaire. Fichier partagé avec la session DIASPORALE : modifié par la session ANTIA seulement.",
+  "//": "Catalogue des applications du moteur ANTIA. Une entrée par application servie : service d'hébergement (identifiant stable, jamais renommé), Dockerfile construit en contexte ECOSYSTEMES (le dossier qui contient ANTIA et DIASPORALE), origine publique, port de développement, variables NEXT_PUBLIC_* inscrites au build (chacune doit être déclarée en ARG dans le Dockerfile : c'est le deuxième des « quatre câblages invisibles »), variables d'exécution. Les domaines sont des hypothèses du cahier (arbitrage A1) ; l'hébergement (Cloud Run ou Vercel) est l'arbitrage A5, non tranché : aucune publication sans décision du propriétaire. Une application EXTERNE (DIASPORALE) a son chemin relatif à ANTIA (`../DIASPORALE/apps/…`) et son Dockerfile dans son dépôt ; elle se construit dans le même contexte, avec l'installation d'ANTIA. Fichier partagé avec la session DIASPORALE : modifié par la session ANTIA seulement.",
   "contextDir": "ECOSYSTEMES",
   "applications": {
     "antia_ga": {
@@ -20,6 +20,16 @@
       "site_url": "https://admin.antia.ga",
       "dev_port": 3032,
       "build_args": ["NEXT_PUBLIC_CONVEX_URL", "NEXT_PUBLIC_SITE_URL", "NEXT_PUBLIC_BUILD_SHA"],
+      "runtime_env": ["CONVEX_SITE_URL"]
+    },
+    "diasporale_com": {
+      "package": "diasporale-com",
+      "path": "../DIASPORALE/apps/diasporale_com",
+      "service": "diasporale-com",
+      "dockerfile": "DIASPORALE/apps/diasporale_com/Dockerfile",
+      "site_url": "https://diasporale.com",
+      "dev_port": 3031,
+      "build_args": ["NEXT_PUBLIC_CONVEX_URL", "NEXT_PUBLIC_SITE_URL", "NEXT_PUBLIC_BUILD_SHA", "NEXT_PUBLIC_DIASPORALE_DATA_SOURCE", "NEXT_PUBLIC_IDN_PORTAL_URL", "NEXT_PUBLIC_CONSULATE_URL"],
       "runtime_env": ["CONVEX_SITE_URL"]
     }
   }

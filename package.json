@@ -91,7 +91,8 @@
     "build:diasporale": "node scripts/workspace-run.mjs build --filter=diasporale-com",
     "deploy:check": "node scripts/deploy-app.mjs --check",
     "deploy:antia": "node scripts/deploy-app.mjs antia_ga",
-    "deploy:admin": "node scripts/deploy-app.mjs admin_antia_ga"
+    "deploy:admin": "node scripts/deploy-app.mjs admin_antia_ga",
+    "deploy:diasporale": "node scripts/deploy-app.mjs diasporale_com"
   },
   "dependencies": {
     "@antia/social-contracts": "workspace:*",

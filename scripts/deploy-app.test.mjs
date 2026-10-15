@@ -3,7 +3,7 @@ import { mkdirSync, mkdtempSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
 
-import { buildPlan, checkCatalog, readCatalog } from "./deploy-app.mjs"
+import { buildPlan, checkCatalog, externalRootWorkspaces, readCatalog } from "./deploy-app.mjs"
 
 describe("catalogue réel du moteur", () => {
   test("est sain : paquets, ports, Dockerfiles, ARG NEXT_PUBLIC_* et listes blanches", () => {
@@ -15,6 +15,24 @@ describe("catalogue réel du moteur", () => {
     expect(plan.build).toContain("--substitutions")
     expect(plan.build.join(" ")).toContain("_NEXT_PUBLIC_CONVEX_URL=<NEXT_PUBLIC_CONVEX_URL>")
     expect(plan.image).toContain("<ANTIA_GCP_PROJECT>")
+  })
+
+  test("le plan passe toutes les clés de Cloud Build : celles d'une autre application, vides", () => {
+    const plan = buildPlan(readCatalog(), "antia_ga", { NEXT_PUBLIC_CONVEX_URL: "u" })
+    const substitutions = plan.build[plan.build.indexOf("--substitutions") + 1]
+    expect(substitutions).toContain("_NEXT_PUBLIC_CONVEX_URL=u")
+    expect(substitutions).toContain("_NEXT_PUBLIC_DIASPORALE_DATA_SOURCE=,")
+    expect(substitutions.split(",").filter((entry) => entry.startsWith("_NEXT_PUBLIC_")).length).toBe(6)
+  })
+
+  test("une application externe (DIASPORALE) a son plan, avec ses propres variables", () => {
+    const plan = buildPlan(readCatalog(), "diasporale_com", {})
+    expect(plan.dockerLocal).toContain("DIASPORALE/apps/diasporale_com/Dockerfile")
+    expect(plan.build.join(" ")).toContain("_NEXT_PUBLIC_CONSULATE_URL=<NEXT_PUBLIC_CONSULATE_URL>")
+  })
+
+  test("les espaces de travail externes dont dépend la racine sont connus", () => {
+    expect(externalRootWorkspaces()).toEqual(["DIASPORALE/packages/diasporale-domain"])
   })
 
   test("refuse une application inconnue", () => {
@@ -46,5 +64,43 @@ describe("contrôle d'un catalogue", () => {
     expect(problems.some((p) => p.includes("ARG NEXT_PUBLIC_SITE_URL"))).toBe(true)
     expect(problems.some((p) => p.includes("3030"))).toBe(true)
     expect(problems.some((p) => p.includes("dockerignore"))).toBe(true)
+    expect(problems).toContain("deploy/cloudbuild.yaml introuvable")
+  })
+
+  test("détecte une variable que Cloud Build ne passe pas, et un espace externe que l'image ne copie pas", () => {
+    const ecosystems = mkdtempSync(join(tmpdir(), "catalogue-"))
+    const root = join(ecosystems, "ANTIA")
+    mkdirSync(join(root, "apps/demo"), { recursive: true })
+    mkdirSync(join(root, "deploy"), { recursive: true })
+    mkdirSync(join(ecosystems, "EXTERNE/packages/regles"), { recursive: true })
+    writeFileSync(
+      join(root, "package.json"),
+      JSON.stringify({ workspaces: { packages: ["apps/*", "../EXTERNE/packages/*"] }, dependencies: { "@externe/regles": "workspace:*" } }),
+    )
+    writeFileSync(join(ecosystems, "EXTERNE/packages/regles/package.json"), JSON.stringify({ name: "@externe/regles" }))
+    writeFileSync(join(root, "apps/demo/package.json"), JSON.stringify({ name: "demo", scripts: { dev: "next dev --port 3999" } }))
+    writeFileSync(join(root, "apps/demo/Dockerfile"), "FROM scratch\nARG NEXT_PUBLIC_CONVEX_URL\nCOPY ANTIA ./ANTIA\n")
+    writeFileSync(join(root, "apps/demo/Dockerfile.dockerignore"), "*\n!ANTIA\n")
+    writeFileSync(join(root, "deploy/cloudbuild.yaml"), "steps: []\n")
+    const catalog = {
+      applications: {
+        demo: {
+          package: "demo",
+          path: "apps/demo",
+          service: "demo",
+          dockerfile: "ANTIA/apps/demo/Dockerfile",
+          site_url: "https://demo.example",
+          dev_port: 3999,
+          build_args: ["NEXT_PUBLIC_CONVEX_URL"],
+        },
+      },
+    }
+    expect(checkCatalog(catalog, root)).toEqual([
+      "demo : deploy/cloudbuild.yaml ne passe pas NEXT_PUBLIC_CONVEX_URL",
+      "demo : le Dockerfile ne copie pas EXTERNE/packages/regles (dépendance de la racine d'ANTIA)",
+    ])
+    writeFileSync(join(root, "deploy/cloudbuild.yaml"), "args: [NEXT_PUBLIC_CONVEX_URL=${_NEXT_PUBLIC_CONVEX_URL}]\n")
+    writeFileSync(join(root, "apps/demo/Dockerfile"), "FROM scratch\nARG NEXT_PUBLIC_CONVEX_URL\nCOPY ANTIA ./ANTIA\nCOPY EXTERNE/packages ./EXTERNE/packages\n")
+    expect(checkCatalog(catalog, root)).toEqual([])
   })
 })

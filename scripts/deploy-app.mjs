@@ -17,8 +17,8 @@
  * l'environnement de la machine qui publie, jamais du dépôt.
  */
 import { spawnSync } from "node:child_process"
-import { existsSync, readFileSync } from "node:fs"
-import { dirname, join, resolve } from "node:path"
+import { existsSync, readdirSync, readFileSync } from "node:fs"
+import { dirname, join, relative, resolve, sep } from "node:path"
 import { fileURLToPath, pathToFileURL } from "node:url"
 
 export const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..")
@@ -29,14 +29,58 @@ export function readCatalog(root = ROOT) {
 }
 
 /**
+ * Espaces de travail EXTERNES (hors d'ANTIA : `../DIASPORALE/…`) dont dépend la
+ * racine d'ANTIA, en chemins relatifs à ECOSYSTEMES. `bun install
+ * --frozen-lockfile` les exige même dans une installation élaguée : toute image
+ * construite avec l'installation d'ANTIA doit les copier.
+ * @returns {string[]}
+ */
+export function externalRootWorkspaces(root = ROOT) {
+  const manifest = JSON.parse(readFileSync(join(root, "package.json"), "utf8"))
+  const wanted = new Set(
+    Object.entries({ ...manifest.dependencies, ...manifest.devDependencies })
+      .filter(([, version]) => String(version).startsWith("workspace:"))
+      .map(([name]) => name),
+  )
+  const found = []
+  for (const glob of manifest.workspaces?.packages ?? []) {
+    if (!glob.startsWith("../") || !glob.endsWith("/*")) continue
+    const base = resolve(root, glob.slice(0, -2))
+    if (!existsSync(base)) continue
+    for (const entry of readdirSync(base)) {
+      const manifestPath = join(base, entry, "package.json")
+      if (!existsSync(manifestPath)) continue
+      if (wanted.has(JSON.parse(readFileSync(manifestPath, "utf8")).name)) {
+        found.push(relative(resolve(root, ".."), join(base, entry)).split(sep).join("/"))
+      }
+    }
+  }
+  return found.sort()
+}
+
+/** Un Dockerfile copie-t-il ce chemin (relatif à ECOSYSTEMES), lui ou un dossier parent ? */
+function copiesPath(dockerfile, path) {
+  return [...dockerfile.matchAll(/^COPY\s+(?:--\S+\s+)*(\S+)\s+\S+\s*$/gm)].some(([, source]) => {
+    const normalized = source.replace(/\/+$/, "")
+    return path === normalized || path.startsWith(`${normalized}/`)
+  })
+}
+
+/**
  * Contrôle d'un catalogue : chaque application déclare un paquet existant,
  * un Dockerfile présent, et chaque variable NEXT_PUBLIC_* est un ARG du
- * Dockerfile (sinon le bundle se construit avec une valeur vide, sans erreur).
+ * Dockerfile ET une substitution de Cloud Build (sinon le bundle se construit
+ * avec une valeur vide, sans erreur) ; chaque image copie les espaces de
+ * travail externes dont dépend la racine (sinon l'installation échoue).
  * @returns {string[]} les défauts trouvés (vide = sain)
  */
 export function checkCatalog(catalog, root = ROOT) {
   const problems = []
   const ecosystems = resolve(root, "..")
+  const cloudbuildPath = join(root, "deploy", "cloudbuild.yaml")
+  const cloudbuild = existsSync(cloudbuildPath) ? readFileSync(cloudbuildPath, "utf8") : null
+  if (cloudbuild === null) problems.push("deploy/cloudbuild.yaml introuvable")
+  const externals = existsSync(join(root, "package.json")) ? externalRootWorkspaces(root) : []
   for (const [key, app] of Object.entries(catalog.applications ?? {})) {
     for (const field of ["package", "path", "service", "dockerfile", "site_url", "dev_port", "build_args"]) {
       if (app[field] === undefined) problems.push(`${key} : champ « ${field} » manquant`)
@@ -57,6 +101,10 @@ export function checkCatalog(catalog, root = ROOT) {
       const dockerfile = readFileSync(dockerfilePath, "utf8")
       for (const arg of app.build_args ?? []) {
         if (!new RegExp(`^ARG ${arg}\\b`, "m").test(dockerfile)) problems.push(`${key} : ARG ${arg} absent du Dockerfile`)
+        if (cloudbuild !== null && !cloudbuild.includes(`${arg}=\${_${arg}}`)) problems.push(`${key} : deploy/cloudbuild.yaml ne passe pas ${arg}`)
+      }
+      for (const external of externals) {
+        if (!copiesPath(dockerfile, external)) problems.push(`${key} : le Dockerfile ne copie pas ${external} (dépendance de la racine d'ANTIA)`)
       }
       if (!existsSync(`${dockerfilePath}.dockerignore`)) problems.push(`${key} : ${app.dockerfile}.dockerignore absent (contexte ECOSYSTEMES sans liste blanche)`)
     }
@@ -73,10 +121,13 @@ export function buildPlan(catalog, appKey, env = process.env) {
   const region = env.ANTIA_GCP_REGION ?? "<ANTIA_GCP_REGION>"
   const image = `${region}-docker.pkg.dev/${project}/antia/${app.service}:latest`
   const buildArgs = (app.build_args ?? []).flatMap((name) => ["--build-arg", `${name}=${env[name] ?? `<${name}>`}`])
+  // Toutes les clés du gabarit Cloud Build : celles de l'application, et vides
+  // celles des autres (la substitution reste stricte).
+  const allArgs = [...new Set(Object.values(catalog.applications).flatMap((entry) => entry.build_args ?? []))]
   const substitutions = [
     `_DOCKERFILE=${app.dockerfile}`,
     `_IMAGE=${image}`,
-    ...(app.build_args ?? []).map((name) => `_${name}=${env[name] ?? `<${name}>`}`),
+    ...allArgs.map((name) => `_${name}=${(app.build_args ?? []).includes(name) ? (env[name] ?? `<${name}>`) : ""}`),
   ].join(",")
   return {
     app,
@@ -122,7 +173,8 @@ function main() {
     console.log("\nRien n'a été publié (ajouter --execute, sur décision du propriétaire).")
     return
   }
-  const missing = ["ANTIA_GCP_PROJECT", "ANTIA_GCP_REGION"].filter((name) => !process.env[name])
+  // Jamais un marqueur `<NOM>` inscrit dans un bundle : chaque variable de build doit être posée.
+  const missing = ["ANTIA_GCP_PROJECT", "ANTIA_GCP_REGION", ...(plan.app.build_args ?? [])].filter((name) => !process.env[name])
   if (missing.length > 0 || process.env.ANTIA_DEPLOY_AUTORISE !== "oui") {
     console.error(`✗ publication refusée : ${missing.length > 0 ? `variables manquantes (${missing.join(", ")})` : ""}${process.env.ANTIA_DEPLOY_AUTORISE !== "oui" ? " ANTIA_DEPLOY_AUTORISE≠oui (décision du propriétaire)" : ""}`)
     process.exitCode = 1
