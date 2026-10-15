@@ -38,7 +38,8 @@
   "nav": {
     "feed": "Feed",
     "signOut": "Sign out",
-    "home": "Home"
+    "home": "Home",
+    "messages": "Messages"
   },
   "signIn": {
     "title": "Sign in to {{brand}}",
@@ -100,7 +101,8 @@
     "audience": {
       "public": "All members",
       "connections": "My connections"
-    }
+    },
+    "icomRail": "iCom and your conversations"
   },
   "reactions": {
     "groupLabel": "Reactions",
@@ -113,5 +115,11 @@
   },
   "errors": {
     "generic": "Something went wrong. Please try again."
+  },
+  "messages": {
+    "title": "Messages"
+  },
+  "stories": {
+    "title": "Statuses"
   }
 }

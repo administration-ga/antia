@@ -1,0 +1,1763 @@
+/* Dupliqué de socle/packages/ui/src/styles/globals.css (l. 1914-2125 classes `.esp-*` des surfaces immersives, des barres basses et des stories ; l. 2544-4095 couche d'appel `.call-*`, `.av-ring`, `.iappel-*`, carte Conférence) @ ad2e7fdc2 — adaptations : feuille DÉDIÉE à la couche de communication du moteur (iCom, iAppel, stories), importée par `styles.css` après la charte ; jetons qu'elle lit et que la charte de base ne déclare pas (`--esp-immersive-ink`, `--esp-immersive-on-ink`, ombres `--shadow-*`, `--destructive-foreground`, rayon des surfaces du réseau, ombre de la carte iCom déplacée, encre et fond du code QR) déclarés ici, en tête, valeurs du socle ; bannière de l'espace personnel, carte de l'espace structure et filet tricolore retirés (coque de l'espace agent, non reprise) ; règles du lanceur de poste conservées (le sélecteur d'invités de la messagerie emploie ses classes) ; le reste tel quel.
+
+   ═════════════════════════════════════════════════════════════════════════
+   COUCHE DE COMMUNICATION — iCom, iAppel, stories
+   ─────────────────────────────────────────────────────────────────────────
+   Les surfaces d'appel et les lecteurs immersifs du socle écrivent des
+   classes globales (`.iappel-layer`, `.iappel-float`, `.call-hero-dark`,
+   `.esp-story-*`…) plutôt que des utilitaires : leurs fonds sont des valeurs
+   COMPOSÉES (dégradés, `color-mix`) qu'aucun utilitaire ne dit, et les sortir
+   du TSX tient la règle « aucune couleur dans les écrans ». Ce fichier vit
+   dans `packages/ui/src/styles` : le seul endroit du moteur où une couleur
+   littérale a le droit d'exister (cliquet `no-hardcoded-colors`).
+   Les jetons de cette couche ne font PAS partie du contrat des thèmes : un
+   réseau change d'habit par la charte de base, la scène d'un appel reste la
+   même partout (sombre par construction, comme au socle).
+   ═════════════════════════════════════════════════════════════════════════ */
+
+/* ── Jetons lus par cette couche, absents de la charte de base ──
+   Valeurs du socle : `:root` (l. 148-152, 251-252) et charte Personnel
+   (l. 1281, 1497). La scène immersive est sombre dans les deux thèmes. */
+[data-charte] {
+  --esp-immersive-ink: rgb(9 9 11);
+  --esp-immersive-on-ink: rgb(255 255 255);
+  --shadow-xs: 0 1px 2px rgba(14, 26, 43, 0.05);
+  --shadow-sm: 0 1px 3px rgba(14, 26, 43, 0.08), 0 1px 2px rgba(14, 26, 43, 0.04);
+  --shadow-md: 0 4px 12px rgba(14, 26, 43, 0.08), 0 2px 4px rgba(14, 26, 43, 0.04);
+  --shadow-lg: 0 12px 32px rgba(14, 26, 43, 0.12), 0 4px 12px rgba(14, 26, 43, 0.06);
+  --shadow-xl: 0 20px 40px rgba(14, 26, 43, 0.16), 0 8px 16px rgba(14, 26, 43, 0.08);
+  --destructive-foreground: var(--esp-neutral-0);
+  /* Rayon des surfaces du réseau : posé par la page réseau du socle (`ReseauAgentPage`). */
+  --rp-surface-radius: 18px;
+  /* Carte iCom flottante soulevée pendant un déplacement (messagerie-styles du socle). */
+  --icom-float-drag-shadow: 0 18px 54px rgb(14 26 43 / 0.3);
+  /* Code QR du lien d'invitation : contraste obligé, identique dans les deux thèmes. */
+  --qr-code-surface: rgb(255 255 255);
+  --qr-code-ink: rgb(0 0 0);
+}
+
+.dark[data-charte],
+.dark [data-charte] {
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.35), 0 1px 2px rgba(0, 0, 0, 0.25);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.35), 0 2px 4px rgba(0, 0, 0, 0.25);
+  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.4), 0 4px 12px rgba(0, 0, 0, 0.3);
+  --shadow-xl: 0 20px 40px rgba(0, 0, 0, 0.5), 0 8px 16px rgba(0, 0, 0, 0.35);
+  --destructive-foreground: var(--esp-night-bg);
+}
+
+
+/* Barre basse mobile. Classe plutôt que trois classes utilitaires : le fond
+   est une valeur COMPOSÉE (`color-mix`) et l'ombre aussi, et les poser en
+   `style={{ … }}` dans le composant remettrait de la couleur dans le TSX —
+   ce que le cliquet de charte interdit. La règle est aussi ce qui garantit
+   qu'un SEUL composant sert les deux comptes : `AgentMobileNav` ne teste
+   jamais la charte active, il pose cette classe et la charte décide.
+
+   ⚠️ Repli sur les jetons de l'hôte. Cette barre est montée par les seize
+   applications, dont onze vivent sous `.dash-v2` et non sous
+   `[data-charte="espace-*"]` : les jetons de l'espace n'y sont pas déclarés.
+   Sans repli, la barre n'aurait ni fond ni filet — un chrome invisible, sans
+   la moindre erreur pour le signaler (même piège que `EspaceAccountSwitcher`).
+   Le repli passe par les jetons shadcn, présents partout. */
+.esp-mobile-bar {
+  background: var(--esp-mobilebar-bg, var(--secondary));
+  border-color: var(--esp-mobilebar-border, var(--border));
+  box-shadow: var(--esp-mobilebar-shadow, 0 6px 18px rgb(20 19 15 / 0.08));
+  /*
+   * ⚠️ Le rayon est posé ICI, et surtout PAS par `rounded-2xl`. C'est
+   * contre-intuitif : le bloc GÉOMÉTRIE de chaque charte redéclare bien
+   * `--radius-2xl` (16 px personnel, 8 px structure), et on attend donc de
+   * l'utilitaire qu'il suive. Il ne suit pas. `@theme inline` (fin de ce
+   * fichier) demande à Tailwind d'INLINER la valeur au build : la classe émet
+   * `border-radius: calc(var(--radius) + 10px)`, jamais `var(--radius-2xl)`.
+   * La redéclaration de la charte n'est donc jamais lue par l'utilitaire, et
+   * seule `--radius` compte — qui vaut 10 px sous `.dash-v2`. MESURÉ : barre à
+   * 20 px sous la charte structure, là où le dossier de design en veut 8, sans
+   * la moindre erreur pour le signaler.
+   *
+   * Lire le jeton en `var()` remet la charte aux commandes. Le repli couvre
+   * les hôtes qui ne déclarent pas la charte de l'espace.
+   */
+  border-radius: var(--radius-2xl, 1rem);
+}
+
+/* Barre d'onglets d'iRÉSEAU — la TROISIÈME barre basse de l'écosystème.
+   Elle reprend exactement l'habillage d'`.esp-mobile-bar` (fond, filet,
+   relief, rayon lu en `var()`), et pour la même raison : un seul composant
+   sert les deux comptes, il pose une classe et la charte décide.
+
+   Classe séparée plutôt qu'un alias, parce que les deux barres devront
+   pouvoir diverger — celle-ci vit DANS iRéseau et suivra la charte du réseau
+   social quand celle-ci se distinguera. Aujourd'hui elles sont identiques :
+   les deux se remplacent l'une l'autre au fil de la navigation, et une
+   différence de surface ferait clignoter le bas de l'écran.
+
+   ⚠️ Le rayon est lu en `var(--radius-2xl)` et surtout PAS par `rounded-2xl` :
+   `@theme inline` demande à Tailwind d'INLINER la valeur au build, si bien que
+   l'utilitaire n'a jamais suivi la charte (mesuré à 20 px là où le dossier de
+   design en veut 8). Voir la note d'`.esp-mobile-bar`. */
+.esp-reseau-tabbar {
+  background: var(--esp-mobilebar-bg, var(--secondary));
+  border-color: var(--esp-mobilebar-border, var(--border));
+  box-shadow: var(--esp-mobilebar-shadow, 0 6px 18px rgb(20 19 15 / 0.08));
+  border-radius: var(--radius-2xl, 1rem);
+}
+
+/* Voile des surfaces immersives (`ImmersiveOverlay` avec `scrim`).
+   Valeur COMPOSÉE (`color-mix`), donc une classe et non un style en ligne : la
+   poser dans le TSX y remettrait de la couleur, ce que le cliquet de charte
+   interdit. Le mélange part du jeton de SCÈNE (`--esp-immersive-ink`) et non
+   de `--foreground` : ce dernier vaut du blanc en thème sombre, et le voile
+   d'assombrissement y devenait un voile d'éclaircissement. */
+.esp-immersive-scrim {
+  background: color-mix(in srgb, var(--esp-immersive-ink) 62%, transparent);
+}
+
+/* ═════════════════════════════════════════════════════════════════════════
+   STORIES ET DIRECTS PLEIN ÉCRAN (LOT M3)
+
+   Cinq classes, toutes pour la même raison que `.esp-immersive-scrim` et
+   `.esp-banner` : ce sont des valeurs COMPOSÉES (dégradés, `color-mix`) que
+   ni une classe Tailwind ni un `style={{ … }}` ne peuvent porter sans
+   remettre de la couleur dans le TSX — ce que le cliquet de charte
+   (`convex/tests/charteRatchet.test.ts`) interdit.
+
+   ⚠️ Elles ne partent QUE de rôles déclarés à `:root` (`--primary`,
+   `--foreground`, `--background`, `--muted-foreground`, `--destructive`) et
+   jamais d'une primitive `--esp-*`. La raison est mécanique : le lecteur
+   plein écran passe par `ImmersiveOverlay`, qui PORTAILLE vers `<body>` —
+   donc HORS du nœud `[data-charte="espace-personnel"]` où vivent les
+   `--esp-*`. Une classe bâtie sur elles s'y rendrait sans couleur du tout.
+   ═════════════════════════════════════════════════════════════════════════ */
+
+/* L'anneau d'une vignette du plateau. Trois états, un seul dégradé conique :
+   il tourne du bleu d'action vers sa version claire, ce qui donne l'anneau
+   « non vu » du genre sans emprunter le violet-orange d'Instagram — la
+   plateforme reste institutionnelle. Les deux autres états n'ont pas de
+   dégradé : ils N'ATTIRENT PAS. */
+.esp-story-ring {
+  background: conic-gradient(
+    from 210deg,
+    var(--primary),
+    color-mix(in srgb, var(--primary) 45%, var(--background)),
+    var(--primary)
+  );
+}
+
+/* Déjà regardée : un filet discret, pas un anneau. C'est ce qui fait qu'une
+   barre SE VIDE à l'œil en la parcourant. */
+.esp-story-ring-seen {
+  background: color-mix(in srgb, var(--muted-foreground) 38%, transparent);
+}
+
+/* La mienne — ni « à voir » ni « vue » : le point de départ. */
+.esp-story-ring-self {
+  background: color-mix(in srgb, var(--primary) 30%, transparent);
+}
+
+/* La barre de progression segmentée. Le RAIL est ce qui reste à lire, la
+   TÊTE ce qui l'a été. Sur un média sombre comme sur un média clair, seule
+   une valeur translucide tient : une couleur pleine disparaîtrait sur la
+   moitié des photos. */
+.esp-story-progress {
+  background: color-mix(in srgb, var(--esp-immersive-on-ink) 32%, transparent);
+}
+.esp-story-progress-fill {
+  background: var(--esp-immersive-on-ink);
+}
+
+/* La scène : le fond derrière un média qui ne remplit pas l'écran (portrait
+   sur écran large, vidéo au ratio libre). Une photo se regarde sur du noir,
+   jamais sur la surface d'une page — d'où le jeton de scène, constant dans
+   les deux thèmes, et non `--foreground` qui blanchissait la scène en sombre. */
+.esp-story-stage {
+  background: color-mix(in srgb, var(--esp-immersive-ink) 92%, transparent);
+}
+
+/* Le voile de lisibilité sous l'auteur et la légende. Sans lui, un texte
+   blanc posé sur une photo claire est illisible, et le mesurer ne sert à
+   rien : le contraste dépend de l'image, pas du thème. */
+.esp-story-shade {
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--esp-immersive-ink) 55%, transparent),
+    transparent 34%,
+    transparent 58%,
+    color-mix(in srgb, var(--esp-immersive-ink) 72%, transparent)
+  );
+}
+
+/* Les commandes posées SUR un média (son, « Vu par », fermeture). Fond
+   translucide tiré de la couleur de texte : sur une photo claire comme sur une
+   photo sombre, c'est le seul fond qui garde le libellé lisible sans imposer
+   un rectangle opaque au milieu de l'image. */
+.esp-story-chip {
+  background: color-mix(in srgb, var(--esp-immersive-ink) 48%, transparent);
+  color: var(--esp-immersive-on-ink);
+}
+
+/* La pastille « EN DIRECT ». `--destructive` est ici la couleur de l'ALERTE
+   au sens propre : un direct est ce qu'on manque si on ne regarde pas
+   maintenant. C'est le seul rôle rouge déclaré à `:root`, et la convention du
+   genre veut ce rouge — un direct signalé en bleu ne se distingue pas d'une
+   vignette de plus. */
+.esp-live-pill {
+  background: var(--destructive);
+  color: var(--background);
+}
+
+@layer components {
+  .call-hero-dark {
+    background: linear-gradient(180deg, #0a0d12 0%, #0c1524 80%);
+    color: #fff;
+  }
+
+  .call-hero-dark-warm {
+    background: linear-gradient(180deg, #0a0d12 0%, #1a1410 80%);
+    color: #fff;
+  }
+
+  .av-ring {
+    position: relative;
+    display: inline-flex;
+  }
+  .av-ring::before,
+  .av-ring::after {
+    content: "";
+    position: absolute;
+    inset: -8px;
+    border-radius: 999px;
+    border: 2px solid currentColor;
+    opacity: 0.5;
+    animation: av-ring-pulse 2.4s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+  }
+  .av-ring::after {
+    animation-delay: 1.2s;
+  }
+  @keyframes av-ring-pulse {
+    0% { transform: scale(0.92); opacity: 0.6; }
+    70% { transform: scale(1.18); opacity: 0; }
+    100% { transform: scale(1.18); opacity: 0; }
+  }
+
+  .call-bars-anim {
+    display: inline-flex;
+    gap: 3px;
+    align-items: flex-end;
+    height: 18px;
+  }
+  .call-bars-anim > span {
+    display: block;
+    width: 2.5px;
+    border-radius: 2px;
+    background: currentColor;
+    animation: call-bar 0.8s ease-in-out infinite alternate;
+    transform-origin: bottom;
+  }
+  .call-bars-anim > span:nth-child(1) { height: 8px; animation-delay: 0s; }
+  .call-bars-anim > span:nth-child(2) { height: 14px; animation-delay: 0.05s; }
+  .call-bars-anim > span:nth-child(3) { height: 6px; animation-delay: 0.1s; }
+  .call-bars-anim > span:nth-child(4) { height: 18px; animation-delay: 0.15s; }
+  .call-bars-anim > span:nth-child(5) { height: 10px; animation-delay: 0.2s; }
+  .call-bars-anim > span:nth-child(6) { height: 14px; animation-delay: 0.25s; }
+  .call-bars-anim > span:nth-child(7) { height: 8px; animation-delay: 0.3s; }
+  @keyframes call-bar {
+    from { transform: scaleY(0.4); }
+    to { transform: scaleY(1); }
+  }
+
+  .call-hold-shim {
+    height: 4px;
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+  .call-hold-shim > span {
+    display: block;
+    height: 100%;
+    background: var(--warning);
+    animation: call-hold-shim 2s ease-in-out infinite;
+  }
+  @keyframes call-hold-shim {
+    0% { width: 20%; }
+    50% { width: 80%; }
+    100% { width: 20%; }
+  }
+
+  .call-pulse-ping {
+    position: relative;
+  }
+  .call-pulse-ping::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 999px;
+    border: 2px solid currentColor;
+    animation: call-pulse-ping 1.6s ease-out infinite;
+  }
+  @keyframes call-pulse-ping {
+    0% { transform: scale(0.95); opacity: 0.7; }
+    100% { transform: scale(1.5); opacity: 0; }
+  }
+
+  .call-blink {
+    animation: call-blink 1.4s ease-in-out infinite;
+  }
+  @keyframes call-blink {
+    50% { opacity: 0.3; }
+  }
+
+  /* ── Mouvement réduit ─────────────────────────────────────────────────────
+     Un écran d'appel est le plus animé de la plateforme : anneau de sonnerie,
+     barres de parole, pulsation de l'entrant. Aucun de ces mouvements ne PORTE
+     l'information — l'état est écrit à côté en toutes lettres. On les arrête
+     donc, sans rien retirer : l'anneau reste dessiné, les barres gardent leur
+     silhouette. C'est ce que demande `prefers-reduced-motion`, et c'est aussi
+     ce qui rend l'écran supportable en appel long. */
+  @media (prefers-reduced-motion: reduce) {
+    .av-ring::before,
+    .av-ring::after,
+    .call-pulse-ping::after,
+    .call-bars-anim > span,
+    .call-hold-shim > span,
+    .call-blink {
+      animation: none;
+    }
+    .av-ring::before { opacity: 0.45; transform: none; }
+    .av-ring::after { opacity: 0; }
+    .call-bars-anim > span { transform: scaleY(0.75); }
+    .call-hold-shim > span { width: 45%; }
+  }
+
+  /* ========================================
+     IAPPEL v2 — surfaces de la couche d'appel
+     ========================================
+     Ces classes ne portent AUCUNE couleur littérale : la scène sombre vit sur
+     `--esp-immersive-ink` / `--esp-immersive-on-ink`, déclarés à `:root` parce
+     que la couche d'appel est portaillée vers `<body>`, HORS du nœud
+     `[data-charte]` (même raison que le lecteur de stories). Les surfaces
+     claires (bannière, journal) consomment `--card` / `--border`.
+
+     Une seule couche pour toutes les poses : 10010, au-dessus de la sphère
+     iAsted (9999) et du sélecteur de comptes de développement (10000), qui
+     voleraient sinon le clic sur « Décrocher ». */
+  .iappel-layer {
+    z-index: 10010;
+  }
+
+  /* Fenêtre flottante de bureau — NON modale : la page reste utilisable
+     pendant l'appel, c'est tout l'intérêt d'un téléphone posé sur le bureau. */
+  .iappel-float {
+    position: fixed;
+    /* L'ancrage vient du style EN LIGNE (`left`/`top` numériques posés par
+       `useSurfaceDrag`), plus de la feuille : la fenêtre est déplaçable. Ces
+       deux valeurs ne sont qu'un point de départ avant la première mesure —
+       `useLayoutEffect` les écrase avant peinture. */
+    left: 0;
+    top: 0;
+    /* Format téléphone = iPhone 17 Pro Max (440 × 956 pt), la même règle que
+       la carte iCom Pro (`icom-poste-styles.tsx`) : la LARGEUR suit la
+       hauteur disponible (× 0,46) et la hauteur en découle, si bien que la
+       fenêtre garde les proportions du téléphone à toute taille d'écran —
+       jamais une fenêtre trapue de 400 × 680 (demande du propriétaire, 07/10).
+       Plancher 300 px : en dessous de 716 px de haut seulement, la hauteur
+       plafonne et le ratio cède plutôt que l'écran. 64 px = les deux marges
+       de `SURFACE_DRAG_MARGIN` et une barre haute. */
+    --iappel-float-w: clamp(300px, min(440px, calc((100dvh - 64px) * 0.46), calc(100vw - 32px)), 440px);
+    width: var(--iappel-float-w);
+    height: min(calc(var(--iappel-float-w) / 0.46), calc(100dvh - 64px));
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border-radius: 18px;
+    border: 1px solid color-mix(in srgb, var(--esp-immersive-on-ink) 14%, transparent);
+    box-shadow: 0 24px 60px -12px color-mix(in srgb, var(--esp-immersive-ink) 55%, transparent);
+  }
+
+  /* ══ UN APPEL DE GROUPE MÉRITE PLUS DE 400 px (IC-10) ════════════════════
+     Bloc SÉPARÉ, à dessein : `.iappel-float {` porte un cliquet
+     (`iappel-surface.ratchet`, « l'ancrage a quitté la feuille de style »),
+     et l'y toucher le rougirait. À cinq personnes dans 400 px, la grille
+     donne des vignettes de 121 px ; à 760, elle en donne 176. */
+  .iappel-float[data-call-kind="group"] {
+    width: min(760px, calc(100vw - 32px));
+    height: min(560px, calc(100dvh - 96px));
+  }
+
+  /* ══ L'APPEL DANS LE TÉLÉPHONE iCom (IC-01/IC-02/IC-06, 2026-09-13) ═══════
+     Quand une carte iCom se déclare hôte pour le scope de l'appel
+     (`features/iappel/call-host-store.ts`), `CallSurface` portaille ses deux
+     poses de bureau DANS le corps de la carte au lieu d'ouvrir une fenêtre à
+     côté : la carte est un smartphone, l'appel reste dedans. `.iappel-float`
+     et la pilule de bureau ne sont plus que le REPLI sans carte.
+
+     Ce cadre REMPLIT l'hôte (une colonne flex de la carte, `min-height: 0`
+     pour que la scène se comprime) et se POSITIONNE : le sélecteur « Ajouter
+     à l'appel », en `absolute`, s'ancre dans le téléphone et non dans la
+     page. Le genre ne l'élargit pas (IC-03) — un groupe reste un appel dans
+     le même téléphone, sa grille se mesure sur la place disponible. */
+  .iappel-hosted {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+    width: 100%;
+    overflow: hidden;
+    background: var(--esp-immersive-ink);
+    color: var(--esp-immersive-on-ink);
+  }
+  /* Le sélecteur prend la largeur du téléphone, moins une marge : ses 320 px
+     nominaux déborderaient d'une carte de rail et l'overflow les couperait. */
+  .iappel-hosted .iappel-launcher-panel[data-pose="anchored"] {
+    inset-inline: 8px;
+    width: auto;
+    max-height: min(420px, calc(100% - 64px));
+  }
+  /* La pilule HÉBERGÉE : une bande en flux, en tête du corps de la carte —
+     ni fixe, ni déplaçable, ni arrondie : c'est le bandeau vert d'un appel
+     en cours sur un téléphone. Bloc SÉPARÉ des deux poses libres, à
+     dessein : `.iappel-pill[data-pose="desktop"] {` porte un cliquet. */
+  .iappel-pill[data-pose="hosted"] {
+    position: static;
+    width: 100%;
+    max-width: none;
+    border-radius: 0;
+    border-inline: 0;
+    border-top: 0;
+    box-shadow: none;
+  }
+
+  /* Le retour au coin s'anime ; le SUIVI du pointeur, jamais — une
+     transition pendant un suivi 1:1 fait traîner la fenêtre derrière le
+     curseur. */
+  .iappel-float {
+    transition:
+      left 180ms cubic-bezier(0.16, 1, 0.3, 1),
+      top 180ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .iappel-float[data-dragging="true"] {
+    transition: none;
+    cursor: grabbing;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .iappel-float {
+      transition: none;
+    }
+  }
+
+  /* La poignée de déplacement — une bande fine, au-dessus de l'en-tête.
+     Elle n'englobe AUCUNE commande : une poignée qui recouvre « Réduire »
+     finit par lui voler son clic. */
+  .iappel-float-handle {
+    flex-shrink: 0;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: grab;
+  }
+  .iappel-float-handle:focus-visible {
+    outline: 2px solid var(--esp-immersive-on-ink);
+    outline-offset: -2px;
+    border-radius: 6px;
+  }
+  .iappel-float-grip {
+    width: 36px;
+    height: 4px;
+    border-radius: 999px;
+    background: var(--esp-immersive-on-ink);
+    opacity: 0.35;
+  }
+
+  .iappel-pill[data-dragging="true"] {
+    transition: none;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .iappel-pill[data-pose="desktop"] {
+      transition: none;
+    }
+  }
+  .iappel-pill-grip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    align-self: stretch;
+    padding-inline: 2px;
+    margin-inline-start: -6px;
+    color: var(--esp-immersive-on-ink);
+    opacity: 0.45;
+    cursor: grab;
+  }
+  .iappel-pill-grip:focus-visible {
+    outline: 2px solid var(--esp-immersive-on-ink);
+    outline-offset: 1px;
+    border-radius: 6px;
+  }
+
+  /* État réduit — l'appel continue, la surface se retire. */
+  .iappel-pill {
+    position: fixed;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 52px;
+    padding: 6px 8px 6px 14px;
+    border-radius: 999px;
+    background: var(--esp-immersive-ink);
+    color: var(--esp-immersive-on-ink);
+    border: 1px solid color-mix(in srgb, var(--esp-immersive-on-ink) 16%, transparent);
+    box-shadow: 0 16px 40px -12px color-mix(in srgb, var(--esp-immersive-ink) 60%, transparent);
+  }
+  .iappel-pill[data-pose="desktop"] {
+    /* Comme la fenêtre : l'ancrage passe au style en ligne, la pilule de
+       bureau est déplaçable. La pose MOBILE, elle, garde ses valeurs de
+       feuille — elle est pleine largeur au-dessus de la barre basse, et la
+       déplacer ne pourrait que la cacher derrière celle-ci. */
+    left: 0;
+    top: 0;
+    transition:
+      left 180ms cubic-bezier(0.16, 1, 0.3, 1),
+      top 180ms cubic-bezier(0.16, 1, 0.3, 1);
+    max-width: min(360px, calc(100vw - 48px));
+  }
+  /* Au téléphone la pilule se pose AU-DESSUS de la barre basse : la hauteur de
+     réserve est celle que `--esp-reseau-tabbar-inset` déclare déjà. */
+  .iappel-pill[data-pose="mobile"] {
+    left: 12px;
+    right: 12px;
+    bottom: calc(12px + var(--iappel-bottom-inset, 0px) + env(safe-area-inset-bottom, 0px));
+  }
+
+  /* Bannière d'appel entrant au bureau — en HAUT à droite, parce que le coin
+     bas-droite est déjà pris par la fenêtre d'appel et la sphère iAsted. */
+  .iappel-banner {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    width: min(360px, calc(100vw - 32px));
+    display: grid;
+    grid-template-columns: 44px 1fr auto;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    border-radius: 16px;
+    background: var(--card);
+    color: var(--card-foreground);
+    border: 1px solid color-mix(in srgb, var(--primary) 30%, var(--border));
+    box-shadow: 0 20px 50px -16px color-mix(in srgb, var(--esp-immersive-ink) 45%, transparent);
+  }
+  .iappel-banner[data-urgent="true"] {
+    border-color: color-mix(in srgb, var(--destructive) 45%, var(--border));
+  }
+  /* Deux entrants simultanés : la seconde bannière se glisse sous la première. */
+  .iappel-banner[data-rank="2"] {
+    top: 96px;
+    width: min(320px, calc(100vw - 32px));
+  }
+
+  /* Scène — le conteneur de la vidéo distante.
+     ⚠️ `min-height: 0` n'est PAS décoratif : sans lui, un enfant `flex-1` dans
+     une colonne flex refuse de se comprimer, et la vidéo en `position:absolute`
+     se rend dans une boîte de hauteur nulle — invisible, sans une erreur. */
+    /*
+   * La bande d'incrustations de l'écran d'appel — en FLUX, jamais posée sur la
+   * scène.
+   *
+   * ⚠️ Elle existe parce que `.iappel-stage` est `position: relative` et
+   * `.iappel-video` `position: absolute; inset: 0` : en ordre de peinture CSS un
+   * descendant positionné passe au-dessus d'un descendant en flux, quel que soit
+   * l'ordre du DOM. Les puces rendues DANS la scène étaient donc peintes sous la
+   * vidéo, qui captait le clic — en appel vidéo, le seul moyen de décrocher un
+   * second appel était invisible et inatteignable.
+   */
+  .iappel-stage-band {
+    flex-shrink: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 0 20px 8px;
+  }
+
+  .iappel-stage-band:empty {
+    display: none;
+  }
+
+.iappel-stage {
+    position: relative;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
+    background: var(--esp-immersive-ink);
+  }
+  .iappel-video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    background: var(--esp-immersive-ink);
+  }
+  /* Vignette locale — MIROIR, comme un miroir de salle de bain : on se regarde
+     dans le sens auquel on est habitué, et seul soi-même est retourné. */
+  .iappel-pip {
+    position: absolute;
+    width: 84px;
+    height: 116px;
+    overflow: hidden;
+    border-radius: 14px;
+    border: 1px solid color-mix(in srgb, var(--esp-immersive-on-ink) 22%, transparent);
+    box-shadow: 0 10px 24px -8px color-mix(in srgb, var(--esp-immersive-ink) 70%, transparent);
+    transition: inset 180ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .iappel-pip > video { transform: scaleX(-1); }
+  .iappel-pip[data-mirror="false"] > video { transform: none; }
+  @media (prefers-reduced-motion: reduce) {
+    .iappel-pip { transition: none; }
+  }
+
+  /* Puce d'information posée SUR la scène sombre (nom, « POSTE », réseau). */
+  .iappel-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    line-height: 1.3;
+    background: color-mix(in srgb, var(--esp-immersive-ink) 55%, transparent);
+    color: var(--esp-immersive-on-ink);
+    border: 1px solid color-mix(in srgb, var(--esp-immersive-on-ink) 18%, transparent);
+    backdrop-filter: blur(6px);
+  }
+
+  /* Commande d'appel — 44 px de cible au minimum, jamais moins : c'est la
+     commande principale d'un écran qu'on manipule souvent d'une seule main. */
+  /* ── Interaction tactile et focus, pour TOUTE la couche d'appel ──────────
+     `touch-action: manipulation` retire le délai de 300 ms que le navigateur
+     s'accorde pour guetter un double-tap. Sur un écran d'appel, ce délai se
+     paie deux fois : on appuie sur « Décrocher », rien ne se passe, on appuie
+     encore — et le second appui arrive parfois après que l'appel a été pris.
+
+     L'anneau de focus, lui, est déclaré GLOBALEMENT sur `--ring`, une encre de
+     la charte parchemin. Posée sur la scène sombre de l'appel, elle se voit
+     mal : on la remplace par l'encre claire de la scène, qui contraste avec
+     elle par construction. Sans cela, la navigation au clavier se ferait à
+     l'aveugle précisément là où elle est la plus utile — un appel entrant
+     qu'on prend sans lâcher son clavier. */
+  .iappel-ctl,
+  .iappel-soft-action,
+  .iappel-pill button,
+  .iappel-card button,
+  .iappel-incoming button {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .iappel-incoming *:focus-visible,
+  .iappel-pill *:focus-visible,
+  .iappel-stage *:focus-visible,
+  .call-hero-dark *:focus-visible,
+  .call-hero-dark-warm *:focus-visible {
+    outline: 2px solid var(--esp-immersive-on-ink);
+    outline-offset: 2px;
+  }
+
+  .iappel-ctl {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 56px;
+    min-width: 44px;
+    min-height: 44px;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--esp-immersive-on-ink) 12%, transparent);
+    color: var(--esp-immersive-on-ink);
+    transition: transform 140ms ease-out, background-color 140ms ease-out;
+  }
+  .iappel-ctl:hover {
+    background: color-mix(in srgb, var(--esp-immersive-on-ink) 18%, transparent);
+  }
+  .iappel-ctl:active { transform: scale(0.95); }
+  .iappel-ctl[data-active="true"] {
+    background: var(--esp-immersive-on-ink);
+    color: var(--esp-immersive-ink);
+  }
+  /* La commande EXISTE mais ne peut pas agir (sortie audio sur iPhone) : elle
+     s'atténue, reste focusable et cliquable, et le tap en dit la raison
+     (`CallControlButton.unavailableReason`). Aucune COULEUR ici — juste une
+     opacité : un gris posé en dur romprait la charte immersive. */
+  .iappel-ctl[data-unavailable="true"] {
+    opacity: 0.5;
+  }
+  /* Le périphérique est BLOQUÉ (micro refusé par le navigateur) : même
+     atténuation, mais le tap réessaie (`CallControlButton.blockedReason`). */
+  .iappel-ctl[data-blocked="true"] {
+    opacity: 0.5;
+  }
+  .iappel-ctl[data-tone="answer"] {
+    background: var(--success);
+    color: var(--on-fill, var(--esp-immersive-on-ink));
+  }
+  .iappel-ctl[data-tone="hangup"] {
+    background: var(--destructive);
+    color: var(--destructive-foreground);
+  }
+  /* ⚠️ PAS de `.iappel-ctl:disabled` ici : cette classe est portée par un
+     `<span>` à l'intérieur du bouton, et `:disabled` ne matche que les
+     éléments de formulaire réellement désactivables. La règle n'aurait jamais
+     rien fait — l'état désactivé se rend sur le `<button>` lui-même, dans
+     `CallControlButton`. */
+  @media (prefers-reduced-motion: reduce) {
+    .iappel-ctl { transition: none; }
+    .iappel-ctl:active { transform: none; }
+  }
+
+  /* Qualité du lien — trois barreaux, l'état est AUSSI écrit à côté. */
+  .iappel-quality {
+    display: inline-flex;
+    align-items: flex-end;
+    gap: 2px;
+    height: 12px;
+  }
+  .iappel-quality > span {
+    width: 3px;
+    border-radius: 1px;
+    background: currentColor;
+    opacity: 0.3;
+  }
+  .iappel-quality > span:nth-child(1) { height: 5px; }
+  .iappel-quality > span:nth-child(2) { height: 8px; }
+  .iappel-quality > span:nth-child(3) { height: 12px; }
+  .iappel-quality[data-bars="1"] > span:nth-child(1),
+  .iappel-quality[data-bars="2"] > span:nth-child(-n + 2),
+  .iappel-quality[data-bars="3"] > span { opacity: 1; }
+
+  /* ── LE LISERÉ INSTITUTIONNEL ─────────────────────────────────────────────
+     La signature de cet écran, et la réponse à une question qu'on se pose en
+     une demi-seconde, souvent sans lire : « est-ce que cet appel engage
+     l'administration, ou est-ce ma vie privée ? »
+
+     Un appel de POSTE porte ce liseré et l'emblème de son administration ; un
+     appel personnel n'en a pas. Le badge coloré aurait été le geste attendu —
+     on lui préfère un signal STRUCTUREL, doublé d'une inversion de hiérarchie
+     dans le contenu (la fonction avant la personne pour l'institution, la
+     personne avant tout pour un appel privé). L'ornement se confond d'un coup
+     d'œil ; une hiérarchie, non. */
+  .iappel-poste-mark {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding-left: 12px;
+    border-left: 3px solid var(--primary);
+  }
+  .iappel-poste-mark[data-tone="on-ink"] {
+    border-left-color: color-mix(in srgb, var(--primary) 70%, var(--esp-immersive-on-ink));
+  }
+  /* Sur-titre institutionnel : capitales espacées, comme la mention portée en
+     tête d'un document officiel. Jamais en monospace — le monospace de cette
+     charte est réservé à ce qui SE COMPTE. */
+  .iappel-eyebrow {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    line-height: 1.2;
+  }
+  /* Le chrono, la durée, le décompte — tout ce qui se compte, et rien d'autre. */
+  .iappel-count {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.02em;
+  }
+
+  /* L'emblème d'une administration ne se rogne PAS en médaillon : c'est une
+     marque, pas un visage. Même règle que les pages d'administration. */
+  .iappel-emblem {
+    width: 34px;
+    height: 34px;
+    flex: 0 0 auto;
+    border-radius: 6px;
+    object-fit: contain;
+    background: color-mix(in srgb, var(--esp-immersive-on-ink) 10%, transparent);
+  }
+
+  /* La carte d'appel entrant, au téléphone : la scène occupe l'écran, les
+     commandes se posent au-dessus de la zone de préhension du pouce. */
+  .iappel-incoming {
+    display: flex;
+    flex: 1 1 auto;
+    min-height: 0;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 24px 20px max(24px, env(safe-area-inset-bottom, 0px));
+  }
+  /* La même carte qui sonne dans le CORPS d'une carte iCom moyenne (≈ 360 px,
+     cf. features/iappel/call-host.ts) : respirations resserrées, avatar
+     réduit par le composant (`density="compact"`), pour que « Refuser » et
+     « Répondre » restent dans le cadre. Le téléphone (réel ou détaché) garde
+     l'écran entier. Règles non layerées : elles priment sur les utilitaires
+     de gap du composant sans `!important`. */
+  .iappel-incoming[data-density="compact"] {
+    padding: 10px 14px 12px;
+  }
+  .iappel-incoming[data-density="compact"] > div {
+    gap: 8px;
+  }
+  .iappel-incoming[data-density="compact"] h1 {
+    font-size: 19px;
+  }
+  .iappel-incoming[data-density="compact"] .av-ring::before,
+  .iappel-incoming[data-density="compact"] .av-ring::after {
+    inset: -5px;
+  }
+  /* ── PILE DES CONVIÉS (appel entrant de groupe, ADR-0149) ─────────────────
+     Sous l'appelant : « Appel de groupe · N personnes », puis quatre visages
+     au plus et une bulle « +k ». Les visages se CHEVAUCHENT — une rangée
+     espacée se lirait comme une liste de choix — et chacun porte un anneau
+     de l'encre immersive, qui les détache l'un de l'autre sans filet coloré.
+     La taille (28, 22 en compact) est portée par le composant ; ici seulement
+     le chevauchement, l'anneau et la bulle. */
+  .iappel-group-line {
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.3;
+    text-align: center;
+    color: var(--esp-immersive-on-ink);
+    opacity: 0.85;
+  }
+  .iappel-pile {
+    display: inline-flex;
+    align-items: center;
+  }
+  .iappel-pile-avatar,
+  .iappel-pile-more {
+    display: inline-flex;
+    flex: 0 0 auto;
+    border: 2px solid var(--esp-immersive-ink);
+    border-radius: 999px;
+    box-sizing: content-box;
+  }
+  .iappel-pile > * + * {
+    margin-left: -8px;
+  }
+  .iappel-incoming[data-density="compact"] .iappel-pile > * + * {
+    margin-left: -6px;
+  }
+  /* Le reste SE COMPTE : monospace, comme le chrono. Fond opaque (mélangé à
+     l'encre, pas au transparent) — la bulle chevauche le dernier visage. */
+  .iappel-pile-more {
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--esp-immersive-on-ink);
+    background: color-mix(in srgb, var(--esp-immersive-on-ink) 14%, var(--esp-immersive-ink));
+  }
+  .iappel-incoming[data-density="compact"] .iappel-pile-more {
+    font-size: 9.5px;
+  }
+  /* « vous compris » après la pile (planche du 14/09) : le « +k » compte
+     l'invité qui regarde. Hors du chevauchement des visages. */
+  .iappel-pile > .iappel-pile-note {
+    margin-left: 8px;
+    align-self: center;
+    font-size: 12px;
+    color: var(--esp-immersive-on-ink);
+    opacity: 0.7;
+    white-space: nowrap;
+  }
+  /* Rangée d'action secondaire (message rapide, répondre en vidéo) : des
+     pilules, pour ne pas concurrencer les deux ronds de décision. */
+  .iappel-soft-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 44px;
+    padding: 0 16px;
+    border-radius: 999px;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--esp-immersive-on-ink);
+    background: color-mix(in srgb, var(--esp-immersive-on-ink) 10%, transparent);
+  }
+  .iappel-soft-action:hover {
+    background: color-mix(in srgb, var(--esp-immersive-on-ink) 16%, transparent);
+  }
+
+  /* Réduction plein écran → pilule. Le seul mouvement orchestré de l'écran :
+     la surface part vers l'endroit où elle se retrouvera. */
+  .iappel-enter {
+    animation: iappel-enter 240ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  @keyframes iappel-enter {
+    from { opacity: 0; transform: translateY(12px) scale(0.98); }
+    to { opacity: 1; transform: none; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .iappel-enter { animation: none; }
+  }
+
+  /* ══ APPEL DE GROUPE — la grille ════════════════════════════════════════
+     Ce bloc est ce qui manquait pour qu'un appel à plusieurs reste un APPEL.
+     Faute de savoir afficher vingt personnes, l'appel de groupe empruntait la
+     façade des RÉUNIONS — et avec elle son vocabulaire, sa sonnerie longue et
+     une route que l'espace agent n'a pas.
+
+     ⚠️ `min-height: 0` sur la grille ET sur `.iappel-stage` : sans lui, une
+     grille en colonne flex refuse de se comprimer et déborde de la surface —
+     le même piège qui avait rendu la vidéo 1:1 invisible (scène à 0 px). */
+  .iappel-grid {
+    /* ⚠️ DÉCLARÉES ici, et pas seulement lues avec un repli. Le composant les
+       surcharge en style inline (`planGroupGrid` décide des colonnes et des
+       lignes selon la surface MESURÉE), mais un `var()` qui ne résout dans
+       AUCUN fichier de jetons est SILENCIEUX à l'écran — et le cliquet de
+       charte le signale à raison (`charteRatchet`, jeton fantôme). Deux par
+       deux est la disposition qui sert de trois à quatre participants, le cas
+       le plus fréquent. */
+    --iappel-grid-cols: 2;
+    --iappel-grid-rows: 2;
+    /* Pistes de la grille et pistes couvertes par une case (ADR-0149) —
+       mêmes raisons : surchargées en ligne, déclarées ici. */
+    --iappel-grid-tracks: 2;
+    --iappel-tile-span: 1;
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-content: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 0;
+    padding: 10px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+  /* ══ LE MODÈLE WHATSAPP (2026-09-13) : les vignettes REMPLISSENT la scène ═
+     Les captures d'appels vidéo de groupe WhatsApp (3, 4, 6, 8 personnes)
+     montrent des cases qui se partagent TOUTE la hauteur, ligne par ligne —
+     pas une grille de carrés centrée sur du noir. Largeur et hauteur d'une
+     case se déduisent donc des colonnes et des lignes décidées par
+     `planGroupGrid`, et la vidéo (`object-fit: cover`) couvre la case. À
+     nombre impair sur deux colonnes, la première case s'étale en pleine
+     largeur (`data-span`) — jamais une case vide en bas à droite.
+
+     ⚠️ 2026-09-14 (ADR-0149) : une VRAIE grille CSS, plus un flex à largeurs
+     calculées. Le calc de largeur ne savait dire que « une colonne » ou
+     « toute la ligne » ; onze personnes sur trois colonnes exigent deux
+     DEMI-cases en tête. D'où les pistes : `--iappel-grid-tracks` =
+     ppcm(colonnes, cases de tête), et chaque case couvre
+     `--iappel-tile-span` pistes (décidé par `planGroupGrid`). Les lignes
+     `minmax(0, 1fr)` sont égales et remplissent la scène ; le `0` laisse une
+     case se comprimer au lieu de pousser la grille hors du téléphone. */
+  .iappel-grid[data-layout="grid"] {
+    display: grid;
+    grid-template-columns: repeat(var(--iappel-grid-tracks), minmax(0, 1fr));
+    grid-template-rows: repeat(var(--iappel-grid-rows), minmax(0, 1fr));
+    align-content: stretch;
+    justify-content: stretch;
+  }
+  /* Chaque case est un BOUTON (toucher épingle) : la largeur et la hauteur
+     sont posées explicitement, un bouton n'étant pas étiré partout par
+     `stretch`. */
+  .iappel-grid[data-layout="grid"] > .iappel-tile {
+    grid-column: span var(--iappel-tile-span);
+    width: 100%;
+    height: 100%;
+    min-width: 0;
+    min-height: 0;
+  }
+  /* L'avatar se centre dans la place AU-DESSUS du pied, pas dans la case
+     entière. Recette réelle du 14/09, onze dans la carte du poste : cases de
+     ~121 × 85 px, avatar au plancher de 40 px, pied de 48 px (14 de fondu +
+     nom + état) — centré sur 85 px, le disque couvrait le nom de chaque case
+     « Sonne… ». 34 px = le texte du pied sans son fondu : l'avatar descend
+     jusqu'à 45 px, le nom commence à 51. La case de l'APPELANT réserve aussi
+     sa puce en haut (24 px = 6 de marge + 18 de puce) : sans cela, remonter
+     l'avatar le glissait sous « Appelant » (un tiers du disque couvert à
+     85 px, revue du 14/09). Miroirs dans `avatarSizeFor`
+     (TILE_FOOT_RESERVE_PX, TILE_CALLER_RESERVE_PX), qui réduit l'avatar quand
+     la place manque. */
+  .iappel-grid[data-layout="grid"] > .iappel-tile .iappel-tile-body {
+    box-sizing: border-box;
+    padding-bottom: 34px;
+  }
+  .iappel-grid[data-layout="grid"] > .iappel-tile[data-caller="true"] .iappel-tile-body {
+    padding-top: 24px;
+  }
+  /* L'auteur de l'appel — ce qu'un invité cherche d'abord en décrochant. En
+     haut à GAUCHE : le coin droit est à l'épingle, le bas au nom. */
+  .iappel-tile-caller {
+    position: absolute;
+    top: 6px;
+    left: 6px;
+    z-index: 1;
+    padding: 2px 7px;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--esp-immersive-ink) 65%, transparent);
+    color: var(--esp-immersive-on-ink);
+    font-size: 10px;
+    font-weight: 600;
+    line-height: 1.3;
+    pointer-events: none;
+  }
+  /* MA vignette est en MIROIR, comme l'incrustation du 1:1 : on se regarde
+     dans le sens auquel on est habitué, et seul soi-même est retourné. */
+  .iappel-tile[data-me="true"] > .iappel-video {
+    transform: scaleX(-1);
+  }
+  /* Grille trop serrée pour rester lisible (`planGroupGrid`, `compact`) : le
+     composant rend alors la scène + bande ci-dessous ; cette règle ne sert
+     plus que de filet si une grille compacte venait à s'afficher. */
+  .iappel-grid[data-compact="true"] {
+    align-content: start;
+    gap: 6px;
+  }
+
+  /* ══ SCÈNE + BANDEAU — le mode compact, RÉELLEMENT rendu (IC-10) ══════════
+     « Scène + bandeau » n'existait que dans un commentaire : `data-compact`
+     ne changeait qu'une gouttière, et les vingt vignettes restaient en
+     grille. Depuis que l'appel monte à cent personnes (2026-08-28), une
+     grille n'est plus lisible bien avant : la scène montre CELUI QUI PARLE
+     (ou l'épinglé), les autres passent en bandeau défilant. */
+  .iappel-grid[data-layout="stage"] {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    align-content: stretch;
+    gap: 8px;
+  }
+  .iappel-stage-main {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+  }
+  .iappel-stage-main > .iappel-tile {
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+  /* Le bandeau défile HORIZONTALEMENT et retient son geste : sans
+     `overscroll-behavior-inline: contain`, un balayage arrivé en bout de
+     bandeau fait reculer la page (ou l'historique, sur iOS). */
+  .iappel-strip {
+    flex: 0 0 auto;
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    overscroll-behavior-inline: contain;
+    scrollbar-width: thin;
+    padding-bottom: 2px;
+  }
+  .iappel-strip-tile {
+    flex: 0 0 auto;
+    width: 96px;
+    height: 72px;
+  }
+  .iappel-strip-tile .iappel-tile-state { display: none; }
+  /* MA vignette ferme la bande et s'y ANCRE à droite (ADR-0149) : poussée au
+     bout quand la bande est courte, collée au bord quand elle défile — on
+     parcourt les autres sans perdre son propre retour. Son fond (opaque,
+     `.iappel-tile`) masque les vignettes qui glissent dessous.
+     ⚠️ Aucune ombre ici : elle écraserait l'anneau de `data-speaking`. */
+  .iappel-strip > .iappel-tile[data-me="true"] {
+    position: sticky;
+    inset-inline-end: 0;
+    z-index: 1;
+    margin-inline-start: auto;
+  }
+  .iappel-tile[data-pinned="true"] {
+    border-color: color-mix(in srgb, var(--primary) 70%, transparent);
+  }
+  /* « Ajouter » est TOUJOURS une barre (ADR-0149 ; une cellule jusqu'à quatre
+     vignettes auparavant) : en cellule au milieu de dix visages, elle vole
+     une place et se perd. En barre, elle reste une commande — et garde sa
+     cible de 44 px. Au dernier siège, la ligne T3 (`.iappel-hint-line`)
+     prend sa place et garde la même réserve. */
+  /* ⚠️ `.iappel-grid` est `position: absolute; inset: 0` : une barre laissée
+     EN FLUX passerait dessous (un descendant positionné se peint au-dessus
+     d'un descendant en flux — le même piège que `.iappel-stage-band`). Elle
+     est donc posée, et la grille se réserve la place par `[data-add="bar"]`. */
+  .iappel-grid[data-add="bar"] { padding-bottom: 64px; }
+  .iappel-add-bar {
+    position: absolute;
+    inset-inline: 10px;
+    bottom: 10px;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-height: 44px;
+    border-radius: 12px;
+    border: 1px solid color-mix(in srgb, var(--esp-immersive-on-ink) 20%, transparent);
+    background: color-mix(in srgb, var(--esp-immersive-on-ink) 8%, transparent);
+    color: var(--esp-immersive-on-ink);
+    font-size: 13px;
+    font-weight: 600;
+    touch-action: manipulation;
+  }
+
+  .iappel-tile {
+    position: relative;
+    overflow: hidden;
+    border-radius: 14px;
+    background: color-mix(in srgb, var(--esp-immersive-on-ink) 8%, var(--esp-immersive-ink));
+    border: 1px solid color-mix(in srgb, var(--esp-immersive-on-ink) 12%, transparent);
+  }
+  /* Une vignette éteinte (refus, absence, départ) reste À SA PLACE, mais en
+     retrait : la retirer ferait croire que la personne n'a jamais été conviée,
+     et l'appelant perdrait la trace de « j'ai bien essayé de le joindre ». */
+  .iappel-tile[data-live="false"] { opacity: 0.55; }
+  /* Celui qui parle s'entoure — le seul signal continu de la grille. */
+  .iappel-tile[data-speaking="true"] {
+    border-color: color-mix(in srgb, var(--success) 70%, transparent);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--success) 45%, transparent);
+  }
+  .iappel-tile-body {
+    display: grid;
+    place-items: center;
+    width: 100%;
+    height: 100%;
+  }
+  /* Nom et état, TOUJOURS lisibles — y compris par-dessus une vidéo : une
+     grille de visages sans nom oblige à deviner qui parle. */
+  .iappel-tile-foot {
+    position: absolute;
+    inset-inline: 0;
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    padding: 14px 8px 6px;
+    background: linear-gradient(
+      to top,
+      color-mix(in srgb, var(--esp-immersive-ink) 78%, transparent),
+      transparent
+    );
+    pointer-events: none;
+  }
+  .iappel-tile-name {
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.2;
+    color: var(--esp-immersive-on-ink);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  /* Micro coupé : à CÔTÉ du nom, en bas à gauche — là où WhatsApp le met, et
+     où l'œil lit déjà qui est là. Le coin haut-droit reste à l'épingle. */
+  .iappel-tile-foot-row {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    min-width: 0;
+  }
+  .iappel-tile-foot-row > .iappel-tile-name {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+  .iappel-tile-mute {
+    flex: 0 0 auto;
+    display: grid;
+    place-items: center;
+    width: 16px;
+    height: 16px;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--esp-immersive-ink) 65%, transparent);
+    color: var(--esp-immersive-on-ink);
+  }
+  .iappel-tile-state {
+    font-size: 11px;
+    line-height: 1.2;
+    color: var(--esp-immersive-on-ink);
+    opacity: 0.7;
+  }
+  .iappel-tile-mic {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    display: grid;
+    place-items: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--esp-immersive-ink) 65%, transparent);
+    color: var(--esp-immersive-on-ink);
+  }
+
+  /* ══ LANCEUR D'APPEL DE GROUPE (espace POSTE) ═══════════════════════════
+     Ce panneau vit dans la page, PAS sur la scène sombre de l'appel : il
+     prend donc les jetons de la charte courante, et non l'encre immersive.
+
+     Ni `Sheet` ni `Dialog` : un cliquet les interdit dans ce dossier depuis
+     que `data-[side=bottom]:h-auto` a réduit la scène vidéo à zéro pixel. */
+  .iappel-launcher { position: relative; display: inline-flex; }
+  .iappel-launcher-trigger {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 32px;
+    padding: 0 10px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--background);
+    color: var(--foreground);
+    font-size: 12.5px;
+    font-weight: 600;
+    touch-action: manipulation;
+  }
+  .iappel-launcher-trigger:hover { background: var(--muted); }
+
+  .iappel-launcher-panel {
+    position: absolute;
+    z-index: 60;
+    top: calc(100% + 6px);
+    inset-inline-start: 0;
+    display: flex;
+    flex-direction: column;
+    width: min(320px, calc(100vw - 32px));
+    max-height: min(420px, 70vh);
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    background: var(--popover, var(--background));
+    color: var(--popover-foreground, var(--foreground));
+    box-shadow: var(--shadow-lg);
+    overflow: hidden;
+  }
+  /* ══ POSE DU SÉLECTEUR — feuille au téléphone, ancré au bureau (IC-11) ═════
+     Le panneau « Ajouter à l'appel » portait sa position en STYLE EN LIGNE :
+     `position: fixed; top: 4.5rem; inset-inline-end: 1rem`. Deux défauts que
+     la feuille de style répare, sans composant parallèle :
+
+      · le clavier logiciel d'un téléphone ne bouge pas `100vh` : la moitié
+        basse du panneau (la liste, et le champ qu'on vient de toucher)
+        passait sous le clavier ;
+      · un panneau de 320 px collé en haut à droite recouvre la scène et les
+        commandes de l'appel sur un écran de 360 px.
+
+     `--vv-height` est la hauteur VISIBLE, publiée par `useVisualViewport` et
+     déclarée en tête de cette feuille (ligne ~55) : elle RECULE quand le
+     clavier monte. */
+  .iappel-launcher-panel[data-pose="sheet"] {
+    position: fixed;
+    inset-inline: 0;
+    inset-block-end: 0;
+    top: auto;
+    width: auto;
+    max-width: none;
+    max-height: calc(var(--vv-height, 100dvh) - 4.5rem);
+    border-radius: 18px 18px 0 0;
+    border-inline: 0;
+    border-block-end: 0;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    z-index: 80;
+  }
+  /* Ancré SUR la surface d'appel (son plus proche ancêtre positionné), jamais
+     au coin du navigateur : réduire ou déplacer la fenêtre emmène le panneau
+     avec elle. */
+  .iappel-launcher-panel[data-pose="anchored"] {
+    position: absolute;
+    inset-inline-end: 12px;
+    inset-inline-start: auto;
+    top: 56px;
+    z-index: 80;
+  }
+  /* ══ LANCEUR COMPACT — ancré aux BORDS de la carte, jamais au bouton ══════
+     En compact (`GroupCallLauncher compact`, pose posée par le composant), le
+     bouton « Groupe » est poussé au BOUT de l'en-tête du centre d'appels, dans
+     une carte étroite : carte iCom du poste (400 px), fenêtre iAsted (420 px),
+     vue téléphone. Ancré au bouton par `inset-inline-start: 0`, le panneau de
+     320 px sortait par la droite, et l'`overflow: hidden` de la carte le
+     rognait — carte T2 et boutons Appeler/Vidéo compris.
+
+     Le lanceur cesse donc d'être le repère : le repère devient le CENTRE
+     D'APPELS compact lui-même (le grand-parent du lanceur, dont l'en-tête est
+     le premier enfant), qui occupe toute la largeur et toute la hauteur du
+     corps de la carte, quel que soit l'hôte. Le panneau s'y pose bord à bord
+     avec 8 px de marge, sous l'en-tête (49 px : 8 + 32 + 8 + le filet), et sa
+     hauteur se borne à ce qui reste — il ne peut plus sortir du corps, donc
+     plus être rogné. Au-delà de 420 px de large (vue téléphone d'une tablette),
+     il se range à l'extrémité du bouton plutôt que de s'étirer. */
+  .iappel-launcher[data-pose="compact"] { position: static; }
+  div:has(> div > .iappel-launcher[data-pose="compact"]) { position: relative; }
+  .iappel-launcher[data-pose="compact"] > .iappel-launcher-panel {
+    top: 52px;
+    inset-inline: 8px;
+    width: auto;
+    max-width: 420px;
+    margin-inline-start: auto;
+    max-height: min(420px, calc(100% - 60px));
+  }
+
+  .iappel-launcher-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  .iappel-launcher-title { font-size: 13px; font-weight: 600; }
+  /* 44 px : la cible tactile minimale, et elle vaut aussi pour FERMER — une
+     croix de 28 px se rate au doigt, et c'est la commande qu'on cherche quand
+     le panneau gêne. Partagée avec `GroupCallLauncher` : voulu (05D). */
+  .iappel-launcher-close {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 8px;
+    color: var(--muted-foreground);
+  }
+  .iappel-launcher-close:hover { background: var(--muted); }
+  /* ⚠️ `font-size: 16px` n'est pas un choix typographique : sous 16 px, iOS
+     ZOOME la page à la mise au point du champ — la surface d'appel sort alors
+     du cadre, et rien ne la ramène. `min-height: 44px` pour la même raison que
+     ci-dessus. */
+  .iappel-launcher-search {
+    margin: 8px 12px;
+    min-height: 44px;
+    padding: 0 12px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--background);
+    font-size: 16px;
+  }
+  .iappel-launcher-list {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 0 6px 6px;
+  }
+  .iappel-launcher-empty {
+    padding: 16px 10px;
+    font-size: 12.5px;
+    color: var(--muted-foreground);
+    text-align: center;
+  }
+  .iappel-launcher-retry {
+    margin-top: 8px;
+    min-height: 44px;
+    padding: 0 14px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    color: var(--foreground);
+    font-weight: 500;
+  }
+  .iappel-launcher-retry:hover { background: var(--muted); }
+  .iappel-launcher-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    min-height: 44px;
+    padding: 6px 8px;
+    border-radius: 8px;
+    text-align: start;
+    touch-action: manipulation;
+  }
+  .iappel-launcher-row:hover { background: var(--muted); }
+  .iappel-launcher-row[data-selected="true"] { background: var(--accent); color: var(--accent-foreground); }
+  .iappel-launcher-check {
+    display: grid;
+    place-items: center;
+    flex: 0 0 auto;
+    width: 18px;
+    height: 18px;
+    border-radius: 5px;
+    border: 1px solid var(--border);
+  }
+  .iappel-launcher-row[data-selected="true"] .iappel-launcher-check {
+    background: var(--primary);
+    color: var(--primary-foreground);
+    border-color: var(--primary);
+  }
+  .iappel-launcher-person { display: flex; flex-direction: column; min-width: 0; }
+  .iappel-launcher-name {
+    font-size: 13px;
+    font-weight: 500;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .iappel-launcher-role {
+    font-size: 11.5px;
+    opacity: 0.7;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  /* Le compteur prend SA ligne au-dessus des boutons : coincé à côté d'eux dans
+     320 px, « 10/10 correspondants — appel complet (11 en tout, vous
+     compris) » montait à 69 px de haut, pris sur la liste. */
+  .iappel-launcher-foot {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 4px 8px;
+    padding: 8px 12px;
+    border-top: 1px solid var(--border);
+  }
+  .iappel-launcher-hint { flex: 1 1 100%; font-size: 11.5px; color: var(--muted-foreground); }
+  .iappel-launcher-actions { display: inline-flex; gap: 6px; margin-inline-start: auto; }
+  /* T2 dans le lanceur (ADR-0149) : dans un panneau de 420 px au plus, la
+     carte (~270 px) poussait le pied hors du panneau — overflow: hidden le
+     coupait, boutons Appeler/Vidéo compris — et ne laissait que 6 px à la
+     liste. Son emplacement se COMPRIME et défile ; la liste garde trois
+     lignes de 44 px, de quoi décocher (fiche §6.1). */
+  .iappel-launcher-hintslot {
+    flex: 0 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 0 8px 8px;
+  }
+  .iappel-launcher-panel[data-hint="T2"] .iappel-launcher-list { min-height: 132px; }
+  /* Recette réelle du 14/09, carte du poste (corps de 533 px) : plafonné à
+     420 px, le panneau compact donnait 183 px à la liste (base « auto » =
+     ses 1 000 px de contenu) et 39 px à la carte T2 — son titre seul ;
+     phrase et « Lancer une conférence » passaient sous le pli. En compact, le
+     panneau prend la hauteur que la carte lui laisse, la liste part d'une
+     base NULLE (elle ne prend que le reste) et garde deux lignes de 44 px
+     pour décocher : la carte T2 s'affiche entière (195 + 185 + 93 = 473).
+     ⚠️ Une HAUTEUR, pas un plafond (revue du 14/09) : en hauteur auto, une
+     colonne flex se dimensionne sur la base de ses enfants — 0 pour la liste,
+     relevée à 88 px — et le panneau s'arrêtait vers 500 px dans les hôtes
+     hauts (carte du poste en plein écran téléphone, fenêtre iAsted à 85dvh),
+     laissant 90 à 350 px vides sous deux lignes. Hauteur définie : la liste
+     prend toute la place libre, dans tous les hôtes. T2 n'apparaît qu'au
+     plafond, donc avec une liste pleine : le panneau n'a rien à « rétrécir ». */
+  .iappel-launcher[data-pose="compact"] > .iappel-launcher-panel[data-hint="T2"] {
+    height: calc(100% - 60px);
+    max-height: calc(100% - 60px);
+  }
+  .iappel-launcher[data-pose="compact"] > .iappel-launcher-panel[data-hint="T2"] .iappel-launcher-list {
+    flex: 1 1 0;
+    min-height: 88px;
+  }
+  .iappel-launcher-go {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    min-height: 32px;
+    padding: 0 10px;
+    border-radius: 8px;
+    background: var(--primary);
+    color: var(--primary-foreground);
+    font-size: 12.5px;
+    font-weight: 600;
+    touch-action: manipulation;
+  }
+  .iappel-launcher-go:disabled { opacity: 0.5; }
+
+  /* L'emblème d'un appel de groupe, le temps que la grille arrive. Rond comme
+     un avatar : c'est bien un correspondant qu'on appelle, au pluriel. */
+  .iappel-group-emblem {
+    display: grid;
+    place-items: center;
+    width: 108px;
+    height: 108px;
+    border-radius: 999px;
+    color: var(--esp-immersive-on-ink);
+    background: color-mix(in srgb, var(--esp-immersive-on-ink) 12%, transparent);
+    border: 1px solid color-mix(in srgb, var(--esp-immersive-on-ink) 20%, transparent);
+  }
+
+  /* ══ CARTE CONFÉRENCE (ADR-0149, fiche « Appels de groupe » §6.2) ════════
+     `ConferenceHintCard` rend trois formes quand le plafond d'un appel se
+     rencontre : T1 (dialogue bloquant dans un écran assombri), T2 (statut
+     dans le sélecteur), T3 (ligne à la place de la barre « Ajouter »).
+
+     Une seule carte, TROIS TONS, par `data-tone` — la même composition dans
+     l'espace agent (`espace` : jetons ui-v2 de la charte parchemin), dans
+     l'espace de poste (`poste` : jetons shadcn) et sur la scène sombre de
+     l'appel (`immersive`). Chaque ton ne fait que remplir les mêmes
+     variables locales `--iappel-hint-*` : les règles de mise en page ne
+     connaissent aucune couleur.
+
+     ⚠️ Le jaune du drapeau (`--warning`) est réservé au LISERÉ et à la
+     pastille, jamais au texte : sur une surface claire il ne tient pas le
+     contraste d'un corps de texte.
+
+     Rien de tout cela n'est `fixed` : la carte vit DANS le téléphone iCom
+     (ADR-0148), c'est son parent qui lui donne sa place. */
+  .iappel-hint[data-tone="immersive"] {
+    --iappel-hint-surface: color-mix(in srgb, var(--esp-immersive-on-ink) 8%, var(--esp-immersive-ink));
+    --iappel-hint-edge: color-mix(in srgb, var(--esp-immersive-on-ink) 14%, transparent);
+    --iappel-hint-ink: var(--esp-immersive-on-ink);
+    --iappel-hint-soft: var(--esp-immersive-on-ink);
+    --iappel-hint-soft-opacity: 0.75;
+    --iappel-hint-strong: var(--esp-immersive-on-ink);
+    --iappel-hint-on-strong: var(--esp-immersive-ink);
+    --iappel-hint-link: var(--esp-immersive-on-ink);
+    --iappel-hint-hover: color-mix(in srgb, var(--esp-immersive-on-ink) 10%, transparent);
+    --iappel-hint-focus: var(--esp-immersive-on-ink);
+  }
+  /* Espace agent : les mêmes jetons que la messagerie — la carte parchemin de
+     `.msg-infos-quick`, le bouton plein du composeur (`.msg-send-btn`). */
+  .iappel-hint[data-tone="espace"] {
+    --iappel-hint-surface: var(--esp-surface-card, var(--ink-0));
+    --iappel-hint-edge: var(--ink-200);
+    --iappel-hint-ink: var(--ink-800);
+    --iappel-hint-soft: var(--ink-600);
+    --iappel-hint-soft-opacity: 1;
+    --iappel-hint-strong: var(--primary-fill);
+    --iappel-hint-on-strong: var(--on-fill);
+    --iappel-hint-link: var(--primary-700, var(--primary-fill));
+    --iappel-hint-hover: var(--ink-100);
+    --iappel-hint-focus: var(--ring);
+  }
+  /* Espace de poste : les jetons du sélecteur `.iappel-launcher-panel`. */
+  .iappel-hint[data-tone="poste"] {
+    --iappel-hint-surface: var(--popover, var(--background));
+    --iappel-hint-edge: var(--border);
+    --iappel-hint-ink: var(--popover-foreground, var(--foreground));
+    --iappel-hint-soft: var(--muted-foreground);
+    --iappel-hint-soft-opacity: 1;
+    --iappel-hint-strong: var(--primary);
+    --iappel-hint-on-strong: var(--primary-foreground);
+    --iappel-hint-link: var(--primary);
+    --iappel-hint-hover: var(--muted);
+    --iappel-hint-focus: var(--ring);
+  }
+
+  .iappel-hint {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+    max-width: 360px;
+    box-sizing: border-box;
+    padding: 16px;
+    border-radius: 14px;
+    border: 1px solid var(--iappel-hint-edge);
+    border-inline-start: 4px solid var(--warning);
+    background: var(--iappel-hint-surface);
+    color: var(--iappel-hint-ink);
+    text-align: start;
+  }
+  .iappel-hint:focus-visible { outline: none; }
+  /* La croix de 44 px est POSÉE dans le coin (voir `.iappel-hint-close`) : en
+     flux, elle aurait fait de la ligne du sur-titre une bande de 44 px. La
+     tête se réserve sa largeur, et une hauteur qui fait commencer le titre
+     sous la croix — un titre long ne passe jamais dessous. */
+  .iappel-hint-head {
+    display: flex;
+    align-items: center;
+    min-height: 28px;
+    padding-inline-end: 40px;
+  }
+  .iappel-hint-eyebrow {
+    margin: 0;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1.3;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--iappel-hint-soft);
+    opacity: var(--iappel-hint-soft-opacity);
+  }
+  .iappel-hint-close {
+    position: absolute;
+    top: 4px;
+    inset-inline-end: 4px;
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    color: var(--iappel-hint-soft);
+    touch-action: manipulation;
+  }
+  .iappel-hint-close:hover { background: var(--iappel-hint-hover); }
+  .iappel-hint-title {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1.3;
+    color: var(--iappel-hint-ink);
+  }
+  .iappel-hint-body {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.45;
+    color: var(--iappel-hint-soft);
+    opacity: var(--iappel-hint-soft-opacity);
+  }
+  .iappel-hint-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 4px;
+    margin-top: 4px;
+  }
+  /* T2 vit en bas d'un sélecteur où chaque ligne compte : les deux gestes
+     côte à côte, et ils repassent l'un sous l'autre quand la place manque. */
+  .iappel-hint[data-kind="T2"] .iappel-hint-actions {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .iappel-hint[data-kind="T2"] .iappel-hint-primary { flex: 1 1 auto; }
+  .iappel-hint-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    padding: 0 16px;
+    border-radius: 10px;
+    background: var(--iappel-hint-strong);
+    color: var(--iappel-hint-on-strong);
+    font-size: 14px;
+    font-weight: 600;
+    touch-action: manipulation;
+  }
+  .iappel-hint-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    padding: 0 12px;
+    border-radius: 10px;
+    background: transparent;
+    color: var(--iappel-hint-link);
+    font-size: 13.5px;
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    touch-action: manipulation;
+  }
+  .iappel-hint-secondary:hover { background: var(--iappel-hint-hover); }
+  .iappel-hint button:focus-visible {
+    outline: 2px solid var(--iappel-hint-focus);
+    outline-offset: 2px;
+  }
+
+  /* T1 — l'écran qui porte le dialogue. EN FLUX : il remplit le corps du
+     téléphone (ou tout parent en colonne) au lieu de se poser en `fixed`
+     par-dessus la page, et le fond assombri n'assombrit que le téléphone. */
+  .iappel-hint-screen[data-tone="immersive"] {
+    --iappel-hint-scrim: color-mix(in srgb, var(--esp-immersive-ink) 55%, transparent);
+  }
+  /* ⚠️ Le voile part du jeton de SCÈNE, qui ne bascule pas avec le thème — pas
+     de --ink-900 ni de --foreground : tous deux valent une encre CLAIRE en
+     thème sombre, et le voile d'assombrissement y devenait un voile
+     d'éclaircissement (même piège que .esp-immersive-scrim). */
+  .iappel-hint-screen[data-tone="espace"],
+  .iappel-hint-screen[data-tone="poste"] {
+    --iappel-hint-scrim: color-mix(in srgb, var(--esp-immersive-ink) 40%, transparent);
+  }
+  /* Il remplit la place RESTANTE de son parent en colonne — sous la barre
+     iCom et sous la bande d'un appel réduit — et défile si elle manque.
+     ⚠️ Jamais min-height: 100% : dans un panneau de hauteur définie, 100 %
+     vaut TOUT le panneau, l'écran débordait de la hauteur de ses frères et
+     overflow: hidden rognait la dernière action de la carte. */
+  .iappel-hint-screen {
+    display: grid;
+    place-items: center;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 16px;
+    background: var(--iappel-hint-scrim);
+  }
+  .iappel-hint-screen:focus-visible { outline: none; }
+
+  /* T3 — la ligne qui prend la place de la barre « Ajouter » : même pose
+     (`absolute`, bas de `.iappel-stage`), même encre. ⚠️ Elle ne tient dans
+     la réserve `[data-add="bar"]` (54 px au-dessus du bord) QUE parce qu'elle
+     est BORNÉE : le corps de la carte est masqué à l'écran (lu par un lecteur
+     d'écran), le titre ne dépasse pas deux lignes, la ligne 46 px. Sans ces
+     bornes, elle passait sur trois lignes à 390 px et sur cinq à 312, et
+     recouvrait les noms de la dernière rangée ou la moitié de la bande. */
+  .iappel-hint-line {
+    position: absolute;
+    inset-inline: 10px;
+    bottom: 10px;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 44px;
+    max-height: 46px;
+    overflow: hidden;
+    box-sizing: border-box;
+    padding: 0 4px 0 12px;
+    border-radius: 12px;
+    border: 1px solid color-mix(in srgb, var(--warning) 55%, transparent);
+    background: color-mix(in srgb, var(--esp-immersive-on-ink) 8%, transparent);
+    color: var(--esp-immersive-on-ink);
+    font-size: 12.5px;
+    line-height: 1.3;
+  }
+  .iappel-hint-dot {
+    flex: 0 0 auto;
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+    background: var(--warning);
+  }
+  .iappel-hint-line-text {
+    flex: 1 1 auto;
+    min-width: 0;
+    margin: 0;
+    padding-block: 4px;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    overflow: hidden;
+  }
+  .iappel-hint-line-text > strong { font-weight: 700; }
+  .iappel-hint-link {
+    flex: 0 0 auto;
+    min-height: 44px;
+    padding: 0 8px;
+    border-radius: 8px;
+    color: var(--esp-immersive-on-ink);
+    font-size: 12.5px;
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    white-space: nowrap;
+    touch-action: manipulation;
+  }
+  .iappel-hint-link:hover {
+    background: color-mix(in srgb, var(--esp-immersive-on-ink) 10%, transparent);
+  }
+  .iappel-hint-link:focus-visible {
+    outline: 2px solid var(--esp-immersive-on-ink);
+    outline-offset: 2px;
+  }
+
+  /* Un fondu, et rien d'autre : la carte n'arrive de nulle part, elle
+     APPARAÎT là où le geste se trouvait déjà. */
+  .iappel-hint-screen,
+  .iappel-hint[data-kind="T2"],
+  .iappel-hint-line {
+    animation: iappel-hint-in 150ms ease-out;
+  }
+  @keyframes iappel-hint-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .iappel-hint-screen,
+    .iappel-hint[data-kind="T2"],
+    .iappel-hint-line {
+      animation: none;
+    }
+  }
+}

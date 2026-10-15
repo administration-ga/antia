@@ -4,6 +4,9 @@ import type { ReactNode } from "react"
 import { Providers } from "@/components/providers"
 import { getAppT } from "@/i18n/server"
 
+// Feuille de LiveKit (salles d'appel) AVANT celle de l'application : la couche
+// de communication du moteur (classes `.iappel-*`) la surcharge.
+import "@livekit/components-styles"
 import "./globals.css"
 
 export function generateMetadata(): Metadata {

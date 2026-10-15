@@ -1,4 +1,4 @@
-// Dupliqué de socle/convex/functions/meetings.ts (l. 829-1230 et 2293-2439 : `join`, `leave`, `setCallRinging`, `declineCall`) @ ad2e7fdc2 — adaptations : appels SEULEMENT (réunions, file d'organisation et sa tâche `meetings.join`, politique d'entrée `joinPolicy`, iRéunion, enregistrement, priorité, appels manqués de file et environnement back-office retirés) ; la garde commune (`requireCallParticipant`) : appel du réseau, ligne de participation, fil d'origine relu — on n'entre plus dans un appel dont on n'a pas de ligne ; présence écrite sur la ligne de participation (D27) au lieu du tableau `participants` réécrit ; plafond d'un appel de groupe lu sur la projection des états (IC-04) et sur le plafond photographié borné ; toute fin par `finishCall` ; raccrocher est sans réponse observable pour un appel inconnu (le socle répondait « introuvable » pour l'un, rien pour l'autre) ; refuser un appel de groupe passe par son ticket QUEL QUE SOIT l'état de l'appel ; refus à code ; débit.
+// Dupliqué de socle/convex/functions/meetings.ts (l. 829-1230 et 2293-2439 : `join`, `leave`, `setCallRinging`, `declineCall`) @ ad2e7fdc2 — adaptations : appels SEULEMENT (réunions, file d'organisation et sa tâche `meetings.join`, politique d'entrée `joinPolicy`, iRéunion, enregistrement, priorité, appels manqués de file et environnement back-office retirés) ; la garde commune (`requireCallParticipant`) : appel du réseau, ligne de participation, fil d'origine relu — on n'entre plus dans un appel dont on n'a pas de ligne ; présence écrite sur la ligne de participation (D27) au lieu du tableau `participants` réécrit ; plafond d'un appel de groupe lu sur la projection des états (IC-04) et sur le plafond photographié borné ; toute fin par `finishCall` ; raccrocher est sans réponse observable pour un appel inconnu (le socle répondait « introuvable » pour l'un, rien pour l'autre) ; refuser un appel de groupe passe par son ticket QUEL QUE SOIT l'état de l'appel ; refus à code ; débit ; `meetings.get` (l. 300-330 de l'hôte d'appel du socle, qui souscrivait au document entier) → `getCall` : l'ÉTAT allowlisté de l'appel, pour ceux qui y ont une ligne, `null` pour tout autre.
 /**
  * Appels — le CYCLE DE VIE : faire sonner, décrocher, raccrocher, refuser.
  *
@@ -11,15 +11,21 @@ import { countReservedSeats } from "@antia/social-contracts/callGroup"
 import { isLiveCallStatus, isRingingCallStatus, isTerminalCallStatus } from "@antia/social-domain/callJournal"
 import { v } from "convex/values"
 
-import type { Doc } from "../../_generated/dataModel"
+import type { Doc, Id } from "../../_generated/dataModel"
 import { failRule, notFound } from "../../lib/errors"
-import { networkMutation } from "../../lib/functions"
+import { networkMutation, networkQuery } from "../../lib/functions"
 import { enforceRateLimit } from "../../lib/rateLimit"
-import { loadGroupParticipants, participationOf, requireCallParticipant } from "./access"
+import { isLiveMemberOfThreadCall, loadGroupParticipants, participationOf, participationsOf, requireCallParticipant } from "./access"
 import { photographedGroupCallCapacity } from "./capacity"
 import { scheduleIncomingCallPush } from "./push"
 import { declineGroupInvite, endGroupCallIfDeserted, finishCall, markGroupInviteJoined } from "./state"
-import { callMediaTypeValidator, callStatusValidator } from "./validators"
+import {
+  callEndReasonValidator,
+  callKindValidator,
+  callLifecycleStatusValidator,
+  callMediaTypeValidator,
+  callStatusValidator,
+} from "./validators"
 
 /**
  * Un départ dans les cinq secondes qui suivent la création ne termine pas un
@@ -144,5 +150,85 @@ export const declineCall = networkMutation({
     if (note !== undefined && note.length > MAX_DECLINE_NOTE_LENGTH) return failRule("CALL_DECLINE_NOTE_TOO_LONG", { max: MAX_DECLINE_NOTE_LENGTH })
     await finishCall(ctx, call, { callStatus: "declined", endReason: "declined", ...(note ? { declineNote: note } : {}) }, Date.now())
     return { ended: true }
+  },
+})
+
+const callStateValidator = v.object({
+  _id: v.id("calls"),
+  kind: callKindValidator,
+  status: callLifecycleStatusValidator,
+  callStatus: callStatusValidator,
+  mediaType: callMediaTypeValidator,
+  createdByPersonId: v.id("persons"),
+  calleePersonId: v.union(v.id("persons"), v.null()),
+  answeredAt: v.union(v.number(), v.null()),
+  calleeEngagedAtCreate: v.boolean(),
+  endReason: v.union(callEndReasonValidator, v.null()),
+  heldBy: v.array(v.id("persons")),
+  declineNote: v.union(v.string(), v.null()),
+  groupThreadId: v.union(v.id("groupThreads"), v.null()),
+  /** Lignes de l'appel, hôte compris (l'effectif d'un appel de groupe). */
+  participantCount: v.number(),
+  /** Le titre du fil d'origine d'un appel de groupe ; `null` sinon (l'écran compose les noms). */
+  title: v.union(v.string(), v.null()),
+  startedAt: v.number(),
+  endedAt: v.union(v.number(), v.null()),
+})
+
+export type CallStateDto = {
+  _id: Id<"calls">
+  kind: Doc<"calls">["kind"]
+  status: Doc<"calls">["status"]
+  callStatus: Doc<"calls">["callStatus"]
+  mediaType: Doc<"calls">["mediaType"]
+  createdByPersonId: Id<"persons">
+  calleePersonId: Id<"persons"> | null
+  answeredAt: number | null
+  calleeEngagedAtCreate: boolean
+  endReason: NonNullable<Doc<"calls">["endReason"]> | null
+  heldBy: Id<"persons">[]
+  declineNote: string | null
+  groupThreadId: Id<"groupThreads"> | null
+  participantCount: number
+  title: string | null
+  startedAt: number
+  endedAt: number | null
+}
+
+/**
+ * L'ÉTAT d'un appel, que l'écran d'appel suit (sonne, en communication,
+ * terminé, raison de fin, attente, mot de refus) — pour ceux qui y ont une
+ * ligne. Tout autre (appel inconnu, d'un autre réseau, sans ligne, fil quitté)
+ * reçoit `null`, la même réponse : la query ne lève pas, l'écran y reste abonné
+ * pendant tout l'appel. Un DTO allowlisté, jamais le document entier.
+ */
+export const getCall = networkQuery({
+  args: { callId: v.id("calls") },
+  returns: v.union(callStateValidator, v.null()),
+  handler: async (ctx, args): Promise<CallStateDto | null> => {
+    const call = await ctx.db.get(args.callId)
+    if (!call || call.networkId !== ctx.networkId) return null
+    if (!(await participationOf(ctx, call._id, ctx.person._id))) return null
+    if ((await isLiveMemberOfThreadCall(ctx, call, ctx.person._id)) === false) return null
+    const thread = call.groupThreadId === undefined ? null : await ctx.db.get(call.groupThreadId)
+    return {
+      _id: call._id,
+      kind: call.kind,
+      status: call.status,
+      callStatus: call.callStatus,
+      mediaType: call.mediaType,
+      createdByPersonId: call.createdByPersonId,
+      calleePersonId: call.calleePersonId ?? null,
+      answeredAt: call.answeredAt ?? null,
+      calleeEngagedAtCreate: call.calleeEngagedAtCreate ?? false,
+      endReason: call.endReason ?? null,
+      heldBy: call.heldBy ?? [],
+      declineNote: call.declineNote ?? null,
+      groupThreadId: call.groupThreadId ?? null,
+      participantCount: (await participationsOf(ctx, call._id)).length,
+      title: thread?.title ?? null,
+      startedAt: call.startedAt,
+      endedAt: call.endedAt ?? null,
+    }
   },
 })

@@ -127,6 +127,19 @@ Cliquets en place (`tests/ratchets/`) : `no-cross-product-imports`, `no-any-vali
 - **`codegen` et `convex dev` en même temps** : `convex codegen` pousse aussi vers le backend local ;
   lancé pendant un déploiement de `convex dev`, il rend `409 ExistingModuleHashConflict`. Attendre
   « Convex functions ready » puis relancer.
+- **Tailwind 4 et les paquets** : `@source "…/packages/*/src"` (étoile à la place d'un dossier) ne fait
+  balayer AUCUN fichier — mesuré au lot F1 (aucune classe des paquets dans la feuille). Chemins EXPLICITES par
+  paquet dans le `globals.css` de chaque application. Et dans un commentaire CSS, `*/` (« packages/*/src »)
+  ferme le commentaire : la feuille entière casse.
+- **Frontière serveur/client de Next** : une page serveur n'appelle aucune fonction exportée d'un module
+  `"use client"` (« Attempted to call … from the server ») ; un analyseur d'adresse vit dans un module pur
+  (`apps/antia_ga/src/lib/messages-route.ts`).
+- **Coque des pages de membre** : montée UNE fois dans le gabarit `(membre)` d'antia.ga ; remontée à chaque
+  page, elle coupait un appel en cours et faisait déborder le seau de présence (8 par minute).
+- **Personnes de démonstration** (développement local) : `node scripts/convex-dev.mjs run
+  seeds/devSocial:demoPerson '{"confirmNonProduction":"ANTIA_SEEDS_HORS_PRODUCTION","networkSlug":"antia",
+  "handle":"awa.demo","displayName":"Awa","connectToHandle":"<votre identifiant>"}'` — personne publiée,
+  membre, reliée, sans session : de quoi éprouver iCom sans second compte.
 - **Garde des fichiers** : tout `ctx.storage.getUrl` passe par `convex/modules/files/storageGuard.ts`
   (`servableUrl`), tout `generateUploadUrl` par `guardUploadUrl`, tout rattachement par
   `assertFreshUpload` puis `admitStoredUpload` (ou `admitPosedUploads`) — quatre cliquets.

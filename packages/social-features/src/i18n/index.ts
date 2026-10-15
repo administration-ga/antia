@@ -14,6 +14,24 @@ import { serverCodeResources } from "@antia/social-contracts/i18n"
 
 import enSocial from "./locales/en/social.json"
 import frSocial from "./locales/fr/social.json"
+import enMessagerieConversation from "./locales/en/messagerie.conversation.json"
+import enMessagerieDock from "./locales/en/messagerie.dock.json"
+import enMessagerieGroupes from "./locales/en/messagerie.groupes.json"
+import enIappelCore from "./locales/en/iappel.core.json"
+import enIappelSurfaces from "./locales/en/iappel.surfaces.json"
+import enIappelStores from "./locales/en/iappel.stores.json"
+import enStories from "./locales/en/stories.json"
+import enReseau from "./locales/en/reseau.json"
+import enShell from "./locales/en/shell.json"
+import frMessagerieConversation from "./locales/fr/messagerie.conversation.json"
+import frMessagerieDock from "./locales/fr/messagerie.dock.json"
+import frMessagerieGroupes from "./locales/fr/messagerie.groupes.json"
+import frIappelCore from "./locales/fr/iappel.core.json"
+import frIappelSurfaces from "./locales/fr/iappel.surfaces.json"
+import frIappelStores from "./locales/fr/iappel.stores.json"
+import frStories from "./locales/fr/stories.json"
+import frReseau from "./locales/fr/reseau.json"
+import frShell from "./locales/fr/shell.json"
 
 export const SUPPORTED_LOCALES = ["fr", "en"] as const
 export type Locale = (typeof SUPPORTED_LOCALES)[number]
@@ -23,10 +41,34 @@ export function isSupportedLocale(value: unknown): value is Locale {
   return typeof value === "string" && (SUPPORTED_LOCALES as readonly string[]).includes(value)
 }
 
-/** Ressources du moteur (surfaces + codes serveur), par langue. */
+/**
+ * Ressources du moteur (surfaces + codes serveur), par langue.
+ *
+ * Espaces de noms des surfaces : `messagerie`, `iappel`, `stories`, `reseau`,
+ * `shell`. Un espace peut être rédigé en PLUSIEURS fichiers (un par tranche de
+ * duplication : `messagerie.conversation.json`, `messagerie.dock.json`…),
+ * fusionnés ici ; leurs clés de premier niveau sont celles des fichiers source
+ * (`messagerieDock.…`), donc disjointes par construction.
+ */
 export const engineResources = {
-  fr: { social: frSocial, ...serverCodeResources.fr },
-  en: { social: enSocial, ...serverCodeResources.en },
+  fr: {
+    social: frSocial,
+    messagerie: { ...frMessagerieConversation, ...frMessagerieDock, ...frMessagerieGroupes },
+    iappel: { ...frIappelCore, ...frIappelSurfaces, ...frIappelStores },
+    stories: frStories,
+    reseau: frReseau,
+    shell: frShell,
+    ...serverCodeResources.fr,
+  },
+  en: {
+    social: enSocial,
+    messagerie: { ...enMessagerieConversation, ...enMessagerieDock, ...enMessagerieGroupes },
+    iappel: { ...enIappelCore, ...enIappelSurfaces, ...enIappelStores },
+    stories: enStories,
+    reseau: enReseau,
+    shell: enShell,
+    ...serverCodeResources.en,
+  },
 } as const
 
 export type AppResources = Record<Locale, Record<string, Record<string, unknown>>>

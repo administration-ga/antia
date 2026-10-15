@@ -1,0 +1,226 @@
+{
+  "audioRoute": {
+    "reason": {
+      "ios": "Sur iPhone, la sortie audio se choisit dans le Centre de contrôle (icône AirPlay) — l'appel suit le réglage du téléphone.",
+      "androidNoStrategy": "Ce navigateur ne permet pas de basculer entre l'écouteur et le haut-parleur.",
+      "desktopNoSelection": "Ce navigateur ne permet pas de choisir la sortie audio : le son suit les réglages de l'ordinateur.",
+      "desktopOutputsHidden": "Le navigateur ne montre les sorties audio qu'une fois le micro autorisé.",
+      "desktopSingleOutput": "Une seule sortie audio sur cet appareil : branchez un casque ou une enceinte pour choisir."
+    },
+    "device": {
+      "default": "Sortie par défaut",
+      "communications": "Sortie de communication",
+      "generic": "Sortie audio"
+    },
+    "button": {
+      "speaker": "Haut-parleur",
+      "earpiece": "Écouteur",
+      "output": "Sortie audio"
+    }
+  },
+  "callControls": {
+    "quality": {
+      "excellent": "Bonne qualité",
+      "good": "Qualité correcte",
+      "poor": "Réseau faible",
+      "lost": "Connexion perdue",
+      "unknown": "Qualité inconnue"
+    }
+  },
+  "callErrors": {
+    "mediaServerNotConfigured": "La visioconférence n'est pas configurée sur ce déploiement. Contactez l'administrateur de la plateforme.",
+    "mediaServerUnavailable": "Le serveur d'appel démarre. Patientez une minute puis réessayez.",
+    "mediaServerNoCapacity": "Le serveur d'appel ne peut pas redémarrer pour le moment. Réessayez dans quelques minutes.",
+    "unauthenticated": "Votre session a expiré. Reconnectez-vous pour appeler.",
+    "notFound": "Cet appel n'est plus disponible ou ne vous est pas destiné.",
+    "fallback": "Connexion à l'appel impossible. Réessayez dans un instant.",
+    "roomUnreachable": "Connexion au serveur d'appel impossible. Vérifiez votre réseau et réessayez dans un instant."
+  },
+  "callKindReconcile": {
+    "defaultGroupTitle": "Appel de groupe"
+  },
+  "callPeer": {
+    "fallbackName": "Votre correspondant",
+    "scopePersonnel": "Appel personnel"
+  },
+  "callPhase": {
+    "phase": {
+      "failed": "Connexion impossible",
+      "reconnecting": "Reconnexion…",
+      "held": "En attente",
+      "peerHeld": "Mis en attente",
+      "active": "En communication",
+      "ringing": "Sonnerie…",
+      "connecting": "Connexion…"
+    },
+    "end": {
+      "missed": "Pas de réponse",
+      "declined": "Appel refusé",
+      "busy": "Occupé",
+      "dnd": "Ne pas déranger",
+      "inMeeting": "En réunion",
+      "offline": "Hors ligne",
+      "outsideRelations": "Hors de ses relations",
+      "cancelled": "Appel annulé",
+      "error": "Connexion impossible",
+      "ended": "Appel terminé"
+    },
+    "copy": {
+      "subjectFallback": "Votre correspondant",
+      "missed": "{{subject}} n'a pas répondu.",
+      "declinedNote": "« {{note}} »",
+      "declined": "{{subject}} n'est pas disponible pour le moment.",
+      "busy": "{{subject}} est déjà en communication.",
+      "dnd": "{{subject}} est indisponible pour le moment.",
+      "inMeeting": "{{subject}} est en réunion.",
+      "offline": "{{subject}} est hors ligne pour le moment.",
+      "outsideRelations": "{{subject}} ne reçoit les appels que de ses relations.",
+      "error": "L'appel n'a pas pu être établi. Vérifiez votre connexion, puis réessayez.",
+      "cancelled": "Vous avez annulé l'appel.",
+      "duration": "Durée : {{duration}}"
+    }
+  },
+  "callSeats": {
+    "people_one": "{{count}} personne",
+    "people_other": "{{count}} personnes",
+    "pendingInvites_one": "{{count}} invitation en attente",
+    "pendingInvites_other": "{{count}} invitations en attente",
+    "seatsLeft_one": "{{count}} place disponible",
+    "seatsLeft_other": "{{count}} places disponibles",
+    "full": "complet ({{max}} participants, vous compris)"
+  },
+  "callTimer": {
+    "justNow": "à l'instant",
+    "minutesAgo": "il y a {{minutes}} min",
+    "yesterday": "hier"
+  },
+  "conferenceHint": {
+    "audience": {
+      "thread": "tout le groupe"
+    },
+    "launch": "Lancer une conférence",
+    "t1": {
+      "eyebrow": "Avant l'appel",
+      "title": "Ce groupe compte {{members}} membres.",
+      "body": "Un appel de groupe réunit {{capacity}} personnes au plus, vous compris. Choisissez jusqu'à {{others}} correspondants, ou réunissez {{audience}} en conférence.",
+      "primary": "Choisir {{others}} personnes"
+    },
+    "t2": {
+      "eyebrow": "L'appel est complet",
+      "title": "{{others}} correspondants — l'appel est complet.",
+      "body": "Pour parler à plus de monde en même temps, la conférence accueille {{audience}}.",
+      "secondary": "Continuer l'appel"
+    },
+    "t3": {
+      "eyebrow": "Appel complet",
+      "title": "Appel complet · {{capacity}} personnes.",
+      "body": "Pour réunir plus de monde, lancez une conférence."
+    }
+  },
+  "conferenceLaunchStore": {
+    "refusal": {
+      "personalElsewhere": "La conférence se lance depuis votre réseau."
+    }
+  },
+  "dndPresets": {
+    "thirtyMinutes": "30 minutes",
+    "oneHour": "1 heure",
+    "twoHours": "2 heures",
+    "tomorrowMorning": "Jusqu'à demain 08:00",
+    "untilDisabled": "Jusqu'à désactivation"
+  },
+  "groupCallCapacity": {
+    "counter": "{{shown}}/{{max}} correspondants",
+    "full": "{{max}}/{{max}} correspondants — appel complet ({{total}} en tout, vous compris)"
+  },
+  "groupStage": {
+    "status": {
+      "ringing": "Sonne…",
+      "left": "A quitté",
+      "missed": "Sans réponse",
+      "declined": "A refusé",
+      "unavailable": "Indisponible",
+      "busy": "Déjà en ligne",
+      "inMeeting": "En réunion"
+    },
+    "subtitle": {
+      "connected_one": "{{count}} en ligne",
+      "connected_other": "{{count}} en ligne",
+      "ringing_one": "{{count}} sonne",
+      "ringing_other": "{{count}} sonnent",
+      "nobodyAnswered": "Personne n'a répondu"
+    },
+    "shortLabel": {
+      "withCount": "Appel de groupe · {{members}}",
+      "plain": "Appel de groupe"
+    },
+    "title": {
+      "plain": "Appel de groupe",
+      "names": "Appel de groupe — {{names}}",
+      "namesMore": "Appel de groupe — {{names}} +{{more}}"
+    }
+  },
+  "incomingGroup": {
+    "listPair": "{{head}} et {{last}}",
+    "withCorrespondents_one": "Avec {{count}} correspondant, vous compris",
+    "withCorrespondents_other": "Avec {{count}} correspondants, vous compris",
+    "namelessInvitee": "un correspondant",
+    "others_one": "{{count}} autre",
+    "others_other": "{{count}} autres",
+    "withList": "Avec {{list}}, vous compris",
+    "label": {
+      "groupOnly": "Appel de groupe",
+      "call": "Appel",
+      "group_one": "Appel de groupe · {{count}} personne",
+      "group_other": "Appel de groupe · {{count}} personnes"
+    },
+    "bannerLabel_one": "{{title}} · {{count}} personne",
+    "bannerLabel_other": "{{title}} · {{count}} personnes"
+  },
+  "mediaErrors": {
+    "camera": {
+      "denied": "Accès à la caméra refusé — autorisez-la dans la barre d'adresse du navigateur.",
+      "notFound": "Aucune caméra détectée — branchez un périphérique vidéo.",
+      "inUse": "Caméra indisponible — un autre logiciel l'utilise peut-être.",
+      "generic": "Impossible d'activer la caméra. Vérifiez les permissions du navigateur."
+    },
+    "mic": {
+      "denied": "Accès au micro refusé — autorisez-le dans la barre d'adresse du navigateur, puis rechargez la page.",
+      "notFound": "Aucun micro détecté — branchez un périphérique audio.",
+      "inUse": "Micro indisponible — un autre logiciel l'utilise peut-être.",
+      "generic": "Impossible d'activer le micro. Vérifiez les permissions du navigateur."
+    },
+    "callMedia": {
+      "denied": "Accès au micro ou à la caméra refusé — autorisez-les dans la barre d'adresse du navigateur, puis relancez l'appel.",
+      "notFound": "Aucun micro ni caméra détecté — branchez un périphérique.",
+      "inUse": "Micro ou caméra indisponible — un autre logiciel les utilise peut-être.",
+      "generic": "Impossible d'activer le micro ou la caméra. Vérifiez les permissions du navigateur."
+    },
+    "micBlocked": {
+      "consequence": "vous entendez votre correspondant, lui ne vous entend pas.",
+      "denied": "Votre navigateur bloque le micro : {{consequence}} Autorisez le micro dans la barre d'adresse, puis touchez « Micro bloqué ».",
+      "notFound": "Aucun micro détecté : {{consequence}} Branchez un micro, puis touchez « Micro bloqué ».",
+      "inUse": "Le micro est utilisé par un autre logiciel : {{consequence}} Libérez-le, puis touchez « Micro bloqué ».",
+      "generic": "Le micro n'a pas démarré : {{consequence}} Touchez « Micro bloqué » pour réessayer."
+    }
+  },
+  "mediaWatchdog": {
+    "cameraTimeout": "La caméra ne répond pas — vérifiez son autorisation dans la barre d'adresse du navigateur, puis rechargez la page."
+  },
+  "useIappelActions": {
+    "declineFailed": "Le refus n'a pas pu être transmis.",
+    "hangUpFailed": "L'appel n'a pas pu être raccroché proprement."
+  },
+  "useIncomingCalls": {
+    "defaultQuickReplies": {
+      "callBack": "Je vous rappelle dans 10 minutes",
+      "inMeeting": "En réunion, écrivez-moi",
+      "cannotAnswer": "Je ne peux pas répondre maintenant"
+    }
+  },
+  "useSpeakerOutput": {
+    "switchFailed": "Impossible de changer la sortie audio.",
+    "selected": "Sortie audio : {{label}}",
+    "chosenDevice": "périphérique choisi"
+  }
+}

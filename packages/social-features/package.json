@@ -9,6 +9,10 @@
     ".": "./src/index.ts",
     "./i18n": "./src/i18n/index.ts",
     "./i18n/client": "./src/i18n/client.tsx",
+    "./shell": "./src/shell/index.ts",
+    "./messagerie": "./src/features/messagerie/index.ts",
+    "./iappel": "./src/features/iappel/index.ts",
+    "./stories": "./src/features/stories/index.ts",
     "./*": "./src/*.ts"
   },
   "scripts": {

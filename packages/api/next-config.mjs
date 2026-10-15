@@ -53,6 +53,10 @@ export function createEngineNextConfig(options) {
   const local = isDev ? readEnvFile(path.join(engineRoot, ".env.local")) : {}
   const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL ?? local.CONVEX_URL ?? ""
   const convexSiteUrl = process.env.CONVEX_SITE_URL ?? local.CONVEX_SITE_URL ?? ""
+  // Serveur média des appels : sa seule trace côté application est la CSP (le
+  // client reçoit l'URL avec son jeton d'appel). Posée par le propriétaire avec les
+  // clés LiveKit du déploiement — sans elle, aucune origine média n'est ouverte.
+  const livekitUrl = process.env.LIVEKIT_WS_URL ?? local.LIVEKIT_WS_URL ?? ""
 
   return {
     output: "standalone",
@@ -77,7 +81,7 @@ export function createEngineNextConfig(options) {
       CONVEX_SITE_URL: convexSiteUrl,
     },
     async headers() {
-      return [{ source: "/(.*)", headers: securityHeaders({ convexUrl, isDev }) }]
+      return [{ source: "/(.*)", headers: securityHeaders({ convexUrl, livekitUrl, isDev }) }]
     },
   }
 }

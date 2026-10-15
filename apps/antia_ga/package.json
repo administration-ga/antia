@@ -20,6 +20,7 @@
     "@antia/social-features": "workspace:*",
     "@antia/ui": "workspace:*",
     "@hookform/resolvers": "catalog:",
+    "@livekit/components-styles": "catalog:",
     "convex": "catalog:",
     "i18next": "catalog:",
     "lucide-react": "catalog:",

@@ -1,4 +1,4 @@
-// Dupliqué de socle/convex/functions/meetings.ts (avec socle/convex/modules/reseauPersonnel/messagerie.ts, l. 1039-1110, `callByHandle`) @ ad2e7fdc2 — adaptations : l. 1863-1993 (`callCitizenById`) et `callByHandle` FUSIONNÉS en `callMember` — une seule porte, la cible désignée par sa personne (journal, grille) ou par son identifiant public, un seul budget (`call.place`) ; verrous « agent » levés (V01 délai de rattachement → statut d'adhésion par le constructeur ; V02 « les ressortissants ne peuvent pas appeler », V03 et V07 « l'appelé doit être affilié » retirés : un membre déclaré appelle un membre déclaré du réseau) ; l'appelé est JOIGNABLE (profil publié, non effacé, membre déclaré du réseau) et sans blocage, sinon le refus indistinct (D13) ; `endStaleCalls` → `reapStaleCallsOf` (lecture indexée bornée, D11, D27) ; admission par le pont du moteur ; titre non stocké ; salle `call-…` ; lignes de participation (D27) ; fin de sonnerie programmée ; messagerie vocale jamais offerte sur « hors de mes relations » (décision 6d du socle, désormais tenue par le serveur).
+// Dupliqué de socle/convex/functions/meetings.ts (avec socle/convex/modules/reseauPersonnel/messagerie.ts, l. 1039-1110, `callByHandle`) @ ad2e7fdc2 — adaptations : la personne appelée est rendue (`calleePersonId`, connue même d'un appel adressé par identifiant public : l'écran d'appel la nomme et la suit) ; l. 1863-1993 (`callCitizenById`) et `callByHandle` FUSIONNÉS en `callMember` — une seule porte, la cible désignée par sa personne (journal, grille) ou par son identifiant public, un seul budget (`call.place`) ; verrous « agent » levés (V01 délai de rattachement → statut d'adhésion par le constructeur ; V02 « les ressortissants ne peuvent pas appeler », V03 et V07 « l'appelé doit être affilié » retirés : un membre déclaré appelle un membre déclaré du réseau) ; l'appelé est JOIGNABLE (profil publié, non effacé, membre déclaré du réseau) et sans blocage, sinon le refus indistinct (D13) ; `endStaleCalls` → `reapStaleCallsOf` (lecture indexée bornée, D11, D27) ; admission par le pont du moteur ; titre non stocké ; salle `call-…` ; lignes de participation (D27) ; fin de sonnerie programmée ; messagerie vocale jamais offerte sur « hors de mes relations » (décision 6d du socle, désormais tenue par le serveur).
 /**
  * Appels — APPELER UN MEMBRE, en tête-à-tête.
  *
@@ -25,8 +25,8 @@ export const callTargetValidator = v.union(v.object({ personId: v.id("persons") 
 export const callMember = networkMutation({
   args: { target: callTargetValidator, mediaType: v.optional(callMediaTypeValidator) },
   returns: v.union(
-    v.object({ admitted: v.literal(true), callId: v.id("calls"), roomName: v.string(), mediaType: callMediaTypeValidator }),
-    v.object({ admitted: v.literal(false), callId: v.id("calls"), reason: callAdmissionReasonValidator, voicemailOffered: v.boolean() }),
+    v.object({ admitted: v.literal(true), callId: v.id("calls"), calleePersonId: v.id("persons"), roomName: v.string(), mediaType: callMediaTypeValidator }),
+    v.object({ admitted: v.literal(false), callId: v.id("calls"), calleePersonId: v.id("persons"), reason: callAdmissionReasonValidator, voicemailOffered: v.boolean() }),
   ),
   handler: async (ctx, args) => {
     const me = ctx.person._id
@@ -47,7 +47,7 @@ export const callMember = networkMutation({
       const reason = admission.decision.reason
       const callId = await insertRefusedCall(ctx, { networkId: ctx.networkId, callerId: me, calleeId: callee._id, roomName, mediaType, reason, now })
       // Sur « hors de mes relations », aucune messagerie vocale : ce serait le contournement du réglage.
-      return { admitted: false as const, callId, reason, voicemailOffered: admission.voicemailEnabled && reason !== "outside_relations" }
+      return { admitted: false as const, callId, calleePersonId: callee._id, reason, voicemailOffered: admission.voicemailEnabled && reason !== "outside_relations" }
     }
 
     const callId = await ctx.db.insert("calls", {
@@ -67,6 +67,6 @@ export const callMember = networkMutation({
     await ctx.db.insert("callParticipants", { networkId: ctx.networkId, callId, personId: me, role: "host", joinedAt: now })
     await ctx.db.insert("callParticipants", { networkId: ctx.networkId, callId, personId: callee._id, role: "participant" })
     await scheduleDirectRingExpiry(ctx, { callId, startedAt: now, now })
-    return { admitted: true as const, callId, roomName, mediaType }
+    return { admitted: true as const, callId, calleePersonId: callee._id, roomName, mediaType }
   },
 })

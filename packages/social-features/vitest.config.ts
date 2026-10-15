@@ -6,6 +6,7 @@ export default defineConfig({
   test: {
     name: "social-features",
     environment: "node",
+    setupFiles: ["./vitest.setup.ts"],
     include: ["src/**/*.test.ts", "src/**/*.test.tsx"],
   },
 })

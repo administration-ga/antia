@@ -38,7 +38,8 @@
   "nav": {
     "feed": "Fil",
     "signOut": "Se déconnecter",
-    "home": "Accueil"
+    "home": "Accueil",
+    "messages": "Messages"
   },
   "signIn": {
     "title": "Entrer sur {{brand}}",
@@ -100,7 +101,8 @@
     "audience": {
       "public": "Tous les membres",
       "connections": "Mes connexions"
-    }
+    },
+    "icomRail": "iCom et vos conversations"
   },
   "reactions": {
     "groupLabel": "Réactions",
@@ -113,5 +115,11 @@
   },
   "errors": {
     "generic": "Une erreur est survenue. Réessayez."
+  },
+  "messages": {
+    "title": "Messages"
+  },
+  "stories": {
+    "title": "Statuts"
   }
 }

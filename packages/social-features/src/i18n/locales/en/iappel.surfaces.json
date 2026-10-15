@@ -1,0 +1,196 @@
+{
+  "localPip": {
+    "move": "Move my thumbnail"
+  },
+  "remoteVideoStage": {
+    "connecting": "Connecting video…",
+    "cameraOff": "Camera off",
+    "cameraOffBy": "Camera turned off by {{name}}"
+  },
+  "heldCallChips": {
+    "label": "Calls on hold",
+    "held": "On hold",
+    "resume": "Resume the call with {{name}}",
+    "hangUp": "Hang up the call with {{name}}"
+  },
+  "speakerPickerPanel": {
+    "title": "Audio output"
+  },
+  "callMinimizedPill": {
+    "move": "Move the call pill",
+    "label": "Ongoing call with {{name}}",
+    "restore": "Back to the call with {{name}}",
+    "unmute": "Turn the microphone back on",
+    "mute": "Mute the microphone",
+    "fullscreen": "Show the call full screen",
+    "hangUp": "Hang up",
+    "heldSuffix": "on hold"
+  },
+  "callSurface": {
+    "label": "Call with {{name}}",
+    "move": "Move the call window",
+    "moveHelp": "Arrow keys to move, Shift for a larger step, Home and End for the corners, Escape to cancel a move in progress, double-click to return to the original position."
+  },
+  "conferenceHintCard": {
+    "close": "Close"
+  },
+  "groupCallGrid": {
+    "cameraPending": "Camera starting…",
+    "videoConnecting": "Connecting video…",
+    "thisPeer": "this participant",
+    "announce": "{{name}}",
+    "announceCaller": "{{name}} (caller)",
+    "announceMe": "{{name}} (you)",
+    "mutedState": "microphone muted",
+    "pin": "Put {{name}} on stage",
+    "unpin": "Remove {{name}} from the stage",
+    "labelWithState": "{{action}} — {{state}}",
+    "caller": "Caller",
+    "muted": "Microphone muted",
+    "peer": "Participant",
+    "meName": "{{name}} (you)",
+    "addLabel": "Add someone to the call",
+    "add": "Add",
+    "others": "Other participants"
+  },
+  "callEndScreen": {
+    "retrying": "Calling back…",
+    "retry": "Call back",
+    "voicemail": "Leave a message",
+    "write": "Write",
+    "close": "Close"
+  },
+  "callWaitingChip": {
+    "label": "Waiting call from {{name}}",
+    "decline": "Decline the call from {{name}}",
+    "acceptHint": "The current call will be put on hold",
+    "accept": "Take"
+  },
+  "incomingCallBanner": {
+    "groupLabel": "Group call from {{name}} — {{group}}",
+    "label": "Incoming call from {{name}}",
+    "audioBlocked": "Click anywhere to turn on the sound",
+    "ringtoneMuted": "Ringtone turned off in your settings",
+    "declineWithMessage": "Decline with a message",
+    "decline": "Decline the call",
+    "answerVideo": "Answer with video",
+    "answer": "Answer"
+  },
+  "incomingCallCard": {
+    "groupVideo": "Group video call",
+    "group": "Group call",
+    "incomingVideo": "Incoming video call",
+    "incoming": "Incoming call",
+    "audioBlocked": "Tap the screen to turn on the sound",
+    "ringtoneMuted": "Ringtone turned off in your settings",
+    "personal": "Personal call",
+    "includingYou": "including you",
+    "declineWithMessage": "Decline with a message",
+    "cancel": "Cancel",
+    "message": "Message",
+    "answerAudio": "Answer with audio",
+    "answerVideo": "Answer with video",
+    "decline": "Decline",
+    "answer": "Answer"
+  },
+  "callStage": {
+    "busy": "Busy",
+    "duration": "Call duration",
+    "minimize": "Minimise the call",
+    "groupCall": "Group call",
+    "participants_one": "{{count}} participant",
+    "participants_other": "{{count}} participants",
+    "heldByMe": "The other person can no longer hear you — resume whenever you like.",
+    "heldByPeer": "The other person has put you on hold.",
+    "micBlocked": "Nobody can hear you — your microphone is blocked. Tap “Mic blocked” to try again.",
+    "micBlockedLabel": "Mic blocked",
+    "muted": "Muted",
+    "mic": "Mic",
+    "camera": "Camera",
+    "cameraOff": "Camera off",
+    "flip": "Flip",
+    "add": "Add",
+    "hold": "Hold",
+    "resume": "Resume",
+    "write": "Write",
+    "hangUp": "Hang up"
+  },
+  "presenceDot": {
+    "available": "Online",
+    "inCall": "Busy",
+    "dnd": "Do not disturb",
+    "offline": "Offline"
+  },
+  "voicemailRecorder": {
+    "sent": "Message left for {{name}}.",
+    "failed": "The message could not be left. Try again.",
+    "label": "Leave a voice message for {{name}}",
+    "sending": "Leaving the message…",
+    "prompt": "Record a message for {{name}}. They will find it in their call log.",
+    "cancel": "Cancel"
+  },
+  "callRoomMount": {
+    "connectionFailed": "Audio connection failed — check your network or reload the page."
+  },
+  "iappelJournal": {
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "category": {
+      "incoming": "Incoming",
+      "outgoing": "Outgoing",
+      "missed": "Missed",
+      "declinedWithNote": "Declined · with a message",
+      "declined": "Declined",
+      "autoDeclinedDnd": "Declined automatically · Do not disturb",
+      "autoDeclinedBusy": "Declined automatically · Busy",
+      "autoDeclinedInMeeting": "Declined automatically · In a meeting",
+      "autoDeclinedOutsideRelations": "Declined automatically · Not a connection",
+      "autoDeclined": "Declined automatically"
+    },
+    "label": "Call log",
+    "filterLabel": "Filter the call log",
+    "all": "All",
+    "missed": "Missed",
+    "loading": "Loading your calls…",
+    "emptyMissed": "No missed calls.",
+    "empty": "No calls yet.",
+    "peer": "Participant",
+    "write": "Write to {{name}}",
+    "callBack": "Call {{name}} back"
+  },
+  "globalCallSurfaceHost": {
+    "answerSecondary": "{{name}} · answer",
+    "incomingRegion": "Incoming call",
+    "groupFallbackTitle": "Group call"
+  },
+  "addToCallPanel": {
+    "alreadyIn": "This person is already in the call.",
+    "ringing": "Their phone is ringing.",
+    "unavailable": "Unavailable right now — the call continues without them.",
+    "failed": "The person could not be added. Try again.",
+    "reinviteSuffix": "{{label}} · Invite again",
+    "alreadyInName": "{{name}} — already in the call",
+    "reinvite": "Invite {{name}} again",
+    "add": "Add {{name}} to the call",
+    "title": "Add to the call",
+    "close": "Close",
+    "seatsUpdating": "{{seats}} · updating…",
+    "searchPlaceholder": "Search your connections…",
+    "searchLabel": "Search for someone to add",
+    "loading": "Loading your connections…",
+    "errorTitle": "Connections unavailable",
+    "errorMessage": "Your connections could not be loaded.",
+    "empty": "No connections to add. People from your network appear here.",
+    "searching": "Searching your connections…",
+    "noMatch": "No connection matches “{{term}}”.",
+    "loadingMore": "Loading…",
+    "more": "Show more connections"
+  },
+  "myPresenceRow": {
+    "failed": "Your status could not be changed. Try again.",
+    "title": "My status",
+    "until": "until {{time}}",
+    "disable": "Turn off",
+    "dnd": "Do not disturb…"
+  }
+}

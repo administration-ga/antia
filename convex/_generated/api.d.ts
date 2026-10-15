@@ -150,6 +150,7 @@ import type * as modules_suggestions_tables from "../modules/suggestions/tables.
 import type * as modules_thematicGroups_access from "../modules/thematicGroups/access.js";
 import type * as modules_thematicGroups_tables from "../modules/thematicGroups/tables.js";
 import type * as modules_thematicGroups_thematicGroups from "../modules/thematicGroups/thematicGroups.js";
+import type * as seeds_devSocial from "../seeds/devSocial.js";
 import type * as seeds_foundations from "../seeds/foundations.js";
 
 import type {
@@ -301,6 +302,7 @@ declare const fullApi: ApiFromModules<{
   "modules/thematicGroups/access": typeof modules_thematicGroups_access;
   "modules/thematicGroups/tables": typeof modules_thematicGroups_tables;
   "modules/thematicGroups/thematicGroups": typeof modules_thematicGroups_thematicGroups;
+  "seeds/devSocial": typeof seeds_devSocial;
   "seeds/foundations": typeof seeds_foundations;
 }>;
 

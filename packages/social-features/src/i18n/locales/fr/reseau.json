@@ -1,0 +1,166 @@
+{
+  "postIdentity": {
+    "announcement": "{{name}}, {{badges}}"
+  },
+  "authorLink": {
+    "pageBadge": "Page officielle",
+    "signedBy": "Publié par {{name}}"
+  },
+  "shared": {
+    "audience": {
+      "connections": "Mes connexions",
+      "public": "Tout le réseau",
+      "group": "Groupe",
+      "followers": "Réservé aux abonnés"
+    },
+    "audienceHint": {
+      "connections": "Visible des personnes avec qui vous êtes connecté.",
+      "public": "Visible de toute personne connectée à la plateforme."
+    },
+    "pageAudience": {
+      "followers": "Abonnés de la page"
+    },
+    "pageAudienceHint": {
+      "public": "Communiqué : visible de toute personne connectée à la plateforme.",
+      "followers": "Note aux abonnés : visible des seuls abonnés de la page et de ses signataires."
+    },
+    "reaction": {
+      "like": "J'aime",
+      "bravo": "Bravo",
+      "soutien": "Soutien",
+      "instructif": "Instructif"
+    },
+    "feedReason": {
+      "own": "Votre publication",
+      "connection": "Une de vos connexions",
+      "follow": "Personne suivie",
+      "public": "Ouverte à tout le réseau",
+      "group": "Membre du groupe",
+      "page": "Page suivie"
+    },
+    "relativeDate": {
+      "now": "à l'instant",
+      "minutes": "il y a {{minutes}} min",
+      "hours": "il y a {{hours}} h",
+      "days": "il y a {{days}} j",
+      "absolute": "{{date, datetime}}"
+    },
+    "unreadBadge_one": "{{count}} notification non lue",
+    "unreadBadge_many": "{{count}} notifications non lues",
+    "unreadBadge_other": "{{count}} notifications non lues",
+    "notification": {
+      "postReaction": "{{actor}} a réagi à votre publication.",
+      "postComment": "{{actor}} a commenté votre publication.",
+      "postShare": "{{actor}} a partagé votre publication.",
+      "mention": "{{actor}} vous a cité.",
+      "connectionRequest": "{{actor}} souhaite se connecter avec vous.",
+      "connectionAccepted": "{{actor}} a accepté votre invitation.",
+      "newFollower": "{{actor}} vous suit désormais.",
+      "groupMessage": "{{actor}} a écrit dans une conversation de groupe.",
+      "groupAdded": "{{actor}} vous a ajouté à une conversation de groupe.",
+      "liveStarted": "{{actor}} a lancé une conférence en direct.",
+      "liveInvite": "{{actor}} vous invite à une conférence en direct.",
+      "liveAntennaInvite": "{{actor}} vous invite à prendre la parole dans une conférence.",
+      "thematicGroupInvite": "{{actor}} vous invite à rejoindre un groupe.",
+      "eventInvite": "{{actor}} vous invite à un évènement.",
+      "liveReplayPublished": "{{actor}} a publié l'enregistrement d'une conférence."
+    },
+    "resolution": {
+      "connectionAccepted": "Vous avez accepté cette invitation.",
+      "accepted": "Invitation acceptée.",
+      "declined": "Invitation déclinée.",
+      "maybe": "Vous avez répondu « peut-être ».",
+      "cancelled": "Invitation annulée.",
+      "withdrawn": "Invitation retirée.",
+      "liveEnded": "Cette conférence est terminée."
+    },
+    "shareExcerptEmpty": "Publication sans texte.",
+    "composerTooLong_one": "Votre publication dépasse de {{count}} caractère.",
+    "composerTooLong_many": "Votre publication dépasse de {{count}} caractères.",
+    "composerTooLong_other": "Votre publication dépasse de {{count}} caractères.",
+    "emptyFeed": {
+      "orphan": "Votre fil est vide : vous n'avez encore ni connexion, ni suivi. Cherchez une personne pour commencer.",
+      "linked": "Rien de nouveau pour l'instant. Les publications de vos connexions et de vos suivis apparaîtront ici."
+    },
+    "handle": {
+      "required": "Choisissez un identifiant public.",
+      "length": "L'identifiant public compte entre {{min}} et {{max}} caractères.",
+      "charset": "Lettres non accentuées, chiffres, point, tiret ou souligné uniquement."
+    },
+    "searchStatus": {
+      "loading": "Recherche de « {{query}} »…",
+      "none": "Aucun résultat pour « {{query}} »",
+      "results_one": "{{count}} résultat pour « {{query}} »",
+      "results_many": "{{count}} résultats pour « {{query}} »",
+      "results_other": "{{count}} résultats pour « {{query}} »"
+    },
+    "avatar": {
+      "format": "Formats acceptés : JPEG, PNG ou WebP.",
+      "size": "Une photo de profil est limitée à {{max}} Mo."
+    }
+  },
+  "reseauQueryError": {
+    "retry": "Réessayer"
+  },
+  "reseauAgentNav": {
+    "tabs": {
+      "fil": {
+        "label": "Fil",
+        "shortLabel": "Fil",
+        "description": "Ce que publie le réseau. Choisissez ci-dessous ce que vous voulez y voir."
+      },
+      "relations": {
+        "label": "Relations",
+        "shortLabel": "Relations",
+        "description": "Vos invitations, vos connexions et les personnes que vous suivez — votre réseau vous appartient."
+      },
+      "groupes": {
+        "label": "Groupes",
+        "shortLabel": "Groupes",
+        "description": "Des lieux à thème : rejoignez-en, créez-en, publiez-y — visible des seuls membres."
+      },
+      "pages": {
+        "label": "Pages",
+        "shortLabel": "Pages",
+        "description": "Les pages des institutions, associations, entreprises et médias du réseau. Abonnez-vous pour recevoir leurs publications dans votre fil."
+      },
+      "conferences": {
+        "label": "Conférences",
+        "shortLabel": "Conférences",
+        "description": "Les conférences en cours de diffusion, et les rediffusions de ce que vous avez manqué."
+      },
+      "evenements": {
+        "label": "Évènements",
+        "shortLabel": "Évènements",
+        "description": "Vos invitations et les évènements que vous organisez. Répondez, annoncez-les au réseau."
+      },
+      "enregistrements": {
+        "label": "Enregistrements",
+        "shortLabel": "Signets",
+        "description": "Les publications que vous avez mises de côté pour y revenir."
+      }
+    }
+  },
+  "reseauLayout": {
+    "returnToFeed": "Revenir au fil",
+    "heading": {
+      "tag": "Publications marquées #{{tag}}",
+      "search": "Résultats de recherche",
+      "post": "Publication ouverte"
+    },
+    "invitationsBanner_one": "{{count}} invitation en attente",
+    "invitationsBanner_many": "{{count}} invitations en attente",
+    "invitationsBanner_other": "{{count}} invitations en attente"
+  },
+  "reseauMobileTabs": {
+    "sections": {
+      "reseau": "Réseau",
+      "more": "Autres dans le réseau"
+    },
+    "menu": {
+      "stories": "Actus",
+      "profile": "Mon profil",
+      "settings": "Paramètres"
+    }
+  }
+}

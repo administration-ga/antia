@@ -58,6 +58,18 @@ async function duo() {
 // ═══════════════════════════════════════════════════════════════
 
 describe("callMember — un membre appelle un membre", () => {
+  it("rend la personne appelée, même d'un appel adressé par identifiant public, admis ou refusé", async () => {
+    const { t, root, alice, bob } = await duo()
+    await connect(t, root, alice, bob)
+    const admitted = await call(root, alice, bob)
+    expect(admitted).toMatchObject({ admitted: true, calleePersonId: bob.personId })
+    tick()
+    await alice.as.mutation(C.lifecycle.leave, { networkId: root, callId: admitted.callId, intentional: true })
+    tick()
+    await setPrefs(t, bob, { dnd: { until: Date.now() + 60_000, startedAt: Date.now() } })
+    expect(await call(root, alice, bob)).toMatchObject({ admitted: false, reason: "dnd", calleePersonId: bob.personId })
+  })
+
   it("admis sans organisation ni affiliation : composé, deux lignes, l'appelant déjà dans sa salle", async () => {
     const { t, root, alice, bob } = await duo()
     const placed = await call(root, alice, bob, "video")

@@ -1,0 +1,137 @@
+{
+  "icomBrickHeader": {
+    "collapse": "Rétracter {{title}}",
+    "detach": "Détacher iCom en fenêtre",
+    "expand": "Déployer {{title}}",
+    "unread_one": "{{count}} message non lu",
+    "unread_other": "{{count}} messages non lus"
+  },
+  "icomDock": {
+    "tabs": {
+      "actus": {
+        "description": "Les statuts de votre réseau",
+        "label": "Statuts"
+      },
+      "iappel": {
+        "description": "Appeler une relation",
+        "label": "iAppel"
+      },
+      "ichat": {
+        "description": "Mes conversations",
+        "label": "iChat"
+      },
+      "icontact": {
+        "description": "Mes relations",
+        "label": "Relations"
+      }
+    }
+  },
+  "icomMobileTabBar": {
+    "navLabel": "Navigation iCom",
+    "subtabsLabel": "Sous-menus iCom"
+  },
+  "icomMobileTabs": {
+    "menu": {
+      "label": "Revenir au menu principal",
+      "shortLabel": "Menu"
+    },
+    "subtabLabel": "{{label}} — {{description}}",
+    "unreadMessages_one": "{{count}} message non lu",
+    "unreadMessages_other": "{{count}} messages non lus",
+    "unseenStatuses_one": "{{count}} statut non vu",
+    "unseenStatuses_other": "{{count}} statuts non vus"
+  },
+  "messagerieComposeView": {
+    "back": "Revenir à la liste des conversations",
+    "foundRelations": "Relations trouvées",
+    "handle": "@{{handle}}",
+    "loadMore": "Voir plus de relations",
+    "loading": "Chargement de vos relations…",
+    "loadingMore": "Chargement d'autres relations…",
+    "myRelations": "Mes relations",
+    "noLoadedMatch": "Aucune relation déjà chargée ne correspond à « {{term}} ». Saisissez au moins deux caractères pour chercher parmi toutes vos relations, ou chargez la suite.",
+    "noMatch": "Aucune relation ne correspond à « {{term}} ».",
+    "noRelations": "Vous n'avez encore aucune relation. Envoyez une demande depuis les « Relations » du réseau pour pouvoir commencer une conversation.",
+    "relationsErrorMessage": "Vos relations n'ont pas pu être chargées.",
+    "relationsErrorTitle": "Relations indisponibles",
+    "searchErrorMessage": "La recherche parmi vos relations a échoué. Les relations déjà chargées restent listées.",
+    "searchErrorTitle": "Recherche indisponible",
+    "searchLabel": "Chercher une personne à qui écrire",
+    "searchPlaceholder": "Nom ou @identifiant",
+    "searching": "Recherche parmi vos relations…",
+    "title": "Nouveau message",
+    "unnamedRelation": "Membre du réseau",
+    "unpublished": "{{name}} n'a plus de profil de réseau publié",
+    "unpublishedProfile": "Profil de réseau non publié",
+    "writeTo": "Écrire à {{name}}"
+  },
+  "messagerieDesktopPage": {
+    "opening": "Ouverture d’iCom…"
+  },
+  "messagerieDock": {
+    "collapse": "Rétracter iCom",
+    "detach": "Détacher iCom en fenêtre",
+    "dragHelp": "Flèches pour déplacer, Maj pour un pas plus grand, Origine et Fin pour les coins, Échap pour annuler le geste en cours et double-clic pour revenir à la position d'origine.",
+    "expand": "Déployer iCom",
+    "floatingLabel": "iCom — fenêtre détachée",
+    "moveWindow": "Déplacer la fenêtre iCom",
+    "reattach": "Ré-ancrer iCom dans la colonne",
+    "title": "iCom",
+    "unreadAnnouncement_one": "{{count}} message non lu",
+    "unreadAnnouncement_other": "{{count}} messages non lus"
+  },
+  "messagerieErreur": {
+    "generic": "L'envoi a échoué. Réessayez dans un instant."
+  },
+  "messagerieListPage": {
+    "title": "iCom"
+  },
+  "messagerieListView": {
+    "callInProgress": "Appel en cours…",
+    "errorMessage": "Vos conversations n'ont pas pu être chargées.",
+    "errorTitle": "Conversations indisponibles",
+    "filterAll": "Toutes",
+    "filterDirects": "Individuels",
+    "filterDirectsLabel": "Conversations individuelles",
+    "filterDirectsUnread_one": "Conversations individuelles, {{count}} message non lu",
+    "filterDirectsUnread_other": "Conversations individuelles, {{count}} messages non lus",
+    "filterGroups": "Groupes",
+    "filterGroupsLabel": "Conversations de groupe",
+    "filterGroupsUnread_one": "Conversations de groupe, {{count}} message non lu",
+    "filterGroupsUnread_other": "Conversations de groupe, {{count}} messages non lus",
+    "filterLabel": "Filtrer les conversations",
+    "groupButton": "Groupe",
+    "loadMore": "Charger plus de conversations",
+    "loadMoreToSearch": "Charger plus pour chercher",
+    "loading": "Chargement…",
+    "newGroup": "Nouveau groupe",
+    "newMessage": "Nouveau message",
+    "noDirects": "Aucune conversation individuelle pour le moment.",
+    "noGroups": "Aucun groupe pour le moment. Utilisez « Groupe » pour en créer un.",
+    "noMatch": "Aucune conversation ne correspond à « {{term}} ».",
+    "noMatchLoaded": "Aucune conversation ne correspond à « {{term}} » parmi celles déjà chargées.",
+    "partialErrorMessage": "La dernière mise à jour de vos conversations a échoué. Ce qui s'affiche peut dater.",
+    "partialErrorTitle": "Conversations partiellement à jour",
+    "searchAll": "Rechercher une conversation",
+    "searchDirects": "Rechercher un message individuel",
+    "searchGroups": "Rechercher un groupe",
+    "titleCompact": "iChat",
+    "titlePage": "Messages",
+    "unknownCounterpart": "Membre du réseau",
+    "unread_one": "{{count}} non lu",
+    "unread_other": "{{count}} non lus"
+  },
+  "messagerieListe": {
+    "attachments_one": "{{count}} pièce jointe",
+    "attachments_other": "{{count}} pièces jointes",
+    "call": "Appel",
+    "deleted": "Message supprimé",
+    "empty": "Aucune conversation. Utilisez « Nouveau message » pour écrire à l'une de vos relations, ou « Nouveau groupe » pour réunir plusieurs connexions.",
+    "fromMe": "Vous : {{text}}",
+    "noMessageYet": "Aucun message pour l'instant",
+    "voiceNote": "Message vocal"
+  },
+  "messagesRoute": {
+    "loading": "Chargement de la messagerie…"
+  }
+}
