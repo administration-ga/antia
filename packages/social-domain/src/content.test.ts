@@ -28,6 +28,7 @@ import {
   isPersonalReactionKind,
   isProfileDiscoverable,
   isProfilePublished,
+  normalizeFeedLanes,
   normalizeHandle,
   PERSONAL_COMMENT_MAX_LENGTH,
   PERSONAL_POST_AUDIENCES,
@@ -399,3 +400,27 @@ describe("portée et pays d'une publication (réseaux à portées)", () => {
     expect(ruleOf(() => assertPostReach({ reach: "local", reachValues }))).toBe("POST_COUNTRY_REQUIRED")
   })
 })
+
+describe("les voies du fil", () => {
+  const reaches = ["local", "diaspora"]
+  const ruleOf = (run: () => unknown) => {
+    try {
+      run()
+    } catch (error) {
+      return error instanceof DomainViolation ? error.code : "autre"
+    }
+    return null
+  }
+
+  it("normalise le pays, écarte les doublons, garde l'ordre", () => {
+    expect(normalizeFeedLanes([{ reach: "local", country: " fr " }, { reach: "diaspora" }, { reach: "local", country: "FR" }], reaches)).toEqual([{ reach: "local", country: "FR" }, { reach: "diaspora" }])
+  })
+
+  it("refuse une portée que le réseau ne déclare pas, un pays mal formé, aucune voie ou plus de quatre", () => {
+    expect(ruleOf(() => normalizeFeedLanes([{ reach: "monde" }], reaches))).toBe("POST_REACH_INVALID")
+    expect(ruleOf(() => normalizeFeedLanes([{ reach: "local", country: "France" }], reaches))).toBe("POST_COUNTRY_INVALID")
+    expect(ruleOf(() => normalizeFeedLanes([], reaches))).toBe("FEED_LANES_INVALID")
+    expect(ruleOf(() => normalizeFeedLanes(Array.from({ length: 5 }, () => ({ reach: "diaspora" })), reaches))).toBe("FEED_LANES_INVALID")
+  })
+})
+

@@ -1,4 +1,4 @@
-// Dupliqué de socle/convex/modules/reseauPersonnel/posts.ts @ ad2e7fdc2 — adaptations : PAR RÉSEAU — tout se lit DEPUIS le réseau de la fonction appelée (une publication `network` d'un réseau fermé n'est rendue par aucune lecture de la racine, R4 ; la racine lit ses natifs et les `root` de tous les réseaux par l'index `onRoot`), adhésion par le constructeur au lieu d'`assertNotSuspended` ; fenêtres par auteur, fusion k-voies, curseur composite et deux phases GARDÉS, lecteurs de fenêtre factorisés (réseau, racine, auteur) ; portée « mon_administration », collègues, organisations et notes de service retirés (l. 1059-1061, 1079-1081, 1221-1224, 1253) ; pages (fenêtres, identité, signataire, `assertCanPublishOnPage`) au lot 13 ; direct et évènement (l. 550-598) au lot de leurs modules ; BLOCAGE exclu du fil, de la recherche et du mur (il l'emporte sur toute audience) ; lacune des ensembles bornés RENDUE (`lacunar`, D19, D24) ; une seule garde dans la recherche (D25) ; partages comptés par agrégat ; cloche du partage et des citations par la porte unique ; portée et pays ; épingle par réseau (sur l'adhésion) rendue avec le mur ; `myPosts` paginé (`paginateMyPosts`) ; le fil « Récents » natif `feed` de la tranche verticale GARDÉ (compatibilité des écrans), DTO étendu ; débit sur publier, éditer, retirer.
+// Dupliqué de socle/convex/modules/reseauPersonnel/posts.ts @ ad2e7fdc2 — adaptations : PAR RÉSEAU — tout se lit DEPUIS le réseau de la fonction appelée (une publication `network` d'un réseau fermé n'est rendue par aucune lecture de la racine, R4 ; la racine lit ses natifs et les `root` de tous les réseaux par l'index `onRoot`), adhésion par le constructeur au lieu d'`assertNotSuspended` ; fenêtres par auteur, fusion k-voies, curseur composite et deux phases GARDÉS, lecteurs de fenêtre factorisés (réseau, racine, auteur) ; portée « mon_administration », collègues, organisations et notes de service retirés (l. 1059-1061, 1079-1081, 1221-1224, 1253) ; pages (fenêtres, identité, signataire, `assertCanPublishOnPage`) au lot 13 ; direct et évènement (l. 550-598) au lot de leurs modules ; BLOCAGE exclu du fil, de la recherche et du mur (il l'emporte sur toute audience) ; lacune des ensembles bornés RENDUE (`lacunar`, D19, D24) ; une seule garde dans la recherche (D25) ; partages comptés par agrégat ; cloche du partage et des citations par la porte unique ; portée et pays ; épingle par réseau (sur l'adhésion) rendue avec le mur ; `myPosts` paginé (`paginateMyPosts`) ; le fil « Récents » natif `feed` de la tranche verticale GARDÉ (compatibilité des écrans), DTO étendu ; débit sur publier, éditer, retirer ; fil par VOIES (portée, pays facultatif) que compose une application servie (le hub d'un pays, « toute la diaspora »), fusionnées par date ; fenêtres bornées fusionnées sous FRONTIÈRE (une fenêtre pleine n'ouvre plus de trou dans « Pour vous »).
 /**
  * Publications d'un réseau — publier, partager, éditer, retirer, épingler ;
  * lire le fil, le mur d'une personne, une publication ; chercher.
@@ -22,20 +22,22 @@ import {
   FEED_REASONS,
   FEED_SCOPE_DEFAULT,
   FEED_SCOPES,
+  type FeedLane,
   type FeedReason,
   feedAdmissionFor,
   groupViewingReasonFor,
   isPersonalPostVisibleTo,
+  normalizeFeedLanes,
   type PersonalPostAudience,
   viewingReasonFor,
   addedMentionedIds,
 } from "@antia/social-domain/content"
 import {
   boundedFeedSourceIds,
-  compareFeedPosts,
   cursorForFeedPost,
   isAfterFeedCursor,
   isLacunarFeedWindow,
+  mergeFeedWindows,
   PERSONAL_FEED_AUTHORS_MAX,
   type PersonalFeedCursor,
 } from "@antia/social-domain/feedScale"
@@ -317,6 +319,25 @@ function authorReader(ctx: ReadCtx, network: Doc<"networks">, authorPersonId: Id
       .withIndex("by_network_author_status_publishedAt", (q) =>
         bounded(q.eq("networkId", network._id).eq("authorPersonId", authorPersonId).eq("status", "published"), bound),
       )
+      .order("desc")
+      .take(take)
+}
+
+/** Les publications vivantes d'une VOIE de ce réseau : une portée et un pays, ou une portée seule. */
+function laneReader(ctx: ReadCtx, networkId: Id<"networks">, lane: FeedLane): RangeReader {
+  const country = lane.country
+  if (country !== undefined) {
+    return async (bound, take) =>
+      await ctx.db
+        .query("posts")
+        .withIndex("by_network_reach_country_status_publishedAt", (q) => bounded(q.eq("networkId", networkId).eq("reach", lane.reach).eq("country", country).eq("status", "published"), bound))
+        .order("desc")
+        .take(take)
+  }
+  return async (bound, take) =>
+    await ctx.db
+      .query("posts")
+      .withIndex("by_network_reach_status_publishedAt", (q) => bounded(q.eq("networkId", networkId).eq("reach", lane.reach).eq("status", "published"), bound))
       .order("desc")
       .take(take)
 }
@@ -647,6 +668,13 @@ export const myFeed = networkQuery({
     limit: v.optional(v.number()),
     tag: v.optional(v.string()),
     scope: v.optional(literals(FEED_SCOPES)),
+    /**
+     * Les VOIES du fil, composées par l'application selon SA règle (le hub d'un
+     * pays, « toute la diaspora ») : une portée et un pays facultatif chacune,
+     * au plus quatre. Le fil devient « tout ce que j'ai le droit de voir dans
+     * ces voies », du plus récent au plus ancien, sans classement.
+     */
+    lanes: v.optional(v.array(v.object({ reach: v.string(), country: v.optional(v.string()) }))),
   },
   returns: v.object({ items: v.array(feedItemValidator), nextCursor: v.union(cursorValidator, v.null()), lacunar: v.boolean() }),
   handler: async (ctx, args) => {
@@ -654,7 +682,9 @@ export const myFeed = networkQuery({
     const limit = clampLimit(args.limit)
     const cursor = args.cursor
     const tag = args.tag?.trim().toLowerCase() || undefined
-    const scope = args.scope ?? FEED_SCOPE_DEFAULT
+    const lanes = args.lanes === undefined ? null : checked(() => normalizeFeedLanes(args.lanes ?? [], ctx.network.reachValues))
+    // Les voies servent « tout ce que j'ai le droit de voir » : la portée de découverte.
+    const scope = lanes !== null ? "recents" : (args.scope ?? FEED_SCOPE_DEFAULT)
 
     const [graph, hidden, muted, marks, cursorCreationTime] = await Promise.all([
       readerGraph(ctx, reader),
@@ -664,21 +694,22 @@ export const myFeed = networkQuery({
       cursorCreationTimeOf(ctx, cursor),
     ])
 
-    const authorWindow = scope === "pour_vous"
+    const authorWindow = lanes === null && scope === "pour_vous"
     let sourceWasFull = false
     let sourcesTruncated = false
     let candidates: Doc<"posts">[]
-    if (authorWindow) {
+    if (lanes !== null) {
+      // Une fenêtre par voie, fusionnées sous la FRONTIÈRE de la plus courte des fenêtres pleines.
+      const merged = mergeFeedWindows(await Promise.all(lanes.map((lane) => feedWindow(laneReader(ctx, ctx.networkId, lane), FEED_SCAN, cursor, cursorCreationTime))))
+      candidates = merged.rows
+      sourceWasFull = merged.wasFull
+    } else if (authorWindow) {
       const sourceIds = boundedFeedSourceIds({ selfId: ctx.person._id, connections: graph.connections.ids, follows: graph.follows.ids })
       sourcesTruncated = new Set([...graph.connections.ids, ...graph.follows.ids, ctx.person._id]).size > PERSONAL_FEED_AUTHORS_MAX
-      const windows = await Promise.all(
-        sourceIds.map(async (authorPersonId) => {
-          const window = await feedWindow(authorReader(ctx, ctx.network, authorPersonId), FEED_AUTHOR_SCAN, cursor, cursorCreationTime)
-          if (window.wasFull) sourceWasFull = true
-          return window.rows
-        }),
-      )
-      candidates = windows.flat().sort(compareFeedPosts)
+      // Fusion sous frontière : une fenêtre d'auteur pleine n'a rien dit de ce qui est plus ancien que sa dernière ligne.
+      const merged = mergeFeedWindows(await Promise.all(sourceIds.map((authorPersonId) => feedWindow(authorReader(ctx, ctx.network, authorPersonId), FEED_AUTHOR_SCAN, cursor, cursorCreationTime))))
+      candidates = merged.rows
+      sourceWasFull = merged.wasFull
     } else {
       const global = await feedWindow(globalReader(ctx, ctx.network), FEED_SCAN, cursor, cursorCreationTime)
       candidates = global.rows
@@ -714,7 +745,7 @@ export const myFeed = networkQuery({
 
     // Un curseur dans DEUX cas : fenêtre pleine (il reste peut-être derrière), ou sortie à `limit` (il reste devant).
     const stoppedEarly = selected.length >= limit
-    const windowLacuna = !authorWindow && isLacunarFeedWindow({ candidatesLength: candidates.length, scanLimit: FEED_SCAN, selectedLength: selected.length, pageLimit: limit })
+    const windowLacuna = !authorWindow && lanes === null && isLacunarFeedWindow({ candidatesLength: candidates.length, scanLimit: FEED_SCAN, selectedLength: selected.length, pageLimit: limit })
     return {
       items,
       nextCursor: (sourceWasFull || stoppedEarly) && lastExamined !== null ? cursorForFeedPost(lastExamined) : null,

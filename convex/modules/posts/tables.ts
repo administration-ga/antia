@@ -63,6 +63,9 @@ export const postsTables = {
     .index("by_root_author_status_publishedAt", ["onRoot", "authorPersonId", "status", "publishedAt"])
     // Le MUR d'un groupe thématique (et la cascade de sa suppression).
     .index("by_network_group_status_publishedAt", ["networkId", "groupId", "status", "publishedAt"])
+    // Les VOIES d'un fil (le hub d'un pays, « toute la diaspora ») : une portée et un pays, ou une portée seule.
+    .index("by_network_reach_country_status_publishedAt", ["networkId", "reach", "country", "status", "publishedAt"])
+    .index("by_network_reach_status_publishedAt", ["networkId", "reach", "status", "publishedAt"])
     // MES publications, retirées comprises (je suis seul à voir les miennes retirées).
     .index("by_network_author_publishedAt", ["networkId", "authorPersonId", "publishedAt"])
     .index("by_author_and_idempotencyKey", ["authorPersonId", "idempotencyKey"])

@@ -777,3 +777,20 @@ dépend.
 ### Écarts assumés
 
 - **Export iCal** (`eventIcalUrl`, route `/ical/event/{id}.ics`) : différé, décision par défaut de l'owner map.
+
+---
+
+## Complément au lot 7 — fil par voies et fusion sous frontière (demande DIASPORALE, PD4)
+
+- **Voies** (`myFeed({ lanes })`) : jusqu'à quatre voies (une portée du réseau, un pays facultatif), chacune servie par
+  un index (`by_network_reach_country_status_publishedAt`, `by_network_reach_status_publishedAt`), fusionnées par date,
+  sans classement, avec les gardes du fil (audience, blocage, masquage, sourdine, statut). L'application compose ses
+  voies selon SA règle : le hub d'un pays X = `[{ reach: "local", country: X }, { reach: "diaspora" }]`, « toute la
+  diaspora » = `[{ reach: "diaspora" }]` — le moteur ne connaît pas la règle (`normalizeFeedLanes` ne juge que les
+  portées déclarées et la forme du pays ; règle `FEED_LANES_INVALID`).
+- **Frontière** (`mergeFeedWindows`) : une fenêtre bornée PLEINE n'a rien dit de ce qui est plus ancien que sa dernière
+  ligne ; la page s'arrête à la plus récente de ces dernières lignes. Corrige un trou latent de « Pour vous » (reproduit
+  par test : avec un mot-clé qui écartait toute la fenêtre d'un auteur prolixe, ses publications plus anciennes étaient
+  perdues — 5 rendues sur 15).
+- Tests : 5 cas convex (`feedLanes.test.ts`) + 4 cas de domaine.
+

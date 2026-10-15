@@ -67,5 +67,6 @@
   "GROUP_FULL": "This group has reached its limit of {{max}} people.",
   "GROUP_SELF_MEMBER": "You are already a member of this group.",
   "GROUP_CLOSED": "This conversation is closed.",
-  "EVENT_CANCELLED": "This event is cancelled."
+  "EVENT_CANCELLED": "This event is cancelled.",
+  "FEED_LANES_INVALID": "A feed combines one to {{max}} lanes."
 }

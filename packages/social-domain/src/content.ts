@@ -208,6 +208,32 @@ export function assertPostReach(input: { reach?: string; country?: string; reach
 }
 
 /**
+ * Une VOIE du fil : les publications d'une portée, et d'un pays si elle en
+ * nomme un. L'application compose ses voies selon SA règle (le hub d'un pays :
+ * le local de ce pays et toute la diaspora) ; le moteur les sert sans la
+ * connaître. Au plus quatre, chacune jugée contre les portées du réseau.
+ */
+export type FeedLane = { reach: string; country?: string }
+
+export const FEED_LANES_MAX = 4
+
+export function normalizeFeedLanes(lanes: readonly FeedLane[], reachValues: readonly string[]): FeedLane[] {
+  if (lanes.length === 0 || lanes.length > FEED_LANES_MAX) throw new DomainViolation("FEED_LANES_INVALID", { max: FEED_LANES_MAX })
+  const out: FeedLane[] = []
+  const keys = new Set<string>()
+  for (const lane of lanes) {
+    if (!reachValues.includes(lane.reach)) throw new DomainViolation("POST_REACH_INVALID")
+    const country = lane.country?.trim().toUpperCase()
+    if (country !== undefined && !COUNTRY_CODE.test(country)) throw new DomainViolation("POST_COUNTRY_INVALID")
+    const key = `${lane.reach}|${country ?? "*"}`
+    if (keys.has(key)) continue
+    keys.add(key)
+    out.push(country === undefined ? { reach: lane.reach } : { reach: lane.reach, country })
+  }
+  return out
+}
+
+/**
  * Une publication vide ou trop longue n'est pas une publication.
  *
  * ⚠️ Ne juge QUE le texte. Une publication portée par un média ou par un

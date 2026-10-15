@@ -1,4 +1,4 @@
-// Dupliqué de socle/convex/modules/reseauPersonnel/feedScale.test.ts (l. 1-12, 49-78 et 186-191) @ ad2e7fdc2 — adaptations : les trois cas purs seulement (les deux cas d'intégration suivent le module posts en PA3) ; identifiants en chaînes simples.
+// Dupliqué de socle/convex/modules/reseauPersonnel/feedScale.test.ts (l. 1-12, 49-78 et 186-191) @ ad2e7fdc2 — adaptations : les trois cas purs seulement (les deux cas d'intégration suivent le module posts en PA3) ; identifiants en chaînes simples ; cas neufs de la fusion sous frontière.
 import { describe, expect, it } from "vitest"
 
 import {
@@ -8,6 +8,7 @@ import {
   exceedsLacunaThreshold,
   isAfterFeedCursor,
   isLacunarFeedWindow,
+  mergeFeedWindows,
   PERSONAL_FEED_AUTHORS_MAX,
 } from "./feedScale"
 
@@ -43,3 +44,27 @@ describe("curseur et mesure du fil", () => {
     expect(exceedsLacunaThreshold({ reads: 100, lacunaryReads: 6 })).toBe(true)
   })
 })
+
+describe("fusion des fenêtres sous frontière", () => {
+  const post = (id: string, publishedAt: number) => ({ _id: id, _creationTime: publishedAt, publishedAt })
+
+  it("sans fenêtre pleine, tout s'examine, dans l'ordre, sans doublon", () => {
+    const merged = mergeFeedWindows([
+      { rows: [post("a2", 20), post("a1", 10)], wasFull: false },
+      { rows: [post("b1", 15), post("a1", 10)], wasFull: false },
+    ])
+    expect(merged).toEqual({ rows: [post("a2", 20), post("b1", 15), post("a1", 10)], wasFull: false })
+  })
+
+  it("une fenêtre pleine pose la frontière : rien de plus ancien que sa dernière ligne n'entre dans la page", () => {
+    const merged = mergeFeedWindows([
+      { rows: [post("a3", 30), post("a2", 25)], wasFull: true },
+      { rows: [post("b2", 27), post("b1", 5)], wasFull: false },
+      { rows: [post("c2", 40), post("c1", 26)], wasFull: true },
+    ])
+    expect(merged.wasFull).toBe(true)
+    // La frontière est la PLUS RÉCENTE des dernières lignes pleines : c1 (26).
+    expect(merged.rows.map((row) => row._id)).toEqual(["c2", "a3", "b2", "c1"])
+  })
+})
+

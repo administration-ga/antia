@@ -102,3 +102,32 @@ export function isLacunarFeedWindow(input: {
 export function exceedsLacunaThreshold(input: { reads: number; lacunaryReads: number }): boolean {
   return input.reads > 0 && input.lacunaryReads / input.reads > 0.05
 }
+
+/**
+ * FUSIONNE des fenêtres bornées (une par auteur, une par voie) sans jamais
+ * ouvrir de trou. Une fenêtre PLEINE n'a rien dit de ce qui est plus ancien que
+ * sa dernière ligne : la plus récente de ces dernières lignes est la FRONTIÈRE,
+ * et rien de plus ancien ne s'examine dans cette page — la suivante reprendra
+ * de là, chaque fenêtre derrière le même curseur. Doublons écartés.
+ */
+export function mergeFeedWindows<PostId extends string, Post extends OrderedPost<PostId>>(windows: readonly { rows: readonly Post[]; wasFull: boolean }[]): { rows: Post[]; wasFull: boolean } {
+  const seen = new Set<string>()
+  const rows: Post[] = []
+  for (const window of windows) {
+    for (const row of window.rows) {
+      if (seen.has(String(row._id))) continue
+      seen.add(String(row._id))
+      rows.push(row)
+    }
+  }
+  rows.sort(compareFeedPosts)
+  let frontier: Post | null = null
+  for (const window of windows) {
+    const last = window.wasFull ? window.rows.at(-1) : undefined
+    if (last !== undefined && (frontier === null || compareFeedPosts(last, frontier) < 0)) frontier = last
+  }
+  if (frontier === null) return { rows, wasFull: false }
+  const cut = frontier
+  return { rows: rows.filter((row) => compareFeedPosts(row, cut) <= 0), wasFull: true }
+}
+
