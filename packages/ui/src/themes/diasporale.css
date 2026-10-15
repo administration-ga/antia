@@ -15,10 +15,11 @@
  *   2. sombre « nuit brune » — redéclare CHAQUE rôle que le bloc sombre de la
  *      base déclare : à spécificité 0,2,0, ce bloc l'emporterait sinon sur le
  *      bloc clair de ce thème (0,1,0) et le bleu du moteur réapparaîtrait.
- * Version 2 (15/10/2026, demande du propriétaire) : le sombre retourne la page —
- * la carte est l'encre, plus profonde que le fond ; en clair comme en sombre, le
- * contenu se pose sur la surface la plus contrastée. Rayons resserrés (contrôles
- * 6 px, cartes 8 px), pilules inchangées (`--esp-r-chrome` de la base).
+ * Version 2 (15/10/2026, demande du propriétaire) : élévation par la clarté dans
+ * les deux thèmes — le fond est la couche la plus basse (sable en clair, encre en
+ * sombre), chaque surface qui monte s'éclaircit (carte, puis ce qui flotte), sans
+ * filet. Rayons resserrés (contrôles 6 px, cartes 8 px), pilules inchangées
+ * (`--esp-r-chrome` de la base).
  * Les contrastes (texte ≥ 4,5:1, contours et focus ≥ 3:1) sont recalculés dans les
  * deux thèmes, à travers la cascade complète base + thème, par le cliquet
  * `engine-theme-contrast.test.ts` de DIASPORALE.
@@ -65,14 +66,16 @@
   --esp-neutral-mute: #6b675d;
   --esp-neutral-faint: #918e89;
 
-  /* Nuit brune, inversée en v2 — carte (encre) < fond (nuit) < section, puce.
-     Texte sable sur la carte : 17,19:1 (14,87 avant) ; grès clair 8,02:1. */
-  --esp-night-bg: #201d18;
-  --esp-night-sidebar: #201d18;
-  --esp-night-section: #2a2620;
-  --esp-night-card: #14130f;
-  --esp-night-chip: #2a2620;
-  --esp-night-hover: #322e27;
+  /* Nuit brune, en couches (v2) — du plus sombre au plus clair : fond (encre)
+     < creux < carte (nuit) < puce et carte flottante < survol. Sans filet, chaque
+     couche se lit par la clarté (carte 1,16:1 sur le fond, flottant 1,14:1 sur la
+     carte). Texte sable 14,83:1 sur la carte ; grès clair 6,92:1. */
+  --esp-night-bg: #14130f;
+  --esp-night-sidebar: #14130f;
+  --esp-night-section: #1b1915;
+  --esp-night-card: #24211c;
+  --esp-night-chip: #2f2b25;
+  --esp-night-hover: #3a362f;
   --esp-night-border: #3d3729;
   --esp-night-input: #7d7666;
   --esp-night-faint: #948e7e;
@@ -249,14 +252,14 @@
 .dark [data-charte="diasporale"] {
   color-scheme: dark;
 
-  /* Le sombre retourne la page : le fond est la nuit, la carte est l'encre (plus
-     profonde) ; ce qui flotte (carte flottante, menu) remonte vers la clarté. */
+  /* Le fond est la couche la plus sombre ; la carte se lève au-dessus, ce qui
+     flotte (carte flottante, menu) se lève encore. */
   --background: var(--esp-night-bg);
   --background-dashboard: var(--esp-night-bg);
   --foreground: var(--esp-neutral-100);
   --card: var(--esp-night-card);
   --card-foreground: var(--esp-neutral-100);
-  --popover: var(--esp-night-section);
+  --popover: var(--esp-night-chip);
   --popover-foreground: var(--esp-neutral-100);
   /* Le bleu s'éclaircit et l'encre se pose dessus : jamais de blanc sur le bleu. */
   --primary: var(--esp-blue-400);
