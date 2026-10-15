@@ -17,6 +17,7 @@ import type * as lib_errors from "../lib/errors.js";
 import type * as lib_functions from "../lib/functions.js";
 import type * as lib_rateLimit from "../lib/rateLimit.js";
 import type * as lib_validators from "../lib/validators.js";
+import type * as modules_diaspora_tables from "../modules/diaspora/tables.js";
 import type * as modules_engagement_engagement from "../modules/engagement/engagement.js";
 import type * as modules_engagement_tables from "../modules/engagement/tables.js";
 import type * as modules_networks_networks from "../modules/networks/networks.js";
@@ -53,6 +54,7 @@ declare const fullApi: ApiFromModules<{
   "lib/functions": typeof lib_functions;
   "lib/rateLimit": typeof lib_rateLimit;
   "lib/validators": typeof lib_validators;
+  "modules/diaspora/tables": typeof modules_diaspora_tables;
   "modules/engagement/engagement": typeof modules_engagement_engagement;
   "modules/engagement/tables": typeof modules_engagement_tables;
   "modules/networks/networks": typeof modules_networks_networks;
