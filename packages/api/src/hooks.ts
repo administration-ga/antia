@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/api/src/hooks.ts @ ad2e7fdc2 — adaptations : aucune (copie textuelle).
+// Dupliqué de socle/packages/api/src/hooks.ts @ ad2e7fdc2 — adaptations : arguments paginés typés par `PaginatedQueryArgs` (deux `any` retirés) ; les deux `any` restants (options TanStack) justifiés en commentaire, règle du moteur « jamais `any` sans justification ».
 "use client";
 
 import { convexQuery, useConvexMutation } from "@convex-dev/react-query";
@@ -8,6 +8,7 @@ import {
 	useQuery,
 } from "@tanstack/react-query";
 import {
+	type PaginatedQueryArgs,
 	type PaginatedQueryReference,
 	useAction,
 	useConvexAuth,
@@ -65,13 +66,12 @@ export function useStableConvexAuth(options?: { gracePeriodMs?: number }) {
  */
 export function usePaginatedConvexQuery<Query extends PaginatedQueryReference>(
 	query: Query,
-	args: Record<string, unknown> | "skip",
+	args: PaginatedQueryArgs<Query> | "skip",
 	options: { initialNumItems: number },
 ) {
-	const shouldSkip = args === "skip";
 	const { results, status, loadMore, isLoading } = usePaginatedQuery(
 		query,
-		shouldSkip ? "skip" : (args as any),
+		args === "skip" ? "skip" : args,
 		options,
 	);
 
@@ -86,15 +86,14 @@ export function useAuthenticatedPaginatedQuery<
 	Query extends PaginatedQueryReference,
 >(
 	query: Query,
-	args: Record<string, unknown> | "skip",
+	args: PaginatedQueryArgs<Query> | "skip",
 	options: { initialNumItems: number },
 ) {
 	const { isAuthenticated, isLoading: isAuthLoading } = useConvexAuth();
-	const shouldSkip = args === "skip" || !isAuthenticated || isAuthLoading;
 
 	const { results, status, loadMore, isLoading } = usePaginatedQuery(
 		query,
-		shouldSkip ? "skip" : (args as any),
+		args === "skip" || !isAuthenticated || isAuthLoading ? "skip" : args,
 		options,
 	);
 
@@ -116,6 +115,10 @@ export function useConvexQuery<Query extends FunctionReference<"query">>(
 	return useQuery({
 		...queryOptions,
 		enabled: !shouldSkip,
+		// `any` justifié : les options « requête » et « skip » portent des clés de
+		// types distincts que TanStack ne sait pas unir ; le résultat reste typé
+		// (`UseQueryResult<FunctionReturnType<Query>>`).
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	} as any);
 }
 
@@ -137,6 +140,10 @@ export function useAuthenticatedConvexQuery<
 	return useQuery({
 		...queryOptions,
 		enabled: !shouldSkip,
+		// `any` justifié : les options « requête » et « skip » portent des clés de
+		// types distincts que TanStack ne sait pas unir ; le résultat reste typé
+		// (`UseQueryResult<FunctionReturnType<Query>>`).
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	} as any);
 }
 
