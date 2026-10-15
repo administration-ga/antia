@@ -714,6 +714,11 @@ describe("attestation consulaire DIASPORA-ATTESTATION-V1 (PD3, côté moteur)", 
     const mine = await ada.as.query(api.modules.diaspora.membership.myMembership, { networkId: diasporale })
     expect(mine).toMatchObject({ status: "verifiee", badges: ["verified"], attestation: { outcome: "verified", postSlug: "consulat-general-paris" } })
     expect(mine?.facet?.postSlug).toBe("consulat-general-paris")
+    // L'issue de SA demande se lit ; celle d'un autre membre n'existe pas pour lui.
+    expect(await ada.as.query(api.modules.diaspora.attestation.myAttestationRequest, { networkId: diasporale, attestationId })).toEqual({ result: "verified" })
+    const other = await verifiedSponsor(t, diasporale, "auth-autre", "autre")
+    const hidden = await refusal(other.as.query(api.modules.diaspora.attestation.myAttestationRequest, { networkId: diasporale, attestationId }))
+    expect(hidden.code).toBe("notFound")
     const consent = await t.run(async (ctx) => (row ? ctx.db.get(row.consentId) : null))
     expect(consent).toMatchObject({ purpose: "consular_attestation", origin: "prompt", networkId: diasporale })
   })

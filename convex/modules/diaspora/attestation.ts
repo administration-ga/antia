@@ -39,13 +39,14 @@ import { v } from "convex/values"
 import { internal } from "../../_generated/api"
 import type { Doc, Id } from "../../_generated/dataModel"
 import { internalAction, internalMutation, internalQuery, type QueryCtx } from "../../_generated/server"
-import { failAppRule } from "../../lib/errors"
-import { networkMutation } from "../../lib/functions"
+import { failAppRule, notFound } from "../../lib/errors"
+import { networkMutation, networkQuery } from "../../lib/functions"
 import { enforceRateLimit } from "../../lib/rateLimit"
 import { literals } from "../../lib/validators"
 import { writeNetworkFacet } from "../people/admission"
 import { liveIdentityLinks } from "../people/persons"
 import { activeSponsorshipOf, applyDerivedStatus, assertDiasporaNetwork, facetOf, isDiasporaNetwork, membershipGrounds, privacyOf, writePrivacy } from "./facts"
+import { ATTESTATION_RESULTS } from "./tables"
 import { attestationSubjectKindValidator } from "./validators"
 
 /** Délai de réponse accordé à consulat.ga avant de conclure à l'échec technique. */
@@ -146,6 +147,22 @@ export const requestConsularAttestation = networkMutation({
     })
     await ctx.scheduler.runAfter(0, internal.modules.diaspora.attestation.callAttestation, { attestationId })
     return { attestationId }
+  },
+})
+
+/**
+ * L'issue de SA propre demande (l'écran attend la réponse de consulat.ga) : en
+ * cours, confirmée, non confirmée ou en échec — jamais la raison consulaire.
+ * La demande d'un autre membre n'existe pas pour le lecteur.
+ */
+export const myAttestationRequest = networkQuery({
+  args: { attestationId: v.id("consularAttestations") },
+  returns: v.object({ result: literals(ATTESTATION_RESULTS) }),
+  handler: async (ctx, { attestationId }) => {
+    assertDiasporaNetwork(ctx.network)
+    const row = await ctx.db.get(attestationId)
+    if (!row || row.personId !== ctx.person._id || row.networkId !== ctx.networkId) return notFound()
+    return { result: row.result }
   },
 })
 
