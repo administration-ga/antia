@@ -9,17 +9,19 @@
  * adhésion → éligibilité → limitation de débit → droit. L'adhésion ANTIA dérivée
  * naît avec l'entrée (invariant 3) ; aucune adhésion n'est créée sans geste.
  */
-import { missingConsentsToJoin } from "@antia/social-domain/consent"
+import { CONSENT_TEXT_VERSIONS as ENGINE_CONSENT_TEXT_VERSIONS, isConsentInForce, missingConsentsToJoin } from "@antia/social-domain/consent"
 import { normalizeHandle } from "@antia/social-domain/content"
 import { isActiveStatus } from "@antia/social-domain/membership"
 import {
   capabilitiesOf,
   checkSponsorship,
+  CONSENT_PURPOSES as DIASPORALE_CONSENT_PURPOSES,
   checkSponsorshipRevocation,
   DEFAULT_DIRECTORY_VISIBILITY,
   deriveMembershipStatus,
   type DiasporaFacet,
   engineVerificationSource,
+  idnGroundFromLink,
   parseFacetInput,
   personBadges,
   type SponsorFacts,
@@ -58,6 +60,7 @@ import {
 } from "./facts"
 import {
   attestationOutcomeValidator,
+  consentPurposeValidator,
   directoryVisibilityValidator,
   facetInputValidator,
   memberCapabilityValidator,
@@ -395,5 +398,67 @@ export const sponsorDashboard = networkQuery({
       })
     }
     return { ...standing, given }
+  },
+})
+
+/**
+ * @selfScoped La personne de la session lit l'état de SES consentements pour
+ * DIASPORALE (les finalités du réseau) : en vigueur ou non, date du dernier geste,
+ * version du texte. Rien n'est présumé : sans geste, une finalité n'est pas accordée.
+ */
+export const myConsents = query({
+  args: { networkId: v.id("networks") },
+  returns: v.array(
+    v.object({
+      purpose: consentPurposeValidator,
+      granted: v.boolean(),
+      recordedAt: v.union(v.number(), v.null()),
+      textVersion: v.string(),
+    }),
+  ),
+  handler: async (ctx, { networkId }) => {
+    const person = await getCurrentPerson(ctx)
+    const network = await ctx.db.get(networkId)
+    if (!person || !isDiasporaNetwork(network)) return []
+    // borné : un consentement par finalité et par réseau.
+    const rows = await ctx.db
+      .query("consents")
+      .withIndex("by_person_and_purpose", (q) => q.eq("personId", person._id))
+      .take(100)
+    const scoped = rows.filter((row) => row.networkId === undefined || row.networkId === network._id)
+    return DIASPORALE_CONSENT_PURPOSES.map((purpose) => {
+      const mine = scoped.filter((row) => row.purpose === purpose)
+      const moment = (row: Doc<"consents">) => row.revokedAt ?? row.grantedAt
+      const latest = mine.reduce<Doc<"consents"> | null>((best, row) => (best === null || moment(row) > moment(best) ? row : best), null)
+      return {
+        purpose,
+        granted: isConsentInForce(mine, purpose),
+        recordedAt: latest ? moment(latest) : null,
+        textVersion: latest?.textVersion ?? ENGINE_CONSENT_TEXT_VERSIONS[purpose],
+      }
+    })
+  },
+})
+
+/**
+ * @selfScoped La personne de la session lit ce que DIASPORALE sait de SES liens
+ * d'identité : un lien IDN et son niveau de garantie, une attestation consulaire
+ * vivante — ni sujet, ni nationalité, ni aucune donnée consulaire. `null` sans personne.
+ */
+export const myIdentity = query({
+  args: {},
+  returns: v.union(
+    v.null(),
+    v.object({ idn: v.union(v.object({ loa: v.number() }), v.null()), consularAttestation: v.boolean() }),
+  ),
+  handler: async (ctx) => {
+    const person = await getCurrentPerson(ctx)
+    if (!person) return null
+    const links = await liveIdentityLinks(ctx, person._id)
+    const idn = links.find((link) => link.provider === "idn")
+    return {
+      idn: idn ? { loa: idnGroundFromLink(idn).loa } : null,
+      consularAttestation: links.some((link) => link.provider === "consular_attestation"),
+    }
   },
 })

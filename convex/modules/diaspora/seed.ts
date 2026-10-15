@@ -10,14 +10,18 @@
  * fondations d'abord). En production, la console crée le réseau avec
  * `managedBy: "diaspora"`.
  */
+import { normalizeHandle } from "@antia/social-domain/content"
 import { validateFacetSchema } from "@antia/social-domain/facets"
 import { isValidNetworkSlug, validateNetworkShape } from "@antia/social-domain/network"
-import { DIASPORALE_NETWORK_SEED, DIASPORALE_SLICE, type EngineFacetField } from "@diasporale/domain"
+import { DAY_MS, DIASPORALE_NETWORK_SEED, DIASPORALE_SLICE, type EngineFacetField } from "@diasporale/domain"
 import { v } from "convex/values"
 
 import { internalMutation } from "../../_generated/server"
-import { getRootNetwork } from "../../lib/access"
+import { getMembership, getRootNetwork } from "../../lib/access"
+import { membershipStatusValidator } from "../../lib/validators"
 import { assertSeedsAllowed, ensureNetwork } from "../../seeds/foundations"
+import { liveIdentityLinks } from "../people/persons"
+import { activeSponsorshipOf, applyDerivedStatus, facetOf, membershipGrounds } from "./facts"
 import { hubRow } from "./hubs"
 
 /** Un champ de facette du domaine (listes figées) au format mutable des tables du moteur. */
@@ -86,5 +90,52 @@ export const run = internalMutation({
       hubs.push(country)
     }
     return { network: network.id, created: network.created, hubs }
+  },
+})
+
+/** Poste FICTIF des attestations de recette : il ne désigne aucun poste consulaire réel. */
+export const RECETTE_POST_SLUG = "poste-de-recette"
+
+/**
+ * Recette locale SEULEMENT (double garde des graines) : rend « vérifié » le membre
+ * désigné par son identifiant, par une attestation consulaire FICTIVE (empreinte
+ * « recette-… », poste de recette), vérifié depuis `verifiedDaysAgo` jours (31 par
+ * défaut), pour jouer le parcours de parrainage (R3) sans consulat.ga. Rien n'est
+ * créé d'office : la personne doit déjà être membre. Jamais en production.
+ */
+export const verifyForRecette = internalMutation({
+  args: { confirmNonProduction: v.string(), handle: v.string(), verifiedDaysAgo: v.optional(v.number()) },
+  returns: v.object({ status: membershipStatusValidator }),
+  handler: async (ctx, args) => {
+    assertSeedsAllowed(args.confirmNonProduction)
+    const network = await ctx.db
+      .query("networks")
+      .withIndex("by_slug", (q) => q.eq("slug", DIASPORALE_NETWORK_SEED.slug))
+      .unique()
+    const person = await ctx.db
+      .query("persons")
+      .withIndex("by_handle", (q) => q.eq("handle", normalizeHandle(args.handle).replace(/^@/, "")))
+      .unique()
+    const membership = network && person ? await getMembership(ctx, network._id, person._id) : null
+    if (!network || !person || !membership) throw new Error("Recette refusée : aucun membre de diasporale sous cet identifiant.")
+
+    const now = Date.now()
+    const links = await liveIdentityLinks(ctx, person._id)
+    if (!links.some((link) => link.provider === "consular_attestation")) {
+      const facet = await facetOf(ctx, network._id, person._id)
+      await ctx.db.insert("identityLinks", {
+        personId: person._id,
+        provider: "consular_attestation",
+        subject: `recette-${person._id}`,
+        ...(facet ? { country: facet.countryOfResidence } : {}),
+        postSlug: RECETTE_POST_SLUG,
+        linkedAt: now,
+      })
+    }
+    const grounds = await membershipGrounds(ctx, network._id, person._id, membership)
+    const sponsorship = await activeSponsorshipOf(ctx, network._id, person._id)
+    const status = await applyDerivedStatus(ctx, membership, grounds, sponsorship?.sponsorPersonId ?? null, now)
+    if (status === "verifiee") await ctx.db.patch(membership._id, { statusChangedAt: now - (args.verifiedDaysAgo ?? 31) * DAY_MS })
+    return { status }
   },
 })

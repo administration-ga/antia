@@ -5,6 +5,7 @@
  */
 import {
   ATTESTATION_SUBJECT_KINDS,
+  CONSENT_PURPOSES,
   MEMBER_CAPABILITIES,
   SPONSORSHIP_REFUSALS,
   TRUST_BADGES,
@@ -50,6 +51,8 @@ export const ownFacetValidator = v.object({
   visibility: facetLevelsValidator,
 })
 
+/** Les finalités de consentement que DIASPORALE demande (sous-ensemble de celles du moteur). */
+export const consentPurposeValidator = literals(CONSENT_PURPOSES)
 export const trustBadgeValidator = literals(TRUST_BADGES)
 export const memberCapabilityValidator = literals(MEMBER_CAPABILITIES)
 export const writeRateTierValidator = literals(WRITE_RATE_TIERS)

@@ -535,3 +535,68 @@ describe("hubs pays — compteurs matérialisés, jamais calculés à la lecture
     expect((await t.run(async (ctx) => ctx.db.query("countryHubs").take(5))).map((row) => row.members)).toEqual([0])
   })
 })
+
+describe("ce que la personne lit d'elle-même pour DIASPORALE", () => {
+  it("myConsents : chaque finalité du réseau, rien de présumé, le dernier geste daté", async () => {
+    const t = testConvex()
+    const { diasporale } = await seedAll(t)
+    const ada = await person(t, "auth-ada", "ada")
+    await ada.as.mutation(api.modules.people.consents.recordConsent, { purpose: "directory", origin: "onboarding", networkId: diasporale })
+    await ada.as.mutation(api.modules.people.consents.recordConsent, { purpose: "notifications", origin: "onboarding" })
+    await ada.as.mutation(api.modules.people.consents.revokeConsent, { purpose: "notifications" })
+    const consents = await ada.as.query(api.modules.diaspora.membership.myConsents, { networkId: diasporale })
+    expect(consents.map((consent) => [consent.purpose, consent.granted])).toEqual([
+      ["social_profile", true],
+      ["directory", true],
+      ["notifications", false],
+      ["consular_attestation", false],
+      ["talents", false],
+    ])
+    expect(consents.find((consent) => consent.purpose === "notifications")?.recordedAt).toEqual(expect.any(Number))
+    expect(consents.find((consent) => consent.purpose === "talents")).toMatchObject({ recordedAt: null, textVersion: "2026-10-14" })
+    expect(await t.query(api.modules.diaspora.membership.myConsents, { networkId: diasporale })).toEqual([])
+  })
+
+  it("myIdentity : le niveau de garantie IDN et l'attestation, ni sujet ni nationalité", async () => {
+    const t = testConvex()
+    await seedAll(t)
+    const ada = await person(t, "auth-ada", "ada")
+    expect(await ada.as.query(api.modules.diaspora.membership.myIdentity, {})).toEqual({ idn: null, consularAttestation: false })
+    await linkIdn(t, ada.personId, 2, "GA")
+    await linkConsularAttestation(t, ada.personId)
+    expect(await ada.as.query(api.modules.diaspora.membership.myIdentity, {})).toEqual({ idn: { loa: 2 }, consularAttestation: true })
+    expect(await t.query(api.modules.diaspora.membership.myIdentity, {})).toBeNull()
+  })
+})
+
+describe("graine de recette — parrain vérifié pour jouer R3 en local", () => {
+  it("rend vérifié depuis 31 jours un membre existant, par une attestation fictive ; il peut alors parrainer", async () => {
+    const t = testConvex()
+    const { diasporale } = await seedAll(t)
+    const sponsor = await person(t, "auth-parrain", "parrain")
+    await join(sponsor.as, diasporale)
+    await expect(
+      t.mutation(internal.modules.diaspora.seed.verifyForRecette, { confirmNonProduction: SEED_CONFIRMATION, handle: "inconnu" }),
+    ).rejects.toThrow(/aucun membre/)
+    const result = await t.mutation(internal.modules.diaspora.seed.verifyForRecette, { confirmNonProduction: SEED_CONFIRMATION, handle: "@Parrain" })
+    expect(result).toEqual({ status: "verifiee" })
+    const row = await membership(t, diasporale, sponsor.personId)
+    expect(Date.now() - (row?.statusChangedAt ?? Date.now())).toBeGreaterThan(30 * DAY_MS)
+    const light = await person(t, "auth-light", "compte.leger")
+    await join(light.as, diasporale)
+    await sponsor.as.mutation(api.modules.diaspora.membership.sponsor, { networkId: diasporale, handle: "compte.leger" })
+    expect(await membership(t, diasporale, light.personId)).toMatchObject({ status: "declaree" })
+    // Rejouée : aucune seconde attestation fictive.
+    await t.mutation(internal.modules.diaspora.seed.verifyForRecette, { confirmNonProduction: SEED_CONFIRMATION, handle: "parrain" })
+    const links = await t.run(async (ctx) =>
+      ctx.db
+        .query("identityLinks")
+        .withIndex("by_person_and_provider", (q) => q.eq("personId", sponsor.personId).eq("provider", "consular_attestation"))
+        .take(5),
+    )
+    expect(links.map((link) => link.postSlug)).toEqual(["poste-de-recette"])
+    await expect(
+      t.mutation(internal.modules.diaspora.seed.verifyForRecette, { confirmNonProduction: "oui", handle: "parrain" }),
+    ).rejects.toThrow(/hors production/)
+  })
+})
