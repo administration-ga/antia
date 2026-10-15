@@ -124,6 +124,8 @@ export const peopleTables = {
   })
     .index("by_network_and_person", ["networkId", "personId"])
     .index("by_person", ["personId"])
+    // Suggestions d'abonnement : les membres découvrables, les plus récents d'abord.
+    .index("by_network_listed", ["networkId", "listed"])
     .searchIndex("search_name", { searchField: "searchName", filterFields: ["networkId", "listed"] }),
 
   handleHistory: defineTable({

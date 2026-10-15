@@ -1,4 +1,4 @@
-// Dupliqué de socle/convex/modules/reseauPersonnel/people.ts (l. 547-650, `searchPeople`) @ ad2e7fdc2 — adaptations : annuaire PAR RÉSEAU — projection cherchable dénormalisée (`peopleDirectory`, `filterFields: ["networkId", "listed"]`) au lieu d'un index global des profils, pour ne jamais rendre un non-membre ni une personne d'un autre réseau ; recherche repliée sans accents (`foldSearchQuery`) ; badges calculés joints ; garde d'adhésion par le constructeur au lieu d'`assertNotSuspended` ; filtre du blocage branché avec le graphe (lot 4).
+// Dupliqué de socle/convex/modules/reseauPersonnel/people.ts (l. 547-650, `searchPeople`) @ ad2e7fdc2 — adaptations : annuaire PAR RÉSEAU — projection cherchable dénormalisée (`peopleDirectory`, `filterFields: ["networkId", "listed"]`) au lieu d'un index global des profils, pour ne jamais rendre un non-membre ni une personne d'un autre réseau ; recherche repliée sans accents (`foldSearchQuery`) ; badges calculés joints ; garde d'adhésion par le constructeur au lieu d'`assertNotSuspended` ; blocage lu sur toute la paire (tous réseaux).
 /**
  * L'annuaire d'un réseau : chercher une personne parmi les MEMBRES qui ont
  * choisi d'être trouvés (profil publié, non privé).
@@ -19,6 +19,7 @@ import { isActiveMember } from "../../lib/access"
 import { networkQuery } from "../../lib/functions"
 import { badgeValidator } from "../../lib/validators"
 import { servableUrl } from "../files/storageGuard"
+import { isBlockedBetween } from "../graph/graph"
 import { isDiscoverablePerson } from "./miniProfile"
 import { badgesOf } from "./persons"
 
@@ -125,6 +126,8 @@ export const searchPeople = networkQuery({
     const hits: PersonHit[] = []
     for (const personId of personIds.slice(0, limit)) {
       if (personId === ctx.person._id) continue
+      // Un blocage, dans un sens ou dans l'autre, retire la personne de l'annuaire.
+      if (await isBlockedBetween(ctx, ctx.person._id, personId)) continue
       const person = await ctx.db.get(personId)
       if (!person || !isDiscoverablePerson(person) || !person.handle || !person.displayName) continue
       hits.push({

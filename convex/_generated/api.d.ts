@@ -40,6 +40,10 @@ import type * as modules_files_scan from "../modules/files/scan.js";
 import type * as modules_files_storageGuard from "../modules/files/storageGuard.js";
 import type * as modules_files_tables from "../modules/files/tables.js";
 import type * as modules_files_verdict from "../modules/files/verdict.js";
+import type * as modules_graph_connections from "../modules/graph/connections.js";
+import type * as modules_graph_follows from "../modules/graph/follows.js";
+import type * as modules_graph_graph from "../modules/graph/graph.js";
+import type * as modules_graph_tables from "../modules/graph/tables.js";
 import type * as modules_media_media from "../modules/media/media.js";
 import type * as modules_networks_networks from "../modules/networks/networks.js";
 import type * as modules_networks_tables from "../modules/networks/tables.js";
@@ -100,6 +104,10 @@ declare const fullApi: ApiFromModules<{
   "modules/files/storageGuard": typeof modules_files_storageGuard;
   "modules/files/tables": typeof modules_files_tables;
   "modules/files/verdict": typeof modules_files_verdict;
+  "modules/graph/connections": typeof modules_graph_connections;
+  "modules/graph/follows": typeof modules_graph_follows;
+  "modules/graph/graph": typeof modules_graph_graph;
+  "modules/graph/tables": typeof modules_graph_tables;
   "modules/media/media": typeof modules_media_media;
   "modules/networks/networks": typeof modules_networks_networks;
   "modules/networks/tables": typeof modules_networks_tables;
@@ -154,4 +162,5 @@ export declare const components: {
   migrations: import("@convex-dev/migrations/_generated/component.js").ComponentApi<"migrations">;
   resend: import("@convex-dev/resend/_generated/component.js").ComponentApi<"resend">;
   engineCounters: import("@convex-dev/aggregate/_generated/component.js").ComponentApi<"engineCounters">;
+  followerCounts: import("@convex-dev/aggregate/_generated/component.js").ComponentApi<"followerCounts">;
 };

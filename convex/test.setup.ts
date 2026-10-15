@@ -8,6 +8,7 @@
  * Fichier à deux points dans son nom : ignoré par le bundler de Convex, qui
  * refuserait `import.meta.glob` (piège payé par PRO.GA).
  */
+import aggregateTest from "@convex-dev/aggregate/test"
 import rateLimiterTest from "@convex-dev/rate-limiter/test"
 import { convexTest } from "convex-test"
 
@@ -36,11 +37,12 @@ export const modules = import.meta.glob([
 
 /**
  * Instancie un backend Convex mocké contre le schéma et les modules réels, avec
- * le VRAI limiteur de débit (composant monté) : les tests exercent les seuils,
- * ils ne les neutralisent pas.
+ * le VRAI limiteur de débit et les VRAIS agrégats (composants montés) : les
+ * tests exercent les seuils et les décomptes, ils ne les neutralisent pas.
  */
 export function testConvex() {
   const t = convexTest(schema, modules)
   rateLimiterTest.register(t, "rateLimiter")
+  aggregateTest.register(t, "followerCounts")
   return t
 }

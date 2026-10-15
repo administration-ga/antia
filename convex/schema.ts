@@ -3,6 +3,7 @@ import { defineSchema } from "convex/server"
 import { diasporaTables } from "./modules/diaspora/tables"
 import { engagementTables } from "./modules/engagement/tables"
 import { filesTables } from "./modules/files/tables"
+import { graphTables } from "./modules/graph/tables"
 import { networksTables } from "./modules/networks/tables"
 import { peopleTables } from "./modules/people/tables"
 import { platformTables } from "./modules/platform/tables"
@@ -31,6 +32,7 @@ export default defineSchema(
     ...postsTables,
     ...engagementTables,
     ...filesTables,
+    ...graphTables,
     ...diasporaTables,
   },
   { schemaValidation: true },

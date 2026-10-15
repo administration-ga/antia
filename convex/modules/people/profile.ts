@@ -18,6 +18,7 @@ import { guardUploadUrl } from "../../lib/uploadPolicy"
 import { badgeValidator, literals } from "../../lib/validators"
 import { admitStoredUpload, assertFreshUpload } from "../files/admission"
 import { resolveFileDelivery, withheldCodeOf, withheldCodeValidator } from "../files/storageGuard"
+import { isBlockedBetween } from "../graph/graph"
 import { syncPersonDirectory } from "./directory"
 import { findPublishedPersonByHandle, isPublishedPerson } from "./miniProfile"
 import { badgesOf } from "./persons"
@@ -226,8 +227,8 @@ export const setMyCover = personMutation({
 
 /**
  * La fiche publique d'une personne, telle qu'on la voit depuis le réseau.
- * Refus INDISTINCT : identifiant inconnu, profil retiré, non-membre du réseau
- * rendent le même `null` (le blocage s'y ajoute avec le graphe, lot 4).
+ * Refus INDISTINCT : identifiant inconnu, profil retiré, non-membre du réseau et
+ * BLOCAGE (dans un sens ou dans l'autre, tous réseaux) rendent le même `null`.
  */
 export const getPublicProfile = networkQuery({
   args: { handle: v.string() },
@@ -247,6 +248,7 @@ export const getPublicProfile = networkQuery({
   handler: async (ctx, { handle }) => {
     const person = await findPublishedPersonByHandle(ctx, ctx.networkId, handle)
     if (!person || !person.handle || !person.displayName) return null
+    if (person._id !== ctx.person._id && (await isBlockedBetween(ctx, ctx.person._id, person._id))) return null
     const image = async (storageId: Id<"_storage"> | undefined) => {
       if (!storageId) return { url: null, withheld: null }
       const delivery = await resolveFileDelivery(ctx, storageId)

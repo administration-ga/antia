@@ -16,7 +16,8 @@ l'owner map), les tests portés et neufs, les écarts assumés. Un module n'entr
 | # | Module | Commit | Tests portés / neufs | Dettes corrigées |
 |---|---|---|---|---|
 | 2 | `files` — garde des fichiers, politique de dépôt | `344f0fa` | 6 fichiers convex + 2 domaine + 4 cliquets | D05, D06, D31, D36 |
-| 3 | `people` (profil, annuaire, images, mentions) et `media` | voir journal git (`feat(people)`) | 2 fichiers convex + 1 cas domaine | D05, D14, D36 |
+| 3 | `people` (profil, annuaire, images, mentions) et `media` | `6ef11f7` | 2 fichiers convex + 1 cas domaine | D05, D14, D36 |
+| 4 | `graph` (connexions, blocages, abonnements) | voir journal git (`feat(graph)`) | 1 fichier convex (15 cas) + 4 cas domaine | D04, D05, D12, D14, D17, D19 |
 
 Ordre suivi (owner map §4.2), avec un écart : le lot 1 (modules purs) est porté avec chaque module qui le
 consomme ; l'avis de verdict des fichiers (`files/notify`) arrive avec le module `notifications` (lot 5), dont il
@@ -156,3 +157,62 @@ dépend.
 - **`accountErasure`** : porté avec l'effacement complet des tables sociales (PA5, D32).
 - **Type déclaré des images de profil** : `setMyAvatar`/`setMyCover` acceptent le type annoncé par l'écran, confronté
   au stockage (même repli que la politique de dépôt quand le stockage n'en porte pas).
+
+---
+
+## Lot 4 — `graph` (connexions, blocages, abonnements)
+
+### Parité, fichier par fichier
+
+| Source (`socle/convex/…`) | Cible | Sort | État |
+|---|---|---|---|
+| `modules/reseau/connections.ts` | `convex/modules/graph/connections.ts` | à réécrire | ✅ |
+| `modules/reseau/enums.ts` (l. 183-196) | `packages/social-domain/src/connectionState.ts` (`CONNECTION_STATUSES`, PA2) | à adapter | ✅ |
+| `modules/reseau/tables.ts` (l. 96-122) | `convex/modules/graph/tables.ts` (`connections`) | à adapter | ✅ |
+| `modules/reseau/graphGuards.ts` | — | exclu | — (le plancher défini positivement est `requireMembership`) |
+| `reseauPersonnel/graph.ts` (l. 1-223) | `convex/modules/graph/graph.ts` | à adapter | ✅ (l. 225-327 exclues : organisations, collègues) |
+| `reseauPersonnel/connections.ts` | fusionné dans `convex/modules/graph/connections.ts` | à réécrire | ✅ (`requestByHandle` + `requestByUserId` → `requestConnection`, `respond`, `paginateMine`, `paginatePendingForMe`, `searchMine`, `pendingState`) |
+| `reseauPersonnel/follows.ts` | `convex/modules/graph/follows.ts` | à adapter | ✅ |
+| `reseauPersonnel/connectionState.ts` | `packages/social-domain/src/connectionState.ts` | à adapter | ✅ (PA2 ; `canonicalPair` et `viewConnection` ajoutés) |
+| `modules/reseau/*` (16 fichiers institutionnels) | — | exclus | — |
+
+### Adaptations (liste fermée)
+
+- Personnes et réseaux : une ligne par paire ET par réseau (`networkId`, `personIdLow`/`personIdHigh`) ;
+  abonnements par réseau ; garde d'adhésion par le constructeur au lieu d'`assertNotSuspended`.
+- **Blocage sur toute la paire, tous réseaux** : écrit sur chaque ligne de la paire (créée dans le réseau
+  courant au besoin), lu par l'index `by_pair` ; il ferme aussi l'annuaire, la fiche et l'abonnement. Bloquer
+  dans un réseau pour être retrouvé dans un autre ne protégerait de rien.
+- Une seule façade (plus de délégation par `runMutation`) ; adressage par identifiant OU par personne, avec la
+  même exigence de découvrabilité et d'adhésion de la cible (EXF-AN-15 : manque du socle sur l'API brute).
+- Demandes reçues listées par un index (`recipientPersonId` dénormalisé) au lieu d'un `.filter()`.
+- Décompte d'abonnés par l'agrégat `followerCounts` (composant `aggregate`, instance nommée) au lieu de compter
+  des lignes ; suggestions puisées dans l'annuaire du réseau.
+- Erreurs à code ; DTO sans fonction ni administration, avec badges calculés.
+
+### Corrections de dette
+
+- **D12 — fuite du blocage** : le bloqué reçoit la réponse d'une demande envoyée, sans écriture ; le test
+  l'AFFIRME (au socle, le test qui devait l'empêcher n'affirmait rien).
+- **D04 — plafond qui lève** : `listMine`/`listPendingForMe` (qui levaient au-delà de 200) non recopiés ;
+  pagination native partout.
+- **D19 — troncatures silencieuses** : les lectures bornées du graphe rendent `truncated` (l'appelant dit la
+  lacune) ; `listMyFollows` paginé.
+- **D17 — lecture sans index** : suggestions d'abonnement par l'annuaire du réseau (`by_network_listed`), plus
+  par un balayage de tous les profils.
+- **D05** : avatar des suggestions par la garde. **D14** : seaux `connection.request`, `connection.respond`,
+  `connection.block`, `follow.toggle`.
+
+### Tests
+
+- Portés : `tests/reseauConnections.test` (paire canonique, demande, réponse, réouverture, blocage, vue,
+  demandes en attente, pagination exhaustive) ; `reseauPersonnel/connections.test` (`searchMine`,
+  `pendingState`, découvrabilité de la porte par personne) ; cas `follows.*` de `reseauPersonnel.test`.
+- Neufs : D12 affirmé, blocage d'un réseau valant dans un autre (fiche, annuaire, abonnement fermés), décompte
+  par agrégat.
+
+### Écarts assumés
+
+- **Cloche** (demande, acceptation, nouvel abonné) : arrive avec le module `notifications` (lot 5).
+- **Directs révoqués au blocage** (`revokeConnectionDirects`) : point d'accroche branché avec `live` (lot 16).
+- **Rompre une connexion sans bloquer** : absent du socle, non ajouté (parité).

@@ -22,5 +22,7 @@ app.use(rateLimiter)
 app.use(migrations)
 app.use(resend)
 app.use(aggregate, { name: "engineCounters" })
+// Abonnés d'une personne dans un réseau (graphe, PA3 lot 4) : un décompte sans balayage (R8).
+app.use(aggregate, { name: "followerCounts" })
 
 export default app
