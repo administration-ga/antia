@@ -115,11 +115,13 @@ Cliquets en place (`tests/ratchets/`) : `no-cross-product-imports`, `no-any-vali
   une installation ou un build.
 - **Actions « use node » et backend local** : le backend local refuse TOUT le déploiement dès
   qu'une action `"use node"` existe et que son Node n'est pas en 20, 22 ou 24 (le Mac a Node 25 :
-  `DeploymentNotConfiguredForNodeActions`). `bun run dev:convex` passe par `scripts/convex-dev.mjs`,
-  qui met un Node supporté en tête du PATH (Homebrew `node@22` présent). Relancer `convex dev`
-  après tout changement de ce lanceur. **C'est le Node de la CLI qui compte, à chaque publication** :
-  `codegen` (donc `verify`) lancé sous Node 25 échoue de même (constaté le 15/10, lot 15) — lancer
-  `PATH="/opt/homebrew/opt/node@22/bin:$PATH" bun run verify`.
+  `DeploymentNotConfiguredForNodeActions`). Il prend le Node du PATH de la commande qui le démarre :
+  `convex dev`, ou `convex codegen`, qui en démarre un éphémère quand aucun `convex dev` ne tourne
+  (d'où l'échec de `verify` sous Node 25 au lot 15). `dev:convex` et `codegen` (donc `verify`)
+  passent par `scripts/convex-dev.mjs [sous-commande]` (`dev` par défaut), qui met un Node supporté
+  en tête du PATH (Homebrew `node@22` présent) : aucun préfixe de PATH à ajouter à la main. Toute
+  autre sous-commande qui peut démarrer le backend local : `node scripts/convex-dev.mjs <sous-commande> …`.
+  Relancer `convex dev` après tout changement de ce lanceur.
 - **Identifiants de cron** : ASCII seulement (`crons.daily("purge des fichiers infectés", …)` fait
   échouer le déploiement entier à cause du `é`).
 - **`codegen` et `convex dev` en même temps** : `convex codegen` pousse aussi vers le backend local ;

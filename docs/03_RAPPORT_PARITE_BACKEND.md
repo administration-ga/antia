@@ -1188,5 +1188,6 @@ dépend.
 - **Titre d'appel** non stocké : l'écran compose « Appel de groupe — A, B +k » (`groupCallTitleParts`) ou lit le titre du
   fil par `threadId`.
 - **`codegen` et `verify` sous Node 25** : le backend local refuse la publication dès qu'une action `"use node"` existe
-  si la CLI tourne sous un Node non supporté — lancer avec `node@22` en tête du `PATH` (piège ajouté à `CLAUDE.md`).
+  si la CLI tourne sous un Node non supporté — réglé le même jour : `codegen` passe lui aussi par `scripts/convex-dev.mjs`
+  (piège mis à jour dans `CLAUDE.md`).
 - **Écrans** (iAppel, journal, réglages, grille, surface d'appel) : PA6.

@@ -1,9 +1,10 @@
 import { describe, expect, test } from "bun:test"
+import { readFileSync } from "node:fs"
 import { join } from "node:path"
 
-import { candidateBinDirs, nodeMajor, pickNodeBinDir } from "./convex-dev.mjs"
+import { candidateBinDirs, convexArgs, nodeMajor, pickNodeBinDir } from "./convex-dev.mjs"
 
-describe("lanceur convex dev — un Node accepté par le backend local", () => {
+describe("lanceur de la CLI Convex — un Node accepté par le backend local", () => {
   test("lit la version majeure de `node --version`", () => {
     expect(nodeMajor("v22.22.3\n")).toBe(22)
     expect(nodeMajor("v25.9.0")).toBe(25)
@@ -23,5 +24,26 @@ describe("lanceur convex dev — un Node accepté par le backend local", () => {
     const exists = (path) => present.has(path)
     const list = () => ["v20.19.0", "v25.0.0"]
     expect(candidateBinDirs("/home/x", exists, list)).toEqual(["/opt/homebrew/opt/node@22/bin", join("/home/x/.nvm/versions/node", "v20.19.0", "bin")])
+  })
+})
+
+describe("lanceur de la CLI Convex — la sous-commande", () => {
+  test("sans argument, ou avec une option en tête : `convex dev`, comme avant", () => {
+    expect(convexArgs([])).toEqual(["dev"])
+    expect(convexArgs(["--once"])).toEqual(["dev", "--once"])
+    expect(convexArgs(["--tail-logs", "disable"])).toEqual(["dev", "--tail-logs", "disable"])
+  })
+
+  test("le premier argument est la sous-commande, suivie de ses propres arguments", () => {
+    expect(convexArgs(["codegen"])).toEqual(["codegen"])
+    expect(convexArgs(["codegen", "--typecheck", "disable"])).toEqual(["codegen", "--typecheck", "disable"])
+    expect(convexArgs(["dev", "--once"])).toEqual(["dev", "--once"])
+  })
+
+  test("`codegen` (donc `verify`) et `dev:convex` du package.json racine passent par le lanceur", () => {
+    const { scripts } = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8"))
+    expect(scripts.codegen).toBe("node scripts/convex-dev.mjs codegen")
+    expect(scripts["dev:convex"]).toBe("node scripts/convex-dev.mjs")
+    expect(scripts.verify.split("&&").map((step) => step.trim())).toContain("bun run codegen")
   })
 })

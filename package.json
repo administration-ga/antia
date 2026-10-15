@@ -73,7 +73,7 @@
     }
   },
   "scripts": {
-    "codegen": "convex codegen",
+    "codegen": "node scripts/convex-dev.mjs codegen",
     "typecheck:convex": "tsgo --noEmit -p convex/tsconfig.json",
     "typecheck:tests": "tsgo --noEmit -p tsconfig.json",
     "test": "bun run test:convex && bun run test:ratchets && bun run test:scripts",

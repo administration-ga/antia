@@ -1,17 +1,23 @@
 #!/usr/bin/env node
 /**
- * `convex dev` avec un Node que le backend LOCAL accepte pour les actions
- * « use node » (analyse des fichiers, LiveKit…).
+ * La CLI Convex (`convex dev`, `convex codegen`…) avec un Node que le backend
+ * LOCAL accepte pour les actions « use node » (analyse des fichiers, LiveKit…).
  *
  * Le backend local de Convex refuse TOUT le déploiement dès qu'une action
  * « use node » est présente et que le Node de la machine n'est pas une version
  * qu'il supporte (20, 22 ou 24) — constaté le 15/10/2026 avec Node 25 :
- * `DeploymentNotConfiguredForNodeActions`. Il hérite de l'environnement de
- * `convex dev` : ce lanceur met donc en tête du PATH le premier Node supporté
- * qu'il trouve (celui du PATH s'il convient, sinon Homebrew `node@24/22/20`,
- * sinon nvm), sans rien installer ni modifier sur la machine.
+ * `DeploymentNotConfiguredForNodeActions`. Il hérite de l'environnement de la
+ * commande qui le démarre : `convex dev`, ou `convex codegen`, qui en démarre
+ * un éphémère quand aucun `convex dev` ne tourne (d'où l'échec de `verify`).
+ * Ce lanceur met donc en tête du PATH le premier Node supporté qu'il trouve
+ * (celui du PATH s'il convient, sinon Homebrew `node@24/22/20`, sinon nvm),
+ * sans rien installer ni modifier sur la machine.
  *
- *   node scripts/convex-dev.mjs [arguments de convex dev]
+ *   node scripts/convex-dev.mjs [sous-commande] [arguments]
+ *
+ * La sous-commande est le premier argument (`codegen`, `dev`…) ; sans
+ * argument, ou si le premier est une option, c'est `convex dev`
+ * (`bun run dev:convex --once` garde son sens).
  */
 import { execFileSync, spawn } from "node:child_process"
 import { existsSync, readdirSync } from "node:fs"
@@ -65,21 +71,35 @@ export function pickNodeBinDir({ currentVersion, candidates, versionAt }) {
   return null
 }
 
+/** La sous-commande de la CLI quand aucune n'est donnée : celle de `bun run dev:convex`. */
+export const DEFAULT_SUBCOMMAND = "dev"
+
+/**
+ * Les arguments de la CLI Convex : le premier argument est la sous-commande
+ * (`codegen`, `dev`…) ; absent ou commençant par `-`, c'est `dev`, qui reçoit
+ * alors tous les arguments (`convex dev` n'accepte aucun argument positionnel).
+ */
+export function convexArgs(argv) {
+  const [first] = argv
+  return first === undefined || first.startsWith("-") ? [DEFAULT_SUBCOMMAND, ...argv] : [...argv]
+}
+
 function main() {
   const root = resolve(dirname(fileURLToPath(import.meta.url)), "..")
+  const args = convexArgs(process.argv.slice(2))
   const currentVersion = versionOf("node") ?? ""
   const binDir = pickNodeBinDir({ currentVersion, candidates: candidateBinDirs(), versionAt: versionOf })
   const env = { ...process.env }
   if (binDir) {
     env.PATH = [binDir, env.PATH ?? ""].join(delimiter)
-    console.log(`[convex-dev] Node ${String(versionOf(join(binDir, "node"))).trim()} en tête du PATH pour le backend local (actions « use node »).`)
+    console.log(`[convex-dev] Node ${String(versionOf(join(binDir, "node"))).trim()} en tête du PATH de \`convex ${args[0]}\` pour le backend local (actions « use node »).`)
   } else if (!SUPPORTED_NODE_MAJORS.includes(nodeMajor(currentVersion))) {
     console.warn(
       `[convex-dev] Node ${currentVersion.trim() || "introuvable"} : le backend local refusera les actions « use node ». Installer Node ${SUPPORTED_NODE_MAJORS.join(", ")} (Homebrew node@22 ou nvm).`,
     )
   }
   const convexBin = join(root, "node_modules", ".bin", "convex")
-  const child = spawn(convexBin, ["dev", ...process.argv.slice(2)], { cwd: root, env, stdio: "inherit" })
+  const child = spawn(convexBin, args, { cwd: root, env, stdio: "inherit" })
   for (const signal of ["SIGINT", "SIGTERM"]) process.on(signal, () => child.kill(signal))
   child.on("exit", (code, signal) => {
     process.exitCode = code ?? (signal ? 1 : 0)
