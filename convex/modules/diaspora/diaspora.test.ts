@@ -1,0 +1,537 @@
+// @vitest-environment edge-runtime
+/**
+ * Tranche `diaspora` (DIASPORALE PD1) : réseau gouverné, entrée par les règles du
+ * domaine, adhésion ANTIA dérivée, parrainage (A3), départ, facette et annuaire,
+ * hubs aux compteurs matérialisés, graine idempotente, étanchéité entre réseaux.
+ */
+import { engineErrorAppRule, engineErrorCode } from "@antia/social-contracts/errors"
+import { validateFacetSchema } from "@antia/social-domain/facets"
+import { DAY_MS, DEFAULT_FACET_VISIBILITY, MEMBER_COUNTER_DISPLAY_THRESHOLD, SPONSORSHIPS_PER_WINDOW } from "@diasporale/domain"
+import { afterEach, describe, expect, it, vi } from "vitest"
+
+import { api, internal } from "../../_generated/api"
+import type { Id } from "../../_generated/dataModel"
+import schema from "../../schema"
+import { SEED_CONFIRMATION } from "../../seeds/foundations"
+import { testConvex } from "../../test.setup"
+import { DIASPORA_SLICE_MANIFEST } from "./manifest"
+import { diasporaTables } from "./tables"
+
+type T = ReturnType<typeof testConvex>
+type As = ReturnType<T["withIdentity"]>
+
+const FRANCE = { countryOfResidence: "FR", city: "Lyon" }
+
+async function seedAll(t: T) {
+  const foundations = await t.mutation(internal.seeds.foundations.run, { confirmNonProduction: SEED_CONFIRMATION })
+  const diaspora = await t.mutation(internal.modules.diaspora.seed.run, { confirmNonProduction: SEED_CONFIRMATION })
+  return { root: foundations.root, testClosed: foundations.testClosed, diasporale: diaspora.network }
+}
+
+/** Une personne qui a choisi son profil et consenti au profil social (sans adhésion). */
+async function person(t: T, subject: string, handle: string) {
+  const as = t.withIdentity({ subject })
+  const personId = await as.mutation(api.modules.people.persons.ensureMyPerson, {})
+  await as.mutation(api.modules.people.consents.recordConsent, { purpose: "social_profile", origin: "onboarding" })
+  await as.mutation(api.modules.people.profile.publishMyProfile, { handle, displayName: handle })
+  return { as, personId }
+}
+
+async function linkIdn(t: T, personId: Id<"persons">, loa: number, nationality?: string) {
+  await t.run(async (ctx) => {
+    await ctx.db.insert("identityLinks", {
+      personId,
+      provider: "idn",
+      subject: `idn-${personId}`,
+      loa,
+      ...(nationality ? { nationality } : {}),
+      linkedAt: Date.now(),
+    })
+  })
+}
+
+async function linkConsularAttestation(t: T, personId: Id<"persons">) {
+  await t.run(async (ctx) => {
+    await ctx.db.insert("identityLinks", {
+      personId,
+      provider: "consular_attestation",
+      subject: `empreinte-${personId}`,
+      country: "FR",
+      postSlug: "consulat-general-paris",
+      linkedAt: Date.now(),
+    })
+  })
+}
+
+async function membership(t: T, networkId: Id<"networks">, personId: Id<"persons">) {
+  return await t.run(async (ctx) =>
+    ctx.db
+      .query("networkMemberships")
+      .withIndex("by_network_and_person", (q) => q.eq("networkId", networkId).eq("personId", personId))
+      .unique(),
+  )
+}
+
+/** Un membre vérifié par attestation consulaire, vérifié depuis `verifiedDaysAgo` jours. */
+async function verifiedSponsor(t: T, diasporale: Id<"networks">, subject: string, handle: string, verifiedDaysAgo = 31) {
+  const sponsor = await person(t, subject, handle)
+  await linkConsularAttestation(t, sponsor.personId)
+  expect(await sponsor.as.mutation(api.modules.diaspora.membership.joinDiasporale, { networkId: diasporale, facet: FRANCE })).toMatchObject({
+    status: "verifiee",
+  })
+  const row = await membership(t, diasporale, sponsor.personId)
+  await t.run(async (ctx) => {
+    if (row) await ctx.db.patch(row._id, { statusChangedAt: Date.now() - verifiedDaysAgo * DAY_MS })
+  })
+  return sponsor
+}
+
+async function caught(promise: Promise<unknown>): Promise<unknown> {
+  try {
+    await promise
+  } catch (error) {
+    return error
+  }
+  throw new Error("aucune erreur levée")
+}
+
+async function refusal(promise: Promise<unknown>) {
+  const error = await caught(promise)
+  return { code: engineErrorCode(error), app: engineErrorAppRule(error) }
+}
+
+async function join(as: As, networkId: Id<"networks">, facet: Record<string, unknown> = FRANCE, directoryVisibility?: "hidden" | "country" | "network") {
+  return await as.mutation(api.modules.diaspora.membership.joinDiasporale, {
+    networkId,
+    facet: facet as { countryOfResidence: string },
+    ...(directoryVisibility ? { directoryVisibility } : {}),
+  })
+}
+
+afterEach(() => {
+  vi.useRealTimers()
+})
+
+describe("graine et manifeste de la tranche", () => {
+  it("sème diasporale : fermé, enfant d'ANTIA, gouverné par la tranche, facette valide, France ouverte", async () => {
+    const t = testConvex()
+    const { root, diasporale } = await seedAll(t)
+    const network = await t.run(async (ctx) => ctx.db.get(diasporale))
+    expect(network).toMatchObject({
+      slug: "diasporale",
+      kind: "closed",
+      parentId: root,
+      managedBy: "diaspora",
+      membershipPolicy: "declared_or_verified",
+      defaultVisibility: "network",
+      openCountries: ["FR"],
+      reachValues: ["local", "diaspora"],
+      theme: "diasporale",
+      status: "active",
+    })
+    expect(validateFacetSchema(network?.facetSchema ?? { fields: [] })).toEqual([])
+    expect(network?.facetSchema?.fields.map((field) => field.key)).toEqual(Object.keys(DEFAULT_FACET_VISIBILITY))
+    const hubs = await t.run(async (ctx) => ctx.db.query("countryHubs").take(10))
+    expect(hubs.map((hub) => [hub.country, hub.members, hub.countersComputedAt])).toEqual([["FR", 0, undefined]])
+  })
+
+  it("est idempotente, et refusée sans confirmation ou sans racine", async () => {
+    const t = testConvex()
+    await expect(t.mutation(internal.modules.diaspora.seed.run, { confirmNonProduction: SEED_CONFIRMATION })).rejects.toThrow(/racine/)
+    const { diasporale } = await seedAll(t)
+    const again = await t.mutation(internal.modules.diaspora.seed.run, { confirmNonProduction: SEED_CONFIRMATION })
+    expect(again).toEqual({ network: diasporale, created: false, hubs: [] })
+    await expect(t.mutation(internal.modules.diaspora.seed.run, { confirmNonProduction: "oui" })).rejects.toThrow(/hors production/)
+  })
+
+  it("le manifeste dit vrai : ses tables sont au schéma du moteur", () => {
+    expect([...DIASPORA_SLICE_MANIFEST.tables].sort()).toEqual(Object.keys(diasporaTables).sort())
+    for (const table of DIASPORA_SLICE_MANIFEST.tables) expect(Object.keys(schema.tables)).toContain(table)
+  })
+})
+
+describe("réseau gouverné : les chemins génériques refusent", () => {
+  it("joinNetwork et setMyFacet du moteur refusent diasporale ; la tranche, elle, l'ouvre", async () => {
+    const t = testConvex()
+    const { diasporale } = await seedAll(t)
+    const ada = await person(t, "auth-ada", "ada.lovelace")
+    await linkIdn(t, ada.personId, 3, "FR")
+    // Une identité IDN étrangère de garantie 3 entrerait « déclarée » par le chemin générique.
+    expect((await refusal(ada.as.mutation(api.modules.people.memberships.joinNetwork, { networkId: diasporale }))).code).toBe("policyRefused")
+    expect(await join(ada.as, diasporale)).toEqual({ status: "en_attente", rootStatus: "verifiee" })
+    const generic = ada.as.mutation(api.modules.people.facets.setMyFacet, {
+      networkId: diasporale,
+      values: { countryOfResidence: "FR", postSlug: "consulat-general-paris" },
+      visibilities: {},
+    })
+    expect((await refusal(generic)).code).toBe("policyRefused")
+  })
+})
+
+describe("entrer dans DIASPORALE (R1, R3)", () => {
+  it("un compte léger entre « en attente », ne publie pas, et l'adhésion ANTIA dérivée existe", async () => {
+    const t = testConvex()
+    const { root, diasporale } = await seedAll(t)
+    const light = await person(t, "auth-light", "compte.leger")
+    expect(await join(light.as, diasporale)).toEqual({ status: "en_attente", rootStatus: "declaree" })
+    expect(await membership(t, root, light.personId)).toMatchObject({ status: "declaree", derivedFrom: diasporale })
+    const publish = light.as.mutation(api.modules.posts.posts.publish, { networkId: diasporale, body: "Bonjour Lyon" })
+    expect((await refusal(publish)).code).toBe("statusInsufficient")
+    const facet = await t.run(async (ctx) =>
+      ctx.db
+        .query("personFacets")
+        .withIndex("by_network_and_person", (q) => q.eq("networkId", diasporale).eq("personId", light.personId))
+        .unique(),
+    )
+    expect(facet?.values).toEqual({ countryOfResidence: "FR", city: "Lyon", helpAvailable: false })
+    expect(facet?.visibilities).toMatchObject({ countryOfResidence: "network", city: "hidden", postSlug: "hidden" })
+  })
+
+  it("IDN gabonaise (ou de nationalité inconnue) déclare ; IDN étrangère seule n'ouvre pas ; l'attestation vérifie", async () => {
+    const t = testConvex()
+    const { diasporale } = await seedAll(t)
+    const cases: [string, (personId: Id<"persons">) => Promise<void>, string][] = [
+      ["idn.ga", (id) => linkIdn(t, id, 1, "GA"), "declaree"],
+      ["idn.inconnue", (id) => linkIdn(t, id, 2), "declaree"],
+      ["idn.etrangere", (id) => linkIdn(t, id, 3, "SN"), "en_attente"],
+      ["atteste", (id) => linkConsularAttestation(t, id), "verifiee"],
+    ]
+    for (const [handle, link, expected] of cases) {
+      const someone = await person(t, `auth-${handle}`, handle)
+      await link(someone.personId)
+      expect((await join(someone.as, diasporale)).status).toBe(expected)
+    }
+    const attested = await t.run(async (ctx) => ctx.db.query("persons").withIndex("by_handle", (q) => q.eq("handle", "atteste")).unique())
+    expect(await membership(t, diasporale, attested?._id as Id<"persons">)).toMatchObject({ verifiedBy: "consulat" })
+  })
+
+  it("exige le profil puis le consentement ; refuse le Gabon comme pays de résidence, avec son code", async () => {
+    const t = testConvex()
+    const { diasporale } = await seedAll(t)
+    const as = t.withIdentity({ subject: "auth-nouveau" })
+    const personId = await as.mutation(api.modules.people.persons.ensureMyPerson, {})
+    expect((await refusal(join(as, diasporale))).code).toBe("profileRequired")
+    await t.run(async (ctx) => ctx.db.patch(personId, { handle: "nouveau", displayName: "Nouveau", publishedAt: Date.now() }))
+    expect((await refusal(join(as, diasporale))).code).toBe("consentRequired")
+    await as.mutation(api.modules.people.consents.recordConsent, { purpose: "social_profile", origin: "onboarding" })
+    const home = await refusal(join(as, diasporale, { countryOfResidence: "GA" }))
+    expect(home).toEqual({ code: "invalidArgument", app: { appRule: "country_is_home", appParams: {} } })
+    const longCity = await refusal(join(as, diasporale, { countryOfResidence: "FR", city: "x".repeat(81) }))
+    expect(longCity.app?.appRule).toBe("city_too_long")
+    expect(await membership(t, diasporale, personId)).toBeNull()
+  })
+
+  it("l'annuaire est opt-in : un niveau visible exige le consentement en vigueur", async () => {
+    const t = testConvex()
+    const { diasporale } = await seedAll(t)
+    const ada = await person(t, "auth-ada", "ada")
+    const refused = await refusal(join(ada.as, diasporale, FRANCE, "country"))
+    expect(refused).toEqual({ code: "policyRefused", app: { appRule: "consent_directory_required", appParams: {} } })
+    await ada.as.mutation(api.modules.people.consents.recordConsent, { purpose: "directory", origin: "onboarding", networkId: diasporale })
+    await join(ada.as, diasporale, FRANCE, "country")
+    expect(await ada.as.query(api.modules.diaspora.membership.myMembership, { networkId: diasporale })).toMatchObject({ directoryVisibility: "country" })
+  })
+
+  it("un réseau qui n'est pas gouverné par la tranche reçoit le refus indistinct", async () => {
+    const t = testConvex()
+    const { root, testClosed } = await seedAll(t)
+    const ada = await person(t, "auth-ada", "ada")
+    expect((await refusal(join(ada.as, testClosed))).code).toBe("notFound")
+    expect((await refusal(join(ada.as, root))).code).toBe("notFound")
+    expect(await ada.as.query(api.modules.diaspora.membership.myMembership, { networkId: root })).toBeNull()
+  })
+})
+
+describe("parrainage (EXF-DG-04, arbitrage A3)", () => {
+  it("un parrain vérifié depuis plus de 30 jours fait passer un compte léger « déclaré » (R3)", async () => {
+    const t = testConvex()
+    const { diasporale } = await seedAll(t)
+    const sponsor = await verifiedSponsor(t, diasporale, "auth-parrain", "parrain")
+    const light = await person(t, "auth-light", "compte.leger")
+    await join(light.as, diasporale)
+    const { sponsorshipId } = await sponsor.as.mutation(api.modules.diaspora.membership.sponsor, { networkId: diasporale, handle: "@Compte.Leger" })
+    expect(await membership(t, diasporale, light.personId)).toMatchObject({ status: "declaree", sponsorPersonId: sponsor.personId })
+    const mine = await light.as.query(api.modules.diaspora.membership.myMembership, { networkId: diasporale })
+    expect(mine).toMatchObject({ status: "declaree", sponsoredBy: { handle: "parrain", displayName: "parrain" } })
+    expect(mine?.capabilities).toContain("publish")
+    await light.as.mutation(api.modules.posts.posts.publish, { networkId: diasporale, body: "Merci pour l'accueil" })
+    const dashboard = await sponsor.as.query(api.modules.diaspora.membership.sponsorDashboard, { networkId: diasporale })
+    expect(dashboard).toMatchObject({ eligible: true, refusal: null, remaining: SPONSORSHIPS_PER_WINDOW - 1, windowDays: 30 })
+    expect(dashboard.given).toEqual([{ _id: sponsorshipId, sponsored: { handle: "compte.leger", displayName: "compte.leger" }, createdAt: expect.any(Number), revokedAt: null }])
+  })
+
+  it("IDN de garantie ≥ 2 et parrainage vérifient", async () => {
+    const t = testConvex()
+    const { diasporale } = await seedAll(t)
+    const sponsor = await verifiedSponsor(t, diasporale, "auth-parrain", "parrain")
+    const idn = await person(t, "auth-idn", "idn.forte")
+    await linkIdn(t, idn.personId, 2, "GAB")
+    expect((await join(idn.as, diasporale)).status).toBe("declaree")
+    await sponsor.as.mutation(api.modules.diaspora.membership.sponsor, { networkId: diasporale, handle: "idn.forte" })
+    expect(await membership(t, diasporale, idn.personId)).toMatchObject({ status: "verifiee", verifiedBy: "idn" })
+  })
+
+  it("le parrain d'abord : non vérifié, trop récent (avec sa date), quota atteint", async () => {
+    const t = testConvex()
+    const { diasporale } = await seedAll(t)
+    const light = await person(t, "auth-light", "compte.leger")
+    await join(light.as, diasporale)
+    const declared = await person(t, "auth-declare", "declare")
+    await linkIdn(t, declared.personId, 1, "GA")
+    await join(declared.as, diasporale)
+    expect((await refusal(declared.as.mutation(api.modules.diaspora.membership.sponsor, { networkId: diasporale, handle: "compte.leger" }))).app?.appRule).toBe(
+      "sponsor_not_verified",
+    )
+    const recent = await verifiedSponsor(t, diasporale, "auth-recent", "recent", 2)
+    const tooRecent = await refusal(recent.as.mutation(api.modules.diaspora.membership.sponsor, { networkId: diasporale, handle: "compte.leger" }))
+    expect(tooRecent.app?.appRule).toBe("sponsor_too_recent")
+    expect(tooRecent.app?.appParams.availableAt).toBeGreaterThan(Date.now())
+    const busy = await verifiedSponsor(t, diasporale, "auth-occupe", "occupe")
+    await t.run(async (ctx) => {
+      for (let index = 0; index < SPONSORSHIPS_PER_WINDOW; index += 1) {
+        await ctx.db.insert("sponsorships", {
+          networkId: diasporale,
+          sponsorPersonId: busy.personId,
+          sponsoredPersonId: light.personId,
+          createdAt: Date.now() - index * DAY_MS,
+          revokedAt: Date.now(),
+          revokedBy: "sponsor",
+        })
+      }
+    })
+    const quota = await refusal(busy.as.mutation(api.modules.diaspora.membership.sponsor, { networkId: diasporale, handle: "compte.leger" }))
+    expect(quota.app).toEqual({ appRule: "sponsor_quota_reached", appParams: { limit: SPONSORSHIPS_PER_WINDOW, windowDays: 30 } })
+    expect((await busy.as.query(api.modules.diaspora.membership.sponsorDashboard, { networkId: diasporale })).refusal).toBe("sponsor_quota_reached")
+  })
+
+  it("la cible ensuite, en un refus indistinct : inconnue, non membre, déjà parrainée, vérifiée ; soi-même à part", async () => {
+    const t = testConvex()
+    const { diasporale } = await seedAll(t)
+    const sponsor = await verifiedSponsor(t, diasporale, "auth-parrain", "parrain")
+    const other = await verifiedSponsor(t, diasporale, "auth-autre", "autre")
+    const outsider = await person(t, "auth-dehors", "dehors")
+    const light = await person(t, "auth-light", "compte.leger")
+    await join(light.as, diasporale)
+    await other.as.mutation(api.modules.diaspora.membership.sponsor, { networkId: diasporale, handle: "compte.leger" })
+    for (const handle of ["inconnu", "dehors", "compte.leger", "autre"]) {
+      const result = await refusal(sponsor.as.mutation(api.modules.diaspora.membership.sponsor, { networkId: diasporale, handle }))
+      expect(result.app?.appRule).toBe("target_not_eligible")
+    }
+    expect((await refusal(sponsor.as.mutation(api.modules.diaspora.membership.sponsor, { networkId: diasporale, handle: "parrain" }))).app?.appRule).toBe(
+      "self_sponsorship",
+    )
+    expect(outsider.personId).toBeDefined()
+  })
+
+  it("retirer : le parrain ou la modération ; le statut retombe ; un second retrait est un conflit ; les autres ne voient rien", async () => {
+    const t = testConvex()
+    const { diasporale } = await seedAll(t)
+    const sponsor = await verifiedSponsor(t, diasporale, "auth-parrain", "parrain")
+    const light = await person(t, "auth-light", "compte.leger")
+    await join(light.as, diasporale)
+    const { sponsorshipId } = await sponsor.as.mutation(api.modules.diaspora.membership.sponsor, { networkId: diasporale, handle: "compte.leger" })
+    const stranger = await verifiedSponsor(t, diasporale, "auth-tiers", "tiers")
+    expect((await refusal(stranger.as.mutation(api.modules.diaspora.membership.revokeSponsorship, { networkId: diasporale, sponsorshipId }))).code).toBe(
+      "notFound",
+    )
+    await sponsor.as.mutation(api.modules.diaspora.membership.revokeSponsorship, { networkId: diasporale, sponsorshipId })
+    expect(await membership(t, diasporale, light.personId)).toMatchObject({ status: "en_attente" })
+    expect((await membership(t, diasporale, light.personId))?.sponsorPersonId).toBeUndefined()
+    const again = await refusal(sponsor.as.mutation(api.modules.diaspora.membership.revokeSponsorship, { networkId: diasporale, sponsorshipId }))
+    expect(again).toEqual({ code: "conflict", app: { appRule: "already_revoked", appParams: {} } })
+
+    // La modération du réseau retire aussi (journal : « moderator »).
+    const second = await sponsor.as.mutation(api.modules.diaspora.membership.sponsor, { networkId: diasporale, handle: "compte.leger" })
+    const strangerRow = await membership(t, diasporale, stranger.personId)
+    await t.run(async (ctx) => {
+      if (strangerRow) await ctx.db.patch(strangerRow._id, { role: "network_moderator" })
+    })
+    await stranger.as.mutation(api.modules.diaspora.membership.revokeSponsorship, { networkId: diasporale, sponsorshipId: second.sponsorshipId })
+    expect(await t.run(async (ctx) => ctx.db.get(second.sponsorshipId))).toMatchObject({ revokedBy: "moderator" })
+  })
+
+  it("un départ éteint le parrainage ; au retour, la personne repart « en attente »", async () => {
+    const t = testConvex()
+    const { root, diasporale } = await seedAll(t)
+    const sponsor = await verifiedSponsor(t, diasporale, "auth-parrain", "parrain")
+    const light = await person(t, "auth-light", "compte.leger")
+    await join(light.as, diasporale)
+    const { sponsorshipId } = await sponsor.as.mutation(api.modules.diaspora.membership.sponsor, { networkId: diasporale, handle: "compte.leger" })
+    await light.as.mutation(api.modules.diaspora.membership.leaveDiasporale, { networkId: diasporale })
+    expect(await membership(t, diasporale, light.personId)).toMatchObject({ status: "partie" })
+    expect(await membership(t, root, light.personId)).toMatchObject({ status: "declaree" })
+    expect(await t.run(async (ctx) => ctx.db.get(sponsorshipId))).toMatchObject({ revokedBy: "departure" })
+    expect((await join(light.as, diasporale)).status).toBe("en_attente")
+  })
+})
+
+describe("facette et confidentialité", () => {
+  it("la facette se règle par les règles du domaine ; le poste consulaire saisi n'existe pas ; les niveaux fins sont gardés", async () => {
+    const t = testConvex()
+    const { diasporale } = await seedAll(t)
+    const ada = await person(t, "auth-ada", "ada")
+    await join(ada.as, diasporale)
+    await ada.as.mutation(api.modules.diaspora.facet.updateMyFacet, {
+      networkId: diasporale,
+      facet: { countryOfResidence: "be", city: "  Bruxelles ", arrivedAt: 2015, helpAvailable: true, visibility: { city: "country", arrivedAt: "connections" } },
+    })
+    const mine = await ada.as.query(api.modules.diaspora.membership.myMembership, { networkId: diasporale })
+    expect(mine?.facet).toEqual({
+      countryOfResidence: "BE",
+      city: "Bruxelles",
+      associationIds: [],
+      arrivedAt: 2015,
+      helpAvailable: true,
+      visibility: { ...DEFAULT_FACET_VISIBILITY, city: "country", arrivedAt: "connections" },
+    })
+    const wrongYear = await refusal(ada.as.mutation(api.modules.diaspora.facet.updateMyFacet, { networkId: diasporale, facet: { countryOfResidence: "BE", arrivedAt: 1900 } }))
+    expect(wrongYear.app?.appRule).toBe("arrived_at_out_of_range")
+  })
+
+  it("l'attestation pose le poste ; la saisie le garde sans pouvoir l'écrire", async () => {
+    const t = testConvex()
+    const { diasporale } = await seedAll(t)
+    const ada = await person(t, "auth-ada", "ada")
+    await join(ada.as, diasporale)
+    await t.run(async (ctx) => {
+      const row = await ctx.db
+        .query("personFacets")
+        .withIndex("by_network_and_person", (q) => q.eq("networkId", diasporale).eq("personId", ada.personId))
+        .unique()
+      if (row) await ctx.db.patch(row._id, { values: { ...row.values, postSlug: "consulat-general-paris" } })
+    })
+    await ada.as.mutation(api.modules.diaspora.facet.updateMyFacet, { networkId: diasporale, facet: { countryOfResidence: "FR", city: "Paris" } })
+    const mine = await ada.as.query(api.modules.diaspora.membership.myMembership, { networkId: diasporale })
+    expect(mine?.facet).toMatchObject({ city: "Paris", postSlug: "consulat-general-paris" })
+  })
+
+  it("le niveau d'annuaire : « personne » sans condition, un autre avec le consentement", async () => {
+    const t = testConvex()
+    const { diasporale } = await seedAll(t)
+    const ada = await person(t, "auth-ada", "ada")
+    await join(ada.as, diasporale)
+    const refused = await refusal(ada.as.mutation(api.modules.diaspora.facet.setDirectoryVisibility, { networkId: diasporale, level: "network" }))
+    expect(refused.app?.appRule).toBe("consent_directory_required")
+    await ada.as.mutation(api.modules.diaspora.facet.setDirectoryVisibility, { networkId: diasporale, level: "hidden" })
+    await ada.as.mutation(api.modules.people.consents.recordConsent, { purpose: "directory", origin: "settings" })
+    await ada.as.mutation(api.modules.diaspora.facet.setDirectoryVisibility, { networkId: diasporale, level: "network" })
+    expect((await ada.as.query(api.modules.diaspora.membership.myMembership, { networkId: diasporale }))?.directoryVisibility).toBe("network")
+  })
+})
+
+describe("myMembership — projection allowlistée de soi", () => {
+  it("rend le statut effectif, les badges calculés, l'ANTIA dérivée — et rien de consulaire", async () => {
+    const t = testConvex()
+    const { diasporale } = await seedAll(t)
+    const ada = await person(t, "auth-ada", "ada")
+    await linkConsularAttestation(t, ada.personId)
+    await join(ada.as, diasporale)
+    const mine = await ada.as.query(api.modules.diaspora.membership.myMembership, { networkId: diasporale })
+    expect(mine).toMatchObject({
+      status: "verifiee",
+      badges: ["verified"],
+      root: { status: "verifiee" },
+      attestation: { outcome: "none", postSlug: "consulat-general-paris", requestedAt: null },
+      rateTier: "standard",
+    })
+    expect(mine?.verifiedSince).toEqual(expect.any(Number))
+    expect(Object.keys(mine ?? {}).sort()).toEqual(
+      ["attestation", "badges", "capabilities", "directoryVisibility", "facet", "joinedAt", "role", "root", "rateTier", "sponsoredBy", "status", "verifiedSince"].sort(),
+    )
+    expect(await t.withIdentity({ subject: "auth-sans-personne" }).query(api.modules.diaspora.membership.myMembership, { networkId: diasporale })).toBeNull()
+  })
+
+  it("une suspension ANTIA vaut dans DIASPORALE", async () => {
+    const t = testConvex()
+    const { root, diasporale } = await seedAll(t)
+    const ada = await person(t, "auth-ada", "ada")
+    await join(ada.as, diasporale)
+    const rootRow = await membership(t, root, ada.personId)
+    await t.run(async (ctx) => {
+      if (rootRow) await ctx.db.patch(rootRow._id, { status: "suspendue", statusBeforeSuspension: "declaree" })
+    })
+    expect((await ada.as.query(api.modules.diaspora.membership.myMembership, { networkId: diasporale }))?.status).toBe("suspendue")
+    expect((await refusal(ada.as.query(api.modules.diaspora.hubs.getCountryHub, { networkId: diasporale, country: "FR" }))).code).toBe(
+      "membershipSuspended",
+    )
+  })
+})
+
+describe("étanchéité entre réseaux", () => {
+  it("un membre d'ANTIA seul ne lit ni le fil ni les hubs de diasporale ; la tranche refuse un autre réseau", async () => {
+    const t = testConvex()
+    const { root, diasporale } = await seedAll(t)
+    const author = await verifiedSponsor(t, diasporale, "auth-auteur", "auteur")
+    await author.as.mutation(api.modules.posts.posts.publish, { networkId: diasporale, body: "Réservé au réseau" })
+    const antiaOnly = await person(t, "auth-antia", "antia.seule")
+    await antiaOnly.as.mutation(api.modules.people.memberships.joinNetwork, { networkId: root })
+    const feed = antiaOnly.as.query(api.modules.posts.posts.feed, { networkId: diasporale, paginationOpts: { numItems: 10, cursor: null } })
+    expect((await refusal(feed)).code).toBe("notFound")
+    expect((await refusal(antiaOnly.as.query(api.modules.diaspora.hubs.getCountryHub, { networkId: diasporale, country: "FR" }))).code).toBe("notFound")
+    // Membre de la racine, mais la racine n'est pas gouvernée par la tranche : refus indistinct.
+    expect((await refusal(antiaOnly.as.query(api.modules.diaspora.hubs.getCountryHub, { networkId: root, country: "FR" }))).code).toBe("notFound")
+    expect((await refusal(antiaOnly.as.query(api.modules.diaspora.membership.sponsorDashboard, { networkId: root }))).code).toBe("notFound")
+  })
+})
+
+describe("hubs pays — compteurs matérialisés, jamais calculés à la lecture", () => {
+  async function listedMember(t: T, diasporale: Id<"networks">, index: number, country = "FR") {
+    const member = await person(t, `auth-membre-${index}`, `membre.${index}`)
+    await linkIdn(t, member.personId, 1, "GA")
+    await member.as.mutation(api.modules.people.consents.recordConsent, { purpose: "directory", origin: "onboarding", networkId: diasporale })
+    await join(member.as, diasporale, { countryOfResidence: country }, "country")
+    return member
+  }
+
+  it("la lecture rend la présentation stockée ; seul le passage nocturne compte", async () => {
+    const t = testConvex()
+    const { diasporale } = await seedAll(t)
+    const first = await listedMember(t, diasporale, 1)
+    await listedMember(t, diasporale, 2)
+    await listedMember(t, diasporale, 3, "BE")
+    const hidden = await person(t, "auth-cache", "cache")
+    await linkIdn(t, hidden.personId, 1, "GA")
+    await join(hidden.as, diasporale)
+    const light = await person(t, "auth-leger", "leger")
+    await light.as.mutation(api.modules.people.consents.recordConsent, { purpose: "directory", origin: "onboarding" })
+    await join(light.as, diasporale, FRANCE, "country")
+
+    const before = await first.as.query(api.modules.diaspora.hubs.getCountryHub, { networkId: diasporale, country: "fr" })
+    expect(before).toEqual({
+      country: "FR",
+      open: true,
+      counters: expect.objectContaining({ dormant: true }),
+      countersComputedAt: null,
+    })
+
+    vi.useFakeTimers()
+    await t.mutation(internal.modules.diaspora.hubs.refreshHubCounters, { pageSize: 2 })
+    await t.finishAllScheduledFunctions(vi.runAllTimers)
+    const rows = await t.run(async (ctx) => ctx.db.query("countryHubs").take(10))
+    // Deux listés en France (le membre caché et le compte en attente ne comptent pas), un en Belgique.
+    expect(Object.fromEntries(rows.map((row) => [row.country, row.members]))).toEqual({ FR: 2, BE: 1 })
+
+    const after = await first.as.query(api.modules.diaspora.hubs.getCountryHub, { networkId: diasporale, country: "FR" })
+    expect(after.countersComputedAt).toEqual(expect.any(Number))
+    // Sous le seuil, le chiffre ne quitte pas le serveur.
+    expect(after.counters.members).toEqual({ kind: "below_threshold", threshold: MEMBER_COUNTER_DISPLAY_THRESHOLD })
+    expect(after.counters.dormant).toBe(false)
+    const open = await first.as.query(api.modules.diaspora.hubs.listOpenCountries, { networkId: diasporale })
+    expect(open.map((hub) => hub.country)).toEqual(["FR"])
+    expect((await refusal(first.as.query(api.modules.diaspora.hubs.getCountryHub, { networkId: diasporale, country: "GA" }))).code).toBe("notFound")
+  })
+
+  it("un consentement retiré sort la personne du compte au passage suivant", async () => {
+    const t = testConvex()
+    const { diasporale } = await seedAll(t)
+    const member = await listedMember(t, diasporale, 1)
+    vi.useFakeTimers()
+    await t.mutation(internal.modules.diaspora.hubs.refreshHubCounters, {})
+    await t.finishAllScheduledFunctions(vi.runAllTimers)
+    expect((await t.run(async (ctx) => ctx.db.query("countryHubs").take(5))).map((row) => row.members)).toEqual([1])
+    await member.as.mutation(api.modules.people.consents.revokeConsent, { purpose: "directory", networkId: diasporale })
+    await t.mutation(internal.modules.diaspora.hubs.refreshHubCounters, {})
+    await t.finishAllScheduledFunctions(vi.runAllTimers)
+    expect((await t.run(async (ctx) => ctx.db.query("countryHubs").take(5))).map((row) => row.members)).toEqual([0])
+  })
+})

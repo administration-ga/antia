@@ -1,0 +1,399 @@
+/**
+ * Adhésion à DIASPORALE — entrer, parrainer, retirer un parrainage, quitter
+ * (DIASPORALE PD1, cahier DIASPORALE §6.2, EXF-DG-04, arbitrage A3).
+ *
+ * Le réseau est GOUVERNÉ par cette tranche (`managedBy = "diaspora"`) : les
+ * chemins génériques du moteur le refusent, car ils ignorent la nationalité
+ * IDN, le parrainage et l'attestation consulaire. Ici, le statut se DÉRIVE des
+ * faits par la règle du domaine (`@diasporale/domain`), dans l'ordre du moteur :
+ * adhésion → éligibilité → limitation de débit → droit. L'adhésion ANTIA dérivée
+ * naît avec l'entrée (invariant 3) ; aucune adhésion n'est créée sans geste.
+ */
+import { missingConsentsToJoin } from "@antia/social-domain/consent"
+import { normalizeHandle } from "@antia/social-domain/content"
+import { isActiveStatus } from "@antia/social-domain/membership"
+import {
+  capabilitiesOf,
+  checkSponsorship,
+  checkSponsorshipRevocation,
+  DEFAULT_DIRECTORY_VISIBILITY,
+  deriveMembershipStatus,
+  type DiasporaFacet,
+  engineVerificationSource,
+  parseFacetInput,
+  personBadges,
+  type SponsorFacts,
+  type SponsorshipRefusal,
+  sponsorSeniorityReachedAt,
+  SPONSORSHIP_WINDOW_DAYS,
+  sponsorshipWindowStart,
+  SPONSORSHIPS_PER_WINDOW,
+  sponsorStanding,
+  toEngineFacet,
+  writeRateTier,
+} from "@diasporale/domain"
+import { v } from "convex/values"
+
+import type { Doc, Id } from "../../_generated/dataModel"
+import { query, type QueryCtx } from "../../_generated/server"
+import { getCurrentPerson, getMembership, getRootNetwork } from "../../lib/access"
+import { fail, failAppRule, notFound } from "../../lib/errors"
+import { networkMutation, networkQuery, personMutation } from "../../lib/functions"
+import { enforceRateLimit } from "../../lib/rateLimit"
+import { membershipRoleValidator, membershipStatusValidator } from "../../lib/validators"
+import { admitToNetwork, setMembershipStatus, writeNetworkFacet } from "../people/admission"
+import { hasStrongIdentityFor, liveIdentityLinks } from "../people/persons"
+import {
+  activeSponsorshipOf,
+  applyDerivedStatus,
+  assertDiasporaNetwork,
+  consentInForce,
+  effectiveStatusIn,
+  endSponsorshipOnDeparture,
+  facetOf,
+  isDiasporaNetwork,
+  membershipGrounds,
+  privacyOf,
+  writePrivacy,
+} from "./facts"
+import {
+  attestationOutcomeValidator,
+  directoryVisibilityValidator,
+  facetInputValidator,
+  memberCapabilityValidator,
+  ownFacetValidator,
+  personLabelValidator,
+  sponsorshipRefusalValidator,
+  trustBadgeValidator,
+  writeRateTierValidator,
+} from "./validators"
+
+/** Le journal des parrainages donnés, tel que l'écran « Parrainer » l'affiche : les plus récents. */
+export const SPONSORSHIP_LOG_MAX = 50
+
+/** La facette de la personne pour elle-même : copie (aucune liste du domaine ne sort par référence). */
+function ownFacetView(facet: DiasporaFacet | null) {
+  return facet ? { ...facet, associationIds: [...facet.associationIds], visibility: { ...facet.visibility } } : null
+}
+
+/** Une personne citée par son identifiant public et son nom affiché — seulement si son profil est publié. */
+function labelOf(person: Doc<"persons"> | null): { handle: string; displayName: string } {
+  if (!person || person.publishedAt === undefined || person.withdrawnAt !== undefined) return { handle: "", displayName: "" }
+  return { handle: person.handle ?? "", displayName: person.displayName ?? "" }
+}
+
+/**
+ * @selfScoped La personne de la session entre dans DIASPORALE par la tranche qui
+ * le gouverne : son statut se dérive de SES faits (IDN et sa garantie, parrainage,
+ * attestation consulaire) ; sa facette suit les règles du domaine (pays hors
+ * Gabon, ville, année d'arrivée) et le poste consulaire n'est jamais saisi.
+ */
+export const joinDiasporale = personMutation({
+  args: {
+    networkId: v.id("networks"),
+    facet: facetInputValidator,
+    directoryVisibility: v.optional(directoryVisibilityValidator),
+  },
+  returns: v.object({ status: membershipStatusValidator, rootStatus: membershipStatusValidator }),
+  handler: async (ctx, args) => {
+    await enforceRateLimit(ctx, "network.join", ctx.person._id)
+    const network = await ctx.db.get(args.networkId)
+    if (!isDiasporaNetwork(network)) return notFound()
+    const root = await getRootNetwork(ctx)
+    if (!root) return notFound()
+    if (!ctx.person.handle || !ctx.person.displayName || ctx.person.publishedAt === undefined) return fail("profileRequired")
+    // borné : un consentement par finalité et par réseau.
+    const consents = await ctx.db
+      .query("consents")
+      .withIndex("by_person_and_purpose", (q) => q.eq("personId", ctx.person._id))
+      .take(100)
+    if (missingConsentsToJoin(consents).length > 0) return fail("consentRequired")
+
+    const now = Date.now()
+    const facet = parseFacetInput(args.facet, now, (await facetOf(ctx, network._id, ctx.person._id)) ?? undefined)
+    if (!facet.ok) return failAppRule(facet.code, {}, "invalidArgument")
+    const directoryVisibility =
+      args.directoryVisibility ?? (await privacyOf(ctx, network._id, ctx.person._id))?.directoryVisibility ?? DEFAULT_DIRECTORY_VISIBILITY
+    if (directoryVisibility !== "hidden" && !(await consentInForce(ctx, network._id, ctx.person._id, "directory"))) {
+      return failAppRule("consent_directory_required")
+    }
+
+    // Un retour après un départ : le parrainage s'est éteint avec le départ.
+    const existing = await getMembership(ctx, network._id, ctx.person._id)
+    if (existing?.status === "partie") await endSponsorshipOnDeparture(ctx, network._id, ctx.person._id, now)
+    const grounds = await membershipGrounds(ctx, network._id, ctx.person._id, null)
+    const entry = deriveMembershipStatus(grounds, now)
+    // Défensif : sans départ ni sanction dans les faits relus, l'entrée est toujours active.
+    if (!isActiveStatus(entry)) return notFound()
+    const sponsorship = await activeSponsorshipOf(ctx, network._id, ctx.person._id)
+    const source = engineVerificationSource(grounds, now)
+    const admitted = await admitToNetwork(ctx, {
+      personId: ctx.person._id,
+      network,
+      root,
+      entry,
+      evidence: {
+        strongIdentity: await hasStrongIdentityFor(ctx, ctx.person._id),
+        externalVerification: grounds.consularAttestation,
+        sponsored: grounds.sponsored,
+      },
+      ...(source ? { verifiedBy: source } : {}),
+      ...(sponsorship ? { sponsorPersonId: sponsorship.sponsorPersonId } : {}),
+    })
+    // Déjà membre actif : les faits ont pu changer depuis l'entrée (IDN liée…), la règle est relue.
+    const status =
+      existing && isActiveStatus(existing.status)
+        ? await applyDerivedStatus(ctx, existing, grounds, sponsorship?.sponsorPersonId ?? null, now)
+        : admitted.status
+
+    await writeNetworkFacet(ctx, network, ctx.person._id, toEngineFacet(facet.value))
+    await writePrivacy(ctx, network._id, ctx.person._id, { facetLevels: facet.value.visibility, directoryVisibility })
+    return { status, rootStatus: admitted.rootStatus }
+  },
+})
+
+/** Ce que la règle du parrainage sait du PARRAIN : son statut, son ancienneté, son quota glissant. */
+async function sponsorFactsOf(
+  ctx: QueryCtx & { networkId: Id<"networks">; person: Doc<"persons">; membership: Doc<"networkMemberships"> },
+  now: number,
+): Promise<SponsorFacts> {
+  // borné : au-delà du quota, le refus est acquis ; inutile de compter plus loin.
+  const recent = await ctx.db
+    .query("sponsorships")
+    .withIndex("by_network_and_sponsor_and_createdAt", (q) =>
+      q.eq("networkId", ctx.networkId).eq("sponsorPersonId", ctx.person._id).gt("createdAt", sponsorshipWindowStart(now)),
+    )
+    .take(SPONSORSHIPS_PER_WINDOW)
+  const status = ctx.membership.status
+  return {
+    status,
+    ...(status === "verifiee" ? { verifiedSince: ctx.membership.statusChangedAt } : {}),
+    sponsorshipsInWindow: recent.length,
+  }
+}
+
+/** Les bornes d'un refus, pour que l'écran dise « à partir du … » ou « dix par trente jours ». */
+function sponsorRefusalParams(code: SponsorshipRefusal, facts: SponsorFacts): Record<string, number> {
+  if (code === "sponsor_too_recent" && facts.verifiedSince !== undefined) {
+    return { availableAt: sponsorSeniorityReachedAt(facts.verifiedSince) }
+  }
+  if (code === "sponsor_quota_reached") return { limit: SPONSORSHIPS_PER_WINDOW, windowDays: SPONSORSHIP_WINDOW_DAYS }
+  return {}
+}
+
+/**
+ * Un membre parraine un compte de DIASPORALE, désigné par son identifiant public.
+ * Le parrain d'abord (vérifié depuis plus de 30 jours, dix par fenêtre glissante
+ * de 30 jours), la cible ensuite, en un refus INDISTINCT (`target_not_eligible`) :
+ * parrainer n'apprend rien du statut d'autrui, ni même de son existence.
+ */
+export const sponsor = networkMutation({
+  minStatus: "en_attente",
+  args: { handle: v.string() },
+  returns: v.object({ sponsorshipId: v.id("sponsorships") }),
+  handler: async (ctx, { handle }) => {
+    assertDiasporaNetwork(ctx.network)
+    await enforceRateLimit(ctx, "diaspora.sponsor", ctx.person._id)
+    const now = Date.now()
+    const facts = await sponsorFactsOf(ctx, now)
+    const target = await ctx.db
+      .query("persons")
+      .withIndex("by_handle", (q) => q.eq("handle", normalizeHandle(handle).replace(/^@/, "")))
+      .unique()
+    const targetAccess = target ? await effectiveStatusIn(ctx, ctx.network, target._id) : null
+    const check = checkSponsorship(
+      facts,
+      {
+        isSelf: target?._id === ctx.person._id,
+        status: targetAccess?.status ?? "partie",
+        alreadySponsored: target ? (await activeSponsorshipOf(ctx, ctx.networkId, target._id)) !== null : false,
+      },
+      now,
+    )
+    if (!check.ok) return failAppRule(check.code, sponsorRefusalParams(check.code, facts))
+    // Inatteignable : la règle a déjà refusé une cible absente ou non membre.
+    if (!target || !targetAccess?.membership) return notFound()
+
+    const sponsorshipId = await ctx.db.insert("sponsorships", {
+      networkId: ctx.networkId,
+      sponsorPersonId: ctx.person._id,
+      sponsoredPersonId: target._id,
+      createdAt: now,
+    })
+    const grounds = await membershipGrounds(ctx, ctx.networkId, target._id, targetAccess.membership)
+    await applyDerivedStatus(ctx, targetAccess.membership, grounds, ctx.person._id, now)
+    return { sponsorshipId }
+  },
+})
+
+/**
+ * Retirer un parrainage : le parrain, ou la modération du réseau. Le journal
+ * garde l'acte et son retrait ; le statut de la personne parrainée retombe selon
+ * ses faits restants. Pour tout autre membre, le parrainage n'existe pas.
+ */
+export const revokeSponsorship = networkMutation({
+  minStatus: "en_attente",
+  args: { sponsorshipId: v.id("sponsorships") },
+  returns: v.null(),
+  handler: async (ctx, { sponsorshipId }) => {
+    assertDiasporaNetwork(ctx.network)
+    await enforceRateLimit(ctx, "diaspora.sponsor.revoke", ctx.person._id)
+    const sponsorship = await ctx.db.get(sponsorshipId)
+    if (!sponsorship || sponsorship.networkId !== ctx.networkId) return notFound()
+    const actor =
+      sponsorship.sponsorPersonId === ctx.person._id
+        ? "sponsor"
+        : ctx.membership.role === "network_moderator" || ctx.membership.role === "network_admin"
+          ? "moderator"
+          : "other"
+    if (actor === "other") return notFound()
+    const check = checkSponsorshipRevocation({ actor, revokedAt: sponsorship.revokedAt ?? null })
+    if (!check.ok) return failAppRule(check.code, {}, "conflict")
+
+    const now = Date.now()
+    await ctx.db.patch(sponsorship._id, { revokedAt: now, revokedBy: actor })
+    const target = await getMembership(ctx, ctx.networkId, sponsorship.sponsoredPersonId)
+    if (target) {
+      const grounds = await membershipGrounds(ctx, ctx.networkId, sponsorship.sponsoredPersonId, target)
+      await applyDerivedStatus(ctx, target, grounds, null, now)
+    }
+    return null
+  },
+})
+
+/** Quitter DIASPORALE (l'adhésion ANTIA reste) ; le parrainage reçu s'éteint avec le départ. */
+export const leaveDiasporale = networkMutation({
+  minStatus: "en_attente",
+  args: {},
+  returns: v.null(),
+  handler: async (ctx) => {
+    assertDiasporaNetwork(ctx.network)
+    await enforceRateLimit(ctx, "network.leave", ctx.person._id)
+    const now = Date.now()
+    await endSponsorshipOnDeparture(ctx, ctx.networkId, ctx.person._id, now)
+    await setMembershipStatus(ctx, ctx.membership, "partie", { leftAt: now, sponsorPersonId: undefined })
+    return null
+  },
+})
+
+/**
+ * @selfScoped La personne de la session lit SON adhésion à DIASPORALE : statut
+ * effectif (une suspension ANTIA vaut ici), facette complète avec ses niveaux,
+ * badges calculés, parrain en vigueur, dernière demande d'attestation (sans la
+ * raison consulaire), capacités. `null` sans personne, sans réseau ou sans adhésion.
+ */
+export const myMembership = query({
+  args: { networkId: v.id("networks") },
+  returns: v.union(
+    v.null(),
+    v.object({
+      status: membershipStatusValidator,
+      role: membershipRoleValidator,
+      joinedAt: v.number(),
+      verifiedSince: v.union(v.number(), v.null()),
+      facet: v.union(ownFacetValidator, v.null()),
+      directoryVisibility: directoryVisibilityValidator,
+      sponsoredBy: v.union(personLabelValidator, v.null()),
+      attestation: v.object({
+        outcome: attestationOutcomeValidator,
+        postSlug: v.union(v.string(), v.null()),
+        requestedAt: v.union(v.number(), v.null()),
+      }),
+      root: v.object({ status: v.union(membershipStatusValidator, v.null()) }),
+      badges: v.array(trustBadgeValidator),
+      capabilities: v.array(memberCapabilityValidator),
+      rateTier: writeRateTierValidator,
+    }),
+  ),
+  handler: async (ctx, { networkId }) => {
+    const person = await getCurrentPerson(ctx)
+    if (!person) return null
+    const network = await ctx.db.get(networkId)
+    if (!isDiasporaNetwork(network)) return null
+    const access = await effectiveStatusIn(ctx, network, person._id)
+    if (!access.membership || access.status === null) return null
+    const { membership, status } = access
+
+    const links = await liveIdentityLinks(ctx, person._id)
+    const idn = links.find((link) => link.provider === "idn")
+    const consular = links.find((link) => link.provider === "consular_attestation")
+    const badges = personBadges({
+      ...(idn?.loa !== undefined ? { idnLoa: idn.loa } : {}),
+      consularAttestation: consular !== undefined,
+      administrationLink: links.some((link) => link.provider === "administration"),
+      membershipStatus: status,
+    })
+    const sponsorship = await activeSponsorshipOf(ctx, network._id, person._id)
+    // borné : une demande d'attestation par 24 h ; les dix dernières suffisent à trouver celle du réseau.
+    const requests = await ctx.db
+      .query("consularAttestations")
+      .withIndex("by_person_and_requestedAt", (q) => q.eq("personId", person._id))
+      .order("desc")
+      .take(10)
+    const latest = requests.find((request) => request.networkId === network._id)
+
+    return {
+      status,
+      role: membership.role,
+      joinedAt: membership.joinedAt,
+      verifiedSince: status === "verifiee" ? membership.statusChangedAt : null,
+      facet: ownFacetView(await facetOf(ctx, network._id, person._id)),
+      directoryVisibility: (await privacyOf(ctx, network._id, person._id))?.directoryVisibility ?? DEFAULT_DIRECTORY_VISIBILITY,
+      sponsoredBy: sponsorship ? labelOf(await ctx.db.get(sponsorship.sponsorPersonId)) : null,
+      attestation: {
+        outcome: latest?.result === "verified" ? ("verified" as const) : latest?.result === "not_confirmed" ? ("not_confirmed" as const) : ("none" as const),
+        postSlug: consular?.postSlug ?? null,
+        requestedAt: latest?.requestedAt ?? null,
+      },
+      root: { status: access.rootStatus },
+      badges,
+      capabilities: [...capabilitiesOf(status)],
+      rateTier: writeRateTier(status, badges),
+    }
+  },
+})
+
+/**
+ * Ce que voit le parrain avant tout geste (écran « Parrainer ») : peut-il
+ * parrainer, sinon pourquoi et jusqu'à quand, ce qui reste dans la fenêtre, et le
+ * journal des parrainages qu'il a donnés (les filleuls cités seulement si leur
+ * profil est publié).
+ */
+export const sponsorDashboard = networkQuery({
+  args: {},
+  returns: v.object({
+    eligible: v.boolean(),
+    refusal: v.union(sponsorshipRefusalValidator, v.null()),
+    remaining: v.number(),
+    windowDays: v.number(),
+    seniorityReachedAt: v.union(v.number(), v.null()),
+    given: v.array(
+      v.object({
+        _id: v.id("sponsorships"),
+        sponsored: personLabelValidator,
+        createdAt: v.number(),
+        revokedAt: v.union(v.number(), v.null()),
+      }),
+    ),
+  }),
+  handler: async (ctx) => {
+    assertDiasporaNetwork(ctx.network)
+    const now = Date.now()
+    const standing = sponsorStanding(await sponsorFactsOf(ctx, now), now)
+    const rows = await ctx.db
+      .query("sponsorships")
+      .withIndex("by_network_and_sponsor_and_createdAt", (q) => q.eq("networkId", ctx.networkId).eq("sponsorPersonId", ctx.person._id))
+      .order("desc")
+      .take(SPONSORSHIP_LOG_MAX)
+    const given = []
+    for (const row of rows) {
+      given.push({
+        _id: row._id,
+        sponsored: labelOf(await ctx.db.get(row.sponsoredPersonId)),
+        createdAt: row.createdAt,
+        revokedAt: row.revokedAt ?? null,
+      })
+    }
+    return { ...standing, given }
+  },
+})
