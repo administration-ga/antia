@@ -13,7 +13,7 @@ import { type Finding, formatFindings, isTestFile, listFiles, readRepoFile } fro
  * (PA3 : tous les modules dupliqués). Un module absent des deux listes est
  * lui-même un défaut (test ci-dessous).
  */
-export const SOCIAL_MODULE_DIRECTORIES: readonly string[] = ["convex/modules/networks", "convex/modules/people"]
+export const SOCIAL_MODULE_DIRECTORIES: readonly string[] = ["convex/modules/networks", "convex/modules/people", "convex/modules/posts", "convex/modules/engagement"]
 
 /** Modules du moteur qui ne sont PAS sociaux (aucun contenu, aucune adhésion). */
 export const NON_SOCIAL_MODULE_DIRECTORIES: readonly string[] = ["convex/modules/platform"]

@@ -19,6 +19,14 @@ export default function HomePage() {
         <p className="text-sm font-medium uppercase tracking-wide text-muted-foreground">{t("home.eyebrow")}</p>
         <h1 className="text-4xl sm:text-5xl">{t("home.title")}</h1>
         <p className="text-lg text-muted-foreground">{t("home.lead")}</p>
+        <div>
+          <Link
+            href={routes.signIn()}
+            className="inline-flex min-h-11 items-center rounded-lg bg-primary px-5 font-medium text-primary-foreground hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            {t("home.enter")}
+          </Link>
+        </div>
       </header>
 
       <section aria-labelledby="badges-title" className="flex flex-col gap-3">

@@ -29,6 +29,7 @@ export const DOMAIN_RULES = [
   // Profil
   "HANDLE_LENGTH",
   "HANDLE_CHARSET",
+  "DISPLAY_NAME_LENGTH",
   "HEADLINE_TOO_LONG",
   "CONNECTION_MESSAGE_TOO_LONG",
   // Forme d'une publication de groupe ou de page

@@ -1,4 +1,4 @@
-// Dupliqué de socle/convex/modules/reseauPersonnel/domain.ts (l. 1-662 et 807-894) @ ad2e7fdc2 — adaptations : module scindé (texte riche, groupes thématiques, évènements, stories et fils de groupe dans leurs fichiers) ; audience « organisation », portée « mon_administration », titre « collegue » et `isPageOrgMember` retirés ; forme d'une publication de page ramenée au seul `public` (pages génériques du moteur) ; `ReseauPersonnelViolation` → `DomainViolation` (code de règle + bornes, texte dans les locales de l'écran).
+// Dupliqué de socle/convex/modules/reseauPersonnel/domain.ts (l. 1-662 et 807-894) @ ad2e7fdc2 — adaptations : module scindé (texte riche, groupes thématiques, évènements, stories et fils de groupe dans leurs fichiers) ; audience « organisation », portée « mon_administration », titre « collegue » et `isPageOrgMember` retirés ; forme d'une publication de page ramenée au seul `public` (pages génériques du moteur) ; borne du nom affiché (en ligne dans `people.ts` au socle) devenue la règle `assertDisplayName` ; `ReseauPersonnelViolation` → `DomainViolation` (code de règle + bornes, texte dans les locales de l'écran).
 /**
  * Domaine PUR des publications du moteur — aucune fonction Convex ici, pour
  * qu'un import client atteigne ce fichier sans embarquer le backend. C'est
@@ -35,6 +35,7 @@ export const CONNECTION_MESSAGE_MAX_LENGTH = 500
 export const HANDLE_MIN_LENGTH = 3
 export const HANDLE_MAX_LENGTH = 30
 export const HEADLINE_MAX_LENGTH = 160
+export const DISPLAY_NAME_MAX_LENGTH = 120
 
 /**
  * Les audiences de PORTÉE — jusqu'où un contenu rayonne parmi les membres.
@@ -247,6 +248,19 @@ export function assertHandle(raw: string): string {
     throw new DomainViolation("HANDLE_CHARSET")
   }
   return handle
+}
+
+/**
+ * Le nom AFFICHÉ : ce que la personne publie, jamais un état civil recopié.
+ * La borne était écrite en ligne dans `publishMyProfile` au socle ; elle devient
+ * une règle du domaine, partagée avec l'écran.
+ */
+export function assertDisplayName(raw: string): string {
+  const name = raw.trim()
+  if (name.length === 0 || name.length > DISPLAY_NAME_MAX_LENGTH) {
+    throw new DomainViolation("DISPLAY_NAME_LENGTH", { min: 1, max: DISPLAY_NAME_MAX_LENGTH })
+  }
+  return name
 }
 
 export function assertHeadline(raw: string | undefined): string | undefined {

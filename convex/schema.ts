@@ -1,8 +1,10 @@
 import { defineSchema } from "convex/server"
 
+import { engagementTables } from "./modules/engagement/tables"
 import { networksTables } from "./modules/networks/tables"
 import { peopleTables } from "./modules/people/tables"
 import { platformTables } from "./modules/platform/tables"
+import { postsTables } from "./modules/posts/tables"
 
 /**
  * Schéma du moteur social national ANTIA — agrégat des tranches verticales
@@ -22,6 +24,8 @@ export default defineSchema(
     ...networksTables,
     ...peopleTables,
     ...platformTables,
+    ...postsTables,
+    ...engagementTables,
   },
   { schemaValidation: true },
 )

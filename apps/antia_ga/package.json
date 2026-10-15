@@ -16,13 +16,20 @@
   "dependencies": {
     "@antia/api": "workspace:*",
     "@antia/social-contracts": "workspace:*",
+    "@antia/social-domain": "workspace:*",
     "@antia/social-features": "workspace:*",
     "@antia/ui": "workspace:*",
+    "@hookform/resolvers": "catalog:",
+    "convex": "catalog:",
     "i18next": "catalog:",
+    "lucide-react": "catalog:",
     "next": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",
-    "react-i18next": "catalog:"
+    "react-hook-form": "catalog:",
+    "react-i18next": "catalog:",
+    "sonner": "catalog:",
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@antia/eslint-config": "workspace:*",

@@ -5,6 +5,9 @@
  */
 export const routes = {
   home: () => "/",
+  signIn: () => "/entrer",
+  welcome: () => "/bienvenue",
+  feed: () => "/fil",
   health: () => "/sante-fonctionnelle",
   healthApi: () => "/api/sante-fonctionnelle",
 } as const

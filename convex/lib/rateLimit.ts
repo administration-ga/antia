@@ -12,6 +12,9 @@ import type { MutationCtx } from "../_generated/server"
 import { fail } from "./errors"
 
 const RATE_LIMITS = {
+  // Authentification (clé : l'adresse ou le numéro normalisé, jamais l'IP seule)
+  "auth.login": { kind: "token bucket", rate: 5, period: 15 * MINUTE, capacity: 5 },
+  "auth.otp.send": { kind: "token bucket", rate: 3, period: 5 * MINUTE, capacity: 3 },
   // Fondations (PA2)
   "person.ensure": { kind: "token bucket", rate: 10, period: HOUR, capacity: 5 },
   "person.profile": { kind: "token bucket", rate: 30, period: HOUR, capacity: 10 },

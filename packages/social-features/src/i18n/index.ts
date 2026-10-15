@@ -40,6 +40,8 @@ export function createAppI18n(options: {
   locale: Locale
   appResources: AppResources
   defaultNS: string
+  /** Variables interpolées par défaut dans toutes les clés (la marque de l'application, `{{brand}}`). */
+  defaultVariables?: Record<string, string>
 }): I18nInstance {
   const resources: Resource = {}
   for (const locale of SUPPORTED_LOCALES) {
@@ -53,7 +55,7 @@ export function createAppI18n(options: {
     resources,
     defaultNS: options.defaultNS,
     ns: Object.keys(resources[DEFAULT_LOCALE] ?? {}),
-    interpolation: { escapeValue: false },
+    interpolation: { escapeValue: false, ...(options.defaultVariables ? { defaultVariables: options.defaultVariables } : {}) },
     initAsync: false,
     returnNull: false,
   })

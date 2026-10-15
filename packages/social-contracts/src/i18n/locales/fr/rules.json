@@ -14,6 +14,7 @@
   "COMMENT_TOO_LONG": "Un commentaire est limité à {{max}} caractères.",
   "HANDLE_LENGTH": "Un identifiant public compte entre {{min}} et {{max}} caractères.",
   "HANDLE_CHARSET": "Un identifiant public n'accepte que des lettres non accentuées, des chiffres, un point, un tiret ou un souligné.",
+  "DISPLAY_NAME_LENGTH": "Un nom affiché compte entre {{min}} et {{max}} caractères.",
   "HEADLINE_TOO_LONG": "Une accroche est limitée à {{max}} caractères.",
   "CONNECTION_MESSAGE_TOO_LONG": "Un message de mise en relation est limité à {{max}} caractères.",
   "POST_GROUP_REQUIRED": "Une publication de groupe désigne son groupe.",

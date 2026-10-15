@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next"
 import type { ReactNode } from "react"
 
+import { Providers } from "@/components/providers"
 import { getAppT } from "@/i18n/server"
 
 import "./globals.css"
@@ -30,7 +31,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         >
           {t("skipToContent")}
         </a>
-        {children}
+        <Providers locale={locale}>{children}</Providers>
       </body>
     </html>
   )

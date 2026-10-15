@@ -14,10 +14,16 @@ export function I18nProvider(props: {
   locale: Locale
   appResources: AppResources
   defaultNS: string
+  defaultVariables?: Record<string, string>
   children: ReactNode
 }) {
   const [i18n] = useState(() =>
-    createAppI18n({ locale: props.locale, appResources: props.appResources, defaultNS: props.defaultNS }),
+    createAppI18n({
+      locale: props.locale,
+      appResources: props.appResources,
+      defaultNS: props.defaultNS,
+      ...(props.defaultVariables ? { defaultVariables: props.defaultVariables } : {}),
+    }),
   )
   return <I18nextProvider i18n={i18n}>{props.children}</I18nextProvider>
 }

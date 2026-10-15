@@ -14,6 +14,7 @@
   "COMMENT_TOO_LONG": "A comment is limited to {{max}} characters.",
   "HANDLE_LENGTH": "A public handle has between {{min}} and {{max}} characters.",
   "HANDLE_CHARSET": "A public handle only accepts unaccented letters, digits, a dot, a hyphen or an underscore.",
+  "DISPLAY_NAME_LENGTH": "A display name has between {{min}} and {{max}} characters.",
   "HEADLINE_TOO_LONG": "A headline is limited to {{max}} characters.",
   "CONNECTION_MESSAGE_TOO_LONG": "A connection message is limited to {{max}} characters.",
   "POST_GROUP_REQUIRED": "A group post names its group.",

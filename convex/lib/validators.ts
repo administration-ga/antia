@@ -5,6 +5,7 @@
  */
 import { BADGES, IDENTITY_PROVIDERS, PAGE_OWNER_KINDS, PAGE_TRUST_LEVELS } from "@antia/social-domain/badges"
 import { CONSENT_ORIGINS, CONSENT_PURPOSES } from "@antia/social-domain/consent"
+import { PERSONAL_POST_AUDIENCES, PERSONAL_POST_STATUSES, PERSONAL_REACH_AUDIENCES, PERSONAL_REACTION_KINDS } from "@antia/social-domain/content"
 import { FACET_FIELD_KINDS, FACET_VISIBILITIES } from "@antia/social-domain/facets"
 import { ACTIVE_MEMBERSHIP_STATUSES, MEMBERSHIP_ROLES, MEMBERSHIP_STATUSES, VERIFICATION_SOURCES } from "@antia/social-domain/membership"
 import { CONTENT_VISIBILITIES, MEMBERSHIP_POLICIES, NETWORK_KINDS, NETWORK_STATUSES } from "@antia/social-domain/network"
@@ -57,3 +58,10 @@ export const consentPurposeValidator = literals(CONSENT_PURPOSES)
 export const consentOriginValidator = literals(CONSENT_ORIGINS)
 
 export const localeValidator = v.union(v.literal("fr"), v.literal("en"))
+
+// Publications et engagement (miroirs EXACTS des listes du domaine pur)
+export const postAudienceValidator = literals(PERSONAL_POST_AUDIENCES)
+export const reachAudienceValidator = literals(PERSONAL_REACH_AUDIENCES)
+export const postStatusValidator = literals(PERSONAL_POST_STATUSES)
+export const reactionKindValidator = literals(PERSONAL_REACTION_KINDS)
+export const reactionCountsValidator = v.object({ like: v.number(), bravo: v.number(), soutien: v.number(), instructif: v.number() })

@@ -7,6 +7,7 @@ import { describe, expect, it } from "vitest"
 
 import {
   assertAvatarUpload,
+  assertDisplayName,
   assertGroupAudienceShape,
   assertHandle,
   assertHeadline,
@@ -126,6 +127,12 @@ describe("bornes de saisie", () => {
   it("un commentaire est plus court qu'une publication", () => {
     expect(PERSONAL_COMMENT_MAX_LENGTH).toBeLessThan(PERSONAL_POST_MAX_LENGTH)
     expect(() => assertPersonalCommentBody("a".repeat(PERSONAL_COMMENT_MAX_LENGTH + 1))).toThrow(DomainViolation)
+  })
+
+  it("le nom affiché est borné et rogné, jamais vide", () => {
+    expect(assertDisplayName("  Lynda Onanga ")).toBe("Lynda Onanga")
+    expect(() => assertDisplayName("   ")).toThrow(DomainViolation)
+    expect(violationOf(() => assertDisplayName("x".repeat(121)))?.params).toEqual({ min: 1, max: 120 })
   })
 
   it("une accroche vide vaut absence, pas chaîne vide", () => {

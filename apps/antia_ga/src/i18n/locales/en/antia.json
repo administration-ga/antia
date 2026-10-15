@@ -14,8 +14,10 @@
       "diaspora": "The Gabonese diaspora, on its own network, whose members are also part of {{brand}}.",
       "administration": "The pages of verified public administrations, mirrored from their own space, read-only."
     },
-    "status": "The service will open in stages. Sign-ups are not open yet.",
-    "healthLink": "Service status"
+    "status": "The service will open in stages. This development version already lets you sign in, choose your handle, post and react.",
+    "healthLink": "Service status",
+    "enter": "Sign in",
+    "goToFeed": "Go to the feed"
   },
   "health": {
     "title": "Service status",
@@ -25,5 +27,91 @@
     "missing": "not configured",
     "version": "Version",
     "backHome": "Back to home"
+  },
+  "session": {
+    "loading": "Securing your connection…",
+    "failed": "Your session could not be renewed.",
+    "retry": "Try again",
+    "backendMissing": "The engine is not configured for this application.",
+    "checking": "Checking your session…"
+  },
+  "nav": {
+    "feed": "Feed",
+    "signOut": "Sign out",
+    "home": "Home"
+  },
+  "signIn": {
+    "title": "Sign in to {{brand}}",
+    "lead": "Receive a one-time code by email. No password.",
+    "emailLabel": "Email address",
+    "emailPlaceholder": "you@example.ga",
+    "sendCode": "Get a code",
+    "sending": "Sending…",
+    "codeTitle": "Enter the code you received",
+    "codeLead": "A six-digit code was sent to {{email}}. It expires in five minutes.",
+    "codeLabel": "One-time code",
+    "verify": "Sign in",
+    "verifying": "Checking…",
+    "changeEmail": "Change address",
+    "resend": "Send a new code",
+    "resent": "A new code has been sent.",
+    "devCode": "Development code: {{code}}",
+    "devCodeHint": "Shown only in local development, instead of the email.",
+    "errors": {
+      "invalidEmail": "Enter a valid email address.",
+      "codeFormat": "The code has six digits.",
+      "invalidCode": "This code is not valid.",
+      "expiredCode": "This code has expired: ask for a new one.",
+      "tooManyAttempts": "Too many attempts: ask for a new code.",
+      "deliveryUnavailable": "Sending codes by email is not open yet on this deployment."
+    }
+  },
+  "welcome": {
+    "title": "Welcome to {{brand}}",
+    "lead": "Choose how members will see you. Nothing is published without you.",
+    "displayNameLabel": "Display name",
+    "displayNameHint": "The name members will see. It is not copied from any registry.",
+    "handleLabel": "Public handle",
+    "handleHint": "Your address on the network: unaccented letters, digits, a dot, a hyphen or an underscore.",
+    "suggestions": "Suggestions:",
+    "taken": "{{handle}} (already taken)",
+    "consentLabel": "I agree that my social profile (display name and handle) is visible to network members.",
+    "consentRequired": "Your agreement is required to join the network.",
+    "submit": "Join {{brand}}",
+    "submitting": "One moment…",
+    "done": "Welcome, {{name}}!"
+  },
+  "feed": {
+    "title": "The feed",
+    "lead": "What {{brand}} members post, newest first.",
+    "composerLabel": "Your post",
+    "composerPlaceholder": "What's new? Add a #keyword or mention a @handle.",
+    "audienceLabel": "Visible to",
+    "publish": "Post",
+    "publishing": "Posting…",
+    "published": "Posted.",
+    "charactersLeft_one": "{{count}} character left",
+    "charactersLeft_other": "{{count}} characters left",
+    "empty": "The feed is empty. Post the first message!",
+    "loadMore": "Show more",
+    "loading": "Loading the feed…",
+    "you": "you",
+    "withdrawnAuthor": "Withdrawn profile",
+    "audience": {
+      "public": "All members",
+      "connections": "My connections"
+    }
+  },
+  "reactions": {
+    "groupLabel": "Reactions",
+    "like": "Like",
+    "bravo": "Bravo",
+    "soutien": "Support",
+    "instructif": "Insightful",
+    "total_one": "{{count}} reaction",
+    "total_other": "{{count}} reactions"
+  },
+  "errors": {
+    "generic": "Something went wrong. Please try again."
   }
 }

@@ -9,6 +9,8 @@
     ".": "./src/index.ts",
     "./csp": "./csp.mjs",
     "./next-config": "./next-config.mjs",
+    "./stable-convex-better-auth-provider": "./src/stable-convex-better-auth-provider.tsx",
+    "./next-provider": "./src/next-provider.tsx",
     "./*": "./src/*.ts"
   },
   "scripts": {
@@ -17,22 +19,30 @@
     "lint": "eslint ."
   },
   "dependencies": {
-    "@antia/social-contracts": "workspace:*"
+    "@antia/social-contracts": "workspace:*",
+    "@convex-dev/better-auth": "catalog:",
+    "@convex-dev/react-query": "catalog:",
+    "@tanstack/react-query": "catalog:",
+    "better-auth": "catalog:",
+    "convex": "catalog:"
   },
   "peerDependencies": {
+    "next": "catalog:",
     "react": "catalog:",
-    "next": "catalog:"
+    "react-dom": "catalog:"
   },
   "devDependencies": {
     "@antia/eslint-config": "workspace:*",
     "@antia/tsconfig": "workspace:*",
     "@types/node": "catalog:",
     "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
     "@typescript/native-preview": "catalog:",
     "eslint": "catalog:",
+    "next": "catalog:",
     "react": "catalog:",
+    "react-dom": "catalog:",
     "typescript": "catalog:",
-    "vitest": "catalog:",
-    "next": "catalog:"
+    "vitest": "catalog:"
   }
 }

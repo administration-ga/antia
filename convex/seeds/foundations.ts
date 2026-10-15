@@ -16,13 +16,12 @@ import { v } from "convex/values"
 
 import type { Id } from "../_generated/dataModel"
 import { internalMutation, type MutationCtx } from "../_generated/server"
+import { isLocalDeployment } from "../lib/devTools"
 
 export const SEED_CONFIRMATION = "ANTIA_SEEDS_HORS_PRODUCTION"
 
 export function seedsAllowed(env: Record<string, string | undefined> = process.env): boolean {
-  const cloudUrl = env.CONVEX_CLOUD_URL ?? ""
-  const local = /^http:\/\/(127\.0\.0\.1|localhost)(:\d+)?$/.test(cloudUrl)
-  return local || env.ANTIA_SEEDS_ALLOWED === "true"
+  return isLocalDeployment(env) || env.ANTIA_SEEDS_ALLOWED === "true"
 }
 
 async function ensureNetwork(
