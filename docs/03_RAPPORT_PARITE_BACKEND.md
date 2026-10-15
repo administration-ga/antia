@@ -25,7 +25,8 @@ l'owner map), les tests portés et neufs, les écarts assumés. Un module n'entr
 | 9 | `thematicGroups` (module complet : cycle de vie, invitations, rôles, mur, découverte, modération de groupe) | `a38c863` | 1 fichier convex (17 cas) | D02, D10, D14, D17, D19 |
 | 10 | `messaging` (fils personnels par réseau, boîte paginée, pastille tenue à l'écriture, pièces gardées, transfert) | `8c0ecda` | 1 fichier convex (37 cas) + 4 fichiers contrats (20 cas) | D13, D14, D16, D21, D37, D38, D39 |
 | 11 | `groups` (conversations de groupe : création par invitation, lien, administration, messages, non-lus tenus, transfert, cascade) | `35db309` | 1 fichier convex (42 cas) + 1 fichier contrats (7 cas) | D02, D05, D07, D10, D14, D15, D16, D22, D23 |
-| 12a | `events` (évènements personnels : création, invitation, réponse, annulation, annonce, agenda) | voir journal git (`feat(events)`) | 1 fichier convex (20 cas) | D02, D14, D15, D19 |
+| 12a | `events` (évènements personnels : création, invitation, réponse, annulation, annonce, agenda) | `3d397a9` | 1 fichier convex (20 cas) | D02, D14, D15, D19 |
+| 12b | `stories` (publier, plateau, mur, vues, retrait, purge) | voir journal git (`feat(stories)`) | 1 fichier convex (17 cas) | D02, D05, D10, D14, D16 |
 
 Ordre suivi (owner map §4.2), avec un écart : le lot 1 (modules purs) est porté avec chaque module qui le
 consomme ; l'avis de verdict des fichiers (`files/notify`) est arrivé avec le module `notifications` (lot 5), dont il
@@ -793,4 +794,53 @@ dépend.
   par test : avec un mot-clé qui écartait toute la fenêtre d'un auteur prolixe, ses publications plus anciennes étaient
   perdues — 5 rendues sur 15).
 - Tests : 5 cas convex (`feedLanes.test.ts`) + 4 cas de domaine.
+
+---
+
+## Lot 12b — `stories` (contenu éphémère d'un réseau)
+
+### Parité, fichier par fichier
+
+| Source (`socle/convex/modules/reseauPersonnel/…`) | Cible | Sort | État |
+|---|---|---|---|
+| `stories.ts` | `convex/modules/stories/stories.ts` | à adapter | ✅ |
+| `tables.ts` (l. 500-595) | `convex/modules/stories/tables.ts` | à adapter | ✅ |
+| `domain.ts` (stories) | `packages/social-domain/src/stories.ts` | pur | ✅ (lot 1) |
+| cron `purge-expired-stories` | `stories-purge-expired` (`convex/crons.ts`, 10 min, se replanifie) | patron | ✅ |
+
+### Adaptations (liste fermée)
+
+- **Par réseau** : une story vit dans le réseau où elle est publiée (plateau, mur, vues, plafond par réseau) ; une story
+  d'un autre réseau est introuvable ; une clé rejouée ailleurs est refusée ; adhésion par le constructeur.
+- **Surfaces** `reseau`/`icom` (ADR-0079 du socle) retirées : une seule borne vidéo, la plus stricte (domaine, lot 1).
+- **Délivrance par la garde** (D05) : une story dont le média n'est pas servable est OMISE pour les autres (le média EST
+  la story) et montrée RETENUE à son auteur (`withheld`) ; la vignette du plateau retombe sur un média servable, un
+  groupe sans aucun est écarté ; champ de compatibilité `coverUrl` non recopié.
+- **Spectateurs** dans l'agrégat `engineCounters` (D02), jamais sur la story ; « vu par » à curseur NATIF (le socle
+  perdait les ex æquo d'une frontière de page).
+- **Instant des lectures** fourni par le client (`tray`, `listByAuthor`, `myActive`, D16).
+- **Purge** : vues et décomptes, blob ET ligne d'analyse (D10), puis la ligne ; lot plein replanifié.
+- **Refus** à code (`notFound` indistinct, règle `STORY_ACTIVE_LIMIT` neuve) ; débit `story.publish`, `story.view`,
+  `story.remove` (D14).
+
+### Corrections de dette
+
+- **D02** : spectateurs par agrégat. **D05** : URL par la garde. **D10** : purge avec la ligne d'analyse. **D14** :
+  débit. **D16** : instant fourni par le client.
+
+### Tests
+
+- Portés (`stories.test`) : média inventé ; vidéo QuickTime et trop longue ; plafond et retrait qui libère ;
+  idempotence ; légende ; audience connexions et abonné ; blocage ; identifiant inconnu et bloqué ; plateau (groupes,
+  non-vues, ordre, les miennes) ; source bloquée ; expirée hors plateau et mur ; vignette de repli et groupe écarté ;
+  auteur tout-vidéo ; « vu » unique, auteur non compté, compte réservé à l'auteur ; « vu par » réservé et paginé ;
+  retrait idempotent, « vu par » gardé, retrait d'autrui ; purge (ligne, vues, blob), vivantes épargnées, blob absent,
+  lot plein replanifié ; DTO sans identifiant de stockage.
+- Neufs : déclaration qui ment refusée, clé rejouée dans un autre réseau, ex æquo de « vu par » rendus, purge de la
+  ligne d'analyse, retenue montrée à l'auteur seul, story d'un autre réseau introuvable.
+- Abandonnés : surfaces (8 cas).
+
+### Écarts assumés
+
+- Une story n'est pas lue depuis la racine pour un autre réseau : elle reste dans son réseau.
 

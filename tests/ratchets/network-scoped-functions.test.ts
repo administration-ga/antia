@@ -30,6 +30,7 @@ export const SOCIAL_MODULE_DIRECTORIES: readonly string[] = [
   "convex/modules/messaging",
   "convex/modules/groups",
   "convex/modules/events",
+  "convex/modules/stories",
   "convex/modules/diaspora",
 ]
 

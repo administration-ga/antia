@@ -27,4 +27,7 @@ crons.daily("files-purge-infected-blobs", { hourUTC: 3, minuteUTC: 15 }, interna
 crons.interval("messaging-purge-expired-typing", { minutes: 1 }, internal.modules.messaging.typing.purgeExpiredTyping, {})
 crons.interval("groups-purge-expired-typing", { minutes: 1 }, internal.modules.groups.typing.purgeExpiredGroupTyping, {})
 
+// Stories : la ligne, ses vues, son blob ET sa ligne d'analyse disparaissent à l'expiration.
+crons.interval("stories-purge-expired", { minutes: 10 }, internal.modules.stories.stories.purgeExpired, {})
+
 export default crons

@@ -61,6 +61,7 @@ export const DOMAIN_RULES = [
   "STORY_MEDIA_TOO_LARGE",
   "STORY_VIDEO_TOO_LONG",
   "STORY_CAPTION_TOO_LONG",
+  "STORY_ACTIVE_LIMIT",
   // Dépôt de fichiers (politique par usage)
   "UPLOAD_TYPE_NOT_ALLOWED",
   "UPLOAD_SIZE_OUT_OF_RANGE",

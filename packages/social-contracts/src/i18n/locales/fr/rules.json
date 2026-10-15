@@ -68,5 +68,6 @@
   "GROUP_SELF_MEMBER": "Vous êtes déjà membre de ce groupe.",
   "GROUP_CLOSED": "Cette conversation est fermée.",
   "EVENT_CANCELLED": "Cet évènement est annulé.",
-  "FEED_LANES_INVALID": "Un fil se compose d'une à {{max}} voies."
+  "FEED_LANES_INVALID": "Un fil se compose d'une à {{max}} voies.",
+  "STORY_ACTIVE_LIMIT": "Vous avez déjà {{max}} stories en cours : attendez qu'une expire, ou retirez-en une."
 }

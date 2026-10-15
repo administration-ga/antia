@@ -14,6 +14,7 @@ import { notificationsTables } from "./modules/notifications/tables"
 import { peopleTables } from "./modules/people/tables"
 import { platformTables } from "./modules/platform/tables"
 import { postsTables } from "./modules/posts/tables"
+import { storiesTables } from "./modules/stories/tables"
 import { thematicGroupsTables } from "./modules/thematicGroups/tables"
 
 /**
@@ -45,6 +46,7 @@ export default defineSchema(
     ...messagingTables,
     ...groupsTables,
     ...eventsTables,
+    ...storiesTables,
     ...marksTables,
     ...moderationTables,
     ...diasporaTables,

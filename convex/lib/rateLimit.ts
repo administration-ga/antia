@@ -68,6 +68,10 @@ const RATE_LIMITS = {
   "event.invite": { kind: "token bucket", rate: 60, period: HOUR, capacity: 20 },
   "event.respond": { kind: "token bucket", rate: 60, period: HOUR, capacity: 20 },
   "event.manage": { kind: "token bucket", rate: 30, period: HOUR, capacity: 10 },
+  // Stories (PA3 lot 12b).
+  "story.publish": { kind: "token bucket", rate: 30, period: HOUR, capacity: 10 },
+  "story.view": { kind: "token bucket", rate: 600, period: HOUR, capacity: 120 },
+  "story.remove": { kind: "token bucket", rate: 30, period: HOUR, capacity: 10 },
   // Garde des fichiers : gestes humains (libération par un modérateur, relance par un opérateur).
   "file.moderate": { kind: "token bucket", rate: 60, period: HOUR, capacity: 20 },
   // Console (PA7)

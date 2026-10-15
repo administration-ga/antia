@@ -68,5 +68,6 @@
   "GROUP_SELF_MEMBER": "You are already a member of this group.",
   "GROUP_CLOSED": "This conversation is closed.",
   "EVENT_CANCELLED": "This event is cancelled.",
-  "FEED_LANES_INVALID": "A feed combines one to {{max}} lanes."
+  "FEED_LANES_INVALID": "A feed combines one to {{max}} lanes.",
+  "STORY_ACTIVE_LIMIT": "You already have {{max}} live stories: wait for one to expire, or remove one."
 }

@@ -103,6 +103,8 @@ import type * as modules_posts_postNotify from "../modules/posts/postNotify.js";
 import type * as modules_posts_postWrite from "../modules/posts/postWrite.js";
 import type * as modules_posts_posts from "../modules/posts/posts.js";
 import type * as modules_posts_tables from "../modules/posts/tables.js";
+import type * as modules_stories_stories from "../modules/stories/stories.js";
+import type * as modules_stories_tables from "../modules/stories/tables.js";
 import type * as modules_thematicGroups_access from "../modules/thematicGroups/access.js";
 import type * as modules_thematicGroups_tables from "../modules/thematicGroups/tables.js";
 import type * as modules_thematicGroups_thematicGroups from "../modules/thematicGroups/thematicGroups.js";
@@ -210,6 +212,8 @@ declare const fullApi: ApiFromModules<{
   "modules/posts/postWrite": typeof modules_posts_postWrite;
   "modules/posts/posts": typeof modules_posts_posts;
   "modules/posts/tables": typeof modules_posts_tables;
+  "modules/stories/stories": typeof modules_stories_stories;
+  "modules/stories/tables": typeof modules_stories_tables;
   "modules/thematicGroups/access": typeof modules_thematicGroups_access;
   "modules/thematicGroups/tables": typeof modules_thematicGroups_tables;
   "modules/thematicGroups/thematicGroups": typeof modules_thematicGroups_thematicGroups;
