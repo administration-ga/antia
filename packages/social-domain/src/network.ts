@@ -30,6 +30,16 @@ export type ContentVisibility = (typeof CONTENT_VISIBILITIES)[number]
 export const NETWORK_STATUSES = ["active", "archived"] as const
 export type NetworkStatus = (typeof NETWORK_STATUSES)[number]
 
+/**
+ * Tranches du moteur qui GOUVERNENT l'entrée et les facettes d'un réseau
+ * (`networks.managedBy`). Une application dont l'admission a ses propres règles
+ * (DIASPORALE : nationalité, parrainage, attestation consulaire) les applique
+ * dans SA tranche `convex/modules/<tranche>` ; les chemins génériques (entrer,
+ * régler sa facette) refusent alors ce réseau. Quitter reste toujours possible.
+ */
+export const NETWORK_SLICES = ["diaspora"] as const
+export type NetworkSlice = (typeof NETWORK_SLICES)[number]
+
 /** Le réseau racine du moteur (arbitrage A1 : nom à confirmer — jeton unique). */
 export const ROOT_NETWORK_SLUG = "antia" as const
 

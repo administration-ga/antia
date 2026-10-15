@@ -30,6 +30,14 @@ const RATE_LIMITS = {
   "upload.url": { kind: "token bucket", rate: 60, period: HOUR, capacity: 20 },
   // Console (PA7)
   "operator.network": { kind: "token bucket", rate: 30, period: HOUR, capacity: 10 },
+  // Tranche DIASPORALE (`convex/modules/diaspora`, PD1). Entrer et régler sa
+  // facette consomment « network.join » et « person.facet » : une personne n'a
+  // qu'un budget, quel que soit le chemin. Les quotas MÉTIER (10 parrainages
+  // par 30 jours glissants, 24 h entre deux demandes d'attestation) vivent dans
+  // `@diasporale/domain`, en plus de ces seaux.
+  "diaspora.sponsor": { kind: "token bucket", rate: 10, period: HOUR, capacity: 5 },
+  "diaspora.sponsor.revoke": { kind: "token bucket", rate: 20, period: HOUR, capacity: 10 },
+  "diaspora.attestation.request": { kind: "token bucket", rate: 3, period: DAY, capacity: 1 },
 } as const satisfies Record<string, RateLimitConfig>
 
 export type RateLimitBucket = keyof typeof RATE_LIMITS & string

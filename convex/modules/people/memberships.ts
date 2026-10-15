@@ -7,20 +7,15 @@
  * - Quitter un réseau fermé ne retire pas la racine ; quitter la racine fait
  *   quitter tous les réseaux fermés.
  * - Suspendre à la racine suspend partout (la garde le lit à chaque appel).
+ * - Un réseau gouverné par une tranche (`networks.managedBy`) n'entre que par
+ *   elle (aides partagées : `./admission`) ; le quitter reste toujours possible.
  */
 import { missingConsentsToJoin } from "@antia/social-domain/consent"
-import { validateFacetValues } from "@antia/social-domain/facets"
-import {
-  derivedRootMembership,
-  type EntryEvidence,
-  entryStatusFor,
-  leaveCascades,
-  nextMembershipStatus,
-} from "@antia/social-domain/membership"
+import { type EntryEvidence, entryStatusFor, leaveCascades, nextMembershipStatus } from "@antia/social-domain/membership"
 import { v } from "convex/values"
 
-import type { Doc, Id } from "../../_generated/dataModel"
-import { type MutationCtx, query } from "../../_generated/server"
+import type { Doc } from "../../_generated/dataModel"
+import { query } from "../../_generated/server"
 import { getCurrentPerson, getMembership, getRootNetwork } from "../../lib/access"
 import { fail, notFound } from "../../lib/errors"
 import { operatorMutation, personMutation } from "../../lib/functions"
@@ -32,6 +27,7 @@ import {
   membershipStatusValidator,
   networkKindValidator,
 } from "../../lib/validators"
+import { admitToNetwork, setMembershipStatus, writeNetworkFacet } from "./admission"
 import { hasStrongIdentityFor } from "./persons"
 
 const facetInputValidator = v.object({
@@ -39,35 +35,10 @@ const facetInputValidator = v.object({
   visibilities: v.record(v.string(), facetVisibilityValidator),
 })
 
-async function writeFacet(
-  ctx: MutationCtx,
-  network: Doc<"networks">,
-  personId: Id<"persons">,
-  facet: { values: Record<string, Doc<"personFacets">["values"][string]>; visibilities: Doc<"personFacets">["visibilities"] } | undefined,
-) {
-  if (!network.facetSchema) {
-    if (facet && Object.keys(facet.values).length > 0) fail("invalidArgument", { field: "facet" })
-    return
-  }
-  const values = facet?.values ?? {}
-  const errors = validateFacetValues(network.facetSchema, values)
-  if (errors.length > 0) fail("invalidArgument", { field: `facet.${errors[0]?.key ?? ""}` })
-  const existing = await ctx.db
-    .query("personFacets")
-    .withIndex("by_network_and_person", (q) => q.eq("networkId", network._id).eq("personId", personId))
-    .unique()
-  const row = { values, visibilities: facet?.visibilities ?? {}, updatedAt: Date.now() }
-  if (existing) await ctx.db.patch(existing._id, row)
-  else await ctx.db.insert("personFacets", { networkId: network._id, personId, ...row })
-}
-
-async function setStatus(ctx: MutationCtx, membership: Doc<"networkMemberships">, status: Doc<"networkMemberships">["status"], extra: Partial<Doc<"networkMemberships">> = {}) {
-  await ctx.db.patch(membership._id, { status, statusChangedAt: Date.now(), ...extra })
-}
-
 /**
  * @selfScoped La personne de la session demande à entrer dans un réseau : la
- * politique du réseau décide du statut (aucun profil ni adhésion d'office).
+ * politique du réseau décide du statut (aucun profil ni adhésion d'office). Un
+ * réseau gouverné par une tranche (`managedBy`) n'entre que par elle.
  */
 export const joinNetwork = personMutation({
   args: { networkId: v.id("networks"), facet: v.optional(facetInputValidator) },
@@ -76,6 +47,9 @@ export const joinNetwork = personMutation({
     await enforceRateLimit(ctx, "network.join", ctx.person._id)
     const network = await ctx.db.get(networkId)
     if (!network || network.status !== "active") return notFound()
+    // Ses règles d'admission sont propres (nationalité, parrainage, attestation…) :
+    // le chemin générique les contournerait.
+    if (network.managedBy) return fail("policyRefused")
     const root = network.kind === "root" ? network : await getRootNetwork(ctx)
     if (!root) return notFound()
 
@@ -95,58 +69,9 @@ export const joinNetwork = personMutation({
     const entry = entryStatusFor(network.membershipPolicy, evidence)
     if (entry === null) return fail("policyRefused")
 
-    // La racine d'abord : une suspension racine interdit toute entrée.
-    const rootMembership = await getMembership(ctx, root._id, ctx.person._id)
-    const now = Date.now()
-    let rootStatus = rootMembership?.status ?? null
-    if (network.kind !== "root") {
-      const action = derivedRootMembership({ childKind: network.kind, existingRootStatus: rootStatus, evidence })
-      if (action.kind === "refuse") return fail("membershipSuspended")
-      if (action.kind === "create") {
-        await ctx.db.insert("networkMemberships", {
-          networkId: root._id,
-          personId: ctx.person._id,
-          status: action.status,
-          role: "member",
-          derivedFrom: network._id,
-          ...(action.status === "verifiee" ? { verifiedBy: "idn" as const } : {}),
-          joinedAt: now,
-          statusChangedAt: now,
-        })
-        rootStatus = action.status
-      } else if (action.kind === "reactivate" && rootMembership) {
-        await setStatus(ctx, rootMembership, action.status, { derivedFrom: network._id, leftAt: undefined })
-        rootStatus = action.status
-      }
-    }
-
-    const existing = network.kind === "root" ? rootMembership : await getMembership(ctx, network._id, ctx.person._id)
-    let status: Doc<"networkMemberships">["status"]
-    if (!existing) {
-      await ctx.db.insert("networkMemberships", {
-        networkId: network._id,
-        personId: ctx.person._id,
-        status: entry,
-        role: "member",
-        ...(entry === "verifiee" ? { verifiedBy: "idn" as const } : {}),
-        joinedAt: now,
-        statusChangedAt: now,
-      })
-      status = entry
-    } else if (existing.status === "suspendue") {
-      return fail("membershipSuspended")
-    } else if (existing.status === "partie") {
-      const next = nextMembershipStatus("partie", { kind: "rejoin", entryStatus: entry })
-      if (!next) return fail("conflict")
-      await setStatus(ctx, existing, next, { leftAt: undefined })
-      status = next
-    } else {
-      status = existing.status
-    }
-    if (network.kind === "root") rootStatus = status
-
-    await writeFacet(ctx, network, ctx.person._id, facet)
-    return { status, rootStatus: rootStatus ?? status }
+    const admitted = await admitToNetwork(ctx, { personId: ctx.person._id, network, root, entry, evidence })
+    await writeNetworkFacet(ctx, network, ctx.person._id, facet)
+    return admitted
   },
 })
 
@@ -167,7 +92,7 @@ export const leaveNetwork = personMutation({
       return membership.status === "suspendue" ? fail("membershipSuspended") : fail("conflict")
     }
     const now = Date.now()
-    await setStatus(ctx, membership, "partie", { leftAt: now })
+    await setMembershipStatus(ctx, membership, "partie", { leftAt: now })
     if (leaveCascades(network.kind) === "children_too") {
       for (const status of ["en_attente", "declaree", "verifiee"] as const) {
         // borné : une personne appartient à peu de réseaux ; 200 par statut au plus.
@@ -175,7 +100,7 @@ export const leaveNetwork = personMutation({
           .query("networkMemberships")
           .withIndex("by_person_and_status", (q) => q.eq("personId", ctx.person._id).eq("status", status))
           .take(200)
-        for (const other of others) if (other._id !== membership._id) await setStatus(ctx, other, "partie", { leftAt: now })
+        for (const other of others) if (other._id !== membership._id) await setMembershipStatus(ctx, other, "partie", { leftAt: now })
       }
     }
     return null
@@ -195,7 +120,7 @@ export const suspendEverywhere = operatorMutation({
     const next = nextMembershipStatus(membership.status, { kind: "suspend" })
     if (!next) return fail("conflict")
     const before = membership.status === "en_attente" || membership.status === "declaree" || membership.status === "verifiee" ? membership.status : undefined
-    await setStatus(ctx, membership, next, {
+    await setMembershipStatus(ctx, membership, next, {
       ...(before ? { statusBeforeSuspension: before } : {}),
       ...(until !== undefined ? { suspendedUntil: until } : {}),
     })
@@ -213,7 +138,7 @@ export const liftSuspension = operatorMutation({
     const membership = await getMembership(ctx, root._id, personId)
     if (!membership || membership.status !== "suspendue") return notFound()
     const restoreTo = membership.statusBeforeSuspension ?? "declaree"
-    await setStatus(ctx, membership, restoreTo, { statusBeforeSuspension: undefined, suspendedUntil: undefined })
+    await setMembershipStatus(ctx, membership, restoreTo, { statusBeforeSuspension: undefined, suspendedUntil: undefined })
     return null
   },
 })

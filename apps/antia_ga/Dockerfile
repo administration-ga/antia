@@ -26,6 +26,10 @@ ENV NEXT_PUBLIC_CONVEX_URL=${NEXT_PUBLIC_CONVEX_URL} \
 WORKDIR /src
 
 COPY ANTIA ./ANTIA
+# La racine d'ANTIA dépend du domaine pur de DIASPORALE (tranche
+# convex/modules/diaspora du moteur) : bun exige, même en installation élaguée,
+# chaque espace de travail dont dépend un espace présent. Ce paquet seul suffit.
+COPY DIASPORALE/packages/diasporale-domain ./DIASPORALE/packages/diasporale-domain
 RUN cd ANTIA && bun install --frozen-lockfile
 RUN cd ANTIA/apps/antia_ga && bun run build
 

@@ -12,6 +12,7 @@
         "@convex-dev/migrations": "catalog:",
         "@convex-dev/rate-limiter": "catalog:",
         "@convex-dev/resend": "catalog:",
+        "@diasporale/domain": "workspace:*",
         "@idn-ga/better-auth": "catalog:",
         "better-auth": "catalog:",
         "convex": "catalog:",
@@ -31,9 +32,14 @@
       "name": "diasporale-com",
       "version": "0.1.0",
       "dependencies": {
+        "@antia/api": "workspace:*",
+        "@antia/social-contracts": "workspace:*",
+        "@antia/social-features": "workspace:*",
+        "@antia/ui": "workspace:*",
         "@diasporale/domain": "workspace:*",
         "@diasporale/features": "workspace:*",
         "@hookform/resolvers": "catalog:",
+        "convex": "catalog:",
         "i18next": "catalog:",
         "lucide-react": "catalog:",
         "next": "catalog:",
@@ -47,6 +53,8 @@
         "zod": "catalog:",
       },
       "devDependencies": {
+        "@antia/eslint-config": "workspace:*",
+        "@antia/tsconfig": "workspace:*",
         "@tailwindcss/postcss": "catalog:",
         "@testing-library/dom": "catalog:",
         "@testing-library/jest-dom": "catalog:",
@@ -67,6 +75,7 @@
       "name": "@diasporale/domain",
       "version": "0.1.0",
       "devDependencies": {
+        "@antia/tsconfig": "workspace:*",
         "@types/bun": "catalog:",
         "typescript": "catalog:",
       },
@@ -75,6 +84,9 @@
       "name": "@diasporale/features",
       "version": "0.1.0",
       "dependencies": {
+        "@antia/api": "workspace:*",
+        "@antia/social-features": "workspace:*",
+        "@antia/ui": "workspace:*",
         "@diasporale/domain": "workspace:*",
         "@fontsource-variable/ibm-plex-sans": "catalog:",
         "@fontsource/ibm-plex-mono": "catalog:",
@@ -92,6 +104,8 @@
         "zod": "catalog:",
       },
       "devDependencies": {
+        "@antia/eslint-config": "workspace:*",
+        "@antia/tsconfig": "workspace:*",
         "@testing-library/dom": "catalog:",
         "@testing-library/jest-dom": "catalog:",
         "@testing-library/react": "catalog:",

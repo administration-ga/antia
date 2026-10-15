@@ -20,6 +20,16 @@ const FORBIDDEN_SPECIFIERS: { pattern: RegExp; reason: string }[] = [
     pattern: /(ADMINISTRATION_GA|GABON_DIPLOMATIE|gabon-diplomatie|PRO_GA|SANTE_GA|identite\.ga\/packages)/,
     reason: "chemin vers un autre dépôt du programme",
   },
+  { pattern: /(^|\/)DIASPORALE\//, reason: "chemin vers le dépôt DIASPORALE (passer par son paquet, depuis sa seule tranche)" },
+]
+
+/**
+ * Paquets d'APPLICATION servies par le moteur : le moteur n'en importe aucun,
+ * sauf la tranche de l'application (`convex/modules/<tranche>/`), et seulement
+ * son domaine pur (TS sans dépendance) — jamais ses écrans ni ses données.
+ */
+const APPLICATION_PACKAGES: { prefix: string; slice: string; allowed: RegExp }[] = [
+  { prefix: "@diasporale/", slice: "convex/modules/diaspora/", allowed: /^@diasporale\/domain(\/|$)/ },
 ]
 
 const OWN_GENERATED = join(REPO_ROOT, "convex", "_generated")
@@ -31,6 +41,15 @@ export function detectCrossProductImports(file: string, text: string): Finding[]
     for (const forbidden of FORBIDDEN_SPECIFIERS) {
       if (forbidden.pattern.test(specifier)) {
         findings.push({ file, line, message: `import interdit « ${specifier} » : ${forbidden.reason}` })
+      }
+    }
+    for (const application of APPLICATION_PACKAGES) {
+      if (specifier.startsWith(application.prefix) && !(file.startsWith(application.slice) && application.allowed.test(specifier))) {
+        findings.push({
+          file,
+          line,
+          message: `import « ${specifier} » : le moteur n'importe un paquet d'application que dans sa tranche (${application.slice}), et seulement son domaine pur`,
+        })
       }
     }
     if (specifier.includes("_generated")) {

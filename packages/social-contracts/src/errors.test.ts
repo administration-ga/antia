@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest"
 
 import { DOMAIN_RULES } from "@antia/social-domain/violation"
 
-import { ENGINE_ERROR_CODES, engineErrorCode, engineErrorRule } from "./errors"
+import { ENGINE_ERROR_CODES, engineErrorAppRule, engineErrorCode, engineErrorRule, isAppRule } from "./errors"
 import en from "./i18n/locales/en/errors.json"
 import enRules from "./i18n/locales/en/rules.json"
 import fr from "./i18n/locales/fr/errors.json"
@@ -36,5 +36,20 @@ describe("codes d'erreur du moteur", () => {
       rule: "POST_EMPTY",
       params: {},
     })
+  })
+
+  it("lit le refus métier d'une application : code bien formé, paramètres numériques seulement", () => {
+    expect(
+      engineErrorAppRule({ data: { code: "policyRefused", appRule: "sponsor_too_recent", appParams: { availableAt: 1_760_000_000_000, label: "x" } } }),
+    ).toEqual({ appRule: "sponsor_too_recent", appParams: { availableAt: 1_760_000_000_000 } })
+    expect(engineErrorAppRule({ data: { code: "policyRefused", appRule: "sponsor_quota_reached" } })).toEqual({ appRule: "sponsor_quota_reached", appParams: {} })
+    // Une phrase, une majuscule ou un code vide ne passent jamais pour un code.
+    expect(engineErrorAppRule({ data: { code: "policyRefused", appRule: "Vous ne pouvez pas parrainer" } })).toBeNull()
+    expect(engineErrorAppRule({ data: { code: "policyRefused", appRule: "Sponsor" } })).toBeNull()
+    expect(engineErrorAppRule({ data: { code: "policyRefused" } })).toBeNull()
+    expect(engineErrorAppRule(new Error("x"))).toBeNull()
+    expect(engineErrorAppRule({ data: { code: "policyRefused", appRule: "quota", appParams: { max: Number.NaN } } })).toEqual({ appRule: "quota", appParams: {} })
+    expect(isAppRule("a")).toBe(false)
+    expect(isAppRule(`a${"b".repeat(64)}`)).toBe(false)
   })
 })

@@ -74,4 +74,13 @@ describe("no-cross-product-imports — étanchéité du moteur (règle 4 de dupl
     expect(lines).not.toContain(5)
     expect(detectImpureDomainImports("packages/social-domain/src/x.ts", 'import { v } from "convex/values"')).toHaveLength(1)
   })
+
+  it("test du test : un paquet d'application n'entre que dans sa tranche, et seulement par son domaine pur", () => {
+    const domain = 'import { canSponsor } from "@diasporale/domain"'
+    expect(detectCrossProductImports("convex/modules/diaspora/sponsorships.ts", domain)).toEqual([])
+    expect(detectCrossProductImports("convex/modules/posts/posts.ts", domain)).toHaveLength(1)
+    expect(detectCrossProductImports("packages/social-features/src/x.ts", domain)).toHaveLength(1)
+    expect(detectCrossProductImports("convex/modules/diaspora/x.ts", 'import { Hub } from "@diasporale/features"')).toHaveLength(1)
+    expect(detectCrossProductImports("convex/modules/diaspora/x.ts", 'import { x } from "../../../../DIASPORALE/packages/diasporale-domain/src"')).toHaveLength(1)
+  })
 })

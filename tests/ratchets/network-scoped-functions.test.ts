@@ -1,3 +1,4 @@
+import { NETWORK_SLICES } from "@antia/social-domain/network"
 import { describe, expect, it } from "vitest"
 
 import { detectUnscopedFunctions } from "./lib/detectors"
@@ -11,9 +12,17 @@ import { type Finding, formatFindings, isTestFile, listFiles, readRepoFile } fro
  *
  * Actif depuis PA2 (networks, people) ; la liste s'étend à chaque module posé
  * (PA3 : tous les modules dupliqués). Un module absent des deux listes est
- * lui-même un défaut (test ci-dessous).
+ * lui-même un défaut (test ci-dessous). Les TRANCHES d'application
+ * (`NETWORK_SLICES` : `convex/modules/diaspora`, écrite par la session
+ * DIASPORALE) sont sociales, classées avant même d'exister.
  */
-export const SOCIAL_MODULE_DIRECTORIES: readonly string[] = ["convex/modules/networks", "convex/modules/people", "convex/modules/posts", "convex/modules/engagement"]
+export const SOCIAL_MODULE_DIRECTORIES: readonly string[] = [
+  "convex/modules/networks",
+  "convex/modules/people",
+  "convex/modules/posts",
+  "convex/modules/engagement",
+  "convex/modules/diaspora",
+]
 
 /** Modules du moteur qui ne sont PAS sociaux (aucun contenu, aucune adhésion). */
 export const NON_SOCIAL_MODULE_DIRECTORIES: readonly string[] = ["convex/modules/platform"]
@@ -26,6 +35,10 @@ describe("network-scoped-functions — toute fonction sociale est bornée par le
       findings.push(...detectUnscopedFunctions(file, readRepoFile(file)))
     }
     expect(findings, formatFindings(findings)).toEqual([])
+  })
+
+  it("chaque tranche qui peut gouverner un réseau est un module social classé", () => {
+    expect(NETWORK_SLICES.map((slice) => `convex/modules/${slice}`).filter((module) => !SOCIAL_MODULE_DIRECTORIES.includes(module))).toEqual([])
   })
 
   it("chaque module du moteur est classé (social ou non) : aucun n'échappe au cliquet", () => {

@@ -9,6 +9,11 @@
  * (backend Convex sur la machine) ou la variable `ANTIA_SEEDS_ALLOWED=true`
  * posée par le propriétaire sur un déploiement de développement. En production,
  * les réseaux se créent par la console (opérateur, trace).
+ *
+ * Une TRANCHE qui gouverne son réseau (`networks.managedBy`) sème le sien dans
+ * son module (`convex/modules/<tranche>/seed.ts`) avec les mêmes aides :
+ * `assertSeedsAllowed` (double garde) et `ensureNetwork` (idempotence) ; la
+ * racine se lit par `getRootNetwork` après cette graine-ci.
  */
 import { BRAND_NAME } from "@antia/social-contracts/brand"
 import { ROOT_NETWORK_SLUG } from "@antia/social-domain/network"
@@ -24,7 +29,15 @@ export function seedsAllowed(env: Record<string, string | undefined> = process.e
   return isLocalDeployment(env) || env.ANTIA_SEEDS_ALLOWED === "true"
 }
 
-async function ensureNetwork(
+/** La double garde de toute graine : argument de confirmation ET déploiement autorisé. */
+export function assertSeedsAllowed(confirmNonProduction: string): void {
+  if (confirmNonProduction !== SEED_CONFIRMATION || !seedsAllowed()) {
+    throw new Error("Graine refusée : hors production seulement (argument de confirmation et déploiement local ou ANTIA_SEEDS_ALLOWED).")
+  }
+}
+
+/** « Chercher puis créer » un réseau par son identifiant public : rejouer ne double rien. */
+export async function ensureNetwork(
   ctx: MutationCtx,
   slug: string,
   build: () => Parameters<MutationCtx["db"]["insert"]>[1] & object,
@@ -41,9 +54,7 @@ export const run = internalMutation({
   args: { confirmNonProduction: v.string() },
   returns: v.object({ root: v.id("networks"), testClosed: v.id("networks"), created: v.array(v.string()) }),
   handler: async (ctx, { confirmNonProduction }) => {
-    if (confirmNonProduction !== SEED_CONFIRMATION || !seedsAllowed()) {
-      throw new Error("Graine refusée : hors production seulement (argument de confirmation et déploiement local ou ANTIA_SEEDS_ALLOWED).")
-    }
+    assertSeedsAllowed(confirmNonProduction)
     const now = Date.now()
     const created: string[] = []
     const root = await ensureNetwork(ctx, ROOT_NETWORK_SLUG, () => ({

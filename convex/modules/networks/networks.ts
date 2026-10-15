@@ -18,6 +18,7 @@ import {
   facetSchemaValidator,
   membershipPolicyValidator,
   networkKindValidator,
+  networkSliceValidator,
   networkStatusValidator,
 } from "../../lib/validators"
 
@@ -28,6 +29,8 @@ const publicNetworkValidator = v.object({
   name: v.string(),
   kind: networkKindValidator,
   parentId: v.optional(v.id("networks")),
+  /** Présent : l'entrée et les facettes passent par la tranche nommée, jamais par les chemins génériques. */
+  managedBy: v.optional(networkSliceValidator),
   membershipPolicy: membershipPolicyValidator,
   defaultVisibility: contentVisibilityValidator,
   facetSchema: v.optional(facetSchemaValidator),
@@ -43,6 +46,7 @@ function toPublicNetwork(network: Doc<"networks">) {
     name: network.name,
     kind: network.kind,
     ...(network.parentId ? { parentId: network.parentId } : {}),
+    ...(network.managedBy ? { managedBy: network.managedBy } : {}),
     membershipPolicy: network.membershipPolicy,
     defaultVisibility: network.defaultVisibility,
     ...(network.facetSchema ? { facetSchema: network.facetSchema } : {}),
@@ -112,9 +116,12 @@ function assertSettings(args: { name: string; facetSchema?: Doc<"networks">["fac
   if (args.openCountries?.some((country) => !/^[A-Z]{2}$/.test(country))) fail("invalidArgument", { field: "openCountries" })
 }
 
-/** Console : créer un réseau (la racine unique, ou un réseau fermé enfant de la racine). */
+/**
+ * Console : créer un réseau (la racine unique, ou un réseau fermé enfant de la
+ * racine). `managedBy` se pose ici, à la naissance, et nulle part ailleurs.
+ */
 export const create = operatorMutation({
-  args: { slug: v.string(), kind: networkKindValidator, ...settingsArgs },
+  args: { slug: v.string(), kind: networkKindValidator, managedBy: v.optional(networkSliceValidator), ...settingsArgs },
   returns: v.id("networks"),
   handler: async (ctx, args) => {
     await enforceRateLimit(ctx, "operator.network", ctx.person._id)
@@ -132,6 +139,8 @@ export const create = operatorMutation({
     if (args.kind === "root" && root) fail("conflict")
     const parentId = args.kind === "root" ? null : (root?._id ?? null)
     if (args.kind === "closed" && !parentId) fail("invalidArgument", { field: "kind" })
+    // La racine est ouverte à toute personne : aucune tranche ne la gouverne.
+    if (args.kind === "root" && args.managedBy) fail("invalidArgument", { field: "managedBy" })
     const shapeErrors = validateNetworkShape({
       kind: args.kind,
       parentId,
@@ -144,6 +153,7 @@ export const create = operatorMutation({
       slug: args.slug,
       kind: args.kind,
       ...(parentId ? { parentId } : {}),
+      ...(args.managedBy ? { managedBy: args.managedBy } : {}),
       name: args.name.trim(),
       membershipPolicy: args.membershipPolicy,
       defaultVisibility: args.defaultVisibility,

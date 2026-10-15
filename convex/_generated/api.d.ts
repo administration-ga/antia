@@ -21,6 +21,7 @@ import type * as modules_engagement_engagement from "../modules/engagement/engag
 import type * as modules_engagement_tables from "../modules/engagement/tables.js";
 import type * as modules_networks_networks from "../modules/networks/networks.js";
 import type * as modules_networks_tables from "../modules/networks/tables.js";
+import type * as modules_people_admission from "../modules/people/admission.js";
 import type * as modules_people_consents from "../modules/people/consents.js";
 import type * as modules_people_facets from "../modules/people/facets.js";
 import type * as modules_people_memberships from "../modules/people/memberships.js";
@@ -56,6 +57,7 @@ declare const fullApi: ApiFromModules<{
   "modules/engagement/tables": typeof modules_engagement_tables;
   "modules/networks/networks": typeof modules_networks_networks;
   "modules/networks/tables": typeof modules_networks_tables;
+  "modules/people/admission": typeof modules_people_admission;
   "modules/people/consents": typeof modules_people_consents;
   "modules/people/facets": typeof modules_people_facets;
   "modules/people/memberships": typeof modules_people_memberships;

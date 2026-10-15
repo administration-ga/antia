@@ -8,25 +8,23 @@ import { CONSENT_ORIGINS, CONSENT_PURPOSES } from "@antia/social-domain/consent"
 import { PERSONAL_POST_AUDIENCES, PERSONAL_POST_STATUSES, PERSONAL_REACH_AUDIENCES, PERSONAL_REACTION_KINDS } from "@antia/social-domain/content"
 import { FACET_FIELD_KINDS, FACET_VISIBILITIES } from "@antia/social-domain/facets"
 import { ACTIVE_MEMBERSHIP_STATUSES, MEMBERSHIP_ROLES, MEMBERSHIP_STATUSES, VERIFICATION_SOURCES } from "@antia/social-domain/membership"
-import { CONTENT_VISIBILITIES, MEMBERSHIP_POLICIES, NETWORK_KINDS, NETWORK_STATUSES } from "@antia/social-domain/network"
+import { CONTENT_VISIBILITIES, MEMBERSHIP_POLICIES, NETWORK_KINDS, NETWORK_SLICES, NETWORK_STATUSES } from "@antia/social-domain/network"
 import { type Validator, v, type VLiteral, type VUnion } from "convex/values"
 
-/** `v.union(v.literal(a), v.literal(b), …)` à partir d'une liste `as const`. */
-export function literals<const T extends readonly [string, string, ...string[]]>(
+/** `v.union(v.literal(a), v.literal(b), …)` à partir d'une liste `as const` (un littéral au moins). */
+export function literals<const T extends readonly [string, ...string[]]>(
   values: T,
 ): VUnion<T[number], { -readonly [K in keyof T]: VLiteral<T[K], "required"> }, "required"> {
-  const [first, second, ...rest] = values.map((value) => v.literal(value)) as unknown as [
-    Validator<T[number], "required">,
-    Validator<T[number], "required">,
-    ...Validator<T[number], "required">[],
-  ]
-  return v.union(first, second, ...rest) as never
+  const members = values.map((value) => v.literal(value)) as unknown as Validator<T[number], "required">[]
+  return v.union(...members) as never
 }
 
 export const networkKindValidator = literals(NETWORK_KINDS)
 export const membershipPolicyValidator = literals(MEMBERSHIP_POLICIES)
 export const contentVisibilityValidator = literals(CONTENT_VISIBILITIES)
 export const networkStatusValidator = literals(NETWORK_STATUSES)
+/** La tranche qui gouverne l'entrée et les facettes d'un réseau (`networks.managedBy`). */
+export const networkSliceValidator = literals(NETWORK_SLICES)
 
 export const membershipStatusValidator = literals(MEMBERSHIP_STATUSES)
 export const activeMembershipStatusValidator = literals(ACTIVE_MEMBERSHIP_STATUSES)

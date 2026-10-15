@@ -8,7 +8,7 @@
   "engines": {
     "node": ">=20"
   },
-  "//workspaces-note": "Espaces de travail du moteur. Les applications EXTERNES de DIASPORALE (../DIASPORALE/apps/*, ../DIASPORALE/packages/*) ajoutées le 15/10/2026 à la demande du prompt DIASPORALE PD0 — une seule installation, dans ANTIA. Les tâches transverses passent par scripts/workspace-run.mjs (dupliqué du socle, ADR-0165) et non par turbo : turbo 2.x refuse tout le graphe dès qu'un espace de travail sort de la racine du dépôt. Les versions vivent UNE fois dans le catalogue ci-dessous ; un paquet les référence par \"catalog:\" (une seule instance de React et de Convex dans le magasin isolé).",
+  "//workspaces-note": "Espaces de travail du moteur. Les applications EXTERNES de DIASPORALE (../DIASPORALE/apps/*, ../DIASPORALE/packages/*) ajoutées le 15/10/2026 à la demande du prompt DIASPORALE PD0 — une seule installation, dans ANTIA. Les tâches transverses passent par scripts/workspace-run.mjs (dupliqué du socle, ADR-0165) et non par turbo : turbo 2.x refuse tout le graphe dès qu'un espace de travail sort de la racine du dépôt. Les versions vivent UNE fois dans le catalogue ci-dessous ; un paquet les référence par \"catalog:\" (une seule instance de React et de Convex dans le magasin isolé). La racine dépend de @diasporale/domain (règles métier de DIASPORALE, TS pur) pour la SEULE tranche convex/modules/diaspora : aucun autre code du moteur n'importe un paquet d'application (cliquet no-cross-product-imports).",
   "workspaces": {
     "packages": [
       "apps/*",
@@ -101,6 +101,7 @@
     "@convex-dev/migrations": "catalog:",
     "@convex-dev/rate-limiter": "catalog:",
     "@convex-dev/resend": "catalog:",
+    "@diasporale/domain": "workspace:*",
     "@idn-ga/better-auth": "catalog:",
     "better-auth": "catalog:",
     "convex": "catalog:",

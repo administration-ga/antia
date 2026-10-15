@@ -11,6 +11,7 @@ import {
   facetSchemaValidator,
   membershipPolicyValidator,
   networkKindValidator,
+  networkSliceValidator,
   networkStatusValidator,
 } from "../../lib/validators"
 
@@ -30,6 +31,12 @@ export const networksTables = {
     slug: v.string(),
     kind: networkKindValidator,
     parentId: v.optional(v.id("networks")),
+    /**
+     * La tranche qui GOUVERNE l'entrée et les facettes (`NETWORK_SLICES`) : posée
+     * à la création, jamais par un réglage de console. Les chemins génériques
+     * refusent alors (`policyRefused`) ; quitter reste ouvert.
+     */
+    managedBy: v.optional(networkSliceValidator),
     ...networkSettingsFields,
     status: networkStatusValidator,
     createdAt: v.number(),

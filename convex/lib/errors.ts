@@ -1,4 +1,4 @@
-import type { EngineErrorCode, EngineErrorData } from "@antia/social-contracts/errors"
+import { type AppRuleParams, type EngineErrorCode, type EngineErrorData, isAppRule } from "@antia/social-contracts/errors"
 import { isDomainViolation } from "@antia/social-domain/violation"
 import { ConvexError } from "convex/values"
 
@@ -9,7 +9,19 @@ import { ConvexError } from "convex/values"
  * ou un délai.
  */
 export function fail(code: EngineErrorCode, details: Omit<EngineErrorData, "code"> = {}): never {
+  // Un code d'application mal formé est une faute de programmation : jamais une phrase vers l'écran.
+  if (details.appRule !== undefined && !isAppRule(details.appRule)) throw new Error("[errors] code de refus d'application mal formé")
   throw new ConvexError<EngineErrorData>({ code, ...details })
+}
+
+/**
+ * Refus MÉTIER d'une application, levé par sa tranche (`convex/modules/<tranche>`) :
+ * un code de l'ensemble fermé de l'application et ses paramètres numériques,
+ * traduits par elle (`policyRefused` par défaut : la demande est bien formée,
+ * la règle de l'application la refuse).
+ */
+export function failAppRule(appRule: string, appParams: AppRuleParams = {}, code: EngineErrorCode = "policyRefused"): never {
+  return fail(code, { appRule, appParams: { ...appParams } })
 }
 
 /** Le refus indistinct (invariant 8) : absent, privé, bloqué, hors réseau — même réponse. */

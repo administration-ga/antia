@@ -25,6 +25,22 @@ export const ENGINE_ERROR_CODES = [
 ] as const
 export type EngineErrorCode = (typeof ENGINE_ERROR_CODES)[number]
 
+/**
+ * Refus MÉTIER d'une application servie par le moteur (DIASPORALE…), levé par
+ * sa tranche `convex/modules/<tranche>` : un code de l'ensemble FERMÉ de
+ * l'application (`sponsor_too_recent`), traduit par elle dans son propre espace
+ * de noms — jamais une phrase, jamais une valeur saisie. `rule` reste réservé
+ * aux règles du domaine du moteur (`DOMAIN_RULES`).
+ */
+export const APP_RULE_PATTERN = /^[a-z][a-z0-9_]{1,63}$/
+
+/** Paramètres d'un refus d'application : des nombres seulement (quotas, dates en millisecondes). */
+export type AppRuleParams = Readonly<Record<string, number>>
+
+export function isAppRule(value: unknown): value is string {
+  return typeof value === "string" && APP_RULE_PATTERN.test(value)
+}
+
 export type EngineErrorData = {
   code: EngineErrorCode
   /** Pour `rateLimited` : délai avant nouvel essai, en millisecondes. */
@@ -37,6 +53,9 @@ export type EngineErrorData = {
    */
   rule?: DomainRule
   params?: DomainRuleParams
+  /** Refus métier d'une application (voir `APP_RULE_PATTERN`) et ses paramètres. */
+  appRule?: string
+  appParams?: AppRuleParams
 }
 
 export function isEngineErrorCode(value: unknown): value is EngineErrorCode {
@@ -55,16 +74,37 @@ export function engineErrorCode(error: unknown): EngineErrorCode | null {
   return null
 }
 
-/** Lit la règle du domaine enfreinte, quand le serveur en a nommé une connue. */
-export function engineErrorRule(error: unknown): { rule: DomainRule; params: DomainRuleParams } | null {
+/** Les données d'une erreur reçue du serveur (forme `ConvexError` : `{ data }`), si c'est un objet. */
+function errorData(error: unknown): Record<string, unknown> | null {
   if (typeof error !== "object" || error === null || !("data" in error)) return null
   const data = (error as { data: unknown }).data
-  if (typeof data !== "object" || data === null || !("rule" in data)) return null
-  const { rule, params } = data as { rule: unknown; params?: unknown }
-  if (typeof rule !== "string" || !(DOMAIN_RULES as readonly string[]).includes(rule)) return null
-  const safeParams: Record<string, number> = {}
+  return typeof data === "object" && data !== null ? (data as Record<string, unknown>) : null
+}
+
+/** Ne garde que les paramètres numériques (une valeur d'un autre type n'est jamais interpolée). */
+function numericParams(params: unknown): Record<string, number> {
+  const safe: Record<string, number> = {}
   if (typeof params === "object" && params !== null) {
-    for (const [key, value] of Object.entries(params)) if (typeof value === "number") safeParams[key] = value
+    for (const [key, value] of Object.entries(params)) if (typeof value === "number" && Number.isFinite(value)) safe[key] = value
   }
-  return { rule: rule as DomainRule, params: safeParams }
+  return safe
+}
+
+/** Lit la règle du domaine enfreinte, quand le serveur en a nommé une connue. */
+export function engineErrorRule(error: unknown): { rule: DomainRule; params: DomainRuleParams } | null {
+  const data = errorData(error)
+  const rule = data?.rule
+  if (typeof rule !== "string" || !(DOMAIN_RULES as readonly string[]).includes(rule)) return null
+  return { rule: rule as DomainRule, params: numericParams(data?.params) }
+}
+
+/**
+ * Lit le refus métier d'une application, quand le serveur en a nommé un bien
+ * formé ; l'application vérifie ensuite qu'il appartient à SON ensemble fermé.
+ */
+export function engineErrorAppRule(error: unknown): { appRule: string; appParams: AppRuleParams } | null {
+  const data = errorData(error)
+  const appRule = data?.appRule
+  if (!isAppRule(appRule)) return null
+  return { appRule, appParams: numericParams(data?.appParams) }
 }
