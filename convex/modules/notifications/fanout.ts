@@ -1,4 +1,4 @@
-// Dupliqué de socle/convex/modules/icom/notifyFanout.ts @ ad2e7fdc2 — adaptations : PATRON repris (lots de 150, job chaîné qui se replanifie, aucune écriture sur le document parent), code réécrit pour la cloche sociale du moteur : sources de destinataires génériques (liste de personnes, abonnés d'une personne dans le réseau, abonnés aux commentaires d'une publication, abonnés d'une PAGE à sa publication (lot 13) — chacun re-gardé au moment de sonner, D08), porte unique `notifyPerson`, dédoublonnage par sa clé.
+// Dupliqué de socle/convex/modules/icom/notifyFanout.ts @ ad2e7fdc2 — adaptations : PATRON repris (lots de 150, job chaîné qui se replanifie, aucune écriture sur le document parent), code réécrit pour la cloche sociale du moteur : sources de destinataires génériques (liste de personnes, abonnés d'une personne dans le réseau, abonnés aux commentaires d'une publication, abonnés d'une PAGE à sa publication (lot 13), abonnés du propriétaire d'un ALBUM publié (lot 14) — chacun re-gardé au moment de sonner, D08), porte unique `notifyPerson`, dédoublonnage par sa clé.
 /**
  * Diffusion de la cloche PAR LOTS CHAÎNÉS, hors de la transaction de l'émetteur.
  *
@@ -14,6 +14,7 @@ import { type Infer, v } from "convex/values"
 import { internal } from "../../_generated/api"
 import type { Id } from "../../_generated/dataModel"
 import { internalMutation, type MutationCtx } from "../../_generated/server"
+import { canSeeAlbum } from "../albums/access"
 import { canSeePostDoc } from "../posts/access"
 import { openingNetworkFor } from "../posts/postNotify"
 import { type NotificationSubjectRef, notifyPerson } from "./notify"
@@ -39,6 +40,12 @@ export const fanoutSourceValidator = v.union(
    * encore — la note aux abonnés comprise.
    */
   v.object({ kind: v.literal("pageFollowers"), postId: v.id("posts") }),
+  /**
+   * Les ABONNÉS du propriétaire d'un album publié, dans le réseau de l'album,
+   * et SEULEMENT s'ils voient l'album au moment de sonner (un album réservé aux
+   * connexions ne sonne pas chez un simple abonné).
+   */
+  v.object({ kind: v.literal("albumFollowers"), albumId: v.id("albums") }),
 )
 
 export type FanoutInput = {
@@ -71,6 +78,19 @@ async function readBatch(ctx: MutationCtx, args: { networkId: Id<"networks">; so
       deliveries: page.page.map((row) => ({ networkId: args.networkId, recipientPersonId: row.followerPersonId })),
       next: page.isDone ? null : { cursor: page.continueCursor },
     }
+  }
+  if (source.kind === "albumFollowers") {
+    const album = await ctx.db.get(source.albumId)
+    if (!album) return { deliveries: [], next: null }
+    const followers = await ctx.db
+      .query("follows")
+      .withIndex("by_network_target_createdAt", (q) => q.eq("networkId", album.networkId).eq("targetPersonId", album.ownerPersonId))
+      .paginate({ cursor: args.cursor ?? null, numItems: FANOUT_BATCH_SIZE })
+    const deliveries: Delivery[] = []
+    for (const row of followers.page) {
+      if (await canSeeAlbum(ctx, album, { personId: row.followerPersonId, networkId: album.networkId })) deliveries.push({ networkId: album.networkId, recipientPersonId: row.followerPersonId })
+    }
+    return { deliveries, next: followers.isDone ? null : { cursor: followers.continueCursor } }
   }
   if (source.kind === "pageFollowers") {
     const post = await ctx.db.get(source.postId)

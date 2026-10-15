@@ -1,5 +1,6 @@
 import { defineSchema } from "convex/server"
 
+import { albumsTables } from "./modules/albums/tables"
 import { diasporaTables } from "./modules/diaspora/tables"
 import { engagementTables } from "./modules/engagement/tables"
 import { eventsTables } from "./modules/events/tables"
@@ -51,6 +52,7 @@ export default defineSchema(
     ...storiesTables,
     ...suggestionsTables,
     ...pagesTables,
+    ...albumsTables,
     ...marksTables,
     ...moderationTables,
     ...diasporaTables,

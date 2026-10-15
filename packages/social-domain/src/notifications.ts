@@ -33,6 +33,8 @@ export const NOTIFICATION_KINDS = [
   "event_invite",
   /** Une page que je suis a publié : le sujet est la PUBLICATION, sans acteur (c'est la page qui parle). */
   "page_post",
+  /** Une personne que je suis a publié un album (première publication seulement) : le sujet est l'ALBUM. */
+  "album_published",
   /** La garde des fichiers retient un fichier déposé (bloqué, ou analyse en échec). */
   "file_withheld",
   // Tranche `diaspora` (émis par `convex/modules/diaspora/`), tous sans sujet.
@@ -58,7 +60,7 @@ export const NOTIFICATION_RESOLUTIONS = ["accepted", "declined", "maybe", "cance
 export type NotificationResolution = (typeof NOTIFICATION_RESOLUTIONS)[number]
 
 /** Les natures de SUJET d'une notification — une référence, jamais un contenu. */
-export const NOTIFICATION_SUBJECT_KINDS = ["post", "connection", "fileScan", "thematicGroup", "groupThread", "event"] as const
+export const NOTIFICATION_SUBJECT_KINDS = ["post", "connection", "fileScan", "thematicGroup", "groupThread", "event", "album"] as const
 
 export type NotificationSubjectKind = (typeof NOTIFICATION_SUBJECT_KINDS)[number]
 

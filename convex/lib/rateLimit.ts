@@ -80,6 +80,11 @@ const RATE_LIMITS = {
   "page.publish": { kind: "token bucket", rate: 30, period: HOUR, capacity: 10 },
   "page.manage": { kind: "token bucket", rate: 30, period: HOUR, capacity: 10 },
   "page.claim": { kind: "token bucket", rate: 5, period: DAY, capacity: 3 },
+  // Albums (PA3 lot 14) : préparer est un geste fréquent, publier et supprimer le sont moins.
+  "album.create": { kind: "token bucket", rate: 20, period: HOUR, capacity: 5 },
+  "album.write": { kind: "token bucket", rate: 240, period: HOUR, capacity: 60 },
+  "album.publish": { kind: "token bucket", rate: 30, period: HOUR, capacity: 10 },
+  "album.remove": { kind: "token bucket", rate: 20, period: HOUR, capacity: 5 },
   // Garde des fichiers : gestes humains (libération par un modérateur, relance par un opérateur).
   "file.moderate": { kind: "token bucket", rate: 60, period: HOUR, capacity: 20 },
   // Console (PA7)

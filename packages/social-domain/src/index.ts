@@ -16,6 +16,7 @@
  */
 export const SOCIAL_DOMAIN_VERSION = "0.0.0" as const
 
+export * from "./albums"
 export * from "./audit"
 export * from "./badges"
 export * from "./connectionState"
@@ -31,6 +32,7 @@ export * from "./membership"
 export * from "./moderation"
 export * from "./network"
 export * from "./notifications"
+export * from "./pages"
 export * from "./richText"
 export * from "./searchText"
 export * from "./stories"

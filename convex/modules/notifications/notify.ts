@@ -35,6 +35,7 @@ export function subjectOf(ref: NotificationSubjectRef | undefined): Notification
   if ("thematicGroup" in ref) return { kind: "thematicGroup", id: ref.thematicGroup }
   if ("groupThread" in ref) return { kind: "groupThread", id: ref.groupThread }
   if ("event" in ref) return { kind: "event", id: ref.event }
+  if ("album" in ref) return { kind: "album", id: ref.album }
   return { kind: "fileScan", id: ref.fileScan }
 }
 
@@ -46,6 +47,7 @@ function subjectColumns(ref: NotificationSubjectRef | undefined): Partial<Doc<"n
   if ("thematicGroup" in ref) return { subjectThematicGroupId: ref.thematicGroup }
   if ("groupThread" in ref) return { subjectGroupThreadId: ref.groupThread }
   if ("event" in ref) return { subjectEventId: ref.event }
+  if ("album" in ref) return { subjectAlbumId: ref.album }
   return { subjectFileScanId: ref.fileScan }
 }
 
@@ -57,6 +59,7 @@ export function subjectRefOf(row: Doc<"notifications">): NotificationSubjectRef 
   if (row.subjectThematicGroupId) return { thematicGroup: row.subjectThematicGroupId }
   if (row.subjectGroupThreadId) return { groupThread: row.subjectGroupThreadId }
   if (row.subjectEventId) return { event: row.subjectEventId }
+  if (row.subjectAlbumId) return { album: row.subjectAlbumId }
   return undefined
 }
 

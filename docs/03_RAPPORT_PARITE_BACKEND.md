@@ -992,3 +992,66 @@ dépend.
 - **Cloche des invitations à signer et des décisions de revendication** : les écrans lisent `myPageInvitations` et
   `paginateMyPageClaims` ; des genres de cloche viendront avec les écrans (PA6).
 
+---
+
+## Lot 14 — `albums` (collections de photos d'une personne, dans un réseau)
+
+### Parité, fichier par fichier
+
+| Source (`socle/convex/modules/reseauAlbums/…`) | Cible | Sort | État |
+|---|---|---|---|
+| `domain.ts` | `packages/social-domain/src/albums.ts` | tel quel | ✅ (refus à code, « 20 Mo » → `maxMb`) |
+| `domain.test.ts` | `packages/social-domain/src/albums.test.ts` | tel quel | ✅ (32 cas, codes au lieu des phrases) |
+| `validators.ts` | `convex/modules/albums/validators.ts` | tel quel | ✅ (statut dérivé du domaine) |
+| `tables.ts` | `convex/modules/albums/tables.ts` | à adapter | ✅ |
+| `access.ts` | `convex/modules/albums/access.ts` | à adapter | ✅ |
+| `albums.ts` | `convex/modules/albums/albums.ts` | à adapter (lourd) | ✅ |
+| `albums.test.ts` | `convex/modules/albums/albums.test.ts` | à adapter | ✅ (26 cas) |
+| `manifest.ts` | — | exclu | — |
+
+### Adaptations (liste fermée)
+
+- **Par réseau** : un album est créé, rempli, lu et listé dans le réseau de la fonction appelée ; ailleurs (ou en
+  suppression), il est introuvable ; une clé rejouée dans un autre réseau est refusée (`conflict`). Connexion lue dans
+  ce réseau, blocage sur toute la paire.
+- **Adhésion par le constructeur** (au lieu d'`assertNotSuspended`) : préparer (créer, remplir, légender, ordonner,
+  couvrir, retirer une photo, retirer, supprimer) est ouvert au membre en attente ; publier exige un membre déclaré ;
+  un compte suspendu n'agit plus dans le réseau (règle du moteur).
+- **Photos sous la garde des fichiers** (D05) : dépôt neuf du propriétaire (usage `album_image`, source `album`,
+  type et poids relus au stockage), galerie et couverture servies par `resolveFileDelivery` ; une photo retenue
+  (analyse en cours, bloquée) est montrée RETENUE à son propriétaire et OMISE pour les autres.
+- **Couverture sans balayage** : préférence toujours valide (effacée quand la photo part), sinon la première photo —
+  une lecture au lieu de 240 par album (dette de performance de l'annexe A3, listes de 24 albums).
+- **Retirer une photo la supprime** et purge son blob et sa ligne d'analyse (plus de tombe : la fenêtre de lecture
+  n'est plus jamais atteinte).
+- **Supprimer un album** (D09) : introuvable aussitôt (`deletingAt`), puis photos, blobs et lignes d'analyse purgés
+  par lots de 30 (suite planifiée `continueRemoveAlbum`) : zéro orphelin ; index par propriétaire sur les photos.
+- **Cloche des abonnés** (`album_published`, sujet `album`) à la PREMIÈRE publication seulement, par la diffusion par
+  lots (source `albumFollowers`), chacun re-gardé — un album réservé aux connexions ne sonne pas chez un simple abonné.
+- **Débit** (D14) sur les dix mutations : `album.create`, `album.write`, `album.publish`, `album.remove`.
+- Listes paginées : `paginateMyAlbums`, `paginatePersonAlbums` (refus indistinct : liste vide et finie).
+
+### Corrections de dette
+
+- **D05** : plus de `getUrl` brut (galerie, couverture). **D09** : suppression sans orphelin, index par propriétaire.
+- **D14** : débit sur chaque écriture. Performance (annexe A3) : couverture en une lecture.
+
+### Tests
+
+- Portés : brouillon privé, idempotence de création, titre vide, double soumission, reprise partielle, identifiant
+  étranger, vérité du stockage, album d'autrui, lot borné, réordonner et ordre partiel, légende et texte alternatif,
+  couverture qui replie, connexion et inconnu, connexion rompue (blocage), blocage sur `public`, album retiré,
+  identifiant inconnu, republication et date d'origine, publier deux fois, album vide, suppression, DTO allowlistés,
+  vignette d'un album fermé, pagination.
+- Neufs : photo non analysée retenue (propriétaire, autres, vignette), zéro orphelin après suppression (35 photos, deux
+  lots), photo retirée purgée, plafond de 60, vidéo refusée, album d'un autre réseau introuvable, clé rejouée ailleurs,
+  membre en attente (prépare, ne publie pas), cloche des abonnés (première publication, re-gardée).
+
+### Écarts assumés
+
+- **EXIF retiré** (EXF-AN-21) : l'écran ré-encode avant le dépôt (composeur du socle, fail-closed) ; un retrait côté
+  serveur viendra avec le pipeline d'inspection des images (PA5).
+- **Formats iPhone** (HEIC) : admis par l'usage `album_image`, refusés par le domaine (images du fil seulement), comme
+  au socle ; à rouvrir avec la conversion côté écran.
+- **Effacement** des albums d'une personne (index par propriétaire posé) : PA5.
+
