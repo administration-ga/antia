@@ -1,4 +1,4 @@
-// Dupliqué de socle/convex/modules/reseauPersonnel/follows.ts @ ad2e7fdc2 — adaptations : personnes et réseaux (abonnement PAR RÉSEAU) ; garde d'adhésion par le constructeur, débit sur s'abonner et se désabonner ; `listMyFollows` paginé (D19, il tronquait à 500) ; `myFollowerCount` lu dans un AGRÉGAT (`followerCounts`) au lieu de compter des lignes (R8 : 5 000 abonnés) ; `suggestions` puisées dans l'annuaire DU RÉSEAU (membres découvrables) au lieu de tous les profils (D17) ; avatar par la garde des fichiers (D05) ; blocage lu sur toute la paire.
+// Dupliqué de socle/convex/modules/reseauPersonnel/follows.ts @ ad2e7fdc2 — adaptations : personnes et réseaux (abonnement PAR RÉSEAU) ; garde d'adhésion par le constructeur, débit sur s'abonner et se désabonner ; `listMyFollows` paginé (D19, il tronquait à 500) ; `myFollowerCount` lu dans un AGRÉGAT (`followerCounts`) au lieu de compter des lignes (R8 : 5 000 abonnés) ; `suggestions` puisées dans l'annuaire DU RÉSEAU (membres découvrables) au lieu de tous les profils (D17), refusées pour un réseau gouverné (annuaire opt-in de la tranche) ; avatar par la garde des fichiers (D05) ; blocage lu sur toute la paire.
 /**
  * Abonnements — suivre quelqu'un sans lui demander son accord.
  *
@@ -144,6 +144,8 @@ const SUGGESTIONS_SCAN = 40
  * sa place. Sont écartés : soi, les personnes déjà suivies, les connexions, les
  * blocages. Aucun classement « intelligent » : les arrivées les plus récentes
  * d'abord — un score d'affinité demanderait de mesurer qui fréquente qui.
+ * Un réseau GOUVERNÉ par une tranche sert ses propres suggestions (annuaire
+ * opt-in) : le chemin générique le refuse.
  */
 export const suggestions = networkQuery({
   args: { limit: v.optional(v.number()) },
@@ -158,6 +160,7 @@ export const suggestions = networkQuery({
     }),
   ),
   handler: async (ctx, args) => {
+    if (ctx.network.managedBy !== undefined) return fail("policyRefused")
     const limit = Math.min(Math.max(Math.trunc(args.limit ?? SUGGESTIONS_MAX), 1), SUGGESTIONS_MAX)
     const [candidates, connections] = await Promise.all([
       ctx.db

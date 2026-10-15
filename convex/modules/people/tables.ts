@@ -80,6 +80,14 @@ export const peopleTables = {
     /** Statut à rendre à la levée d'une suspension. */
     statusBeforeSuspension: v.optional(activeMembershipStatusValidator),
     suspendedUntil: v.optional(v.number()),
+    /**
+     * La personne a CHOISI de paraître dans l'annuaire de ce réseau. Lu pour un
+     * réseau gouverné par une tranche (`networks.managedBy`), dont l'annuaire
+     * est opt-in : sans ce choix, la personne n'y est pas listée. Posé par la
+     * tranche (`setDirectoryListed`), remis à zéro à un retour après départ.
+     * Sans effet pour un réseau générique (le profil découvrable y suffit).
+     */
+    directoryListed: v.optional(v.boolean()),
     joinedAt: v.number(),
     statusChangedAt: v.number(),
     leftAt: v.optional(v.number()),

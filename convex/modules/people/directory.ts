@@ -1,4 +1,4 @@
-// Dupliqué de socle/convex/modules/reseauPersonnel/people.ts (l. 547-650, `searchPeople`) @ ad2e7fdc2 — adaptations : annuaire PAR RÉSEAU — projection cherchable dénormalisée (`peopleDirectory`, `filterFields: ["networkId", "listed"]`) au lieu d'un index global des profils, pour ne jamais rendre un non-membre ni une personne d'un autre réseau ; recherche repliée sans accents (`foldSearchQuery`) ; badges calculés joints ; garde d'adhésion par le constructeur au lieu d'`assertNotSuspended` ; blocage lu sur toute la paire (tous réseaux).
+// Dupliqué de socle/convex/modules/reseauPersonnel/people.ts (l. 547-650, `searchPeople`) @ ad2e7fdc2 — adaptations : annuaire PAR RÉSEAU — projection cherchable dénormalisée (`peopleDirectory`, `filterFields: ["networkId", "listed"]`) au lieu d'un index global des profils, pour ne jamais rendre un non-membre ni une personne d'un autre réseau ; recherche repliée sans accents (`foldSearchQuery`) ; badges calculés joints ; garde d'adhésion par le constructeur au lieu d'`assertNotSuspended` ; blocage lu sur toute la paire (tous réseaux) ; annuaire OPT-IN d'un réseau gouverné par une tranche (`directoryListed`, chemin générique refusé, resynchronisation par lots).
 /**
  * L'annuaire d'un réseau : chercher une personne parmi les MEMBRES qui ont
  * choisi d'être trouvés (profil publié, non privé).
@@ -13,9 +13,11 @@ import { isActiveStatus } from "@antia/social-domain/membership"
 import { buildSearchableText, foldSearchQuery } from "@antia/social-domain/searchText"
 import { v } from "convex/values"
 
+import { internal } from "../../_generated/api"
 import type { Doc, Id } from "../../_generated/dataModel"
-import type { MutationCtx } from "../../_generated/server"
+import { internalMutation, type MutationCtx } from "../../_generated/server"
 import { isActiveMember } from "../../lib/access"
+import { fail } from "../../lib/errors"
 import { networkQuery } from "../../lib/functions"
 import { badgeValidator } from "../../lib/validators"
 import { servableUrl } from "../files/storageGuard"
@@ -29,9 +31,11 @@ const SEARCH_LIMIT_MAX = 25
 /**
  * Recalcule les lignes d'annuaire d'une personne : une par adhésion ACTIVE
  * (réseau actif), `listed` si le profil est découvrable et la racine non
- * suspendue ; les lignes des adhésions closes disparaissent. Idempotent, borné
- * (une personne appartient à peu de réseaux), sans écriture inutile. À appeler
- * après tout changement de profil ou de statut d'adhésion.
+ * suspendue — et, pour un réseau GOUVERNÉ par une tranche, si la personne a
+ * choisi d'y paraître (`directoryListed`, annuaire opt-in) ; les lignes des
+ * adhésions closes disparaissent. Idempotent, borné (une personne appartient à
+ * peu de réseaux), sans écriture inutile. À appeler après tout changement de
+ * profil, de statut d'adhésion ou de choix d'annuaire.
  */
 export async function syncPersonDirectory(ctx: MutationCtx, personId: Id<"persons">): Promise<void> {
   const person = await ctx.db.get(personId)
@@ -58,7 +62,8 @@ export async function syncPersonDirectory(ctx: MutationCtx, personId: Id<"person
       if (!isActiveStatus(membership.status)) continue
       const network = await ctx.db.get(membership.networkId)
       if (!network || network.status !== "active") continue
-      wanted.set(network._id, discoverable && !rootSuspended)
+      const optedIn = network.managedBy === undefined || membership.directoryListed === true
+      wanted.set(network._id, discoverable && !rootSuspended && optedIn)
     }
   }
   const searchName = person ? buildSearchableText(person.displayName, person.handle) : ""
@@ -76,6 +81,28 @@ export async function syncPersonDirectory(ctx: MutationCtx, personId: Id<"person
     await ctx.db.insert("peopleDirectory", { networkId, personId, searchName, listed, updatedAt: now })
   }
 }
+
+/** Lignes d'annuaire relues par lot de resynchronisation. */
+const RESYNC_BATCH = 100
+
+/**
+ * Resynchronise l'annuaire d'un réseau, par lots chaînés : après un changement
+ * de règle d'inscription (réseau devenu gouverné, annuaire passé en opt-in),
+ * les lignes déjà écrites suivent. Idempotent.
+ */
+export const resyncNetworkDirectory = internalMutation({
+  args: { networkId: v.id("networks"), cursor: v.optional(v.union(v.string(), v.null())) },
+  returns: v.object({ resynced: v.number(), done: v.boolean() }),
+  handler: async (ctx, args) => {
+    const page = await ctx.db
+      .query("peopleDirectory")
+      .withIndex("by_network_and_person", (q) => q.eq("networkId", args.networkId))
+      .paginate({ cursor: args.cursor ?? null, numItems: RESYNC_BATCH })
+    for (const row of page.page) await syncPersonDirectory(ctx, row.personId)
+    if (!page.isDone) await ctx.scheduler.runAfter(0, internal.modules.people.directory.resyncNetworkDirectory, { networkId: args.networkId, cursor: page.continueCursor })
+    return { resynced: page.page.length, done: page.isDone }
+  },
+})
 
 async function rootIsSuspended(ctx: MutationCtx, memberships: readonly Doc<"networkMemberships">[]): Promise<boolean> {
   for (const membership of memberships) {
@@ -99,11 +126,14 @@ type PersonHit = { personId: Id<"persons">; handle: string; displayName: string;
 
 /**
  * Chercher une personne parmi les membres découvrables du réseau. Jamais soi-même.
+ * Un réseau GOUVERNÉ par une tranche sert son propre annuaire (opt-in, règles
+ * de l'application) : le chemin générique le refuse, comme l'entrée.
  */
 export const searchPeople = networkQuery({
   args: { query: v.string(), limit: v.optional(v.number()) },
   returns: v.array(personHitValidator),
   handler: async (ctx, args) => {
+    if (ctx.network.managedBy !== undefined) return fail("policyRefused")
     const term = args.query.trim()
     if (term.length === 0) return []
     const limit = Math.min(Math.max(Math.trunc(args.limit ?? SEARCH_LIMIT_DEFAULT), 1), SEARCH_LIMIT_MAX)

@@ -7,11 +7,11 @@
  * (`modules/people/admission`), qui tiennent les invariants ; quitter reste
  * toujours possible.
  */
-import { describe, expect, it } from "vitest"
+import { afterEach, describe, expect, it, vi } from "vitest"
 
 import { api, internal } from "../_generated/api"
 import type { Id } from "../_generated/dataModel"
-import { admitToNetwork, writeNetworkFacet } from "../modules/people/admission"
+import { admitToNetwork, setDirectoryListed, writeNetworkFacet } from "../modules/people/admission"
 import { SEED_CONFIRMATION } from "../seeds/foundations"
 import { testConvex } from "../test.setup"
 
@@ -162,6 +162,67 @@ describe("réseau gouverné par une tranche : les chemins génériques ne le con
       await writeNetworkFacet(ctx, network, personId, { values: { countryOfResidence: "FR" }, visibilities: { inconnu: "root" } })
     })
     expect(await errorCode(attempt)).toBe("invalidArgument")
+  })
+})
+
+async function listedIn(t: T, networkId: Id<"networks">, personId: Id<"persons">): Promise<boolean | undefined> {
+  return await t.run(async (ctx) => {
+    const row = await ctx.db
+      .query("peopleDirectory")
+      .withIndex("by_network_and_person", (q) => q.eq("networkId", networkId).eq("personId", personId))
+      .unique()
+    return row?.listed
+  })
+}
+
+describe("annuaire d'un réseau gouverné : opt-in, servi par la tranche", () => {
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
+  it("les chemins génériques refusent de chercher et de suggérer ; un membre n'est listé qu'après son choix", async () => {
+    const t = testConvex()
+    const { root, managed } = await seedWithManagedNetwork(t)
+    const reader = await onboardedPerson(t, "auth-lecteur", "lecteur")
+    const member = await onboardedPerson(t, "auth-discret", "membre.discret")
+    await admitAsSlice(t, managed, root, reader.personId)
+    await admitAsSlice(t, managed, root, member.personId)
+
+    expect(await errorCode(reader.as.query(api.modules.people.directory.searchPeople, { networkId: managed, query: "membre" }))).toBe("policyRefused")
+    expect(await errorCode(reader.as.query(api.modules.graph.follows.suggestions, { networkId: managed }))).toBe("policyRefused")
+    // Masqué par défaut dans le réseau gouverné ; la racine, générique, suit le profil découvrable.
+    expect(await listedIn(t, managed, member.personId)).toBe(false)
+    expect(await listedIn(t, root, member.personId)).toBe(true)
+
+    await t.run(async (ctx) => setDirectoryListed(ctx, managed, member.personId, true))
+    expect(await listedIn(t, managed, member.personId)).toBe(true)
+    await t.run(async (ctx) => setDirectoryListed(ctx, managed, member.personId, false))
+    expect(await listedIn(t, managed, member.personId)).toBe(false)
+  })
+
+  it("un retour après départ ne reprend pas l'ancien choix ; la resynchronisation corrige les lignes déjà écrites", async () => {
+    vi.useFakeTimers()
+    const t = testConvex()
+    const { root, managed } = await seedWithManagedNetwork(t)
+    const member = await onboardedPerson(t, "auth-revenant", "revenant")
+    await admitAsSlice(t, managed, root, member.personId)
+    await t.run(async (ctx) => setDirectoryListed(ctx, managed, member.personId, true))
+    await member.as.mutation(api.modules.people.memberships.leaveNetwork, { networkId: managed })
+    await admitAsSlice(t, managed, root, member.personId)
+    expect((await membershipOf(t, managed, member.personId))?.directoryListed).toBeUndefined()
+    expect(await listedIn(t, managed, member.personId)).toBe(false)
+
+    // Une ligne écrite sous l'ancienne règle (listée sans choix) : la resynchronisation la referme.
+    await t.run(async (ctx) => {
+      const row = await ctx.db
+        .query("peopleDirectory")
+        .withIndex("by_network_and_person", (q) => q.eq("networkId", managed).eq("personId", member.personId))
+        .unique()
+      if (row) await ctx.db.patch(row._id, { listed: true })
+    })
+    await t.mutation(internal.modules.people.directory.resyncNetworkDirectory, { networkId: managed })
+    await t.finishAllScheduledFunctions(vi.runAllTimers)
+    expect(await listedIn(t, managed, member.personId)).toBe(false)
   })
 })
 

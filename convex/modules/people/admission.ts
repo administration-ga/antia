@@ -44,6 +44,20 @@ export async function setMembershipStatus(
 }
 
 /**
+ * Pose le CHOIX d'une personne de paraître (ou non) dans l'annuaire d'un
+ * réseau, puis resynchronise l'annuaire. Réservé aux tranches qui gouvernent
+ * un réseau (annuaire opt-in) : elles le posent selon LEURS règles (niveau
+ * choisi, consentement en vigueur). Sans adhésion : rien, `false`.
+ */
+export async function setDirectoryListed(ctx: MutationCtx, networkId: Id<"networks">, personId: Id<"persons">, listed: boolean): Promise<boolean> {
+  const membership = await getMembership(ctx, networkId, personId)
+  if (!membership) return false
+  if ((membership.directoryListed === true) !== listed) await ctx.db.patch(membership._id, { directoryListed: listed })
+  await syncPersonDirectory(ctx, personId)
+  return true
+}
+
+/**
  * Écrit la facette d'une personne dans un réseau, validée contre le schéma du
  * réseau : le champ fautif est nommé, jamais la valeur. Sans schéma, aucune
  * valeur n'est admise ; une visibilité ne vise qu'un champ déclaré.
@@ -148,6 +162,8 @@ export async function admitToNetwork(
     if (!next) return fail("conflict")
     await setMembershipStatus(ctx, existing, next, {
       leftAt: undefined,
+      // Un retour après départ ne reprend pas un ancien choix d'annuaire : il se refait.
+      directoryListed: undefined,
       ...(next === "verifiee" ? { verifiedBy: source } : {}),
       ...(args.sponsorPersonId ? { sponsorPersonId: args.sponsorPersonId } : {}),
     })
