@@ -33,6 +33,15 @@ export const NOTIFICATION_KINDS = [
   "event_invite",
   /** La garde des fichiers retient un fichier déposé (bloqué, ou analyse en échec). */
   "file_withheld",
+  // Tranche `diaspora` (émis par `convex/modules/diaspora/`), tous sans sujet.
+  /** Parrainé : l'acteur est le parrain. */
+  "sponsorship_received",
+  /** Parrainage retiré : l'acteur est le parrain s'il retire lui-même, ABSENT si c'est la modération. */
+  "sponsorship_withdrawn",
+  /** L'attestation consulaire a confirmé : le statut est passé « vérifiée ». Sans acteur. */
+  "attestation_verified",
+  /** L'attestation n'a pas confirmé — sans acteur, sans aucune raison consulaire. */
+  "attestation_not_confirmed",
 ] as const
 
 export type NotificationKind = (typeof NOTIFICATION_KINDS)[number]

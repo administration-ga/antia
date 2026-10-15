@@ -18,7 +18,7 @@ l'owner map), les tests portés et neufs, les écarts assumés. Un module n'entr
 | 2 | `files` — garde des fichiers, politique de dépôt | `344f0fa` | 6 fichiers convex + 2 domaine + 4 cliquets | D05, D06, D31, D36 |
 | 3 | `people` (profil, annuaire, images, mentions) et `media` | `6ef11f7` | 2 fichiers convex + 1 cas domaine | D05, D14, D36 |
 | 4 | `graph` (connexions, blocages, abonnements) | `bfb2db9` | 1 fichier convex (15 cas) + 4 cas domaine | D04, D05, D12, D14, D17, D19 |
-| 5 | `notifications` (cloche sociale, diffusion par lots) et avis de verdict des fichiers | voir journal git (`feat(notifications)`) | 1 fichier convex (10 cas) + 1 fichier domaine + 1 cliquet | D07, D18, D19 |
+| 5 | `notifications` (cloche sociale, diffusion par lots) et avis de verdict des fichiers | `9f2f12b` | 1 fichier convex (10 cas) + 1 fichier domaine + 1 cliquet | D07, D18, D19 |
 
 Ordre suivi (owner map §4.2), avec un écart : le lot 1 (modules purs) est porté avec chaque module qui le
 consomme ; l'avis de verdict des fichiers (`files/notify`) est arrivé avec le module `notifications` (lot 5), dont il
@@ -288,3 +288,6 @@ dépend.
   un corps et un lien, que le moteur ne stocke pas.
 - **Push** (abonnements, envoi sans aperçu, D20, D29) et **rétention** (D30) : PA5.
 - Les genres de messagerie, groupes, évènements et directs sont déclarés au domaine ; ils sonnent avec leur module.
+- Quatre genres de la tranche `diaspora`, sans sujet, à la demande de DIASPORALE : `sponsorship_received`,
+  `sponsorship_withdrawn` (sans acteur si la modération retire), `attestation_verified`, `attestation_not_confirmed`
+  (aucune raison consulaire) ; émis par `convex/modules/diaspora/` via `notifyPerson`.
