@@ -15,6 +15,10 @@
  *   2. sombre « nuit brune » — redéclare CHAQUE rôle que le bloc sombre de la
  *      base déclare : à spécificité 0,2,0, ce bloc l'emporterait sinon sur le
  *      bloc clair de ce thème (0,1,0) et le bleu du moteur réapparaîtrait.
+ * Version 2 (15/10/2026, demande du propriétaire) : le sombre retourne la page —
+ * la carte est l'encre, plus profonde que le fond ; en clair comme en sombre, le
+ * contenu se pose sur la surface la plus contrastée. Rayons resserrés (contrôles
+ * 6 px, cartes 8 px), pilules inchangées (`--esp-r-chrome` de la base).
  * Les contrastes (texte ≥ 4,5:1, contours et focus ≥ 3:1) sont recalculés dans les
  * deux thèmes, à travers la cascade complète base + thème, par le cliquet
  * `engine-theme-contrast.test.ts` de DIASPORALE.
@@ -40,7 +44,8 @@
   /* Encre posée sur le bleu éclairci du thème sombre (6,53:1). */
   --esp-on-blue: #14130f;
 
-  /* Sable, papier, grès, encre. 400 et le champ sont non textuels (3,26:1). */
+  /* Sable, papier, grès, encre. 400 et le champ sont non textuels (3,26:1).
+     Grès assombri en v2 : 6,46:1 sur le sable (5,54 avant), texte discret 5,22:1. */
   --esp-neutral-0: #ffffff;
   --esp-neutral-50: #fbfaf6;
   --esp-neutral-100: #f7f6f2;
@@ -48,8 +53,8 @@
   --esp-neutral-200: #efebe0;
   --esp-neutral-300: #d2cdbf;
   --esp-neutral-400: #918e89;
-  --esp-neutral-500: #736e61;
-  --esp-neutral-600: #66635d;
+  --esp-neutral-500: #6b675d;
+  --esp-neutral-600: #5c5952;
   --esp-neutral-700: #3a3833;
   --esp-neutral-800: #26241f;
   --esp-neutral-900: #14130f;
@@ -57,20 +62,21 @@
   --esp-neutral-field: #918e89;
   --esp-neutral-chip: #efebe0;
   --esp-neutral-hover: #f3efe4;
-  --esp-neutral-mute: #736e61;
+  --esp-neutral-mute: #6b675d;
   --esp-neutral-faint: #918e89;
 
-  /* Nuit brune — fond < section < carte < puce. */
-  --esp-night-bg: #14130f;
-  --esp-night-sidebar: #1c1a15;
-  --esp-night-section: #1c1a15;
-  --esp-night-card: #201d18;
+  /* Nuit brune, inversée en v2 — carte (encre) < fond (nuit) < section, puce.
+     Texte sable sur la carte : 17,19:1 (14,87 avant) ; grès clair 8,02:1. */
+  --esp-night-bg: #201d18;
+  --esp-night-sidebar: #201d18;
+  --esp-night-section: #2a2620;
+  --esp-night-card: #14130f;
   --esp-night-chip: #2a2620;
-  --esp-night-hover: #2a2620;
+  --esp-night-hover: #322e27;
   --esp-night-border: #3d3729;
   --esp-night-input: #7d7666;
-  --esp-night-faint: #8c8676;
-  --esp-night-soft: #a8a291;
+  --esp-night-faint: #948e7e;
+  --esp-night-soft: #b0aa99;
   --esp-night-accent-soft: #17293f;
   --esp-night-accent-deep: #b4dbff;
 
@@ -112,11 +118,14 @@
   --esp-seg-on-fg: #f7f6f2;
   --esp-night-seg-on: #f4f1e8;
   --esp-night-seg-on-fg: #14130f;
-  --esp-shadow: 0 1px 0 rgb(20 19 15 / 0.04), 0 1px 3px rgb(20 19 15 / 0.07);
-  --esp-night-shadow: 0 1px 2px rgb(0 0 0 / 0.45);
-  --esp-shadow-float: 0 6px 18px rgb(20 19 15 / 0.1);
-  --esp-night-shadow-float: 0 6px 18px rgb(0 0 0 / 0.5);
-  --esp-shadow-card-hover: 0 10px 26px rgb(20 19 15 / 0.08);
+  /* Reliefs v2 : presque rien. La carte se détache par la clarté (papier sur
+     sable, encre sur nuit), sans filet ; l'ombre n'est qu'un souffle, à peine
+     plus marqué pour ce qui passe DEVANT la page (carte flottante, barre basse). */
+  --esp-shadow: 0 1px 2px rgb(20 19 15 / 0.05);
+  --esp-night-shadow: 0 1px 1px rgb(0 0 0 / 0.25);
+  --esp-shadow-float: 0 1px 2px rgb(20 19 15 / 0.04), 0 4px 14px -4px rgb(20 19 15 / 0.08);
+  --esp-night-shadow-float: 0 1px 2px rgb(0 0 0 / 0.3), 0 4px 14px -4px rgb(0 0 0 / 0.35);
+  --esp-shadow-card-hover: 0 1px 2px rgb(20 19 15 / 0.05), 0 4px 12px -4px rgb(20 19 15 / 0.08);
 
   /* ── 2. Rôles — thème clair ── */
 
@@ -198,16 +207,19 @@
   --status-active: var(--esp-blue-500);
   --status-active-bg: var(--esp-blue-50);
 
-  /* Géométrie — rayon de base 10 px (A7). */
-  --radius: 10px;
+  /* Géométrie v2 — rayons resserrés : 4 px pour les badges et l'étiquette, 6 px
+     pour les contrôles (bouton, champ, option), 8 px pour les cartes et les
+     cartes flottantes, 12 px pour les panneaux et les feuilles. La pilule
+     (onglets, filtres, sélecteurs, interrupteur) reste `--esp-r-chrome`. */
+  --radius: 6px;
   --radius-xs: 4px;
-  --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-lg: 14px;
-  --radius-xl: 16px;
-  --radius-2xl: 20px;
-  --radius-3xl: 24px;
-  --radius-4xl: 28px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 6px;
+  --radius-xl: 8px;
+  --radius-2xl: 12px;
+  --radius-3xl: 16px;
+  --radius-4xl: 20px;
 
   /* IBM Plex en trois largeurs — polices importées par l'application (fontsource). */
   --font-sans: "IBM Plex Sans Variable", "IBM Plex Sans", "Inter", system-ui, -apple-system, sans-serif;
@@ -237,12 +249,14 @@
 .dark [data-charte="diasporale"] {
   color-scheme: dark;
 
+  /* Le sombre retourne la page : le fond est la nuit, la carte est l'encre (plus
+     profonde) ; ce qui flotte (carte flottante, menu) remonte vers la clarté. */
   --background: var(--esp-night-bg);
   --background-dashboard: var(--esp-night-bg);
   --foreground: var(--esp-neutral-100);
   --card: var(--esp-night-card);
   --card-foreground: var(--esp-neutral-100);
-  --popover: var(--esp-night-card);
+  --popover: var(--esp-night-section);
   --popover-foreground: var(--esp-neutral-100);
   /* Le bleu s'éclaircit et l'encre se pose dessus : jamais de blanc sur le bleu. */
   --primary: var(--esp-blue-400);
@@ -274,7 +288,8 @@
   --chart-3: var(--esp-amber-dark);
   --chart-4: var(--esp-rose-dark);
   --chart-5: var(--esp-night-faint);
-  --sidebar: var(--esp-night-section);
+  /* Le rail se fond dans la page, comme en clair (sable sur sable). */
+  --sidebar: var(--esp-night-bg);
   --sidebar-foreground: var(--esp-neutral-100);
   --sidebar-primary: var(--esp-blue-400);
   --sidebar-primary-foreground: var(--esp-on-blue);
