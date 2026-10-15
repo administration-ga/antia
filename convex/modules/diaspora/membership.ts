@@ -10,7 +10,6 @@
  * naît avec l'entrée (invariant 3) ; aucune adhésion n'est créée sans geste.
  */
 import { CONSENT_TEXT_VERSIONS as ENGINE_CONSENT_TEXT_VERSIONS, isConsentInForce, missingConsentsToJoin } from "@antia/social-domain/consent"
-import { normalizeHandle } from "@antia/social-domain/content"
 import { isActiveStatus } from "@antia/social-domain/membership"
 import {
   capabilitiesOf,
@@ -43,7 +42,9 @@ import { fail, failAppRule, notFound } from "../../lib/errors"
 import { networkMutation, networkQuery, personMutation } from "../../lib/functions"
 import { enforceRateLimit } from "../../lib/rateLimit"
 import { membershipRoleValidator, membershipStatusValidator } from "../../lib/validators"
+import { isBlockedBetween } from "../graph/graph"
 import { admitToNetwork, setMembershipStatus, writeNetworkFacet } from "../people/admission"
+import { findPublishedPersonByHandle } from "../people/miniProfile"
 import { hasStrongIdentityFor, liveIdentityLinks } from "../people/persons"
 import {
   activeSponsorshipOf,
@@ -188,7 +189,7 @@ function sponsorRefusalParams(code: SponsorshipRefusal, facts: SponsorFacts): Re
  * Un membre parraine un compte de DIASPORALE, désigné par son identifiant public.
  * Le parrain d'abord (vérifié depuis plus de 30 jours, dix par fenêtre glissante
  * de 30 jours), la cible ensuite, en un refus INDISTINCT (`target_not_eligible`) :
- * parrainer n'apprend rien du statut d'autrui, ni même de son existence.
+ * parrainer n'apprend rien du statut d'autrui, ni de son existence, ni d'un blocage.
  */
 export const sponsor = networkMutation({
   minStatus: "en_attente",
@@ -199,11 +200,11 @@ export const sponsor = networkMutation({
     await enforceRateLimit(ctx, "diaspora.sponsor", ctx.person._id)
     const now = Date.now()
     const facts = await sponsorFactsOf(ctx, now)
-    const target = await ctx.db
-      .query("persons")
-      .withIndex("by_handle", (q) => q.eq("handle", normalizeHandle(handle).replace(/^@/, "")))
-      .unique()
-    const targetAccess = target ? await effectiveStatusIn(ctx, ctx.network, target._id) : null
+    // Une personne joignable (profil publié, membre active du réseau), et sans blocage
+    // dans la paire, dans un sens ou dans l'autre : sinon, le même refus indistinct.
+    const target = await findPublishedPersonByHandle(ctx, ctx.networkId, handle.trim().replace(/^@/, ""))
+    const blocked = target !== null && (await isBlockedBetween(ctx, ctx.person._id, target._id))
+    const targetAccess = target && !blocked ? await effectiveStatusIn(ctx, ctx.network, target._id) : null
     const check = checkSponsorship(
       facts,
       {
@@ -215,7 +216,7 @@ export const sponsor = networkMutation({
     )
     if (!check.ok) return failAppRule(check.code, sponsorRefusalParams(check.code, facts))
     // Inatteignable : la règle a déjà refusé une cible absente ou non membre.
-    if (!target || !targetAccess?.membership) return notFound()
+    if (!target || blocked || !targetAccess?.membership) return notFound()
 
     const sponsorshipId = await ctx.db.insert("sponsorships", {
       networkId: ctx.networkId,

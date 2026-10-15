@@ -6,7 +6,7 @@
  */
 import { engineErrorAppRule, engineErrorCode } from "@antia/social-contracts/errors"
 import { validateFacetSchema } from "@antia/social-domain/facets"
-import { DAY_MS, DEFAULT_FACET_VISIBILITY, MEMBER_COUNTER_DISPLAY_THRESHOLD, SPONSORSHIPS_PER_WINDOW } from "@diasporale/domain"
+import { ATTESTATION_PATH, canonicalAttestationString, DAY_MS, DEFAULT_FACET_VISIBILITY, MEMBER_COUNTER_DISPLAY_THRESHOLD, SPONSORSHIPS_PER_WINDOW } from "@diasporale/domain"
 import { afterEach, describe, expect, it, vi } from "vitest"
 
 import { api, internal } from "../../_generated/api"
@@ -14,6 +14,7 @@ import type { Id } from "../../_generated/dataModel"
 import schema from "../../schema"
 import { SEED_CONFIRMATION } from "../../seeds/foundations"
 import { testConvex } from "../../test.setup"
+import { sha256Hex, signAttestation } from "./attestation"
 import { DIASPORA_SLICE_MANIFEST } from "./manifest"
 import { diasporaTables } from "./tables"
 
@@ -604,5 +605,200 @@ describe("graine de recette — parrain vérifié pour jouer R3 en local", () =>
     await expect(
       t.mutation(internal.modules.diaspora.seed.verifyForRecette, { confirmNonProduction: "oui", handle: "parrain" }),
     ).rejects.toThrow(/hors production/)
+  })
+})
+
+describe("parrainage et blocage", () => {
+  it("un blocage dans la paire, dans un sens ou dans l'autre, rend le même refus indistinct", async () => {
+    const t = testConvex()
+    const { diasporale } = await seedAll(t)
+    const sponsor = await verifiedSponsor(t, diasporale, "auth-parrain", "parrain")
+    const light = await person(t, "auth-light", "compte.leger")
+    await join(light.as, diasporale)
+    await light.as.mutation(api.modules.graph.connections.blockPerson, { networkId: diasporale, targetPersonId: sponsor.personId })
+    const refused = await refusal(sponsor.as.mutation(api.modules.diaspora.membership.sponsor, { networkId: diasporale, handle: "compte.leger" }))
+    expect(refused.app?.appRule).toBe("target_not_eligible")
+    expect(await membership(t, diasporale, light.personId)).toMatchObject({ status: "en_attente" })
+  })
+})
+
+describe("attestation consulaire DIASPORA-ATTESTATION-V1 (PD3, côté moteur)", () => {
+  const SECRET = btoa("k".repeat(32))
+  const BASE = "https://consulat.exemple.test"
+
+  function configure() {
+    vi.stubEnv("DIASPORA_ATTESTATION_URL", BASE)
+    vi.stubEnv("DIASPORA_PARTNER_KEY_ID", "cle-recette")
+    vi.stubEnv("DIASPORA_PARTNER_KEY", SECRET)
+  }
+
+  /** Un FAUX consulat.ga : vérifie la signature et la forme de la requête, puis rend `reply`. */
+  function fakeConsulate(reply: (request: Record<string, unknown>) => unknown, seen: Record<string, unknown>[] = []) {
+    const fetchMock = vi.fn(async (input: URL | string, init?: RequestInit) => {
+      const url = new URL(String(input))
+      const headers = new Headers(init?.headers)
+      const body = String(init?.body)
+      expect(url.origin + url.pathname).toBe(`${BASE}${ATTESTATION_PATH}`)
+      expect(headers.get("x-diaspora-key-id")).toBe("cle-recette")
+      const timestamp = headers.get("x-diaspora-timestamp") ?? ""
+      const expected = await signAttestation(SECRET, canonicalAttestationString({ timestamp, bodySha256: await sha256Hex(body) }))
+      expect(headers.get("x-diaspora-signature")).toBe(expected)
+      const request = JSON.parse(body) as Record<string, unknown>
+      seen.push(request)
+      return new Response(JSON.stringify(reply(request)), { status: 200, headers: { "content-type": "application/json" } })
+    })
+    vi.stubGlobal("fetch", fetchMock)
+    return fetchMock
+  }
+
+  async function settle(t: T) {
+    await t.finishAllScheduledFunctions(() => vi.advanceTimersByTime(1))
+  }
+
+  /** Une personne IDN gabonaise (garantie 1) entrée « déclarée ». */
+  async function idnMember(t: T, diasporale: Id<"networks">) {
+    const ada = await person(t, "auth-ada", "ada")
+    await linkIdn(t, ada.personId, 1, "GA")
+    await join(ada.as, diasporale)
+    return ada
+  }
+
+  afterEach(() => {
+    vi.unstubAllEnvs()
+    vi.unstubAllGlobals()
+  })
+
+  it("confirmée : lien d'attestation (empreinte), poste sur la facette, statut vérifié — et rien d'autre", async () => {
+    vi.useFakeTimers()
+    configure()
+    const t = testConvex()
+    const { diasporale } = await seedAll(t)
+    const ada = await idnMember(t, diasporale)
+    const seen: Record<string, unknown>[] = []
+    fakeConsulate(
+      () => ({
+        contract: "DIASPORA-ATTESTATION-V1",
+        verified: true,
+        countryOfResidence: "FR",
+        postSlug: "consulat-general-paris",
+        registrationStatus: "active",
+        since: Date.UTC(2023, 2, 1),
+        attestedAt: Date.now(),
+      }),
+      seen,
+    )
+    const { attestationId } = await ada.as.mutation(api.modules.diaspora.attestation.requestConsularAttestation, { networkId: diasporale, consent: true })
+    await settle(t)
+
+    // La requête : quatre champs, le sujet IDN, une référence de consentement conforme.
+    expect(Object.keys(seen[0] ?? {})).toEqual(["subjectKind", "subject", "consentRef", "requestedAt"])
+    expect(seen[0]).toMatchObject({ subjectKind: "idnSub", subject: `idn-${ada.personId}` })
+    expect(String(seen[0]?.consentRef)).toMatch(/^consent:[A-Za-z0-9:_-]{8,}$/)
+
+    // La ligne : l'empreinte du sujet, jamais le sujet ; aucune donnée hors contrat.
+    const row = await t.run(async (ctx) => ctx.db.get(attestationId))
+    expect(row).toMatchObject({ result: "verified", country: "FR", postSlug: "consulat-general-paris", subjectKind: "idnSub" })
+    expect(row?.subjectHash).toMatch(/^[0-9a-f]{64}$/)
+    expect(JSON.stringify(row)).not.toContain(`idn-${ada.personId}`)
+    expect(Object.keys(row ?? {}).sort()).toEqual(
+      ["_creationTime", "_id", "attestedAt", "consentId", "consentRef", "country", "networkId", "personId", "postSlug", "requestedAt", "respondedAt", "result", "since", "subjectHash", "subjectKind"].sort(),
+    )
+    const link = await t.run(async (ctx) =>
+      ctx.db
+        .query("identityLinks")
+        .withIndex("by_person_and_provider", (q) => q.eq("personId", ada.personId).eq("provider", "consular_attestation"))
+        .unique(),
+    )
+    expect(link).toMatchObject({ subject: row?.subjectHash, country: "FR", postSlug: "consulat-general-paris" })
+    expect(await membership(t, diasporale, ada.personId)).toMatchObject({ status: "verifiee", verifiedBy: "consulat" })
+    const mine = await ada.as.query(api.modules.diaspora.membership.myMembership, { networkId: diasporale })
+    expect(mine).toMatchObject({ status: "verifiee", badges: ["verified"], attestation: { outcome: "verified", postSlug: "consulat-general-paris" } })
+    expect(mine?.facet?.postSlug).toBe("consulat-general-paris")
+    const consent = await t.run(async (ctx) => (row ? ctx.db.get(row.consentId) : null))
+    expect(consent).toMatchObject({ purpose: "consular_attestation", origin: "prompt", networkId: diasporale })
+  })
+
+  it("non confirmée : l'issue est notée, rien n'est posé, sans raison consulaire", async () => {
+    vi.useFakeTimers()
+    configure()
+    const t = testConvex()
+    const { diasporale } = await seedAll(t)
+    const ada = await idnMember(t, diasporale)
+    fakeConsulate(() => ({ contract: "DIASPORA-ATTESTATION-V1", verified: false, registrationStatus: "expired", attestedAt: Date.now() }))
+    await ada.as.mutation(api.modules.diaspora.attestation.requestConsularAttestation, { networkId: diasporale, consent: true })
+    await settle(t)
+    expect(await membership(t, diasporale, ada.personId)).toMatchObject({ status: "declaree" })
+    const mine = await ada.as.query(api.modules.diaspora.membership.myMembership, { networkId: diasporale })
+    expect(mine?.attestation).toMatchObject({ outcome: "not_confirmed", postSlug: null })
+    const links = await t.run(async (ctx) => ctx.db.query("identityLinks").take(10))
+    expect(links.map((link) => link.provider)).toEqual(["idn"])
+  })
+
+  it("une réponse hors contrat est refusée : échec technique, rien de consulaire n'entre", async () => {
+    vi.useFakeTimers()
+    configure()
+    const t = testConvex()
+    const { diasporale } = await seedAll(t)
+    const ada = await idnMember(t, diasporale)
+    fakeConsulate(() => ({
+      contract: "DIASPORA-ATTESTATION-V1",
+      verified: true,
+      countryOfResidence: "FR",
+      postSlug: "consulat-general-paris",
+      registrationStatus: "active",
+      attestedAt: Date.now(),
+      passportNumber: "jamais",
+    }))
+    const { attestationId } = await ada.as.mutation(api.modules.diaspora.attestation.requestConsularAttestation, { networkId: diasporale, consent: true })
+    await settle(t)
+    const row = await t.run(async (ctx) => ctx.db.get(attestationId))
+    expect(row).toMatchObject({ result: "failed" })
+    expect(row?.country).toBeUndefined()
+    expect(JSON.stringify(row)).not.toContain("jamais")
+    expect(await membership(t, diasporale, ada.personId)).toMatchObject({ status: "declaree" })
+  })
+
+  it("sans configuration du déploiement, rien ne part", async () => {
+    vi.useFakeTimers()
+    const t = testConvex()
+    const { diasporale } = await seedAll(t)
+    const ada = await idnMember(t, diasporale)
+    const fetchMock = fakeConsulate(() => ({}))
+    const { attestationId } = await ada.as.mutation(api.modules.diaspora.attestation.requestConsularAttestation, { networkId: diasporale, consent: true })
+    await settle(t)
+    expect(fetchMock).not.toHaveBeenCalled()
+    expect(await t.run(async (ctx) => ctx.db.get(attestationId))).toMatchObject({ result: "failed" })
+  })
+
+  it("une demande par 24 h ; inutile pour un membre vérifié ; sans IDN, rien à présenter ; le geste est exigé", async () => {
+    vi.useFakeTimers()
+    configure()
+    fakeConsulate(() => ({ contract: "DIASPORA-ATTESTATION-V1", verified: false, registrationStatus: "none", attestedAt: Date.now() }))
+    const t = testConvex()
+    const { diasporale } = await seedAll(t)
+    const ada = await idnMember(t, diasporale)
+    await ada.as.mutation(api.modules.diaspora.attestation.requestConsularAttestation, { networkId: diasporale, consent: true })
+    await settle(t)
+    // Tout de suite : le seau de débit (une demande, puis une toutes les huit heures) refuse d'abord.
+    const immediate = await refusal(ada.as.mutation(api.modules.diaspora.attestation.requestConsularAttestation, { networkId: diasporale, consent: true }))
+    expect(immediate.code).toBe("rateLimited")
+    // Neuf heures plus tard, le seau le permet, mais la règle du domaine (24 h) dit quand.
+    vi.advanceTimersByTime(9 * 60 * 60 * 1000)
+    const again = await refusal(ada.as.mutation(api.modules.diaspora.attestation.requestConsularAttestation, { networkId: diasporale, consent: true }))
+    expect(again.app?.appRule).toBe("attestation_too_soon")
+    expect(again.app?.appParams.availableAt).toBeGreaterThan(Date.now())
+
+    const verified = await verifiedSponsor(t, diasporale, "auth-verifie", "verifie")
+    const notNeeded = await refusal(verified.as.mutation(api.modules.diaspora.attestation.requestConsularAttestation, { networkId: diasporale, consent: true }))
+    expect(notNeeded).toEqual({ code: "conflict", app: { appRule: "attestation_not_needed", appParams: {} } })
+
+    const light = await person(t, "auth-leger", "leger")
+    await join(light.as, diasporale)
+    const unavailable = await refusal(light.as.mutation(api.modules.diaspora.attestation.requestConsularAttestation, { networkId: diasporale, consent: true }))
+    expect(unavailable.app?.appRule).toBe("attestation_unavailable")
+
+    await expect(
+      light.as.mutation(api.modules.diaspora.attestation.requestConsularAttestation, { networkId: diasporale, consent: false as never }),
+    ).rejects.toThrow()
   })
 })
