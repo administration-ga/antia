@@ -75,13 +75,14 @@
   --esp-neutral-faint: #8b8882;
 
   /* Nuit chaude, en couches (v3) — une seule teinte (OKLCH h 75), chroma basse :
-     plus de brun olive. Du plus sombre au plus clair : fond < creux < carte < puce
-     et carte flottante < survol ; carte 1,16:1 sur le fond, flottant 1,15:1 sur la
-     carte. Texte #e9e7e1 : 14,99:1 sur le fond, 12,94:1 sur la carte (sans halo) ;
+     plus de brun olive. Du plus sombre au plus clair : fond < carte < aplats
+     (survol, étiquettes, squelettes — v3.1 : ils éclaircissent au lieu de creuser)
+     < puce et carte flottante < survol fort ; carte 1,16:1 sur le fond, flottant
+     1,15:1 sur la carte. Texte #e9e7e1 : 14,99:1 sur le fond, 12,94:1 sur la carte (sans halo) ;
      grès clair 7,32:1 sur la carte, discret 5,12:1. */
   --esp-night-bg: #151311;
   --esp-night-sidebar: #151311;
-  --esp-night-section: #1a1816;
+  --esp-night-section: #2b2825;
   --esp-night-card: #24211f;
   --esp-night-chip: #2e2c28;
   --esp-night-hover: #393632;
@@ -92,36 +93,41 @@
   --esp-night-accent-soft: #17293f;
   --esp-night-accent-deep: #b4dbff;
 
-  /* Tons — paires texte / fond mesurées. */
+  /* Tons — paires texte / fond mesurées. Teintes harmonisées (v3.1) : même clarté et
+     même chroma par thème (OKLCH L 95,8 % C 0,030 en clair ; L 29,5 % C 0,045 en
+     sombre, au-dessus de la carte : plus de pastille rose fondue). */
   --esp-blue: #004c7d;
-  --esp-blue-bg: #eef7ff;
+  --esp-blue-bg: #e1f4ff;
   --esp-blue-dark: #7ec2ff;
-  --esp-blue-bg-dark: #17293f;
+  --esp-blue-bg-dark: #182f42;
   --esp-amber: #8a5e00;
-  --esp-amber-bg: #faedca;
+  --esp-amber-bg: #fbf0db;
   --esp-amber-border: #f3dfa6;
   --esp-amber-point: #a16e00;
   --esp-amber-dark: #d7ad63;
-  --esp-amber-bg-dark: #322813;
+  --esp-amber-bg-dark: #382a10;
   --esp-rose: #b3261e;
-  --esp-rose-bg: #fdecea;
+  --esp-rose-bg: #ffeae7;
   --esp-rose-dark: #e18c85;
-  --esp-rose-bg-dark: #331917;
+  --esp-rose-bg-dark: #402321;
   --esp-green: #0f5f2f;
-  --esp-green-bg: #e3f1e8;
+  --esp-green-bg: #e3f7e7;
   --esp-green-dark: #6ebe85;
-  --esp-green-bg-dark: #143021;
+  --esp-green-bg-dark: #1a3321;
   --esp-green-strong: #157a3d;
 
-  /* Avatars — mêmes teintes et même ordre que la base ; trois barreaux
-     assombris dans leur teinte (blanc ≥ 5,07:1 sous des initiales de 13 px). */
+  /* Avatars — mêmes familles et même ordre que la base (une personne garde sa couleur
+     d'un réseau à l'autre). v3.1, réglés au validateur de palette (Machado 2009,
+     toutes paires) : pire paire en vision normale ΔE 12,5 (9,2 avant), en daltonisme
+     6,3 (2,2 avant : bleu et violet se confondaient), blanc ≥ 4,6:1 sous les
+     initiales. Le sarcelle plafonne à C 0,08 : limite du gamut sRGB à cette clarté. */
   --esp-on-avatar: #ffffff;
-  --esp-ava-1: #2f6fbf;
-  --esp-ava-2: #0c7a44;
-  --esp-ava-3: #a35a09;
-  --esp-ava-4: #7a4fc9;
-  --esp-ava-5: #c2413b;
-  --esp-ava-6: #167580;
+  --esp-ava-1: #2971d5;
+  --esp-ava-2: #01793d;
+  --esp-ava-3: #9a5600;
+  --esp-ava-4: #804dae;
+  --esp-ava-5: #c94050;
+  --esp-ava-6: #238090;
 
   /* Navigation active, segments, reliefs teintés d'encre. */
   --esp-accent-soft: #eef7ff;
