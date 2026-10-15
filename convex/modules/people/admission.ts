@@ -7,7 +7,9 @@
  * profil, les consentements, l'éligibilité et le débit (ordre du moteur :
  * adhésion → éligibilité → débit → droit). Ces aides posent l'état en tenant
  * les invariants : adhésion DÉRIVÉE vers la racine, suspension racine =
- * partout, facette validée contre le schéma BORNÉ du réseau.
+ * partout, facette validée contre le schéma BORNÉ du réseau, annuaire du
+ * réseau tenu à jour (`syncPersonDirectory`) — une tranche qui passe par elles
+ * n'a rien à y penser.
  */
 import { validateFacetValues } from "@antia/social-domain/facets"
 import {
@@ -23,13 +25,14 @@ import type { Doc, Id } from "../../_generated/dataModel"
 import type { MutationCtx } from "../../_generated/server"
 import { getMembership } from "../../lib/access"
 import { fail } from "../../lib/errors"
+import { syncPersonDirectory } from "./directory"
 
 export type FacetInput = {
   values: Doc<"personFacets">["values"]
   visibilities: Doc<"personFacets">["visibilities"]
 }
 
-/** Change le statut d'une adhésion en datant le changement. */
+/** Change le statut d'une adhésion en datant le changement ; l'annuaire suit. */
 export async function setMembershipStatus(
   ctx: MutationCtx,
   membership: Doc<"networkMemberships">,
@@ -37,6 +40,7 @@ export async function setMembershipStatus(
   extra: Partial<Doc<"networkMemberships">> = {},
 ): Promise<void> {
   await ctx.db.patch(membership._id, { status, statusChangedAt: Date.now(), ...extra })
+  await syncPersonDirectory(ctx, membership.personId)
 }
 
 /**
@@ -152,5 +156,6 @@ export async function admitToNetwork(
     status = existing.status
   }
   if (network.kind === "root") rootStatus = status
+  await syncPersonDirectory(ctx, personId)
   return { status, rootStatus: rootStatus ?? status }
 }

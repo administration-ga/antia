@@ -8,7 +8,7 @@
  * (`ctx.auth`). Tout refus d'accès à un réseau dont on n'est pas membre est
  * INDISTINCT (`notFound`) ; une suspension à la racine vaut partout.
  */
-import { type ActiveMembershipStatus, effectiveAccessStatus, satisfiesMinimum } from "@antia/social-domain/membership"
+import { type ActiveMembershipStatus, effectiveAccessStatus, isActiveStatus, satisfiesMinimum } from "@antia/social-domain/membership"
 
 import type { Doc, Id } from "../_generated/dataModel"
 import type { QueryCtx } from "../_generated/server"
@@ -37,7 +37,7 @@ export async function requirePerson(ctx: QueryCtx): Promise<Doc<"persons">> {
 }
 
 /** Le réseau racine actif (il y en a un, et un seul). */
-export async function getRootNetwork(ctx: QueryCtx): Promise<Doc<"networks"> | null> {
+export async function getRootNetwork(ctx: Pick<QueryCtx, "db">): Promise<Doc<"networks"> | null> {
   return await ctx.db
     .query("networks")
     .withIndex("by_kind_and_status", (q) => q.eq("kind", "root").eq("status", "active"))
@@ -45,7 +45,7 @@ export async function getRootNetwork(ctx: QueryCtx): Promise<Doc<"networks"> | n
 }
 
 export async function getMembership(
-  ctx: QueryCtx,
+  ctx: Pick<QueryCtx, "db">,
   networkId: Id<"networks">,
   personId: Id<"persons">,
 ): Promise<Doc<"networkMemberships"> | null> {
@@ -91,4 +91,24 @@ export async function requireMembership(
   if (status === "suspendue") return fail("membershipSuspended")
   if (!satisfiesMinimum(status, minStatus)) return fail("statusInsufficient")
   return { person, network, membership, rootNetwork }
+}
+
+/**
+ * Une AUTRE personne est-elle membre active du réseau (en attente, déclarée ou
+ * vérifiée, sans suspension à la racine) ? Pour les lectures qui exposent un
+ * tiers dans un réseau (annuaire, fiche, mentions) : jamais un non-membre.
+ */
+export async function isActiveMember(ctx: Pick<QueryCtx, "db">, networkId: Id<"networks">, personId: Id<"persons">): Promise<boolean> {
+  const network = await ctx.db.get(networkId)
+  if (!network || network.status !== "active") return false
+  const membership = await getMembership(ctx, network._id, personId)
+  if (!membership) return false
+  const root = network.kind === "root" ? network : await getRootNetwork(ctx)
+  const rootMembership = network.kind === "root" || !root ? membership : await getMembership(ctx, root._id, personId)
+  const status = effectiveAccessStatus({
+    networkStatus: membership.status,
+    rootStatus: rootMembership?.status ?? null,
+    isRoot: network.kind === "root",
+  })
+  return status !== null && isActiveStatus(status)
 }

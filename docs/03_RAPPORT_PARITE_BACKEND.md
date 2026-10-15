@@ -15,7 +15,8 @@ l'owner map), les tests portés et neufs, les écarts assumés. Un module n'entr
 
 | # | Module | Commit | Tests portés / neufs | Dettes corrigées |
 |---|---|---|---|---|
-| 2 | `files` — garde des fichiers, politique de dépôt | voir journal git (`feat(files)`) | 6 fichiers convex + 2 domaine + 4 cliquets | D05, D06, D31, D36 |
+| 2 | `files` — garde des fichiers, politique de dépôt | `344f0fa` | 6 fichiers convex + 2 domaine + 4 cliquets | D05, D06, D31, D36 |
+| 3 | `people` (profil, annuaire, images, mentions) et `media` | voir journal git (`feat(people)`) | 2 fichiers convex + 1 cas domaine | D05, D14, D36 |
 
 Ordre suivi (owner map §4.2), avec un écart : le lot 1 (modules purs) est porté avec chaque module qui le
 consomme ; l'avis de verdict des fichiers (`files/notify`) arrive avec le module `notifications` (lot 5), dont il
@@ -97,3 +98,61 @@ dépend.
 - **Backend local et actions Node** : le backend local refuse tout déploiement contenant une action
   `"use node"` si son Node n'est pas en version 20, 22 ou 24 ; `bun run dev:convex` passe désormais par
   `scripts/convex-dev.mjs`, qui met un Node supporté en tête du PATH (Homebrew `node@24/22/20`, puis nvm).
+
+---
+
+## Lot 3 — `people` (profil social complet, annuaire, mentions) et `media`
+
+### Parité, fichier par fichier
+
+| Source (`socle/convex/…`) | Cible | Sort | État |
+|---|---|---|---|
+| `reseauPersonnel/people.ts` — `rethrowDomain` | `convex/lib/errors.ts` (`rethrowDomain`, `checked`, PA2) | à réécrire | ✅ |
+| `reseauPersonnel/people.ts` — `addedMentionedUserIds` | `packages/social-domain/src/content.ts` (`addedMentionedIds`) | pur | ✅ |
+| `reseauPersonnel/people.ts` — `livePersonalProfile`, `findPublishedPersonByHandle`, `publishedMiniProfile`, `miniProfileCache`, `resolveMentionedUserIds` | `convex/modules/people/miniProfile.ts` | à réécrire | ✅ |
+| `reseauPersonnel/people.ts` — `getMyProfile`, `ensureMyProfile` | `people/persons.ts` (`getMyPerson`, `ensureMyPerson`, PA2 ; photo et couverture ajoutées) | à réécrire | ✅ |
+| `reseauPersonnel/people.ts` — `publishMyProfile`, `suggestHandles` (tranche verticale), `withdrawMyProfile`, `setMyProfilePrivacy`, `setMyAvatar`, `setMyCover`, `getPublicProfile`, `assertFreshAvatarStorage` | `convex/modules/people/profile.ts` | à réécrire | ✅ |
+| `reseauPersonnel/people.ts` — `searchPeople` | `convex/modules/people/directory.ts` | à réécrire | ✅ |
+| `reseauPersonnel/people.ts` — `confirmMyHandle` | — | sans objet | — (aucun identifiant provisoire : la personne choisit le sien dès la publication) |
+| `reseauPersonnel/people.ts` — `ensurePublishedProfile`, `civilNameOf`, positions et administrations | — | **retirés** | — (publication d'office contraire à l'invariant 7) |
+| `reseauPersonnel/handleSuggestion.ts` | `packages/social-domain/src/handleSuggestion.ts` | tel quel | ✅ (PA2) |
+| `lib/accountErasure.ts` | `convex/modules/people/accountErasure.ts` | à adapter | ⏳ avec l'effacement (PA5) |
+| `reseauPersonnel/media.ts` | `convex/modules/media/media.ts` + `packages/social-contracts/src/media.ts` (`PostMediaDto`) | à adapter | ✅ |
+
+### Adaptations (liste fermée)
+
+- `users` + `reseauPersonnel_profiles` → `persons` ; « joignable » = profil publié, personne non effacée **et membre
+  active du réseau demandé** (fiche, mentions, annuaire) : un réseau ne voit jamais un non-membre.
+- Annuaire **par réseau** : projection `peopleDirectory` (réseau, personne, texte cherchable replié, `listed`), index
+  de recherche à `filterFields: ["networkId", "listed"]`, tenue par `syncPersonDirectory` à chaque changement de
+  profil ou de statut d'adhésion (dans les aides partagées : une tranche n'a rien à y penser).
+- Nom neutre rendu `null` (l'écran le traduit) ; badges calculés joints aux mini-profils.
+- Images de profil par la garde des fichiers (fraîcheur, politique `avatar`/`cover`, retenue nommée tant que
+  l'analyse n'a pas conclu) ; `getUrl` brut du socle (8 dans `people.ts`) remplacés par `resolveFileDelivery`.
+- `media` : déclaration du client confrontée au stockage (type et poids : `UPLOAD_MISMATCH`), admission sous la
+  politique de l'usage, URL de dépôt sous adhésion et usage déclaré, DTO avec retenue nommée.
+- Débit : `person.profile` sur retrait, mode privé et images ; `upload.url` sur les URL de dépôt.
+
+### Corrections de dette
+
+- **D36** : l'exception `media_social` disparaît — les usages des publications, stories et avatars dérivent des
+  constantes du domaine (une seule source) ; le PDF sort de `media_social` (une publication porte des images et des
+  vidéos), il reste admis en pièce de conversation.
+- **D05** : aucun `getUrl` brut dans `people` et `media`.
+- **D14** : débit sur les écritures du profil et les URL de dépôt.
+
+### Tests
+
+- Portés et adaptés : `media.adoption.test` → `media.test` (vérification et délivrance des médias, pour elles-mêmes ;
+  les cas qui passent par les stories et les groupes thématiques reviennent avec ces modules) ;
+  `profileAutoPublish.test` **réécrit en négatif** (rien n'est publié d'office) ; cas `people.*` de
+  `reseauPersonnel.test` → `people.test` (retrait, mode privé, fiche, mentions).
+- Neufs : annuaire borné au réseau (réseau fermé, non-membre, suspension racine, départ), images retenues jusqu'au
+  verdict, image d'autrui refusée comme absente, mini-profil mémoïsé.
+
+### Écarts assumés
+
+- **Blocage** : le filtre du blocage (annuaire, fiche) arrive avec le graphe (lot 4), qui porte `isBlockedBetween`.
+- **`accountErasure`** : porté avec l'effacement complet des tables sociales (PA5, D32).
+- **Type déclaré des images de profil** : `setMyAvatar`/`setMyCover` acceptent le type annoncé par l'écran, confronté
+  au stockage (même repli que la politique de dépôt quand le stockage n'en porte pas).

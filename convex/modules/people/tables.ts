@@ -106,6 +106,26 @@ export const peopleTables = {
     revokedAt: v.optional(v.number()),
   }).index("by_person_and_purpose", ["personId", "purpose"]),
 
+  /**
+   * L'ANNUAIRE d'un réseau : une projection cherchable par (réseau, personne),
+   * dénormalisée depuis le profil et l'adhésion. Elle n'existe que pour une
+   * adhésion ACTIVE, et n'est `listed` que pour un profil publié, non privé, sans
+   * suspension à la racine : la recherche ne rend jamais un non-membre ni une
+   * personne qui ne veut pas être trouvée (`filterFields`). Écrite par
+   * `syncPersonDirectory` seulement.
+   */
+  peopleDirectory: defineTable({
+    networkId: v.id("networks"),
+    personId: v.id("persons"),
+    /** Nom affiché et identifiant, avec leur repli sans accents (`buildSearchableText`). */
+    searchName: v.string(),
+    listed: v.boolean(),
+    updatedAt: v.number(),
+  })
+    .index("by_network_and_person", ["networkId", "personId"])
+    .index("by_person", ["personId"])
+    .searchIndex("search_name", { searchField: "searchName", filterFields: ["networkId", "listed"] }),
+
   handleHistory: defineTable({
     personId: v.id("persons"),
     handle: v.string(),

@@ -93,9 +93,10 @@ async function admit(
   storageId: Id<"_storage">,
   mimeType: string,
   meta: { networkId?: Id<"networks">; uploadedByPersonId?: Id<"persons">; filename?: string } = {},
-  usage: UploadUsage = "media_social",
+  usage: UploadUsage = "chat_attachment",
 ) {
-  return await t.run(async (ctx) => admitStoredUpload(ctx as unknown as MutationCtx, { storageId, usage, mimeType }, { source: "post_media", ...meta }))
+  // Pièce de conversation par défaut : son usage admet PDF, images et bureautique.
+  return await t.run(async (ctx) => admitStoredUpload(ctx as unknown as MutationCtx, { storageId, usage, mimeType }, { source: "message", ...meta }))
 }
 
 async function scanOf(t: T, storageId: Id<"_storage">): Promise<Doc<"fileScans"> | null> {
@@ -138,7 +139,7 @@ describe("admission — une ligne par fichier, un job planifié", () => {
         .take(5),
     )
     expect(rows).toHaveLength(1)
-    expect(rows[0]).toMatchObject({ status: "pending", source: "post_media", declaredMimeType: "application/pdf", attempts: 0, networkId: rootId })
+    expect(rows[0]).toMatchObject({ status: "pending", source: "message", declaredMimeType: "application/pdf", attempts: 0, networkId: rootId })
   })
 
   it("`FILE_GUARD=off` SUSPEND : la ligne naît `pending` sans job, et reste retenue", async () => {

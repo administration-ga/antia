@@ -14,9 +14,10 @@ import { getCurrentPerson } from "../../lib/access"
 import { fail } from "../../lib/errors"
 import { enforceRateLimit } from "../../lib/rateLimit"
 import { badgeValidator, consentPurposeValidator, localeValidator } from "../../lib/validators"
+import { resolveFileDelivery, withheldCodeOf, withheldCodeValidator } from "../files/storageGuard"
 
 /** Liens d'identité VIVANTS d'une personne (bornés : un par fournisseur, quatre fournisseurs). */
-export async function liveIdentityLinks(ctx: QueryCtx, personId: Id<"persons">): Promise<Doc<"identityLinks">[]> {
+export async function liveIdentityLinks(ctx: Pick<QueryCtx, "db">, personId: Id<"persons">): Promise<Doc<"identityLinks">[]> {
   // borné : au plus un lien par fournisseur et par personne (quatre fournisseurs).
   const links = await ctx.db
     .query("identityLinks")
@@ -25,11 +26,11 @@ export async function liveIdentityLinks(ctx: QueryCtx, personId: Id<"persons">):
   return links.filter((link) => link.revokedAt === undefined)
 }
 
-export async function badgesOf(ctx: QueryCtx, personId: Id<"persons">) {
+export async function badgesOf(ctx: Pick<QueryCtx, "db">, personId: Id<"persons">) {
   return computePersonBadges(await liveIdentityLinks(ctx, personId))
 }
 
-export async function hasStrongIdentityFor(ctx: QueryCtx, personId: Id<"persons">): Promise<boolean> {
+export async function hasStrongIdentityFor(ctx: Pick<QueryCtx, "db">, personId: Id<"persons">): Promise<boolean> {
   return hasStrongIdentity(await liveIdentityLinks(ctx, personId))
 }
 
@@ -44,7 +45,17 @@ const myPersonValidator = v.object({
   timeZone: v.optional(v.string()),
   badges: v.array(badgeValidator),
   consentsInForce: v.array(consentPurposeValidator),
+  /** Photo et couverture : URL servie par la garde, ou la retenue (analyse en cours, bloquée). */
+  avatar: v.union(v.object({ url: v.union(v.string(), v.null()), withheld: v.union(withheldCodeValidator, v.null()) }), v.null()),
+  cover: v.union(v.object({ url: v.union(v.string(), v.null()), withheld: v.union(withheldCodeValidator, v.null()) }), v.null()),
 })
+
+/** L'image d'un profil par la garde des fichiers : `null` sans image. */
+async function profileImage(ctx: QueryCtx, storageId: Id<"_storage"> | undefined) {
+  if (!storageId) return null
+  const delivery = await resolveFileDelivery(ctx, storageId)
+  return { url: delivery.url, withheld: withheldCodeOf(delivery.scan) }
+}
 
 /**
  * @selfScoped La personne de la session lit SA propre fiche (aucun contenu d'un
@@ -73,6 +84,8 @@ export const getMyPerson = query({
       ...(person.timeZone ? { timeZone: person.timeZone } : {}),
       badges: await badgesOf(ctx, person._id),
       consentsInForce: purposes,
+      avatar: await profileImage(ctx, person.avatarStorageId),
+      cover: await profileImage(ctx, person.coverStorageId),
     }
   },
 })

@@ -6,6 +6,7 @@
 import { describe, expect, it } from "vitest"
 
 import {
+  addedMentionedIds,
   assertAvatarUpload,
   assertDisplayName,
   assertGroupAudienceShape,
@@ -362,5 +363,13 @@ describe("assertPageAudienceShape", () => {
     )
     expect(new Set(codes).size).toBe(3)
     expect(codes).not.toContain(null)
+  })
+})
+
+describe("addedMentionedIds — les seules personnes à notifier lors d'une édition", () => {
+  it("rend les nouvelles, dans l'ordre de la nouvelle version, sans les déjà citées", () => {
+    expect(addedMentionedIds(["a", "b"], ["c", "a", "d"])).toEqual(["c", "d"])
+    expect(addedMentionedIds(undefined, ["a"])).toEqual(["a"])
+    expect(addedMentionedIds(["a"], [])).toEqual([])
   })
 })

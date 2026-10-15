@@ -1,4 +1,4 @@
-// Dupliqué de socle/convex/lib/uploadPolicy.ts @ ad2e7fdc2 — adaptations : partie PURE seulement (registre des usages, normalisations, recoupement déclaré ↔ stocké), la lecture de `_storage` reste au backend (`convex/lib/uploadPolicy.ts`) ; usages SOCIAUX seulement (D36 : `media_social` avec GIF, `avatar`, `cover`, `page_logo`, `page_banner`, `album_image`, `story_media`, `chat_attachment`, `voice`, `live_recording`) ; libellés retirés ; refus à code de règle (`DomainViolation`) au lieu de chaînes `UPLOAD_*:usage`.
+// Dupliqué de socle/convex/lib/uploadPolicy.ts @ ad2e7fdc2 — adaptations : partie PURE seulement (registre des usages, normalisations, recoupement déclaré ↔ stocké), la lecture de `_storage` reste au backend (`convex/lib/uploadPolicy.ts`) ; usages SOCIAUX seulement (D36 : `media_social` avec GIF, `avatar`, `cover`, `page_logo`, `page_banner`, `album_image`, `story_media`, `chat_attachment`, `voice`, `live_recording`), les usages des publications, stories et avatars DÉRIVÉS des constantes du domaine (une seule source : le socle les laissait diverger, d'où l'exception `media_social`) ; libellés retirés ; refus à code de règle (`DomainViolation`) au lieu de chaînes `UPLOAD_*:usage`.
 /**
  * Politique de dépôt de fichiers — les règles pures.
  *
@@ -14,6 +14,8 @@
  * à l'usage. Ajouter une surface = ajouter une entrée, pas élargir une entrée.
  * Les écrans lisent ce registre pour refuser AVANT le dépôt (même borne).
  */
+import { AVATAR_MAX_BYTES, AVATAR_MIME_TYPES, POST_IMAGE_MAX_BYTES, POST_IMAGE_MIME_TYPES, POST_VIDEO_MAX_BYTES, POST_VIDEO_MIME_TYPES } from "./content"
+import { STORY_VIDEO_MAX_BYTES, STORY_VIDEO_MIME_TYPES } from "./stories"
 import { DomainViolation, megabytes } from "./violation"
 
 const IMAGES = ["image/jpeg", "image/png", "image/webp"] as const
@@ -43,12 +45,17 @@ export type UploadUsageSpec = {
   readonly maxBytes: number
 }
 
-/** Le registre des usages sociaux du moteur. */
+/**
+ * Le registre des usages sociaux du moteur. Publications, stories et avatars
+ * reprennent les bornes du DOMAINE (`content`, `stories`) : la plus large des
+ * deux natures (image, vidéo) borne le dépôt, la règle fine par nature est
+ * appliquée ensuite par le domaine (`assertPostMedia`, `assertStoryMedia`).
+ */
 export const UPLOAD_USAGES = {
-  /** Média d'une publication (image, GIF, vidéo, PDF). */
-  media_social: { mimeTypes: [...IMAGES, ...GIF, ...VIDEO, ...PDF], maxBytes: 25 * MO },
+  /** Média d'une publication (images, GIF, vidéos). */
+  media_social: { mimeTypes: [...POST_IMAGE_MIME_TYPES, ...POST_VIDEO_MIME_TYPES], maxBytes: Math.max(POST_IMAGE_MAX_BYTES, POST_VIDEO_MAX_BYTES) },
   /** Photo de profil, avatar de groupe. */
-  avatar: { mimeTypes: IMAGES, maxBytes: 5 * MO },
+  avatar: { mimeTypes: AVATAR_MIME_TYPES, maxBytes: AVATAR_MAX_BYTES },
   /** Image de couverture d'un profil, d'un groupe ou d'un évènement. */
   cover: { mimeTypes: IMAGES, maxBytes: 10 * MO },
   /** Logo d'une page. */
@@ -58,7 +65,7 @@ export const UPLOAD_USAGES = {
   /** Photo d'un album. */
   album_image: { mimeTypes: [...IMAGES, ...GIF, ...PHOTOS_IPHONE], maxBytes: 20 * MO },
   /** Média d'une story : la borne vidéo la plus stricte du socle (50 Mo). */
-  story_media: { mimeTypes: [...IMAGES, ...GIF, ...VIDEO], maxBytes: 50 * MO },
+  story_media: { mimeTypes: [...POST_IMAGE_MIME_TYPES, ...STORY_VIDEO_MIME_TYPES], maxBytes: Math.max(POST_IMAGE_MAX_BYTES, STORY_VIDEO_MAX_BYTES) },
   /** Pièce jointe d'une conversation (documents et médias). */
   chat_attachment: {
     mimeTypes: [...PDF, ...IMAGES, ...GIF, ...PHOTOS_IPHONE, ...VIDEO, ...AUDIO, "audio/aac", ...BUREAUTIQUE, ...PRESENTATION, "text/plain"],

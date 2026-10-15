@@ -97,6 +97,16 @@ export type PostMediaInput = {
   altText?: string
 }
 
+/**
+ * Les personnes citées par une NOUVELLE version d'un contenu qui ne l'étaient
+ * pas dans la précédente — les seules à notifier lors d'une édition. Diff pur et
+ * stable (l'ordre de `next` est gardé).
+ */
+export function addedMentionedIds<Id extends string>(previous: readonly Id[] | undefined, next: readonly Id[]): Id[] {
+  const known = new Set<string>(previous ?? [])
+  return next.filter((id) => !known.has(id))
+}
+
 export function assertAvatarUpload(input: { mimeType: string; sizeBytes: number }): void {
   if (!(AVATAR_MIME_TYPES as readonly string[]).includes(input.mimeType)) {
     throw new DomainViolation("AVATAR_MIME_INVALID")

@@ -1,6 +1,8 @@
 // Dupliqué de socle/convex/tests/uploadPolicy.test.ts @ ad2e7fdc2 — adaptations : partie pure (`checkStoredUpload` au lieu du contexte stubbé, la lecture de `_storage` est testée côté backend) ; usages sociaux ; refus à code de règle ; `tryStoredUpload` retiré.
 import { describe, expect, it } from "vitest"
 
+import { AVATAR_MAX_BYTES, POST_IMAGE_MAX_BYTES, POST_VIDEO_MAX_BYTES } from "./content"
+import { STORY_VIDEO_MAX_BYTES } from "./stories"
 import { checkStoredUpload, isMimeAllowedForUsage, normalizeMimeType, normalizeSha256, UPLOAD_USAGE_NAMES, UPLOAD_USAGES } from "./uploadPolicy"
 import { DomainViolation } from "./violation"
 
@@ -130,5 +132,14 @@ describe("registre des usages", () => {
   it("les médias sociaux admettent le GIF (D36)", () => {
     expect(isMimeAllowedForUsage("media_social", "image/gif")).toBe(true)
     expect(isMimeAllowedForUsage("avatar", "image/gif")).toBe(false)
+  })
+
+  it("les usages des publications, stories et avatars suivent les bornes du domaine (une seule source)", () => {
+    expect(UPLOAD_USAGES.media_social.maxBytes).toBe(Math.max(POST_IMAGE_MAX_BYTES, POST_VIDEO_MAX_BYTES))
+    expect(isMimeAllowedForUsage("media_social", "video/quicktime")).toBe(true)
+    expect(isMimeAllowedForUsage("media_social", "application/pdf")).toBe(false)
+    expect(UPLOAD_USAGES.story_media.maxBytes).toBe(STORY_VIDEO_MAX_BYTES)
+    expect(isMimeAllowedForUsage("story_media", "video/quicktime")).toBe(false)
+    expect(UPLOAD_USAGES.avatar.maxBytes).toBe(AVATAR_MAX_BYTES)
   })
 })

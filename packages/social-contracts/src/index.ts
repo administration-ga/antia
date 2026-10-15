@@ -18,4 +18,5 @@ export {
   isAppRule,
   isEngineErrorCode,
 } from "./errors"
+export type { MediaWithheld, PostMediaDto } from "./media"
 export { SOCIAL_DOMAIN_VERSION } from "@antia/social-domain"
