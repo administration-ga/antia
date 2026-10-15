@@ -23,7 +23,8 @@ l'owner map), les tests portés et neufs, les écarts assumés. Un module n'entr
 | 7 | `thematicGroups/access`, `posts` (accès, retrait, compteurs, écriture, fil, mur, recherche) et `marks` | `3dfebcc` | 2 fichiers convex (32 + 8 cas) + cas domaine | D01, D14, D18, D19, D24, D25, D35 |
 | 8 | `engagement` (réactions, commentaires paginés, cloches) et `moderation` (signalements, file du réseau, décisions tracées) | `44831f1` | 2 fichiers convex (8 + 5 cas) + 1 fichier domaine | D01, D03, D08, D14, D35 |
 | 9 | `thematicGroups` (module complet : cycle de vie, invitations, rôles, mur, découverte, modération de groupe) | `a38c863` | 1 fichier convex (17 cas) | D02, D10, D14, D17, D19 |
-| 10 | `messaging` (fils personnels par réseau, boîte paginée, pastille tenue à l'écriture, pièces gardées, transfert) | voir journal git (`feat(messaging)`) | 1 fichier convex (37 cas) + 4 fichiers contrats (20 cas) | D13, D14, D16, D21, D37, D38, D39 |
+| 10 | `messaging` (fils personnels par réseau, boîte paginée, pastille tenue à l'écriture, pièces gardées, transfert) | `8c0ecda` | 1 fichier convex (37 cas) + 4 fichiers contrats (20 cas) | D13, D14, D16, D21, D37, D38, D39 |
+| 11 | `groups` (conversations de groupe : création par invitation, lien, administration, messages, non-lus tenus, transfert, cascade) | voir journal git (`feat(groups)`) | 1 fichier convex (42 cas) + 1 fichier contrats (7 cas) | D02, D05, D07, D10, D14, D15, D16, D22, D23 |
 
 Ordre suivi (owner map §4.2), avec un écart : le lot 1 (modules purs) est porté avec chaque module qui le
 consomme ; l'avis de verdict des fichiers (`files/notify`) est arrivé avec le module `notifications` (lot 5), dont il
@@ -633,3 +634,95 @@ dépend.
   demandé.
 - **Conversations de groupe**, part `groups` de la pastille, source et cible de groupe du transfert : lot 11.
   **Appels** (événements `call_started` / `call_ended`, aperçu « appel ») : lot 15.
+
+---
+
+## Lot 11 — `groups` (conversations de groupe d'un réseau)
+
+### Parité, fichier par fichier
+
+| Source (`socle/convex/…`) | Cible | Sort | État |
+|---|---|---|---|
+| `modules/reseauPersonnel/groupes.ts` (garde, plancher, effacement) | `convex/modules/groups/access.ts` | à adapter | ✅ |
+| `modules/reseauPersonnel/groupes.ts` (création, lectures, curseur, départ, administration) | `convex/modules/groups/threads.ts` | à adapter | ✅ (« mes groupes », membres et conviés paginés) |
+| `modules/reseauPersonnel/groupes.ts` (messages, projection, épingle) | `convex/modules/groups/messages.ts` | à adapter | ✅ (`listGroupMessages` non recopiée : la pagination native seule) |
+| `modules/reseauPersonnel/groupes.ts` (invitations, lien) | `convex/modules/groups/invites.ts` | à adapter | ✅ |
+| `modules/reseauPersonnel/groupes.ts` (saisie) | `convex/modules/groups/typing.ts` | à adapter | ✅ |
+| `modules/reseauPersonnel/groupes.ts` (suppression) | `convex/modules/groups/cascade.ts` | à adapter | ✅ |
+| `modules/reseauPersonnel/groupes.ts` (`unreadForMember`, `totalUnread`, cloche des membres) | `convex/modules/groups/unread.ts` | à réécrire | ✅ (compteur tenu, D23 ; diffusion par lots, D07) |
+| `modules/reseauPersonnel/tables.ts` (l. 596-899) | `convex/modules/groups/tables.ts` | à adapter | ✅ (+ `groupMessageHides`, D22) |
+| `lib/groupCapacity.ts` | `packages/social-contracts/src/groupCapacity.ts` | à adapter | ✅ (+ bornes du titre, de la description et de la composition) |
+| `modules/messagerieScope/transfert.ts` (porte de groupe, cible `thread`) | `convex/modules/messaging/forward.ts` (`forwardGroupMessage`, cible `group`) | à adapter | ✅ |
+| `modules/reseauPersonnel/domain.ts` (administration d'un fil) | `packages/social-domain/src/groupThreads.ts` | pur | ✅ (lot 1) |
+| cron `purge-expired-group-typing` | `groups-purge-expired-typing` (`convex/crons.ts`, 1 min) | patron | ✅ |
+
+### Adaptations (liste fermée)
+
+- **Par réseau** : le fil, l'appartenance, l'invitation, le lien et le message portent `networkId` ; toute fonction exige le
+  réseau du fil (un fil ou un jeton d'un autre réseau est introuvable) ; une clé de création rejouée dans un autre réseau
+  est refusée.
+- **Qui entre** : une personne publiée du réseau, en relation ACCEPTÉE avec qui l'invite, sans blocage — chaque
+  manquement rend le refus d'un identifiant inconnu ; les autres sont INVITÉS (l'appartenance naît à l'acceptation), le
+  lien porte le consentement du groupe. Plafond de structure ramené à **256** (le socle : 1 000) ; titre, description et
+  composition jugés par le contrat ; effectif dans l'agrégat `engineCounters` (D02).
+- **Lire** : l'histoire d'un membre commence à SON arrivée (plancher inclusif, aperçu de liste compris) ; masquage « pour
+  moi » dans `groupMessageHides` (D22), lus par plage pour une page ; corps d'un expéditeur bloqué retiré à la lecture,
+  dans les deux sens, le fil demeure ; DTO allowlistés, personnes nommées par `counterpartLabel`.
+- **Non-lus (D23)** : `unreadCount` TENU sur l'appartenance (avec la position jusqu'où les messages ont été examinés :
+  une diffusion rejouée ou en retard ne recompte rien), somme dans `unreadTotals.groups` ; lu, effacé, quitté, retiré,
+  supprimé : la pastille suit ; le blocage d'une paire recompte les fils qu'elle partage ; seuls les messages TEXTE
+  d'autrui comptent.
+- **Diffusion (D07)** : un message déclenche UN job par lots de 100 membres (rattrapage des non-lus, ordre d'activité,
+  cloche `group_message` sauf sourdine) hors de la transaction de l'envoi ; les cloches `group_added` de la création
+  passent par la diffusion du moteur.
+- **Écrire** : un point d'insertion (`appendGroupMessage`) que partagent l'envoi et le transfert ; pièces par la garde
+  des fichiers (source `group`) ; réagir, citer, épingler exigent de VOIR le message ; un retrait pour tous efface
+  l'aperçu sans déplacer le fil (D37 : jamais « [Message supprimé] » en base) ; un événement ne se modifie pas.
+- **Administrer** : rôles du domaine (`groupThreads`) ; refus de rôle `groupRoleRequired` ; photo sous la garde (dépôt
+  neuf, usage `avatar`, type déclaré confronté au stockage), purgée quand elle est remplacée ou retirée.
+- **Supprimer** : cascade bornée et chaînée (messages avec réactions et masquages, pièces propres purgées blob ET ligne
+  d'analyse — D10 —, membres décomptés de l'agrégat et de la pastille, cloches du fil retirées, saisies, invitations,
+  liens, photo, fil). Une pièce n'est purgée que si son message n'est pas une copie, que le registre la dit déposée par
+  son auteur, et qu'aucune copie vivante ne la sert (index `by_forwarded_message`).
+- **Transfert** : source et cible de groupe (`forwardGroupMessage`, cible `group`), mêmes gardes que le 1:1, refus
+  explicite entre réseaux ; la provenance distingue `personal` et `group`.
+- **Débit (D14)** : `groupThread.create`, `groupThread.invite`, `groupThread.join`, `groupThread.manage`, et les seaux
+  `message.*` pour les messages.
+- **Retirés** : espace poste / personnel (`assertGroupScope`, `GROUP_SCOPE_*`), mécanique d'appel (lot 15), comptes
+  publics, coffre (`sourceDocumentId`), exemption du back-office et réglage d'organisation du plafond d'appel.
+
+### Corrections de dette
+
+- **D02** : effectif par agrégat. **D05** : photo et pièces servies par la garde des fichiers. **D07** : cloches et
+  non-lus par diffusion chaînée. **D10** : purge du blob avec sa ligne d'analyse. **D14** : débit. **D15** : adhésion par
+  le constructeur sur chaque fonction. **D16** : saisie lue à l'instant fourni. **D22** : table de masquage. **D23** :
+  pastille de groupe tenue à l'écriture.
+
+### Tests
+
+- Portés (`groupes.test`, `groupes.cascadeBlobs.test`, cas de groupe de `transfert.test`) : titre vide, moins de trois,
+  soi-même ; création qui invite ; refus muet ; idempotence ; non-connecté, bloqué, profil retiré indistincts ;
+  `group_added` ; refus indistinct (non-membre, parti, supprimé, autre réseau) ; envoi, clé, curseur ; `markGroupRead`
+  no-op ; cloche dédupliquée et sourdine ; pagination à milliseconde égale ; blocage ultérieur (corps, pièces, aperçu) ;
+  non-lus d'un bloqué ; pièces (poids, blob disparu, cinq, texte vide, vocal) ; citation relue ; réactions ; « pour
+  moi » ; édition et retrait (auteur, fenêtre, pierre tombale, idempotence) ; membre parti ; effacement local ; plancher
+  d'arrivée ; renommer ; description ; photo ; administrateur qui invite ; retrait nommé ; succession et fermeture ;
+  conviés et membres ; épingle (rôle, remplacement, refus) et sa relecture masquée ; lien (réservé, réutilisé,
+  réinitialisé, idempotent, refus indistincts, plafond) ; cloches résolues ; saisie ; suppression complète et par lots ;
+  purge des blobs ; transfert 1:1 ↔ groupe.
+- Neufs : diffusion rejouée et désordonnée qui ne recompte rien, blocage qui recompte les fils partagés, masquage par
+  table, compteur égal au recalcul, fil et jeton d'un autre réseau, transfert refusé entre réseaux et pour un message
+  d'avant mon arrivée, blob épargné tant qu'une copie le sert ; contrats (`groupCapacity`, 7 cas).
+- Abandonnés : appels de groupe (×15 → lot 15), espaces poste / personnel (×7), comptes publics, coffre.
+
+### Écarts assumés
+
+- **Plafond 256** au lieu de 1 000 : il borne aussi les lectures et la diffusion de chaque message ; une audience passe
+  par les groupes thématiques et les pages. Une constante du contrat, réversible.
+- **`listMyConnectionsForGroup`** non recopiée : le sélecteur lit les relations du graphe (`paginateMine`,
+  `searchMine`), qui ne rendent que des relations acceptées du réseau ; une relation sans profil publié n'a pas
+  d'identifiant à proposer.
+- Un **message retiré pour tous** reste compté en non-lu (sa pierre tombale est une ligne du fil), comme au socle.
+- Une **chaîne de copies** (copie d'une copie dont l'intermédiaire a disparu) peut perdre sa pièce à la purge de
+  l'original : la référence comptée des blobs viendra avec la rétention (PA5, D30).
+- **Appels de groupe** (fil d'origine, sonnerie des membres vivants, capacité) : lot 15.

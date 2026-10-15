@@ -16,6 +16,7 @@ import { notFound } from "../../lib/errors"
 import { resolveFileDelivery, withheldCodeOf } from "../files/storageGuard"
 import { isBlockedBetween } from "../graph/graph"
 import { miniProfileCache, type PersonMiniProfile, publishedMiniProfile } from "../people/miniProfile"
+import type { StoredAttachment } from "./attachmentStorage"
 import { isForwardedOriginAlive } from "./forwardedFrom"
 import { isHiddenFor, otherParticipant } from "./threads"
 
@@ -129,6 +130,23 @@ function senderLabels(ctx: ProfileCtx) {
   }
 }
 
+/** Les pièces d'un message, servies par la garde des fichiers (URL, ou retenue nommée). */
+export async function deliverAttachments(ctx: Pick<QueryCtx, "db" | "storage">, files: readonly StoredAttachment[]): Promise<AttachmentDto[]> {
+  const out: AttachmentDto[] = []
+  for (const file of files) {
+    const delivery = await resolveFileDelivery(ctx, file.storageId)
+    out.push({
+      filename: file.filename,
+      mimeType: file.mimeType,
+      sizeBytes: file.sizeBytes,
+      durationMs: file.durationMs ?? null,
+      url: delivery.url,
+      withheld: withheldCodeOf(delivery.scan),
+    })
+  }
+  return out
+}
+
 /** Projette UNE page bornée de messages — la seule projection, partagée par toutes les lectures. */
 export async function enrichMessagePage(ctx: QueryCtx, thread: Doc<"personalThreads">, readerId: Id<"persons">, messages: readonly Doc<"personalMessages">[]): Promise<MessageDto[]> {
   const myReactionRows = await ctx.db
@@ -140,18 +158,7 @@ export async function enrichMessagePage(ctx: QueryCtx, thread: Doc<"personalThre
   const out: MessageDto[] = []
   for (const message of messages) {
     const deleted = message.deletedAt !== undefined
-    const attachmentFiles: AttachmentDto[] = []
-    for (const file of deleted ? [] : (message.attachmentFiles ?? [])) {
-      const delivery = await resolveFileDelivery(ctx, file.storageId)
-      attachmentFiles.push({
-        filename: file.filename,
-        mimeType: file.mimeType,
-        sizeBytes: file.sizeBytes,
-        durationMs: file.durationMs ?? null,
-        url: delivery.url,
-        withheld: withheldCodeOf(delivery.scan),
-      })
-    }
+    const attachmentFiles = deleted ? [] : await deliverAttachments(ctx, message.attachmentFiles ?? [])
     out.push({
       messageId: message._id,
       senderPersonId: message.senderPersonId,

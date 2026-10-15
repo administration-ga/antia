@@ -1,4 +1,4 @@
-// Dupliqué de socle/convex/modules/messagerieScope/forwardedFrom.ts @ ad2e7fdc2 — adaptations : identifiants renommés (fils personnels du moteur ; les groupes s'y ajoutent au lot 11).
+// Dupliqué de socle/convex/modules/messagerieScope/forwardedFrom.ts @ ad2e7fdc2 — adaptations : identifiants renommés (fils personnels et conversations de groupe du moteur).
 /**
  * La PROVENANCE d'un message transféré, RELUE à la lecture.
  *

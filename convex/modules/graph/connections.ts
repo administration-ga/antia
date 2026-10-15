@@ -1,4 +1,4 @@
-// Dupliqué de socle/convex/modules/reseau/connections.ts (avec la façade socle/convex/modules/reseauPersonnel/connections.ts) @ ad2e7fdc2 — adaptations : RÉÉCRIT sur personnes et réseaux, une seule façade (plus de délégation par `runMutation`) ; garde d'adhésion par le constructeur, débit, message borné par le domaine ; adressage par identifiant OU par personne, avec la MÊME exigence de découvrabilité (manque du socle sur l'API brute, EXF-AN-15) ; FUITE DU BLOCAGE CORRIGÉE (D12 : le bloqué reçoit la réponse d'une demande envoyée, sans rien écrire) ; blocage posé et lu sur toute la paire, tous réseaux ; demandes reçues listées par un index (`recipientPersonId`) au lieu d'un `.filter()` ; listes historiques plafonnées (`listMine`, `listPendingForMe`, qui levaient au-delà de 200) non recopiées, la pagination native les remplace (D04) ; fonction et administration (`resolvePostIdentities`) retirées ; poser ou lever le blocage d'une paire déplace la pastille de messagerie à l'écriture (D38).
+// Dupliqué de socle/convex/modules/reseau/connections.ts (avec la façade socle/convex/modules/reseauPersonnel/connections.ts) @ ad2e7fdc2 — adaptations : RÉÉCRIT sur personnes et réseaux, une seule façade (plus de délégation par `runMutation`) ; garde d'adhésion par le constructeur, débit, message borné par le domaine ; adressage par identifiant OU par personne, avec la MÊME exigence de découvrabilité (manque du socle sur l'API brute, EXF-AN-15) ; FUITE DU BLOCAGE CORRIGÉE (D12 : le bloqué reçoit la réponse d'une demande envoyée, sans rien écrire) ; blocage posé et lu sur toute la paire, tous réseaux ; demandes reçues listées par un index (`recipientPersonId`) au lieu d'un `.filter()` ; listes historiques plafonnées (`listMine`, `listPendingForMe`, qui levaient au-delà de 200) non recopiées, la pagination native les remplace (D04) ; fonction et administration (`resolvePostIdentities`) retirées ; poser ou lever le blocage d'une paire déplace la pastille de messagerie à l'écriture (D38) et recompte les conversations de groupe partagées (D23).
 /**
  * Connexions personne ↔ personne dans un réseau : demander, répondre, bloquer.
  *
@@ -26,6 +26,7 @@ import { checked, fail, notFound } from "../../lib/errors"
 import { networkMutation, networkQuery } from "../../lib/functions"
 import { enforceRateLimit } from "../../lib/rateLimit"
 import { badgeValidator } from "../../lib/validators"
+import { onPairBlockChangedInGroups } from "../groups/unread"
 import { onPairBlockChanged } from "../messaging/threads"
 import { notifyPerson, resolveNotifications } from "../notifications/notify"
 import { findPublishedPersonByHandle, isDiscoverablePerson, isPublishedPerson, miniProfileCache } from "../people/miniProfile"
@@ -188,7 +189,10 @@ export const blockPerson = networkMutation({
       })
     }
     // La paire SE FERME : la pastille de messagerie de chaque côté perd les non-lus du fil (D38).
-    if (!wasBlocked) await onPairBlockChanged(ctx, ctx.person._id, targetPersonId, true)
+    if (!wasBlocked) {
+      await onPairBlockChanged(ctx, ctx.person._id, targetPersonId, true)
+      await onPairBlockChangedInGroups(ctx, ctx.person._id, targetPersonId)
+    }
     return null
   },
 })
@@ -209,7 +213,10 @@ export const unblockPerson = networkMutation({
     const now = Date.now()
     for (const row of mine) await ctx.db.patch(row._id, { status: "declined", blockedByPersonId: undefined, updatedAt: now })
     // La paire ne se ROUVRE que si l'autre ne bloque pas de son côté : la pastille retrouve alors ses non-lus.
-    if (!(await isBlockedBetween(ctx, ctx.person._id, targetPersonId))) await onPairBlockChanged(ctx, ctx.person._id, targetPersonId, false)
+    if (!(await isBlockedBetween(ctx, ctx.person._id, targetPersonId))) {
+      await onPairBlockChanged(ctx, ctx.person._id, targetPersonId, false)
+      await onPairBlockChangedInGroups(ctx, ctx.person._id, targetPersonId)
+    }
     return null
   },
 })

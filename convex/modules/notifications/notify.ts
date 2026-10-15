@@ -33,6 +33,7 @@ export function subjectOf(ref: NotificationSubjectRef | undefined): Notification
   if ("post" in ref) return { kind: "post", id: ref.post }
   if ("connection" in ref) return { kind: "connection", id: ref.connection }
   if ("thematicGroup" in ref) return { kind: "thematicGroup", id: ref.thematicGroup }
+  if ("groupThread" in ref) return { kind: "groupThread", id: ref.groupThread }
   return { kind: "fileScan", id: ref.fileScan }
 }
 
@@ -42,6 +43,7 @@ function subjectColumns(ref: NotificationSubjectRef | undefined): Partial<Doc<"n
   if ("post" in ref) return { subjectPostId: ref.post }
   if ("connection" in ref) return { subjectConnectionId: ref.connection }
   if ("thematicGroup" in ref) return { subjectThematicGroupId: ref.thematicGroup }
+  if ("groupThread" in ref) return { subjectGroupThreadId: ref.groupThread }
   return { subjectFileScanId: ref.fileScan }
 }
 
@@ -51,6 +53,7 @@ export function subjectRefOf(row: Doc<"notifications">): NotificationSubjectRef 
   if (row.subjectConnectionId) return { connection: row.subjectConnectionId }
   if (row.subjectFileScanId) return { fileScan: row.subjectFileScanId }
   if (row.subjectThematicGroupId) return { thematicGroup: row.subjectThematicGroupId }
+  if (row.subjectGroupThreadId) return { groupThread: row.subjectGroupThreadId }
   return undefined
 }
 
@@ -126,4 +129,26 @@ export async function resolveNotifications(
     resolved += 1
   }
   return { resolved }
+}
+
+/**
+ * RETIRE les notifications d'un destinataire pour un genre et un sujet qui
+ * n'existe plus (un fil supprimé), quel que soit l'acteur. Bornée par `limit` :
+ * `more` dit qu'il en reste, l'appelant poursuit dans sa transaction suivante.
+ */
+export async function dropNotificationsAbout(
+  ctx: Pick<MutationCtx, "db">,
+  input: { networkId: Id<"networks">; recipientPersonId: Id<"persons">; kind: NotificationKind; subject: NotificationSubjectRef; limit: number },
+): Promise<{ dropped: number; more: boolean }> {
+  const subject = subjectOf(input.subject)
+  if (!subject) return { dropped: 0, more: false }
+  const prefix = notificationResolutionPrefix(input.kind, subject)
+  const rows = await ctx.db
+    .query("notifications")
+    .withIndex("by_network_recipient_dedupKey", (q) =>
+      q.eq("networkId", input.networkId).eq("recipientPersonId", input.recipientPersonId).gte("dedupKey", prefix).lt("dedupKey", `${prefix}￿`),
+    )
+    .take(input.limit)
+  for (const row of rows) await ctx.db.delete(row._id)
+  return { dropped: rows.length, more: rows.length >= input.limit }
 }

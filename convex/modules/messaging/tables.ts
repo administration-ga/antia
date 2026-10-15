@@ -1,4 +1,4 @@
-// Dupliqué de socle/convex/schemas/chats.ts (avec socle/convex/schemas/chatMessages.ts, chatMessageReactions.ts, chatTyping.ts et la table `reseauPersonnel_unreadTotals` de modules/reseauPersonnel/tables.ts, l. 1101-1134) @ ad2e7fdc2 — adaptations : fils PERSONNELS seulement, PAR RÉSEAU (`networkId`, paire de personnes ordonnée) ; retirés `orgId`, `requestId`, type standard, `claimedBy`, `scope`, `posteA`/`posteB` et leurs index ; messages : `senderPoste`, pièces « documents » et `sourceDocumentId` retirés, `by_chat_read` non recopié, provenance d'un transfert entre fils personnels (les groupes l'étendent au lot 11), masquage « pour moi » sur une liste bornée par construction (deux participants) ; contenu ABSENT pour des pièces seules ou un message retiré (D37) ; aperçu dénormalisé en NATURE (texte, vocal, pièces) que l'écran traduit ; pastille de non-lus par (réseau, personne), avec la part des groupes réservée.
+// Dupliqué de socle/convex/schemas/chats.ts (avec socle/convex/schemas/chatMessages.ts, chatMessageReactions.ts, chatTyping.ts et la table `reseauPersonnel_unreadTotals` de modules/reseauPersonnel/tables.ts, l. 1101-1134) @ ad2e7fdc2 — adaptations : fils PERSONNELS seulement, PAR RÉSEAU (`networkId`, paire de personnes ordonnée) ; retirés `orgId`, `requestId`, type standard, `claimedBy`, `scope`, `posteA`/`posteB` et leurs index ; messages : `senderPoste`, pièces « documents » et `sourceDocumentId` retirés, `by_chat_read` non recopié, provenance d'un transfert, 1:1 ou de groupe, et copies indexées par leur original, masquage « pour moi » sur une liste bornée par construction (deux participants) ; contenu ABSENT pour des pièces seules ou un message retiré (D37) ; aperçu dénormalisé en NATURE (texte, vocal, pièces) que l'écran traduit ; pastille de non-lus par (réseau, personne), avec la part des groupes réservée.
 /**
  * Messagerie PERSONNELLE d'un réseau — fils 1:1 entre deux personnes.
  */
@@ -23,8 +23,11 @@ export const storedAttachmentValidator = v.object({
   durationMs: v.optional(v.number()),
 })
 
-/** La provenance d'un message transféré : le fil et le message d'origine (relue à la lecture). */
-export const forwardedFromValidator = v.object({ kind: v.literal("personal"), threadId: v.id("personalThreads"), messageId: v.id("personalMessages") })
+/** La provenance d'un message transféré : le fil et le message d'origine, 1:1 ou de groupe (relue à la lecture). */
+export const forwardedFromValidator = v.union(
+  v.object({ kind: v.literal("personal"), threadId: v.id("personalThreads"), messageId: v.id("personalMessages") }),
+  v.object({ kind: v.literal("group"), threadId: v.id("groupThreads"), messageId: v.id("groupMessages") }),
+)
 
 /** La nature du dernier message, pour l'aperçu de liste. */
 export const lastMessageKindValidator = v.union(v.literal("text"), v.literal("voice"), v.literal("attachments"), v.literal("call"), v.literal("system"))
@@ -83,7 +86,9 @@ export const messagingTables = {
     .index("by_thread_createdAt", ["threadId", "createdAt"])
     .index("by_thread_idempotency", ["threadId", "idempotencyKey"])
     // Les NON-LUS d'un fil : les messages de l'autre, sans balayer le fil.
-    .index("by_thread_sender_read", ["threadId", "senderPersonId", "readAt"]),
+    .index("by_thread_sender_read", ["threadId", "senderPersonId", "readAt"])
+    // Les copies d'un message (transferts) : une purge ne détruit pas un blob qu'une copie sert encore.
+    .index("by_forwarded_message", ["forwardedFrom.messageId"]),
 
   /** Une réaction par (message, personne) : réagir deux fois bascule, n'empile pas. */
   personalMessageReactions: defineTable({

@@ -61,5 +61,10 @@
   "MESSAGE_FORWARD_CROSS_NETWORK": "A message is not forwarded from one network to another.",
   "THREAD_RELATION_REQUIRED": "You are not connected yet. Send a connection request; you will be able to write once it is accepted.",
   "THREAD_ARCHIVED": "This conversation is archived.",
-  "THREAD_SELF": "You cannot write to yourself."
+  "THREAD_SELF": "You cannot write to yourself.",
+  "MESSAGE_NOT_EDITABLE": "This message cannot be edited.",
+  "GROUP_TOO_FEW_MEMBERS": "A group brings together at least {{min}} people, you included — for two, write to each other directly.",
+  "GROUP_FULL": "This group has reached its limit of {{max}} people.",
+  "GROUP_SELF_MEMBER": "You are already a member of this group.",
+  "GROUP_CLOSED": "This conversation is closed."
 }

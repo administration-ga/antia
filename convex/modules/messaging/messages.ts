@@ -1,4 +1,4 @@
-// Dupliqué de socle/convex/functions/chats.ts (l. 503-980 et 1378-1573 : `listMessages`, `paginateMessages`, `generateAttachmentUploadUrl`, `sendMessage`, `markReadBatchForParticipant`, `markRead`, `markReadBatch`, `deleteMessage`, `editMessage`, `deleteMessageForMe`) @ ad2e7fdc2 — adaptations : participant, réseau et BLOCAGE par la garde du fil (D13 : un bloqué n'écrit plus) ; `sendMessage` réécrit — adhésion par le constructeur, débit, contenu borné par le contrat, pièces vérifiées par la garde des fichiers (`verifyDeclaredAttachments`), aperçu en nature (D39 : jugé sur les pièces VÉRIFIÉES), pastille de l'autre, par le point d'insertion unique (`appendPersonalMessage`) ; `listMessages` (fenêtre par instant, ex æquo perdus) non recopiée, la pagination native seule ; push reporté (PA5, D20) ; standard et iAsted retirés ; retrait « pour tout le monde » rembobine l'aperçu sur le dernier message survivant ou l'efface (plus de « [Message supprimé] » écrit en base) et RETIRE le contenu (`undefined`, D37) ; refus à code.
+// Dupliqué de socle/convex/functions/chats.ts (l. 503-980 et 1378-1573 : `listMessages`, `paginateMessages`, `generateAttachmentUploadUrl`, `sendMessage`, `markReadBatchForParticipant`, `markRead`, `markReadBatch`, `deleteMessage`, `editMessage`, `deleteMessageForMe`) @ ad2e7fdc2 — adaptations : participant, réseau et BLOCAGE par la garde du fil (D13 : un bloqué n'écrit plus) ; `sendMessage` réécrit — adhésion par le constructeur, débit, contenu borné par le contrat, pièces vérifiées par la garde des fichiers (`verifyDeclaredAttachments`), aperçu en nature (D39 : jugé sur les pièces VÉRIFIÉES), pastille de l'autre, par le point d'insertion unique (`appendPersonalMessage`) ; `listMessages` (fenêtre par instant, ex æquo perdus) non recopiée, la pagination native seule ; push reporté (PA5, D20) ; standard et iAsted retirés ; un événement (appel, système) ne se modifie ni ne se retire ; retrait « pour tout le monde » rembobine l'aperçu sur le dernier message survivant ou l'efface (plus de « [Message supprimé] » écrit en base) et RETIRE le contenu (`undefined`, D37) ; refus à code.
 /**
  * Les messages d'un fil personnel : lire, envoyer, marquer lu, modifier,
  * retirer pour tous, masquer pour soi.
@@ -161,6 +161,7 @@ export const deleteMessage = networkMutation({
     await enforceRateLimit(ctx, "message.edit", ctx.person._id)
     const { message, thread, otherPersonId } = await requireMessage(ctx, args.messageId, ctx.person._id)
     if (message.senderPersonId !== ctx.person._id) return notFound()
+    if (message.type !== undefined && message.type !== "text") return failRule("MESSAGE_NOT_EDITABLE")
     if (message.deletedAt !== undefined) return { deleted: true as const, alreadyDeleted: true }
     const now = Date.now()
     if (!isWithinEditWindow(message.createdAt, now)) return failRule("MESSAGE_EDIT_WINDOW_EXPIRED", { minutes: MESSAGE_EDIT_WINDOW_MS / 60_000 })
@@ -194,6 +195,7 @@ export const editMessage = networkMutation({
     await enforceRateLimit(ctx, "message.edit", ctx.person._id)
     const { message, thread } = await requireMessage(ctx, args.messageId, ctx.person._id)
     if (message.senderPersonId !== ctx.person._id) return notFound()
+    if (message.type !== undefined && message.type !== "text") return failRule("MESSAGE_NOT_EDITABLE")
     if (message.deletedAt !== undefined) return failRule("MESSAGE_ALREADY_DELETED")
     const now = Date.now()
     if (!isWithinEditWindow(message.createdAt, now)) return failRule("MESSAGE_EDIT_WINDOW_EXPIRED", { minutes: MESSAGE_EDIT_WINDOW_MS / 60_000 })

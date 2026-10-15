@@ -61,5 +61,10 @@
   "MESSAGE_FORWARD_CROSS_NETWORK": "Un message ne se transfère pas d'un réseau à l'autre.",
   "THREAD_RELATION_REQUIRED": "Vous n'êtes pas encore en relation. Envoyez-lui une demande de relation ; vous pourrez lui écrire dès qu'elle sera acceptée.",
   "THREAD_ARCHIVED": "Cette conversation est archivée.",
-  "THREAD_SELF": "Vous ne pouvez pas vous écrire à vous-même."
+  "THREAD_SELF": "Vous ne pouvez pas vous écrire à vous-même.",
+  "MESSAGE_NOT_EDITABLE": "Ce message ne peut pas être modifié.",
+  "GROUP_TOO_FEW_MEMBERS": "Un groupe réunit au moins {{min}} personnes, vous compris — à deux, écrivez-vous directement.",
+  "GROUP_FULL": "Ce groupe a atteint son plafond de {{max}} personnes.",
+  "GROUP_SELF_MEMBER": "Vous êtes déjà membre de ce groupe.",
+  "GROUP_CLOSED": "Cette conversation est fermée."
 }

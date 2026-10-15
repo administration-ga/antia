@@ -25,5 +25,6 @@ crons.daily("files-purge-infected-blobs", { hourUTC: 3, minuteUTC: 15 }, interna
 // Messagerie : purge des signaux « en train d'écrire » expirés (la lecture les
 // écarte déjà ; le passage ne fait que vider la table).
 crons.interval("messaging-purge-expired-typing", { minutes: 1 }, internal.modules.messaging.typing.purgeExpiredTyping, {})
+crons.interval("groups-purge-expired-typing", { minutes: 1 }, internal.modules.groups.typing.purgeExpiredGroupTyping, {})
 
 export default crons

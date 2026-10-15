@@ -4,6 +4,7 @@ import { diasporaTables } from "./modules/diaspora/tables"
 import { engagementTables } from "./modules/engagement/tables"
 import { filesTables } from "./modules/files/tables"
 import { graphTables } from "./modules/graph/tables"
+import { groupsTables } from "./modules/groups/tables"
 import { marksTables } from "./modules/marks/tables"
 import { messagingTables } from "./modules/messaging/tables"
 import { moderationTables } from "./modules/moderation/tables"
@@ -41,6 +42,7 @@ export default defineSchema(
     ...notificationsTables,
     ...thematicGroupsTables,
     ...messagingTables,
+    ...groupsTables,
     ...marksTables,
     ...moderationTables,
     ...diasporaTables,

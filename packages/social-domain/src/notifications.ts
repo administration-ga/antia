@@ -56,7 +56,7 @@ export const NOTIFICATION_RESOLUTIONS = ["accepted", "declined", "maybe", "cance
 export type NotificationResolution = (typeof NOTIFICATION_RESOLUTIONS)[number]
 
 /** Les natures de SUJET d'une notification — une référence, jamais un contenu. */
-export const NOTIFICATION_SUBJECT_KINDS = ["post", "connection", "fileScan", "thematicGroup"] as const
+export const NOTIFICATION_SUBJECT_KINDS = ["post", "connection", "fileScan", "thematicGroup", "groupThread"] as const
 
 export type NotificationSubjectKind = (typeof NOTIFICATION_SUBJECT_KINDS)[number]
 

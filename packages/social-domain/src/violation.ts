@@ -85,6 +85,12 @@ export const DOMAIN_RULES = [
   "THREAD_RELATION_REQUIRED",
   "THREAD_ARCHIVED",
   "THREAD_SELF",
+  "MESSAGE_NOT_EDITABLE",
+  // Conversations de groupe
+  "GROUP_TOO_FEW_MEMBERS",
+  "GROUP_FULL",
+  "GROUP_SELF_MEMBER",
+  "GROUP_CLOSED",
 ] as const
 export type DomainRule = (typeof DOMAIN_RULES)[number]
 

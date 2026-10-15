@@ -76,36 +76,54 @@ async function unreadTotalDoc(ctx: ReadCtx, networkId: Id<"networks">, personId:
     .first()
 }
 
-/** Le total des non-lus 1:1 d'une personne dans un réseau — `0` sans document. */
-export async function readPersonalUnreadTotal(ctx: ReadCtx, networkId: Id<"networks">, personId: Id<"persons">): Promise<number> {
+/** Les deux parts de la pastille : les fils 1:1 et les conversations de groupe (lot 11). */
+export type UnreadPart = "personal" | "groups"
+
+/** Une part de la pastille d'une personne dans un réseau — `0` sans document. */
+export async function readUnreadPart(ctx: ReadCtx, networkId: Id<"networks">, personId: Id<"persons">, part: UnreadPart): Promise<number> {
   const doc = await unreadTotalDoc(ctx, networkId, personId)
-  return doc === null ? 0 : Math.max(0, doc.personal)
+  return doc === null ? 0 : Math.max(0, doc[part])
 }
 
-/** Déplacer le compteur de `delta`, clampé à zéro — le seul geste des points d'écriture. */
-export async function adjustPersonalUnreadTotal(ctx: WriteCtx, networkId: Id<"networks">, personId: Id<"persons">, delta: number): Promise<number> {
+/** Déplacer une part de `delta`, clampée à zéro — le seul geste des points d'écriture. */
+export async function adjustUnreadPart(ctx: WriteCtx, networkId: Id<"networks">, personId: Id<"persons">, part: UnreadPart, delta: number): Promise<number> {
   const doc = await unreadTotalDoc(ctx, networkId, personId)
-  if (delta === 0) return doc === null ? 0 : Math.max(0, doc.personal)
+  if (delta === 0) return doc === null ? 0 : Math.max(0, doc[part])
   const now = Date.now()
   if (doc === null) {
-    const personal = Math.max(0, delta)
-    await ctx.db.insert("unreadTotals", { networkId, personId, personal, groups: 0, updatedAt: now })
-    return personal
+    const value = Math.max(0, delta)
+    await ctx.db.insert("unreadTotals", { networkId, personId, personal: part === "personal" ? value : 0, groups: part === "groups" ? value : 0, updatedAt: now })
+    return value
   }
-  const personal = Math.max(0, doc.personal + delta)
-  await ctx.db.patch(doc._id, { personal, updatedAt: now })
-  return personal
+  const value = Math.max(0, doc[part] + delta)
+  await ctx.db.patch(doc._id, { [part]: value, updatedAt: now })
+  return value
 }
 
-/** Poser une valeur ABSOLUE — réconciliation seulement. */
-export async function setPersonalUnreadTotal(ctx: WriteCtx, networkId: Id<"networks">, personId: Id<"persons">, total: number): Promise<void> {
+/** Poser une valeur ABSOLUE sur une part — réconciliation seulement. */
+export async function setUnreadPart(ctx: WriteCtx, networkId: Id<"networks">, personId: Id<"persons">, part: UnreadPart, total: number): Promise<void> {
   const value = Math.max(0, Math.trunc(total))
   const doc = await unreadTotalDoc(ctx, networkId, personId)
   if (doc === null) {
-    if (value > 0) await ctx.db.insert("unreadTotals", { networkId, personId, personal: value, groups: 0, updatedAt: Date.now() })
+    if (value > 0) await ctx.db.insert("unreadTotals", { networkId, personId, personal: part === "personal" ? value : 0, groups: part === "groups" ? value : 0, updatedAt: Date.now() })
     return
   }
-  if (doc.personal !== value) await ctx.db.patch(doc._id, { personal: value, updatedAt: Date.now() })
+  if (doc[part] !== value) await ctx.db.patch(doc._id, { [part]: value, updatedAt: Date.now() })
+}
+
+/** Le total des non-lus 1:1 d'une personne dans un réseau — `0` sans document. */
+export async function readPersonalUnreadTotal(ctx: ReadCtx, networkId: Id<"networks">, personId: Id<"persons">): Promise<number> {
+  return await readUnreadPart(ctx, networkId, personId, "personal")
+}
+
+/** Déplacer la part 1:1 de `delta`, clampée à zéro. */
+export async function adjustPersonalUnreadTotal(ctx: WriteCtx, networkId: Id<"networks">, personId: Id<"persons">, delta: number): Promise<number> {
+  return await adjustUnreadPart(ctx, networkId, personId, "personal", delta)
+}
+
+/** Poser une valeur ABSOLUE sur la part 1:1 — réconciliation seulement. */
+export async function setPersonalUnreadTotal(ctx: WriteCtx, networkId: Id<"networks">, personId: Id<"persons">, total: number): Promise<void> {
+  await setUnreadPart(ctx, networkId, personId, "personal", total)
 }
 
 /**

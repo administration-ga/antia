@@ -58,6 +58,11 @@ const RATE_LIMITS = {
   "message.react": { kind: "token bucket", rate: 120, period: MINUTE, capacity: 30 },
   "message.typing": { kind: "token bucket", rate: 60, period: MINUTE, capacity: 20 },
   "message.forward": { kind: "token bucket", rate: 30, period: HOUR, capacity: 10 },
+  // Conversations de groupe (PA3 lot 11) — les messages consomment les seaux « message.* ».
+  "groupThread.create": { kind: "token bucket", rate: 10, period: HOUR, capacity: 3 },
+  "groupThread.invite": { kind: "token bucket", rate: 60, period: HOUR, capacity: 20 },
+  "groupThread.join": { kind: "token bucket", rate: 30, period: HOUR, capacity: 10 },
+  "groupThread.manage": { kind: "token bucket", rate: 60, period: HOUR, capacity: 20 },
   // Garde des fichiers : gestes humains (libération par un modérateur, relance par un opérateur).
   "file.moderate": { kind: "token bucket", rate: 60, period: HOUR, capacity: 20 },
   // Console (PA7)
