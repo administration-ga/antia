@@ -105,6 +105,8 @@ import type * as modules_posts_posts from "../modules/posts/posts.js";
 import type * as modules_posts_tables from "../modules/posts/tables.js";
 import type * as modules_stories_stories from "../modules/stories/stories.js";
 import type * as modules_stories_tables from "../modules/stories/tables.js";
+import type * as modules_suggestions_suggestions from "../modules/suggestions/suggestions.js";
+import type * as modules_suggestions_tables from "../modules/suggestions/tables.js";
 import type * as modules_thematicGroups_access from "../modules/thematicGroups/access.js";
 import type * as modules_thematicGroups_tables from "../modules/thematicGroups/tables.js";
 import type * as modules_thematicGroups_thematicGroups from "../modules/thematicGroups/thematicGroups.js";
@@ -214,6 +216,8 @@ declare const fullApi: ApiFromModules<{
   "modules/posts/tables": typeof modules_posts_tables;
   "modules/stories/stories": typeof modules_stories_stories;
   "modules/stories/tables": typeof modules_stories_tables;
+  "modules/suggestions/suggestions": typeof modules_suggestions_suggestions;
+  "modules/suggestions/tables": typeof modules_suggestions_tables;
   "modules/thematicGroups/access": typeof modules_thematicGroups_access;
   "modules/thematicGroups/tables": typeof modules_thematicGroups_tables;
   "modules/thematicGroups/thematicGroups": typeof modules_thematicGroups_thematicGroups;

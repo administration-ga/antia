@@ -26,7 +26,8 @@ l'owner map), les tests portés et neufs, les écarts assumés. Un module n'entr
 | 10 | `messaging` (fils personnels par réseau, boîte paginée, pastille tenue à l'écriture, pièces gardées, transfert) | `8c0ecda` | 1 fichier convex (37 cas) + 4 fichiers contrats (20 cas) | D13, D14, D16, D21, D37, D38, D39 |
 | 11 | `groups` (conversations de groupe : création par invitation, lien, administration, messages, non-lus tenus, transfert, cascade) | `35db309` | 1 fichier convex (42 cas) + 1 fichier contrats (7 cas) | D02, D05, D07, D10, D14, D15, D16, D22, D23 |
 | 12a | `events` (évènements personnels : création, invitation, réponse, annulation, annonce, agenda) | `3d397a9` | 1 fichier convex (20 cas) | D02, D14, D15, D19 |
-| 12b | `stories` (publier, plateau, mur, vues, retrait, purge) | voir journal git (`feat(stories)`) | 1 fichier convex (17 cas) | D02, D05, D10, D14, D16 |
+| 12b | `stories` (publier, plateau, mur, vues, retrait, purge) | `989d1f0` | 1 fichier convex (17 cas) | D02, D05, D10, D14, D16 |
+| 12c | `suggestions` (catalogue, masquage, invitations envoyées) | voir journal git (`feat(suggestions)`) | 1 fichier convex (10 cas) | D05, D14, D17, D19 |
 
 Ordre suivi (owner map §4.2), avec un écart : le lot 1 (modules purs) est porté avec chaque module qui le
 consomme ; l'avis de verdict des fichiers (`files/notify`) est arrivé avec le module `notifications` (lot 5), dont il
@@ -843,4 +844,40 @@ dépend.
 ### Écarts assumés
 
 - Une story n'est pas lue depuis la racine pour un autre réseau : elle reste dans son réseau.
+
+---
+
+## Lot 12c — `suggestions` (catalogue d'un réseau)
+
+### Parité, fichier par fichier
+
+| Source (`socle/convex/modules/reseauPersonnel/…`) | Cible | Sort | État |
+|---|---|---|---|
+| `suggestions.ts` | `convex/modules/suggestions/suggestions.ts` | à adapter (`paginate` et `listSentInvitations` réécrits) | ✅ |
+| `tables.ts` (l. 1135-1165) | `convex/modules/suggestions/tables.ts` | à adapter | ✅ |
+
+### Adaptations (liste fermée)
+
+- **Par réseau** : le catalogue puise dans l'annuaire DU réseau (`peopleDirectory`, membres découvrables) ; un réseau
+  gouverné par une tranche le refuse (`policyRefused`, comme le rail) ; le masquage vaut dans le réseau où il est fait
+  (D17).
+- **Carte** : identifiant, nom, titre (`headline`, au lieu du poste et de l'organisation), avatar par la garde (D05),
+  état de la relation relu côté serveur ; allowlistée.
+- **Ensembles bornés** (connexions, blocages, abonnements) relus par paire quand ils sont tronqués : une relation n'est
+  jamais une lacune.
+- **Listes paginées** (D19) : personnes masquées (`paginateDismissed`), invitations envoyées
+  (`paginateSentInvitations`, sur un index du demandeur `by_network_requester_status` au lieu de deux balayages filtrés).
+- Adhésion par le constructeur ; débit `suggestion.dismiss` sur masquer et rouvrir (D14) ; refus à code.
+
+### Corrections de dette
+
+- **D05** : avatar par la garde. **D14** : débit. **D17** : index et masquage par réseau. **D19** : listes paginées.
+
+### Tests
+
+- Portés (`suggestions.test`) : pagination jusqu'au bout ; page filtrée qui continue ; filtres (soi, connexion, suivi,
+  blocage dans les deux sens) ; carte sans état civil ; masquage durable, listé, levé ; `includeDismissed` ; masquer deux
+  fois ; restaurer sans masquage ; identifiant inconnu ; masquage propre à l'appelant ; états `requested_by_me` /
+  `requested_by_them` ; acceptée, sortie du catalogue ; invitations envoyées (sens, acceptation).
+- Neufs : réseau gouverné refusé, masquage propre au réseau.
 

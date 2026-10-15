@@ -41,6 +41,8 @@ export const graphTables = {
     .index("by_network_low_status", ["networkId", "personIdLow", "status"])
     .index("by_network_high_status", ["networkId", "personIdHigh", "status"])
     .index("by_network_recipient_status", ["networkId", "recipientPersonId", "status"])
+    // Les demandes que J'AI envoyées, encore sans réponse (« invitations envoyées », lot 12c).
+    .index("by_network_requester_status", ["networkId", "requestedByPersonId", "status"])
     // Les blocages d'une personne, tous réseaux (filtres du fil, des suggestions).
     .index("by_low_status", ["personIdLow", "status"])
     .index("by_high_status", ["personIdHigh", "status"]),
