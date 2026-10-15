@@ -11,7 +11,7 @@
     "badgesTitle": "Quatre badges, jamais confondus",
     "networksTitle": "Des réseaux dans le réseau",
     "networks": {
-      "diaspora": "La diaspora gabonaise, sur son propre réseau, dont les membres font aussi partie de {{brand}}.",
+      "diaspora": "La diaspora gabonaise, sur son propre réseau, dont les membres font aussi partie d'{{brand}}.",
       "administration": "Les pages des administrations vérifiées, reflétées depuis leur espace, en lecture seule."
     },
     "status": "Le service ouvrira par étapes. Cette version de développement permet déjà d'entrer, de choisir son identifiant, de publier et de réagir.",
@@ -83,7 +83,7 @@
   },
   "feed": {
     "title": "Le fil",
-    "lead": "Ce que publient les membres de {{brand}}, du plus récent au plus ancien.",
+    "lead": "Ce que publient les membres d'{{brand}}, du plus récent au plus ancien.",
     "composerLabel": "Votre publication",
     "composerPlaceholder": "Quoi de neuf ? Ajoutez un #mot-clé ou citez un @identifiant.",
     "audienceLabel": "Visible par",

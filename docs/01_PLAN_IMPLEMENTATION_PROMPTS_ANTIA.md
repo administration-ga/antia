@@ -26,6 +26,8 @@ dependances:
 > | PA0 — scaffold du monorepo | 2026-10-14 | `9367243` |
 > | PA1 — owner map | 2026-10-14 | `9a8fbb3` |
 > | PA2 — fondations multi-réseaux | 2026-10-14 | `f1851fd` |
+> | ↳ tranche verticale testable (priorité du propriétaire : entrer, identifiant, publier, fil, réagir) | 2026-10-15 | `5021401` |
+> | ↳ câblage de DIASPORALE (sa demande PD0 : espaces de travail, catalogue, port 3031) | 2026-10-15 | `5535a63` |
 > | PA3 — duplication du backend | — | — |
 > | PA4 — identité | — | — |
 > | PA5 — modération, débit, données, notifications, fédération | — | — |

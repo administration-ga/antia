@@ -23,10 +23,12 @@ Deux objets dans un dépôt :
 d'identité unique du programme. Licence : voir `LICENSE` et `NOTICE` (AGPL-3.0, héritée du socle
 dont le code est dupliqué — à confirmer par le propriétaire).
 
-## État (14 octobre 2026)
+## État (15 octobre 2026)
 
-Scaffold du monorepo posé (prompt **PA0**) : backend Convex vide (`schemaValidation: true`),
-deux applications servies, sept paquets câblés, cliquets en place, ADR 0001–0004 proposés.
+PA0 (scaffold), PA1 (owner map de duplication, `docs/02`) et PA2 (fondations multi-réseaux,
+domaine pur) sont clos ; une **tranche verticale testable** tourne sur antia.ga : entrer par code
+à usage unique, choisir son nom et son identifiant, rejoindre le réseau `antia`, publier, lire le
+fil, réagir. DIASPORALE est câblé comme application externe (installation unique ici).
 L'avancement prompt par prompt est tenu dans l'encart « État » de
 [`docs/01_PLAN_IMPLEMENTATION_PROMPTS_ANTIA.md`](docs/01_PLAN_IMPLEMENTATION_PROMPTS_ANTIA.md).
 
@@ -60,8 +62,8 @@ ANTIA/
 └── docs/                    # cahiers, prompts, ADR (owner map, parité, charte, contrats à venir)
 ```
 
-Espaces de travail bun : `apps/*`, `packages/*` — et, dès le prompt DIASPORALE PD0,
-`../DIASPORALE/apps/*`, `../DIASPORALE/packages/*` (une seule installation, ici). Les versions
+Espaces de travail bun : `apps/*`, `packages/*`, `../DIASPORALE/apps/*`, `../DIASPORALE/packages/*`
+(une seule installation, ici ; DIASPORALE câblé le 15/10 à la demande de son prompt PD0). Les versions
 vivent une fois dans le **catalogue** du `package.json` racine (`"catalog:"`). Les tâches
 transverses passent par `scripts/workspace-run.mjs` (turbo refuse les espaces de travail hors
 racine).
@@ -95,6 +97,22 @@ CONVEX_AGENT_MODE=anonymous bun run dev:convex
 Le CLI écrit `ANTIA/.env.local` (non versionné) ; les applications le lisent d'elles-mêmes en
 développement. Quand le projet `antia` existera : `bunx convex dev --configure` pour s'y
 rattacher, puis `bunx convex env set …` pour ses variables (voir `.env.example`).
+
+### Tester la tranche verticale en local
+
+Une fois par déploiement local (le propriétaire l'a autorisé pour le déploiement LOCAL seulement) :
+
+```bash
+openssl rand -base64 32 | bunx convex env set BETTER_AUTH_SECRET
+bunx convex env set SITE_URL http://localhost:3030
+bunx convex env set ANTIA_DEV_TOOLS true
+bunx convex run seeds/foundations:run '{"confirmNonProduction":"ANTIA_SEEDS_HORS_PRODUCTION"}'
+```
+
+Puis `bun run dev:convex` et `bun run dev:antia`, et ouvrir http://localhost:3030 → « Entrer ».
+Sans service de courriel, le code à usage unique s'affiche sur l'écran de connexion — seulement
+quand `ANTIA_DEV_TOOLS=true` ET que le backend est local (double garde, `convex/lib/devTools.ts`) ;
+ailleurs, aucun code n'est lu ni écrit.
 
 ## Invariants non négociables
 
