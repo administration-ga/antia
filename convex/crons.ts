@@ -16,4 +16,10 @@ const crons = cronJobs()
 // pays. Sans réseau `diasporale` gouverné par la tranche, le passage ne fait rien.
 crons.daily("compteurs des hubs DIASPORALE", { hourUTC: 2, minuteUTC: 30 }, internal.modules.diaspora.hubs.refreshHubCounters, {})
 
+// Garde des fichiers : relance des analyses perdues (job tombé, redéploiement),
+// et purge des fichiers infectés au-delà de la rétention (la ligne reste).
+// Identifiants en ASCII : Convex refuse tout autre caractère (`é` compris).
+crons.interval("files-retry-stale-scans", { minutes: 5 }, internal.modules.files.mutations.retryStale, {})
+crons.daily("files-purge-infected-blobs", { hourUTC: 3, minuteUTC: 15 }, internal.modules.files.mutations.purgeQuarantinedBlobs, {})
+
 export default crons

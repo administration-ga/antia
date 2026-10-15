@@ -33,5 +33,8 @@
   "STORY_MEDIA_MIME_INVALID": "Format non accepté pour une story : images JPEG, PNG, WebP ou GIF ; vidéos MP4 ou WebM — exportez les vidéos iPhone (.mov) en MP4.",
   "STORY_MEDIA_TOO_LARGE": "Ce média de story dépasse la taille autorisée ({{maxMegabytes}} Mo).",
   "STORY_VIDEO_TOO_LONG": "Une vidéo de story dure au plus {{maxMinutes}} minutes.",
-  "STORY_CAPTION_TOO_LONG": "Une légende est limitée à {{max}} caractères."
+  "STORY_CAPTION_TOO_LONG": "Une légende est limitée à {{max}} caractères.",
+  "UPLOAD_TYPE_NOT_ALLOWED": "Ce type de fichier n'est pas accepté ici.",
+  "UPLOAD_SIZE_OUT_OF_RANGE": "Ce fichier est vide ou dépasse la taille autorisée ({{maxMegabytes}} Mo).",
+  "UPLOAD_MISMATCH": "Le fichier reçu ne correspond pas à celui annoncé. Réessayez le dépôt."
 }

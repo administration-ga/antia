@@ -92,7 +92,8 @@ Cliquets en place (`tests/ratchets/`) : `no-cross-product-imports`, `no-any-vali
 `no-unbounded-collect`, `no-hardcoded-colors`, `no-hardcoded-strings`, `no-hardcoded-urls`,
 `network-scoped-functions` (liste des modules sociaux à étendre à chaque module),
 `public-communication`, `i18n-locales`, `theme-contract`, `provenance-headers`,
-`deploy-catalog`. À venir : `rate-limited-writes` (PA5), `sign-out-everywhere` (PA4).
+`deploy-catalog`, et pour la garde des fichiers (PA3) `file-delivery-gate`, `upload-policy`,
+`fresh-upload`, `storage-arg-freshness`. À venir : `rate-limited-writes` (PA5), `sign-out-everywhere` (PA4).
 
 ## Pièges déjà payés
 
@@ -110,6 +111,19 @@ Cliquets en place (`tests/ratchets/`) : `no-cross-product-imports`, `no-any-vali
 - **Disque plein** : le 14/10, le disque du Mac n'avait plus que 118 Mo libres pendant le premier
   `convex dev` (binaire du backend local : ~164 Mo). Vérifier `df -h /System/Volumes/Data` avant
   une installation ou un build.
+- **Actions « use node » et backend local** : le backend local refuse TOUT le déploiement dès
+  qu'une action `"use node"` existe et que son Node n'est pas en 20, 22 ou 24 (le Mac a Node 25 :
+  `DeploymentNotConfiguredForNodeActions`). `bun run dev:convex` passe par `scripts/convex-dev.mjs`,
+  qui met un Node supporté en tête du PATH (Homebrew `node@22` présent). Relancer `convex dev`
+  après tout changement de ce lanceur.
+- **Identifiants de cron** : ASCII seulement (`crons.daily("purge des fichiers infectés", …)` fait
+  échouer le déploiement entier à cause du `é`).
+- **`codegen` et `convex dev` en même temps** : `convex codegen` pousse aussi vers le backend local ;
+  lancé pendant un déploiement de `convex dev`, il rend `409 ExistingModuleHashConflict`. Attendre
+  « Convex functions ready » puis relancer.
+- **Garde des fichiers** : tout `ctx.storage.getUrl` passe par `convex/modules/files/storageGuard.ts`
+  (`servableUrl`), tout `generateUploadUrl` par `guardUploadUrl`, tout rattachement par
+  `assertFreshUpload` puis `admitStoredUpload` (ou `admitPosedUploads`) — quatre cliquets.
 
 ## Mémoire
 

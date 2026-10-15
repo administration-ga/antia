@@ -24,8 +24,12 @@ export const SOCIAL_MODULE_DIRECTORIES: readonly string[] = [
   "convex/modules/diaspora",
 ]
 
-/** Modules du moteur qui ne sont PAS sociaux (aucun contenu, aucune adhésion). */
-export const NON_SOCIAL_MODULE_DIRECTORIES: readonly string[] = ["convex/modules/platform"]
+/**
+ * Modules du moteur qui ne sont PAS sociaux (aucun contenu, aucune adhésion) :
+ * `files` est l'infrastructure de garde des fichiers — ses lectures publiques
+ * sont bornées une à une (réseau, déposant, modérateur, opérateur).
+ */
+export const NON_SOCIAL_MODULE_DIRECTORIES: readonly string[] = ["convex/modules/platform", "convex/modules/files"]
 
 describe("network-scoped-functions — toute fonction sociale est bornée par le réseau (R10)", () => {
   it("chaque fonction publique des modules sociaux exige un réseau et une adhésion", () => {

@@ -380,3 +380,42 @@ export function usedCustomProperties(text: string): Set<string> {
   }
   return used
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// garde des fichiers : délivrance, dépôt, fraîcheur (owner map §1.5, D05, D06)
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Le SEUL fichier du moteur qui appelle `ctx.storage.getUrl` : la garde de délivrance. */
+export const FILE_DELIVERY_GATE = "convex/modules/files/storageGuard.ts"
+
+/** Le SEUL fichier du moteur qui appelle `ctx.storage.generateUploadUrl` : la politique de dépôt. */
+export const UPLOAD_POLICY_GATE = "convex/lib/uploadPolicy.ts"
+
+function callsOf(file: string, text: string, method: string, message: string): Finding[] {
+  const findings: Finding[] = []
+  const source = parseSource(file, text)
+  walk(source, (node) => {
+    if (ts.isCallExpression(node) && ts.isPropertyAccessExpression(node.expression) && node.expression.name.text === method) {
+      const target = node.expression.expression
+      if (ts.isPropertyAccessExpression(target) && target.name.text === "storage") {
+        findings.push({ file, line: lineOf(source, node.getStart(source)), message })
+      }
+    }
+  })
+  return findings
+}
+
+/**
+ * Liste NOIRE (le socle tenait une liste blanche, et 21 `getUrl` bruts lui
+ * échappaient) : tout `….storage.getUrl(` hors de la garde est un défaut.
+ */
+export function detectRawGetUrl(file: string, text: string): Finding[] {
+  if (file === FILE_DELIVERY_GATE) return []
+  return callsOf(file, text, "getUrl", `URL de fichier délivrée hors de la garde : passer par servableUrl / resolveFileDelivery (${FILE_DELIVERY_GATE})`)
+}
+
+/** Tout `….storage.generateUploadUrl(` hors de la politique de dépôt est un défaut (usage non déclaré). */
+export function detectRawUploadUrl(file: string, text: string): Finding[] {
+  if (file === UPLOAD_POLICY_GATE) return []
+  return callsOf(file, text, "generateUploadUrl", `URL de dépôt sans usage déclaré : passer par guardUploadUrl (${UPLOAD_POLICY_GATE})`)
+}

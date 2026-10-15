@@ -33,5 +33,8 @@
   "STORY_MEDIA_MIME_INVALID": "Format not accepted for a story: JPEG, PNG, WebP or GIF images; MP4 or WebM videos — export iPhone videos (.mov) to MP4.",
   "STORY_MEDIA_TOO_LARGE": "This story media item exceeds the allowed size ({{maxMegabytes}} MB).",
   "STORY_VIDEO_TOO_LONG": "A story video lasts at most {{maxMinutes}} minutes.",
-  "STORY_CAPTION_TOO_LONG": "A caption is limited to {{max}} characters."
+  "STORY_CAPTION_TOO_LONG": "A caption is limited to {{max}} characters.",
+  "UPLOAD_TYPE_NOT_ALLOWED": "This file type is not accepted here.",
+  "UPLOAD_SIZE_OUT_OF_RANGE": "This file is empty or exceeds the allowed size ({{maxMegabytes}} MB).",
+  "UPLOAD_MISMATCH": "The file received does not match the one announced. Please upload it again."
 }

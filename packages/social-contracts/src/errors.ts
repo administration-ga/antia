@@ -22,6 +22,9 @@ export const ENGINE_ERROR_CODES = [
   "policyRefused",
   "consentRequired",
   "profileRequired",
+  // Garde des fichiers : un fichier RETENU (analyse en cours, ou bloqué).
+  "fileScanPending",
+  "fileQuarantined",
 ] as const
 export type EngineErrorCode = (typeof ENGINE_ERROR_CODES)[number]
 

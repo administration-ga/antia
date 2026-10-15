@@ -53,6 +53,10 @@ export const DOMAIN_RULES = [
   "STORY_MEDIA_TOO_LARGE",
   "STORY_VIDEO_TOO_LONG",
   "STORY_CAPTION_TOO_LONG",
+  // Dépôt de fichiers (politique par usage)
+  "UPLOAD_TYPE_NOT_ALLOWED",
+  "UPLOAD_SIZE_OUT_OF_RANGE",
+  "UPLOAD_MISMATCH",
 ] as const
 export type DomainRule = (typeof DOMAIN_RULES)[number]
 

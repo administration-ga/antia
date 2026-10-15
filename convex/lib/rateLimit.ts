@@ -28,6 +28,8 @@ const RATE_LIMITS = {
   "reaction.toggle": { kind: "token bucket", rate: 120, period: MINUTE, capacity: 30 },
   "comment.create": { kind: "token bucket", rate: 60, period: HOUR, capacity: 15 },
   "upload.url": { kind: "token bucket", rate: 60, period: HOUR, capacity: 20 },
+  // Garde des fichiers : gestes humains (libération par un modérateur, relance par un opérateur).
+  "file.moderate": { kind: "token bucket", rate: 60, period: HOUR, capacity: 20 },
   // Console (PA7)
   "operator.network": { kind: "token bucket", rate: 30, period: HOUR, capacity: 10 },
   // Tranche DIASPORALE (`convex/modules/diaspora`, PD1). Entrer et régler sa

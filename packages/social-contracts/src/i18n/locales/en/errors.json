@@ -10,5 +10,7 @@
   "operatorRequired": "This action is reserved for platform operators.",
   "policyRefused": "This network's policy does not allow this membership.",
   "consentRequired": "Your consent is required to continue.",
-  "profileRequired": "First choose your handle and display name."
+  "profileRequired": "First choose your handle and display name.",
+  "fileScanPending": "Security scan in progress: the file will be available in a few moments.",
+  "fileQuarantined": "This file was blocked by the security scan."
 }

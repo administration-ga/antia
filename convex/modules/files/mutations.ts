@@ -1,0 +1,261 @@
+// Dupliqué de socle/convex/modules/fileGuard/mutations.ts @ ad2e7fdc2 — adaptations : table `fileScans` ; quarantaine iDocument et triage IA retirés (le statut bloquant EST la retenue) ; libération par un MODÉRATEUR du réseau du fichier ou un opérateur (au lieu de `settings.manage` d'une administration), relance par un opérateur (au lieu du superadmin) ; débit sur les gestes humains ; coupe-circuit respecté par l'analyse et le balayeur (fail-closed) ; purge indexée sur `blobPurgedAt` (D31 : une ligne purgée ne bloque plus la file) ; `_ageScanForTests` non recopiée (les tests vieillissent la ligne eux-mêmes) ; refus à code du moteur.
+/**
+ * Garde des fichiers — MUTATIONS.
+ *
+ * Machine d'états d'une analyse :
+ *
+ *   pending ─▶ running ─▶ clean | suspicious | infected | skipped
+ *                  └─▶ error ─(attempts < max)─▶ pending (nouvelle tentative)
+ *   suspicious | error ─(libération par un modérateur)─▶ clean
+ *   infected            ─(relance par un opérateur)───▶ pending
+ *
+ * `_markRunning` et `_record` sont les DEUX seules écritures de l'action
+ * d'analyse ; tout échec après `_markRunning` finit dans `_record`. Le balayeur
+ * `retryStale` rattrape le crash pur du runtime.
+ */
+import { v } from "convex/values"
+
+import { internal } from "../../_generated/api"
+import type { Doc } from "../../_generated/dataModel"
+import { internalMutation, type MutationCtx } from "../../_generated/server"
+import { getMembership } from "../../lib/access"
+import { fail, notFound } from "../../lib/errors"
+import { operatorMutation, personMutation } from "../../lib/functions"
+import { enforceRateLimit } from "../../lib/rateLimit"
+import {
+  FILE_GUARD_MAX_ATTEMPTS,
+  FILE_GUARD_RUNNING_STALE_MS,
+  isKillSwitched,
+  isReleasableStatus,
+  quarantineRetentionDays,
+} from "./policy"
+import { fileScanAvValidator, fileScanFindingValidator, fileScanStatusValidator } from "./tables"
+
+const RETRY_BACKOFF_MS = 30_000
+const SWEEP_TAKE = 50
+const PURGE_TAKE = 50
+const MIN_RELEASE_REASON_CHARS = 3
+
+/** Ce que l'action d'analyse a besoin de savoir pour travailler. */
+export const scanFactsValidator = v.object({
+  scanId: v.id("fileScans"),
+  storageId: v.id("_storage"),
+  filename: v.union(v.string(), v.null()),
+  declaredMimeType: v.union(v.string(), v.null()),
+  attempts: v.number(),
+})
+
+/**
+ * Passe la ligne en `running`. Rend `null` si l'analyse est terminale, ou
+ * suspendue par le coupe-circuit — l'action s'arrête alors sans écrire.
+ */
+export const _markRunning = internalMutation({
+  args: { scanId: v.id("fileScans") },
+  returns: v.union(scanFactsValidator, v.null()),
+  handler: async (ctx, args) => {
+    if (isKillSwitched(process.env)) return null
+    const scan = await ctx.db.get(args.scanId)
+    if (!scan) return null
+    if (scan.status !== "pending" && scan.status !== "running") return null
+    const now = Date.now()
+    const attempts = scan.attempts + 1
+    await ctx.db.patch(scan._id, { status: "running", attempts, startedAt: now, updatedAt: now })
+    return {
+      scanId: scan._id,
+      storageId: scan.storageId,
+      filename: scan.filename ?? null,
+      declaredMimeType: scan.declaredMimeType ?? null,
+      attempts,
+    }
+  },
+})
+
+export const scanOutcomeValidator = v.union(
+  v.object({
+    kind: v.literal("verdict"),
+    status: v.union(v.literal("clean"), v.literal("suspicious"), v.literal("infected"), v.literal("error")),
+    reason: v.string(),
+    detectedMimeType: v.optional(v.string()),
+    findings: v.array(fileScanFindingValidator),
+    av: v.optional(fileScanAvValidator),
+    sizeBytes: v.optional(v.number()),
+  }),
+  v.object({ kind: v.literal("error"), reason: v.string() }),
+  v.object({ kind: v.literal("skipped"), reason: v.string(), sizeBytes: v.optional(v.number()) }),
+)
+
+async function settleError(ctx: MutationCtx, scan: Doc<"fileScans">, reason: string): Promise<void> {
+  const now = Date.now()
+  if (scan.attempts < FILE_GUARD_MAX_ATTEMPTS) {
+    await ctx.db.patch(scan._id, { status: "pending", verdictReason: reason, updatedAt: now })
+    await ctx.scheduler.runAfter(RETRY_BACKOFF_MS * scan.attempts, internal.modules.files.scan.runScan, { scanId: scan._id })
+    return
+  }
+  await ctx.db.patch(scan._id, { status: "error", verdictReason: reason, completedAt: now, updatedAt: now })
+}
+
+/** Écrit le résultat de l'analyse. Un verdict bloquant EST la retenue : rien d'autre à déplacer. */
+export const _record = internalMutation({
+  args: { scanId: v.id("fileScans"), outcome: scanOutcomeValidator },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    const scan = await ctx.db.get(args.scanId)
+    if (!scan) return null
+    // Une analyse libérée ou replanifiée pendant le travail garde sa décision.
+    if (scan.status !== "running") return null
+    const now = Date.now()
+    const { outcome } = args
+
+    if (outcome.kind === "skipped") {
+      await ctx.db.patch(scan._id, {
+        status: "skipped",
+        skipReason: outcome.reason,
+        ...(outcome.sizeBytes !== undefined ? { sizeBytes: outcome.sizeBytes } : {}),
+        completedAt: now,
+        updatedAt: now,
+      })
+      return null
+    }
+
+    if (outcome.kind === "error" || outcome.status === "error") {
+      await settleError(ctx, scan, outcome.reason)
+      return null
+    }
+
+    await ctx.db.patch(scan._id, {
+      status: outcome.status,
+      verdictReason: outcome.reason,
+      ...(outcome.detectedMimeType !== undefined ? { detectedMimeType: outcome.detectedMimeType } : {}),
+      findings: outcome.findings,
+      ...(outcome.av ? { av: outcome.av } : {}),
+      ...(outcome.sizeBytes !== undefined ? { sizeBytes: outcome.sizeBytes } : {}),
+      completedAt: now,
+      updatedAt: now,
+    })
+    return null
+  },
+})
+
+/** Un modérateur du réseau du fichier, ou un opérateur de plateforme. */
+async function canModerateScan(ctx: MutationCtx, scan: Doc<"fileScans">, personId: Doc<"persons">["_id"]): Promise<boolean> {
+  const operator = await ctx.db
+    .query("operators")
+    .withIndex("by_person", (q) => q.eq("personId", personId))
+    .unique()
+  if (operator && operator.revokedAt === undefined) return true
+  if (!scan.networkId) return false
+  const membership = await getMembership(ctx, scan.networkId, personId)
+  return membership !== null && (membership.status === "declaree" || membership.status === "verifiee") && (membership.role === "network_moderator" || membership.role === "network_admin")
+}
+
+/**
+ * Libération HUMAINE d'un fichier `suspicious` ou `error`, avec motif. Jamais un
+ * `infected` : il ne redevient servable que par une nouvelle analyse saine.
+ * Autorité : un modérateur du réseau du fichier, ou un opérateur ; un fichier
+ * sans réseau (profil) ne se libère que par un opérateur. Refus indistinct.
+ */
+export const releaseScan = personMutation({
+  args: { scanId: v.id("fileScans"), reason: v.string() },
+  returns: v.object({ status: fileScanStatusValidator }),
+  handler: async (ctx, args) => {
+    const scan = await ctx.db.get(args.scanId)
+    if (!scan || !(await canModerateScan(ctx, scan, ctx.person._id))) return notFound()
+    await enforceRateLimit(ctx, "file.moderate", ctx.person._id)
+    const reason = args.reason.trim()
+    if (reason.length < MIN_RELEASE_REASON_CHARS) return fail("invalidArgument", { field: "reason" })
+    if (!isReleasableStatus(scan.status)) return fail("conflict")
+    const now = Date.now()
+    await ctx.db.patch(scan._id, {
+      status: "clean",
+      releasedByPersonId: ctx.person._id,
+      releasedAt: now,
+      releaseReason: reason,
+      verdictReason: `${scan.verdictReason ?? scan.status} → RELEASED`,
+      updatedAt: now,
+    })
+    return { status: "clean" as const }
+  },
+})
+
+/** Relance une analyse depuis zéro (opérateur) — seule issue d'un `infected`. */
+export const requeueScan = operatorMutation({
+  args: { scanId: v.id("fileScans") },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    await enforceRateLimit(ctx, "file.moderate", ctx.person._id)
+    const scan = await ctx.db.get(args.scanId)
+    if (!scan) return notFound()
+    if (scan.blobPurgedAt !== undefined) return fail("conflict")
+    await ctx.db.patch(scan._id, {
+      status: "pending",
+      attempts: 0,
+      findings: undefined,
+      av: undefined,
+      verdictReason: undefined,
+      skipReason: undefined,
+      completedAt: undefined,
+      updatedAt: Date.now(),
+    })
+    if (!isKillSwitched(process.env)) await ctx.scheduler.runAfter(0, internal.modules.files.scan.runScan, { scanId: scan._id })
+    return null
+  },
+})
+
+/**
+ * Balayeur (cron) : un `pending`/`running` plus vieux que
+ * `FILE_GUARD_RUNNING_STALE_MS` est un job perdu — replanifié tant que le
+ * plafond de tentatives tient, figé en `error` sinon. Coupe-circuit : rien.
+ */
+export const retryStale = internalMutation({
+  args: {},
+  returns: v.number(),
+  handler: async (ctx) => {
+    if (isKillSwitched(process.env)) return 0
+    const threshold = Date.now() - FILE_GUARD_RUNNING_STALE_MS
+    let touched = 0
+    for (const status of ["pending", "running"] as const) {
+      const stale = await ctx.db
+        .query("fileScans")
+        .withIndex("by_status_updatedAt", (q) => q.eq("status", status).lt("updatedAt", threshold))
+        .take(SWEEP_TAKE)
+      for (const scan of stale) {
+        touched += 1
+        const now = Date.now()
+        if (scan.attempts >= FILE_GUARD_MAX_ATTEMPTS) {
+          await ctx.db.patch(scan._id, { status: "error", verdictReason: "STALE_JOB", completedAt: now, updatedAt: now })
+          continue
+        }
+        await ctx.db.patch(scan._id, { status: "pending", updatedAt: now })
+        await ctx.scheduler.runAfter(0, internal.modules.files.scan.runScan, { scanId: scan._id })
+      }
+    }
+    return touched
+  },
+})
+
+/**
+ * Purge (cron) : le fichier d'une analyse `infected` plus vieille que la
+ * rétention est retiré du stockage ; la ligne reste (la trace survit au
+ * contenu). Index sur `blobPurgedAt` : une ligne déjà purgée sort de la file
+ * (D31 — au socle, cinquante lignes purgées bouchaient la purge pour toujours).
+ */
+export const purgeQuarantinedBlobs = internalMutation({
+  args: {},
+  returns: v.number(),
+  handler: async (ctx) => {
+    const threshold = Date.now() - quarantineRetentionDays(process.env) * 24 * 60 * 60_000
+    const candidates = await ctx.db
+      .query("fileScans")
+      .withIndex("by_status_purged_updatedAt", (q) => q.eq("status", "infected").eq("blobPurgedAt", undefined).lt("updatedAt", threshold))
+      .take(PURGE_TAKE)
+    for (const scan of candidates) {
+      try {
+        await ctx.storage.delete(scan.storageId)
+      } catch {
+        // Fichier déjà absent : la purge est acquise.
+      }
+      await ctx.db.patch(scan._id, { blobPurgedAt: Date.now() })
+    }
+    return candidates.length
+  },
+})

@@ -10,5 +10,7 @@
   "operatorRequired": "Cette action est réservée aux opérateurs de la plateforme.",
   "policyRefused": "La politique de ce réseau ne permet pas cette adhésion.",
   "consentRequired": "Votre consentement est nécessaire pour continuer.",
-  "profileRequired": "Choisissez d'abord votre identifiant et votre nom affiché."
+  "profileRequired": "Choisissez d'abord votre identifiant et votre nom affiché.",
+  "fileScanPending": "Analyse de sécurité en cours : le fichier sera disponible dans quelques instants.",
+  "fileQuarantined": "Ce fichier a été bloqué par l'analyse de sécurité."
 }
