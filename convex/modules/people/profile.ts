@@ -50,6 +50,21 @@ export const suggestHandles = personQuery({
 })
 
 /**
+ * @selfScoped La personne de la session vérifie si un identifiant de SON choix
+ * est libre POUR ELLE (pris, ou porté naguère par une autre : non) — l'accueil
+ * le vérifie avant les consentements. Une forme invalide lève la règle du
+ * domaine (`HANDLE_LENGTH`, `HANDLE_CHARSET`), comme à la publication.
+ */
+export const isHandleAvailable = personQuery({
+  args: { handle: v.string() },
+  returns: v.object({ available: v.boolean() }),
+  handler: async (ctx, { handle }) => {
+    const normalized = checked(() => assertHandle(handle))
+    return { available: await isHandleFreeFor(ctx, normalized, ctx.person._id) }
+  },
+})
+
+/**
  * @selfScoped La personne de la session publie (ou met à jour) SON profil :
  * identifiant, nom affiché, accroche. Idempotente ; republier après un retrait
  * lève le retrait. Changer d'identifiant laisse l'ancien réservé à soi.

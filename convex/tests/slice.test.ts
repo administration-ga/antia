@@ -85,6 +85,24 @@ describe("profil : identifiant et nom affiché", () => {
     expect(code(error)).toBe("invalidArgument")
     expect(engineErrorRule(error)).toEqual({ rule: "HANDLE_LENGTH", params: { min: 3, max: 30 } })
   })
+
+  it("dit si un identifiant choisi est libre POUR la personne : pris, ancien d'une autre, le sien, forme invalide", async () => {
+    const t = testConvex()
+    await seed(t)
+    const lynda = await enter(t, "auth-lynda", "lynda.onanga")
+    await lynda.as.mutation(api.modules.people.profile.publishMyProfile, { handle: "lynda", displayName: "Lynda" })
+    const paul = t.withIdentity({ subject: "auth-paul" })
+    await paul.mutation(api.modules.people.persons.ensureMyPerson, {})
+    const available = (as: typeof paul, handle: string) => as.query(api.modules.people.profile.isHandleAvailable, { handle })
+    expect(await available(paul, "Paul.Mba")).toEqual({ available: true })
+    expect(await available(paul, "lynda")).toEqual({ available: false })
+    // L'ancien identifiant de Lynda lui reste réservé : libre pour elle, pas pour Paul.
+    expect(await available(paul, "lynda.onanga")).toEqual({ available: false })
+    expect(await available(lynda.as, "lynda.onanga")).toEqual({ available: true })
+    const error = await caught(available(paul, "a!"))
+    expect(code(error)).toBe("invalidArgument")
+    expect(engineErrorRule(error)?.rule).toBe("HANDLE_LENGTH")
+  })
 })
 
 describe("publier et lire le fil", () => {
