@@ -471,6 +471,8 @@ describe("étanchéité entre réseaux", () => {
     // Membre de la racine, mais la racine n'est pas gouvernée par la tranche : refus indistinct.
     expect((await refusal(antiaOnly.as.query(api.modules.diaspora.hubs.getCountryHub, { networkId: root, country: "FR" }))).code).toBe("notFound")
     expect((await refusal(antiaOnly.as.query(api.modules.diaspora.membership.sponsorDashboard, { networkId: root }))).code).toBe("notFound")
+    // La vitrine publique d'un réseau non gouverné est vide : rien n'y est annoncé.
+    expect(await antiaOnly.as.query(api.modules.diaspora.hubs.listOpenCountries, { networkId: root })).toEqual([])
   })
 })
 
@@ -518,6 +520,10 @@ describe("hubs pays — compteurs matérialisés, jamais calculés à la lecture
     expect(after.counters.dormant).toBe(false)
     const open = await first.as.query(api.modules.diaspora.hubs.listOpenCountries, { networkId: diasporale })
     expect(open.map((hub) => hub.country)).toEqual(["FR"])
+    // La vitrine publique lit la même présentation, sans compte ; jamais le chiffre sous le seuil.
+    const anonymous = await t.query(api.modules.diaspora.hubs.listOpenCountries, { networkId: diasporale })
+    expect(anonymous).toEqual(open)
+    expect(JSON.stringify(anonymous)).not.toContain('"value":2')
     expect((await refusal(first.as.query(api.modules.diaspora.hubs.getCountryHub, { networkId: diasporale, country: "GA" }))).code).toBe("notFound")
   })
 

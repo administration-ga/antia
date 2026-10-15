@@ -20,7 +20,7 @@ import { v } from "convex/values"
 
 import { internal } from "../../_generated/api"
 import type { Doc, Id } from "../../_generated/dataModel"
-import { internalMutation, type MutationCtx, type QueryCtx } from "../../_generated/server"
+import { internalMutation, type MutationCtx, query, type QueryCtx } from "../../_generated/server"
 import { notFound } from "../../lib/errors"
 import { networkQuery } from "../../lib/functions"
 import { assertDiasporaNetwork, consentInForce, effectiveStatusIn, isDiasporaNetwork, privacyOf } from "./facts"
@@ -62,16 +62,22 @@ export const getCountryHub = networkQuery({
   },
 })
 
-/** Les pays ouverts du réseau, dans l'ordre de la console, avec leurs compteurs matérialisés. */
-export const listOpenCountries = networkQuery({
-  args: {},
+/**
+ * @publicProjection La vitrine publique (page d'accueil, sans compte) annonce les
+ * pays OUVERTS du réseau, dans l'ordre de la console, et la présentation de leurs
+ * compteurs matérialisés — sous le seuil, aucun chiffre de membres. Aucun membre,
+ * aucun contenu, aucun pays fermé ; un réseau non gouverné par la tranche rend une liste vide.
+ */
+export const listOpenCountries = query({
+  args: { networkId: v.id("networks") },
   returns: v.array(countryHubViewValidator),
-  handler: async (ctx) => {
-    assertDiasporaNetwork(ctx.network)
+  handler: async (ctx, { networkId }) => {
+    const network = await ctx.db.get(networkId)
+    if (!isDiasporaNetwork(network)) return []
     const views = []
-    for (const country of (ctx.network.openCountries ?? []).slice(0, COUNTRIES_MAX)) {
+    for (const country of (network.openCountries ?? []).slice(0, COUNTRIES_MAX)) {
       if (!isResidenceCountry(country)) continue
-      views.push(hubView(ctx.network, country, await hubRow(ctx, ctx.networkId, country)))
+      views.push(hubView(network, country, await hubRow(ctx, network._id, country)))
     }
     return views
   },
