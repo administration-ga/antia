@@ -21,8 +21,17 @@
     "@antia/social-contracts": "workspace:*",
     "@antia/social-domain": "workspace:*",
     "@antia/ui": "workspace:*",
+    "@livekit/components-react": "catalog:",
+    "@livekit/components-styles": "catalog:",
+    "convex": "catalog:",
     "i18next": "catalog:",
-    "react-i18next": "catalog:"
+    "livekit-client": "catalog:",
+    "lucide-react": "catalog:",
+    "motion": "catalog:",
+    "react-i18next": "catalog:",
+    "react-qr-code": "catalog:",
+    "sonner": "catalog:",
+    "tslib": "catalog:"
   },
   "peerDependencies": {
     "react": "catalog:",

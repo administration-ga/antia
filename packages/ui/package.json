@@ -7,6 +7,8 @@
   "description": "Jetons, charte de base (dupliquée de la charte Personnel du socle), thèmes d'application et primitives du moteur ANTIA.",
   "exports": {
     ".": "./src/index.ts",
+    "./overlay": "./src/overlay/index.ts",
+    "./sheet": "./src/sheet/index.ts",
     "./styles.css": "./src/styles.css",
     "./themes/*.css": "./src/themes/*.css",
     "./lib/*": "./src/lib/*.ts"
@@ -19,20 +21,30 @@
   "dependencies": {
     "@fontsource-variable/familjen-grotesk": "catalog:",
     "@fontsource/dm-mono": "catalog:",
+    "class-variance-authority": "catalog:",
     "clsx": "catalog:",
+    "lucide-react": "catalog:",
+    "radix-ui": "catalog:",
     "tailwind-merge": "catalog:"
   },
   "peerDependencies": {
-    "react": "catalog:"
+    "react": "catalog:",
+    "react-dom": "catalog:"
   },
   "devDependencies": {
     "@antia/eslint-config": "workspace:*",
     "@antia/tsconfig": "workspace:*",
+    "@testing-library/dom": "catalog:",
+    "@testing-library/jest-dom": "catalog:",
+    "@testing-library/react": "catalog:",
     "@types/node": "catalog:",
     "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
     "@typescript/native-preview": "catalog:",
     "eslint": "catalog:",
+    "jsdom": "catalog:",
     "react": "catalog:",
+    "react-dom": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"
   }

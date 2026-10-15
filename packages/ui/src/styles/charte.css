@@ -481,6 +481,77 @@
   --esp-tone-rose-bg: var(--esp-rose-bg);
   --esp-tone-green: var(--esp-green);
   --esp-tone-green-bg: var(--esp-green-bg);
+
+  /* ── Primitives d'ui-v2 et du tiroir, dupliquées pour le moteur (ANTIA) ──
+     Les valeurs du socle, en jetons : voile du tiroir (`bg-black/10` du
+     socle, identique dans les deux thèmes) et ombre du curseur de
+     l'interrupteur (`Toggle`). */
+  --sheet-scrim: rgb(0 0 0 / 0.1);
+  --shadow-knob: 0 1px 2px rgb(0 0 0 / 0.2);
+
+  /* ── Familles sémantiques d'ui-v2 (socle/packages/ui-v2/src/styles/tokens.css,
+     `:root`, l. 41-95) — les primitives d'ui-v2 les lisent en direct (badge,
+     alerte, bouton, champs) ; la charte Personnel du socle ne les remappait
+     pas, elles venaient de la racine. Valeurs du socle, thème clair. */
+  --danger-fill: var(--danger-500);
+  --danger-fill-hover: var(--danger-600);
+  --success-fill: var(--success-500);
+  --success-fill-hover: var(--success-600);
+  --success-50: #ecf3ec;
+  --success-100: #d8eed8;
+  --success-500: #2e8540;
+  --success-600: #1f6b30;
+  --warning-50: #fff5e0;
+  --warning-100: #ffe8b9;
+  --warning-500: #b88600;
+  --warning-600: #8c6500;
+  --danger-50: #fbe9e9;
+  --danger-100: #f8d7d7;
+  --danger-500: #b50909;
+  --danger-600: #8a0303;
+  --danger-700: #6e0202;
+  --status-semi: #4a5876;
+  --status-semi-bg: #ebeff5;
+  --status-inactive: #6b7a96;
+  --status-inactive-bg: #f3f5f9;
+  --status-archived: #2e8540;
+  --status-archived-bg: #ecf3ec;
+  --status-destruct: #b88600;
+  --status-destruct-bg: #fff5e0;
+  --status-error: #b50909;
+  --status-error-bg: #fbe9e9;
+
+  /* ── Dimensions des commandes d'ui-v2 (socle/packages/ui/src/styles/globals.css,
+     l. 182-221) : les composants les appliquent EN LIGNE, seule une propriété
+     personnalisée les atteint par la cascade (plancher tactile au téléphone,
+     ci-dessous). */
+  --tap-target-min: 44px;
+  --ui2-button-min-h: 36px;
+  --ui2-field-min-h: 38px;
+  --ui2-button-sm-min-h: 32px;
+  --ui2-button-link-min-h: auto;
+  --ui2-button-link-pad: 0px;
+  --ui2-tab-min-h: 32px;
+  --ui2-page-gutter: 32px;
+  --ui2-card-pad: 24px;
+  --ui2-motion-fast: 250ms;
+  --ui2-scrim: rgba(14, 26, 43, 0.55);
+  --ui2-z-surface: 1000;
+}
+
+/* Au téléphone et sur les petites tablettes, les commandes d'ui-v2 rejoignent
+   le plancher tactile de 44 px (WCAG 2.1 — 2.5.5), comme au socle. */
+@media (max-width: 1023px) {
+  [data-charte] {
+    --ui2-button-min-h: 44px;
+    --ui2-field-min-h: 44px;
+    --ui2-button-sm-min-h: 44px;
+    --ui2-button-link-min-h: 44px;
+    --ui2-button-link-pad: 8px 4px;
+    --ui2-tab-min-h: 44px;
+    --ui2-page-gutter: 16px;
+    --ui2-card-pad: 16px;
+  }
 }
 
 /* ─────────────────────────────────────────────────────────────────────────
@@ -632,4 +703,33 @@
      court-circuits qui échappaient à la bascule. */
   --esp-neutral-chip: var(--esp-night-chip);
   --esp-neutral-hover: var(--esp-night-hover);
+
+  /* Familles sémantiques d'ui-v2, thème sombre (tokens.css du socle, l. 432-505). */
+  --danger-fill: #c0322f;
+  --danger-fill-hover: #d24744;
+  --success-fill: #2f8f4a;
+  --success-fill-hover: #38a155;
+  --success-50: #14271a;
+  --success-100: #1c3a25;
+  --success-500: #38a155;
+  --success-600: #6cc585;
+  --warning-50: #2a2008;
+  --warning-100: #3a2c0a;
+  --warning-500: #d9a300;
+  --warning-600: #e8be4d;
+  --danger-50: #2c1416;
+  --danger-100: #3d191c;
+  --danger-500: #f1696e;
+  --danger-600: #f48b8f;
+  --danger-700: #f9b4b6;
+  --status-semi: #9aa8c0;
+  --status-semi-bg: #233040;
+  --status-inactive: #8493ab;
+  --status-inactive-bg: #1c2735;
+  --status-archived: #46b35e;
+  --status-archived-bg: #14271a;
+  --status-destruct: #d9a300;
+  --status-destruct-bg: #2a2008;
+  --status-error: #f1696e;
+  --status-error-bg: #2c1416;
 }
