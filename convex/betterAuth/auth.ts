@@ -23,8 +23,8 @@ import { devToolsAllowed } from "../lib/devTools"
 
 export const authComponent = createClient<DataModel>(components.betterAuth)
 
-/** Ports des applications du moteur en développement (antia.ga, console). */
-const DEV_APP_PORTS = [3030, 3032] as const
+/** Ports des applications du moteur en développement (antia.ga, diasporale.com, console). */
+const DEV_APP_PORTS = [3030, 3031, 3032] as const
 
 /** Durée de vie d'un code à usage unique : cinq minutes. */
 export const OTP_TTL_SECONDS = 300
