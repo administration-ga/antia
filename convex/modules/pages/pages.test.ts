@@ -455,7 +455,7 @@ describe("les publications de page dans le fil", () => {
     expect((await bob.as.query(POSTS.search, { networkId: root, query: "guichet" })).items.map((item) => item._id)).toEqual([postId])
   })
 
-  it("ses abonnés sont prévenus par la cloche (`page_post`, sans acteur, diffusion par lots) ; un non-abonné non", async () => {
+  it("ses abonnés sont prévenus par la cloche (`page_post`, sans acteur, diffusion par lots) ; un non-abonné non — la ligne NOMME la page et son badge calculé, jusqu'à son retrait", async () => {
     const t = testConvex()
     const { root, alice, pageId, handle } = await pageWithPost(t)
     // La diffusion de la première publication s'achève avant tout abonnement.
@@ -466,8 +466,13 @@ describe("les publications de page dans le fil", () => {
     const { postId } = await publishAs(alice, root, pageId, "Nouvelle annonce")
     await t.finishAllScheduledFunctions(vi.runAllTimers)
     const bell = async (person: Person) => (await person.as.query(api.modules.notifications.bell.paginateNotifications, { networkId: root, paginationOpts: { numItems: 10, cursor: null } })).page
-    expect(await bell(bob)).toMatchObject([{ kind: "page_post", subject: { kind: "post", id: postId }, actor: null }])
+    expect(await bell(bob)).toMatchObject([{ kind: "page_post", subject: { kind: "post", id: postId }, actor: null, page: { pageId, handle, name: "Direction des Impôts", badge: "community" } }])
     expect(await bell(carol)).toEqual([])
+    // Une page retirée ne parle plus : la ligne reste, sans carte (jamais l'identité d'un signataire).
+    const operator = await enter(t, root, "operatrice")
+    await makeOperator(t, operator)
+    await operator.as.mutation(ADMIN.setPageStatus, { pageId, status: "inactive", reason: "Retrait après signalements." })
+    expect(await bell(bob)).toMatchObject([{ kind: "page_post", page: null }])
   })
 })
 

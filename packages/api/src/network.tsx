@@ -30,6 +30,10 @@ export interface EngineRoutes {
   stories: () => string
   /** Profil d'une personne, par son identifiant public. */
   profile: (handle: string) => string
+  /** Fiche d'une page (identité propre), par son identifiant public — un espace de noms distinct des personnes. */
+  page: (handle: string) => string
+  /** Réglages de la personne ; absent tant que l'application ne les sert pas (l'entrée de menu disparaît). */
+  settings?: () => string
   /** Conférence en direct (lot `live`). */
   conference: (sessionId: string) => string
 }

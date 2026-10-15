@@ -1,0 +1,220 @@
+{
+  "pagesPanel": {
+    "sections": {
+      "followed": "Pages you follow",
+      "discover": "Pages to discover",
+      "results": "Results",
+      "mine": "My pages",
+      "invitations": "Invitations to sign"
+    },
+    "follow": "Follow",
+    "following": "Following",
+    "followersNone": "No followers",
+    "followers_one": "{{count, number}} follower",
+    "followers_many": "{{count, number}} followers",
+    "followers_other": "{{count, number}} followers",
+    "ownerKind": {
+      "institution": "Institution",
+      "association": "Association",
+      "company": "Company",
+      "media": "Media",
+      "community": "Collective"
+    },
+    "role": {
+      "admin": "Administrator",
+      "signatory": "Signatory"
+    },
+    "invitation": {
+      "text": "You are invited to post on behalf of this page — role: {{role}}.",
+      "accept": "Accept",
+      "decline": "Decline",
+      "accepted": "You now post on behalf of this page.",
+      "declined": "Invitation declined."
+    },
+    "empty": {
+      "search": "No page matches “{{query}}”.",
+      "country": "No page is linked to this country yet: {{country}}.",
+      "nothingNew": "No new page to discover for now.",
+      "firstTime": "You don't follow any page yet. Discover the network's pages below."
+    },
+    "followedTruncated": "Only your {{limit}} most recent follows are listed here.",
+    "errors": {
+      "followed": {
+        "title": "Followed pages unavailable",
+        "message": "Your followed pages could not be loaded."
+      },
+      "discover": {
+        "title": "Pages unavailable",
+        "message": "The network's pages could not be loaded. Your follows are intact."
+      },
+      "mine": {
+        "title": "Your pages unavailable",
+        "message": "The pages you post on behalf of could not be loaded."
+      },
+      "invitations": {
+        "title": "Invitations unavailable",
+        "message": "Your invitations to sign could not be loaded."
+      }
+    },
+    "actionFailed": "This action could not be completed.",
+    "searchPlaceholder": "Search for a page…",
+    "searchLabel": "Search for a page",
+    "countryLabel": "Filter pages by country",
+    "countryAll": "All countries",
+    "createToggle": "Create a page",
+    "loadMore": "Show more pages",
+    "loadingMore": "Loading more pages…",
+    "pageLink": "View the page {{name}}",
+    "create": {
+      "title": "Create a page",
+      "intro": "A page speaks on behalf of an association, a company, a media outlet or a collective. It starts as “Community”: its verification is requested afterwards, with supporting documents.",
+      "name": "Page name",
+      "ownerKind": "Type",
+      "handle": "Page address",
+      "handleHint": "The page will be at the address @{{handle}}.",
+      "handleHintEmpty": "The address is derived from the name, unless you suggest one.",
+      "shortName": "Acronym",
+      "description": "Description",
+      "country": "Country",
+      "countryNone": "No country",
+      "submit": "Create the page",
+      "pending": "Creating…",
+      "cancel": "Cancel",
+      "created": "Page created."
+    }
+  },
+  "pagesSuggestionsRail": {
+    "title": "Pages to follow",
+    "seeAll": "See all",
+    "listLabel": "Suggested pages",
+    "dismiss": "Hide the suggestion {{name}}",
+    "pageLink": "Page {{name}}",
+    "unavailable": "Pages to follow are temporarily unavailable.",
+    "retry": "Try again",
+    "empty": "No new page to suggest for now. The pages you already follow remain available in Pages."
+  },
+  "profilPage": {
+    "refusalTitle": "This page is not accessible.",
+    "refusalBody": "Check the address, or go back to the pages you follow.",
+    "postsNone": "No posts",
+    "posts_one": "{{count, number}} post",
+    "posts_many": "{{count, number}} posts",
+    "posts_other": "{{count, number}} posts",
+    "roleNote": {
+      "admin": "You administer this page: you post on its behalf and manage its signatories.",
+      "signatory": "You sign for this page: you post on its behalf."
+    },
+    "wallEmptyCanPublish": "This page hasn't posted anything yet. You can post on its behalf above.",
+    "wallEmpty": "This page hasn't posted anything yet.",
+    "claim": {
+      "claim": {
+        "title": "Claim this page",
+        "intro": "Do you represent what this page names? Attach the documents that prove it (statutes, registration receipt, mandate): the network's moderation reviews them. Once accepted, your request makes you the page's administrator and marks it “Verified”."
+      },
+      "verify": {
+        "title": "Request verification",
+        "intro": "Attach the documents that attest to what the page represents (statutes, registration receipt, mandate): the network's moderation reviews them. Once accepted, your request marks the page “Verified”."
+      },
+      "status": {
+        "pending": "Your request is being reviewed by the network's moderation.",
+        "approved": "Your request was accepted.",
+        "rejected": "Your previous request was rejected.",
+        "withdrawn": "You withdrew your previous request."
+      },
+      "submittedOn": "Submitted on {{date}}."
+    },
+    "signatories": {
+      "unnamed": "Unpublished profile"
+    }
+  },
+  "profilPagePage": {
+    "backToPages": "Back to pages",
+    "unavailable": {
+      "title": "Page unavailable",
+      "message": "This page could not be loaded."
+    },
+    "publications": "Posts",
+    "loadMore": "Show more posts",
+    "followed": "You now follow this page.",
+    "unfollowed": "You no longer follow this page.",
+    "wall": {
+      "errorTitle": "Posts unavailable",
+      "errorMessage": "This page's posts could not be loaded."
+    },
+    "manage": {
+      "open": "Manage the page",
+      "close": "Close management",
+      "title": "Page management"
+    },
+    "identity": {
+      "title": "Page identity",
+      "name": "Name",
+      "shortName": "Acronym",
+      "description": "Description",
+      "country": "Country",
+      "countryNone": "No country",
+      "handleNote": "The address @{{handle}} does not change here: a link already shared would stop working.",
+      "save": "Save",
+      "saving": "Saving…",
+      "saved": "Page updated.",
+      "unchanged": "No change to save."
+    },
+    "images": {
+      "title": "Logo and banner",
+      "logo": "Logo",
+      "banner": "Banner",
+      "chooseLogo": "Choose a logo",
+      "chooseBanner": "Choose a banner",
+      "removeLogo": "Remove the logo",
+      "removeBanner": "Remove the banner",
+      "updated": "Image updated.",
+      "removed": "Image removed.",
+      "uploading": "Uploading…",
+      "uploadFailed": "The file upload failed. Please try again."
+    },
+    "signatories": {
+      "title": "Signatories",
+      "errorTitle": "Signatories unavailable",
+      "errorMessage": "The list of signatories could not be loaded.",
+      "pending": "Pending invitation",
+      "you": "You",
+      "remove": "Remove",
+      "removeLabel": "Remove {{name}} from the signatories",
+      "removed": "Signatory removed.",
+      "leave": "Stop signing for this page",
+      "left": "You no longer sign for this page.",
+      "roleLabel": "Role of {{name}}",
+      "roleChanged": "Role updated.",
+      "invite": {
+        "title": "Invite a signatory",
+        "handle": "Person's handle",
+        "placeholder": "handle",
+        "role": "Offered role",
+        "submit": "Invite",
+        "sent": "Invitation sent: the person must accept it.",
+        "handleRequired": "Enter the person's handle."
+      }
+    },
+    "invitation": {
+      "title": "Invitation to sign for this page"
+    },
+    "claim": {
+      "note": "Note for the moderation (optional)",
+      "files": "Supporting documents",
+      "filesHint": "From one to {{max}} documents: PDF or images.",
+      "filesSelected_one": "{{count}} document selected",
+      "filesSelected_many": "{{count}} documents selected",
+      "filesSelected_other": "{{count}} documents selected",
+      "submit": "Send the request",
+      "submitting": "Sending…",
+      "sent": "Request sent to the network's moderation.",
+      "withdraw": "Withdraw my request",
+      "withdrawn": "Request withdrawn.",
+      "cancel": "Cancel",
+      "reason": "Reason: {{reason}}",
+      "errorTitle": "Requests unavailable",
+      "errorMessage": "The status of your requests could not be loaded.",
+      "uploadFailed": "Uploading a document failed. Please try again."
+    }
+  }
+}

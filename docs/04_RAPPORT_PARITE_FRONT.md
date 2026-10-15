@@ -15,8 +15,8 @@ vérification sur le serveur qui tourne.
 | Lot | Contenu | Clos le | Commit(s) |
 |---|---|---|---|
 | F0 — fondations | `@antia/ui` (primitives d'ui-v2, tiroir, surfaces plein écran), `@antia/api` (routage, réseau courant, références typées du moteur), dépendances | 2026-10-15 | `8ddece5` |
-| F1 — iCom | messagerie (iChat, groupes), iAppel (appels 1:1 et de groupe, journal, présence, messagerie vocale), stories (Statuts), primitives du réseau personnel, coque légère, branchement d'antia.ga | 2026-10-15 | ce commit |
-| F2 — réseau personnel | fil et volets, profil, relations, groupes thématiques, évènements, pages, signets, cloche, albums (A5, A6 §4.3) | — | — |
+| F1 — iCom | messagerie (iChat, groupes), iAppel (appels 1:1 et de groupe, journal, présence, messagerie vocale), stories (Statuts), primitives du réseau personnel, coque légère, branchement d'antia.ga | 2026-10-15 | `517bf13` |
+| F2 — réseau personnel | fil et publication, relations, groupes thématiques, évènements, signets, vie privée, profil, pages, cloche, albums, coque de bureau et coquille mobile (A5, A6 §4.3) | 2026-10-15 | ce commit |
 | F3 — direct | conférences en direct (A6 §4.1), après le lot 16 `live` du moteur | — | — |
 
 ---
@@ -125,7 +125,101 @@ de chaque lot (en-têtes des fichiers de test).
 - **`signOutEverywhere`** (PA4) : purger `messagerie-dock:v6`, `icom-floating-placement:v1`, `ringtone-muted`
   et `iappel:audio-route` sous le préfixe du réseau.
 - `calls.ringing.hold` pourrait rendre `holdOnAnswer` (le hook l'infère).
-- `EngineRoutes` sans `page()` ni `settings()` : les liens de page et l'entrée « réglages » attendent F2.
-- Tests à rétablir avec la page réseau de bureau (F2) : 8 cas de `reseau-layout`, 3 de
-  `reseau-mobile-tabs` ; test `messagerie-floating-contract` (440 × 956) à réécrire.
+- ~~`EngineRoutes` sans `page()` ni `settings()`~~ : réglé en F2 (`page()` obligatoire, `settings?()` facultatif).
+- Tests à rétablir avec la page réseau de bureau : voir « Reste ouvert » de F2.
 - Barre basse d'iCom à 375 px : le dernier onglet défile (comportement du socle, R-15).
+
+---
+
+## Lot F2 — le réseau personnel
+
+### Méthode
+
+Même chaîne qu'en F1 : **copie mécanique** par le codemod (fermeture d'imports à partir de la page réseau,
+du profil, de la cloche et des albums, coupée aux fichiers retirés et à ceux qu'iCom a déjà livrés),
+**adaptation par huit lots parallèles** d'agents Opus sur un avenant au brief commun (fonctions du moteur
+par module, adresses `page()` et `settings?()`, espaces de noms), puis **intégration** : signatures
+réconciliées, contrats communs posés au fil des rapports, application branchée, `verify`, navigateur.
+
+### Volumes
+
+| Lot d'adaptation | Fichiers | Tests du lot | Clés i18n (fr = en) |
+|---|---|---|---|
+| P1 fil et publication (carte, composeur, commentaires, réactions, médias, création) | 36 | 183 | 189 |
+| P2 relations et découverte (personnes, suggestions, sélecteur de relations) | 18 | 128 | 137 |
+| P3 groupes thématiques, évènements, signets, vie privée | 16 | 134 | 244 |
+| P4 profil social (fiche, publication du profil, identifiant, mini-carte) | 15 | 114 | 140 |
+| P5 coque de bureau (page réseau, menu) et coquille mobile | 24 | 71 | 56 |
+| P6 cloche et carte flottante | 16 | 91 | 45 |
+| P7 albums et kit d'espace (`@antia/ui/espace-kit`) | 24 | 125 | 89 |
+| P8 pages, RÉÉCRITES sur le module `pages` du moteur | 11 | 135 | 158 |
+
+`@antia/social-features` : **160 fichiers de test, 2 704 cas verts** (1 757 à la fin de F1). Cas du socle
+portés sauf branches retirées (poste, administration, iProfil, conférences, iAgenda), chaque retrait
+nommé dans l'en-tête du fichier de test.
+
+### Cibles
+
+- `SF/features/reseau-personnel` (fil, volets, profil, pages, évènements, signets…), `SF/features/notifications`,
+  `SF/features/reseau-albums` ; `SF/shell/{ReseauAgentPage, ReseauMenuRail, ReseauDesktopIcomLink,
+  reseau-header, reseau-menu, design-styles, floating-card}`, `SF/shell/mobile/*` (coquille mobile).
+- `UI/espace-kit` : le kit d'espace (cartes, onglets « chemise », état vide, pagination, dialogue), SANS
+  i18n — les phrases viennent de l'appelant (`EspacePagination.labels`, `EspaceDialog.closeLabel`).
+- Exports du paquet : `@antia/social-features/reseau-personnel`, `/albums`, `/notifications`.
+
+### Décisions et écarts
+
+- **Pages réécrites, pas dupliquées** : le module `pages` du moteur (identité propre, signataires,
+  revendications, badge calculé) n'a pas d'équivalent au socle ; mêmes noms et props que les composants du
+  socle (`PagesPanel`, `PageFollowButton`, `ProfilPagePage`…), en-tête « Réécrit d'après ».
+- **Création d'évènement dans le volet Évènements** (iAgenda n'existe pas dans le moteur) : carte de
+  création sur place, invitation de relations, liste des invités ; « Créer → Évènement » ouvre la carte
+  (intention `nouveau=evenement`, consommée une fois).
+- **Profil sans section professionnelle** : « Modifier mon profil » ouvre la gestion sur ma fiche
+  (`?gerer=1`) faute de réglages servis ; l'identifiant se choisit dans l'éditeur.
+- **Cloche** : une seule source (`notifications.bell.*`), lacune du décompte dite (« 99+ »), 24 genres du
+  moteur phrasés. **Moteur** : le DTO de `page_post` porte la CARTE de la page (nom, badge calculé), relue
+  à la lecture — la ligne nomme la page et montre son badge ; une page retirée rend `null`.
+- **Contrats communs posés à l'intégration** : `useEspacePaginationLabels()` (phrases de pagination
+  traduites une fois), `useRingRelation` dupliqué du socle dans `features/iappel` (le volet Relations et la
+  fiche profil y convergent ; `IcomRelationsPanel` garde sa fonction, son cliquet de canal la relit).
+- **Feuilles** : `.esp-banner` (repli de couverture) et `.citizen-scrollbar` dans `communication.css` ;
+  espacements `--sp-1` → `--sp-8` d'ui-v2 dans la charte.
+- **Direct absent** (lot `live`) : volet Conférences, rail des directs et format « Conférence » retirés ;
+  une adresse `?tab=conferences` retombe sur le fil.
+
+### Branchement d'antia.ga
+
+- `/fil` : la page réseau du moteur, qui choisit son arbre (≤ 959 px : coquille mobile, le document défile ;
+  au-delà : trois colonnes qui défilent chacune, dans un conteneur de hauteur définie) ; barre du haut au
+  bureau seulement.
+- `/profil/<identifiant>`, `/profil/<identifiant>/albums/<album>`, `/page/<identifiant>` : fiches du moteur
+  sous la barre du haut des membres (`MemberPage` : cloche, messages, mon profil, déconnexion) ; segments
+  décodés une fois (`lib/route-params.ts`), refus indistinct laissé au moteur.
+- Le fil minimal de la tranche verticale (composeur et carte de l'application) est retiré.
+
+### Vérification
+
+- `bun run verify` : vert (Convex 656 cas, cliquets 53, `@antia/social-features` 2 704, `@antia/ui` 86,
+  typage des 10 paquets, lint).
+- Navigateur (http://localhost:3030, compte de développement) : page réseau au bureau (menu, fil, identité,
+  rail iCom, suggestions, pages à suivre, évènements) et au téléphone (en-tête, barre basse, aucun
+  défilement horizontal de page) ; volets Relations, Groupes, Pages, Évènements ; évènement créé depuis
+  l'adresse d'intention, relation invitée ; profil (le mien, onglet Albums ; celui d'une relation : écrire,
+  appeler → fenêtre d'appel « visioconférence non configurée ») ; cloche ; création de page REFUSÉE
+  (adhésion seulement déclarée : refus traduit) ; page inconnue → refus indistinct.
+
+### Reste ouvert
+
+- **Cliquets du bureau à rétablir** : 11 cas de `reseau-layout` (feuille `RESEAU_DESKTOP_CSS` et volets
+  désormais présents), parité de `reseau-mobile-tabs` (`ReseauMobilePage` présente), test
+  `messagerie-floating-contract` (440 × 956).
+- **Pages en direct** : la création exige une adhésion `verifiee` — aucune page éprouvée au navigateur sur
+  le compte de développement (135 cas de test) ; règle de visibilité `root` d'une page non exposée ; libellé
+  « Collectif » de la nature `community` à valider ; modération des revendications : à la console.
+- Signaux rendus par le moteur sans écran au socle : `lacunar` du fil, réseau d'origine, carte d'un
+  évènement annoncé.
+- Réseau gouverné : `searchPeople` et `suggestions.paginate` y refusent (`policyRefused`) — la coque d'un tel
+  réseau ne doit pas monter le volet Relations générique.
+- Écrans absents au socle aussi : blocage d'une personne, clôture et archivage d'un groupe, `ContactsRail`
+  sans point de montage.

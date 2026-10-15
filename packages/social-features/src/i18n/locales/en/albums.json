@@ -1,0 +1,121 @@
+{
+  "albumModel": {
+    "steps": {
+      "identite": "Title and audience",
+      "photos": "Photos",
+      "ordre": "Order and cover",
+      "apercu": "Preview"
+    },
+    "blocker": {
+      "titleRequired": "Give this album a title.",
+      "titleTooLong": "The title is limited to {{max}} characters.",
+      "photoRequired": "Add at least one photo."
+    },
+    "progress": {
+      "none": "No photo selected.",
+      "done_one": "{{count}} photo sent.",
+      "done_other": "{{count}} photos sent.",
+      "partial": "{{uploaded}} of {{total}} sent, {{failed}} to retry. Photos already sent will not be sent again.",
+      "running": "Sending: {{uploaded}} of {{total}}."
+    },
+    "move": {
+      "named": "“{{caption}}” is in position {{position}} of {{total}}.",
+      "unnamed": "The photo is in position {{position}} of {{total}}."
+    },
+    "reencode": {
+      "gifRefused": "GIF is not accepted in an album: reformatting it would keep only its first frame.",
+      "failed": "“{{name}}” could not be prepared: it was not sent. Try again or choose another photo."
+    },
+    "audience": {
+      "public": "The whole network",
+      "connections": "My connections"
+    },
+    "audienceHint": {
+      "public": "Anyone signed in to the network. This album does not leave the platform.",
+      "connections": "Only the people you are connected with."
+    },
+    "status": {
+      "draft": "Draft",
+      "published": "Published",
+      "withdrawn": "Withdrawn"
+    },
+    "withdrawNotice": "Withdrawing closes the album to others. A copy already downloaded cannot be recalled.",
+    "empty": {
+      "self": "You don't have an album yet. Gather your field, mission or ceremony photos into a collection.",
+      "other": "No album is open to you here."
+    },
+    "count": {
+      "none": "No photos",
+      "photos_one": "{{count}} photo",
+      "photos_other": "{{count}} photos"
+    }
+  },
+  "albumComposer": {
+    "title": "New album",
+    "tooMany": "An album holds at most {{max}} photos.",
+    "addedAnnouncement": "{{photos}} in the album.",
+    "notDuplicated": "Photos already sent were not added twice.",
+    "uploadFailed": "Sending failed. Photos already sent are kept.",
+    "published": "Album published.",
+    "publishFailed": "Publishing failed.",
+    "refusedTitle": "Action refused",
+    "rejectedTitle": "Photo set aside",
+    "titleLabel": "Album title",
+    "titlePlaceholder": "Field mission in Oyem",
+    "descriptionLabel": "Description (optional)",
+    "audienceLegend": "Who will see this album once it is published?",
+    "nothingVisible": "Nothing is visible until you publish.",
+    "choosePhotos": "Choose photos",
+    "photosHint_one": "{{photos}} — {{count}} more possible. Date and location data recorded by the device are removed before sending.",
+    "photosHint_other": "{{photos}} — {{count}} more possible. Date and location data recorded by the device are removed before sending.",
+    "uploadState": {
+      "uploaded": "Sent",
+      "failed": "To retry",
+      "pending": "Waiting"
+    },
+    "removeFile": "Remove {{name}}",
+    "remove": "Remove",
+    "sending": "Sending…",
+    "send": "Send the photos",
+    "continue": "Continue",
+    "orderHint": "Arrange the photos and choose the cover. The controls work with the keyboard as well as by touch.",
+    "photoPosition": "Photo {{position}} of {{total}}",
+    "cover": "Cover",
+    "captionLabel": "Caption for photo {{position}}",
+    "captionPlaceholder": "Caption (optional)",
+    "captionFailed": "The caption could not be saved.",
+    "moveUp": "Move up",
+    "moveUpLabel": "Move photo {{position}} up",
+    "moveDown": "Move down",
+    "moveDownLabel": "Move photo {{position}} down",
+    "setCoverLabel": "Set photo {{position}} as the cover",
+    "beforePublishTitle": "Before publishing",
+    "beforePublishText": "Once published, this album can be withdrawn at any time. However, a copy already downloaded by a viewer cannot be recalled.",
+    "back": "Back",
+    "cancel": "Cancel",
+    "publishing": "Publishing…",
+    "publish": "Publish the album"
+  },
+  "albumPage": {
+    "errorTitle": "Album unavailable",
+    "errorMessage": "This album could not be loaded.",
+    "inaccessibleTitle": "This album is not accessible",
+    "inaccessibleText": "It does not exist, it is no longer published, or it is not open to you.",
+    "backToProfileAction": "Go back to the profile",
+    "backToProfile": "Back to the profile",
+    "unknownOwner": "Network member",
+    "withdrawTitle": "Withdraw this album",
+    "withdraw": "Withdraw this album",
+    "withdrawing": "Withdrawing…",
+    "withdrawn": "Album withdrawn.",
+    "withdrawFailed": "The withdrawal did not go through.",
+    "empty": "This album contains no photos.",
+    "photoUnavailable": "Photo unavailable."
+  },
+  "albumsSection": {
+    "errorTitle": "Albums unavailable",
+    "errorMessage": "The albums could not be loaded.",
+    "create": "Create an album",
+    "photosHint": "Open an album to see all its photos."
+  }
+}

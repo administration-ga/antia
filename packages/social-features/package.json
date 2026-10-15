@@ -13,6 +13,9 @@
     "./messagerie": "./src/features/messagerie/index.ts",
     "./iappel": "./src/features/iappel/index.ts",
     "./stories": "./src/features/stories/index.ts",
+    "./reseau-personnel": "./src/features/reseau-personnel/index.ts",
+    "./albums": "./src/features/reseau-albums/index.ts",
+    "./notifications": "./src/features/notifications/index.ts",
     "./*": "./src/*.ts"
   },
   "scripts": {

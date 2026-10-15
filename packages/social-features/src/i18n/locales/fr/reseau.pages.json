@@ -1,0 +1,220 @@
+{
+  "pagesPanel": {
+    "sections": {
+      "followed": "Pages suivies",
+      "discover": "Pages à découvrir",
+      "results": "Résultats",
+      "mine": "Mes pages",
+      "invitations": "Invitations à signer"
+    },
+    "follow": "Suivre",
+    "following": "Suivi",
+    "followersNone": "Aucun abonné",
+    "followers_one": "{{count, number}} abonné",
+    "followers_many": "{{count, number}} abonnés",
+    "followers_other": "{{count, number}} abonnés",
+    "ownerKind": {
+      "institution": "Institution",
+      "association": "Association",
+      "company": "Entreprise",
+      "media": "Média",
+      "community": "Collectif"
+    },
+    "role": {
+      "admin": "Administrateur",
+      "signatory": "Signataire"
+    },
+    "invitation": {
+      "text": "Vous êtes invité à publier au nom de cette page — rôle : {{role}}.",
+      "accept": "Accepter",
+      "decline": "Décliner",
+      "accepted": "Vous publiez désormais au nom de cette page.",
+      "declined": "Invitation déclinée."
+    },
+    "empty": {
+      "search": "Aucune page ne correspond à « {{query}} ».",
+      "country": "Aucune page rattachée à ce pays pour l'instant : {{country}}.",
+      "nothingNew": "Aucune nouvelle page à découvrir pour l'instant.",
+      "firstTime": "Vous ne suivez encore aucune page. Découvrez les pages du réseau ci-dessous."
+    },
+    "followedTruncated": "Seuls vos {{limit}} abonnements les plus récents sont listés ici.",
+    "errors": {
+      "followed": {
+        "title": "Pages suivies indisponibles",
+        "message": "Vos pages suivies n'ont pas pu être chargées."
+      },
+      "discover": {
+        "title": "Pages indisponibles",
+        "message": "Les pages du réseau n'ont pas pu être chargées. Vos abonnements sont intacts."
+      },
+      "mine": {
+        "title": "Vos pages indisponibles",
+        "message": "Les pages au nom desquelles vous publiez n'ont pas pu être chargées."
+      },
+      "invitations": {
+        "title": "Invitations indisponibles",
+        "message": "Vos invitations à signer n'ont pas pu être chargées."
+      }
+    },
+    "actionFailed": "Cette action n'a pas pu être effectuée.",
+    "searchPlaceholder": "Rechercher une page…",
+    "searchLabel": "Rechercher une page",
+    "countryLabel": "Filtrer les pages par pays",
+    "countryAll": "Tous les pays",
+    "createToggle": "Créer une page",
+    "loadMore": "Afficher plus de pages",
+    "loadingMore": "Chargement des pages suivantes…",
+    "pageLink": "Voir la page {{name}}",
+    "create": {
+      "title": "Créer une page",
+      "intro": "Une page parle au nom d'une association, d'une entreprise, d'un média ou d'un collectif. Elle naît « Communauté » : sa vérification se demande ensuite, pièces à l'appui.",
+      "name": "Nom de la page",
+      "ownerKind": "Nature",
+      "handle": "Adresse de la page",
+      "handleHint": "La page sera à l'adresse @{{handle}}.",
+      "handleHintEmpty": "L'adresse se déduit du nom, sauf si vous en proposez une.",
+      "shortName": "Sigle",
+      "description": "Description",
+      "country": "Pays",
+      "countryNone": "Aucun pays",
+      "submit": "Créer la page",
+      "pending": "Création…",
+      "cancel": "Annuler",
+      "created": "Page créée."
+    }
+  },
+  "pagesSuggestionsRail": {
+    "title": "Pages à suivre",
+    "seeAll": "Voir tout",
+    "listLabel": "Pages proposées",
+    "dismiss": "Masquer la suggestion {{name}}",
+    "pageLink": "Page {{name}}",
+    "unavailable": "Les pages à suivre sont momentanément indisponibles.",
+    "retry": "Réessayer",
+    "empty": "Aucune nouvelle page à proposer pour le moment. Les pages déjà suivies restent accessibles dans Pages."
+  },
+  "profilPage": {
+    "refusalTitle": "Cette page n'est pas accessible.",
+    "refusalBody": "Vérifiez l'adresse, ou revenez aux pages que vous suivez.",
+    "postsNone": "Aucune publication",
+    "posts_one": "{{count, number}} publication",
+    "posts_many": "{{count, number}} publications",
+    "posts_other": "{{count, number}} publications",
+    "roleNote": {
+      "admin": "Vous administrez cette page : vous publiez en son nom et gérez ses signataires.",
+      "signatory": "Vous signez pour cette page : vous publiez en son nom."
+    },
+    "wallEmptyCanPublish": "Cette page n'a encore rien publié. Vous pouvez publier en son nom ci-dessus.",
+    "wallEmpty": "Cette page n'a encore rien publié.",
+    "claim": {
+      "claim": {
+        "title": "Revendiquer cette page",
+        "intro": "Vous représentez ce que cette page nomme ? Joignez les pièces qui le prouvent (statuts, récépissé, mandat) : la modération du réseau les examine. Acceptée, votre demande fait de vous l'administrateur de la page et la rend « Vérifié »."
+      },
+      "verify": {
+        "title": "Demander la vérification",
+        "intro": "Joignez les pièces qui attestent de ce que la page représente (statuts, récépissé, mandat) : la modération du réseau les examine. Acceptée, votre demande rend la page « Vérifié »."
+      },
+      "status": {
+        "pending": "Votre demande est en cours d'examen par la modération du réseau.",
+        "approved": "Votre demande a été acceptée.",
+        "rejected": "Votre demande précédente a été refusée.",
+        "withdrawn": "Vous avez retiré votre demande précédente."
+      },
+      "submittedOn": "Déposée le {{date}}."
+    },
+    "signatories": {
+      "unnamed": "Profil non publié"
+    }
+  },
+  "profilPagePage": {
+    "backToPages": "Revenir aux pages",
+    "unavailable": {
+      "title": "Page indisponible",
+      "message": "Cette page n'a pas pu être chargée."
+    },
+    "publications": "Publications",
+    "loadMore": "Voir plus de publications",
+    "followed": "Abonnement pris.",
+    "unfollowed": "Abonnement retiré.",
+    "wall": {
+      "errorTitle": "Publications indisponibles",
+      "errorMessage": "Les publications de cette page n'ont pas pu être chargées."
+    },
+    "manage": {
+      "open": "Gérer la page",
+      "close": "Fermer la gestion",
+      "title": "Gestion de la page"
+    },
+    "identity": {
+      "title": "Identité de la page",
+      "name": "Nom",
+      "shortName": "Sigle",
+      "description": "Description",
+      "country": "Pays",
+      "countryNone": "Aucun pays",
+      "handleNote": "L'adresse @{{handle}} ne change pas ici : un lien déjà partagé cesserait d'aboutir.",
+      "save": "Enregistrer",
+      "saving": "Enregistrement…",
+      "saved": "Page mise à jour.",
+      "unchanged": "Aucun changement à enregistrer."
+    },
+    "images": {
+      "title": "Logo et bannière",
+      "logo": "Logo",
+      "banner": "Bannière",
+      "chooseLogo": "Choisir un logo",
+      "chooseBanner": "Choisir une bannière",
+      "removeLogo": "Retirer le logo",
+      "removeBanner": "Retirer la bannière",
+      "updated": "Image mise à jour.",
+      "removed": "Image retirée.",
+      "uploading": "Dépôt en cours…",
+      "uploadFailed": "Le dépôt du fichier a échoué. Réessayez."
+    },
+    "signatories": {
+      "title": "Signataires",
+      "errorTitle": "Signataires indisponibles",
+      "errorMessage": "La liste des signataires n'a pas pu être chargée.",
+      "pending": "Invitation en attente",
+      "you": "Vous",
+      "remove": "Retirer",
+      "removeLabel": "Retirer {{name}} des signataires",
+      "removed": "Signataire retiré.",
+      "leave": "Ne plus signer pour cette page",
+      "left": "Vous ne signez plus pour cette page.",
+      "roleLabel": "Rôle de {{name}}",
+      "roleChanged": "Rôle mis à jour.",
+      "invite": {
+        "title": "Inviter un signataire",
+        "handle": "Identifiant de la personne",
+        "placeholder": "identifiant",
+        "role": "Rôle proposé",
+        "submit": "Inviter",
+        "sent": "Invitation envoyée : la personne doit l'accepter.",
+        "handleRequired": "Indiquez l'identifiant de la personne."
+      }
+    },
+    "invitation": {
+      "title": "Invitation à signer pour cette page"
+    },
+    "claim": {
+      "note": "Note pour la modération (facultative)",
+      "files": "Pièces justificatives",
+      "filesHint": "De une à {{max}} pièces : PDF ou images.",
+      "filesSelected_one": "{{count}} pièce sélectionnée",
+      "filesSelected_many": "{{count}} pièces sélectionnées",
+      "filesSelected_other": "{{count}} pièces sélectionnées",
+      "submit": "Envoyer la demande",
+      "submitting": "Envoi…",
+      "sent": "Demande envoyée à la modération du réseau.",
+      "withdraw": "Retirer ma demande",
+      "withdrawn": "Demande retirée.",
+      "cancel": "Annuler",
+      "reason": "Motif : {{reason}}",
+      "errorTitle": "Demandes indisponibles",
+      "errorMessage": "L'état de vos demandes n'a pas pu être chargé.",
+      "uploadFailed": "Le dépôt d'une pièce a échoué. Réessayez."
+    }
+  }
+}

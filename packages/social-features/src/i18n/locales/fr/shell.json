@@ -1,1 +1,6 @@
-{}
+{
+  "espaceFloatingCard": {
+    "close": "Fermer",
+    "stepProgress": "Étape {{current}} sur {{total}} : {{label}}"
+  }
+}

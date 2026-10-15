@@ -1,0 +1,230 @@
+{
+  "profilPersonnePage": {
+    "profileError": {
+      "title": "Profil indisponible",
+      "message": "Ce profil n'a pas pu être chargé."
+    },
+    "profileStale": {
+      "title": "Profil non actualisé",
+      "message": "La dernière lecture a échoué ; ce qui est affiché peut être ancien."
+    },
+    "refused": {
+      "title": "Ce profil n'est pas accessible",
+      "message": "Il n'existe pas, il n'est plus publié, ou il ne vous est pas ouvert.",
+      "back": "Revenir à mon réseau"
+    },
+    "retired": {
+      "title": "Mon profil"
+    },
+    "apercu": {
+      "title": "Aperçu : ce que voient les membres du réseau",
+      "message": "Vos commandes personnelles sont masquées le temps de l'aperçu. Rien n'est modifié.",
+      "back": "Revenir à mon profil"
+    },
+    "identity": {
+      "you": "Vous",
+      "selfNote": "Voici ce que les autres voient de vous. Rien d'autre de votre compte n'est publié."
+    },
+    "actions": {
+      "editProfile": "Modifier mon profil"
+    },
+    "manage": {
+      "title": "Gérer mon profil"
+    },
+    "tabs": {
+      "label": "Contenus du profil",
+      "publications": "Publications",
+      "photos": "Photos",
+      "albums": "Albums"
+    },
+    "wall": {
+      "title": "Publications",
+      "pinned": "Épinglée",
+      "unpin": "Désépingler"
+    },
+    "connection": {
+      "connected": "Connecté",
+      "requested": "Invitation envoyée",
+      "accept": "Accepter l'invitation",
+      "decline": "Refuser",
+      "blocked": "Bloqué",
+      "connect": "Se connecter",
+      "sending": "Envoi…"
+    },
+    "follow": {
+      "following": "Suivi",
+      "follow": "Suivre"
+    },
+    "contact": {
+      "write": "Écrire",
+      "call": "Appeler",
+      "callLabel": "Appeler {{name}}"
+    },
+    "toast": {
+      "requestSent": "Invitation envoyée.",
+      "requestFailed": "L'invitation n'a pas pu être envoyée.",
+      "accepted": "Vous êtes désormais connectés.",
+      "declined": "Invitation refusée.",
+      "respondFailed": "La réponse n'a pas pu être envoyée.",
+      "followed": "Suivi enregistré.",
+      "unfollowed": "Suivi retiré.",
+      "followFailed": "L'action a échoué.",
+      "unpinned": "Publication désépinglée.",
+      "unpinFailed": "Le désépinglage a échoué."
+    }
+  },
+  "profilPersonne": {
+    "wall": {
+      "errorTitle": "Publications indisponibles",
+      "errorMessage": "Les publications n'ont pas pu être chargées.",
+      "emptySelf": "Vous n'avez encore rien publié.",
+      "emptyOther": "Aucune publication ne vous est ouverte ici.",
+      "loadMore": "Voir plus de publications"
+    }
+  },
+  "profilReseauSection": {
+    "facts": {
+      "title": "Ce que le réseau montre de vous",
+      "imagesNote": "Les commandes « Photo » et « Couverture » ci-dessous sont le seul chemin par lequel une image rejoint votre profil. Le nom affiché est celui que vous choisissez : il n'est jamais repris de votre compte de connexion."
+    },
+    "preview": "Aperçu — vu par les membres du réseau"
+  },
+  "profilePublicationCard": {
+    "loading": "Chargement du profil…",
+    "error": {
+      "title": "Profil de réseau indisponible",
+      "message": "Votre profil n'a pas pu être chargé. Vos réglages existants sont conservés."
+    },
+    "editor": {
+      "title": "Votre profil de réseau",
+      "nameLabel": "Nom affiché",
+      "nameHint": "Le nom sous lequel vous apparaissez. Il n'est pas repris de votre compte : c'est vous qui décidez.",
+      "nameRequired": "Indiquez le nom sous lequel vous souhaitez apparaître.",
+      "handleLabel": "Identifiant public",
+      "handleHint": "Votre adresse sur le réseau : c'est par elle qu'on vous trouve et qu'on se connecte à vous.",
+      "handlePlaceholder": "a.ndong",
+      "headlineLabel": "Accroche (facultatif)",
+      "headlineHint": "Une ligne pour situer votre activité.",
+      "headlinePlaceholder": "Chargée d'études, Libreville…",
+      "cancel": "Annuler",
+      "publish": "Publier mon profil",
+      "publishing": "Publication…"
+    },
+    "unpublished": {
+      "title": "Vous n'êtes pas encore trouvable",
+      "body": "Votre nom de compte n'est jamais publié sur le réseau : il a été collecté pour vous authentifier, pas pour vous exposer. Publiez un profil de réseau pour être trouvé, recevoir des demandes de connexion et apparaître sous votre nom.",
+      "action": "Publier mon profil de réseau"
+    },
+    "retired": {
+      "title": "Votre profil est retiré du réseau",
+      "body": "Vous n'êtes plus trouvable et votre nom s'affiche de façon neutre. Rien n'a été effacé : republier votre profil vous rétablit.",
+      "action": "Republier mon profil"
+    },
+    "withheld": {
+      "avatarPending": "Votre photo est en cours d'analyse de sécurité : elle apparaîtra dans quelques instants.",
+      "avatarBlocked": "Votre photo a été bloquée par l'analyse de sécurité. Choisissez-en une autre.",
+      "coverPending": "Votre couverture est en cours d'analyse de sécurité : elle apparaîtra dans quelques instants.",
+      "coverBlocked": "Votre couverture a été bloquée par l'analyse de sécurité. Choisissez-en une autre."
+    },
+    "actions": {
+      "avatar": "Photo",
+      "cover": "Couverture",
+      "sending": "Envoi…",
+      "removeAvatar": "Retirer la photo",
+      "removeCover": "Retirer la couverture",
+      "edit": "Modifier",
+      "goOffline": "Passer hors connexion",
+      "goOnline": "Revenir sur le réseau",
+      "withdraw": "Me retirer du réseau"
+    },
+    "toast": {
+      "avatarUpdated": "Photo mise à jour.",
+      "coverUpdated": "Couverture mise à jour.",
+      "avatarPending": "Photo enregistrée : elle apparaîtra une fois son analyse terminée.",
+      "coverPending": "Couverture enregistrée : elle apparaîtra une fois son analyse terminée.",
+      "avatarFailed": "La photo n'a pas pu être enregistrée.",
+      "coverFailed": "La couverture n'a pas pu être enregistrée.",
+      "avatarRemoved": "Photo retirée.",
+      "coverRemoved": "Couverture retirée.",
+      "removeFailed": "Le retrait a échoué.",
+      "published": "Profil de réseau publié.",
+      "publishFailed": "La publication a échoué. Cet identifiant public est peut-être déjà pris.",
+      "nowOffline": "Profil hors connexion. Vos relations et vos publications sont intactes.",
+      "backOnline": "Vous êtes de nouveau visible sur le réseau.",
+      "privacyFailed": "Le changement a échoué.",
+      "withdrawn": "Profil dépublié. Vous n'êtes plus trouvable ; rien n'a été effacé.",
+      "withdrawFailed": "La dépublication a échoué."
+    }
+  },
+  "handleChoiceCard": {
+    "legend": "Identifiants disponibles",
+    "needName": "Saisissez d'abord votre nom affiché : les propositions en partent.",
+    "loading": "Recherche des identifiants disponibles…",
+    "error": "Les propositions n'ont pas pu être chargées. Vous pouvez saisir votre identifiant vous-même.",
+    "none": "Aucune forme n'est disponible à partir de ce nom. Saisissez votre identifiant vous-même.",
+    "currentTag": "adresse actuelle",
+    "status": {
+      "current": "C'est votre identifiant actuel.",
+      "available": "@{{handle}} est disponible.",
+      "taken": "@{{handle}} n'est pas disponible.",
+      "checking": "Vérification de la disponibilité…"
+    }
+  },
+  "profileMiniCard": {
+    "viewProfile": "Voir mon profil"
+  },
+  "profileOnboarding": {
+    "publish": {
+      "title": "Vous n'êtes pas encore trouvable",
+      "body": "Votre profil n'est pas publié sur le réseau. Publiez-le pour être trouvé, recevoir des invitations et apparaître sous votre nom.",
+      "action": "Publier mon profil"
+    },
+    "private": {
+      "title": "Votre profil est hors connexion",
+      "action": "Revenir sur le réseau"
+    }
+  },
+  "profileVisibilityCopy": {
+    "facts": {
+      "accountNotCopied": {
+        "title": "Votre compte ne publie rien à votre place",
+        "body": "Votre nom de compte, votre adresse électronique et votre photo de connexion ne sont jamais repris sur le réseau. Votre profil commence vide : tout ce qu'il montre, c'est vous qui l'y mettez."
+      },
+      "publishedByChoice": {
+        "title": "Votre profil n'existe que si vous le publiez",
+        "body": "Votre identifiant public, votre nom affiché et votre accroche sont ceux que vous choisissez en publiant. Une fois publié, votre profil est visible des membres du réseau."
+      },
+      "restByGesture": {
+        "title": "Tout le reste ne part que par un geste",
+        "body": "Photo, couverture, publications, albums : chacun s'ajoute par une commande de votre part et se retire de la même façon. Une photo ou une couverture nouvelle peut être retenue le temps de son analyse de sécurité avant d'apparaître."
+      }
+    },
+    "actions": {
+      "offline": {
+        "label": "Passer hors connexion",
+        "consequence": "Vous n'apparaissez ni dans les recherches ni dans les suggestions, et personne ne peut vous adresser de nouvelle invitation ni commencer à vous suivre.",
+        "reversibility": "Vos relations et vos publications sont intactes, et revenir sur le réseau vous y remet tel quel."
+      },
+      "withdraw": {
+        "label": "Me retirer du réseau",
+        "consequence": "Votre profil est dépublié : votre nom ne s'affiche plus pour les autres membres et les liens vers votre page ne mènent plus à rien.",
+        "reversibility": "Rien n'est effacé et votre identifiant public reste le vôtre — personne d'autre ne peut le reprendre entre-temps."
+      },
+      "mute": {
+        "label": "Mettre une personne en sourdine",
+        "consequence": "Ses publications quittent votre fil dans ce réseau. Elle n'en est pas avertie et votre relation reste en place.",
+        "reversibility": "La liste « Personnes en sourdine » de cette page la rouvre d'un clic."
+      },
+      "hide": {
+        "label": "Masquer une publication",
+        "consequence": "Cette publication disparaît de votre fil dans ce réseau, pour vous seul. Son auteur continue de la voir et de la partager.",
+        "reversibility": "La liste « Publications masquées » de cette page la rétablit d'un clic."
+      },
+      "block": {
+        "label": "Bloquer une personne",
+        "consequence": "Le lien est rompu dans les deux sens et dans tous les réseaux : plus de messages, plus d'invitations, plus rien de l'un chez l'autre. Le blocage est silencieux — la personne n'en reçoit pas l'annonce.",
+        "reversibility": "Le blocage se lève, mais la relation rompue ne revient pas d'elle-même : il faut réinviter."
+      }
+    }
+  }
+}

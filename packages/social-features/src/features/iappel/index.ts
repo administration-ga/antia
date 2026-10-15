@@ -348,5 +348,7 @@ export {
 export { useIappelActions, type IappelActions } from "./use-iappel-actions"
 export { useIncomingCalls, type IncomingCallsState } from "./use-incoming-calls"
 export { useRingVibration } from "./use-ring-vibration"
+export { useRingRelation } from "./useRingRelation"
+export type { RingRelation, RingRelationTarget } from "./useRingRelation"
 export { useSpeakerOutput, type SpeakerOutput } from "./use-speaker-output"
 export { useCameraFlip, type CameraFlip } from "./use-camera-flip"

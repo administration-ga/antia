@@ -22,6 +22,7 @@ export const TEST_ROUTES: EngineRoutes = {
   messages: () => "/messages",
   stories: () => "/actus",
   profile: (handle) => `/profil/${handle}`,
+  page: (handle) => `/page/${handle}`,
   conference: (sessionId) => `/conference/${sessionId}`,
 }
 

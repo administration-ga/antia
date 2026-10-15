@@ -1,0 +1,336 @@
+{
+  "groupesThematiques": {
+    "returnLabel": "Back to groups",
+    "role": {
+      "owner": "Owner",
+      "moderator": "Moderator",
+      "member": "Member"
+    },
+    "nameLength": "A group name is between {{min}} and {{max}} characters long.",
+    "memberCount_zero": "{{count}} members",
+    "memberCount_one": "{{count}} member",
+    "memberCount_many": "{{count}} members",
+    "memberCount_other": "{{count}} members",
+    "emptyWall": {
+      "member": "No posts in this group yet. Be the first to post.",
+      "visitor": "No visible posts."
+    },
+    "emptyDiscover": "No group matches. Create the first one on this topic.",
+    "emptyMyGroups": "You have not joined any group yet. Browse the discovery list below, or create your own.",
+    "errors": {
+      "invites": {
+        "title": "Invitations unavailable",
+        "message": "Your group invitations could not be loaded."
+      },
+      "mine": {
+        "title": "My groups unavailable",
+        "message": "Your groups could not be loaded."
+      },
+      "discover": {
+        "title": "Discovery unavailable",
+        "message": "Groups could not be searched."
+      },
+      "group": {
+        "title": "Group unavailable",
+        "message": "This group could not be loaded."
+      },
+      "members": {
+        "title": "Members unavailable",
+        "message": "The member list could not be loaded."
+      },
+      "wall": {
+        "title": "Posts unavailable",
+        "message": "The group's posts could not be loaded."
+      },
+      "candidates": {
+        "title": "Connections unavailable",
+        "message": "Your connections could not be loaded."
+      }
+    },
+    "join": {
+      "acceptInvite": "Accept the invitation",
+      "join": "Join"
+    },
+    "invitesBanner_one": "{{count}} pending group invitation",
+    "invitesBanner_many": "{{count}} pending group invitations",
+    "invitesBanner_other": "{{count}} pending group invitations",
+    "unnamedPerson": "Network member",
+    "invite": {
+      "open": "Invite connections",
+      "picker": "Invite connections to the group",
+      "empty": "No connection to invite yet. Grow your network, then come back here."
+    },
+    "inviteReport": {
+      "invited_one": "{{count}} invitation sent",
+      "invited_many": "{{count}} invitations sent",
+      "invited_other": "{{count}} invitations sent",
+      "alreadyInvited_one": "{{count}} reminder",
+      "alreadyInvited_many": "{{count}} reminders",
+      "alreadyInvited_other": "{{count}} reminders",
+      "alreadyMember_one": "{{count}} person already a member",
+      "alreadyMember_many": "{{count}} people already members",
+      "alreadyMember_other": "{{count}} people already members",
+      "failed_one": "{{count}} failure",
+      "failed_many": "{{count}} failures",
+      "failed_other": "{{count}} failures",
+      "none": "No invitation sent.",
+      "sentence": "{{parts}}."
+    }
+  },
+  "groupsPanel": {
+    "invites": {
+      "sentence": "<strong>{{name}}</strong> invites you to join “{{group}}” ({{members}}).",
+      "accept": "Accept",
+      "decline": "Decline",
+      "more": "See more invitations"
+    },
+    "toast": {
+      "joined": "Group joined.",
+      "inviteExpired": "This invitation is no longer valid.",
+      "joinFailed": "Could not join this group.",
+      "created": "Group created.",
+      "createFailed": "The group could not be created.",
+      "left": "You left the group.",
+      "leaveFailed": "Your departure could not be recorded.",
+      "unpinned": "Post unpinned.",
+      "unpinFailed": "Unpinning failed.",
+      "promoted": "Member promoted to moderator.",
+      "demoted": "Moderator demoted.",
+      "roleFailed": "The role change failed.",
+      "memberRemoved": "Member removed from the group.",
+      "removeFailed": "The removal failed.",
+      "pinned": "Post pinned at the top of the group.",
+      "pinFailed": "Pinning failed.",
+      "postRemoved": "Post removed from the group."
+    },
+    "directory": {
+      "mine": "My groups",
+      "mineList": "my groups",
+      "mineTruncated": "Only your most active groups are shown.",
+      "discoverSection": "Discover groups",
+      "discover": "Discover",
+      "discoverList": "discover groups",
+      "searchForm": "Search for a group",
+      "searchLabel": "Search for a group by topic",
+      "searchPlaceholder": "Search for a group by topic…",
+      "search": "Search"
+    },
+    "card": {
+      "open": "Open"
+    },
+    "create": {
+      "open": "Create a group",
+      "form": "Create a group",
+      "nameLabel": "Group name",
+      "namePlaceholder": "Group name (the topic, in plain words)",
+      "descriptionLabel": "Group description",
+      "descriptionPlaceholder": "Description (optional): who this group is for, and what for.",
+      "visibility": "The group's card (name, description, member count) is visible to the whole network; its posts, to members only.",
+      "cancel": "Cancel",
+      "submit": "Create",
+      "submitting": "Creating…"
+    },
+    "page": {
+      "notAccessible": "This group is no longer accessible.",
+      "leave": "Leave the group",
+      "showMembers": "Show members",
+      "hideMembers": "Hide members",
+      "membersReserved": "The member list is reserved for the group's members.",
+      "pinnedBadge": "Pinned",
+      "unpin": "Unpin",
+      "joinToRead": "Join this group to read and publish its contributions.",
+      "morePosts": "See more posts"
+    },
+    "members": {
+      "title": "Members",
+      "promote": "Promote",
+      "demote": "Demote",
+      "remove": "Remove",
+      "more": "See more members"
+    },
+    "wall": {
+      "pin": "Pin",
+      "removeFromGroup": "Remove from the group"
+    }
+  },
+  "evenementsList": {
+    "section": {
+      "upcoming": "Upcoming",
+      "today": "Today",
+      "pendingInvitations": "Pending invitations",
+      "past": "Past"
+    },
+    "response": {
+      "accepted": "I'm attending",
+      "declined": "I'm declining",
+      "maybe": "Maybe",
+      "pending": "No reply"
+    },
+    "participant": {
+      "accepted": "Attending",
+      "declined": "Declined",
+      "maybe": "Maybe",
+      "pending": "No reply"
+    },
+    "emptyAgenda": "Your personal agenda is empty. Create an event to invite your connections, or wait for an invitation.",
+    "announceAudience": {
+      "public": "the whole network",
+      "connections": "your connections"
+    },
+    "announceSummary_zero": "No guests yet; the announcement will be visible to {{audience}}.",
+    "announceSummary_one": "{{count}} person is invited; the announcement will be visible to {{audience}}.",
+    "announceSummary_many": "{{count}} people are invited; the announcement will be visible to {{audience}}.",
+    "announceSummary_other": "{{count}} people are invited; the announcement will be visible to {{audience}}.",
+    "titleLength": "An event title is between {{min}} and {{max}} characters long.",
+    "endBeforeStart": "The end must come after the start",
+    "unnamedPerson": "Network member",
+    "inviteReport": {
+      "invited_one": "{{count}} invitation sent",
+      "invited_many": "{{count}} invitations sent",
+      "invited_other": "{{count}} invitations sent",
+      "alreadyResponded_one": "{{count}} person has already replied",
+      "alreadyResponded_many": "{{count}} people have already replied",
+      "alreadyResponded_other": "{{count}} people have already replied",
+      "failed_one": "{{count}} failure",
+      "failed_many": "{{count}} failures",
+      "failed_other": "{{count}} failures",
+      "none": "No invitation sent.",
+      "sentence": "{{parts}}."
+    }
+  },
+  "evenementsPanel": {
+    "errorTitle": "Agenda unavailable",
+    "errorMessage": "Your events could not be loaded.",
+    "truncated": "Your agenda is long: only the nearest events are shown.",
+    "create": "Create an event",
+    "toast": {
+      "accepted": "Your attendance is recorded.",
+      "declined": "Your refusal is recorded.",
+      "respondFailed": "Could not record your reply.",
+      "cancelled": "Event cancelled.",
+      "cancelFailed": "Could not cancel this event.",
+      "created": "Event created.",
+      "createFailed": "The event could not be created."
+    },
+    "card": {
+      "cancelledBadge": "Cancelled",
+      "youOrganize": "You are organizing",
+      "organizedBy": "Organized by {{name}}",
+      "guests_one": "Guests: {{count}} accepted out of {{total}}",
+      "guests_many": "Guests: {{count}} accepted out of {{total}}",
+      "guests_other": "Guests: {{count}} accepted out of {{total}}",
+      "accept": "I'm attending",
+      "decline": "I'm declining",
+      "announce": "Announce to the network",
+      "confirmCancelStatus": "Confirm the event cancellation, or go back.",
+      "confirmCancel": "Confirm the cancellation",
+      "back": "Go back",
+      "askCancel": "Cancel the event"
+    },
+    "composer": {
+      "form": "Create an event",
+      "title": "New event",
+      "zone": "An event in your agenda — the time zone ({{timeZone}}) is fixed at creation.",
+      "titleLabel": "Title",
+      "titlePlaceholder": "Farewell drinks, alumni meeting…",
+      "date": "Date",
+      "start": "Start",
+      "end": "End",
+      "location": "Place (optional)",
+      "locationPlaceholder": "Room, address, video link…",
+      "description": "Description (optional)",
+      "missingTiming": "Fill in the date and times of the event.",
+      "cancel": "Cancel",
+      "submit": "Create the event",
+      "submitting": "Creating…"
+    },
+    "invite": {
+      "open": "Invite connections",
+      "picker": "Invite connections to “{{title}}”",
+      "empty": "Search for a connection by name or @handle."
+    },
+    "participants": {
+      "show": "Show guests",
+      "hide": "Hide guests",
+      "title": "Guests",
+      "empty": "Nobody is invited yet.",
+      "more": "See more guests",
+      "errorTitle": "Guests unavailable",
+      "errorMessage": "The guest list could not be loaded."
+    }
+  },
+  "evenementsRail": {
+    "error": "Events are temporarily unavailable.",
+    "retry": "Retry",
+    "title": "Events",
+    "seeAll": "See all",
+    "awaitingReply": "Reply expected"
+  },
+  "announceEventDialog": {
+    "dialogLabel": "Announce “{{title}}” to the network",
+    "heading": "Announce “{{title}}”",
+    "bodyLabel": "Add a word (optional)",
+    "bodyPlaceholder": "Why this event matters, what will happen there…",
+    "audienceLabel": "Who sees the announcement",
+    "audienceHint": "The announcement is a post in your feed. It invites nobody: invitations are sent from the event itself.",
+    "cancel": "Cancel",
+    "submit": "Announce",
+    "submitting": "Announcing…",
+    "toast": {
+      "announced": "Event announced in your feed.",
+      "failed": "Could not announce this event."
+    }
+  },
+  "bookmarksPanel": {
+    "empty": "No saved post. From the “…” menu of a post in the feed, choose “Save” to find it here.",
+    "count_zero": "{{count}} saved posts",
+    "count_one": "{{count}} saved post",
+    "count_many": "{{count}} saved posts",
+    "count_other": "{{count}} saved posts",
+    "errorTitle": "Saved posts unavailable",
+    "errorMessage": "Your saved posts could not be loaded. Nothing was deleted.",
+    "dates": "Published {{published}} · saved {{marked}}",
+    "open": "Open the post",
+    "remove": "Remove",
+    "more": "See more saved posts",
+    "loadingMore": "Loading earlier saved posts…",
+    "unnamedAuthor": "Network member",
+    "toast": {
+      "removed": "Post removed from your saved posts.",
+      "removeFailed": "Could not remove this post."
+    }
+  },
+  "privacyLists": {
+    "errorTitle": "Privacy unavailable",
+    "errorMessage": "Your lists could not be loaded. No setting was lost.",
+    "loading": "Loading your privacy settings…",
+    "title": "Feed privacy",
+    "itemLine": "{{author}} · {{body}}",
+    "mediaOnly": "Media post",
+    "unnamedPerson": "Network member",
+    "loadingMore": "Loading earlier items…",
+    "bookmarks": {
+      "title": "Saved posts",
+      "empty": "No saved post.",
+      "more": "See more saved posts"
+    },
+    "mutes": {
+      "title": "Muted people",
+      "empty": "No muted person.",
+      "unmute": "Show again",
+      "more": "See more muted people"
+    },
+    "hidden": {
+      "title": "Hidden posts",
+      "empty": "No hidden post.",
+      "restore": "Restore",
+      "more": "See more hidden posts"
+    },
+    "toast": {
+      "unmuted": "Mute removed.",
+      "unmuteFailed": "The mute could not be removed.",
+      "restored": "Post restored.",
+      "restoreFailed": "The post could not be restored."
+    }
+  }
+}

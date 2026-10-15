@@ -1,4 +1,4 @@
-/* Dupliqué de socle/packages/ui/src/styles/globals.css (l. 1914-2125 classes `.esp-*` des surfaces immersives, des barres basses et des stories ; l. 2544-4095 couche d'appel `.call-*`, `.av-ring`, `.iappel-*`, carte Conférence) @ ad2e7fdc2 — adaptations : feuille DÉDIÉE à la couche de communication du moteur (iCom, iAppel, stories), importée par `styles.css` après la charte ; jetons qu'elle lit et que la charte de base ne déclare pas (`--esp-immersive-ink`, `--esp-immersive-on-ink`, ombres `--shadow-*`, `--destructive-foreground`, rayon des surfaces du réseau, ombre de la carte iCom déplacée, encre et fond du code QR) déclarés ici, en tête, valeurs du socle ; bannière de l'espace personnel, carte de l'espace structure et filet tricolore retirés (coque de l'espace agent, non reprise) ; règles du lanceur de poste conservées (le sélecteur d'invités de la messagerie emploie ses classes) ; le reste tel quel.
+/* Dupliqué de socle/packages/ui/src/styles/globals.css (l. 1914-2125 classes `.esp-*` des surfaces immersives, des barres basses et des stories ; l. 2544-4095 couche d'appel `.call-*`, `.av-ring`, `.iappel-*`, carte Conférence) @ ad2e7fdc2 — adaptations : feuille DÉDIÉE à la couche de communication du moteur (iCom, iAppel, stories), importée par `styles.css` après la charte ; jetons qu'elle lit et que la charte de base ne déclare pas (`--esp-immersive-ink`, `--esp-immersive-on-ink`, ombres `--shadow-*`, `--destructive-foreground`, rayon des surfaces du réseau, ombre de la carte iCom déplacée, encre et fond du code QR) déclarés ici, en tête, valeurs du socle ; bannière `.esp-banner` gardée (repli de couverture du profil, de la mini-carte et des albums, lot F2) ; barre de défilement fine `.citizen-scrollbar` ajoutée (socle `dashboard-v2.css` l. 990-1003, hors de `.dash-v2`, teinte du rôle `--foreground`) ; carte de l'espace structure et filet tricolore retirés (coque de l'espace agent, non reprise) ; règles du lanceur de poste conservées (le sélecteur d'invités de la messagerie emploie ses classes) ; le reste tel quel.
 
    ═════════════════════════════════════════════════════════════════════════
    COUCHE DE COMMUNICATION — iCom, iAppel, stories
@@ -102,6 +102,30 @@
   border-color: var(--esp-mobilebar-border, var(--border));
   box-shadow: var(--esp-mobilebar-shadow, 0 6px 18px rgb(20 19 15 / 0.08));
   border-radius: var(--radius-2xl, 1rem);
+}
+
+/* Bannière de couverture (repli sans image du profil, de la mini-carte et de
+   la page d'album). Classe plutôt que jeton nu : le dégradé est une valeur
+   composée, et la poser en `style={{ background: … }}` dans le composant
+   remettrait de la couleur dans le TSX. */
+.esp-banner {
+  background: var(--esp-banner);
+  color: var(--esp-on-banner);
+}
+
+/* Barre de défilement FINE des colonnes de la page réseau et du profil
+   (`.citizen-scrollbar`, socle `dashboard-v2.css` l. 990-1003, portée hors de
+   `.dash-v2`). Teinte tirée du rôle `--foreground` : juste dans les deux thèmes
+   sans bloc sombre. */
+.citizen-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--foreground) 12%, transparent) transparent;
+}
+.citizen-scrollbar::-webkit-scrollbar { width: 5px; }
+.citizen-scrollbar::-webkit-scrollbar-track { background: transparent; }
+.citizen-scrollbar::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--foreground) 12%, transparent);
+  border-radius: 10px;
 }
 
 /* Voile des surfaces immersives (`ImmersiveOverlay` avec `scrim`).

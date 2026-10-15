@@ -136,6 +136,12 @@ Cliquets en place (`tests/ratchets/`) : `no-cross-product-imports`, `no-any-vali
   (`apps/antia_ga/src/lib/messages-route.ts`).
 - **Coque des pages de membre** : montée UNE fois dans le gabarit `(membre)` d'antia.ga ; remontée à chaque
   page, elle coupait un appel en cours et faisait déborder le seau de présence (8 par minute).
+- **Kit d'espace sans i18n** (`@antia/ui/espace-kit`) : `EspacePagination` exige ses phrases (`labels`) et
+  `EspaceDialog` son `closeLabel` — dans le moteur, `useEspacePaginationLabels()` (`shell/`) les traduit une fois.
+- **Page réseau de bureau** (`ReseauAgentPage`) : ses colonnes défilent chacune, elle exige un conteneur de
+  hauteur DÉFINIE ; au téléphone (≤ 959 px), sa coquille laisse défiler le document — pas de hauteur figée.
+- **Pages en développement local** : créer une page exige une adhésion `verifiee` ; le compte de
+  développement n'a qu'une adhésion déclarée (refus traduit attendu).
 - **Personnes de démonstration** (développement local) : `node scripts/convex-dev.mjs run
   seeds/devSocial:demoPerson '{"confirmNonProduction":"ANTIA_SEEDS_HORS_PRODUCTION","networkSlug":"antia",
   "handle":"awa.demo","displayName":"Awa","connectToHandle":"<votre identifiant>"}'` — personne publiée,

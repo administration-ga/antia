@@ -39,7 +39,9 @@
     "feed": "Feed",
     "signOut": "Sign out",
     "home": "Home",
-    "messages": "Messages"
+    "messages": "Messages",
+    "myProfile": "My profile",
+    "label": "Network navigation"
   },
   "signIn": {
     "title": "Sign in to {{brand}}",
@@ -83,26 +85,7 @@
     "done": "Welcome, {{name}}!"
   },
   "feed": {
-    "title": "The feed",
-    "lead": "What {{brand}} members post, newest first.",
-    "composerLabel": "Your post",
-    "composerPlaceholder": "What's new? Add a #keyword or mention a @handle.",
-    "audienceLabel": "Visible to",
-    "publish": "Post",
-    "publishing": "Posting…",
-    "published": "Posted.",
-    "charactersLeft_one": "{{count}} character left",
-    "charactersLeft_other": "{{count}} characters left",
-    "empty": "The feed is empty. Post the first message!",
-    "loadMore": "Show more",
-    "loading": "Loading the feed…",
-    "you": "you",
-    "withdrawnAuthor": "Withdrawn profile",
-    "audience": {
-      "public": "All members",
-      "connections": "My connections"
-    },
-    "icomRail": "iCom and your conversations"
+    "title": "The feed"
   },
   "reactions": {
     "groupLabel": "Reactions",
@@ -121,5 +104,14 @@
   },
   "stories": {
     "title": "Statuses"
+  },
+  "profile": {
+    "title": "@{{handle}}'s profile"
+  },
+  "pageProfile": {
+    "title": "@{{handle}} page"
+  },
+  "album": {
+    "title": "Album by @{{handle}}"
   }
 }

@@ -1,0 +1,80 @@
+{
+  "reseauMenu": {
+    "badge": {
+      "invitations_one": "{{count}} pending invitation",
+      "invitations_many": "{{count}} pending invitations",
+      "invitations_other": "{{count}} pending invitations"
+    }
+  },
+  "reseauMenuRail": {
+    "navLabel": "Network menu",
+    "showMore": "Show more",
+    "showLess": "Show less",
+    "myProfile": "My profile",
+    "settings": "Settings",
+    "shortcuts": "Your shortcuts"
+  },
+  "reseauDesktopIcomLink": {
+    "label": "iCom",
+    "open": "Open iCom",
+    "openWithUnread_one": "Open iCom — {{count}} unread conversation",
+    "openWithUnread_many": "Open iCom — {{count}} unread conversations",
+    "openWithUnread_other": "Open iCom — {{count}} unread conversations"
+  },
+  "reseauAgentPage": {
+    "title": "Network",
+    "railStartLabel": "Network navigation",
+    "railEndLabel": "iCom and network discovery",
+    "tabsLabel": "Network sections",
+    "publish": "Post",
+    "searchLabel": "Search posts",
+    "searchPlaceholder": "Search posts…",
+    "searchSubmit": "Search",
+    "scopeLabel": "Feed scope",
+    "seeRequests": "See requests",
+    "postUnavailable": "This post is no longer available.",
+    "searchEmpty": "No post matches this search.",
+    "loadMore": "See more posts"
+  },
+  "reseauMobileHeader": {
+    "wordmark": "Network",
+    "searchLabel": "Search posts",
+    "searchPlaceholder": "Search…",
+    "searchSubmit": "Run the search",
+    "searchClose": "Close the search",
+    "searchEdit": "Edit the search",
+    "searchOpen": "Open the search",
+    "icomOpen": "Open iCom",
+    "icomOpenWithUnread_one": "Open iCom — {{count}} unread conversation",
+    "icomOpenWithUnread_many": "Open iCom — {{count}} unread conversations",
+    "icomOpenWithUnread_other": "Open iCom — {{count}} unread conversations",
+    "profileLink": "View my profile"
+  },
+  "reseauMobileFeed": {
+    "seeRequests": "See requests",
+    "composerFallbackName": "Me",
+    "composerPrompt": "Share an update…",
+    "composerPromptNamed": "Share an update, {{name}}?",
+    "scopeLabel": "Feed scope",
+    "postUnavailable": "This post is no longer available.",
+    "searchEmpty": "No post matches this search.",
+    "loadMore": "See more posts"
+  },
+  "reseauMobilePage": {
+    "title": "Network"
+  },
+  "reseauMobileTabBar": {
+    "navLabel": "Network navigation",
+    "menu": "Menu",
+    "menuLabel": "Open the main menu",
+    "subtabsLabel": "Network sub-menus"
+  },
+  "reseauMobileMenuSheet": {
+    "title": "Main menu",
+    "close": "Close the menu"
+  },
+  "reseauMobileCreateButton": {
+    "create": "Create",
+    "formats": "Formats"
+  }
+}

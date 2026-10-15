@@ -20,6 +20,7 @@ export const routes = {
   /** Le composeur de statut, ouvert sur le lecteur. */
   storiesNew: () => `/actus/${STORIES_NEW_SEGMENT}`,
   profile: (handle: string) => `/profil/${encodeURIComponent(handle)}`,
+  page: (handle: string) => `/page/${encodeURIComponent(handle)}`,
   conference: (sessionId: string) => `/conference/${encodeURIComponent(sessionId)}`,
   health: () => "/sante-fonctionnelle",
   healthApi: () => "/api/sante-fonctionnelle",
@@ -31,5 +32,6 @@ export const engineRoutes: EngineRoutes = {
   messages: routes.messages,
   stories: routes.stories,
   profile: routes.profile,
+  page: routes.page,
   conference: routes.conference,
 }

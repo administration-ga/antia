@@ -162,5 +162,15 @@
       "profile": "Mon profil",
       "settings": "Paramètres"
     }
+  },
+  "espacePagination": {
+    "navigation": "Pagination — {{list}}",
+    "previous": "Précédent",
+    "next": "Suivant",
+    "page": "Page {{page}} sur {{count}}",
+    "currentPage": "Page {{page}} sur {{count}}, page actuelle",
+    "empty": "Aucun élément",
+    "single": "1 élément",
+    "range": "Page {{page}} sur {{count}} — {{start}} à {{end}} sur {{total}}"
   }
 }

@@ -1,0 +1,230 @@
+{
+  "profilPersonnePage": {
+    "profileError": {
+      "title": "Profile unavailable",
+      "message": "This profile could not be loaded."
+    },
+    "profileStale": {
+      "title": "Profile not refreshed",
+      "message": "The last read failed; what is shown may be out of date."
+    },
+    "refused": {
+      "title": "This profile is not accessible",
+      "message": "It does not exist, it is no longer published, or it is not open to you.",
+      "back": "Back to my network"
+    },
+    "retired": {
+      "title": "My profile"
+    },
+    "apercu": {
+      "title": "Preview: what network members see",
+      "message": "Your personal controls are hidden during the preview. Nothing is changed.",
+      "back": "Back to my profile"
+    },
+    "identity": {
+      "you": "You",
+      "selfNote": "This is what others see of you. Nothing else from your account is published."
+    },
+    "actions": {
+      "editProfile": "Edit my profile"
+    },
+    "manage": {
+      "title": "Manage my profile"
+    },
+    "tabs": {
+      "label": "Profile content",
+      "publications": "Posts",
+      "photos": "Photos",
+      "albums": "Albums"
+    },
+    "wall": {
+      "title": "Posts",
+      "pinned": "Pinned",
+      "unpin": "Unpin"
+    },
+    "connection": {
+      "connected": "Connected",
+      "requested": "Invitation sent",
+      "accept": "Accept invitation",
+      "decline": "Decline",
+      "blocked": "Blocked",
+      "connect": "Connect",
+      "sending": "Sending…"
+    },
+    "follow": {
+      "following": "Following",
+      "follow": "Follow"
+    },
+    "contact": {
+      "write": "Message",
+      "call": "Call",
+      "callLabel": "Call {{name}}"
+    },
+    "toast": {
+      "requestSent": "Invitation sent.",
+      "requestFailed": "The invitation could not be sent.",
+      "accepted": "You are now connected.",
+      "declined": "Invitation declined.",
+      "respondFailed": "Your response could not be sent.",
+      "followed": "You are now following.",
+      "unfollowed": "You are no longer following.",
+      "followFailed": "The action failed.",
+      "unpinned": "Post unpinned.",
+      "unpinFailed": "Unpinning failed."
+    }
+  },
+  "profilPersonne": {
+    "wall": {
+      "errorTitle": "Posts unavailable",
+      "errorMessage": "The posts could not be loaded.",
+      "emptySelf": "You have not published anything yet.",
+      "emptyOther": "No post is open to you here.",
+      "loadMore": "Show more posts"
+    }
+  },
+  "profilReseauSection": {
+    "facts": {
+      "title": "What the network shows of you",
+      "imagesNote": "The “Photo” and “Cover” controls below are the only way an image reaches your profile. Your display name is the one you choose: it is never taken from your sign-in account."
+    },
+    "preview": "Preview — as network members see it"
+  },
+  "profilePublicationCard": {
+    "loading": "Loading profile…",
+    "error": {
+      "title": "Network profile unavailable",
+      "message": "Your profile could not be loaded. Your existing settings are kept."
+    },
+    "editor": {
+      "title": "Your network profile",
+      "nameLabel": "Display name",
+      "nameHint": "The name you appear under. It is not taken from your account: you decide.",
+      "nameRequired": "Enter the name you want to appear under.",
+      "handleLabel": "Public handle",
+      "handleHint": "Your address on the network: it is how people find you and connect with you.",
+      "handlePlaceholder": "a.ndong",
+      "headlineLabel": "Headline (optional)",
+      "headlineHint": "One line to describe what you do.",
+      "headlinePlaceholder": "Research officer, Libreville…",
+      "cancel": "Cancel",
+      "publish": "Publish my profile",
+      "publishing": "Publishing…"
+    },
+    "unpublished": {
+      "title": "You cannot be found yet",
+      "body": "Your account name is never published on the network: it was collected to authenticate you, not to expose you. Publish a network profile to be found, receive connection requests and appear under your name.",
+      "action": "Publish my network profile"
+    },
+    "retired": {
+      "title": "Your profile is withdrawn from the network",
+      "body": "You can no longer be found and your name is shown neutrally. Nothing has been deleted: publishing your profile again restores you.",
+      "action": "Publish my profile again"
+    },
+    "withheld": {
+      "avatarPending": "Your photo is undergoing a security scan: it will appear in a few moments.",
+      "avatarBlocked": "Your photo was blocked by the security scan. Choose another one.",
+      "coverPending": "Your cover is undergoing a security scan: it will appear in a few moments.",
+      "coverBlocked": "Your cover was blocked by the security scan. Choose another one."
+    },
+    "actions": {
+      "avatar": "Photo",
+      "cover": "Cover",
+      "sending": "Sending…",
+      "removeAvatar": "Remove photo",
+      "removeCover": "Remove cover",
+      "edit": "Edit",
+      "goOffline": "Go offline",
+      "goOnline": "Back on the network",
+      "withdraw": "Withdraw from the network"
+    },
+    "toast": {
+      "avatarUpdated": "Photo updated.",
+      "coverUpdated": "Cover updated.",
+      "avatarPending": "Photo saved: it will appear once its scan is complete.",
+      "coverPending": "Cover saved: it will appear once its scan is complete.",
+      "avatarFailed": "The photo could not be saved.",
+      "coverFailed": "The cover could not be saved.",
+      "avatarRemoved": "Photo removed.",
+      "coverRemoved": "Cover removed.",
+      "removeFailed": "Removal failed.",
+      "published": "Network profile published.",
+      "publishFailed": "Publishing failed. This public handle may already be taken.",
+      "nowOffline": "Profile offline. Your connections and posts are intact.",
+      "backOnline": "You are visible on the network again.",
+      "privacyFailed": "The change failed.",
+      "withdrawn": "Profile unpublished. You can no longer be found; nothing has been deleted.",
+      "withdrawFailed": "Unpublishing failed."
+    }
+  },
+  "handleChoiceCard": {
+    "legend": "Available handles",
+    "needName": "Enter your display name first: the suggestions are based on it.",
+    "loading": "Looking for available handles…",
+    "error": "The suggestions could not be loaded. You can type your handle yourself.",
+    "none": "No form is available from this name. Type your handle yourself.",
+    "currentTag": "current address",
+    "status": {
+      "current": "This is your current handle.",
+      "available": "@{{handle}} is available.",
+      "taken": "@{{handle}} is not available.",
+      "checking": "Checking availability…"
+    }
+  },
+  "profileMiniCard": {
+    "viewProfile": "View my profile"
+  },
+  "profileOnboarding": {
+    "publish": {
+      "title": "You cannot be found yet",
+      "body": "Your profile is not published on the network. Publish it to be found, receive invitations and appear under your name.",
+      "action": "Publish my profile"
+    },
+    "private": {
+      "title": "Your profile is offline",
+      "action": "Back on the network"
+    }
+  },
+  "profileVisibilityCopy": {
+    "facts": {
+      "accountNotCopied": {
+        "title": "Your account publishes nothing on your behalf",
+        "body": "Your account name, your email address and your sign-in photo are never taken over onto the network. Your profile starts empty: everything it shows is what you put there."
+      },
+      "publishedByChoice": {
+        "title": "Your profile exists only if you publish it",
+        "body": "Your public handle, display name and headline are the ones you choose when publishing. Once published, your profile is visible to network members."
+      },
+      "restByGesture": {
+        "title": "Everything else goes out only through an action",
+        "body": "Photo, cover, posts, albums: each is added by an action of yours and removed the same way. A new photo or cover may be held back during its security scan before it appears."
+      }
+    },
+    "actions": {
+      "offline": {
+        "label": "Go offline",
+        "consequence": "You appear neither in searches nor in suggestions, and no one can send you a new invitation or start following you.",
+        "reversibility": "Your connections and posts are intact, and coming back to the network restores you as you were."
+      },
+      "withdraw": {
+        "label": "Withdraw from the network",
+        "consequence": "Your profile is unpublished: your name is no longer shown to other members and links to your page lead nowhere.",
+        "reversibility": "Nothing is deleted and your public handle remains yours — no one else can take it in the meantime."
+      },
+      "mute": {
+        "label": "Mute a person",
+        "consequence": "Their posts leave your feed in this network. They are not notified and your connection stays in place.",
+        "reversibility": "The “Muted people” list on this page restores them in one click."
+      },
+      "hide": {
+        "label": "Hide a post",
+        "consequence": "This post disappears from your feed in this network, for you only. Its author still sees it and can share it.",
+        "reversibility": "The “Hidden posts” list on this page restores it in one click."
+      },
+      "block": {
+        "label": "Block a person",
+        "consequence": "The link is cut both ways and in every network: no more messages, no more invitations, nothing of one reaches the other. Blocking is silent — the person is not told.",
+        "reversibility": "The block can be lifted, but the broken connection does not come back by itself: you have to invite again."
+      }
+    }
+  }
+}

@@ -22,6 +22,14 @@ import enIappelSurfaces from "./locales/en/iappel.surfaces.json"
 import enIappelStores from "./locales/en/iappel.stores.json"
 import enStories from "./locales/en/stories.json"
 import enReseau from "./locales/en/reseau.json"
+import enReseauFil from "./locales/en/reseau.fil.json"
+import enReseauRelations from "./locales/en/reseau.relations.json"
+import enReseauGroupes from "./locales/en/reseau.groupes.json"
+import enReseauProfil from "./locales/en/reseau.profil.json"
+import enReseauCoque from "./locales/en/reseau.coque.json"
+import enReseauPages from "./locales/en/reseau.pages.json"
+import enNotifications from "./locales/en/notifications.json"
+import enAlbums from "./locales/en/albums.json"
 import enShell from "./locales/en/shell.json"
 import frMessagerieConversation from "./locales/fr/messagerie.conversation.json"
 import frMessagerieDock from "./locales/fr/messagerie.dock.json"
@@ -31,6 +39,14 @@ import frIappelSurfaces from "./locales/fr/iappel.surfaces.json"
 import frIappelStores from "./locales/fr/iappel.stores.json"
 import frStories from "./locales/fr/stories.json"
 import frReseau from "./locales/fr/reseau.json"
+import frReseauFil from "./locales/fr/reseau.fil.json"
+import frReseauRelations from "./locales/fr/reseau.relations.json"
+import frReseauGroupes from "./locales/fr/reseau.groupes.json"
+import frReseauProfil from "./locales/fr/reseau.profil.json"
+import frReseauCoque from "./locales/fr/reseau.coque.json"
+import frReseauPages from "./locales/fr/reseau.pages.json"
+import frNotifications from "./locales/fr/notifications.json"
+import frAlbums from "./locales/fr/albums.json"
 import frShell from "./locales/fr/shell.json"
 
 export const SUPPORTED_LOCALES = ["fr", "en"] as const
@@ -45,7 +61,7 @@ export function isSupportedLocale(value: unknown): value is Locale {
  * Ressources du moteur (surfaces + codes serveur), par langue.
  *
  * Espaces de noms des surfaces : `messagerie`, `iappel`, `stories`, `reseau`,
- * `shell`. Un espace peut être rédigé en PLUSIEURS fichiers (un par tranche de
+ * `notifications`, `albums`, `shell`. Un espace peut être rédigé en PLUSIEURS fichiers (un par tranche de
  * duplication : `messagerie.conversation.json`, `messagerie.dock.json`…),
  * fusionnés ici ; leurs clés de premier niveau sont celles des fichiers source
  * (`messagerieDock.…`), donc disjointes par construction.
@@ -56,7 +72,9 @@ export const engineResources = {
     messagerie: { ...frMessagerieConversation, ...frMessagerieDock, ...frMessagerieGroupes },
     iappel: { ...frIappelCore, ...frIappelSurfaces, ...frIappelStores },
     stories: frStories,
-    reseau: frReseau,
+    reseau: { ...frReseau, ...frReseauFil, ...frReseauRelations, ...frReseauGroupes, ...frReseauProfil, ...frReseauCoque, ...frReseauPages },
+    notifications: frNotifications,
+    albums: frAlbums,
     shell: frShell,
     ...serverCodeResources.fr,
   },
@@ -65,7 +83,9 @@ export const engineResources = {
     messagerie: { ...enMessagerieConversation, ...enMessagerieDock, ...enMessagerieGroupes },
     iappel: { ...enIappelCore, ...enIappelSurfaces, ...enIappelStores },
     stories: enStories,
-    reseau: enReseau,
+    reseau: { ...enReseau, ...enReseauFil, ...enReseauRelations, ...enReseauGroupes, ...enReseauProfil, ...enReseauCoque, ...enReseauPages },
+    notifications: enNotifications,
+    albums: enAlbums,
     shell: enShell,
     ...serverCodeResources.en,
   },

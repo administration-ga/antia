@@ -1,4 +1,4 @@
-// Dupliqué de socle/convex/modules/reseauPersonnel/notifications.ts (l. 255-499) @ ad2e7fdc2 — adaptations : personnes et réseaux (la cloche d'un réseau) ; `myNotifications` à curseur temporel (qui LEVAIT à égalité de date, D18) non recopiée, la pagination native `paginateNotifications` la remplace ; `unreadCount` rend sa lacune (`capped`, D19) ; `markAllRead` lit l'index jusqu'à la date du clic au lieu d'un `.filter()` ; sujet rendu en `{ kind, id }` avec l'état VIVANT d'une demande de relation et d'une analyse de fichier ; acteur par le mini-profil publié (badges compris) ; débit sur les marquages.
+// Dupliqué de socle/convex/modules/reseauPersonnel/notifications.ts (l. 255-499) @ ad2e7fdc2 — adaptations : personnes et réseaux (la cloche d'un réseau) ; `myNotifications` à curseur temporel (qui LEVAIT à égalité de date, D18) non recopiée, la pagination native `paginateNotifications` la remplace ; `unreadCount` rend sa lacune (`capped`, D19) ; `markAllRead` lit l'index jusqu'à la date du clic au lieu d'un `.filter()` ; sujet rendu en `{ kind, id }` avec l'état VIVANT d'une demande de relation et d'une analyse de fichier ; acteur par le mini-profil publié (badges compris) ; la PAGE d'un `page_post` par sa carte publique relue (nom, badge calculé — lot F2) ; débit sur les marquages.
 /**
  * La cloche d'un réseau, côté lecteur : lister, compter, marquer lu.
  *
@@ -19,6 +19,8 @@ import { notFound } from "../../lib/errors"
 import { networkMutation, networkQuery } from "../../lib/functions"
 import { enforceRateLimit } from "../../lib/rateLimit"
 import { miniProfileCache, type PersonMiniProfile } from "../people/miniProfile"
+import { pageCardCache } from "../pages/access"
+import type { PageCard } from "../pages/validators"
 import { subjectOf, subjectRefOf } from "./notify"
 
 /** Marquage par lots bornés, poursuivi par continuation interne. */
@@ -39,10 +41,26 @@ export type NotificationDto = {
   fileScanStatus: FileScanStatus | null
   /** `null` pour un avis du système. */
   actor: Pick<PersonMiniProfile, "personId" | "displayName" | "handle" | "avatarUrl" | "badges"> | null
+  /**
+   * `page_post` : la PAGE qui a publié — sa carte publique (nom, logo, badge CALCULÉ), relue à
+   * l'instant ; `null` pour tout autre genre, ou quand la page n'est plus active. Sans elle, la
+   * ligne ne dirait pas QUI publie — et c'est là qu'une page usurpant le nom d'une institution
+   * tromperait. Rien n'est stocké : la carte est déjà publique.
+   */
+  page: PageCard | null
 }
 
-async function toDto(ctx: Pick<QueryCtx, "db" | "storage">, me: Id<"persons">, row: Doc<"notifications">, profileOf: ReturnType<typeof miniProfileCache>): Promise<NotificationDto> {
+type DtoCaches = { profileOf: ReturnType<typeof miniProfileCache>; pageOf: ReturnType<typeof pageCardCache> }
+
+/** La page d'une publication annoncée par `page_post` (`null` : publication disparue, ou sans page). */
+async function pageOfPost(ctx: Pick<QueryCtx, "db">, postId: Id<"posts">, pageOf: DtoCaches["pageOf"]): Promise<PageCard | null> {
+  const post = await ctx.db.get(postId)
+  return post?.pageId ? await pageOf(post.pageId) : null
+}
+
+async function toDto(ctx: Pick<QueryCtx, "db" | "storage">, me: Id<"persons">, row: Doc<"notifications">, { profileOf, pageOf }: DtoCaches): Promise<NotificationDto> {
   const actor = row.actorPersonId ? await profileOf(row.actorPersonId) : null
+  const page = row.kind === "page_post" && row.subjectPostId ? await pageOfPost(ctx, row.subjectPostId, pageOf) : null
   const inviteState = row.kind === "connection_request" && row.subjectConnectionId ? pendingStateOf(await ctx.db.get(row.subjectConnectionId), me) : null
   const scan = row.kind === "file_withheld" && row.subjectFileScanId ? await ctx.db.get(row.subjectFileScanId) : null
   return {
@@ -55,6 +73,7 @@ async function toDto(ctx: Pick<QueryCtx, "db" | "storage">, me: Id<"persons">, r
     inviteState,
     fileScanStatus: scan?.status ?? null,
     actor: actor ? { personId: actor.personId, displayName: actor.displayName, handle: actor.handle, avatarUrl: actor.avatarUrl, badges: actor.badges } : null,
+    page,
   }
 }
 
@@ -67,9 +86,9 @@ export const paginateNotifications = networkQuery({
       .withIndex("by_network_recipient_createdAt", (q) => q.eq("networkId", ctx.networkId).eq("recipientPersonId", ctx.person._id))
       .order("desc")
       .paginate(args.paginationOpts)
-    const profileOf = miniProfileCache(ctx)
+    const caches: DtoCaches = { profileOf: miniProfileCache(ctx), pageOf: pageCardCache(ctx) }
     const page: NotificationDto[] = []
-    for (const row of result.page) page.push(await toDto(ctx, ctx.person._id, row, profileOf))
+    for (const row of result.page) page.push(await toDto(ctx, ctx.person._id, row, caches))
     return { ...result, page }
   },
 })

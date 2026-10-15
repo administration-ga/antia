@@ -1,0 +1,61 @@
+{
+  "notificationBell": {
+    "open": "View notifications",
+    "title": "Notifications"
+  },
+  "notificationsCenter": {
+    "markAllRead": "Mark all as read"
+  },
+  "notificationsList": {
+    "errorTitle": "Activity unavailable",
+    "errorMessage": "Your activity could not be loaded. Your notifications are still saved.",
+    "heading": "Activity",
+    "markAllRead": "Mark all as read",
+    "loading": "Loading…",
+    "empty": "No activity yet. Reactions, comments, invitations and mentions will appear here.",
+    "loadMore": "Show more activity",
+    "loadingMore": "Loading earlier activity…",
+    "seeAll": "See all"
+  },
+  "reseauNotificationRow": {
+    "markRead": "Mark as read",
+    "accept": "Accept",
+    "decline": "Decline",
+    "accepted": "Connection accepted.",
+    "declined": "Invitation declined.",
+    "alreadyHandled": "Invitation already handled."
+  },
+  "notificationCenterTabs": {
+    "unread_one": "{{count}} unread notification",
+    "unread_many": "{{count}} unread notifications",
+    "unread_other": "{{count}} unread notifications",
+    "unreadCapped": "More than {{count}} unread notifications",
+    "markFailed": "Marking as read could not be saved."
+  },
+  "notificationTargets": {
+    "open": "Open",
+    "viewProfile": "View profile",
+    "respond": "Respond",
+    "inviteAlreadyHandled": "Invitation already handled.",
+    "inviteCancelled": "Invitation cancelled.",
+    "unknownActor": "Network member",
+    "sentence": {
+      "pagePost": "A page you follow published a post.",
+      "pagePostNamed": "{{page}} posted.",
+      "albumPublished": "{{actor}} published an album.",
+      "fileWithheld": "An uploaded file was withheld by the security scan.",
+      "callMissed": "{{actor}} tried to reach you.",
+      "voicemailLeft": "{{actor}} left you a voice message.",
+      "sponsorshipReceived": "{{actor}} is sponsoring you.",
+      "sponsorshipWithdrawn": "{{actor}} withdrew their sponsorship.",
+      "sponsorshipWithdrawnSystem": "Your sponsorship was withdrawn.",
+      "attestationVerified": "Your consular registration is confirmed: your account is verified.",
+      "attestationNotConfirmed": "We could not confirm your consular registration.",
+      "other": "New activity in the network."
+    },
+    "fileScan": {
+      "released": "This file has since been released.",
+      "pending": "This file is being scanned again."
+    }
+  }
+}

@@ -9,6 +9,7 @@
     ".": "./src/index.ts",
     "./overlay": "./src/overlay/index.ts",
     "./sheet": "./src/sheet/index.ts",
+    "./espace-kit": "./src/espace-kit/index.ts",
     "./styles.css": "./src/styles.css",
     "./themes/*.css": "./src/themes/*.css",
     "./lib/*": "./src/lib/*.ts"

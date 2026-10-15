@@ -537,6 +537,16 @@
   --ui2-motion-fast: 250ms;
   --ui2-scrim: rgba(14, 26, 43, 0.55);
   --ui2-z-surface: 1000;
+
+  /* ── Espacements d'ui-v2 (socle/packages/ui-v2/src/styles/tokens.css, l. 141-152,
+     base 4 px) : lus en ligne par le fil, la page réseau et la cloche (lot F2). */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 20px;
+  --sp-6: 24px;
+  --sp-8: 32px;
 }
 
 /* Au téléphone et sur les petites tablettes, les commandes d'ui-v2 rejoignent

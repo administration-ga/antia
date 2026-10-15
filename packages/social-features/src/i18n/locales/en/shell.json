@@ -1,1 +1,6 @@
-{}
+{
+  "espaceFloatingCard": {
+    "close": "Close",
+    "stepProgress": "Step {{current}} of {{total}}: {{label}}"
+  }
+}
