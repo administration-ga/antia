@@ -27,6 +27,7 @@ export const SOCIAL_MODULE_DIRECTORIES: readonly string[] = [
   "convex/modules/thematicGroups",
   "convex/modules/marks",
   "convex/modules/moderation",
+  "convex/modules/messaging",
   "convex/modules/diaspora",
 ]
 

@@ -49,6 +49,15 @@ const RATE_LIMITS = {
   // Cloche (PA3 lot 5)
   "notification.read": { kind: "token bucket", rate: 300, period: HOUR, capacity: 60 },
   "notification.readAll": { kind: "token bucket", rate: 30, period: HOUR, capacity: 10 },
+  // Messagerie (PA3 lot 10). Ouvrir un fil, y compris par un transfert vers un
+  // identifiant, consomme « thread.open » : un seul budget, quel que soit le chemin.
+  "thread.open": { kind: "token bucket", rate: 30, period: HOUR, capacity: 10 },
+  "message.send": { kind: "token bucket", rate: 30, period: MINUTE, capacity: 15 },
+  "message.read": { kind: "token bucket", rate: 120, period: MINUTE, capacity: 60 },
+  "message.edit": { kind: "token bucket", rate: 120, period: HOUR, capacity: 30 },
+  "message.react": { kind: "token bucket", rate: 120, period: MINUTE, capacity: 30 },
+  "message.typing": { kind: "token bucket", rate: 60, period: MINUTE, capacity: 20 },
+  "message.forward": { kind: "token bucket", rate: 30, period: HOUR, capacity: 10 },
   // Garde des fichiers : gestes humains (libération par un modérateur, relance par un opérateur).
   "file.moderate": { kind: "token bucket", rate: 60, period: HOUR, capacity: 20 },
   // Console (PA7)

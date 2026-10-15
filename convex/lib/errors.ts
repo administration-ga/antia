@@ -1,5 +1,5 @@
 import { type AppRuleParams, type EngineErrorCode, type EngineErrorData, isAppRule } from "@antia/social-contracts/errors"
-import { isDomainViolation } from "@antia/social-domain/violation"
+import { type DomainRule, type DomainRuleParams, isDomainViolation } from "@antia/social-domain/violation"
 import { ConvexError } from "convex/values"
 
 /**
@@ -22,6 +22,15 @@ export function fail(code: EngineErrorCode, details: Omit<EngineErrorData, "code
  */
 export function failAppRule(appRule: string, appParams: AppRuleParams = {}, code: EngineErrorCode = "policyRefused"): never {
   return fail(code, { appRule, appParams: { ...appParams } })
+}
+
+/**
+ * Une règle du domaine levée HORS du domaine — un ÉTAT jugé par le serveur
+ * (fil archivé, fenêtre d'édition close), pas une saisie : `invalidArgument`
+ * portant le code de la règle et ses bornes, comme `rethrowDomain`.
+ */
+export function failRule(rule: DomainRule, params: DomainRuleParams = {}): never {
+  return fail("invalidArgument", { rule, params: { ...params } })
 }
 
 /** Le refus indistinct (invariant 8) : absent, privé, bloqué, hors réseau — même réponse. */

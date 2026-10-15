@@ -22,4 +22,8 @@ crons.daily("compteurs des hubs DIASPORALE", { hourUTC: 2, minuteUTC: 30 }, inte
 crons.interval("files-retry-stale-scans", { minutes: 5 }, internal.modules.files.mutations.retryStale, {})
 crons.daily("files-purge-infected-blobs", { hourUTC: 3, minuteUTC: 15 }, internal.modules.files.mutations.purgeQuarantinedBlobs, {})
 
+// Messagerie : purge des signaux « en train d'écrire » expirés (la lecture les
+// écarte déjà ; le passage ne fait que vider la table).
+crons.interval("messaging-purge-expired-typing", { minutes: 1 }, internal.modules.messaging.typing.purgeExpiredTyping, {})
+
 export default crons

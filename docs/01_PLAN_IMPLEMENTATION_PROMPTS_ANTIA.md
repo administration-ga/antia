@@ -28,7 +28,7 @@ dependances:
 > | PA2 — fondations multi-réseaux | 2026-10-14 | `f1851fd` |
 > | ↳ tranche verticale testable (priorité du propriétaire : entrer, identifiant, publier, fil, réagir) | 2026-10-15 | `5021401` |
 > | ↳ câblage de DIASPORALE (sa demande PD0 : espaces de travail, catalogue, port 3031) | 2026-10-15 | `5535a63` |
-> | PA3 — duplication du backend | en cours : lots 2 → 9 livrés (fichiers ; personnes et médias ; graphe ; cloche et diffusion ; journal des décisions ; publications, fil, mur, recherche et marques ; engagement et modération ; groupes thématiques), parité dans `docs/03` | `344f0fa`, `6ef11f7`, `bfb2db9`, `9f2f12b`, `75e4b26`, `3dfebcc`, `44831f1`, lot 9 |
+> | PA3 — duplication du backend | en cours : lots 2 → 10 livrés (fichiers ; personnes et médias ; graphe ; cloche et diffusion ; journal des décisions ; publications, fil, mur, recherche et marques ; engagement et modération ; groupes thématiques ; messagerie personnelle), parité dans `docs/03` | `344f0fa`, `6ef11f7`, `bfb2db9`, `9f2f12b`, `75e4b26`, `3dfebcc`, `44831f1`, `a38c863`, lot 10 |
 > | PA4 — identité | — | — |
 > | PA5 — modération, débit, données, notifications, fédération | — | — |
 > | PA6 — frontend `social-features` | — | — |

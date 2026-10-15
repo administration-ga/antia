@@ -22,7 +22,8 @@ l'owner map), les tests portés et neufs, les écarts assumés. Un module n'entr
 | 6 | `platform/audit` (journal des décisions du moteur) | `75e4b26` | 1 fichier convex (5 cas) + 4 cas fichiers + 1 fichier domaine + 1 cliquet | D14, D35 |
 | 7 | `thematicGroups/access`, `posts` (accès, retrait, compteurs, écriture, fil, mur, recherche) et `marks` | `3dfebcc` | 2 fichiers convex (32 + 8 cas) + cas domaine | D01, D14, D18, D19, D24, D25, D35 |
 | 8 | `engagement` (réactions, commentaires paginés, cloches) et `moderation` (signalements, file du réseau, décisions tracées) | `44831f1` | 2 fichiers convex (8 + 5 cas) + 1 fichier domaine | D01, D03, D08, D14, D35 |
-| 9 | `thematicGroups` (module complet : cycle de vie, invitations, rôles, mur, découverte, modération de groupe) | voir journal git (`feat(thematicGroups)`) | 1 fichier convex (17 cas) | D02, D10, D14, D17, D19 |
+| 9 | `thematicGroups` (module complet : cycle de vie, invitations, rôles, mur, découverte, modération de groupe) | `a38c863` | 1 fichier convex (17 cas) | D02, D10, D14, D17, D19 |
+| 10 | `messaging` (fils personnels par réseau, boîte paginée, pastille tenue à l'écriture, pièces gardées, transfert) | voir journal git (`feat(messaging)`) | 1 fichier convex (37 cas) + 4 fichiers contrats (20 cas) | D13, D14, D16, D21, D37, D38, D39 |
 
 Ordre suivi (owner map §4.2), avec un écart : le lot 1 (modules purs) est porté avec chaque module qui le
 consomme ; l'avis de verdict des fichiers (`files/notify`) est arrivé avec le module `notifications` (lot 5), dont il
@@ -536,3 +537,99 @@ dépend.
 - **Journal des décisions** : les gestes de modération d'un groupe (rôle, retrait, épingle) relèvent de
   l'autogestion du groupe et ne sont pas écrits dans `engineAudit` (comme au socle) ; la modération du réseau l'est.
 - **Vivier d'invitation** borné à 200 connexions (la recherche serveur des connexions prend le relais), comme au socle.
+
+---
+
+## Lot 10 — `messaging` (messagerie personnelle d'un réseau)
+
+### Parité, fichier par fichier
+
+| Source (`socle/convex/…`) | Cible | Sort | État |
+|---|---|---|---|
+| `functions/chats.ts` (participation, messages, réactions, épingle, saisie) | `convex/modules/messaging/{participation,messages,reactions,pins,typing}.ts` | à réécrire par scission | ✅ (`listMessages` non recopiée : la pagination native seule ; push → PA5) |
+| `modules/messagerieScope/threads.ts` | `convex/modules/messaging/threads.ts` | à réécrire (patron) | ✅ (un seul point de création de fil, `ensurePersonalThread`, et d'insertion, `appendPersonalMessage`) |
+| `modules/messagerieScope/transfert.ts` | `convex/modules/messaging/forward.ts` | à adapter | ✅ (source et cible personnelles ; le groupe arrive au lot 11) |
+| `modules/messagerieScope/forwardedFrom.ts` | `convex/modules/messaging/forwardedFrom.ts` | tel quel | ✅ |
+| `modules/reseauPersonnel/messagerie.ts` | `convex/modules/messaging/inbox.ts` | à réécrire (partiel) | ✅ (`listMyThreadsPage` → `paginateMyThreads`) |
+| `modules/reseauPersonnel/messagerie/attachmentStorage.ts` | `convex/modules/messaging/attachmentStorage.ts` | à adapter | ✅ |
+| `modules/reseauPersonnel/messagerie/attachments.ts` | `packages/social-contracts/src/attachments.ts` | tel quel | ✅ (listes blanches dérivées de la politique de dépôt) |
+| `modules/reseauPersonnel/messagerie/counterpart.ts` | `packages/social-contracts/src/counterpart.ts` | à adapter | ✅ |
+| `schemas/chats.ts`, `chatMessages.ts`, `chatMessageReactions.ts`, `chatTyping.ts`, table `reseauPersonnel_unreadTotals` | `convex/modules/messaging/tables.ts` | à réécrire / adapter | ✅ |
+| `schemas/chatMessages.ts` (`MESSAGE_EDIT_WINDOW_MS`) | `packages/social-contracts/src/messaging.ts` | à adapter | ✅ (borne de longueur ajoutée) |
+| `schemas/messageReactions.ts` | `packages/social-contracts/src/messageReactions.ts` | tel quel | ✅ |
+| `migrations/backfillUnreadTotals.ts` | `recomputePersonalUnreadTotal` (`threads.ts`) | patron | ✅ (référence de la pastille ; aucune donnée à rattraper) |
+| cron `purge-expired-chat-typing` | `messaging-purge-expired-typing` (`convex/crons.ts`, 1 min) | patron | ✅ |
+
+### Adaptations (liste fermée)
+
+- **Par réseau** : un fil par paire ET par réseau (`by_network_pair`) ; la garde du fil (`requireThread`) exige
+  d'y être partie, dans le réseau appelé, sans blocage entre les deux ; toute fonction passe par le constructeur
+  (adhésion, `declaree` pour écrire). Être en relation à la racine n'ouvre rien ailleurs.
+- **Ouvrir un fil** : relation acceptée DANS le réseau, ou fil déjà ouvert (jamais rétroactif) ; identifiant
+  inconnu, profil retiré et blocage rendent le même refus ; soi-même et l'absence de relation se disent
+  (`THREAD_SELF`, `THREAD_RELATION_REQUIRED`) ; être dans le même groupe n'ouvre rien.
+- **Boîte** : l'union de deux plages d'index (`personLow`, `personHigh`) fusionnée avec un curseur par côté —
+  sans doublon ni trou, une ligne écartée (fil archivé, correspondant bloqué) fait avancer son côté ; projection
+  allowlistée ; interlocuteur nommé par le contrat `counterpartLabel` (profil publié, sinon le nom choisi — plus
+  après une demande d'effacement —, jamais d'e-mail) ; nature du dernier message lue sur l'aperçu dénormalisé.
+- **Pastille** : `unreadTotals` par (réseau, personne), tenue à l'envoi, à la lecture, au retrait, au masquage et
+  au BLOCAGE ; `totalUnread` lit un document, plafond 99 DIT (`capped`).
+- **Messages** : DTO allowlisté (ni identifiant de stockage, ni clé d'idempotence, ni liste de masquage) ; pièces
+  servies par la garde des fichiers (URL ou retenue nommée) ; citation du même fil, extrait relu ; provenance
+  relue ; retrait pour tous réservé à l'auteur dans la fenêtre (l'aperçu se rembobine, l'épingle tombe, le non-lu
+  sort de la pastille de l'autre), masquage pour moi ouvert à tout participant ; marquage lu par lots chaînés.
+- **Pièces** : admission à la garde (fraîcheur au nom de l'expéditeur, usage `chat_attachment`, réseau et
+  déposant inscrits) ; poids et type relus au stockage — une déclaration qui ment est refusée (`UPLOAD_MISMATCH`)
+  au lieu d'être écrasée ; le nombre est jugé avant toute lecture ; vocal par le mime de sa pièce, durée bornée.
+- **Transfert** : la frontière est le RÉSEAU (refus explicite `MESSAGE_FORWARD_CROSS_NETWORK` pour un fil dont je
+  suis partie, source comme cible) ; pièces recopiées par le serveur, relues au stockage, sans changer de
+  déposant (le blob reste celui de l'original) ; idempotent par (cible, clé) ; vers un identifiant, les gardes de
+  l'ouverture dans leur ordre, et le budget `thread.open`.
+- **Débit** : `thread.open`, `message.send`, `message.read`, `message.edit`, `message.react`, `message.typing`,
+  `message.forward`.
+- **Retirés** : postes et fils de poste, Standard, iAsted, ressortissants, coffre (`sourceDocumentId`), politique
+  des organisations, cloisonnement poste / personnel (remplacé par le réseau), push (PA5).
+
+### Corrections de dette
+
+- **D13** : le blocage ferme le fil à la lecture ET à l'écriture (garde du fil), dans les deux sens.
+- **D14** : débit sur chaque geste. **D16** : la saisie se lit à l'instant fourni par le client (arrondi à la
+  seconde), plus de `Date.now()` dans une query.
+- **D21** : aucun chemin ne lit d'e-mail ; nom neutre (clé i18n) quand il n'y a rien à nommer.
+- **D37** : contenu ABSENT pour des pièces seules et pour un message retiré (`undefined`, jamais `""`) ; le DTO
+  rend `null`.
+- **D38** : poser ou lever le blocage d'une paire déplace la pastille à l'écriture, de chaque côté et dans chaque
+  réseau ; un blocage posé de l'autre côté garde la paire fermée (rien d'ôté deux fois, rien de rendu trop tôt).
+- **D39** : l'aperçu se juge sur les pièces VÉRIFIÉES.
+
+### Tests
+
+- Portés (`messagerie.test`, `threads.test`, `transfert.test`, `chatsMessagerie.test`, `chatsP2P.test`,
+  `chatsPinning.test`, `chatsAttachmentsAdoption.test`) : même refus pour inconnu, profil retiré et blocage ; fil
+  réutilisé ; relation exigée et dite, demandée insuffisante, jamais rétroactive, le groupe n'ouvre rien ;
+  `findThreadWithHandle` ; nommer l'interlocuteur ; fils d'un bloqué retirés ; pages sans doublon ni trou, fil
+  réactivé en tête, boîte vide ; `getThread` ; nature du dernier message et accusé ; non-lus (balayage, envoi,
+  lecture, retrait, masquage, plafond) ; tiers refusé partout ; idempotence ; pièces (poids, blob disparu, cinq au
+  plus, texte vide), vocal ; blob d'un tiers refusé ; citation ; deux suppressions ; fenêtre ; historique au-delà
+  de 50 et marquage par lots ; réactions ; épingle et bande relue ; saisie ; transfert (provenance, aperçu,
+  non-lus, création par identifiant, relation, idempotence, contenu indisponible, pièces recopiées, blob disparu,
+  marque qui tombe). Contrats : pièces, interlocuteur, réactions, messages (20 cas).
+- Neufs : le blocage déplace la pastille dans chaque réseau et un second blocage garde la paire fermée (D38) ;
+  contenu absent (D37) ; saisie à instant fourni (D16) ; nom tu après une demande d'effacement ; déposant
+  inchangé au transfert ; une paire a un fil par réseau ; transfert refusé d'un réseau à l'autre, dans les deux
+  sens.
+- Abandonnés : `callByHandle` (→ module des appels, lot 15), cloisonnement poste / personnel, `listMyPosteThreads`,
+  deux réseaux du socle (réécrits « entre réseaux »), Standard, iAsted, réglages des organisations, coffre,
+  pièces « documents ».
+
+### Écarts assumés
+
+- **Push** (D20, D29) : PA5 ; aucune notification ne sort d'un message en attendant (le socle ne sonnait pas la
+  cloche pour le 1:1 : seul le push l'annonçait).
+- **Rétention** (D30) : PA5 — un message transféré ne possède pas son blob (c'est celui de l'original) : la purge
+  devra le respecter.
+- **Archiver un fil** : le statut `archived` est lu partout (envoi, boîte, transfert) mais aucun geste ne l'écrit
+  encore (au socle, seul le Standard l'écrivait) ; l'archivage par personne viendra avec l'écran (PA6) s'il est
+  demandé.
+- **Conversations de groupe**, part `groups` de la pastille, source et cible de groupe du transfert : lot 11.
+  **Appels** (événements `call_started` / `call_ended`, aperçu « appel ») : lot 15.
