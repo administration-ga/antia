@@ -16,10 +16,20 @@
  */
 import { normalizeHandle } from "@antia/social-domain/content"
 import { foldSearchQuery } from "@antia/social-domain/searchText"
-import { DIRECTORY_PAGE_SIZE_MAX, isListedInDirectoryFor, isResidenceCountry, normalizeCountryCode, projectFacet } from "@diasporale/domain"
+import {
+  type DiasporaFacet,
+  DIRECTORY_PAGE_SIZE_MAX,
+  type FacetProjection,
+  isListedInDirectoryFor,
+  isResidenceCountry,
+  type MembershipStatus,
+  normalizeCountryCode,
+  projectFacet,
+} from "@diasporale/domain"
 import { v } from "convex/values"
 
-import type { Id } from "../../_generated/dataModel"
+import type { Doc, Id } from "../../_generated/dataModel"
+import type { QueryCtx } from "../../_generated/server"
 import { networkQuery } from "../../lib/functions"
 import { badgeValidator } from "../../lib/validators"
 import { isBlockedBetween, isConnectedTo } from "../graph/graph"
@@ -44,6 +54,70 @@ export const directoryEntryValidator = v.object({
   facet: facetProjectionValidator,
 })
 
+/** Le lecteur, tel que la règle de l'annuaire le juge. */
+export interface DirectoryReader {
+  readonly personId: Id<"persons">
+  readonly status: MembershipStatus
+  readonly facet: DiasporaFacet
+}
+
+/** Le lecteur de la session : membre actif, avec sa facette ; sinon `null`. */
+export async function directoryReader(
+  ctx: QueryCtx,
+  network: Doc<"networks">,
+  personId: Id<"persons">,
+): Promise<DirectoryReader | null> {
+  const [facet, { status }] = await Promise.all([facetOf(ctx, network._id, personId), effectiveStatusIn(ctx, network, personId)])
+  return facet && status ? { personId, status, facet } : null
+}
+
+/** Un membre que l'annuaire montre au lecteur : sa facette entière (pour juger) et ce que le lecteur en voit. */
+export interface ListedMember {
+  readonly personId: Id<"persons">
+  readonly facet: DiasporaFacet
+  readonly projection: FacetProjection
+}
+
+/**
+ * LA règle de l'annuaire, pour un candidat : profil découvrable, niveau choisi,
+ * consentement EN VIGUEUR, statut, pays du lecteur, blocage dans la paire —
+ * puis la facette projetée pour le lecteur. `null` : absent pour ce lecteur.
+ */
+export async function listedMemberFor(
+  ctx: QueryCtx,
+  network: Doc<"networks">,
+  reader: DirectoryReader,
+  personId: Id<"persons">,
+): Promise<ListedMember | null> {
+  const isSelf = personId === reader.personId
+  const [person, privacy, facet] = await Promise.all([ctx.db.get(personId), privacyOf(ctx, network._id, personId), facetOf(ctx, network._id, personId)])
+  if (!person || !isDiscoverablePerson(person) || !privacy || !facet) return null
+  const { status } = await effectiveStatusIn(ctx, network, personId)
+  if (!status) return null
+  const listed = isListedInDirectoryFor(
+    {
+      status,
+      visibility: privacy.directoryVisibility,
+      consentActive: await consentInForce(ctx, network._id, personId, "directory"),
+      country: facet.countryOfResidence,
+    },
+    {
+      status: reader.status,
+      country: reader.facet.countryOfResidence,
+      isSelf,
+      blockedWithTarget: !isSelf && (await isBlockedBetween(ctx, reader.personId, personId)),
+    },
+  )
+  if (!listed) return null
+  const projection = projectFacet(facet, {
+    isSelf,
+    isConnection: !isSelf && (await isConnectedTo(ctx, network._id, reader.personId, personId)),
+    isSameCountryMember: reader.facet.countryOfResidence === facet.countryOfResidence,
+    isActiveMember: true,
+  })
+  return { personId, facet, projection }
+}
+
 /**
  * Chercher un membre par son nom ou son identifiant, parmi ceux qui ont choisi
  * d'être trouvés par ce lecteur. Réservé aux membres actifs (« déclaré » ou
@@ -60,9 +134,8 @@ export const searchMembers = networkQuery({
     if (term.length < DIRECTORY_QUERY_MIN_LENGTH) return []
     const only = args.country === undefined ? null : normalizeCountryCode(args.country)
     if (only !== null && !isResidenceCountry(only)) return []
-    const viewerFacet = await facetOf(ctx, ctx.networkId, ctx.person._id)
-    const { status: viewerStatus } = await effectiveStatusIn(ctx, ctx.network, ctx.person._id)
-    if (!viewerFacet || !viewerStatus) return []
+    const reader = await directoryReader(ctx, ctx.network, ctx.person._id)
+    if (!reader) return []
 
     const rows = await ctx.db
       .query("peopleDirectory")
@@ -80,39 +153,10 @@ export const searchMembers = networkQuery({
     const entries: (typeof directoryEntryValidator.type)[] = []
     for (const personId of candidates) {
       if (entries.length >= DIRECTORY_PAGE_SIZE_MAX) break
-      const isSelf = personId === ctx.person._id
-      const [person, privacy, facet] = await Promise.all([
-        ctx.db.get(personId),
-        privacyOf(ctx, ctx.networkId, personId),
-        facetOf(ctx, ctx.networkId, personId),
-      ])
-      if (!person || !isDiscoverablePerson(person) || !privacy || !facet) continue
-      if (only !== null && facet.countryOfResidence !== only) continue
-      const { status } = await effectiveStatusIn(ctx, ctx.network, personId)
-      if (!status) continue
-      const listed = isListedInDirectoryFor(
-        {
-          status,
-          visibility: privacy.directoryVisibility,
-          consentActive: await consentInForce(ctx, ctx.networkId, personId, "directory"),
-          country: facet.countryOfResidence,
-        },
-        {
-          status: viewerStatus,
-          country: viewerFacet.countryOfResidence,
-          isSelf,
-          blockedWithTarget: !isSelf && (await isBlockedBetween(ctx, ctx.person._id, personId)),
-        },
-      )
-      if (!listed) continue
+      const member = await listedMemberFor(ctx, ctx.network, reader, personId)
+      if (!member || (only !== null && member.facet.countryOfResidence !== only)) continue
       const profile = await profileOf(personId)
       if (!profile.handle || !profile.displayName) continue
-      const projection = projectFacet(facet, {
-        isSelf,
-        isConnection: !isSelf && (await isConnectedTo(ctx, ctx.networkId, ctx.person._id, personId)),
-        isSameCountryMember: viewerFacet.countryOfResidence === facet.countryOfResidence,
-        isActiveMember: true,
-      })
       entries.push({
         personId,
         handle: profile.handle,
@@ -120,7 +164,7 @@ export const searchMembers = networkQuery({
         headline: profile.headline,
         avatarUrl: profile.avatarUrl,
         badges: profile.badges,
-        facet: toProjection(projection),
+        facet: toProjection(member.projection),
       })
     }
     return entries

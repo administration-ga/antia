@@ -1025,3 +1025,70 @@ describe("annuaire opt-in de la tranche (EXF-DG-19, EXF-DG-46)", () => {
     expect(await search(lyon.as, diasporale, "Awa")).toEqual([])
   })
 })
+
+describe("suggestions de relations (EXF-DG-18)", () => {
+  async function member(
+    t: T,
+    diasporale: Id<"networks">,
+    handle: string,
+    facet: Record<string, unknown>,
+    level?: "country" | "network",
+  ) {
+    const as = t.withIdentity({ subject: `auth-${handle}` })
+    const personId = await as.mutation(api.modules.people.persons.ensureMyPerson, {})
+    await as.mutation(api.modules.people.consents.recordConsent, { purpose: "social_profile", origin: "onboarding" })
+    await as.mutation(api.modules.people.profile.publishMyProfile, { handle, displayName: handle })
+    await linkIdn(t, personId, 1, "GA")
+    if (level) await as.mutation(api.modules.people.consents.recordConsent, { purpose: "directory", origin: "onboarding", networkId: diasporale })
+    await join(as, diasporale, facet, level)
+    return { as, personId }
+  }
+
+  const handles = async (as: As, diasporale: Id<"networks">) =>
+    (await as.query(api.modules.diaspora.suggestions.forMe, { networkId: diasporale })).map((item) => item.handle)
+
+  it("même pays et même ville visibles, puis relations communes ; jamais soi, une relation, une demande, un masqué ; « ne plus me proposer » tient", async () => {
+    const t = testConvex()
+    const { diasporale } = await seedAll(t)
+    const lecteur = await member(t, diasporale, "lecteur", { countryOfResidence: "FR", city: "Lyon" })
+    await member(t, diasporale, "voisine", { countryOfResidence: "FR", city: "lyon", visibility: { city: "network" } }, "network")
+    await member(t, diasporale, "compatriote", { countryOfResidence: "FR" }, "country")
+    await member(t, diasporale, "lointain", { countryOfResidence: "BE" }, "network")
+    await member(t, diasporale, "discrete", { countryOfResidence: "FR" })
+    const ami = await member(t, diasporale, "ami", { countryOfResidence: "FR" }, "network")
+    const attendu = await member(t, diasporale, "attendu", { countryOfResidence: "FR" }, "network")
+    const commun = await member(t, diasporale, "commun", { countryOfResidence: "BE" }, "network")
+
+    // Le lecteur et « ami » sont liés ; « commun » est lié à « ami » ; le lecteur a demandé « attendu ».
+    const accept = async (from: { as: As; personId: Id<"persons"> }) => {
+      await from.as.mutation(api.modules.graph.connections.requestConnection, { networkId: diasporale, targetPersonId: ami.personId })
+      const pending = await ami.as.query(api.modules.graph.connections.connectionWith, { networkId: diasporale, otherPersonId: from.personId })
+      if (pending.state !== "requested_by_them") throw new Error("demande absente")
+      await ami.as.mutation(api.modules.graph.connections.respondToConnection, { networkId: diasporale, connectionId: pending.connectionId, accept: true })
+    }
+    await accept(lecteur)
+    await accept(commun)
+    await lecteur.as.mutation(api.modules.graph.connections.requestConnection, { networkId: diasporale, targetPersonId: attendu.personId })
+
+    const first = await lecteur.as.query(api.modules.diaspora.suggestions.forMe, { networkId: diasporale })
+    expect(first.map((item) => item.handle)).toEqual(["voisine", "commun", "compatriote"])
+    expect(first[0]?.reasons).toEqual({ sameCountry: true, sameCity: true, sharedAssociations: 0, mutualConnections: 0 })
+    expect(first[1]?.reasons).toEqual({ sameCountry: false, sameCity: false, sharedAssociations: 0, mutualConnections: 1 })
+    // Rien que la facette projetée : la ville de « compatriote » n'est pas montrée.
+    expect(first[2]?.facet).toEqual({ countryOfResidence: "FR" })
+
+    // « Ne plus me proposer » : le masquage générique du moteur, réversible.
+    await lecteur.as.mutation(api.modules.suggestions.suggestions.dismiss, { networkId: diasporale, handle: "voisine" })
+    expect(await handles(lecteur.as, diasporale)).toEqual(["commun", "compatriote"])
+    await lecteur.as.mutation(api.modules.suggestions.suggestions.restore, { networkId: diasporale, targetPersonId: first[0]!.personId })
+    expect(await handles(lecteur.as, diasporale)).toEqual(["voisine", "commun", "compatriote"])
+  })
+
+  it("un compte en attente ne reçoit pas de suggestions", async () => {
+    const t = testConvex()
+    const { diasporale } = await seedAll(t)
+    const attente = await person(t, "auth-attente", "attente")
+    await join(attente.as, diasporale)
+    expect(await refusal(handles(attente.as, diasporale))).toMatchObject({ code: "statusInsufficient" })
+  })
+})
