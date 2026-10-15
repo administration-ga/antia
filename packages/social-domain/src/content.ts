@@ -1,4 +1,4 @@
-// Dupliqué de socle/convex/modules/reseauPersonnel/domain.ts (l. 1-662 et 807-894) @ ad2e7fdc2 — adaptations : module scindé (texte riche, groupes thématiques, évènements, stories et fils de groupe dans leurs fichiers) ; audience « organisation », portée « mon_administration », titre « collegue » et `isPageOrgMember` retirés ; forme d'une publication de page ramenée au seul `public` (pages génériques du moteur) ; borne du nom affiché (en ligne dans `people.ts` au socle) devenue la règle `assertDisplayName` ; `ReseauPersonnelViolation` → `DomainViolation` (code de règle + bornes, texte dans les locales de l'écran).
+// Dupliqué de socle/convex/modules/reseauPersonnel/domain.ts (l. 1-662 et 807-894) @ ad2e7fdc2 — adaptations : module scindé (texte riche, groupes thématiques, évènements, stories et fils de groupe dans leurs fichiers) ; audience « organisation », portée « mon_administration », titre « collegue » et `isPageOrgMember` retirés ; forme d'une publication de page : `public` (le communiqué) ou `followers` (la note aux abonnés, EXF-AN-18), seule audience réservée aux pages, épingle d'une publication de page refusée sur un mur personnel ; borne du nom affiché (en ligne dans `people.ts` au socle) devenue la règle `assertDisplayName` ; `ReseauPersonnelViolation` → `DomainViolation` (code de règle + bornes, texte dans les locales de l'écran).
 /**
  * Domaine PUR des publications du moteur — aucune fonction Convex ici, pour
  * qu'un import client atteigne ce fichier sans embarquer le backend. C'est
@@ -49,12 +49,15 @@ export type PersonalReachAudience = (typeof PERSONAL_REACH_AUDIENCES)[number]
 /**
  * Les audiences d'une PUBLICATION. `group` ne RAYONNE pas : elle vit sur le mur
  * de son groupe, visible de ses seuls membres — c'est un lieu, pas une portée.
+ * `followers` n'appartient qu'aux PAGES (la note aux abonnés : les abonnés de la
+ * page et ses signataires vivants) — jamais à une personne, dont l'abonnement
+ * n'ouvre rien de plus que le `public`.
  *
  * ⚠️ Cette liste DOIT rester le miroir exact du validateur Convex des
  * audiences (test d'alignement côté backend) : le validateur décide ce que la
  * base accepte, cette constante ce que le code sait traiter.
  */
-export const PERSONAL_POST_AUDIENCES = ["public", "connections", "group"] as const
+export const PERSONAL_POST_AUDIENCES = ["public", "connections", "group", "followers"] as const
 export type PersonalPostAudience = (typeof PERSONAL_POST_AUDIENCES)[number]
 
 export const PERSONAL_POST_STATUSES = ["published", "removed"] as const
@@ -380,6 +383,12 @@ export type PostReadContext = {
    * côte : sans ce fait, l'appartenance commune contournerait le blocage.
    */
   isBlockedWithAuthor: boolean
+  /**
+   * Abonné à la PAGE de la publication, ou son signataire VIVANT — le seul fait
+   * qui ouvre l'audience `followers`. `false` pour toute publication sans page,
+   * et quand l'appelant ne le charge pas : le refus par défaut est le bon défaut.
+   */
+  isPageAudience: boolean
 }
 
 /**
@@ -390,7 +399,8 @@ export type PostReadContext = {
  *  1. une publication retirée ne reste lisible que par son auteur ;
  *  2. son auteur voit toujours sa publication vivante ;
  *  3. l'audience tranche : `public` pour tous les membres, `connections` pour
- *     les connexions acceptées, `group` pour les membres vivants non bloqués.
+ *     les connexions acceptées, `group` pour les membres vivants non bloqués,
+ *     `followers` pour les abonnés et signataires vivants de la page.
  */
 export function isPersonalPostVisibleTo(
   input: { audience: PersonalPostAudience; status: PersonalPostStatus } & PostReadContext,
@@ -404,6 +414,8 @@ export function isPersonalPostVisibleTo(
       return input.isConnected
     case "group":
       return input.isGroupMember && !input.isBlockedWithAuthor
+    case "followers":
+      return input.isPageAudience
   }
 }
 
@@ -514,6 +526,8 @@ export function feedAdmissionFor(input: {
     isConnected: input.isConnected,
     isGroupMember: false,
     isBlockedWithAuthor: false,
+    // Une publication de PAGE n'arrive jamais ici (sa règle : `pageFeedAdmissionFor`).
+    isPageAudience: false,
   })
   if (!visible) return null
 
@@ -552,23 +566,30 @@ export function assertShareOutsideGroup(input: { hasGroup: boolean; hasShare: bo
   if (input.hasGroup && input.hasShare) throw new DomainViolation("POST_SHARE_IN_GROUP")
 }
 
-/** Une publication de GROUPE s'épingle dans son groupe, jamais sur un mur personnel qu'elle ne peut pas habiter. */
-export function assertPinnableOnWall(input: { audience: PersonalPostAudience }): void {
+/**
+ * Une publication de GROUPE s'épingle dans son groupe, jamais sur un mur
+ * personnel qu'elle ne peut pas habiter ; une publication de PAGE appartient à
+ * la page, pas à son signataire.
+ */
+export function assertPinnableOnWall(input: { audience: PersonalPostAudience; hasPage: boolean }): void {
   if (input.audience === "group") throw new DomainViolation("POST_PIN_GROUP")
+  if (input.hasPage) throw new DomainViolation("POST_PIN_PAGE")
 }
 
 /**
- * La FORME d'une publication de PAGE, tenue au point d'écriture unique. Trois
+ * La FORME d'une publication de PAGE, tenue au point d'écriture unique. Quatre
  * interdits, chacun pour une raison différente :
- *  · une page ne publie que pour tous les membres (`public`) — elle n'a pas de
- *    connexions, elle a des abonnés, et `connections` se jugerait sur le
- *    signataire, donc sur une personne ;
+ *  · une page publie pour tous les membres (`public`) ou pour ses abonnés
+ *    (`followers`) — elle n'a pas de connexions, et `connections` se jugerait
+ *    sur le signataire, donc sur une personne ;
+ *  · `followers` n'existe qu'avec une page : l'abonnement à une PERSONNE
+ *    n'ouvre rien de plus que le `public` ;
  *  · une publication de page n'entre pas dans un groupe thématique — le mur
  *    d'un groupe appartient à ses membres ;
  *  · une page ne PARTAGE pas — republier le propos d'un tiers sous l'identité
  *    d'une page lui prêterait un endossement que personne n'a signé.
  *
- * Appelée pour TOUTE publication : sans page, elle n'impose rien.
+ * Appelée pour TOUTE publication.
  */
 export function assertPageAudienceShape(input: {
   audience: PersonalPostAudience
@@ -576,8 +597,11 @@ export function assertPageAudienceShape(input: {
   hasGroup: boolean
   hasShare: boolean
 }): void {
-  if (!input.hasPage) return
-  if (input.audience !== "public") throw new DomainViolation("PAGE_POST_AUDIENCE_INVALID")
+  if (!input.hasPage) {
+    if (input.audience === "followers") throw new DomainViolation("POST_FOLLOWERS_REQUIRES_PAGE")
+    return
+  }
+  if (input.audience !== "public" && input.audience !== "followers") throw new DomainViolation("PAGE_POST_AUDIENCE_INVALID")
   if (input.hasGroup) throw new DomainViolation("PAGE_POST_FORBIDS_GROUP")
   if (input.hasShare) throw new DomainViolation("PAGE_POST_FORBIDS_SHARE")
 }

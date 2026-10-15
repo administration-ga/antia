@@ -15,5 +15,6 @@
   "fileQuarantined": "Ce fichier a été bloqué par l'analyse de sécurité.",
   "groupMembershipRequired": "Rejoignez ce groupe pour accéder à ses publications.",
   "groupRoleRequired": "Votre rôle dans ce groupe ne permet pas ce geste.",
-  "eventOrganizerRequired": "Seul l'organisateur de cet évènement peut faire ce geste."
+  "eventOrganizerRequired": "Seul l'organisateur de cet évènement peut faire ce geste.",
+  "pageRoleRequired": "Cette action est réservée aux signataires de la page."
 }

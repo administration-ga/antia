@@ -40,6 +40,8 @@ export const FILE_SCAN_SOURCES = [
   "thematic_group",
   "event",
   "page",
+  /** Pièces d'une revendication de page (EXF-AN-17), lues par la modération seule. */
+  "page_claim",
   "album",
   "voice",
   "live",

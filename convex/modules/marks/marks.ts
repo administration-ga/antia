@@ -1,4 +1,4 @@
-// Dupliqué de socle/convex/modules/reseauPersonnel/marks.ts @ ad2e7fdc2 — adaptations : marques et sourdines PAR RÉSEAU (celui de la fonction appelée), garde d'adhésion par le constructeur ; `myBookmarks`/`myHiddenPosts` (qui levaient au-delà de 50, D18) non recopiées au profit des versions paginées ; `myMutes` paginée (`paginateMyMutes`, D19) ; ensembles du fil (`hiddenPostIds`, `mutedPersonIds`) bornés AVEC leur lacune ; marques du lecteur (`readerMarks`, en tête de `posts.ts` au socle) rangées ici ; débit sur les gestes ; garde de visibilité du moteur (contexte de lecture, blocage).
+// Dupliqué de socle/convex/modules/reseauPersonnel/marks.ts @ ad2e7fdc2 — adaptations : marques et sourdines PAR RÉSEAU (celui de la fonction appelée), garde d'adhésion par le constructeur ; `myBookmarks`/`myHiddenPosts` (qui levaient au-delà de 50, D18) non recopiées au profit des versions paginées ; `myMutes` paginée (`paginateMyMutes`, D19) ; ensembles du fil (`hiddenPostIds`, `mutedPersonIds`) bornés AVEC leur lacune ; marques du lecteur (`readerMarks`, en tête de `posts.ts` au socle) rangées ici ; débit sur les gestes ; garde de visibilité du moteur (contexte de lecture, blocage) ; une publication de PAGE marquée porte la carte de sa page (son signataire n'en est pas l'auteur affiché).
 /**
  * Marques personnelles et mise en sourdine — le menu « … » d'une publication.
  *
@@ -19,6 +19,8 @@ import type { QueryCtx } from "../../_generated/server"
 import { networkMutation, networkQuery } from "../../lib/functions"
 import { enforceRateLimit } from "../../lib/rateLimit"
 import type { BoundedIds } from "../graph/graph"
+import { pageCardCache } from "../pages/access"
+import type { PageCard } from "../pages/validators"
 import { miniProfileCache, type PersonMiniProfile } from "../people/miniProfile"
 import { assertVisiblePost, canSeePostDoc, type ReaderContext } from "../posts/access"
 import { type PostMarkKind, postMarkKindValidator } from "./tables"
@@ -131,7 +133,9 @@ export type MarkedPostDto = {
   body: string
   publishedAt: number
   markedAt: number
+  /** Le SIGNATAIRE quand la publication est celle d'une page — l'en-tête est alors `page`. */
   author: Pick<PersonMiniProfile, "personId" | "displayName" | "handle" | "avatarUrl">
+  page: PageCard | null
 }
 
 /**
@@ -151,10 +155,13 @@ async function paginateMarked(
     .order("desc")
     .paginate(paginationOpts)
   const profileOf = miniProfileCache(ctx)
+  const pageOf = pageCardCache(ctx)
   const page: MarkedPostDto[] = []
   for (const mark of result.page) {
     const post = await ctx.db.get(mark.postId)
     if (!post || !(await canSeePostDoc(ctx, reader, post))) continue
+    const card = post.pageId === undefined ? null : await pageOf(post.pageId)
+    if (post.pageId !== undefined && card === null) continue
     const author = await profileOf(post.authorPersonId)
     page.push({
       postId: post._id,
@@ -162,6 +169,7 @@ async function paginateMarked(
       publishedAt: post.publishedAt,
       markedAt: mark.createdAt,
       author: { personId: author.personId, displayName: author.displayName, handle: author.handle, avatarUrl: author.avatarUrl },
+      page: card,
     })
   }
   return { ...result, page }

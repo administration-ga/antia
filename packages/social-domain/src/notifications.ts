@@ -31,6 +31,8 @@ export const NOTIFICATION_KINDS = [
   "live_replay_published",
   "thematic_group_invite",
   "event_invite",
+  /** Une page que je suis a publié : le sujet est la PUBLICATION, sans acteur (c'est la page qui parle). */
+  "page_post",
   /** La garde des fichiers retient un fichier déposé (bloqué, ou analyse en échec). */
   "file_withheld",
   // Tranche `diaspora` (émis par `convex/modules/diaspora/`), tous sans sujet.

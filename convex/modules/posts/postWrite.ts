@@ -1,4 +1,4 @@
-// Dupliqué de socle/convex/modules/reseauPersonnel/postWrite.ts @ ad2e7fdc2 — adaptations : réseau, visibilité et `onRoot` (lisible depuis la racine) dénormalisés à l'écriture ; portée et pays ; citations résolues parmi les profils PUBLIÉS et membres du réseau de la publication (`resolveMentionedPersonIds`) ; cloche des citations par la porte unique (`notifyPerson`) avec la règle « qui peut être sonné » (`mentionCanSeePost`) — au plus 10 citations par publication (`MENTION_MAX_PER_POST`), aucune diffusion différée nécessaire ; partage compté dans l'agrégat ; aucun compteur sur la publication ; extensions page et direct reportées avec leurs modules, l'évènement annoncé porté (lot 12) ; branche organisation (l. 187-198) retirée.
+// Dupliqué de socle/convex/modules/reseauPersonnel/postWrite.ts @ ad2e7fdc2 — adaptations : réseau, visibilité et `onRoot` (lisible depuis la racine) dénormalisés à l'écriture ; portée et pays ; citations résolues parmi les profils PUBLIÉS et membres du réseau de la publication (`resolveMentionedPersonIds`) ; cloche des citations par la porte unique (`notifyPerson`) avec la règle « qui peut être sonné » (`mentionCanSeePost`) — au plus 10 citations par publication (`MENTION_MAX_PER_POST`), aucune diffusion différée nécessaire ; partage compté dans l'agrégat ; aucun compteur sur la publication ; extension direct reportée avec son module, l'évènement annoncé porté (lot 12), la PAGE portée (lot 13 : forme `public`/`followers`, publication comptée pour la page, citations d'une note aux abonnés sonnées vers ses seuls abonnés et signataires vivants) ; branche organisation (l. 187-198) retirée.
 /**
  * L'ÉCRITURE d'une publication — le geste commun à tous les écrivains,
  * présents (`posts.publish`) et à venir (annonce d'un direct, d'un évènement,
@@ -23,9 +23,11 @@ import { checked } from "../../lib/errors"
 import { isBlockedBetween, isConnectedTo } from "../graph/graph"
 import type { StoredMedia } from "../media/media"
 import { notifyPerson } from "../notifications/notify"
+import { liveSignatoryRole } from "../pages/access"
+import { isFollowingPage } from "../pages/follows"
 import { resolveMentionedPersonIds } from "../people/miniProfile"
 import { isLiveThematicGroupMember } from "../thematicGroups/access"
-import { recordShare } from "./counters"
+import { recordPagePost, recordShare } from "./counters"
 
 export type PostWriteInput = {
   network: Doc<"networks">
@@ -46,6 +48,8 @@ export type PostWriteInput = {
   idempotencyKey?: string
   /** L'évènement ANNONCÉ — l'organisateur est DÉJÀ vérifié par l'appelant. */
   eventId?: Id<"events">
+  /** La PAGE au nom de laquelle on publie — le rôle VIVANT du signataire est DÉJÀ vérifié par l'appelant. */
+  pageId?: Id<"pages">
 }
 
 /** Lisible depuis la racine : née à la racine, ou `root`. */
@@ -57,16 +61,22 @@ export function isOnRoot(network: Pick<Doc<"networks">, "kind">, visibility: Con
  * La personne citée voit-elle cette publication ? La règle de la lecture,
  * appliquée AVANT de sonner : `public` pour tous les membres, `connections`
  * pour les connexions de l'auteur dans le réseau, `group` pour les membres
- * vivants non bloqués du groupe. Le blocage et l'adhésion sont, en plus,
- * refusés par la porte (`notifyPerson`). Partagée par l'écriture et l'édition.
+ * vivants non bloqués du groupe, `followers` pour les abonnés et signataires
+ * vivants de la page. Le blocage et l'adhésion sont, en plus, refusés par la
+ * porte (`notifyPerson`). Partagée par l'écriture et l'édition.
  */
 export async function mentionCanSeePost(
   ctx: Pick<MutationCtx, "db">,
-  post: { networkId: Id<"networks">; authorPersonId: Id<"persons">; audience: PersonalPostAudience; groupId?: Id<"thematicGroups"> },
+  post: { networkId: Id<"networks">; authorPersonId: Id<"persons">; audience: PersonalPostAudience; groupId?: Id<"thematicGroups">; pageId?: Id<"pages"> },
   mentionedPersonId: Id<"persons">,
 ): Promise<boolean> {
   if (mentionedPersonId === post.authorPersonId) return true
   if (post.audience === "public") return true
+  if (post.audience === "followers") {
+    const page = post.pageId === undefined ? null : await ctx.db.get(post.pageId)
+    if (!page) return false
+    return (await isFollowingPage(ctx, page._id, mentionedPersonId)) || (await liveSignatoryRole(ctx, page, mentionedPersonId)) !== null
+  }
   if (post.audience === "group") {
     if (post.groupId === undefined) return false
     const [isMember, isBlocked] = await Promise.all([
@@ -81,7 +91,7 @@ export async function mentionCanSeePost(
 /** Sonne les personnes citées qui VOIENT la publication. */
 export async function notifyMentions(
   ctx: MutationCtx,
-  post: { _id: Id<"posts">; networkId: Id<"networks">; authorPersonId: Id<"persons">; audience: PersonalPostAudience; groupId?: Id<"thematicGroups"> },
+  post: { _id: Id<"posts">; networkId: Id<"networks">; authorPersonId: Id<"persons">; audience: PersonalPostAudience; groupId?: Id<"thematicGroups">; pageId?: Id<"pages"> },
   personIds: readonly Id<"persons">[],
 ): Promise<void> {
   for (const personId of personIds) {
@@ -99,7 +109,7 @@ export async function notifyMentions(
 export async function writePost(ctx: MutationCtx, input: PostWriteInput): Promise<{ postId: Id<"posts"> }> {
   checked(() => assertGroupAudienceShape({ audience: input.audience, hasGroup: input.groupId !== undefined }))
   checked(() =>
-    assertPageAudienceShape({ audience: input.audience, hasPage: false, hasGroup: input.groupId !== undefined, hasShare: input.sharedPostId !== undefined }),
+    assertPageAudienceShape({ audience: input.audience, hasPage: input.pageId !== undefined, hasGroup: input.groupId !== undefined, hasShare: input.sharedPostId !== undefined }),
   )
 
   // Dénormalisés à l'ÉCRITURE : le filtre du fil reste une comparaison de tableau.
@@ -125,12 +135,14 @@ export async function writePost(ctx: MutationCtx, input: PostWriteInput): Promis
     searchText: buildSearchableText(input.body, tags.join(" ")),
     ...(input.idempotencyKey ? { idempotencyKey: input.idempotencyKey } : {}),
     ...(input.eventId ? { eventId: input.eventId } : {}),
+    ...(input.pageId ? { pageId: input.pageId } : {}),
     publishedAt: now,
     createdAt: now,
     updatedAt: now,
   }
   const postId = await ctx.db.insert("posts", doc)
   await recordShare(ctx, { _id: postId, ...(input.sharedPostId ? { sharedPostId: input.sharedPostId } : {}), publishedAt: now })
+  await recordPagePost(ctx, { _id: postId, ...(input.pageId ? { pageId: input.pageId } : {}), publishedAt: now })
   await notifyMentions(ctx, { _id: postId, ...doc }, mentionedPersonIds)
   return { postId }
 }

@@ -1,4 +1,4 @@
-// Dupliqué de socle/convex/lib/uploadPolicy.ts @ ad2e7fdc2 — adaptations : partie PURE seulement (registre des usages, normalisations, recoupement déclaré ↔ stocké), la lecture de `_storage` reste au backend (`convex/lib/uploadPolicy.ts`) ; usages SOCIAUX seulement (D36 : `media_social` avec GIF, `avatar`, `cover`, `page_logo`, `page_banner`, `album_image`, `story_media`, `chat_attachment`, `voice`, `live_recording`), les usages des publications, stories et avatars DÉRIVÉS des constantes du domaine (une seule source : le socle les laissait diverger, d'où l'exception `media_social`) ; libellés retirés ; refus à code de règle (`DomainViolation`) au lieu de chaînes `UPLOAD_*:usage`.
+// Dupliqué de socle/convex/lib/uploadPolicy.ts @ ad2e7fdc2 — adaptations : partie PURE seulement (registre des usages, normalisations, recoupement déclaré ↔ stocké), la lecture de `_storage` reste au backend (`convex/lib/uploadPolicy.ts`) ; usages SOCIAUX seulement (D36 : `media_social` avec GIF, `avatar`, `cover`, `page_logo`, `page_banner`, `page_claim_evidence`, `album_image`, `story_media`, `chat_attachment`, `voice`, `live_recording`), les usages des publications, stories et avatars DÉRIVÉS des constantes du domaine (une seule source : le socle les laissait diverger, d'où l'exception `media_social`) ; libellés retirés ; refus à code de règle (`DomainViolation`) au lieu de chaînes `UPLOAD_*:usage`.
 /**
  * Politique de dépôt de fichiers — les règles pures.
  *
@@ -62,6 +62,8 @@ export const UPLOAD_USAGES = {
   page_logo: { mimeTypes: IMAGES, maxBytes: 5 * MO },
   /** Bannière d'une page. */
   page_banner: { mimeTypes: IMAGES, maxBytes: 10 * MO },
+  /** Pièce d'une revendication de page (statuts, récépissé, mandat) : document ou photo. */
+  page_claim_evidence: { mimeTypes: [...PDF, ...IMAGES], maxBytes: 10 * MO },
   /** Photo d'un album. */
   album_image: { mimeTypes: [...IMAGES, ...GIF, ...PHOTOS_IPHONE], maxBytes: 20 * MO },
   /** Média d'une story : la borne vidéo la plus stricte du socle (50 Mo). */

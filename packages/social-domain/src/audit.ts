@@ -28,6 +28,15 @@ export const AUDIT_ACTIONS = [
   "file.release",
   "file.requeue",
   "file.purge_blob",
+  // Pages : décisions tracées (confiance, état, adresse, création d'une page
+  // d'institution, habilitation des signataires, revendications)
+  "page.create_official",
+  "page.trust_set",
+  "page.status_set",
+  "page.handle_set",
+  "page.signatory_grant",
+  "page.signatory_revoke",
+  "page.claim_decide",
   // Tranche `diaspora` (émis par `convex/modules/diaspora/`)
   /** Un parrainage retiré par la MODÉRATION du réseau (le retrait par le parrain n'est pas une décision). */
   "diaspora.sponsorship_revoke",
@@ -35,11 +44,11 @@ export const AUDIT_ACTIONS = [
 export type AuditAction = (typeof AUDIT_ACTIONS)[number]
 
 /** À quel titre l'acte a été posé : la qualité qui l'AUTORISAIT au moment de l'acte. */
-export const AUDIT_CAPACITIES = ["platform_admin", "platform_operator", "network_admin", "network_moderator", "system"] as const
+export const AUDIT_CAPACITIES = ["platform_admin", "platform_operator", "network_admin", "network_moderator", "page_admin", "system"] as const
 export type AuditCapacity = (typeof AUDIT_CAPACITIES)[number]
 
 /** Les tables qu'une décision peut viser — une référence, jamais un contenu. */
-export const AUDIT_SUBJECT_TABLES = ["networks", "persons", "fileScans", "contentReports"] as const
+export const AUDIT_SUBJECT_TABLES = ["networks", "persons", "fileScans", "contentReports", "pages", "pageClaims"] as const
 export type AuditSubjectTable = (typeof AUDIT_SUBJECT_TABLES)[number]
 
 export type AuditSubject = { table: AuditSubjectTable; id: string }

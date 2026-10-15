@@ -56,6 +56,7 @@ describe("visibilité d'une publication, par audience", () => {
     isConnected: false,
     isGroupMember: false,
     isBlockedWithAuthor: false,
+    isPageAudience: false,
   }
 
   it("le public est lisible sans aucun lien", () => {
@@ -95,6 +96,21 @@ describe("visibilité d'une publication, par audience", () => {
     it("l'auteur voit la sienne, retirée comprise", () => {
       expect(isPersonalPostVisibleTo({ ...groupPost, isAuthor: true })).toBe(true)
       expect(isPersonalPostVisibleTo({ ...groupPost, status: "removed", isAuthor: true })).toBe(true)
+    })
+  })
+
+  describe("audience `followers` (la note aux abonnés d'une page)", () => {
+    const note = { ...base, audience: "followers" as const }
+
+    it("réservée aux abonnés et signataires vivants de la page — ni le public, ni une connexion, ni un groupe", () => {
+      expect(isPersonalPostVisibleTo(note)).toBe(false)
+      expect(isPersonalPostVisibleTo({ ...note, isConnected: true })).toBe(false)
+      expect(isPersonalPostVisibleTo({ ...note, isGroupMember: true })).toBe(false)
+      expect(isPersonalPostVisibleTo({ ...note, isPageAudience: true })).toBe(true)
+    })
+
+    it("retirée, elle ne s'ouvre plus à ses abonnés", () => {
+      expect(isPersonalPostVisibleTo({ ...note, status: "removed", isPageAudience: true })).toBe(false)
     })
   })
 })
@@ -314,9 +330,9 @@ describe("feedAdmissionFor — la garde d'audience ne se relâche jamais", () =>
 })
 
 describe("audiences — le vocabulaire reste séparé", () => {
-  it("la PORTÉE ne connaît pas `group`, les PUBLICATIONS si", () => {
+  it("la PORTÉE ne connaît ni `group` ni `followers`, les PUBLICATIONS si (`followers` pour les pages seules)", () => {
     expect([...PERSONAL_REACH_AUDIENCES]).toEqual(["public", "connections"])
-    expect([...PERSONAL_POST_AUDIENCES]).toEqual(["public", "connections", "group"])
+    expect([...PERSONAL_POST_AUDIENCES]).toEqual(["public", "connections", "group", "followers"])
   })
 })
 
@@ -343,8 +359,17 @@ describe("assertPageAudienceShape", () => {
     expect(() => assertPageAudienceShape(page)).not.toThrow()
   })
 
-  it("n'impose rien à une publication SANS page", () => {
+  it("n'impose rien à une publication SANS page — sauf l'audience des abonnés, qui n'appartient qu'aux pages", () => {
     expect(() => assertPageAudienceShape({ audience: "connections", hasPage: false, hasGroup: false, hasShare: true })).not.toThrow()
+    expect(violationOf(() => assertPageAudienceShape({ audience: "followers", hasPage: false, hasGroup: false, hasShare: false }))?.code).toBe("POST_FOLLOWERS_REQUIRES_PAGE")
+  })
+
+  it("accepte la note aux abonnés d'une page", () => {
+    expect(() => assertPageAudienceShape({ ...page, audience: "followers" })).not.toThrow()
+  })
+
+  it("refuse une page qui publierait pour ses connexions, ou dans un groupe par l'audience", () => {
+    expect(violationOf(() => assertPageAudienceShape({ ...page, audience: "group" }))?.code).toBe("PAGE_POST_AUDIENCE_INVALID")
   })
 
   it("refuse une page qui publierait pour ses connexions", () => {

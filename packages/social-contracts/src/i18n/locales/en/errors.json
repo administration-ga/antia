@@ -15,5 +15,6 @@
   "fileQuarantined": "This file was blocked by the security scan.",
   "groupMembershipRequired": "Join this group to access its posts.",
   "groupRoleRequired": "Your role in this group does not allow this action.",
-  "eventOrganizerRequired": "Only the organizer of this event can do this."
+  "eventOrganizerRequired": "Only the organizer of this event can do this.",
+  "pageRoleRequired": "This action is reserved for the page's signatories."
 }

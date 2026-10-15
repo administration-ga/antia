@@ -1,4 +1,4 @@
-// Dupliqué de socle/convex/modules/reseauPersonnel/access.ts @ ad2e7fdc2 — adaptations : CONTEXTE DE LECTURE — une publication se lit dans son réseau, ou depuis la racine si elle est `root` (une publication `network` de DIASPORALE n'est rendue par aucune lecture de la racine, R4) ; garde `isVisibleTo` du moteur (réseau, blocage, audience) ; le BLOCAGE l'emporte sur toute audience (cahier §12.3) et se lit sur toute la paire ; connexion lue dans le réseau de la publication, et seulement pour l'audience qui la demande ; branches page/organisation (l. 97-106, 135-140) et `isPlatformAccount` retirées (pages au lot 13) ; refus indistinct par code.
+// Dupliqué de socle/convex/modules/reseauPersonnel/access.ts @ ad2e7fdc2 — adaptations : CONTEXTE DE LECTURE — une publication se lit dans son réseau, ou depuis la racine si elle est `root` (une publication `network` de DIASPORALE n'est rendue par aucune lecture de la racine, R4) ; garde `isVisibleTo` du moteur (réseau, blocage, audience) ; le BLOCAGE l'emporte sur toute audience (cahier §12.3) et se lit sur toute la paire ; connexion lue dans le réseau de la publication, et seulement pour l'audience qui la demande ; branche organisation (l. 135-140) et `isPlatformAccount` retirées ; publication de PAGE (lot 13, l. 97-106 rebranchées sur les pages du moteur) : la page doit être servable, personne n'en est l'auteur (le signataire historique ne garde rien), le blocage entre personnes ne s'y applique pas, la note aux abonnés (`followers`) s'ouvre aux abonnés et signataires vivants ; refus indistinct par code.
 /**
  * LE point de passage : voir une publication.
  *
@@ -16,6 +16,8 @@ import type { Doc, Id } from "../../_generated/dataModel"
 import type { QueryCtx } from "../../_generated/server"
 import { notFound } from "../../lib/errors"
 import { isBlockedBetween, isConnectedTo } from "../graph/graph"
+import { liveSignatoryRole } from "../pages/access"
+import { isFollowingPage } from "../pages/follows"
 import { isLiveThematicGroupMember } from "../thematicGroups/access"
 
 type ReadCtx = Pick<QueryCtx, "db">
@@ -39,6 +41,7 @@ export function isInReadingContext(post: Doc<"posts">, network: Doc<"networks">)
  */
 export async function canSeePostDoc(ctx: ReadCtx, reader: ReaderContext, post: Doc<"posts">): Promise<boolean> {
   if (!isInReadingContext(post, reader.network)) return false
+  if (post.pageId !== undefined) return await canSeePagePostDoc(ctx, reader, post, post.pageId)
   const isAuthor = post.authorPersonId === reader.personId
   const isBlockedWithAuthor = isAuthor ? false : await isBlockedBetween(ctx, reader.personId, post.authorPersonId)
   const isConnected = !isAuthor && post.audience === "connections" ? await isConnectedTo(ctx, post.networkId, reader.personId, post.authorPersonId) : false
@@ -52,7 +55,38 @@ export async function canSeePostDoc(ctx: ReadCtx, reader: ReaderContext, post: D
     isConnected,
     isGroupMember,
     isBlockedWithAuthor,
+    isPageAudience: false,
     // Le contexte de lecture est tranché ci-dessus ; la garde du réseau le reconfirme.
+    isMemberOfPostNetwork: post.networkId === reader.network._id,
+    isMemberOfRoot: reader.network.kind === "root",
+  })
+}
+
+/**
+ * Une publication de PAGE. La page doit être SERVABLE : la retirer referme ses
+ * publications partout, par leur lien comme par le fil — le signataire n'en est
+ * pas exempté, ce n'est pas son propos. Personne n'en est « l'auteur » : le
+ * signataire historique ne garde aucune exception (une note aux abonnés se
+ * referme sur lui s'il n'est plus ni abonné ni signataire vivant). Le blocage
+ * entre PERSONNES ne s'y applique pas — c'est la page qui parle ; se désabonner
+ * ou masquer la publication sont les gestes qui correspondent.
+ */
+async function canSeePagePostDoc(ctx: ReadCtx, reader: ReaderContext, post: Doc<"posts">, pageId: Id<"pages">): Promise<boolean> {
+  const page = await ctx.db.get(pageId)
+  if (!page || page.status !== "active") return false
+  const isPageAudience =
+    post.audience === "followers"
+      ? (await isFollowingPage(ctx, pageId, reader.personId)) || (await liveSignatoryRole(ctx, page, reader.personId)) !== null
+      : false
+  return isVisibleTo({
+    audience: post.audience,
+    status: post.status,
+    visibility: post.visibility,
+    isAuthor: false,
+    isConnected: false,
+    isGroupMember: false,
+    isBlockedWithAuthor: false,
+    isPageAudience,
     isMemberOfPostNetwork: post.networkId === reader.network._id,
     isMemberOfRoot: reader.network.kind === "root",
   })

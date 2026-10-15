@@ -1,4 +1,4 @@
-// Dupliqué de socle/convex/modules/reseauPersonnel/tables.ts (l. 922-1030, `reseauPersonnel_thematicGroups`, `…ThematicGroupMembers`, `…ThematicGroupInvites`) @ ad2e7fdc2 — adaptations : `networkId` sur le groupe, l'appartenance et l'invitation ; personnes ; `memberCount` retiré du document (agrégat `engineCounters`, D02) ; découverte indexée PAR RÉSEAU (`by_network_createdAt`, recherche `search_name` filtrée par réseau, D17) ; appartenances et invitations indexées par réseau (« mes groupes », « mes invitations ») ; pays facultatif du groupe et vitrine par pays (demande DIASPORALE, EXF-DG-24).
+// Dupliqué de socle/convex/modules/reseauPersonnel/tables.ts (l. 922-1030, `reseauPersonnel_thematicGroups`, `…ThematicGroupMembers`, `…ThematicGroupInvites`) @ ad2e7fdc2 — adaptations : `networkId` sur le groupe, l'appartenance et l'invitation ; personnes ; `memberCount` retiré du document (agrégat `engineCounters`, D02) ; découverte indexée PAR RÉSEAU (`by_network_createdAt`, recherche `search_name` filtrée par réseau, D17) ; appartenances et invitations indexées par réseau (« mes groupes », « mes invitations ») ; pays facultatif du groupe et vitrine par pays (demande DIASPORALE, EXF-DG-24) ; page d'association facultative du groupe (le groupe d'adhérents d'une association, EXF-DG-26).
 /**
  * Groupes THÉMATIQUES d'un réseau — des lieux de PUBLICATION autour d'un thème,
  * découvrables dans leur réseau, ouverts à l'adhésion. Ni une messagerie (les
@@ -24,6 +24,11 @@ export const thematicGroupsTables = {
     description: v.optional(v.string()),
     /** Le pays du groupe (deux lettres), facultatif : la découverte d'un pays rend ses groupes et ceux sans pays. */
     country: v.optional(v.string()),
+    /**
+     * La PAGE d'association dont ce groupe est le groupe d'adhérents (EXF-DG-26),
+     * posée à la création par un administrateur de la page, dans son réseau.
+     */
+    associationPageId: v.optional(v.id("pages")),
     createdByPersonId: v.id("persons"),
     /**
      * Publication ÉPINGLÉE en tête du mur — un acte de MODÉRATION du groupe.
@@ -49,6 +54,8 @@ export const thematicGroupsTables = {
     .index("by_network_createdAt", ["networkId", "createdAt"])
     // La vitrine d'un PAYS : ses groupes, et (pays absent) ceux de tout le réseau.
     .index("by_network_country_createdAt", ["networkId", "country", "createdAt"])
+    // Les groupes d'adhérents d'une page d'association.
+    .index("by_network_associationPage_createdAt", ["networkId", "associationPageId", "createdAt"])
     .searchIndex("search_name", { searchField: "searchText", filterFields: ["networkId"] }),
 
   /**

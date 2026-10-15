@@ -12,6 +12,7 @@ const reader = {
   isConnected: false,
   isGroupMember: false,
   isBlockedWithAuthor: false,
+  isPageAudience: false,
   isMemberOfPostNetwork: false,
   isMemberOfRoot: true,
 }

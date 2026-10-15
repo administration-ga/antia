@@ -370,7 +370,7 @@ dépend.
 | `contentRemoval.ts` | `convex/modules/posts/contentRemoval.ts` | à adapter | ✅ (retrait d'un commentaire : lot 8) |
 | `counters.ts` | `convex/modules/posts/counters.ts` | à adapter | ✅ |
 | `postWrite.ts` | `convex/modules/posts/postWrite.ts` | à adapter | ✅ |
-| `posts.ts` | `convex/modules/posts/posts.ts` | à adapter (lourd) | ✅ (pages : lot 13 ; direct et évènements : leurs lots) |
+| `posts.ts` | `convex/modules/posts/posts.ts` | à adapter (lourd) | ✅ (pages rebranchées au lot 13 ; direct et évènements : leurs lots) |
 | `tables.ts` (l. 137-300, publications) | `convex/modules/posts/tables.ts` | à réécrire | ✅ |
 | `marks.ts` | `convex/modules/marks/marks.ts` | à adapter | ✅ |
 | `tables.ts` (l. 465-500, marques et sourdines) | `convex/modules/marks/tables.ts` | à adapter | ✅ |
@@ -886,4 +886,109 @@ dépend.
   fois ; restaurer sans masquage ; identifiant inconnu ; masquage propre à l'appelant ; états `requested_by_me` /
   `requested_by_them` ; acceptée, sortie du catalogue ; invitations envoyées (sens, acceptation).
 - Neufs : réseau gouverné refusé, masquage propre au réseau.
+
+---
+
+## Lot 13 — `pages` (réécrit : pages à identité propre, signataires, revendications)
+
+### Parité, fichier par fichier
+
+| Source (`socle/convex/modules/reseauPages/…`) | Cible | Sort | État |
+|---|---|---|---|
+| `tables.ts` | `convex/modules/pages/tables.ts` | à adapter | ✅ (+ `pageSignatories`, `pageClaims`, `pageIdentityHistory`) |
+| `validators.ts` | `convex/modules/pages/validators.ts` | tel quel | ✅ (dérivés du domaine, + carte allowlistée) |
+| `domain.ts` | `packages/social-domain/src/pages.ts` | à adapter | ✅ |
+| `graph.ts` | `convex/modules/pages/follows.ts` | à adapter | ✅ |
+| `access.ts` | `convex/modules/pages/access.ts` | à réécrire | ✅ |
+| `pages.ts` | `convex/modules/pages/pages.ts` | à réécrire | ✅ |
+| `admin.ts` | `convex/modules/pages/admin.ts` + `signatories.ts` + `identity.ts` + `claims.ts` | à réécrire | ✅ |
+| `followedUpdates.ts` | `convex/modules/pages/followedUpdates.ts` | à adapter | ✅ |
+| `manifest.ts` | — | exclu | — |
+| `reseauPersonnel/posts.ts` (l. 255-325, 1201-1246, `FeedItem.page`, `signedBy`) | `convex/modules/posts/posts.ts` | rebranché | ✅ |
+| `reseauPersonnel/access.ts` (l. 97-106) | `convex/modules/posts/access.ts` (`canSeePagePostDoc`) | rebranché | ✅ |
+
+### Adaptations (liste fermée)
+
+- **Pages génériques par réseau** (`networkId`) : institution, association, entreprise, média, communauté ; identité
+  PROPRE (nom, sigle, description, logo et bannière sous la garde des fichiers, usages `page_logo`/`page_banner`) au
+  lieu d'une identité dérivée d'`orgs` (`orgId` retiré). Adresse UNIQUE dans le moteur, dérivée du nom.
+- **Naissance** : un membre VÉRIFIÉ crée une page `community` (association, entreprise, média, communauté) et en est
+  le premier administrateur ; une page d'INSTITUTION « Officiel » naît d'une décision de console tracée
+  (`createInstitutionPage`, idempotente par référence d'import — patron de l'import contractuel des postes
+  consulaires), jamais d'un compte (`PAGE_OWNER_KIND_RESERVED`).
+- **Confiance** (`trust`) posée par décision tracée seulement : console (`setPageTrust`, « Officiel » réservé à une
+  institution, `isTrustAllowedForOwner`), ou revendication validée (`community` → `verified`) ; badge CALCULÉ dans la
+  carte. Rang dénormalisé (`trustRank`) : l'annuaire montre les officielles, puis les vérifiées, puis les autres, les
+  plus récentes d'abord — au lieu des plus suivies (un compteur réécrit à chaque abonnement, D02).
+- **Autorité ACTUELLE = signataire vivant** (au lieu de `communication.publish`) : habilitation ACCEPTÉE (une
+  habilitation est une invitation — personne n'est associé à une page sans l'avoir voulu), page active, adhésion
+  active au réseau de la page, identité forte (IDN `loa ≥ 2`) relue pour une page officielle. Rôles `admin` (publie et
+  gère) et `signatory` (publie) ; dernier administrateur protégé ; plafond de 50 signataires ; habiliter et révoquer
+  tracés (`page.signatory_grant`, `page.signatory_revoke`, qualité `page_admin`).
+- **Lecture** : une page se lit dans son réseau, et depuis la racine si elle y est (`onRoot` : page de la racine, ou
+  règle `root`) ; refus indistinct (`null` ou `notFound`).
+- **Publier au nom d'une page** (EXF-AN-18) : audience `public` (communiqué) ou `followers` (note aux abonnés, au lieu
+  de la note de service `organisation`) ; visibilité par la RÈGLE de la page (`root` : ses communiqués lus aussi depuis
+  la racine) ; portée et pays tirés de la page (EXF-DG-23 : publication locale au pays de la page, `diaspora` sans
+  pays) ; idempotence par signataire et page ; point d'écriture unique (`writePost`, forme tenue par
+  `assertPageAudienceShape`) ; abonnés prévenus par la diffusion par lots (`page_post`, sans acteur, chacun re-gardé —
+  source `pageFollowers`).
+- **Fil** (rebranché) : une fenêtre par page suivie dans « Pour vous » (au plus 50) fusionnée sous frontière avec les
+  fenêtres d'auteur ; admission propre (`pageFeedAdmissionFor`) — ni la connexion au signataire, ni sa sourdine, ni
+  son blocage ne s'y appliquent (la page parle) ; la note aux abonnés ne sort de son cercle par aucun volet ; les voies
+  (hub d'un pays) rendent les publications locales des pages. Aucune publication de page sur un mur personnel, ni dans
+  « mes publications », ni épinglable (`POST_PIN_PAGE`) ; DTO : `page` (carte), `author` = le signataire,
+  `isMine` faux.
+- **Garde de lecture** : page retirée = publications indisponibles partout (lien, fil, mur, recherche, signets),
+  rendues à la réactivation ; personne n'est « l'auteur » d'une publication de page.
+- **Revendications** (EXF-AN-17, neuf) : pièces admises par la garde des fichiers (usage `page_claim_evidence`,
+  source `page_claim`), lues par la modération du réseau et le demandeur seuls ; une demande en attente par
+  (page, demandeur) ; page officielle jamais revendicable, page vérifiée non plus, page tenue par un de ses
+  administrateurs seulement (demande de vérification) ; décision motivée et tracée (`page.claim_decide`) ; retirer sa
+  demande purge ses pièces.
+- **Identité** : modifiée par les administrateurs avec HISTORIQUE (`pageIdentityHistory`, valeurs d'avant) ; adresse
+  changée par la console seule (l'ancienne gardée dans l'historique).
+- **Groupe d'adhérents** (EXF-DG-26, demande DIASPORALE) : `thematicGroups.associationPageId`, posé par un
+  administrateur vivant de la page ; carte de la page sur la fiche ; découverte des groupes d'une page.
+- **Rappels** (`followedUpdates`) par réseau, communiqués seuls.
+- Débit : `page.create`, `page.follow`, `page.publish`, `page.manage`, `page.claim`, `operator.page` ; retrait par
+  `post.remove`, décision par `moderation.decide`.
+
+### Corrections de dette
+
+- **D02** : abonnés et publications d'une page dans l'agrégat `engineCounters` (au lieu de `followerCount`/`postCount`
+  sur la page) ; découverte sans compteur chaud.
+- **D05** : logo, bannière et pièces par la garde des fichiers.
+- **D14** : débit sur chaque écriture.
+- **D19** : « mes pages suivies » et la découverte paginées ; ensemble des pages suivies borné AVEC sa lacune.
+
+### Tests
+
+- Portés (`pages.test`, `followedUpdates.test`, adaptés) : création (au lieu de l'activation) et adresse dérivée,
+  adresse longue, adresse prise, idempotence de la console, identité lue sur la page, même `null` pour inconnue et
+  retirée, abonnement idempotent et décompte, suivre une page retirée ou suspendu, publier sans droit, invitation non
+  acceptée (au lieu du rattachement déclaré), publier comme signataire, identité de la page et signataire à part,
+  idempotence, décompte des publications au retrait, retrait par un autre signataire, tiers refusé, retrait de la page
+  qui referme sans supprimer, fil (« Pour vous » sans et avec abonnement, pas par la connexion au signataire, une seule
+  fois pour le signataire, « Récents », mur personnel exclu, sourdine sans effet, masquage, mur de la page, retrait de
+  tous les volets, de la recherche et des signets), découverte (accents, page retirée, pagination de 60 pages, recherche
+  paginée, requête courte, pages suivies marquées, « mes pages »), note aux abonnés (défaut communiqué, lecture,
+  mur, perte de l'abonnement et du rôle, citations, fil d'un étranger et d'un abonné, partage refusé, audience sans
+  page refusée), autorité actuelle (ancien signataire, page retirée), rappels (communiqués seuls, tri et limite).
+- Neufs : signataires (invitation, acceptation, refus, dernier administrateur, plafond, identité forte d'une page
+  officielle relue à chaque acte, journal), console (confiance, état, adresse, habilitation, liste), revendications
+  (pièces, file, fiche, validation, rejet, retrait et purge), logo sous la garde, pays et portée, règle `root`, lecture
+  depuis la racine, cloche des abonnés, groupe d'adhérents, réactivation ; domaine (`pages.test.ts`, audience
+  `followers`, forme d'une publication de page).
+
+### Écarts assumés
+
+- **Lecture anonyme** des pages officielles et de leurs publications `root` (EXF-AN-49) : avec l'arbitrage A4 (PA6).
+- **Import contractuel** des postes consulaires et des associations (DIASPORA-COMMUNAUTE-V1) et **reflets fédérés**
+  des administrations : la console en pose le patron (`importRef`, idempotence) ; les contrats viennent avec PA4/PA9.
+- **Rétention des pièces** d'une revendication tranchée et **effacement** des tables de pages : PA5 (D30).
+- **Évènement ou direct organisé par une page** (EXF-DG-28/29) : à brancher avec les modules `events` et `live` quand
+  DIASPORALE le demandera.
+- **Cloche des invitations à signer et des décisions de revendication** : les écrans lisent `myPageInvitations` et
+  `paginateMyPageClaims` ; des genres de cloche viendront avec les écrans (PA6).
 

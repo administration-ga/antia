@@ -11,6 +11,7 @@ import { messagingTables } from "./modules/messaging/tables"
 import { moderationTables } from "./modules/moderation/tables"
 import { networksTables } from "./modules/networks/tables"
 import { notificationsTables } from "./modules/notifications/tables"
+import { pagesTables } from "./modules/pages/tables"
 import { peopleTables } from "./modules/people/tables"
 import { platformTables } from "./modules/platform/tables"
 import { postsTables } from "./modules/posts/tables"
@@ -49,6 +50,7 @@ export default defineSchema(
     ...eventsTables,
     ...storiesTables,
     ...suggestionsTables,
+    ...pagesTables,
     ...marksTables,
     ...moderationTables,
     ...diasporaTables,

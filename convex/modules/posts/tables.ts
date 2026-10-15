@@ -1,4 +1,4 @@
-// Dupliqué de socle/convex/modules/reseauPersonnel/tables.ts (l. 137-300) @ ad2e7fdc2 — adaptations : `networkId` et visibilité `network`/`root` sur chaque publication, index préfixés par le réseau ; `onRoot` dénormalisé (lisible depuis la racine) et index de la racine ; portée (`reach`) et pays (`country`) des réseaux à portées ; auteurs et réacteurs en personnes ; AUCUN compteur sur la publication (D01) : réactions par fragments (`postReactionShards`), partages par l'agrégat `engineCounters` ; index jamais lus non recopiés (`by_directSessionId`, `by_eventId`, `by_sharedPostId`, D35) ; mur de groupe préfixé par le réseau ; index des pages et des directs ajoutés avec leurs modules ; l'évènement annoncé porté par la publication (lot 12, sans index : rien ne le relit par là) ; recherche `search_body_v2` filtrée par réseau, statut et racine.
+// Dupliqué de socle/convex/modules/reseauPersonnel/tables.ts (l. 137-300) @ ad2e7fdc2 — adaptations : `networkId` et visibilité `network`/`root` sur chaque publication, index préfixés par le réseau ; `onRoot` dénormalisé (lisible depuis la racine) et index de la racine ; portée (`reach`) et pays (`country`) des réseaux à portées ; auteurs et réacteurs en personnes ; AUCUN compteur sur la publication (D01) : réactions par fragments (`postReactionShards`), partages par l'agrégat `engineCounters` ; index jamais lus non recopiés (`by_directSessionId`, `by_eventId`, `by_sharedPostId`, D35) ; mur de groupe préfixé par le réseau ; index des directs ajoutés avec leur module ; la PAGE de la publication (lot 13 : `pageId`, mur et fenêtres de fil d'une page, dans son réseau et depuis la racine) ; l'évènement annoncé porté par la publication (lot 12, sans index : rien ne le relit par là) ; recherche `search_body_v2` filtrée par réseau, statut et racine.
 import { defineTable } from "convex/server"
 import { v } from "convex/values"
 
@@ -39,6 +39,12 @@ export const postsTables = {
     groupId: v.optional(v.id("thematicGroups")),
     /** L'ÉVÈNEMENT annoncé par cette publication (son organisateur seul l'annonce, une fois). */
     eventId: v.optional(v.id("events")),
+    /**
+     * La PAGE au nom de laquelle la publication parle (`authorPersonId` est
+     * alors son SIGNATAIRE, pour l'audit et l'idempotence). Audience `public`
+     * ou `followers` seulement, jamais de groupe ni de partage (`writePost`).
+     */
+    pageId: v.optional(v.id("pages")),
     /** Portée, parmi celles que le réseau déclare (`networks.reachValues`). */
     reach: v.optional(v.string()),
     /** Pays (ISO 3166-1 alpha-2) ; exigé par la portée locale. */
@@ -63,6 +69,9 @@ export const postsTables = {
     .index("by_root_author_status_publishedAt", ["onRoot", "authorPersonId", "status", "publishedAt"])
     // Le MUR d'un groupe thématique (et la cascade de sa suppression).
     .index("by_network_group_status_publishedAt", ["networkId", "groupId", "status", "publishedAt"])
+    // Le MUR d'une page et sa fenêtre de fil, dans son réseau, puis depuis la racine.
+    .index("by_network_page_status_publishedAt", ["networkId", "pageId", "status", "publishedAt"])
+    .index("by_root_page_status_publishedAt", ["onRoot", "pageId", "status", "publishedAt"])
     // Les VOIES d'un fil (le hub d'un pays, « toute la diaspora ») : une portée et un pays, ou une portée seule.
     .index("by_network_reach_country_status_publishedAt", ["networkId", "reach", "country", "status", "publishedAt"])
     .index("by_network_reach_status_publishedAt", ["networkId", "reach", "status", "publishedAt"])

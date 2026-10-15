@@ -1,4 +1,4 @@
-// Dupliqué de socle/convex/modules/reseauPersonnel/counters.ts @ ad2e7fdc2 — adaptations : réactions lues et écrites dans des FRAGMENTS (`postReactionShards`) au lieu des champs dénormalisés sur la publication (D01) ; partages (et commentaires, lot 8) comptés par l'agrégat `engineCounters` (une entrée par contenu compté, sous l'espace de noms de la publication) au lieu de `shareCount`/`commentCount` ; MA réaction lue par l'index `by_post_and_person` ; en-tête obsolète corrigé.
+// Dupliqué de socle/convex/modules/reseauPersonnel/counters.ts @ ad2e7fdc2 — adaptations : réactions lues et écrites dans des FRAGMENTS (`postReactionShards`) au lieu des champs dénormalisés sur la publication (D01) ; partages (et commentaires, lot 8) comptés par l'agrégat `engineCounters` (une entrée par contenu compté, sous l'espace de noms de la publication) au lieu de `shareCount`/`commentCount` ; MA réaction lue par l'index `by_post_and_person` ; en-tête obsolète corrigé ; abonnés et publications d'une PAGE dans le même agrégat (lot 13, au lieu de `followerCount`/`postCount` sur la page).
 /**
  * Décomptes d'engagement d'une publication — jamais écrits sur la publication.
  *
@@ -156,4 +156,39 @@ export async function recordGroupMember(ctx: MutationCtx, membership: { _id: Id<
 /** Décompte une appartenance (départ, retrait, suppression du groupe). Idempotent. */
 export async function unrecordGroupMember(ctx: MutationCtx, membership: { _id: Id<"thematicGroupMembers">; groupId: Id<"thematicGroups"> }): Promise<void> {
   await engineCounters.deleteIfExists(ctx, { namespace: membersOf(membership.groupId), key: 0, id: membership._id })
+}
+
+const pageFollowersOf = (pageId: Id<"pages">) => `pages.followers:${pageId}`
+const pagePostsOf = (pageId: Id<"pages">) => `pages.posts:${pageId}`
+
+/** Combien d'ABONNÉS vivants pour cette page (D02 : jamais un champ de la page). */
+export async function countPageFollowers(ctx: Pick<QueryCtx, "runQuery">, pageId: Id<"pages">): Promise<number> {
+  return await engineCounters.count(ctx, { namespace: pageFollowersOf(pageId) })
+}
+
+/** Compte un abonnement (une entrée par ligne d'abonnement). Idempotent. */
+export async function recordPageFollower(ctx: MutationCtx, follow: { _id: Id<"pageFollows">; pageId: Id<"pages">; createdAt: number }): Promise<void> {
+  await engineCounters.insertIfDoesNotExist(ctx, { namespace: pageFollowersOf(follow.pageId), key: follow.createdAt, id: follow._id })
+}
+
+/** Décompte un abonnement (désabonnement, effacement). Idempotent. */
+export async function unrecordPageFollower(ctx: MutationCtx, follow: { _id: Id<"pageFollows">; pageId: Id<"pages">; createdAt: number }): Promise<void> {
+  await engineCounters.deleteIfExists(ctx, { namespace: pageFollowersOf(follow.pageId), key: follow.createdAt, id: follow._id })
+}
+
+/** Combien de publications VIVANTES au nom de cette page. */
+export async function countPagePosts(ctx: Pick<QueryCtx, "runQuery">, pageId: Id<"pages">): Promise<number> {
+  return await engineCounters.count(ctx, { namespace: pagePostsOf(pageId) })
+}
+
+/** Compte une publication de page (à l'écriture). Idempotent ; sans page, rien. */
+export async function recordPagePost(ctx: MutationCtx, post: { _id: Id<"posts">; pageId?: Id<"pages">; publishedAt: number }): Promise<void> {
+  if (post.pageId === undefined) return
+  await engineCounters.insertIfDoesNotExist(ctx, { namespace: pagePostsOf(post.pageId), key: post.publishedAt, id: post._id })
+}
+
+/** Décompte une publication de page (à son retrait, quel qu'en soit le chemin). Idempotent. */
+export async function unrecordPagePost(ctx: MutationCtx, post: { _id: Id<"posts">; pageId?: Id<"pages">; publishedAt: number }): Promise<void> {
+  if (post.pageId === undefined) return
+  await engineCounters.deleteIfExists(ctx, { namespace: pagePostsOf(post.pageId), key: post.publishedAt, id: post._id })
 }

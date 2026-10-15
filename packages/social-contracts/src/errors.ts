@@ -30,6 +30,8 @@ export const ENGINE_ERROR_CODES = [
   "groupRoleRequired",
   // Évènement : le voir suffit à en être, en disposer est à l'organisateur seul.
   "eventOrganizerRequired",
+  // Page : la lire suffit à la suivre ; parler en son nom exige d'en être signataire vivant, la gérer d'en être administrateur.
+  "pageRoleRequired",
 ] as const
 export type EngineErrorCode = (typeof ENGINE_ERROR_CODES)[number]
 

@@ -74,11 +74,18 @@ const RATE_LIMITS = {
   "story.remove": { kind: "token bucket", rate: 30, period: HOUR, capacity: 10 },
   // Suggestions (PA3 lot 12c).
   "suggestion.dismiss": { kind: "token bucket", rate: 120, period: HOUR, capacity: 30 },
+  // Pages (PA3 lot 13). Créer une page et la revendiquer sont des gestes rares.
+  "page.create": { kind: "token bucket", rate: 5, period: DAY, capacity: 3 },
+  "page.follow": { kind: "token bucket", rate: 60, period: HOUR, capacity: 20 },
+  "page.publish": { kind: "token bucket", rate: 30, period: HOUR, capacity: 10 },
+  "page.manage": { kind: "token bucket", rate: 30, period: HOUR, capacity: 10 },
+  "page.claim": { kind: "token bucket", rate: 5, period: DAY, capacity: 3 },
   // Garde des fichiers : gestes humains (libération par un modérateur, relance par un opérateur).
   "file.moderate": { kind: "token bucket", rate: 60, period: HOUR, capacity: 20 },
   // Console (PA7)
   "operator.network": { kind: "token bucket", rate: 30, period: HOUR, capacity: 10 },
   "operator.membership": { kind: "token bucket", rate: 60, period: HOUR, capacity: 20 },
+  "operator.page": { kind: "token bucket", rate: 30, period: HOUR, capacity: 10 },
   // Tranche DIASPORALE (`convex/modules/diaspora`, PD1). Entrer et régler sa
   // facette consomment « network.join » et « person.facet » : une personne n'a
   // qu'un budget, quel que soit le chemin. Les quotas MÉTIER (10 parrainages

@@ -1,4 +1,4 @@
-// Dupliqué de socle/convex/modules/reseauPersonnel/contentRemoval.ts @ ad2e7fdc2 — adaptations : branche `page.postCount` retirée (les pages du moteur arrivent au lot 13, compteur en agrégat) ; le partage et le commentaire retirés se DÉCOMPTENT dans l'agrégat (`unrecordShare`, `unrecordComment`) au lieu de `shareCount` et `commentCount` sur la publication ; une RACINE retirée emporte ses réponses (lots bornés, suite planifiée) — le socle les laissait comptées sans plus aucune lecture pour les rendre.
+// Dupliqué de socle/convex/modules/reseauPersonnel/contentRemoval.ts @ ad2e7fdc2 — adaptations : la publication d'une PAGE se décompte dans l'agrégat (`unrecordPagePost`, au lieu de `page.postCount`) ; le partage et le commentaire retirés se DÉCOMPTENT dans l'agrégat (`unrecordShare`, `unrecordComment`) au lieu de `shareCount` et `commentCount` sur la publication ; une RACINE retirée emporte ses réponses (lots bornés, suite planifiée) — le socle les laissait comptées sans plus aucune lecture pour les rendre.
 /**
  * Retrait transactionnel d'un contenu — le point unique des invariants de
  * décompte : retirer un partage le décompte de l'original, retirer une racine
@@ -11,7 +11,7 @@ import { v } from "convex/values"
 import { internal } from "../../_generated/api"
 import type { Doc, Id } from "../../_generated/dataModel"
 import { internalMutation, type MutationCtx } from "../../_generated/server"
-import { unrecordComment, unrecordShare } from "./counters"
+import { unrecordComment, unrecordPagePost, unrecordShare } from "./counters"
 
 /** Réponses retirées avec leur racine dans une même transaction ; au-delà, la suite part en lots planifiés. */
 const REPLIES_REMOVAL_BATCH = 100
@@ -20,6 +20,8 @@ export async function markPostRemoved(ctx: MutationCtx, post: Doc<"posts">, remo
   if (post.status === "removed") return
   await ctx.db.patch(post._id, { status: "removed", removedAt, updatedAt: removedAt })
   await unrecordShare(ctx, post)
+  // Écrivain UNIQUE du décompte au retrait, quel que soit le chemin (signataire, modération).
+  await unrecordPagePost(ctx, post)
 }
 
 /**
