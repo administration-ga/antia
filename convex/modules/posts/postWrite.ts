@@ -1,4 +1,4 @@
-// Dupliqué de socle/convex/modules/reseauPersonnel/postWrite.ts @ ad2e7fdc2 — adaptations : réseau, visibilité et `onRoot` (lisible depuis la racine) dénormalisés à l'écriture ; portée et pays ; citations résolues parmi les profils PUBLIÉS et membres du réseau de la publication (`resolveMentionedPersonIds`) ; cloche des citations par la porte unique (`notifyPerson`) avec la règle « qui peut être sonné » (`mentionCanSeePost`) — au plus 10 citations par publication (`MENTION_MAX_PER_POST`), aucune diffusion différée nécessaire ; partage compté dans l'agrégat ; aucun compteur sur la publication ; extensions page, direct et évènement reportées avec leurs modules ; branche organisation (l. 187-198) retirée.
+// Dupliqué de socle/convex/modules/reseauPersonnel/postWrite.ts @ ad2e7fdc2 — adaptations : réseau, visibilité et `onRoot` (lisible depuis la racine) dénormalisés à l'écriture ; portée et pays ; citations résolues parmi les profils PUBLIÉS et membres du réseau de la publication (`resolveMentionedPersonIds`) ; cloche des citations par la porte unique (`notifyPerson`) avec la règle « qui peut être sonné » (`mentionCanSeePost`) — au plus 10 citations par publication (`MENTION_MAX_PER_POST`), aucune diffusion différée nécessaire ; partage compté dans l'agrégat ; aucun compteur sur la publication ; extensions page et direct reportées avec leurs modules, l'évènement annoncé porté (lot 12) ; branche organisation (l. 187-198) retirée.
 /**
  * L'ÉCRITURE d'une publication — le geste commun à tous les écrivains,
  * présents (`posts.publish`) et à venir (annonce d'un direct, d'un évènement,
@@ -44,6 +44,8 @@ export type PostWriteInput = {
   reach?: string
   country?: string
   idempotencyKey?: string
+  /** L'évènement ANNONCÉ — l'organisateur est DÉJÀ vérifié par l'appelant. */
+  eventId?: Id<"events">
 }
 
 /** Lisible depuis la racine : née à la racine, ou `root`. */
@@ -122,6 +124,7 @@ export async function writePost(ctx: MutationCtx, input: PostWriteInput): Promis
     ...(mentionedPersonIds.length > 0 ? { mentionedPersonIds } : {}),
     searchText: buildSearchableText(input.body, tags.join(" ")),
     ...(input.idempotencyKey ? { idempotencyKey: input.idempotencyKey } : {}),
+    ...(input.eventId ? { eventId: input.eventId } : {}),
     publishedAt: now,
     createdAt: now,
     updatedAt: now,

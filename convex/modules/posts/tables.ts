@@ -1,4 +1,4 @@
-// Dupliqué de socle/convex/modules/reseauPersonnel/tables.ts (l. 137-300) @ ad2e7fdc2 — adaptations : `networkId` et visibilité `network`/`root` sur chaque publication, index préfixés par le réseau ; `onRoot` dénormalisé (lisible depuis la racine) et index de la racine ; portée (`reach`) et pays (`country`) des réseaux à portées ; auteurs et réacteurs en personnes ; AUCUN compteur sur la publication (D01) : réactions par fragments (`postReactionShards`), partages par l'agrégat `engineCounters` ; index jamais lus non recopiés (`by_directSessionId`, `by_eventId`, `by_sharedPostId`, D35) ; mur de groupe préfixé par le réseau ; index des pages, des directs et des évènements ajoutés avec leurs modules ; recherche `search_body_v2` filtrée par réseau, statut et racine.
+// Dupliqué de socle/convex/modules/reseauPersonnel/tables.ts (l. 137-300) @ ad2e7fdc2 — adaptations : `networkId` et visibilité `network`/`root` sur chaque publication, index préfixés par le réseau ; `onRoot` dénormalisé (lisible depuis la racine) et index de la racine ; portée (`reach`) et pays (`country`) des réseaux à portées ; auteurs et réacteurs en personnes ; AUCUN compteur sur la publication (D01) : réactions par fragments (`postReactionShards`), partages par l'agrégat `engineCounters` ; index jamais lus non recopiés (`by_directSessionId`, `by_eventId`, `by_sharedPostId`, D35) ; mur de groupe préfixé par le réseau ; index des pages et des directs ajoutés avec leurs modules ; l'évènement annoncé porté par la publication (lot 12, sans index : rien ne le relit par là) ; recherche `search_body_v2` filtrée par réseau, statut et racine.
 import { defineTable } from "convex/server"
 import { v } from "convex/values"
 
@@ -37,6 +37,8 @@ export const postsTables = {
     sharedPostId: v.optional(v.id("posts")),
     /** Le groupe THÉMATIQUE : présent SI ET SEULEMENT SI l'audience est `group` (tenu par `writePost`). */
     groupId: v.optional(v.id("thematicGroups")),
+    /** L'ÉVÈNEMENT annoncé par cette publication (son organisateur seul l'annonce, une fois). */
+    eventId: v.optional(v.id("events")),
     /** Portée, parmi celles que le réseau déclare (`networks.reachValues`). */
     reach: v.optional(v.string()),
     /** Pays (ISO 3166-1 alpha-2) ; exigé par la portée locale. */

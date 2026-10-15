@@ -60,6 +60,7 @@ import {
   reactionKindValidator,
 } from "../../lib/validators"
 import { acceptedCounterpartIds, blockedCounterpartIds, type BoundedIds, followedPersonIds, isBlockedBetween, isConnectedTo, isFollowingPerson } from "../graph/graph"
+import { eventCardOf, eventCardValidator } from "../events/card"
 import { hiddenPostIds, mutedPersonIds, readerMarks } from "../marks/marks"
 import { declaredMediaValidator, postMediaDtoValidator, resolvePostMediaDtos, verifyDeclaredMedia } from "../media/media"
 import { notifyPerson } from "../notifications/notify"
@@ -143,6 +144,8 @@ export const feedItemValidator = v.object({
   tags: v.array(v.string()),
   /** Le groupe de la publication (audience `group`) — pour mener au groupe, jamais pour juger un droit. */
   groupId: v.union(v.id("thematicGroups"), v.null()),
+  /** L'évènement ANNONCÉ par la publication, relu à chaque lecture (statut, MA réponse). */
+  event: v.union(eventCardValidator, v.null()),
   reach: v.union(v.string(), v.null()),
   country: v.union(v.string(), v.null()),
   origin: originValidator,
@@ -199,7 +202,7 @@ async function resolveShareProjection(ctx: QueryCtx, post: Doc<"posts">, reader:
 
 /** LA projection d'une publication — le fil, le mur, la recherche et la lecture unitaire rendent la même carte. */
 export async function toFeedItem(ctx: QueryCtx, post: Doc<"posts">, reader: ReaderContext, reason: FeedReason, enrich: Enrichment): Promise<FeedItem> {
-  const [author, reactions, commentCount, shareCount, media, share, origin] = await Promise.all([
+  const [author, reactions, commentCount, shareCount, media, share, origin, event] = await Promise.all([
     enrich.profileOf(post.authorPersonId),
     summarizeReactions(ctx, post._id, reader.personId),
     countComments(ctx, post._id),
@@ -207,6 +210,7 @@ export async function toFeedItem(ctx: QueryCtx, post: Doc<"posts">, reader: Read
     resolvePostMediaDtos(ctx, post.media),
     resolveShareProjection(ctx, post, reader, enrich.profileOf),
     post.networkId === reader.network._id ? Promise.resolve(null) : enrich.originOf(post.networkId),
+    eventCardOf(ctx, post.eventId, reader.personId),
   ])
   return {
     _id: post._id,
@@ -231,6 +235,7 @@ export async function toFeedItem(ctx: QueryCtx, post: Doc<"posts">, reader: Read
     share,
     tags: post.tags ?? [],
     groupId: post.groupId ?? null,
+    event,
     reach: post.reach ?? null,
     country: post.country ?? null,
     origin,

@@ -63,6 +63,11 @@ const RATE_LIMITS = {
   "groupThread.invite": { kind: "token bucket", rate: 60, period: HOUR, capacity: 20 },
   "groupThread.join": { kind: "token bucket", rate: 30, period: HOUR, capacity: 10 },
   "groupThread.manage": { kind: "token bucket", rate: 60, period: HOUR, capacity: 20 },
+  // Évènements (PA3 lot 12) — l'annonce consomme « post.publish ».
+  "event.create": { kind: "token bucket", rate: 20, period: HOUR, capacity: 5 },
+  "event.invite": { kind: "token bucket", rate: 60, period: HOUR, capacity: 20 },
+  "event.respond": { kind: "token bucket", rate: 60, period: HOUR, capacity: 20 },
+  "event.manage": { kind: "token bucket", rate: 30, period: HOUR, capacity: 10 },
   // Garde des fichiers : gestes humains (libération par un modérateur, relance par un opérateur).
   "file.moderate": { kind: "token bucket", rate: 60, period: HOUR, capacity: 20 },
   // Console (PA7)

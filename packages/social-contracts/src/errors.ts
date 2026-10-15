@@ -28,6 +28,8 @@ export const ENGINE_ERROR_CODES = [
   // Groupe thématique : la fiche est découvrable, agir y exige d'en être membre — et parfois un rôle.
   "groupMembershipRequired",
   "groupRoleRequired",
+  // Évènement : le voir suffit à en être, en disposer est à l'organisateur seul.
+  "eventOrganizerRequired",
 ] as const
 export type EngineErrorCode = (typeof ENGINE_ERROR_CODES)[number]
 

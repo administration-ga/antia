@@ -2,6 +2,7 @@ import { defineSchema } from "convex/server"
 
 import { diasporaTables } from "./modules/diaspora/tables"
 import { engagementTables } from "./modules/engagement/tables"
+import { eventsTables } from "./modules/events/tables"
 import { filesTables } from "./modules/files/tables"
 import { graphTables } from "./modules/graph/tables"
 import { groupsTables } from "./modules/groups/tables"
@@ -43,6 +44,7 @@ export default defineSchema(
     ...thematicGroupsTables,
     ...messagingTables,
     ...groupsTables,
+    ...eventsTables,
     ...marksTables,
     ...moderationTables,
     ...diasporaTables,

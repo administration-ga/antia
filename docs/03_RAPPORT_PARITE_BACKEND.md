@@ -24,7 +24,8 @@ l'owner map), les tests portés et neufs, les écarts assumés. Un module n'entr
 | 8 | `engagement` (réactions, commentaires paginés, cloches) et `moderation` (signalements, file du réseau, décisions tracées) | `44831f1` | 2 fichiers convex (8 + 5 cas) + 1 fichier domaine | D01, D03, D08, D14, D35 |
 | 9 | `thematicGroups` (module complet : cycle de vie, invitations, rôles, mur, découverte, modération de groupe) | `a38c863` | 1 fichier convex (17 cas) | D02, D10, D14, D17, D19 |
 | 10 | `messaging` (fils personnels par réseau, boîte paginée, pastille tenue à l'écriture, pièces gardées, transfert) | `8c0ecda` | 1 fichier convex (37 cas) + 4 fichiers contrats (20 cas) | D13, D14, D16, D21, D37, D38, D39 |
-| 11 | `groups` (conversations de groupe : création par invitation, lien, administration, messages, non-lus tenus, transfert, cascade) | voir journal git (`feat(groups)`) | 1 fichier convex (42 cas) + 1 fichier contrats (7 cas) | D02, D05, D07, D10, D14, D15, D16, D22, D23 |
+| 11 | `groups` (conversations de groupe : création par invitation, lien, administration, messages, non-lus tenus, transfert, cascade) | `35db309` | 1 fichier convex (42 cas) + 1 fichier contrats (7 cas) | D02, D05, D07, D10, D14, D15, D16, D22, D23 |
+| 12a | `events` (évènements personnels : création, invitation, réponse, annulation, annonce, agenda) | voir journal git (`feat(events)`) | 1 fichier convex (20 cas) | D02, D14, D15, D19 |
 
 Ordre suivi (owner map §4.2), avec un écart : le lot 1 (modules purs) est porté avec chaque module qui le
 consomme ; l'avis de verdict des fichiers (`files/notify`) est arrivé avec le module `notifications` (lot 5), dont il
@@ -726,3 +727,53 @@ dépend.
 - Une **chaîne de copies** (copie d'une copie dont l'intermédiaire a disparu) peut perdre sa pièce à la purge de
   l'original : la référence comptée des blobs viendra avec la rétention (PA5, D30).
 - **Appels de groupe** (fil d'origine, sonnerie des membres vivants, capacité) : lot 15.
+
+---
+
+## Lot 12a — `events` (évènements personnels d'un réseau)
+
+### Parité, fichier par fichier
+
+| Source (`socle/convex/modules/reseauPersonnel/…`) | Cible | Sort | État |
+|---|---|---|---|
+| `evenements.ts` | `convex/modules/events/events.ts` | à adapter | ✅ (iCal différé) |
+| `tables.ts` (l. 1031-1097) | `convex/modules/events/tables.ts` | à adapter | ✅ |
+| `posts.ts` (`resolveEventProjection`) | `convex/modules/events/card.ts` (carte de la publication) | à adapter | ✅ |
+| `postWrite.ts` (`eventId`) | `convex/modules/posts/postWrite.ts` | à adapter | ✅ |
+| `domain.ts` (évènements) | `packages/social-domain/src/events.ts` | pur | ✅ (lot 1) |
+
+### Adaptations (liste fermée)
+
+- **Par réseau** : l'évènement et la participation portent `networkId` ; un évènement d'un autre réseau est introuvable ;
+  une clé de création rejouée ailleurs est refusée ; la relation exigée pour inviter est celle DU réseau.
+- **Adhésion** par le constructeur sur chaque fonction (D15, absente au socle) ; « comptes publics » sans objet.
+- **Décomptes** (`participantCount`, `acceptedCount`) dans l'agrégat `engineCounters` (D02), jamais sur l'évènement.
+- **Fuseau** : celui de l'évènement, ou à défaut celui de la personne — jamais un fuseau imposé ; refus sinon.
+- **Agenda** : organisés et invitations, prochains d'abord puis l'historique récent, borné et qui DIT sa lacune
+  (`truncated`, D19) ; `eventStartAt` obligatoire (le chemin hérité est supprimé).
+- **Fiche** sans participants ; ceux-ci se paginent (`paginateEventParticipants`).
+- **Annonce** par le point d'écriture des publications (portée, pays, visibilité du réseau) ; la publication porte la
+  carte de l'évènement, RELUE à chaque lecture (statut, réponse du lecteur).
+- **Cloche** `event_invite` (sujet `event`) par la porte du moteur, résolue à la réponse ; à l'annulation, job paginé
+  gardé tel quel.
+- **Refus** à code : `notFound` indistinct, `eventOrganizerRequired` (neuf), règle `EVENT_CANCELLED` (neuve) ; débit
+  `event.create`, `event.invite`, `event.respond`, `event.manage` (l'annonce consomme `post.publish`).
+
+### Corrections de dette
+
+- **D02** : décomptes par agrégat. **D14** : débit. **D15** : adhésion partout. **D19** : agenda borné qui dit sa lacune.
+
+### Tests
+
+- Portés (`evenements.test`) : idempotence et fuseau ; fuseau, fenêtre, durée, titre ; une ligne par invitation ;
+  participants paginés ; réponse qui écrit la ligne et décomptes ; réinvitation d'un refus, pas d'un accord ; réponse
+  d'autrui ; anti-oracle ; autorité de l'organisateur ; tiers indistinct ; annulé visible et figé ; fenêtre de l'agenda ;
+  invitation future derrière 200 anciennes ; cloche dédupliquée et refus muet ; résolution à la réponse ; annulation
+  résolue par lots ; job sans effet hors annulation ; annonce unique, carte relue, annulé non annoncé.
+- Neufs : clé rejouée dans un autre réseau, autre réseau introuvable, relation d'un autre réseau refusée, fuseau de la
+  personne par défaut, adhésion en attente refusée (D15), lacune de l'agenda.
+- Différés : iCal (2 cas).
+
+### Écarts assumés
+
+- **Export iCal** (`eventIcalUrl`, route `/ical/event/{id}.ics`) : différé, décision par défaut de l'owner map.
