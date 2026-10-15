@@ -140,3 +140,20 @@ export async function unrecordShare(ctx: MutationCtx, share: { _id: Id<"posts">;
   if (share.sharedPostId === undefined) return
   await engineCounters.deleteIfExists(ctx, { namespace: sharesOf(share.sharedPostId), key: share.publishedAt, id: share._id })
 }
+
+const membersOf = (groupId: Id<"thematicGroups">) => `groups.members:${groupId}`
+
+/** Combien de membres VIVANTS dans ce groupe thématique (D02 : jamais un champ du groupe). */
+export async function countGroupMembers(ctx: Pick<QueryCtx, "runQuery">, groupId: Id<"thematicGroups">): Promise<number> {
+  return await engineCounters.count(ctx, { namespace: membersOf(groupId) })
+}
+
+/** Compte une appartenance vivante (une entrée par ligne d'appartenance). Idempotent. */
+export async function recordGroupMember(ctx: MutationCtx, membership: { _id: Id<"thematicGroupMembers">; groupId: Id<"thematicGroups"> }): Promise<void> {
+  await engineCounters.insertIfDoesNotExist(ctx, { namespace: membersOf(membership.groupId), key: 0, id: membership._id })
+}
+
+/** Décompte une appartenance (départ, retrait, suppression du groupe). Idempotent. */
+export async function unrecordGroupMember(ctx: MutationCtx, membership: { _id: Id<"thematicGroupMembers">; groupId: Id<"thematicGroups"> }): Promise<void> {
+  await engineCounters.deleteIfExists(ctx, { namespace: membersOf(membership.groupId), key: 0, id: membership._id })
+}

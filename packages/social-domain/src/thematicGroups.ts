@@ -75,3 +75,8 @@ export function canSetThematicGroupRole(input: { actorRole: ThematicGroupRole; t
 export function canLeaveThematicGroup(role: ThematicGroupRole): boolean {
   return role !== "owner"
 }
+
+/** La même règle, levée : le propriétaire ne quitte pas son groupe. */
+export function assertCanLeaveThematicGroup(role: ThematicGroupRole): void {
+  if (!canLeaveThematicGroup(role)) throw new DomainViolation("GROUP_OWNER_CANNOT_LEAVE")
+}

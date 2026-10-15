@@ -42,5 +42,6 @@
   "POST_PIN_GROUP": "A group post is pinned in its group.",
   "POST_REACH_INVALID": "This reach does not exist in this network.",
   "POST_COUNTRY_INVALID": "The country must be a two-letter code, for example FR.",
-  "POST_COUNTRY_REQUIRED": "A local post must state its country."
+  "POST_COUNTRY_REQUIRED": "A local post must state its country.",
+  "GROUP_OWNER_CANNOT_LEAVE": "The owner does not leave their group: they close, archive or delete it."
 }

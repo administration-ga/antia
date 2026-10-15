@@ -1,4 +1,4 @@
-// Dupliqué de socle/convex/modules/reseauPersonnel/tables.ts (l. 137-300) @ ad2e7fdc2 — adaptations : `networkId` et visibilité `network`/`root` sur chaque publication, index préfixés par le réseau ; `onRoot` dénormalisé (lisible depuis la racine) et index de la racine ; portée (`reach`) et pays (`country`) des réseaux à portées ; auteurs et réacteurs en personnes ; AUCUN compteur sur la publication (D01) : réactions par fragments (`postReactionShards`), partages par l'agrégat `engineCounters` ; index jamais lus non recopiés (`by_directSessionId`, `by_eventId`, `by_sharedPostId`, D35) ; index du mur de groupe, des pages, des directs et des évènements ajoutés avec leurs modules ; recherche `search_body_v2` filtrée par réseau, statut et racine.
+// Dupliqué de socle/convex/modules/reseauPersonnel/tables.ts (l. 137-300) @ ad2e7fdc2 — adaptations : `networkId` et visibilité `network`/`root` sur chaque publication, index préfixés par le réseau ; `onRoot` dénormalisé (lisible depuis la racine) et index de la racine ; portée (`reach`) et pays (`country`) des réseaux à portées ; auteurs et réacteurs en personnes ; AUCUN compteur sur la publication (D01) : réactions par fragments (`postReactionShards`), partages par l'agrégat `engineCounters` ; index jamais lus non recopiés (`by_directSessionId`, `by_eventId`, `by_sharedPostId`, D35) ; mur de groupe préfixé par le réseau ; index des pages, des directs et des évènements ajoutés avec leurs modules ; recherche `search_body_v2` filtrée par réseau, statut et racine.
 import { defineTable } from "convex/server"
 import { v } from "convex/values"
 
@@ -59,6 +59,8 @@ export const postsTables = {
     // Les mêmes, lus depuis la RACINE (natifs et `root` de tous les réseaux).
     .index("by_root_status_publishedAt", ["onRoot", "status", "publishedAt"])
     .index("by_root_author_status_publishedAt", ["onRoot", "authorPersonId", "status", "publishedAt"])
+    // Le MUR d'un groupe thématique (et la cascade de sa suppression).
+    .index("by_network_group_status_publishedAt", ["networkId", "groupId", "status", "publishedAt"])
     // MES publications, retirées comprises (je suis seul à voir les miennes retirées).
     .index("by_network_author_publishedAt", ["networkId", "authorPersonId", "publishedAt"])
     .index("by_author_and_idempotencyKey", ["authorPersonId", "idempotencyKey"])

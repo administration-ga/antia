@@ -83,15 +83,15 @@ export const FEED_PAGE_MAX = 30
  */
 const FEED_SCAN = 200
 /** Fenêtre bornée PAR AUTEUR avant la fusion k-voies (une page maximale). */
-const FEED_AUTHOR_SCAN = FEED_LIMIT_MAX
+export const FEED_AUTHOR_SCAN = FEED_LIMIT_MAX
 /** Fenêtres d'auteur balayées au plus pour une page de mur. */
-const WALL_WINDOWS_MAX = 4
+export const WALL_WINDOWS_MAX = 4
 /** Fenêtre de la recherche : bornée avant même la garde par lecteur. */
 const SEARCH_SCAN = 100
 /** En deçà, on ne cherche pas : une lettre seule rapporterait un fragment de l'index. */
 const SEARCH_QUERY_MIN = 2
 
-const clampLimit = (limit: number | undefined) => Math.min(Math.max(Math.trunc(limit ?? FEED_LIMIT_DEFAULT), 1), FEED_LIMIT_MAX)
+export const clampLimit = (limit: number | undefined) => Math.min(Math.max(Math.trunc(limit ?? FEED_LIMIT_DEFAULT), 1), FEED_LIMIT_MAX)
 
 // ═══════════════════════════════════════════════════════════════
 // DTO
@@ -156,15 +156,15 @@ export type FeedItem = Infer<typeof feedItemValidator>
 type SharedPostProjection = Infer<typeof sharedPostValidator>
 type FeedOrigin = NonNullable<Infer<typeof originValidator>>
 
-const cursorValidator = v.object({ publishedAt: v.number(), postId: v.id("posts") })
+export const cursorValidator = v.object({ publishedAt: v.number(), postId: v.id("posts") })
 
-type Enrichment = {
+export type Enrichment = {
   profileOf: ReturnType<typeof miniProfileCache>
   originOf: (networkId: Id<"networks">) => Promise<FeedOrigin | null>
   marks: { bookmarked: ReadonlySet<string>; notifying: ReadonlySet<string> }
 }
 
-function enrichment(ctx: ReadCtx & Pick<QueryCtx, "storage">, marks?: Enrichment["marks"]): Enrichment {
+export function enrichment(ctx: ReadCtx & Pick<QueryCtx, "storage">, marks?: Enrichment["marks"]): Enrichment {
   const origins = new Map<string, FeedOrigin | null>()
   return {
     profileOf: miniProfileCache(ctx),
@@ -276,7 +276,7 @@ function bounded(q: PublishedAtRange, bound: Bound): IndexRange {
   }
 }
 
-type RangeReader = (bound: Bound, take: number) => Promise<Doc<"posts">[]>
+export type RangeReader = (bound: Bound, take: number) => Promise<Doc<"posts">[]>
 
 /** Les publications vivantes lisibles DEPUIS ce réseau : ses natives, ou celles de la racine (`onRoot`). */
 function globalReader(ctx: ReadCtx, network: Doc<"networks">): RangeReader {
@@ -316,10 +316,20 @@ function authorReader(ctx: ReadCtx, network: Doc<"networks">, authorPersonId: Id
       .take(take)
 }
 
+/** Les publications vivantes d'UN groupe thématique de ce réseau — son mur. */
+export function groupReader(ctx: ReadCtx, networkId: Id<"networks">, groupId: Id<"thematicGroups">): RangeReader {
+  return async (bound, take) =>
+    await ctx.db
+      .query("posts")
+      .withIndex("by_network_group_status_publishedAt", (q) => bounded(q.eq("networkId", networkId).eq("groupId", groupId).eq("status", "published"), bound))
+      .order("desc")
+      .take(take)
+}
+
 type FeedCandidateWindow = { rows: Doc<"posts">[]; wasFull: boolean }
 
 /** Une fenêtre STRICTEMENT derrière le curseur global. */
-async function feedWindow(
+export async function feedWindow(
   read: RangeReader,
   scan: number,
   cursor: PersonalFeedCursor<Id<"posts">> | undefined,
@@ -342,7 +352,7 @@ async function feedWindow(
 }
 
 /** `_creationTime` de la publication frontière, seul départage réel de l'index. */
-async function cursorCreationTimeOf(ctx: ReadCtx, cursor: PersonalFeedCursor<Id<"posts">> | undefined): Promise<number | undefined> {
+export async function cursorCreationTimeOf(ctx: ReadCtx, cursor: PersonalFeedCursor<Id<"posts">> | undefined): Promise<number | undefined> {
   if (cursor === undefined) return undefined
   const post = await ctx.db.get(cursor.postId)
   return post !== null && post.publishedAt === cursor.publishedAt ? post._creationTime : undefined

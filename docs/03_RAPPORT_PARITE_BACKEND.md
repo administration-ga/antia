@@ -21,7 +21,8 @@ l'owner map), les tests portés et neufs, les écarts assumés. Un module n'entr
 | 5 | `notifications` (cloche sociale, diffusion par lots) et avis de verdict des fichiers | `9f2f12b` | 1 fichier convex (10 cas) + 1 fichier domaine + 1 cliquet | D07, D18, D19 |
 | 6 | `platform/audit` (journal des décisions du moteur) | `75e4b26` | 1 fichier convex (5 cas) + 4 cas fichiers + 1 fichier domaine + 1 cliquet | D14, D35 |
 | 7 | `thematicGroups/access`, `posts` (accès, retrait, compteurs, écriture, fil, mur, recherche) et `marks` | `3dfebcc` | 2 fichiers convex (32 + 8 cas) + cas domaine | D01, D14, D18, D19, D24, D25, D35 |
-| 8 | `engagement` (réactions, commentaires paginés, cloches) et `moderation` (signalements, file du réseau, décisions tracées) | voir journal git (`feat(engagement)`) | 2 fichiers convex (8 + 5 cas) + 1 fichier domaine | D01, D03, D08, D14, D35 |
+| 8 | `engagement` (réactions, commentaires paginés, cloches) et `moderation` (signalements, file du réseau, décisions tracées) | `44831f1` | 2 fichiers convex (8 + 5 cas) + 1 fichier domaine | D01, D03, D08, D14, D35 |
+| 9 | `thematicGroups` (module complet : cycle de vie, invitations, rôles, mur, découverte, modération de groupe) | voir journal git (`feat(thematicGroups)`) | 1 fichier convex (17 cas) | D02, D10, D14, D17, D19 |
 
 Ordre suivi (owner map §4.2), avec un écart : le lot 1 (modules purs) est porté avec chaque module qui le
 consomme ; l'avis de verdict des fichiers (`files/notify`) est arrivé avec le module `notifications` (lot 5), dont il
@@ -481,3 +482,57 @@ dépend.
 - **Modération à l'échelle** (équipes, files par équipe puis réseau puis plateforme, sanctions graduées, recours,
   relecture, mots bloqués, détection de spam, rapport périodique) : PA5, sur `contentReports` et `engineAudit`.
 - **Prévenir l'auteur d'un retrait** et le **recours** : PA5 (EXF-AN-28/29).
+
+---
+
+## Lot 9 — `thematicGroups` (module complet)
+
+### Parité, fichier par fichier
+
+| Source (`socle/convex/modules/reseauPersonnel/…`) | Cible | Sort | État |
+|---|---|---|---|
+| `groupesThematiques.ts` | `convex/modules/thematicGroups/thematicGroups.ts` | à adapter | ✅ |
+| `tables.ts` (l. 922-1030) | `convex/modules/thematicGroups/tables.ts` (groupes, membres, invitations) | à adapter | ✅ |
+| `groupesThematiquesAccess.ts` | `convex/modules/thematicGroups/access.ts` | tel quel | ✅ (lot 7) |
+| purges de `stories.ts`, `groupes.ts`, `groupesThematiques.ts` (D10) | `convex/modules/files/purge.ts` (`purgeStoredFile`) | à réécrire | ✅ (blob ET ligne d'analyse) |
+
+### Adaptations (liste fermée)
+
+- **Par réseau** : le groupe, l'appartenance et l'invitation portent `networkId` ; toute fonction exige le réseau du
+  groupe (un groupe d'un autre réseau est introuvable) ; adhésion par le constructeur ; « ressortissants »
+  (`isPublicUser`) sans objet dans le moteur.
+- **Effectif** dans l'agrégat `engineCounters` (D02), une entrée par appartenance vivante ; jamais un champ du groupe.
+- **Découverte** indexée par réseau (`by_network_createdAt`, `search_name` filtrée par réseau, D17).
+- **Listes** : membres et invitations paginés ; « mes groupes » bornés par activité récente avec `truncated` ; vivier
+  d'invitation borné avec `truncated`, chaque relation jugée personne par personne (D19).
+- **Mur du groupe** à curseur composite (le socle repartait d'un instant et perdait les ex æquo), blocage et
+  masquage appliqués.
+- **Invitations** par la cloche du moteur (nouveau sujet `thematicGroup`), résolues par le serveur (accepter, décliner,
+  adhérer librement) ; anti-oracle (inconnue, non connectée, bloquée : même refus).
+- **Suppression** : cascade bornée et chaînée qui nettoie réactions, fragments, commentaires (décomptés), marques,
+  signalements, médias (blob ET ligne d'analyse, D10), membres (décomptés), invitations, puis le groupe.
+- **Refus** à code : `notFound`, `groupMembershipRequired`, `groupRoleRequired` (neuf), règle
+  `GROUP_OWNER_CANNOT_LEAVE` (neuve) ; débit `group.create`, `group.join`, `group.invite`, `group.moderate`,
+  `group.manage` (D14).
+
+### Corrections de dette
+
+- **D02** : effectif par agrégat. **D10** : purge du blob avec sa ligne d'analyse. **D14** : débit sur chaque geste.
+- **D17** : découverte filtrée par réseau. **D19** : listes paginées ou bornées avec leur lacune.
+
+### Tests
+
+- Portés (`groupesThematiques.test`) : idempotence et owner unique, adhésion et départ (effectif, rôle qui ne survit
+  pas), l'owner ne quitte pas, fermer (actes gelés, découverte retirée, fiche gardée), archiver monotone, cascade de
+  suppression, publier et lire dans un groupe (co-membre, non-membre, départ, aucune portée du fil, aucune recherche),
+  blocage entre co-membres, partage interdit, invitations (rappel, acceptation qui résout toutes les lignes, anti-oracle,
+  refus muet, déjà membre), vivier (statuts, relation bloquée, vivier propre), rôles et retraits, modération de groupe
+  (épingler, retirer, re-garde), citations dans un groupe, découverte et « mes groupes », signalement.
+- Neufs : groupe d'un autre réseau introuvable, clé rejouée dans un autre réseau refusée, mur à ex æquo parcouru sans
+  perte, purge vérifiée jusqu'au blob et à la ligne d'analyse.
+
+### Écarts assumés
+
+- **Journal des décisions** : les gestes de modération d'un groupe (rôle, retrait, épingle) relèvent de
+  l'autogestion du groupe et ne sont pas écrits dans `engineAudit` (comme au socle) ; la modération du réseau l'est.
+- **Vivier d'invitation** borné à 200 connexions (la recherche serveur des connexions prend le relais), comme au socle.

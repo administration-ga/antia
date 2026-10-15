@@ -39,6 +39,7 @@ import type * as modules_files_mutations from "../modules/files/mutations.js";
 import type * as modules_files_notify from "../modules/files/notify.js";
 import type * as modules_files_policy from "../modules/files/policy.js";
 import type * as modules_files_posedUploads from "../modules/files/posedUploads.js";
+import type * as modules_files_purge from "../modules/files/purge.js";
 import type * as modules_files_queries from "../modules/files/queries.js";
 import type * as modules_files_scan from "../modules/files/scan.js";
 import type * as modules_files_storageGuard from "../modules/files/storageGuard.js";
@@ -81,6 +82,7 @@ import type * as modules_posts_posts from "../modules/posts/posts.js";
 import type * as modules_posts_tables from "../modules/posts/tables.js";
 import type * as modules_thematicGroups_access from "../modules/thematicGroups/access.js";
 import type * as modules_thematicGroups_tables from "../modules/thematicGroups/tables.js";
+import type * as modules_thematicGroups_thematicGroups from "../modules/thematicGroups/thematicGroups.js";
 import type * as seeds_foundations from "../seeds/foundations.js";
 
 import type {
@@ -121,6 +123,7 @@ declare const fullApi: ApiFromModules<{
   "modules/files/notify": typeof modules_files_notify;
   "modules/files/policy": typeof modules_files_policy;
   "modules/files/posedUploads": typeof modules_files_posedUploads;
+  "modules/files/purge": typeof modules_files_purge;
   "modules/files/queries": typeof modules_files_queries;
   "modules/files/scan": typeof modules_files_scan;
   "modules/files/storageGuard": typeof modules_files_storageGuard;
@@ -163,6 +166,7 @@ declare const fullApi: ApiFromModules<{
   "modules/posts/tables": typeof modules_posts_tables;
   "modules/thematicGroups/access": typeof modules_thematicGroups_access;
   "modules/thematicGroups/tables": typeof modules_thematicGroups_tables;
+  "modules/thematicGroups/thematicGroups": typeof modules_thematicGroups_thematicGroups;
   "seeds/foundations": typeof seeds_foundations;
 }>;
 

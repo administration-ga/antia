@@ -42,5 +42,6 @@
   "POST_PIN_GROUP": "Une publication de groupe s'épingle dans son groupe.",
   "POST_REACH_INVALID": "Cette portée n'existe pas dans ce réseau.",
   "POST_COUNTRY_INVALID": "Le pays doit être un code à deux lettres, par exemple FR.",
-  "POST_COUNTRY_REQUIRED": "Une publication locale précise son pays."
+  "POST_COUNTRY_REQUIRED": "Une publication locale précise son pays.",
+  "GROUP_OWNER_CANNOT_LEAVE": "Le propriétaire ne quitte pas son groupe : il le ferme, l'archive ou le supprime."
 }

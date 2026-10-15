@@ -1,4 +1,4 @@
-// Dupliqué de socle/convex/modules/reseauPersonnel/tables.ts (l. 391-455, `reseauPersonnel_notifications`) @ ad2e7fdc2 — adaptations : UNE seule table `notifications` du moteur (le centre administratif `functions/notifications.ts` est exclu) ; `networkId` et personnes ; acteur facultatif (avis du système) ; sujets typés ajoutés avec leur module (publication, connexion, analyse de fichier pour l'instant) ; non-lus indexés jusqu'à la date (`markAllRead` sans `.filter()`) ; index de rétention reportés avec la rétention (PA5, D30).
+// Dupliqué de socle/convex/modules/reseauPersonnel/tables.ts (l. 391-455, `reseauPersonnel_notifications`) @ ad2e7fdc2 — adaptations : UNE seule table `notifications` du moteur (le centre administratif `functions/notifications.ts` est exclu) ; `networkId` et personnes ; acteur facultatif (avis du système) ; sujets typés ajoutés avec leur module (publication, connexion, analyse de fichier, groupe thématique) ; non-lus indexés jusqu'à la date (`markAllRead` sans `.filter()`) ; index de rétention reportés avec la rétention (PA5, D30).
 /**
  * La cloche sociale d'un réseau : le RÉSIDU d'un geste social (quelqu'un a
  * réagi, commenté, demandé une connexion), jamais un contenu. Le sujet est une
@@ -20,6 +20,7 @@ export const notificationSubjectValidator = v.union(
   v.object({ post: v.id("posts") }),
   v.object({ connection: v.id("connections") }),
   v.object({ fileScan: v.id("fileScans") }),
+  v.object({ thematicGroup: v.id("thematicGroups") }),
 )
 
 export const notificationsTables = {
@@ -33,6 +34,7 @@ export const notificationsTables = {
     subjectPostId: v.optional(v.id("posts")),
     subjectConnectionId: v.optional(v.id("connections")),
     subjectFileScanId: v.optional(v.id("fileScans")),
+    subjectThematicGroupId: v.optional(v.id("thematicGroups")),
     dedupKey: v.string(),
     createdAt: v.number(),
     readAt: v.optional(v.number()),

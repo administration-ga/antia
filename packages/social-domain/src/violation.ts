@@ -46,6 +46,7 @@ export const DOMAIN_RULES = [
   // Groupes thématiques
   "GROUP_NAME_LENGTH",
   "GROUP_DESCRIPTION_TOO_LONG",
+  "GROUP_OWNER_CANNOT_LEAVE",
   // Évènements
   "EVENT_TITLE_LENGTH",
   "EVENT_DESCRIPTION_TOO_LONG",

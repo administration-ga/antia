@@ -30,6 +30,11 @@ const RATE_LIMITS = {
   "comment.edit": { kind: "token bucket", rate: 60, period: HOUR, capacity: 20 },
   "comment.remove": { kind: "token bucket", rate: 60, period: HOUR, capacity: 20 },
   "report.create": { kind: "token bucket", rate: 20, period: HOUR, capacity: 5 },
+  "group.create": { kind: "token bucket", rate: 10, period: HOUR, capacity: 3 },
+  "group.join": { kind: "token bucket", rate: 60, period: HOUR, capacity: 20 },
+  "group.invite": { kind: "token bucket", rate: 60, period: HOUR, capacity: 20 },
+  "group.moderate": { kind: "token bucket", rate: 120, period: HOUR, capacity: 30 },
+  "group.manage": { kind: "token bucket", rate: 20, period: HOUR, capacity: 5 },
   "moderation.decide": { kind: "token bucket", rate: 300, period: HOUR, capacity: 60 },
   "upload.url": { kind: "token bucket", rate: 60, period: HOUR, capacity: 20 },
   // Graphe (PA3 lot 4)

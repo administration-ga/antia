@@ -32,6 +32,7 @@ export function subjectOf(ref: NotificationSubjectRef | undefined): Notification
   if (!ref) return null
   if ("post" in ref) return { kind: "post", id: ref.post }
   if ("connection" in ref) return { kind: "connection", id: ref.connection }
+  if ("thematicGroup" in ref) return { kind: "thematicGroup", id: ref.thematicGroup }
   return { kind: "fileScan", id: ref.fileScan }
 }
 
@@ -40,6 +41,7 @@ function subjectColumns(ref: NotificationSubjectRef | undefined): Partial<Doc<"n
   if (!ref) return {}
   if ("post" in ref) return { subjectPostId: ref.post }
   if ("connection" in ref) return { subjectConnectionId: ref.connection }
+  if ("thematicGroup" in ref) return { subjectThematicGroupId: ref.thematicGroup }
   return { subjectFileScanId: ref.fileScan }
 }
 
@@ -48,6 +50,7 @@ export function subjectRefOf(row: Doc<"notifications">): NotificationSubjectRef 
   if (row.subjectPostId) return { post: row.subjectPostId }
   if (row.subjectConnectionId) return { connection: row.subjectConnectionId }
   if (row.subjectFileScanId) return { fileScan: row.subjectFileScanId }
+  if (row.subjectThematicGroupId) return { thematicGroup: row.subjectThematicGroupId }
   return undefined
 }
 

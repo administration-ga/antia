@@ -1,4 +1,4 @@
-// Dupliqué de socle/convex/modules/reseauPersonnel/tables.ts (l. 347-366, `reseauPersonnel_contentReports`) @ ad2e7fdc2 — adaptations : `networkId` (le réseau du contenu signalé : c'est la file de SES modérateurs) ; personnes ; motifs et statuts du domaine ; `by_status_and_createdAt` préfixé par le réseau ; `by_post` et `by_comment` non recopiés tant qu'ils ne sont pas lus (D35).
+// Dupliqué de socle/convex/modules/reseauPersonnel/tables.ts (l. 347-366, `reseauPersonnel_contentReports`) @ ad2e7fdc2 — adaptations : `networkId` (le réseau du contenu signalé : c'est la file de SES modérateurs) ; personnes ; motifs et statuts du domaine ; `by_status_and_createdAt` préfixé par le réseau ; `by_post` lu par la cascade de suppression d'un groupe ; `by_comment` non recopié (D35).
 /**
  * Signalements — un lecteur signale une publication ou un commentaire ; la file
  * du réseau du contenu les reçoit. La modération à l'échelle (équipes, sanctions,
@@ -33,5 +33,7 @@ export const moderationTables = {
     // Un signalement par (déclarant, cible) : le second se dédoublonne.
     .index("by_reporter_target", ["reporterPersonId", "targetKind", "postId", "commentId"])
     // La file d'un réseau, par statut, la plus ancienne d'abord.
-    .index("by_network_status_createdAt", ["networkId", "status", "createdAt"]),
+    .index("by_network_status_createdAt", ["networkId", "status", "createdAt"])
+    // Les signalements d'une publication (cascade de la suppression d'un groupe).
+    .index("by_post", ["postId"]),
 }

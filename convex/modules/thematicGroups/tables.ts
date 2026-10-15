@@ -1,8 +1,8 @@
-// Dupliqué de socle/convex/modules/reseauPersonnel/tables.ts (l. 922-990, `reseauPersonnel_thematicGroups` et `reseauPersonnel_thematicGroupMembers`) @ ad2e7fdc2 — adaptations : `networkId` sur le groupe et sur l'appartenance ; personnes ; `memberCount` retiré du document (agrégat au module complet, D02) ; index réduits à ceux que lit la garde d'appartenance (lot 7) — découverte (`search_name` filtrée par réseau, D17), invitations et listes de membres arrivent avec le module complet (lot 9).
+// Dupliqué de socle/convex/modules/reseauPersonnel/tables.ts (l. 922-1030, `reseauPersonnel_thematicGroups`, `…ThematicGroupMembers`, `…ThematicGroupInvites`) @ ad2e7fdc2 — adaptations : `networkId` sur le groupe, l'appartenance et l'invitation ; personnes ; `memberCount` retiré du document (agrégat `engineCounters`, D02) ; découverte indexée PAR RÉSEAU (`by_network_createdAt`, recherche `search_name` filtrée par réseau, D17) ; appartenances et invitations indexées par réseau (« mes groupes », « mes invitations »).
 /**
- * Groupes THÉMATIQUES d'un réseau — un espace de discussion autour d'un thème,
- * avec son mur. Ce lot pose ce que la garde d'audience `group` lit : le groupe
- * (vivant ou fermé) et l'appartenance VIVANTE d'une personne.
+ * Groupes THÉMATIQUES d'un réseau — des lieux de PUBLICATION autour d'un thème,
+ * découvrables dans leur réseau, ouverts à l'adhésion. Ni une messagerie (les
+ * conversations de groupe), ni un canal d'organisation.
  */
 import { THEMATIC_GROUP_ROLES } from "@antia/social-domain/thematicGroups"
 import { defineTable } from "convex/server"
@@ -11,6 +11,10 @@ import { v } from "convex/values"
 import { literals } from "../../lib/validators"
 
 export const thematicGroupRoleValidator = literals(THEMATIC_GROUP_ROLES)
+
+/** Une invitation : en attente, acceptée ou déclinée — une ligne par (groupe, invité). */
+export const THEMATIC_GROUP_INVITE_STATUSES = ["pending", "accepted", "declined"] as const
+export const thematicGroupInviteStatusValidator = literals(THEMATIC_GROUP_INVITE_STATUSES)
 
 export const thematicGroupsTables = {
   thematicGroups: defineTable({
@@ -35,8 +39,13 @@ export const thematicGroupsTables = {
     /** Suppression définitive demandée : les gardes ferment pendant la cascade bornée. */
     deletingAt: v.optional(v.number()),
     createdAt: v.number(),
+    /** Dernière activité (adhésion, publication, réglage) — l'ordre de « mes groupes ». */
     updatedAt: v.number(),
-  }),
+  })
+    .index("by_creator_and_idempotencyKey", ["createdByPersonId", "idempotencyKey"])
+    // La vitrine d'un réseau : ses groupes les plus récents.
+    .index("by_network_createdAt", ["networkId", "createdAt"])
+    .searchIndex("search_name", { searchField: "searchText", filterFields: ["networkId"] }),
 
   /**
    * L'appartenance d'une personne à un groupe thématique. Le DÉPART est une
@@ -50,5 +59,29 @@ export const thematicGroupsTables = {
     role: thematicGroupRoleValidator,
     joinedAt: v.number(),
     leftAt: v.optional(v.number()),
-  }).index("by_group_and_person", ["groupId", "personId"]),
+  })
+    .index("by_group_and_person", ["groupId", "personId"])
+    // Les membres VIVANTS d'un groupe, par ancienneté (liste paginée, cascade).
+    .index("by_group_leftAt_joinedAt", ["groupId", "leftAt", "joinedAt"])
+    // MES groupes dans un réseau.
+    .index("by_network_person_leftAt", ["networkId", "personId", "leftAt"]),
+
+  /**
+   * Une invitation — une SUGGESTION (l'adhésion reste libre). UNE ligne par
+   * (groupe, invité) : réinviter rafraîchit la ligne en attente ou rouvre une
+   * ligne déclinée. Le refus n'émet rien.
+   */
+  thematicGroupInvites: defineTable({
+    networkId: v.id("networks"),
+    groupId: v.id("thematicGroups"),
+    inviteePersonId: v.id("persons"),
+    invitedByPersonId: v.id("persons"),
+    status: thematicGroupInviteStatusValidator,
+    createdAt: v.number(),
+    respondedAt: v.optional(v.number()),
+  })
+    .index("by_group_and_invitee", ["groupId", "inviteePersonId"])
+    .index("by_group_and_status", ["groupId", "status"])
+    // MES invitations en attente dans un réseau.
+    .index("by_network_invitee_status", ["networkId", "inviteePersonId", "status"]),
 }

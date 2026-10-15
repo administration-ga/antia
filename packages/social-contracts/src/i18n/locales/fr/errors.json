@@ -13,5 +13,6 @@
   "profileRequired": "Choisissez d'abord votre identifiant et votre nom affiché.",
   "fileScanPending": "Analyse de sécurité en cours : le fichier sera disponible dans quelques instants.",
   "fileQuarantined": "Ce fichier a été bloqué par l'analyse de sécurité.",
-  "groupMembershipRequired": "Rejoignez ce groupe pour accéder à ses publications."
+  "groupMembershipRequired": "Rejoignez ce groupe pour accéder à ses publications.",
+  "groupRoleRequired": "Votre rôle dans ce groupe ne permet pas ce geste."
 }
