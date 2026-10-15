@@ -9,6 +9,7 @@
  */
 
 import type * as betterAuth_auth from "../betterAuth/auth.js";
+import type * as crons from "../crons.js";
 import type * as health from "../health.js";
 import type * as http from "../http.js";
 import type * as lib_access from "../lib/access.js";
@@ -17,7 +18,14 @@ import type * as lib_errors from "../lib/errors.js";
 import type * as lib_functions from "../lib/functions.js";
 import type * as lib_rateLimit from "../lib/rateLimit.js";
 import type * as lib_validators from "../lib/validators.js";
+import type * as modules_diaspora_facet from "../modules/diaspora/facet.js";
+import type * as modules_diaspora_facts from "../modules/diaspora/facts.js";
+import type * as modules_diaspora_hubs from "../modules/diaspora/hubs.js";
+import type * as modules_diaspora_manifest from "../modules/diaspora/manifest.js";
+import type * as modules_diaspora_membership from "../modules/diaspora/membership.js";
+import type * as modules_diaspora_seed from "../modules/diaspora/seed.js";
 import type * as modules_diaspora_tables from "../modules/diaspora/tables.js";
+import type * as modules_diaspora_validators from "../modules/diaspora/validators.js";
 import type * as modules_engagement_engagement from "../modules/engagement/engagement.js";
 import type * as modules_engagement_tables from "../modules/engagement/tables.js";
 import type * as modules_networks_networks from "../modules/networks/networks.js";
@@ -46,6 +54,7 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   "betterAuth/auth": typeof betterAuth_auth;
+  crons: typeof crons;
   health: typeof health;
   http: typeof http;
   "lib/access": typeof lib_access;
@@ -54,7 +63,14 @@ declare const fullApi: ApiFromModules<{
   "lib/functions": typeof lib_functions;
   "lib/rateLimit": typeof lib_rateLimit;
   "lib/validators": typeof lib_validators;
+  "modules/diaspora/facet": typeof modules_diaspora_facet;
+  "modules/diaspora/facts": typeof modules_diaspora_facts;
+  "modules/diaspora/hubs": typeof modules_diaspora_hubs;
+  "modules/diaspora/manifest": typeof modules_diaspora_manifest;
+  "modules/diaspora/membership": typeof modules_diaspora_membership;
+  "modules/diaspora/seed": typeof modules_diaspora_seed;
   "modules/diaspora/tables": typeof modules_diaspora_tables;
+  "modules/diaspora/validators": typeof modules_diaspora_validators;
   "modules/engagement/engagement": typeof modules_engagement_engagement;
   "modules/engagement/tables": typeof modules_engagement_tables;
   "modules/networks/networks": typeof modules_networks_networks;

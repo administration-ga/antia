@@ -18,7 +18,8 @@ describe("no-cross-product-imports — étanchéité du moteur (règle 4 de dupl
       findings.push(...detectCrossProductImports(file, readRepoFile(file)))
     }
     expect(findings, formatFindings(findings)).toEqual([])
-  })
+    // Relit tout le dépôt et les espaces externes : sous charge, plus que les 5 s par défaut.
+  }, 20_000)
 
   it("l'alias @convex/* ne vise que le backend du moteur", () => {
     const findings: string[] = []
