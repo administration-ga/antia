@@ -1,4 +1,4 @@
-// Dupliqué de socle/convex/modules/reseauPersonnel/groupes.ts (l. 1025-1362 lectures et projection, l. 1364-1835 écritures : `projectPinnedGroupMessage`, `projectGroupMessages`, `paginateGroupMessages`, `generateAttachmentUploadUrl`, `sendGroupMessage`, `toggleGroupMessageReaction`, `deleteGroupMessageForMe`, `editGroupMessage`, `deleteGroupMessage`, `setGroupPinnedMessage`) @ ad2e7fdc2 — adaptations : garde du fil par réseau ; `listGroupMessages` (curseur par instant, ex æquo perdus) non recopiée, la pagination native seule ; contenu jugé par le contrat partagé (une seule borne pour tous les messages) ; pièces par la garde des fichiers (`verifyDeclaredAttachments`, source `group`) ; UN point d'insertion (`appendGroupMessage`) que partagent l'envoi et le transfert : aperçu en nature, curseur de l'expéditeur, diffusion par lots (non-lus, activité, cloche — D07, D23) ; masquage « pour moi » dans `groupMessageHides` (D22), lus par plage pour une page ; DTO allowlisté (personnes nommées par `counterpartLabel`, jamais d'e-mail) ; réagir, citer et épingler exigent de VOIR le message (plancher d'arrivée, effacement, masquage, blocage) ; un retrait pour tous efface l'aperçu au lieu d'écrire « [Message supprimé] » (D37) ; refus à code ; débit.
+// Dupliqué de socle/convex/modules/reseauPersonnel/groupes.ts (l. 1025-1362 lectures et projection, l. 1364-1835 écritures : `projectPinnedGroupMessage`, `projectGroupMessages`, `paginateGroupMessages`, `generateAttachmentUploadUrl`, `sendGroupMessage`, `toggleGroupMessageReaction`, `deleteGroupMessageForMe`, `editGroupMessage`, `deleteGroupMessage`, `setGroupPinnedMessage`) @ ad2e7fdc2 — adaptations : garde du fil par réseau ; `listGroupMessages` (curseur par instant, ex æquo perdus) non recopiée, la pagination native seule ; contenu jugé par le contrat partagé (une seule borne pour tous les messages) ; pièces par la garde des fichiers (`verifyDeclaredAttachments`, source `group`) ; UN point d'insertion (`appendGroupMessage`) que partagent l'envoi et le transfert : aperçu en nature, curseur de l'expéditeur, diffusion par lots (non-lus, activité, cloche — D07, D23) ; masquage « pour moi » dans `groupMessageHides` (D22), lus par plage pour une page ; DTO allowlisté (personnes nommées par `counterpartLabel`, jamais d'e-mail) ; réagir, citer et épingler exigent de VOIR le message (plancher d'arrivée, effacement, masquage, blocage) ; un retrait pour tous efface l'aperçu au lieu d'écrire « [Message supprimé] » (D37) ; refus à code ; débit ; l'événement `call_started` rend sa référence d'appel (lot 15).
 /**
  * Les messages d'une conversation de groupe : lire, envoyer, réagir, masquer,
  * modifier, retirer, épingler.
@@ -84,6 +84,8 @@ export type GroupMessageDto = {
   replyTo: GroupReplyToDto | null
   /** La personne VISÉE par un événement (`member_removed`). */
   target: { personId: Id<"persons">; label: CounterpartLabel } | null
+  /** L'appel annoncé par `call_started` — la carte le relit avec sa garde (`calls.listParticipants`). */
+  callId: Id<"calls"> | null
   createdAt: number
   isMine: boolean
   /** Le corps a été retiré par le serveur (blocage) : l'écran peut le dire. */
@@ -159,6 +161,7 @@ export async function projectGroupMessages(ctx: ReadCtx, member: Doc<"groupMembe
       reactions: { counts: row.reactionCounts ?? emptyMessageReactionCounts(), mine: mine.get(row._id) ?? null },
       replyTo,
       target: row.targetPersonId === undefined ? null : { personId: row.targetPersonId, label: await labelOf(row.targetPersonId) },
+      callId: row.callId ?? null,
       createdAt: row.createdAt,
       isMine: row.senderPersonId === me,
       masked,

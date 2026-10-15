@@ -16,5 +16,8 @@
   "groupMembershipRequired": "Rejoignez ce groupe pour accéder à ses publications.",
   "groupRoleRequired": "Votre rôle dans ce groupe ne permet pas ce geste.",
   "eventOrganizerRequired": "Seul l'organisateur de cet évènement peut faire ce geste.",
-  "pageRoleRequired": "Cette action est réservée aux signataires de la page."
+  "pageRoleRequired": "Cette action est réservée aux signataires de la page.",
+  "mediaServerNotConfigured": "Les appels ne sont pas encore disponibles sur ce service.",
+  "mediaServerUnavailable": "Le serveur des appels ne répond pas. Réessayez dans un instant.",
+  "mediaServerNoCapacity": "Le serveur des appels est momentanément saturé. Réessayez dans quelques minutes."
 }

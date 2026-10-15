@@ -101,5 +101,21 @@
   "GROUP_CLOSED": "This conversation is closed.",
   "EVENT_CANCELLED": "This event is cancelled.",
   "FEED_LANES_INVALID": "A feed combines one to {{max}} lanes.",
-  "STORY_ACTIVE_LIMIT": "You already have {{max}} live stories: wait for one to expire, or remove one."
+  "STORY_ACTIVE_LIMIT": "You already have {{max}} live stories: wait for one to expire, or remove one.",
+  "CALL_SELF": "You cannot call yourself.",
+  "CALL_ENDED": "This call has ended.",
+  "CALL_NOT_LIVE": "Only a call in progress can be put on hold or resumed.",
+  "CALL_GROUP_NO_HOLD": "A group call cannot be put on hold.",
+  "CALL_DECLINE_NOTE_TOO_LONG": "A note left when declining is limited to {{max}} characters.",
+  "CALL_DND_PAST": "The end of the quiet period must be in the future.",
+  "CALL_DND_TOO_LONG": "A quiet period longer than {{days}} days is not allowed: it is almost always a forgotten setting.",
+  "GROUP_CALL_TOO_FEW": "Choose at least {{min}} people, or call the person concerned directly.",
+  "GROUP_CALL_SELECTION_TOO_LARGE": "You chose {{chosen}} people, and a call stops at {{max}} participants, you included. Remove {{excess}}.",
+  "GROUP_CALL_THREAD_TOO_LARGE": "This group has {{members}} members, and a call stops at {{max}} people. Choose up to {{maxOthers}} people to call.",
+  "GROUP_CALL_FULL": "A group call is limited to {{max}} participants, you included.",
+  "GROUP_CALL_INVITES_EXHAUSTED": "This call has already received {{max}} invitations: it cannot take any more.",
+  "GROUP_CALL_ALREADY_IN": "You are already in this call.",
+  "VOICEMAIL_DISABLED": "This person does not accept voice messages.",
+  "VOICEMAIL_DURATION": "A voice message lasts at most {{maxSeconds}} seconds.",
+  "VOICEMAIL_DIRECT_ONLY": "Voicemail only exists for a direct call that did not go through."
 }

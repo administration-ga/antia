@@ -36,6 +36,8 @@ export function subjectOf(ref: NotificationSubjectRef | undefined): Notification
   if ("groupThread" in ref) return { kind: "groupThread", id: ref.groupThread }
   if ("event" in ref) return { kind: "event", id: ref.event }
   if ("album" in ref) return { kind: "album", id: ref.album }
+  if ("call" in ref) return { kind: "call", id: ref.call }
+  if ("voicemail" in ref) return { kind: "voicemail", id: ref.voicemail }
   return { kind: "fileScan", id: ref.fileScan }
 }
 
@@ -48,6 +50,8 @@ function subjectColumns(ref: NotificationSubjectRef | undefined): Partial<Doc<"n
   if ("groupThread" in ref) return { subjectGroupThreadId: ref.groupThread }
   if ("event" in ref) return { subjectEventId: ref.event }
   if ("album" in ref) return { subjectAlbumId: ref.album }
+  if ("call" in ref) return { subjectCallId: ref.call }
+  if ("voicemail" in ref) return { subjectVoicemailId: ref.voicemail }
   return { subjectFileScanId: ref.fileScan }
 }
 
@@ -60,6 +64,8 @@ export function subjectRefOf(row: Doc<"notifications">): NotificationSubjectRef 
   if (row.subjectGroupThreadId) return { groupThread: row.subjectGroupThreadId }
   if (row.subjectEventId) return { event: row.subjectEventId }
   if (row.subjectAlbumId) return { album: row.subjectAlbumId }
+  if (row.subjectCallId) return { call: row.subjectCallId }
+  if (row.subjectVoicemailId) return { voicemail: row.subjectVoicemailId }
   return undefined
 }
 

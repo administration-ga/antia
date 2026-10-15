@@ -37,6 +37,15 @@ export const NOTIFICATION_KINDS = [
   "album_published",
   /** La garde des fichiers retient un fichier déposé (bloqué, ou analyse en échec). */
   "file_withheld",
+  /**
+   * Un appel a été écarté par MES réglages (ne pas déranger, réunion, ligne
+   * occupée) ou n'a pu sonner nulle part (hors ligne) : le sujet est l'APPEL,
+   * l'acteur l'appelant. Ni pour « hors de mes relations » (notifier chaque
+   * inconnu annulerait le réglage), ni pour une simple sonnerie sans réponse.
+   */
+  "call_missed",
+  /** Un message vocal m'a été laissé : le sujet est le MESSAGE, l'acteur son auteur. */
+  "voicemail_left",
   // Tranche `diaspora` (émis par `convex/modules/diaspora/`), tous sans sujet.
   /** Parrainé : l'acteur est le parrain. */
   "sponsorship_received",
@@ -60,7 +69,7 @@ export const NOTIFICATION_RESOLUTIONS = ["accepted", "declined", "maybe", "cance
 export type NotificationResolution = (typeof NOTIFICATION_RESOLUTIONS)[number]
 
 /** Les natures de SUJET d'une notification — une référence, jamais un contenu. */
-export const NOTIFICATION_SUBJECT_KINDS = ["post", "connection", "fileScan", "thematicGroup", "groupThread", "event", "album"] as const
+export const NOTIFICATION_SUBJECT_KINDS = ["post", "connection", "fileScan", "thematicGroup", "groupThread", "event", "album", "call", "voicemail"] as const
 
 export type NotificationSubjectKind = (typeof NOTIFICATION_SUBJECT_KINDS)[number]
 

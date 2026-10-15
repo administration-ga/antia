@@ -1,0 +1,72 @@
+// Dupliqué de socle/convex/functions/meetings.ts (avec socle/convex/modules/reseauPersonnel/messagerie.ts, l. 1039-1110, `callByHandle`) @ ad2e7fdc2 — adaptations : l. 1863-1993 (`callCitizenById`) et `callByHandle` FUSIONNÉS en `callMember` — une seule porte, la cible désignée par sa personne (journal, grille) ou par son identifiant public, un seul budget (`call.place`) ; verrous « agent » levés (V01 délai de rattachement → statut d'adhésion par le constructeur ; V02 « les ressortissants ne peuvent pas appeler », V03 et V07 « l'appelé doit être affilié » retirés : un membre déclaré appelle un membre déclaré du réseau) ; l'appelé est JOIGNABLE (profil publié, non effacé, membre déclaré du réseau) et sans blocage, sinon le refus indistinct (D13) ; `endStaleCalls` → `reapStaleCallsOf` (lecture indexée bornée, D11, D27) ; admission par le pont du moteur ; titre non stocké ; salle `call-…` ; lignes de participation (D27) ; fin de sonnerie programmée ; messagerie vocale jamais offerte sur « hors de mes relations » (décision 6d du socle, désormais tenue par le serveur).
+/**
+ * Appels — APPELER UN MEMBRE, en tête-à-tête.
+ *
+ * C'est un appel, pas une réunion : il entre dans la machine d'états
+ * (`initiating`, puis `ringing` quand l'appelant a rejoint sa salle), il sonne
+ * dans sa fenêtre, il se décroche. Un refus d'admission n'est PAS une exception :
+ * l'appel est inscrit déjà terminé, des deux côtés, et la raison est RENDUE.
+ */
+import { v } from "convex/values"
+
+import { failRule, notFound } from "../../lib/errors"
+import { networkMutation } from "../../lib/functions"
+import { enforceRateLimit } from "../../lib/rateLimit"
+import { isBlockedBetween } from "../graph/graph"
+import { callRoomName, reachablePerson } from "./access"
+import { reapStaleCallsOf } from "./cleanup"
+import { evaluateCallAdmission, insertRefusedCall } from "./evaluate"
+import { scheduleDirectRingExpiry } from "./ringExpiry"
+import { callAdmissionReasonValidator, callMediaTypeValidator } from "./validators"
+
+/** Qui l'on appelle : sa personne, ou son identifiant public. */
+export const callTargetValidator = v.union(v.object({ personId: v.id("persons") }), v.object({ handle: v.string() }))
+
+export const callMember = networkMutation({
+  args: { target: callTargetValidator, mediaType: v.optional(callMediaTypeValidator) },
+  returns: v.union(
+    v.object({ admitted: v.literal(true), callId: v.id("calls"), roomName: v.string(), mediaType: callMediaTypeValidator }),
+    v.object({ admitted: v.literal(false), callId: v.id("calls"), reason: callAdmissionReasonValidator, voicemailOffered: v.boolean() }),
+  ),
+  handler: async (ctx, args) => {
+    const me = ctx.person._id
+    await enforceRateLimit(ctx, "call.place", me)
+    const callee = await reachablePerson(ctx, ctx.networkId, args.target)
+    if (callee === null) return notFound()
+    if (callee._id === me) return failRule("CALL_SELF")
+    // Bloqué, dans un sens ou dans l'autre : le même refus qu'un inconnu.
+    if (await isBlockedBetween(ctx, me, callee._id)) return notFound()
+
+    const now = Date.now()
+    const mediaType = args.mediaType ?? "audio"
+    await reapStaleCallsOf(ctx, ctx.networkId, me, now)
+    const roomName = callRoomName("direct", now)
+
+    const admission = await evaluateCallAdmission(ctx, { networkId: ctx.networkId, calleePersonId: callee._id, callerPersonId: me, now })
+    if (!admission.decision.admitted) {
+      const reason = admission.decision.reason
+      const callId = await insertRefusedCall(ctx, { networkId: ctx.networkId, callerId: me, calleeId: callee._id, roomName, mediaType, reason, now })
+      // Sur « hors de mes relations », aucune messagerie vocale : ce serait le contournement du réglage.
+      return { admitted: false as const, callId, reason, voicemailOffered: admission.voicemailEnabled && reason !== "outside_relations" }
+    }
+
+    const callId = await ctx.db.insert("calls", {
+      networkId: ctx.networkId,
+      kind: "direct",
+      status: "active",
+      callStatus: "initiating",
+      roomName,
+      createdByPersonId: me,
+      calleePersonId: callee._id,
+      mediaType,
+      maxParticipants: 2,
+      startedAt: now,
+      ...(admission.calleeEngaged ? { calleeEngagedAtCreate: true } : {}),
+    })
+    // L'appelant est dans sa salle dès la création ; l'appelé y entrera en décrochant.
+    await ctx.db.insert("callParticipants", { networkId: ctx.networkId, callId, personId: me, role: "host", joinedAt: now })
+    await ctx.db.insert("callParticipants", { networkId: ctx.networkId, callId, personId: callee._id, role: "participant" })
+    await scheduleDirectRingExpiry(ctx, { callId, startedAt: now, now })
+    return { admitted: true as const, callId, roomName, mediaType }
+  },
+})

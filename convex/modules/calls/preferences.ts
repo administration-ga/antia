@@ -1,0 +1,143 @@
+// Dupliqué de socle/convex/modules/iappel/preferences.ts @ ad2e7fdc2 — adaptations : réglages de la PERSONNE (constructeurs `personQuery`/`personMutation`, fonctions sur soi) ; miroir du « ne pas déranger » vers la présence d'organisation (`mirrorDndToPresence`, V23) et portée du silence (poste / personnel / tout) retirés ; réponses rapides par défaut → `null` (l'écran propose les siennes, traduites) au lieu de trois phrases françaises stockées dans le code ; nettoyage des réponses rapides par la règle pure du contrat (`normalizeQuickReplies`) ; instant de lecture fourni par l'écran (D16) ; refus à code de règle (`CALL_DND_PAST`, `CALL_DND_TOO_LONG`) ; débit.
+/**
+ * Appels — les RÉGLAGES d'appel d'une personne.
+ *
+ * Une ligne par personne, créée au besoin. La lecture rend TOUJOURS les défauts
+ * sans jamais écrire : créer une ligne au simple affichage peuplerait la table de
+ * réglages que personne n'a choisis. Chaque mise à jour ne touche que les champs
+ * fournis — plusieurs cartes indépendantes à l'écran ne s'écrasent pas.
+ */
+import { MAX_DND_DURATION_MS, normalizeQuickReplies } from "@antia/social-contracts/calls"
+import { v } from "convex/values"
+
+import { failRule } from "../../lib/errors"
+import { personMutation, personQuery } from "../../lib/functions"
+import { enforceRateLimit } from "../../lib/rateLimit"
+import { autoMeetingDndValidator, outsideRelationsCallsValidator, ringtonePrefsValidator } from "./validators"
+
+const DAY_MS = 24 * 60 * 60 * 1000
+
+/**
+ * Mes réglages d'appel, ou les défauts si je n'ai jamais rien réglé. Un « ne pas
+ * déranger » échu à l'instant fourni est rendu ABSENT : c'est ici, à la lecture,
+ * qu'on décide qu'il ne compte plus — jamais en nettoyant la base.
+ *
+ * @selfScoped la personne lit ses propres réglages d'appel, valables dans tous ses réseaux
+ */
+export const getMine = personQuery({
+  args: { now: v.number() },
+  handler: async (ctx, args) => {
+    const row = await ctx.db
+      .query("callPreferences")
+      .withIndex("by_person", (q) => q.eq("personId", ctx.person._id))
+      .unique()
+    return {
+      dnd: row?.dnd && row.dnd.until > args.now ? row.dnd : null,
+      ringtone: { muted: row?.ringtone?.muted ?? false, vibrate: row?.ringtone?.vibrate ?? true },
+      callWaiting: row?.callWaiting ?? true,
+      /** `null` : jamais réglées — l'écran propose ses réponses par défaut, traduites. */
+      quickReplies: row?.quickReplies ?? null,
+      voicemailEnabled: row?.voicemailEnabled ?? true,
+      autoMeetingDnd: row?.autoMeetingDnd ?? null,
+      sharePresence: row?.sharePresence ?? true,
+      pushIncoming: row?.pushIncoming ?? true,
+      // Absent = `ring` : par défaut, un membre qui n'est pas une relation fait sonner le téléphone.
+      outsideRelationsCalls: row?.outsideRelationsCalls ?? ("ring" as const),
+      journalSeenAt: row?.journalSeenAt ?? null,
+      saved: row !== null,
+    }
+  },
+})
+
+/**
+ * Pose ou efface MON « ne pas déranger ». `until: null` efface immédiatement.
+ * Sinon, `until` doit être dans le futur et à moins de sept jours — au-delà, c'est
+ * presque toujours un oubli de réglage, pas une intention.
+ *
+ * @selfScoped la personne règle son propre silence, valable dans tous ses réseaux
+ */
+export const setDnd = personMutation({
+  args: { until: v.union(v.number(), v.null()) },
+  returns: v.object({ dnd: v.union(v.object({ until: v.number(), startedAt: v.number() }), v.null()) }),
+  handler: async (ctx, args) => {
+    await enforceRateLimit(ctx, "call.settings", ctx.person._id)
+    const now = Date.now()
+    const existing = await ctx.db
+      .query("callPreferences")
+      .withIndex("by_person", (q) => q.eq("personId", ctx.person._id))
+      .unique()
+    if (args.until === null) {
+      if (existing) await ctx.db.patch(existing._id, { dnd: undefined, updatedAt: now })
+      return { dnd: null }
+    }
+    if (args.until <= now) return failRule("CALL_DND_PAST")
+    if (args.until - now > MAX_DND_DURATION_MS) return failRule("CALL_DND_TOO_LONG", { days: Math.round(MAX_DND_DURATION_MS / DAY_MS) })
+    const dnd = { until: args.until, startedAt: now }
+    if (existing) await ctx.db.patch(existing._id, { dnd, updatedAt: now })
+    else await ctx.db.insert("callPreferences", { personId: ctx.person._id, dnd, updatedAt: now })
+    return { dnd }
+  },
+})
+
+/**
+ * Met à jour un SOUS-ENSEMBLE de mes réglages — chaque champ omis reste inchangé.
+ *
+ * @selfScoped la personne règle ses propres préférences d'appel, valables dans tous ses réseaux
+ */
+export const update = personMutation({
+  args: {
+    ringtone: v.optional(ringtonePrefsValidator),
+    callWaiting: v.optional(v.boolean()),
+    quickReplies: v.optional(v.array(v.string())),
+    voicemailEnabled: v.optional(v.boolean()),
+    autoMeetingDnd: v.optional(autoMeetingDndValidator),
+    sharePresence: v.optional(v.boolean()),
+    pushIncoming: v.optional(v.boolean()),
+    outsideRelationsCalls: v.optional(outsideRelationsCallsValidator),
+  },
+  returns: v.object({ saved: v.literal(true) }),
+  handler: async (ctx, args) => {
+    await enforceRateLimit(ctx, "call.settings", ctx.person._id)
+    const now = Date.now()
+    const patch = {
+      ...(args.ringtone !== undefined ? { ringtone: args.ringtone } : {}),
+      ...(args.callWaiting !== undefined ? { callWaiting: args.callWaiting } : {}),
+      ...(args.quickReplies !== undefined ? { quickReplies: normalizeQuickReplies(args.quickReplies) } : {}),
+      ...(args.voicemailEnabled !== undefined ? { voicemailEnabled: args.voicemailEnabled } : {}),
+      ...(args.autoMeetingDnd !== undefined ? { autoMeetingDnd: args.autoMeetingDnd } : {}),
+      ...(args.sharePresence !== undefined ? { sharePresence: args.sharePresence } : {}),
+      ...(args.pushIncoming !== undefined ? { pushIncoming: args.pushIncoming } : {}),
+      ...(args.outsideRelationsCalls !== undefined ? { outsideRelationsCalls: args.outsideRelationsCalls } : {}),
+      updatedAt: now,
+    }
+    const existing = await ctx.db
+      .query("callPreferences")
+      .withIndex("by_person", (q) => q.eq("personId", ctx.person._id))
+      .unique()
+    if (existing) await ctx.db.patch(existing._id, patch)
+    else await ctx.db.insert("callPreferences", { personId: ctx.person._id, ...patch })
+    return { saved: true as const }
+  },
+})
+
+/**
+ * Marque MON journal des appels comme vu maintenant — l'écran borne son compteur
+ * d'appels manqués non vus à cet instant.
+ *
+ * @selfScoped la personne marque son propre journal des appels comme vu
+ */
+export const markJournalSeen = personMutation({
+  args: {},
+  returns: v.object({ journalSeenAt: v.number() }),
+  handler: async (ctx) => {
+    await enforceRateLimit(ctx, "call.settings", ctx.person._id)
+    const now = Date.now()
+    const existing = await ctx.db
+      .query("callPreferences")
+      .withIndex("by_person", (q) => q.eq("personId", ctx.person._id))
+      .unique()
+    if (existing) await ctx.db.patch(existing._id, { journalSeenAt: now, updatedAt: now })
+    else await ctx.db.insert("callPreferences", { personId: ctx.person._id, journalSeenAt: now, updatedAt: now })
+    return { journalSeenAt: now }
+  },
+})

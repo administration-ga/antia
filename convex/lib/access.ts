@@ -99,16 +99,32 @@ export async function requireMembership(
  * tiers dans un réseau (annuaire, fiche, mentions) : jamais un non-membre.
  */
 export async function isActiveMember(ctx: Pick<QueryCtx, "db">, networkId: Id<"networks">, personId: Id<"persons">): Promise<boolean> {
+  const status = await effectiveStatusOf(ctx, networkId, personId)
+  return status !== null && isActiveStatus(status)
+}
+
+/**
+ * Une AUTRE personne est-elle membre du réseau AU STATUT demandé, sans
+ * suspension à la racine ? Pour un geste qui l'ENGAGE (décrocher un appel) :
+ * un membre en attente est visible, il n'agit pas encore — le faire sonner
+ * serait l'inviter à un geste que son adhésion refuse.
+ */
+export async function memberHasStatus(ctx: Pick<QueryCtx, "db">, networkId: Id<"networks">, personId: Id<"persons">, minStatus: ActiveMembershipStatus): Promise<boolean> {
+  const status = await effectiveStatusOf(ctx, networkId, personId)
+  return status !== null && isActiveStatus(status) && satisfiesMinimum(status, minStatus)
+}
+
+/** Le statut d'accès EFFECTIF d'une personne dans un réseau actif (adhésion propre et racine), ou `null`. */
+async function effectiveStatusOf(ctx: Pick<QueryCtx, "db">, networkId: Id<"networks">, personId: Id<"persons">) {
   const network = await ctx.db.get(networkId)
-  if (!network || network.status !== "active") return false
+  if (!network || network.status !== "active") return null
   const membership = await getMembership(ctx, network._id, personId)
-  if (!membership) return false
+  if (!membership) return null
   const root = network.kind === "root" ? network : await getRootNetwork(ctx)
   const rootMembership = network.kind === "root" || !root ? membership : await getMembership(ctx, root._id, personId)
-  const status = effectiveAccessStatus({
+  return effectiveAccessStatus({
     networkStatus: membership.status,
     rootStatus: rootMembership?.status ?? null,
     isRoot: network.kind === "root",
   })
-  return status !== null && isActiveStatus(status)
 }

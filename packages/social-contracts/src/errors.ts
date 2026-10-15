@@ -32,6 +32,10 @@ export const ENGINE_ERROR_CODES = [
   "eventOrganizerRequired",
   // Page : la lire suffit à la suivre ; parler en son nom exige d'en être signataire vivant, la gérer d'en être administrateur.
   "pageRoleRequired",
+  // Serveur des appels et des directs : non configuré (variables absentes), injoignable, ou sans machine disponible.
+  "mediaServerNotConfigured",
+  "mediaServerUnavailable",
+  "mediaServerNoCapacity",
 ] as const
 export type EngineErrorCode = (typeof ENGINE_ERROR_CODES)[number]
 

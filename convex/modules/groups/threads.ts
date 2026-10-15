@@ -1,4 +1,4 @@
-// Dupliqué de socle/convex/modules/reseauPersonnel/groupes.ts (l. 571-1023 création et lectures : `createGroup`, `listMyGroupThreads`, `totalUnread`, `getGroupThread` ; l. 1837-1995 : `clearGroupConversation`, `markGroupRead`, `leaveGroup`, `setGroupMuted` ; l. 2639-2883 administration : `renameGroup`, `setGroupDescription`, `setGroupAvatar`, `removeGroupMember`, `setGroupMemberRole`) @ ad2e7fdc2 — adaptations : fils PAR RÉSEAU (création dans le réseau appelé, une clé rejouée dans un autre réseau est refusée) ; admissibilité = relation acceptée dans le réseau ; titre, description et composition jugés par le contrat (`groupCapacity`, plafond ramené à 256) ; invitations de la création sonnées par la diffusion par lots (D07) ; effectif par l'agrégat (D02) ; « mes groupes » PAGINÉS par activité sur l'appartenance (le socle lisait 50 appartenances puis triait) ; pastille lue sur le compteur tenu (D23) ; membres et invitations en attente PAGINÉS hors de la fiche (le socle rendait jusqu'à 1 000 profils d'un coup) ; photo du groupe sous la garde des fichiers (dépôt neuf, usage `avatar`, source `group`) et PURGÉE quand elle est remplacée ou retirée (elle n'appartient qu'à ce fil) ; mécanique d'appel retirée (lot 15) ; `listMyConnectionsForGroup` non recopiée (le sélecteur lit les relations du graphe) ; refus à code ; débit.
+// Dupliqué de socle/convex/modules/reseauPersonnel/groupes.ts (l. 571-1023 création et lectures : `createGroup`, `listMyGroupThreads`, `totalUnread`, `getGroupThread` ; l. 1837-1995 : `clearGroupConversation`, `markGroupRead`, `leaveGroup`, `setGroupMuted` ; l. 2639-2883 administration : `renameGroup`, `setGroupDescription`, `setGroupAvatar`, `removeGroupMember`, `setGroupMemberRole`) @ ad2e7fdc2 — adaptations : fils PAR RÉSEAU (création dans le réseau appelé, une clé rejouée dans un autre réseau est refusée) ; admissibilité = relation acceptée dans le réseau ; titre, description et composition jugés par le contrat (`groupCapacity`, plafond ramené à 256) ; invitations de la création sonnées par la diffusion par lots (D07) ; effectif par l'agrégat (D02) ; « mes groupes » PAGINÉS par activité sur l'appartenance (le socle lisait 50 appartenances puis triait) ; pastille lue sur le compteur tenu (D23) ; membres et invitations en attente PAGINÉS hors de la fiche (le socle rendait jusqu'à 1 000 profils d'un coup) ; photo du groupe sous la garde des fichiers (dépôt neuf, usage `avatar`, source `group`) et PURGÉE quand elle est remplacée ou retirée (elle n'appartient qu'à ce fil) ; mécanique d'appel rebranchée sur le module `calls` au lot 15 (l'appel vivant du fil dans la fiche et la liste, l'événement `call_started`, le départ ou le retrait d'un membre qui le sort de l'appel en cours) ; `listMyConnectionsForGroup` non recopiée (le sélecteur lit les relations du graphe) ; refus à code ; débit.
 /**
  * Conversations de GROUPE d'un réseau : créer, lister, ouvrir, lire, quitter,
  * administrer.
@@ -22,6 +22,8 @@ import { checked, fail, failRule, notFound } from "../../lib/errors"
 import { networkMutation, networkQuery } from "../../lib/functions"
 import { enforceRateLimit } from "../../lib/rateLimit"
 import { guardUploadUrl } from "../../lib/uploadPolicy"
+import { liveThreadCall } from "../calls/access"
+import { revokeThreadCallParticipation } from "../calls/state"
 import { admitStoredUpload, assertFreshUpload, findScanByStorageId } from "../files/admission"
 import { purgeStoredFile } from "../files/purge"
 import { resolveFileDelivery, withheldCodeOf, withheldCodeValidator } from "../files/storageGuard"
@@ -42,7 +44,7 @@ import {
   unrecordThreadMember,
 } from "./access"
 import { type GroupPinnedDto, projectPinnedGroupMessage } from "./messages"
-import { groupThreadRoleValidator } from "./tables"
+import { type GroupSystemEvent, groupThreadRoleValidator } from "./tables"
 import { markMemberReadThrough, releaseMemberUnread, unreadBadgeOf } from "./unread"
 
 type ReadCtx = Pick<QueryCtx, "db" | "storage">
@@ -61,13 +63,17 @@ async function avatarUrlOf(ctx: ReadCtx, thread: Doc<"groupThreads">): Promise<s
   return (await resolveFileDelivery(ctx, thread.avatarStorageId)).url
 }
 
-/** Un message système : un fait du fil, sans aperçu ni cloche. */
-async function insertSystemMessage(
+/**
+ * Un message système : un fait du fil, sans aperçu ni cloche. `call_started`
+ * (émis par le module `calls`) porte une RÉFÉRENCE à l'appel, jamais un
+ * contenu : la carte de l'écran relit l'appel avec sa garde.
+ */
+export async function insertSystemMessage(
   ctx: MutationCtx,
   thread: Doc<"groupThreads">,
   sender: Id<"persons">,
-  event: "group_created" | "member_joined" | "member_left" | "member_removed" | "group_renamed",
-  extra: { content?: string; targetPersonId?: Id<"persons">; at?: number } = {},
+  event: GroupSystemEvent,
+  extra: { content?: string; targetPersonId?: Id<"persons">; callId?: Id<"calls">; at?: number } = {},
 ): Promise<Id<"groupMessages">> {
   return await ctx.db.insert("groupMessages", {
     networkId: thread.networkId,
@@ -77,6 +83,7 @@ async function insertSystemMessage(
     event,
     ...(extra.content !== undefined ? { content: extra.content } : {}),
     ...(extra.targetPersonId !== undefined ? { targetPersonId: extra.targetPersonId } : {}),
+    ...(extra.callId !== undefined ? { callId: extra.callId } : {}),
     createdAt: extra.at ?? Date.now(),
   })
 }
@@ -188,6 +195,8 @@ export type GroupThreadDto = {
   unreadCapped: boolean
   muted: boolean
   myRole: GroupThreadRole
+  /** L'appel VIVANT du fil — la bannière « appel en cours » ; `null` sans appel. */
+  activeCall: { callId: Id<"calls">; mediaType: "audio" | "video" } | null
 }
 
 /** UN fil projeté pour SA liste — ce que la dénormalisation peut montrer à ce membre. */
@@ -199,6 +208,7 @@ async function projectThreadRow(ctx: QueryCtx, thread: Doc<"groupThreads">, memb
   const cleared = last !== null && isClearedForMember(last, member)
   const hidePreview = lastByBlocked || beforeMe || cleared
   const badge = unreadBadgeOf(member)
+  const call = await liveThreadCall(ctx, thread._id)
   return {
     threadId: thread._id,
     title: thread.title,
@@ -214,6 +224,7 @@ async function projectThreadRow(ctx: QueryCtx, thread: Doc<"groupThreads">, memb
     unreadCapped: badge.capped,
     muted: member.mutedAt !== undefined,
     myRole: member.role,
+    activeCall: call === null ? null : { callId: call._id, mediaType: call.mediaType },
   }
 }
 
@@ -364,6 +375,8 @@ export const clearGroupConversation = networkMutation({
 async function exitMember(ctx: MutationCtx, member: Doc<"groupMembers">, at: number): Promise<number> {
   await releaseMemberUnread(ctx, member, { leftAt: at })
   await unrecordThreadMember(ctx, member)
+  // Le parti cesse d'entendre l'appel en cours, pas seulement de lire le fil.
+  await revokeThreadCallParticipation(ctx, member.threadId, member.personId, at)
   const typing = await ctx.db
     .query("groupTyping")
     .withIndex("by_thread_person", (q) => q.eq("threadId", member.threadId).eq("personId", member.personId))

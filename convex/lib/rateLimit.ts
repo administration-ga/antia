@@ -85,6 +85,20 @@ const RATE_LIMITS = {
   "album.write": { kind: "token bucket", rate: 240, period: HOUR, capacity: 60 },
   "album.publish": { kind: "token bucket", rate: 30, period: HOUR, capacity: 10 },
   "album.remove": { kind: "token bucket", rate: 20, period: HOUR, capacity: 5 },
+  // Appels (PA3 lot 15). Passer un appel — tête-à-tête, groupe ad hoc, depuis un
+  // fil — consomme « call.place » : un seul budget, quel que soit le chemin.
+  // Répondre (sonner, décrocher, refuser, parquer, reprendre) consomme
+  // « call.respond ». Raccrocher a un seau très large : un départ refusé
+  // laisserait un participant fantôme dans la salle.
+  "call.place": { kind: "token bucket", rate: 30, period: HOUR, capacity: 10 },
+  "call.invite": { kind: "token bucket", rate: 60, period: HOUR, capacity: 20 },
+  "call.respond": { kind: "token bucket", rate: 240, period: HOUR, capacity: 60 },
+  "call.leave": { kind: "token bucket", rate: 600, period: HOUR, capacity: 120 },
+  "call.settings": { kind: "token bucket", rate: 60, period: HOUR, capacity: 20 },
+  "voicemail.leave": { kind: "token bucket", rate: 20, period: HOUR, capacity: 5 },
+  "voicemail.read": { kind: "token bucket", rate: 240, period: HOUR, capacity: 60 },
+  // Présence : un battement toutes les 30 s par écran ouvert, quelques écrans au plus.
+  "presence.heartbeat": { kind: "token bucket", rate: 8, period: MINUTE, capacity: 8 },
   // Garde des fichiers : gestes humains (libération par un modérateur, relance par un opérateur).
   "file.moderate": { kind: "token bucket", rate: 60, period: HOUR, capacity: 20 },
   // Console (PA7)

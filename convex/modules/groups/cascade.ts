@@ -1,4 +1,4 @@
-// Dupliqué de socle/convex/modules/reseauPersonnel/groupes.ts (l. 2885-3112 : `isExclusiveGroupAttachment`, `deleteGroupCascadeBatch`, `continueDeleteGroup`, `deleteGroup`) @ ad2e7fdc2 — adaptations : garde du fil par réseau ; mécanique d'appel retirée (lot 15) ; purge = blob ET ligne d'analyse (D10) ; une pièce n'est purgée que si son message n'est pas une copie, que le registre la dit déposée par son auteur, et qu'AUCUNE copie vivante (1:1 ou groupe) ne la sert encore ; masquages (D22) et réactions par lots ; appartenances décomptées de l'agrégat (D02) et de la pastille (D23) ; cloches du fil retirées (`group_message` des membres, `group_added` des conviés) ; la photo du groupe, admise pour lui seul, est purgée ; refus à code.
+// Dupliqué de socle/convex/modules/reseauPersonnel/groupes.ts (l. 2885-3112 : `isExclusiveGroupAttachment`, `deleteGroupCascadeBatch`, `continueDeleteGroup`, `deleteGroup`) @ ad2e7fdc2 — adaptations : garde du fil par réseau ; l'appel vivant du fil se termine AVANT que le fil ne devienne introuvable (lot 15, `endThreadCall` : sans fil, la garde vivante ne trouverait plus rien) ; purge = blob ET ligne d'analyse (D10) ; une pièce n'est purgée que si son message n'est pas une copie, que le registre la dit déposée par son auteur, et qu'AUCUNE copie vivante (1:1 ou groupe) ne la sert encore ; masquages (D22) et réactions par lots ; appartenances décomptées de l'agrégat (D02) et de la pastille (D23) ; cloches du fil retirées (`group_message` des membres, `group_added` des conviés) ; la photo du groupe, admise pour lui seul, est purgée ; refus à code.
 /**
  * SUPPRIMER un groupe pour tout le monde — le propriétaire seul, par arbitrage
  * explicite (dans un groupe, les autres n'ont pas à perdre leur conversation :
@@ -18,6 +18,7 @@ import { internalMutation, type MutationCtx } from "../../_generated/server"
 import { fail } from "../../lib/errors"
 import { networkMutation } from "../../lib/functions"
 import { enforceRateLimit } from "../../lib/rateLimit"
+import { endThreadCall } from "../calls/state"
 import { findScanByStorageId } from "../files/admission"
 import { purgeStoredFile } from "../files/purge"
 import { dropNotificationsAbout } from "../notifications/notify"
@@ -182,6 +183,7 @@ export const deleteGroup = networkMutation({
     const { thread, member } = await requireLiveMembership(ctx, ctx.networkId, args.threadId, ctx.person._id)
     if (!canDeleteGroupThread(member.role)) return fail("groupRoleRequired")
     const now = Date.now()
+    await endThreadCall(ctx, thread._id, now)
     await ctx.db.patch(thread._id, { deletingAt: now, closedAt: now })
     const result = await cascadeBatch(ctx, { ...thread, deletingAt: now, closedAt: now }, "messages")
     return { deleted: true as const, pending: !result.done }

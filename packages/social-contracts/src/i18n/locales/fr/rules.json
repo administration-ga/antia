@@ -101,5 +101,21 @@
   "GROUP_CLOSED": "Cette conversation est fermée.",
   "EVENT_CANCELLED": "Cet évènement est annulé.",
   "FEED_LANES_INVALID": "Un fil se compose d'une à {{max}} voies.",
-  "STORY_ACTIVE_LIMIT": "Vous avez déjà {{max}} stories en cours : attendez qu'une expire, ou retirez-en une."
+  "STORY_ACTIVE_LIMIT": "Vous avez déjà {{max}} stories en cours : attendez qu'une expire, ou retirez-en une.",
+  "CALL_SELF": "Vous ne pouvez pas vous appeler vous-même.",
+  "CALL_ENDED": "Cet appel est terminé.",
+  "CALL_NOT_LIVE": "Seul un appel en cours peut être mis en attente ou repris.",
+  "CALL_GROUP_NO_HOLD": "Un appel de groupe ne se met pas en attente.",
+  "CALL_DECLINE_NOTE_TOO_LONG": "Un mot laissé en refusant est limité à {{max}} caractères.",
+  "CALL_DND_PAST": "La fin du silence doit être dans le futur.",
+  "CALL_DND_TOO_LONG": "Un silence de plus de {{days}} jours n'est pas autorisé : c'est presque toujours un oubli de réglage.",
+  "GROUP_CALL_TOO_FEW": "Choisissez au moins {{min}} personnes, ou appelez directement la personne concernée.",
+  "GROUP_CALL_SELECTION_TOO_LARGE": "Vous avez choisi {{chosen}} personnes, et un appel s'arrête à {{max}} participants, vous compris. Retirez-en {{excess}}.",
+  "GROUP_CALL_THREAD_TOO_LARGE": "Ce groupe compte {{members}} membres, et un appel s'arrête à {{max}} personnes. Choisissez jusqu'à {{maxOthers}} personnes à appeler.",
+  "GROUP_CALL_FULL": "Un appel de groupe est plafonné à {{max}} participants, vous compris.",
+  "GROUP_CALL_INVITES_EXHAUSTED": "Cet appel a déjà reçu {{max}} invitations : il ne peut plus en porter d'autres.",
+  "GROUP_CALL_ALREADY_IN": "Vous êtes déjà dans cet appel.",
+  "VOICEMAIL_DISABLED": "Ce correspondant n'accepte pas les messages vocaux.",
+  "VOICEMAIL_DURATION": "Un message vocal dure au plus {{maxSeconds}} secondes.",
+  "VOICEMAIL_DIRECT_ONLY": "La messagerie vocale n'existe que pour un appel direct qui n'a pas abouti."
 }

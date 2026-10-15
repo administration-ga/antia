@@ -27,7 +27,10 @@ l'owner map), les tests portés et neufs, les écarts assumés. Un module n'entr
 | 11 | `groups` (conversations de groupe : création par invitation, lien, administration, messages, non-lus tenus, transfert, cascade) | `35db309` | 1 fichier convex (42 cas) + 1 fichier contrats (7 cas) | D02, D05, D07, D10, D14, D15, D16, D22, D23 |
 | 12a | `events` (évènements personnels : création, invitation, réponse, annulation, annonce, agenda) | `3d397a9` | 1 fichier convex (20 cas) | D02, D14, D15, D19 |
 | 12b | `stories` (publier, plateau, mur, vues, retrait, purge) | `989d1f0` | 1 fichier convex (17 cas) | D02, D05, D10, D14, D16 |
-| 12c | `suggestions` (catalogue, masquage, invitations envoyées) | voir journal git (`feat(suggestions)`) | 1 fichier convex (10 cas) | D05, D14, D17, D19 |
+| 12c | `suggestions` (catalogue, masquage, invitations envoyées) | `d4a2bd8` | 1 fichier convex (10 cas) | D05, D14, D17, D19 |
+| 13 | `pages` (réécrit : identité propre, signataires vivants, revendications, console) | `06e31fa` | 2 fichiers convex + 1 fichier domaine | D02, D05, D14, D19 |
+| 14 | `albums` (photos par réseau sous la garde des fichiers, purge sans orphelin) | `daf3750` | 1 fichier convex (26 cas) + 1 fichier domaine (32 cas) | D05, D09, D14 |
+| 15 | `calls` (appels 1:1 et de groupe, sonnerie, attente, journal, présence, réglages, messagerie vocale, jeton LiveKit) | voir journal git (`feat(calls)`) | 4 fichiers convex (114 cas) + 2 purs du module (22 cas) + 3 bibliothèques LiveKit (21 cas) + 1 fichier domaine (14 cas) + 2 fichiers contrats (29 cas) | D02, D05, D11, D13, D14, D16, D19, D21, D26, D27 |
 
 Ordre suivi (owner map §4.2), avec un écart : le lot 1 (modules purs) est porté avec chaque module qui le
 consomme ; l'avis de verdict des fichiers (`files/notify`) est arrivé avec le module `notifications` (lot 5), dont il
@@ -1055,3 +1058,135 @@ dépend.
   au socle ; à rouvrir avec la conversion côté écran.
 - **Effacement** des albums d'une personne (index par propriétaire posé) : PA5.
 
+---
+
+## Lot 15 — `calls` (appels personnels 1:1 et de groupe d'un réseau)
+
+### Parité, fichier par fichier
+
+| Source (`socle/convex/…`) | Cible | Sort | État |
+|---|---|---|---|
+| `modules/iappel/scope.ts` | `packages/social-domain/src/callJournal.ts` (réexporté par `convex/modules/calls/journal.ts`) | à simplifier | ✅ (portée et environnement retirés ; listes source des validateurs) |
+| `modules/iappel/group.ts` | `packages/social-contracts/src/callGroup.ts` | tel quel | ✅ (dans les CONTRATS, voir écarts ; titre → ses parties) |
+| `modules/iappel/validators.ts` | `convex/modules/calls/validators.ts` + bornes `packages/social-contracts/src/calls.ts` | à simplifier | ✅ |
+| `modules/iappel/admission.ts` | `convex/modules/calls/admission.ts` | à simplifier | ✅ (raisons, plus de phrases) |
+| `modules/iappel/capacity.ts` | `convex/modules/calls/capacity.ts` | à simplifier | ✅ (`photographedGroupCallCapacity` devient LA lecture du plafond) |
+| `modules/iappel/tables.ts`, `schemas/meetings.ts`, `schemas/agentPresence.ts` | `convex/modules/calls/tables.ts` | à simplifier / réécrire | ✅ (six tables, dont `callParticipants`) |
+| `modules/iappel/evaluate.ts` | `convex/modules/calls/evaluate.ts` | à simplifier (fort) | ✅ (routage et priorité retirés) |
+| `modules/iappel/calls.ts` | `convex/modules/calls/ringing.ts` | à adapter | ✅ (`listRinging`, `hold`, `resume`) |
+| `modules/iappel/groupCalls.ts` | `convex/modules/calls/{groupCalls,access,state}.ts` | à adapter | ✅ |
+| `modules/iappel/preferences.ts` | `convex/modules/calls/preferences.ts` | à adapter | ✅ |
+| `modules/iappel/presence.ts`, `functions/agentPresence.ts` | `convex/modules/calls/presence.ts` | à réécrire | ✅ (`forMyConnections`, `offlineHints`, `heartbeat`, `setOffline`, nettoyage) |
+| `modules/iappel/push.ts` | `convex/modules/calls/push.ts` | à simplifier | ✅ la DÉCISION (canal en PA5) |
+| `modules/iappel/ringExpiry.ts` | `convex/modules/calls/ringExpiry.ts` | tel quel | ✅ (+ extinction précise du tête-à-tête) |
+| `modules/iappel/voicemail.ts` | `convex/modules/calls/voicemail.ts` | à adapter | ✅ |
+| `functions/meetings.ts` (`callCitizenById`) et `reseauPersonnel/messagerie.ts` (`callByHandle`) | `convex/modules/calls/direct.ts` (`callMember`) | à réécrire | ✅ (une seule porte) |
+| `functions/meetings.ts` (`join`, `leave`, `setCallRinging`, `declineCall`) | `convex/modules/calls/lifecycle.ts` | à réécrire | ✅ |
+| `functions/meetings.ts` (`listCallHistory`) | `convex/modules/calls/history.ts` | à simplifier | ✅ |
+| `functions/meetings.ts` (`endStaleCalls`, `cleanupStaleCalls`) | `convex/modules/calls/cleanup.ts` | à réécrire | ✅ |
+| `functions/meetings.ts` (`getAuthorizedForToken`, `getDisplayNameByAuthSubject`) | `convex/modules/calls/token.ts` (`authorizeToken`) | à adapter | ✅ (une query au lieu de quatre) |
+| `actions/livekit.ts` (`requestToken`) | `convex/modules/calls/livekitActions.ts` | à simplifier | ✅ (`"use node"`, constructeur `networkAction`) |
+| `lib/livekit.ts`, `lib/livekitWake.ts` | `convex/lib/livekit.ts`, `convex/lib/livekitWake.ts` | tel quel | ✅ (codes `mediaServer*`) |
+| `lib/livekitIdentity.ts` | `convex/lib/livekitIdentity.ts` | à simplifier | ✅ (identité `call` seule) |
+| `reseauPersonnel/groupes.ts` (mécanique d'appel des fils) | `convex/modules/calls/{access,state}.ts` + accroches dans `convex/modules/groups/{threads,cascade,tables,messages}.ts` | à adapter | ✅ |
+| crons `cleanup-stale-calls` (30 s), `cleanup-stale-presence` (60 s) | `calls-cleanup-stale`, `calls-presence-cleanup-stale` (`convex/crons.ts`) | patron | ✅ |
+| `iappel/{_deps, manifest, agentAccess, authority, authorityResolve, hours, posteHours, postePolicy, priority, priorityCallers, priorityResolve, routing}.ts`, `lib/presenceTransitions.ts`, `actions/pnpeLivekit.ts` | — | exclus | — |
+
+### Adaptations (liste fermée)
+
+- **Par réseau** : un appel, ses lignes, ses tickets, la messagerie vocale et la présence portent `networkId` ; toute
+  fonction exige le réseau de l'appel (un appel, un fil ou un message d'un autre réseau est introuvable) ; la sonnerie,
+  le journal, la pastille et « hors ligne » se lisent dans le réseau (un appel du réseau A ne compte pas dans le réseau B).
+- **Verrous « agent » levés** (liste fermée de l'annexe A4) : V01 à V07 — un membre DÉCLARÉ appelle un membre déclaré,
+  sans affiliation ni catégorie ; V08 à V17 — l'appel de groupe ad hoc n'exige ni organisation, ni appartenance, ni
+  `canPlaceDirectCall`, ses invités sont des personnes JOIGNABLES du réseau ; V18 à V23 — présence par personne,
+  plus d'`agentPresence` d'organisation ni de miroir du silence ; V24 à V30 (poste, horaires, secrétariat, autorité,
+  priorité), V31 (centre d'appels), V32 (environnement back-office), V33 (grant « citoyen ») et V34 (réunions) partent
+  avec leur code.
+- **Une porte d'appel** : `callMember` fusionne `callCitizenById` et `callByHandle` (cible par personne ou par
+  identifiant public) ; l'appelé est JOIGNABLE (profil publié, non effacé, membre déclaré du réseau) et sans blocage,
+  sinon le refus indistinct.
+- **Admission** : ordre du socle gardé (`outside_relations` → `dnd` → `in_meeting` → `busy` → `offline`) ; la décision
+  rend une RAISON, l'écran la dit (plus de phrase composée côté serveur) ; « hors ligne » prouvé sur la présence du
+  réseau ; silence de réunion sur l'agenda personnel du réseau ; « hors de mes relations » relu à l'admission (le lien
+  n'est lu que si le réglage est actif), et non appliqué depuis un fil (le fil vaut consentement).
+- **Participation** (D02, D27) : le tableau `meetings.participants`, réécrit à chaque entrée, devient la table
+  `callParticipants` ; INVARIANT tenu par `finishCall`, seule porte de fin d'appel : une ligne sans départ appartient
+  à un appel vivant — « suis-je en appel ? » et « déjà en ligne » sont des lectures d'index bornées (appels de groupe
+  compris, que le socle ne voyait pas).
+- **Sonnerie tenue par l'ÉTAT** (D16) : extinction programmée de chaque ticket ET de chaque tête-à-tête (au socle, le
+  1:1 attendait le nettoyage et `listRinging` filtrait sur l'horloge de la query) ; `listRinging` sans instant, deux
+  sources bornées à vingt.
+- **Appels de fil** : le fil d'origine est porté par l'APPEL (`groupThreadId`, index `by_groupThread_status`) au lieu
+  d'un pointeur paresseux sur le fil ; quitter le fil ou en être retiré sort de l'appel (sonnerie tue, départ écrit) ;
+  supprimer le fil termine l'appel ; `call_started` (avec `callId`) dans le fil ; l'appel vivant dans la fiche et la
+  liste des fils (`activeCall`) et par `activeForThread` ; un membre hors de la sélection REJOINT l'appel en cours ; un
+  ajout en cours d'appel n'accepte que des membres vivants du fil.
+- **Journal** : trois sources indexées, bornées à cinquante avec lacune dite ; un appel où l'on m'a convié se classe
+  d'après MON ticket (manqué, refusé, écarté par mes réglages) ; DTO allowlisté, personnes nommées par `counterpartLabel`.
+- **Présence** : battement par personne dans un réseau, rendu aux seules relations acceptées du réseau, partage
+  coupé = absent ; nettoyage indexé par `lastHeartbeat`, chaîné.
+- **Réglages** : par personne (`@selfScoped`), silence sans portée, réponses rapides `null` tant que jamais réglées
+  (l'écran propose les siennes, traduites), nettoyage pur au contrat.
+- **Messagerie vocale** : réservée à l'appelant d'un tête-à-tête TERMINÉ sans décrochage ; jamais sur « hors de mes
+  relations » (décision 6d, désormais serveur) ; dépôt neuf admis à la garde des fichiers (usage `voice`) ; écoute par
+  la garde de délivrance ; suppression = blob, ligne d'analyse et avis de la cloche.
+- **Jeton** : nouveau constructeur `networkAction` (`lib/functions.ts`, garde de réseau d'une action par une query
+  interne, `lib/actionAccess.ts`) ; autorisation puis réveil ; identité `sujet::nonce`, personne en `attributes`.
+- **Cloche** : `call_missed` (sujet l'appel ; jamais pour « hors de mes relations » ni pour un invité de groupe écarté),
+  `voicemail_left` (sujet le message) ; sujets `call` et `voicemail` ajoutés à la table.
+- **Débit** (D14) : `call.place`, `call.invite`, `call.respond`, `call.leave` (seau très large : un départ refusé
+  laisserait un fantôme), `call.settings`, `voicemail.leave`, `voicemail.read`, `presence.heartbeat`.
+- **Codes** : seize règles (`CALL_*`, `GROUP_CALL_*`, `VOICEMAIL_*`) et trois erreurs (`mediaServerNotConfigured`,
+  `mediaServerUnavailable`, `mediaServerNoCapacity`), traduites en fr et en.
+
+### Corrections de dette
+
+- **D02**, **D27** : table de participation ; `endStaleCalls` (`.collect()` de tous les appels de l'appelant) →
+  `reapStaleCallsOf`, lecture indexée bornée qui pose un `callStatus` terminal. **D11** : aucun `.collect()`.
+- **D13** : blocage vérifié pour chaque invité, à chaque porte (ad hoc, fil, ajout) et pour l'appel 1:1.
+- **D14** : débit sur chaque geste. **D16** : plus de `Date.now()` dans une query (instant fourni à la pastille et aux
+  réglages, sonnerie tenue par l'état).
+- **D19** : lacunes dites (pastille, indices hors ligne, journal). **D21** : aucun état civil ni e-mail.
+- **D26** : nettoyage de la présence indexé et chaîné (le socle balayait 500 lignes de toute la table) ; lectures
+  restreintes aux relations. **D05** : écoute de la messagerie vocale par la garde.
+
+### Tests
+
+- Portés : `calls.test` (sonnerie, ordre, réponses rapides, attente dont différée et croisée, appel terminé, appel
+  parqué quitté), `evaluate.test` (silence et silence échu, déjà en ligne et tonalité « occupé », réunion opt-in,
+  hors ligne fail-open, cloche), `callJournalAndDecline` (entrant, sortant, correspondant, refus automatiques, durée,
+  cloisonnement, mot de refus), `groupCalls.test` (sonnerie des invités, refus et départ qui ne terminent pas, hôte qui
+  renonce, second invité, grille, journal, ad hoc, admission par ligne, promotion, plafond, idempotence, IC-04),
+  `ringExpiry.test`, `preferences.test`, `presence.test`, `voicemail.test`, `livekitTokenIssuance`, et les purs
+  (`group`, `scope`, `admission`, `capacity`, `livekit`, `livekitWake`, `livekitIdentity`).
+- Neufs : refus indistinct (inconnu, profil retiré, bloqué, autre réseau, membre en attente), débit, hors de mes
+  relations sans cloche ni messagerie vocale, raccrocher sans réponse qui distingue, lignes closes à chaque fin, appels
+  périmés de l'appelant clos, nettoyage (composé, vide, fantôme), jeton (autorisation avant configuration, identité par
+  connexion, personne en attributs), journal par ticket, membre hors sélection qui rejoint, départ, retrait et
+  suppression du fil, fil d'un autre réseau, présence d'un autre réseau, battement et départ explicite, blob déjà admis
+  refusé, retenue de l'écoute, effacement complet.
+- Abandonnés : portée poste / personnel, horaires, autorité, priorité, secrétariat, file d'appels, environnement
+  back-office, miroir de présence d'organisation, `forOrgContacts`, `forOrgMembers`, réunions instantanées,
+  configuration d'organisation du plafond, exemption du back-office, adoption iDocument.
+
+### Écarts assumés
+
+- **`callGroup` dans les contrats**, pas dans le domaine (owner map : `SD/callGroup.ts`) : il lit le plafond d'appel de
+  `groupCapacity`, qui vit dans les contrats, et le domaine pur ne dépend d'aucun paquet.
+- **Borne de balayage des tickets à 32** (owner map : 11) : égale au plafond, elle fermerait la porte au remplaçant
+  d'un invité qui a refusé (IC-04) ; une ligne par personne conviée, bornée bien en deçà des 1 000 du back-office.
+- **Présence par (réseau, personne)** : un appel du réseau ne sonne que là où une application de ce réseau est ouverte ;
+  « battement par personne » (EXF-AN-23) vaut donc dans chaque réseau.
+- **Push** (EXF-AN-23) : la décision est posée (`push.ts`, préférence `pushIncoming`), le canal arrive avec PA5 ; jusque
+  là, « hors ligne » se constate sans la condition « aucun abonnement push » du socle, et un écran fermé ne sonne pas.
+- **Aucun événement d'appel dans les fils 1:1** (`call_started`/`call_ended` de `chatMessages`) : le socle ne les écrivait
+  nulle part ; le journal des appels porte l'historique.
+- **Départ de la salle vu par le serveur multimédia** (webhook `participant_left`) : absent comme au socle ; le nettoyage
+  reste le filet (fantôme au-delà de quatre heures).
+- **Effacement** des tables d'appel, de présence et de messagerie vocale d'une personne : PA5 (D32).
+- **Titre d'appel** non stocké : l'écran compose « Appel de groupe — A, B +k » (`groupCallTitleParts`) ou lit le titre du
+  fil par `threadId`.
+- **`codegen` et `verify` sous Node 25** : le backend local refuse la publication dès qu'une action `"use node"` existe
+  si la CLI tourne sous un Node non supporté — lancer avec `node@22` en tête du `PATH` (piège ajouté à `CLAUDE.md`).
+- **Écrans** (iAppel, journal, réglages, grille, surface d'appel) : PA6.

@@ -16,5 +16,8 @@
   "groupMembershipRequired": "Join this group to access its posts.",
   "groupRoleRequired": "Your role in this group does not allow this action.",
   "eventOrganizerRequired": "Only the organizer of this event can do this.",
-  "pageRoleRequired": "This action is reserved for the page's signatories."
+  "pageRoleRequired": "This action is reserved for the page's signatories.",
+  "mediaServerNotConfigured": "Calls are not available on this service yet.",
+  "mediaServerUnavailable": "The call server is not responding. Try again in a moment.",
+  "mediaServerNoCapacity": "The call server is temporarily at capacity. Try again in a few minutes."
 }

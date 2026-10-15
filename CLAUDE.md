@@ -117,7 +117,9 @@ Cliquets en place (`tests/ratchets/`) : `no-cross-product-imports`, `no-any-vali
   qu'une action `"use node"` existe et que son Node n'est pas en 20, 22 ou 24 (le Mac a Node 25 :
   `DeploymentNotConfiguredForNodeActions`). `bun run dev:convex` passe par `scripts/convex-dev.mjs`,
   qui met un Node supporté en tête du PATH (Homebrew `node@22` présent). Relancer `convex dev`
-  après tout changement de ce lanceur.
+  après tout changement de ce lanceur. **C'est le Node de la CLI qui compte, à chaque publication** :
+  `codegen` (donc `verify`) lancé sous Node 25 échoue de même (constaté le 15/10, lot 15) — lancer
+  `PATH="/opt/homebrew/opt/node@22/bin:$PATH" bun run verify`.
 - **Identifiants de cron** : ASCII seulement (`crons.daily("purge des fichiers infectés", …)` fait
   échouer le déploiement entier à cause du `é`).
 - **`codegen` et `convex dev` en même temps** : `convex codegen` pousse aussi vers le backend local ;

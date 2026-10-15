@@ -30,4 +30,10 @@ crons.interval("groups-purge-expired-typing", { minutes: 1 }, internal.modules.g
 // Stories : la ligne, ses vues, son blob ET sa ligne d'analyse disparaissent à l'expiration.
 crons.interval("stories-purge-expired", { minutes: 10 }, internal.modules.stories.stories.purgeExpired, {})
 
+// Appels : les appels périmés (composés sans suite, sonneries sans réponse, salles
+// vidées par un onglet fermé, fantômes) se closent ; les présences dont le battement
+// s'est tu passent hors ligne. Lectures indexées, poursuivies par chaîne.
+crons.interval("calls-cleanup-stale", { seconds: 30 }, internal.modules.calls.cleanup.cleanupStaleCalls, {})
+crons.interval("calls-presence-cleanup-stale", { seconds: 60 }, internal.modules.calls.presence.cleanupStalePresence, {})
+
 export default crons

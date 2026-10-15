@@ -1,4 +1,4 @@
-// Dupliqué de socle/convex/modules/reseauPersonnel/tables.ts (l. 596-899 : `reseauPersonnel_groupThreads`, `…GroupMembers`, `…GroupInvites`, `…GroupInviteLinks`, `…GroupMessages`, `…GroupMessageReactions`, `…GroupTyping`) @ ad2e7fdc2 — adaptations : `networkId` sur le fil, l'appartenance, l'invitation, le lien et le message ; personnes ; `scope` (poste / personnel), `activeMeetingId` et `meetingId` retirés (les appels arrivent au lot 15), `sourceDocumentId` (iDocument) retiré ; `memberCount` retiré du fil (agrégat `engineCounters`, D02) ; masquage « pour moi » dans la table `groupMessageHides` au lieu du tableau `deletedForUserIds` (D22) ; non-lus TENUS sur l'appartenance (`unreadCount`, avec la position jusqu'où les messages ont été comptés) et sommés dans `unreadTotals.groups` (D23, au lieu d'un recalcul de 50 fils × 200 messages) ; ordre d'activité porté par l'appartenance (« mes groupes » paginés sans relire les fils) ; aperçu en NATURE (comme le 1:1) ; provenance d'un transfert commune aux deux messageries ; copies indexées par leur original (la purge ne détruit pas le blob d'une copie vivante).
+// Dupliqué de socle/convex/modules/reseauPersonnel/tables.ts (l. 596-899 : `reseauPersonnel_groupThreads`, `…GroupMembers`, `…GroupInvites`, `…GroupInviteLinks`, `…GroupMessages`, `…GroupMessageReactions`, `…GroupTyping`) @ ad2e7fdc2 — adaptations : `networkId` sur le fil, l'appartenance, l'invitation, le lien et le message ; personnes ; `scope` (poste / personnel) et `activeMeetingId` retirés (l'appel porte son fil d'origine, module `calls`), `meetingId` → `callId` (lot 15), `sourceDocumentId` (iDocument) retiré ; `memberCount` retiré du fil (agrégat `engineCounters`, D02) ; masquage « pour moi » dans la table `groupMessageHides` au lieu du tableau `deletedForUserIds` (D22) ; non-lus TENUS sur l'appartenance (`unreadCount`, avec la position jusqu'où les messages ont été comptés) et sommés dans `unreadTotals.groups` (D23, au lieu d'un recalcul de 50 fils × 200 messages) ; ordre d'activité porté par l'appartenance (« mes groupes » paginés sans relire les fils) ; aperçu en NATURE (comme le 1:1) ; provenance d'un transfert commune aux deux messageries ; copies indexées par leur original (la purge ne détruit pas le blob d'une copie vivante).
 /**
  * CONVERSATIONS DE GROUPE d'un réseau — distinctes du 1:1 (`messaging`) : la
  * paire ordonnée ne se généralise pas à N personnes.
@@ -18,8 +18,9 @@ export const groupThreadRoleValidator = literals(GROUP_THREAD_ROLES)
 export const groupInviteStatusValidator = v.union(v.literal("pending"), v.literal("accepted"), v.literal("declined"))
 
 /** Les événements d'un message système — chacun a son émetteur dans le module. */
-export const GROUP_SYSTEM_EVENTS = ["group_created", "member_joined", "member_left", "member_removed", "group_renamed"] as const
+export const GROUP_SYSTEM_EVENTS = ["group_created", "member_joined", "member_left", "member_removed", "group_renamed", "call_started"] as const
 export const groupSystemEventValidator = literals(GROUP_SYSTEM_EVENTS)
+export type GroupSystemEvent = (typeof GROUP_SYSTEM_EVENTS)[number]
 
 export const groupsTables = {
   /**
@@ -133,6 +134,8 @@ export const groupsTables = {
     event: v.optional(groupSystemEventValidator),
     /** La personne VISÉE par un événement (`member_removed`), quand ce n'est pas l'émetteur. */
     targetPersonId: v.optional(v.id("persons")),
+    /** L'appel annoncé par un événement `call_started` — une référence, relue avec sa garde. */
+    callId: v.optional(v.id("calls")),
     attachmentFiles: v.optional(v.array(storedAttachmentValidator)),
     replyToMessageId: v.optional(v.id("groupMessages")),
     reactionCounts: v.optional(messageReactionCountsValidator),

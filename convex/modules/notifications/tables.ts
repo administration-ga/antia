@@ -1,4 +1,4 @@
-// Dupliqué de socle/convex/modules/reseauPersonnel/tables.ts (l. 391-455, `reseauPersonnel_notifications`) @ ad2e7fdc2 — adaptations : UNE seule table `notifications` du moteur (le centre administratif `functions/notifications.ts` est exclu) ; `networkId` et personnes ; acteur facultatif (avis du système) ; sujets typés ajoutés avec leur module (publication, connexion, analyse de fichier, groupe thématique, conversation de groupe, évènement, album) ; non-lus indexés jusqu'à la date (`markAllRead` sans `.filter()`) ; index de rétention reportés avec la rétention (PA5, D30).
+// Dupliqué de socle/convex/modules/reseauPersonnel/tables.ts (l. 391-455, `reseauPersonnel_notifications`) @ ad2e7fdc2 — adaptations : UNE seule table `notifications` du moteur (le centre administratif `functions/notifications.ts` est exclu) ; `networkId` et personnes ; acteur facultatif (avis du système) ; sujets typés ajoutés avec leur module (publication, connexion, analyse de fichier, groupe thématique, conversation de groupe, évènement, album, appel, message vocal) ; non-lus indexés jusqu'à la date (`markAllRead` sans `.filter()`) ; index de rétention reportés avec la rétention (PA5, D30).
 /**
  * La cloche sociale d'un réseau : le RÉSIDU d'un geste social (quelqu'un a
  * réagi, commenté, demandé une connexion), jamais un contenu. Le sujet est une
@@ -24,6 +24,8 @@ export const notificationSubjectValidator = v.union(
   v.object({ groupThread: v.id("groupThreads") }),
   v.object({ event: v.id("events") }),
   v.object({ album: v.id("albums") }),
+  v.object({ call: v.id("calls") }),
+  v.object({ voicemail: v.id("voicemails") }),
 )
 
 export const notificationsTables = {
@@ -41,6 +43,8 @@ export const notificationsTables = {
     subjectGroupThreadId: v.optional(v.id("groupThreads")),
     subjectEventId: v.optional(v.id("events")),
     subjectAlbumId: v.optional(v.id("albums")),
+    subjectCallId: v.optional(v.id("calls")),
+    subjectVoicemailId: v.optional(v.id("voicemails")),
     dedupKey: v.string(),
     createdAt: v.number(),
     readAt: v.optional(v.number()),
