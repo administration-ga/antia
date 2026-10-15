@@ -94,9 +94,34 @@ export const engineCounters = new DirectAggregate<{ Namespace: string; Key: numb
 const sharesOf = (postId: Id<"posts">) => `posts.shares:${postId}`
 const commentsOf = (postId: Id<"posts">) => `posts.comments:${postId}`
 
-/** Combien de COMMENTAIRES vivants sous cette publication (écrits par le module engagement). */
+const repliesOf = (commentId: Id<"postComments">) => `posts.replies:${commentId}`
+
+/** Combien de COMMENTAIRES vivants sous cette publication, réponses comprises. */
 export async function countComments(ctx: Pick<QueryCtx, "runQuery">, postId: Id<"posts">): Promise<number> {
   return await engineCounters.count(ctx, { namespace: commentsOf(postId) })
+}
+
+/** Combien de RÉPONSES vivantes sous cette racine. */
+export async function countReplies(ctx: Pick<QueryCtx, "runQuery">, rootCommentId: Id<"postComments">): Promise<number> {
+  return await engineCounters.count(ctx, { namespace: repliesOf(rootCommentId) })
+}
+
+type CountedComment = { _id: Id<"postComments">; postId: Id<"posts">; parentCommentId?: Id<"postComments">; createdAt: number }
+
+/** Compte un commentaire (à sa publication, et à sa racine s'il répond). Idempotent. */
+export async function recordComment(ctx: MutationCtx, comment: CountedComment): Promise<void> {
+  await engineCounters.insertIfDoesNotExist(ctx, { namespace: commentsOf(comment.postId), key: comment.createdAt, id: comment._id })
+  if (comment.parentCommentId !== undefined) {
+    await engineCounters.insertIfDoesNotExist(ctx, { namespace: repliesOf(comment.parentCommentId), key: comment.createdAt, id: comment._id })
+  }
+}
+
+/** Décompte un commentaire (à son retrait). Idempotent. */
+export async function unrecordComment(ctx: MutationCtx, comment: CountedComment): Promise<void> {
+  await engineCounters.deleteIfExists(ctx, { namespace: commentsOf(comment.postId), key: comment.createdAt, id: comment._id })
+  if (comment.parentCommentId !== undefined) {
+    await engineCounters.deleteIfExists(ctx, { namespace: repliesOf(comment.parentCommentId), key: comment.createdAt, id: comment._id })
+  }
 }
 
 /** Combien de PARTAGES vivants de cette publication circulent. */

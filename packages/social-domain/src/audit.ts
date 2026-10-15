@@ -22,6 +22,8 @@ export const AUDIT_ACTIONS = [
   // Console : adhésions (suspension à la racine, qui vaut partout)
   "membership.suspend_everywhere",
   "membership.lift_suspension",
+  // Modération d'un réseau
+  "moderation.report_decide",
   // Garde des fichiers
   "file.release",
   "file.requeue",
@@ -37,7 +39,7 @@ export const AUDIT_CAPACITIES = ["platform_admin", "platform_operator", "network
 export type AuditCapacity = (typeof AUDIT_CAPACITIES)[number]
 
 /** Les tables qu'une décision peut viser — une référence, jamais un contenu. */
-export const AUDIT_SUBJECT_TABLES = ["networks", "persons", "fileScans"] as const
+export const AUDIT_SUBJECT_TABLES = ["networks", "persons", "fileScans", "contentReports"] as const
 export type AuditSubjectTable = (typeof AUDIT_SUBJECT_TABLES)[number]
 
 export type AuditSubject = { table: AuditSubjectTable; id: string }

@@ -1,4 +1,4 @@
-// Dupliqué de socle/convex/modules/reseauPersonnel/tables.ts (l. 465-500, `reseauPersonnel_postMarks` et `reseauPersonnel_mutes`) @ ad2e7fdc2 — adaptations : `networkId` (le réseau DEPUIS lequel la marque est posée) en tête de chaque index ; personnes ; `by_post_and_kind` (abonnés aux commentaires d'une publication) ajouté avec son lecteur, le module engagement (lot 8).
+// Dupliqué de socle/convex/modules/reseauPersonnel/tables.ts (l. 465-500, `reseauPersonnel_postMarks` et `reseauPersonnel_mutes`) @ ad2e7fdc2 — adaptations : `networkId` (le réseau DEPUIS lequel la marque est posée) en tête des index du lecteur ; personnes ; `by_post_and_kind` (les abonnés aux commentaires d'une publication, lus par la diffusion par lots).
 /**
  * Marques d'un LECTEUR sur une publication (enregistrer, masquer, suivre les
  * commentaires) et mises en sourdine — des gestes silencieux, invisibles de
@@ -26,7 +26,9 @@ export const marksTables = {
     // Unicité et test d'existence en un seul coup.
     .index("by_network_person_kind_post", ["networkId", "personId", "kind", "postId"])
     // Mes marques d'un genre, les plus récentes d'abord.
-    .index("by_network_person_kind_createdAt", ["networkId", "personId", "kind", "createdAt"]),
+    .index("by_network_person_kind_createdAt", ["networkId", "personId", "kind", "createdAt"])
+    // Qui suit CETTE publication — la diffusion d'un nouveau commentaire (D08).
+    .index("by_post_and_kind", ["postId", "kind"]),
 
   /**
    * SOURDINE — « ne plus voir les publications de cette personne dans mon

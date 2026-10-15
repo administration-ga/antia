@@ -1,4 +1,4 @@
-// Dupliqué de socle/convex/modules/icom/notifyFanout.ts @ ad2e7fdc2 — adaptations : PATRON repris (lots de 150, job chaîné qui se replanifie, aucune écriture sur le document parent), code réécrit pour la cloche sociale du moteur : sources de destinataires génériques (liste de personnes, abonnés d'une personne dans le réseau), porte unique `notifyPerson`, dédoublonnage par sa clé.
+// Dupliqué de socle/convex/modules/icom/notifyFanout.ts @ ad2e7fdc2 — adaptations : PATRON repris (lots de 150, job chaîné qui se replanifie, aucune écriture sur le document parent), code réécrit pour la cloche sociale du moteur : sources de destinataires génériques (liste de personnes, abonnés d'une personne dans le réseau, abonnés aux commentaires d'une publication — chacun re-gardé au moment de sonner, D08), porte unique `notifyPerson`, dédoublonnage par sa clé.
 /**
  * Diffusion de la cloche PAR LOTS CHAÎNÉS, hors de la transaction de l'émetteur.
  *
@@ -14,6 +14,7 @@ import { type Infer, v } from "convex/values"
 import { internal } from "../../_generated/api"
 import type { Id } from "../../_generated/dataModel"
 import { internalMutation, type MutationCtx } from "../../_generated/server"
+import { canSeePostDoc } from "../posts/access"
 import { type NotificationSubjectRef, notifyPerson } from "./notify"
 import { notificationKindValidator, notificationSubjectValidator } from "./tables"
 
@@ -24,6 +25,12 @@ export const FANOUT_BATCH_SIZE = 150
 export const fanoutSourceValidator = v.union(
   v.object({ kind: v.literal("persons"), personIds: v.array(v.id("persons")) }),
   v.object({ kind: v.literal("followers"), targetPersonId: v.id("persons") }),
+  /**
+   * Les abonnés aux commentaires d'une publication (marque `notify`), chacun
+   * sonné dans le réseau où il s'est abonné, et SEULEMENT s'il voit encore la
+   * publication : un abonnement est vivant, ce n'est pas une copie d'audience.
+   */
+  v.object({ kind: v.literal("postSubscribers"), postId: v.id("posts") }),
 )
 
 export type FanoutInput = {
@@ -32,6 +39,44 @@ export type FanoutInput = {
   kind: NotificationKind
   subject?: NotificationSubjectRef
   source: Infer<typeof fanoutSourceValidator>
+}
+
+type Delivery = { networkId: Id<"networks">; recipientPersonId: Id<"persons"> }
+type Batch = { deliveries: Delivery[]; next: { offset: number } | { cursor: string } | null }
+
+async function readBatch(ctx: MutationCtx, args: { networkId: Id<"networks">; source: FanoutInput["source"]; offset?: number; cursor?: string | null }): Promise<Batch> {
+  const source = args.source
+  if (source.kind === "persons") {
+    const offset = args.offset ?? 0
+    const ids = source.personIds.slice(offset, offset + FANOUT_BATCH_SIZE)
+    return {
+      deliveries: [...new Set(ids)].map((recipientPersonId) => ({ networkId: args.networkId, recipientPersonId })),
+      next: offset + FANOUT_BATCH_SIZE < source.personIds.length ? { offset: offset + FANOUT_BATCH_SIZE } : null,
+    }
+  }
+  if (source.kind === "followers") {
+    const page = await ctx.db
+      .query("follows")
+      .withIndex("by_network_target_createdAt", (q) => q.eq("networkId", args.networkId).eq("targetPersonId", source.targetPersonId))
+      .paginate({ cursor: args.cursor ?? null, numItems: FANOUT_BATCH_SIZE })
+    return {
+      deliveries: page.page.map((row) => ({ networkId: args.networkId, recipientPersonId: row.followerPersonId })),
+      next: page.isDone ? null : { cursor: page.continueCursor },
+    }
+  }
+  const page = await ctx.db
+    .query("postMarks")
+    .withIndex("by_post_and_kind", (q) => q.eq("postId", source.postId).eq("kind", "notify"))
+    .paginate({ cursor: args.cursor ?? null, numItems: FANOUT_BATCH_SIZE })
+  const post = await ctx.db.get(source.postId)
+  const deliveries: Delivery[] = []
+  if (post) {
+    for (const mark of page.page) {
+      const network = await ctx.db.get(mark.networkId)
+      if (network && (await canSeePostDoc(ctx, { personId: mark.personId, network }, post))) deliveries.push({ networkId: mark.networkId, recipientPersonId: mark.personId })
+    }
+  }
+  return { deliveries, next: page.isDone ? null : { cursor: page.continueCursor } }
 }
 
 export const fanoutNotifications = internalMutation({
@@ -47,26 +92,12 @@ export const fanoutNotifications = internalMutation({
   },
   returns: v.object({ notified: v.number(), done: v.boolean() }),
   handler: async (ctx, args) => {
-    let recipients: Id<"persons">[]
-    let next: { offset: number } | { cursor: string } | null = null
-    if (args.source.kind === "persons") {
-      const offset = args.offset ?? 0
-      recipients = args.source.personIds.slice(offset, offset + FANOUT_BATCH_SIZE)
-      if (offset + FANOUT_BATCH_SIZE < args.source.personIds.length) next = { offset: offset + FANOUT_BATCH_SIZE }
-    } else {
-      const targetPersonId = args.source.targetPersonId
-      const page = await ctx.db
-        .query("follows")
-        .withIndex("by_network_target_createdAt", (q) => q.eq("networkId", args.networkId).eq("targetPersonId", targetPersonId))
-        .paginate({ cursor: args.cursor ?? null, numItems: FANOUT_BATCH_SIZE })
-      recipients = page.page.map((row) => row.followerPersonId)
-      if (!page.isDone) next = { cursor: page.continueCursor }
-    }
+    const { deliveries, next } = await readBatch(ctx, args)
     let notified = 0
-    for (const recipientPersonId of new Set(recipients)) {
+    for (const delivery of deliveries) {
       const written = await notifyPerson(ctx, {
-        networkId: args.networkId,
-        recipientPersonId,
+        networkId: delivery.networkId,
+        recipientPersonId: delivery.recipientPersonId,
         ...(args.actorPersonId !== undefined ? { actorPersonId: args.actorPersonId } : {}),
         kind: args.kind,
         ...(args.subject ? { subject: args.subject } : {}),

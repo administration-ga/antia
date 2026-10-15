@@ -27,6 +27,10 @@ const RATE_LIMITS = {
   "post.publish.reinforced": { kind: "token bucket", rate: 10, period: DAY, capacity: 3 },
   "reaction.toggle": { kind: "token bucket", rate: 120, period: MINUTE, capacity: 30 },
   "comment.create": { kind: "token bucket", rate: 60, period: HOUR, capacity: 15 },
+  "comment.edit": { kind: "token bucket", rate: 60, period: HOUR, capacity: 20 },
+  "comment.remove": { kind: "token bucket", rate: 60, period: HOUR, capacity: 20 },
+  "report.create": { kind: "token bucket", rate: 20, period: HOUR, capacity: 5 },
+  "moderation.decide": { kind: "token bucket", rate: 300, period: HOUR, capacity: 60 },
   "upload.url": { kind: "token bucket", rate: 60, period: HOUR, capacity: 20 },
   // Graphe (PA3 lot 4)
   "connection.request": { kind: "token bucket", rate: 30, period: HOUR, capacity: 10 },

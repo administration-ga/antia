@@ -20,7 +20,8 @@ l'owner map), les tests portés et neufs, les écarts assumés. Un module n'entr
 | 4 | `graph` (connexions, blocages, abonnements) | `bfb2db9` | 1 fichier convex (15 cas) + 4 cas domaine | D04, D05, D12, D14, D17, D19 |
 | 5 | `notifications` (cloche sociale, diffusion par lots) et avis de verdict des fichiers | `9f2f12b` | 1 fichier convex (10 cas) + 1 fichier domaine + 1 cliquet | D07, D18, D19 |
 | 6 | `platform/audit` (journal des décisions du moteur) | `75e4b26` | 1 fichier convex (5 cas) + 4 cas fichiers + 1 fichier domaine + 1 cliquet | D14, D35 |
-| 7 | `thematicGroups/access`, `posts` (accès, retrait, compteurs, écriture, fil, mur, recherche) et `marks` | voir journal git (`feat(posts)`) | 2 fichiers convex (32 + 8 cas) + cas domaine | D01, D14, D18, D19, D24, D25, D35 |
+| 7 | `thematicGroups/access`, `posts` (accès, retrait, compteurs, écriture, fil, mur, recherche) et `marks` | `3dfebcc` | 2 fichiers convex (32 + 8 cas) + cas domaine | D01, D14, D18, D19, D24, D25, D35 |
+| 8 | `engagement` (réactions, commentaires paginés, cloches) et `moderation` (signalements, file du réseau, décisions tracées) | voir journal git (`feat(engagement)`) | 2 fichiers convex (8 + 5 cas) + 1 fichier domaine | D01, D03, D08, D14, D35 |
 
 Ordre suivi (owner map §4.2), avec un écart : le lot 1 (modules purs) est porté avec chaque module qui le
 consomme ; l'avis de verdict des fichiers (`files/notify`) est arrivé avec le module `notifications` (lot 5), dont il
@@ -420,3 +421,63 @@ dépend.
 - **Commentaires, cloche des réactions, abonnés d'une publication** : lot 8 (`engagement`).
 - **Groupes thématiques** (créer, rejoindre, mur) : lot 9 ; les publications de groupe sont testées sur des lignes posées.
 - **Seau renforcé** `post.publish.reinforced` (déclarée sans badge) : avec la modération à l'échelle (PA5).
+
+---
+
+## Lot 8 — `engagement` et `moderation`
+
+### Parité, fichier par fichier
+
+| Source (`socle/convex/modules/reseauPersonnel/…`) | Cible | Sort | État |
+|---|---|---|---|
+| `engagement.ts` | `convex/modules/engagement/engagement.ts` | à adapter | ✅ (`listComments` → `paginateComments` + `paginateReplies`) |
+| `tables.ts` (l. 324-346, commentaires) | `convex/modules/engagement/tables.ts` (`postComments`) | à adapter | ✅ |
+| `contentRemoval.ts` — `markPersonalCommentRemoved` | `convex/modules/posts/contentRemoval.ts` (`markCommentRemoved`) | à adapter | ✅ |
+| `moderation.ts` | `convex/modules/moderation/moderation.ts` | à adapter | ✅ |
+| `tables.ts` (l. 347-366, signalements) | `convex/modules/moderation/tables.ts` (`contentReports`) | à adapter | ✅ |
+| `validators.ts` (l. 347-361, motifs et statuts) | `packages/social-domain/src/moderation.ts` | pur | ✅ (transitions explicites) |
+| `marks.ts` — `NOTIFY_FANOUT` | source `postSubscribers` de `convex/modules/notifications/fanout.ts` | patron | ✅ |
+
+### Adaptations (liste fermée)
+
+- **Commentaires** : un seul niveau (le serveur aplatit), vivent dans le réseau de la publication ; racines paginées
+  avec l'aperçu de trois réponses et leur nombre, réponses paginées (D03) ; comptés par l'agrégat `engineCounters`
+  (publication et racine) — l'engagement n'écrit plus la publication (D01, vérifié par test) ; commentaires d'un
+  auteur bloqué écartés.
+- **Cloches** : réaction (auteur), commentaire (auteur, personne à qui l'on répond), citation (personnes citées),
+  chacune par `notifyAboutPost` — dans le réseau d'où le destinataire peut OUVRIR la publication (le sien, sinon la
+  racine pour une publication `root`), garde de lecture rejouée pour lui ; abonnés de la publication par la
+  DIFFUSION PAR LOTS (source `postSubscribers`), re-gardés au moment de sonner (D08, au lieu d'une boucle de 100 dans
+  la transaction).
+- **Signalements** : sur un contenu qu'on voit, jamais le sien (refus indistinct), dédoublonnés, masqués pour le
+  déclarant ; la file appartient au réseau du CONTENU (`networkId`), servie à ses modérateurs et administrateurs ;
+  l'opérateur de plateforme tranche en dernier ressort (`decideAsOperator`). DTO de file sans corps, sans auteur,
+  sans déclarant.
+- **Décisions** : transitions du domaine (examen depuis l'ouverture ; terminale définitive), motif borné
+  (`assertDecisionReason`), retrait par les aides du moteur (agrégats décomptés), ligne de journal écrite par le
+  décideur (`moderation.report_decide`, qualité du décideur) au lieu d'`appendContextAudit`.
+- Débit : `comment.edit`, `comment.remove`, `report.create`, `moderation.decide`.
+
+### Corrections de dette
+
+- **D01** : réactions par fragments, commentaires par agrégat ; la publication n'est jamais réécrite par l'engagement.
+- **D03** : pagination par racine et réponses paginées (le socle rendait 100 lignes et 10 réponses, sans curseur).
+- **D08** : abonnés d'une publication par la diffusion par lots, hors de la transaction du commentaire.
+- **D14** : débit sur chaque geste d'engagement et de modération.
+- **D35** : `by_parent_and_createdAt`, `contentReports.by_post` et `by_comment` non recopiés.
+
+### Tests
+
+- Portés : réagir (bascule, changement, retrait, refus si invisible), réponses à un niveau, retrait d'un commentaire
+  (auteur de la publication oui, tiers non ; retiré sans réponse), lister exige de voir, citation en commentaire, réponse
+  qui prévient, abonné prévenu puis plus après révocation (`reseauPersonnel.test`) ; gardes de signalement, file
+  anonymisée, dossier en examen jusqu'à la décision terminale, retrait modéré qui décompte (`moderation.test`) ;
+  patron `reseauPlatformActsAudit` (la décision écrit sa ligne).
+- Neufs : la publication n'est jamais réécrite par une réaction, 150 racines paginées sans perte, réponses paginées et
+  décomptées, commentaires d'un auteur bloqué écartés, opérateur en dernier ressort ; domaine (`moderation.test.ts`).
+
+### Écarts assumés
+
+- **Modération à l'échelle** (équipes, files par équipe puis réseau puis plateforme, sanctions graduées, recours,
+  relecture, mots bloqués, détection de spam, rapport périodique) : PA5, sur `contentReports` et `engineAudit`.
+- **Prévenir l'auteur d'un retrait** et le **recours** : PA5 (EXF-AN-28/29).
