@@ -246,6 +246,37 @@
   --info-600: var(--esp-blue-700);
   --status-active: var(--esp-blue-500);
   --status-active-bg: var(--esp-blue-50);
+  /* Familles sémantiques d'ui-v2 (danger, succès, alerte, statuts) sur les tons de
+     DIASPORALE, mêmes rôles que la base : fond 50, liseré 100, point et contour 500,
+     texte 600 (alerte, badge) ; en clair, l'aplat du bouton suit 500 et son survol
+     600 (alias de la base), sous l'encre claire. Paliers sans ton propre, dérivés en
+     OKLCH à la teinte de leur famille : liseré 100 à la clarté du liseré ambre
+     (L 90,6 %, chroma 0,05) ; rose 600 puis 700 au pas du vert 500 → 600 (L −8,2
+     points chaque fois, chroma à proportion). Statuts : neutres chauds, pas l'ardoise
+     bleutée du socle. */
+  --success-50: var(--esp-green-bg);
+  --success-100: #c9ead0;
+  --success-500: var(--esp-green-strong);
+  --success-600: var(--esp-green);
+  --warning-50: var(--esp-amber-bg);
+  --warning-100: var(--esp-amber-border);
+  --warning-500: var(--esp-amber-point);
+  --warning-600: var(--esp-amber);
+  --danger-50: var(--esp-rose-bg);
+  --danger-100: #ffd5cf;
+  --danger-500: var(--esp-rose);
+  --danger-600: #8c1c15;
+  --danger-700: #67120d;
+  --status-semi: var(--esp-neutral-500);
+  --status-semi-bg: var(--esp-neutral-150);
+  --status-inactive: var(--esp-neutral-400);
+  --status-inactive-bg: var(--esp-neutral-50);
+  --status-archived: var(--esp-green-strong);
+  --status-archived-bg: var(--esp-green-bg);
+  --status-destruct: var(--esp-amber-point);
+  --status-destruct-bg: var(--esp-amber-bg);
+  --status-error: var(--esp-rose);
+  --status-error-bg: var(--esp-rose-bg);
 
   /* Géométrie v2 — rayons resserrés : 4 px pour les badges et l'étiquette, 6 px
      pour les contrôles (bouton, champ, option), 8 px pour les cartes et les
@@ -374,6 +405,38 @@
   --info-600: var(--esp-blue-300);
   --status-active: var(--esp-blue-300);
   --status-active-bg: var(--esp-blue-900);
+  /* Familles sémantiques d'ui-v2 en sombre : les tons sombres de DIASPORALE, levés
+     au-dessus de la carte. L'aplat du bouton est CLAIR et l'encre se pose dessus,
+     comme sur le bleu (jamais de blanc) ; son survol s'éclaircit au pas de survol de
+     la base (L +5,3 points). Palier 100 au pas de la base : L +6,6 points au-dessus du
+     fond teinté, même teinte, même chroma. */
+  --danger-fill: var(--esp-rose-dark);
+  --danger-fill-hover: #f39d95;
+  --success-fill: var(--esp-green-dark);
+  --success-fill-hover: #7fcf95;
+  --success-50: var(--esp-green-bg-dark);
+  --success-100: #2b4431;
+  --success-500: var(--esp-green-dark);
+  --success-600: var(--esp-green-dark);
+  --warning-50: var(--esp-amber-bg-dark);
+  --warning-100: #4a3b21;
+  --warning-500: var(--esp-amber-dark);
+  --warning-600: var(--esp-amber-dark);
+  --danger-50: var(--esp-rose-bg-dark);
+  --danger-100: #523431;
+  --danger-500: var(--esp-rose-dark);
+  --danger-600: var(--esp-rose-dark);
+  --danger-700: #f39d95;
+  --status-semi: var(--esp-night-soft);
+  --status-semi-bg: var(--esp-night-chip);
+  --status-inactive: var(--esp-night-faint);
+  --status-inactive-bg: var(--esp-night-section);
+  --status-archived: var(--esp-green-dark);
+  --status-archived-bg: var(--esp-green-bg-dark);
+  --status-destruct: var(--esp-amber-dark);
+  --status-destruct-bg: var(--esp-amber-bg-dark);
+  --status-error: var(--esp-rose-dark);
+  --status-error-bg: var(--esp-rose-bg-dark);
   /* La navigation active lit `--esp-accent-*` directement : en sombre, l'ardoise
      levée et le bleu clair (la pastille claire du thème clair éblouissait, et son
      bleu profond tombait à 1,8:1 sur la barre basse). */
