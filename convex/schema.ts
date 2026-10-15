@@ -8,6 +8,7 @@ import { eventsTables } from "./modules/events/tables"
 import { filesTables } from "./modules/files/tables"
 import { graphTables } from "./modules/graph/tables"
 import { groupsTables } from "./modules/groups/tables"
+import { liveTables } from "./modules/live/tables"
 import { marksTables } from "./modules/marks/tables"
 import { messagingTables } from "./modules/messaging/tables"
 import { moderationTables } from "./modules/moderation/tables"
@@ -55,6 +56,7 @@ export default defineSchema(
     ...pagesTables,
     ...albumsTables,
     ...callsTables,
+    ...liveTables,
     ...marksTables,
     ...moderationTables,
     ...diasporaTables,

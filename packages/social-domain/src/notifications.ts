@@ -1,4 +1,4 @@
-// Dupliqué de socle/convex/modules/reseauPersonnel/notifications.ts (l. 54-126, genres, résolutions et clé de sujet) @ ad2e7fdc2 — adaptations : règles PURES sorties du backend ; genres du moteur (le direct s'appelle `live`, l'évènement personnel `event`, l'avis de la garde des fichiers `file_withheld`) ; sujet en forme générique `{ kind, id }`.
+// Dupliqué de socle/convex/modules/reseauPersonnel/notifications.ts (l. 54-126, genres, résolutions et clé de sujet) @ ad2e7fdc2 — adaptations : règles PURES sorties du backend ; genres du moteur (le direct s'appelle `live`, l'évènement personnel `event`, l'avis de la garde des fichiers `file_withheld`) ; sujet en forme générique `{ kind, id }` ; sujet « session de direct » (`liveSession`, le `subjectDirectSessionId` du socle) rétabli avec le module `live` (lot 16).
 /**
  * La cloche sociale — genres, résolutions et clés de dédoublonnage.
  *
@@ -68,8 +68,13 @@ export const NOTIFICATION_RESOLUTIONS = ["accepted", "declined", "maybe", "cance
 
 export type NotificationResolution = (typeof NOTIFICATION_RESOLUTIONS)[number]
 
-/** Les natures de SUJET d'une notification — une référence, jamais un contenu. */
-export const NOTIFICATION_SUBJECT_KINDS = ["post", "connection", "fileScan", "thematicGroup", "groupThread", "event", "album", "call", "voicemail"] as const
+/**
+ * Les natures de SUJET d'une notification — une référence, jamais un contenu.
+ * `liveSession` : la session de direct que désignent `live_started`,
+ * `live_invite`, `live_antenna_invite` et `live_replay_published` — relue avec
+ * sa garde à l'ouverture (la page de conférence sert le direct ou sa rediffusion).
+ */
+export const NOTIFICATION_SUBJECT_KINDS = ["post", "connection", "fileScan", "thematicGroup", "groupThread", "event", "album", "call", "voicemail", "liveSession"] as const
 
 export type NotificationSubjectKind = (typeof NOTIFICATION_SUBJECT_KINDS)[number]
 

@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/notifications/notification-targets.test.ts @ ad2e7fdc2 — adaptations : adresses attendues composées sur des adresses INJECTÉES de test (accueil, messagerie, profil) et non plus sur la base de l'espace agent ; sujet du moteur `{ kind, id }` au lieu des colonnes `subject…Id` ; libellés et phrases lus dans l'i18n du moteur (`t` en dernier paramètre) ; retirés : les deux cas « publication masquée sans base iRéseau » et « barre finale de la base » (la page réseau du moteur est toujours l'accueil, `reseauBaseHref` n'existe plus) et les cibles de DIRECT (aucun sujet de direct dans le moteur avant le lot `live` — le cas « enregistrement publié » devient « un direct ne mène nulle part », le direct expiré du cas « autres genres résolus » devient un évènement annulé) ; tous les autres cas portés (matrice de l'invitation tranchée comprise) ; ajoutés : base portant déjà une query ou une ancre, album d'un profil, journal iAppel (appel manqué, message vocal), fichier retenu sans cible, nature de sujet inconnue, profil du parrain, rappel jamais offert pour un album ou le journal, phrases de TOUS les genres du moteur (acteur, nom neutre, avis du système, page nommée par le serveur, retrait de parrainage, genre inconnu, anglais) et ligne de résultat (invitation, fichier libéré ou de nouveau analysé).
+// Dupliqué de socle/packages/agent-features/src/features/notifications/notification-targets.test.ts @ ad2e7fdc2 — adaptations : adresses attendues composées sur des adresses INJECTÉES de test (accueil, messagerie, profil, conférence) et non plus sur la base de l'espace agent ; sujet du moteur `{ kind, id }` au lieu des colonnes `subject…Id` ; libellés et phrases lus dans l'i18n du moteur (`t` en dernier paramètre) ; retirés : les deux cas « publication masquée sans base iRéseau » et « barre finale de la base » (la page réseau du moteur est toujours l'accueil, `reseauBaseHref` n'existe plus) ; les cibles de DIRECT portées sur le sujet `liveSession` du moteur et l'adresse injectée `conference(sessionId)` (rétablies au lot `live` : « enregistrement publié » et son rappel `onOpenDirect`, invitation à un direct expirée qui garde son ouverture — le cas « autres genres résolus » garde en plus l'évènement annulé) ; tous les autres cas portés (matrice de l'invitation tranchée comprise) ; ajoutés : base portant déjà une query ou une ancre, album d'un profil, journal iAppel (appel manqué, message vocal), fichier retenu sans cible, nature de sujet inconnue, profil du parrain, rappel jamais offert pour un album ou le journal, phrases de TOUS les genres du moteur (acteur, nom neutre, avis du système, page nommée par le serveur, retrait de parrainage, genre inconnu, anglais) et ligne de résultat (invitation, fichier libéré ou de nouveau analysé).
 import type {
 	NotificationKind,
 	NotificationSubject,
@@ -27,10 +27,12 @@ const tEn = i18n.getFixedT("en")
 const HOME = "/fil"
 const MESSAGES = "/messages"
 const PROFILES = "/profil"
+const CONFERENCES = "/conference"
 const ROUTES: NotificationRoutes = {
 	home: () => HOME,
 	messages: () => MESSAGES,
 	profile: (handle) => `${PROFILES}/${handle}`,
+	conference: (sessionId) => `${CONFERENCES}/${sessionId}`,
 }
 
 type ItemOverrides = Partial<NotificationTargetInput> & { readAt?: number | null }
@@ -120,10 +122,25 @@ describe("notificationTarget — une adresse par nature de sujet", () => {
 		expect(notificationTarget(item({ kind: "attestation_verified" }), ROUTES, t)).toBeNull()
 	})
 
-	it("un direct ne mène nulle part tant que le moteur ne porte aucun sujet de direct (lot `live`)", () => {
-		const replay = item({ kind: "live_replay_published", actor: { handle: "awa.mba" } })
-		expect(notificationTarget(replay, ROUTES, t)).toBeNull()
-		expect(notificationRowAction(replay, ROUTES, {}, t)).toEqual({ mode: "none" })
+	it("ouvre un enregistrement publié sur la page de sa conférence", () => {
+		const replay = item({ kind: "live_replay_published", subject: subject("liveSession", "sess-9"), actor: { handle: "awa.mba" } })
+		// Même cible que `live_started` : la SESSION, relue avec sa garde.
+		expect(notificationTarget(replay, ROUTES, t)).toEqual({
+			kind: "direct",
+			id: "sess-9",
+			href: `${CONFERENCES}/sess-9`,
+			label: "Ouvrir",
+		})
+		expect(notificationRowAction(replay, ROUTES, {}, t)).toEqual({
+			mode: "link",
+			kind: "direct",
+			href: `${CONFERENCES}/sess-9`,
+			label: "Ouvrir",
+		})
+		// L'hôte qui sait ouvrir un direct ouvre aussi son enregistrement.
+		expect(notificationRowAction(replay, ROUTES, { onOpenDirect: vi.fn() }, t)).toEqual({ mode: "callback", kind: "direct", id: "sess-9", label: "Ouvrir" })
+		// Sans référence de session, aucune cible inventée.
+		expect(notificationTarget(item({ kind: "live_started", actor: { handle: "awa.mba" } }), ROUTES, t)).toBeNull()
 	})
 
 	it("ouvre un album sur le profil de son propriétaire, jamais sans @handle", () => {
@@ -154,8 +171,8 @@ describe("notificationTarget — une adresse par nature de sujet", () => {
 	it("ne fabrique aucune cible pour un fichier retenu ni pour une nature de sujet inconnue", () => {
 		expect(notificationTarget(item({ kind: "file_withheld", subject: subject("fileScan", "scan-1") }), ROUTES, t)).toBeNull()
 		// Un serveur en avance peut servir une nature que ce client ne connaît pas encore.
-		const future = { kind: "liveSession", id: "s-1" } as unknown as NotificationSubject
-		expect(notificationTarget(item({ kind: "live_started", subject: future }), ROUTES, t)).toBeNull()
+		const future = { kind: "reel", id: "s-1" } as unknown as NotificationSubject
+		expect(notificationTarget(item({ kind: "post_reaction", subject: future }), ROUTES, t)).toBeNull()
 		// Un identifiant vide n'est pas une référence.
 		expect(notificationTarget(item({ subject: subject("post", "  ") }), ROUTES, t)).toBeNull()
 	})
@@ -209,6 +226,9 @@ describe("notificationRowAction — rappel de l'hôte, sinon adresse", () => {
 		expect(targetCallback("album", everything)).toBeUndefined()
 		expect(targetCallback("calls", everything)).toBeUndefined()
 		expect(targetCallback("profile", everything)).toBe(everything.onOpenProfile)
+		// La conférence, elle, s'ouvre sur place quand l'hôte le sait — et seulement alors.
+		expect(targetCallback("direct", everything)).toBeUndefined()
+		expect(targetCallback("direct", { onOpenDirect: everything.onOpenPost })).toBe(everything.onOpenPost)
 		expect(notificationRowAction(item({ kind: "call_missed", subject: subject("call", "c-1") }), ROUTES, everything, t)).toEqual({
 			mode: "link",
 			kind: "calls",
@@ -381,6 +401,23 @@ describe("notificationRowAction — une invitation tranchée ne se décide plus"
 			mode: "link",
 			kind: "event",
 			href: `${HOME}?tab=evenements`,
+			label: "Ouvrir",
+		})
+		expect(
+			notificationRowAction(
+				item({
+					kind: "live_invite",
+					subject: subject("liveSession", "sess-1"),
+					resolution: { kind: "expired", at: 10 },
+				}),
+				ROUTES,
+				{},
+				t,
+			),
+		).toEqual({
+			mode: "link",
+			kind: "direct",
+			href: `${CONFERENCES}/sess-1`,
 			label: "Ouvrir",
 		})
 	})

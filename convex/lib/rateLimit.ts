@@ -99,6 +99,28 @@ const RATE_LIMITS = {
   "voicemail.read": { kind: "token bucket", rate: 240, period: HOUR, capacity: 60 },
   // Présence : un battement toutes les 30 s par écran ouvert, quelques écrans au plus.
   "presence.heartbeat": { kind: "token bucket", rate: 8, period: MINUTE, capacity: 8 },
+  // Direct (PA3 lot 16). Les quatre seaux du socle (`directComment`, `directReaction`,
+  // `directAntennaRequest`, `directAntennaInvite`), valeurs reprises telles quelles, par
+  // PERSONNE : changer de conférence ne remet pas le compteur à zéro. Une main déjà levée,
+  // une invitation encore ouverte sont dédoublonnées AVANT le seau et ne consomment rien.
+  // Le spectateur n'a pas de canal de données : « live.comment » est LA borne du chat ;
+  // « live.reaction » borne la cadence des RAFALES (≤ 12 réactions chacune), pas des taps.
+  "live.comment": { kind: "token bucket", rate: 10, period: MINUTE, capacity: 4 },
+  "live.reaction": { kind: "token bucket", rate: 20, period: MINUTE, capacity: 6 },
+  "live.antennaRequest": { kind: "token bucket", rate: 4, period: MINUTE, capacity: 2 },
+  "live.antennaInvite": { kind: "token bucket", rate: 12, period: MINUTE, capacity: 4 },
+  // Gestes du direct qui n'avaient AUCUN seau au socle (D14) — valeurs de départ prudentes,
+  // mesurées puis ajustées en PA10. Créer une conférence est un geste rare ; ajouter un
+  // invité fait sonner sa cloche pendant le live.
+  "live.create": { kind: "token bucket", rate: 10, period: HOUR, capacity: 3 },
+  "live.inviteesAdd": { kind: "token bucket", rate: 60, period: HOUR, capacity: 20 },
+  // Battements : un spectateur toutes les 30 s, l'hôte toutes les 15 s, quelques onglets au plus.
+  "live.presence": { kind: "token bucket", rate: 8, period: MINUTE, capacity: 8 },
+  "live.hostPresence": { kind: "token bucket", rate: 12, period: MINUTE, capacity: 12 },
+  // Jeton de salle : une entrée, une reconnexion, un changement de rôle (promotion, retour au
+  // public). Consommé par `live/access.authorizeToken` APRÈS la visibilité et AVANT le réveil
+  // du serveur multimédia : un refus ne coûte rien, une boucle ne rallume pas la machine.
+  "live.token": { kind: "token bucket", rate: 60, period: HOUR, capacity: 20 },
   // Garde des fichiers : gestes humains (libération par un modérateur, relance par un opérateur).
   "file.moderate": { kind: "token bucket", rate: 60, period: HOUR, capacity: 20 },
   // Console (PA7)

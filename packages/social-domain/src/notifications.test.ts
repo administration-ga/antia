@@ -19,6 +19,15 @@ describe("cloche — clés de dédoublonnage et de résolution", () => {
     expect(notificationDedupKey("attestation_not_confirmed", null, null)).toBe("attestation_not_confirmed|-|-")
   })
 
+  it("la session de direct est un sujet : une invitation à l'antenne se résout sur la session, quel que soit l'invitant", () => {
+    const session = { kind: "liveSession", id: "s1" } as const
+    expect(notificationSubjectKey(session)).toBe("liveSession:s1")
+    expect(notificationDedupKey("live_antenna_invite", session, "hote")).toBe("live_antenna_invite|liveSession:s1|hote")
+    const prefix = notificationResolutionPrefix("live_antenna_invite", session)
+    expect(notificationDedupKey("live_antenna_invite", session, "cohote").startsWith(prefix)).toBe(true)
+    expect(notificationDedupKey("live_invite", session, "hote").startsWith(prefix)).toBe(false)
+  })
+
   it("le préfixe de résolution couvre toutes les lignes du sujet, quel que soit l'acteur", () => {
     const prefix = notificationResolutionPrefix("connection_request", { kind: "connection", id: "c1" })
     expect(notificationDedupKey("connection_request", { kind: "connection", id: "c1" }, "x").startsWith(prefix)).toBe(true)

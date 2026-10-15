@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/notifications/notification-targets.ts @ ad2e7fdc2 — adaptations : plus aucune adresse écrite — la cible se compose sur les adresses INJECTÉES de l'application (`NotificationRoutes`, tirées de `useRoutes()` : page réseau `home()` et ses paramètres de vue de `reseau-agent-nav`, messagerie `messages()` par `conversationHref`, journal iAppel par `icomMobileTabHref`, profil `profile(handle)` et albums d'un profil composés dessus) ; `reseauBaseHref` retiré (la page réseau du moteur est toujours l'accueil, la publication n'est plus masquée) ; sujet du moteur en forme générique `{ kind, id }` au lieu des colonnes `subject…Id`, aiguillé par un `switch` exhaustif sur les natures du domaine ; cible « direct » et rappel `onOpenDirect` retirés (aucun sujet de direct dans le moteur avant le lot `live`) ; cibles ajoutées pour les sujets du moteur (album d'un profil, appel et message vocal vers le journal iAppel ; analyse de fichier sans cible) et profil du parrain pour `sponsorship_received` ; état d'invitation du domaine (`@antia/social-domain/connectionState`) ; libellés et phrases traduits (`t` en DERNIER paramètre de `notificationTarget`, `notificationRowAction`, `connectionInviteOutcome` ; clés qualifiées `notifications:notificationTargets.…`) ; ajouts : `notificationRowSentence` (phrase de TOUS les genres du moteur — ceux de `shared.notificationSentence` et, ici, page suivie, album, fichier retenu, appel manqué, message vocal, parrainages et attestations de DIASPORALE ; nom neutre quand le profil n'est pas publié), `notificationRowNote` (résultat d'une invitation, statut vivant d'un fichier retenu) et `targetCallback`.
+// Dupliqué de socle/packages/agent-features/src/features/notifications/notification-targets.ts @ ad2e7fdc2 — adaptations : plus aucune adresse écrite — la cible se compose sur les adresses INJECTÉES de l'application (`NotificationRoutes`, tirées de `useRoutes()` : page réseau `home()` et ses paramètres de vue de `reseau-agent-nav`, messagerie `messages()` par `conversationHref`, journal iAppel par `icomMobileTabHref`, profil `profile(handle)` et albums d'un profil composés dessus, conférence `conference(sessionId)`) ; `reseauBaseHref` retiré (la page réseau du moteur est toujours l'accueil, la publication n'est plus masquée) ; sujet du moteur en forme générique `{ kind, id }` au lieu des colonnes `subject…Id`, aiguillé par un `switch` exhaustif sur les natures du domaine ; cible « direct » (démarrage, invitations, rediffusion publiée) composée sur l'adresse INJECTÉE de la conférence (`conference(sessionId)`) pour le sujet `liveSession` du moteur au lieu de `subjectDirectSessionId` et d'une adresse de l'espace, avec son rappel `onOpenDirect` ; cibles ajoutées pour les sujets du moteur (album d'un profil, appel et message vocal vers le journal iAppel ; analyse de fichier sans cible) et profil du parrain pour `sponsorship_received` ; état d'invitation du domaine (`@antia/social-domain/connectionState`) ; libellés et phrases traduits (`t` en DERNIER paramètre de `notificationTarget`, `notificationRowAction`, `connectionInviteOutcome` ; clés qualifiées `notifications:notificationTargets.…`) ; ajouts : `notificationRowSentence` (phrase de TOUS les genres du moteur — ceux de `shared.notificationSentence` et, ici, page suivie, album, fichier retenu, appel manqué, message vocal, parrainages et attestations de DIASPORALE ; nom neutre quand le profil n'est pas publié), `notificationRowNote` (résultat d'une invitation, statut vivant d'un fichier retenu) et `targetCallback`.
 /**
  * notification-targets — CE QU'OUVRE une ligne de notification, par où, et ce
  * qu'elle DIT.
@@ -46,6 +46,8 @@ export type NotificationTargetKind =
 	| "album"
 	/** Le journal iAppel : appel manqué, message vocal. */
 	| "calls"
+	/** Une conférence en direct — ou sa rediffusion : la SESSION, relue avec sa garde. */
+	| "direct"
 
 export interface NotificationTargetRef {
 	kind: NotificationTargetKind
@@ -59,7 +61,7 @@ export interface NotificationTargetRef {
 
 /**
  * Les adresses de l'application qu'une cible compose — `useRoutes()` s'y
- * passe tel quel (la table du moteur porte ces trois entrées, et d'autres).
+ * passe tel quel (la table du moteur porte ces quatre entrées, et d'autres).
  */
 export interface NotificationRoutes {
 	/** La page réseau : l'accueil, le fil et ses volets. */
@@ -68,6 +70,8 @@ export interface NotificationRoutes {
 	messages: () => string
 	/** Le profil d'une personne, par son identifiant public. */
 	profile: (handle: string) => string
+	/** La page d'une conférence en direct (et de sa rediffusion), par sa session. */
+	conference: (sessionId: string) => string
 }
 
 /**
@@ -103,6 +107,7 @@ export interface NotificationTargetInput {
 export interface NotificationTargets {
 	onOpenPost?: (postId: string) => void
 	onOpenGroupThread?: (threadId: string) => void
+	onOpenDirect?: (sessionId: string) => void
 	onOpenGroup?: (groupId: string) => void
 	onOpenPersonalEvent?: (eventId: string) => void
 	/** Ouvrir l'invitation de relation désignée (le volet Relations). */
@@ -149,7 +154,7 @@ function withQuery(base: string, query: string): string {
 /**
  * Une nature de sujet que ce client ne connaît pas : aucune cible inventée.
  * Le paramètre `never` rend le `switch` EXHAUSTIF : une nature ajoutée au
- * domaine (le direct du lot `live`…) sans cible ici ne compile pas.
+ * domaine sans cible ici ne compile pas.
  */
 function unknownSubject(kind: never): null {
 	void kind
@@ -199,6 +204,11 @@ export function notificationTarget(item: NotificationTargetInput, routes: Notifi
 			if (handle === null) return null
 			return { kind: "album", id, href: `${routes.profile(handle)}/albums/${encodeURIComponent(id)}`, label: t(OPEN_LABEL) }
 		}
+		case "liveSession":
+			// Démarrage, invitations et ENREGISTREMENT publié (`live_replay_published`)
+			// désignent la même SESSION : la page de conférence relit sa garde et sert
+			// le direct ou son enregistrement.
+			return { kind: "direct", id, href: routes.conference(id), label: t(OPEN_LABEL) }
 		case "call":
 		case "voicemail":
 			// L'appel manqué et le message vocal se relisent dans le journal
@@ -236,6 +246,8 @@ export function targetCallback(kind: NotificationTargetKind, targets: Notificati
 			return targets.onOpenPost
 		case "groupThread":
 			return targets.onOpenGroupThread
+		case "direct":
+			return targets.onOpenDirect
 		case "group":
 			return targets.onOpenGroup
 		case "event":

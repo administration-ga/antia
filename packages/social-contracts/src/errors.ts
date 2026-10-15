@@ -36,6 +36,8 @@ export const ENGINE_ERROR_CODES = [
   "mediaServerNotConfigured",
   "mediaServerUnavailable",
   "mediaServerNoCapacity",
+  // Direct : la conférence est visible, mais le rôle de l'appelant (hôte, délégation) ne porte pas ce geste de gestion.
+  "liveRoleRequired",
 ] as const
 export type EngineErrorCode = (typeof ENGINE_ERROR_CODES)[number]
 

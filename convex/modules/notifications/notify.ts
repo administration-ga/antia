@@ -1,4 +1,4 @@
-// Dupliqué de socle/convex/lib/notify.ts (avec socle/convex/modules/reseauPersonnel/notifications.ts, l. 128-253) @ ad2e7fdc2 — adaptations : la porte UNIQUE d'écriture de la cloche sociale du moteur (`notifyPerson`, `resolveNotifications`) ; personnes et réseaux ; aucun titre ni corps ni lien stocké (l'écran traduit le genre et route le sujet) ; deux gardes ajoutées à la porte : jamais un non-membre du réseau, jamais à travers un blocage ; acteur facultatif pour les avis du système.
+// Dupliqué de socle/convex/lib/notify.ts (avec socle/convex/modules/reseauPersonnel/notifications.ts, l. 128-253) @ ad2e7fdc2 — adaptations : la porte UNIQUE d'écriture de la cloche sociale du moteur (`notifyPerson`, `resolveNotifications`) ; personnes et réseaux ; aucun titre ni corps ni lien stocké (l'écran traduit le genre et route le sujet) ; deux gardes ajoutées à la porte : jamais un non-membre du réseau, jamais à travers un blocage ; acteur facultatif pour les avis du système ; sujet « session de direct » (`liveSession`) ajouté avec le module `live` (lot 16).
 /**
  * LA porte d'écriture de la cloche sociale.
  *
@@ -38,6 +38,7 @@ export function subjectOf(ref: NotificationSubjectRef | undefined): Notification
   if ("album" in ref) return { kind: "album", id: ref.album }
   if ("call" in ref) return { kind: "call", id: ref.call }
   if ("voicemail" in ref) return { kind: "voicemail", id: ref.voicemail }
+  if ("liveSession" in ref) return { kind: "liveSession", id: ref.liveSession }
   return { kind: "fileScan", id: ref.fileScan }
 }
 
@@ -52,6 +53,7 @@ function subjectColumns(ref: NotificationSubjectRef | undefined): Partial<Doc<"n
   if ("album" in ref) return { subjectAlbumId: ref.album }
   if ("call" in ref) return { subjectCallId: ref.call }
   if ("voicemail" in ref) return { subjectVoicemailId: ref.voicemail }
+  if ("liveSession" in ref) return { subjectLiveSessionId: ref.liveSession }
   return { subjectFileScanId: ref.fileScan }
 }
 
@@ -66,6 +68,7 @@ export function subjectRefOf(row: Doc<"notifications">): NotificationSubjectRef 
   if (row.subjectAlbumId) return { album: row.subjectAlbumId }
   if (row.subjectCallId) return { call: row.subjectCallId }
   if (row.subjectVoicemailId) return { voicemail: row.subjectVoicemailId }
+  if (row.subjectLiveSessionId) return { liveSession: row.subjectLiveSessionId }
   return undefined
 }
 
