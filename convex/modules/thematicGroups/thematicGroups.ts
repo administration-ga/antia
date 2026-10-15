@@ -1,4 +1,4 @@
-// Dupliqué de socle/convex/modules/reseauPersonnel/groupesThematiques.ts @ ad2e7fdc2 — adaptations : groupes PAR RÉSEAU (le groupe appartient au réseau de la fonction appelée), adhésion par le constructeur au lieu d'`assertNotSuspended`, « ressortissants » (`isPublicUser`) sans objet ; libellés → codes (`notFound`, `groupMembershipRequired`, `groupRoleRequired`, règle `GROUP_OWNER_CANNOT_LEAVE`) ; `memberCount` dans l'agrégat `engineCounters` (D02) ; découverte indexée et filtrée par réseau (D17) ; `listMembers` et `myInvites` paginées, `myGroups` bornée par activité récente avec sa lacune, vivier d'invitation borné avec sa lacune et jugé personne par personne (D19) ; mur du groupe à CURSEUR COMPOSITE (le socle repartait d'un instant, ex æquo perdus) ; invitation par la cloche du moteur (sujet groupe thématique) et résolution serveur ; cascade de suppression bornée qui purge blob ET ligne d'analyse (D10), décompte les agrégats, et nettoie réactions, fragments, commentaires, marques et signalements ; débit sur chaque geste (D14).
+// Dupliqué de socle/convex/modules/reseauPersonnel/groupesThematiques.ts @ ad2e7fdc2 — adaptations : groupes PAR RÉSEAU (le groupe appartient au réseau de la fonction appelée), adhésion par le constructeur au lieu d'`assertNotSuspended`, « ressortissants » (`isPublicUser`) sans objet ; libellés → codes (`notFound`, `groupMembershipRequired`, `groupRoleRequired`, règle `GROUP_OWNER_CANNOT_LEAVE`) ; `memberCount` dans l'agrégat `engineCounters` (D02) ; découverte indexée et filtrée par réseau (D17) ; `listMembers` et `myInvites` paginées, `myGroups` bornée par activité récente avec sa lacune, vivier d'invitation borné avec sa lacune et jugé personne par personne (D19) ; mur du groupe à CURSEUR COMPOSITE (le socle repartait d'un instant, ex æquo perdus) ; invitation par la cloche du moteur (sujet groupe thématique) et résolution serveur ; cascade de suppression bornée qui purge blob ET ligne d'analyse (D10), décompte les agrégats, et nettoie réactions, fragments, commentaires, marques et signalements ; débit sur chaque geste (D14) ; pays facultatif du groupe et découverte par pays (ses groupes et ceux de tout le réseau, demande DIASPORALE EXF-DG-24).
 /**
  * GROUPES THÉMATIQUES d'un réseau — des lieux de PUBLICATION, pas une
  * messagerie, pas un canal d'organisation.
@@ -23,7 +23,7 @@ import {
   isThematicGroupModerator,
   type ThematicGroupRole,
 } from "@antia/social-domain/thematicGroups"
-import { groupViewingReasonFor } from "@antia/social-domain/content"
+import { assertCountryCode, groupViewingReasonFor } from "@antia/social-domain/content"
 import type { PersonalFeedCursor } from "@antia/social-domain/feedScale"
 import { cursorForFeedPost } from "@antia/social-domain/feedScale"
 import { buildSearchableText, foldSearchQuery } from "@antia/social-domain/searchText"
@@ -115,7 +115,7 @@ async function closeMembership(ctx: MutationCtx, group: Doc<"thematicGroups">, m
 /** Créer un groupe dans le réseau. Idempotent par (créateur, clé) ; le créateur devient `owner`. */
 export const create = networkMutation({
   minStatus: "declaree",
-  args: { name: v.string(), description: v.optional(v.string()), idempotencyKey: v.string() },
+  args: { name: v.string(), description: v.optional(v.string()), country: v.optional(v.string()), idempotencyKey: v.string() },
   returns: v.object({ groupId: v.id("thematicGroups"), created: v.boolean() }),
   handler: async (ctx, args) => {
     const replay = await ctx.db
@@ -126,11 +126,13 @@ export const create = networkMutation({
     await enforceRateLimit(ctx, "group.create", ctx.person._id)
     const name = checked(() => assertThematicGroupName(args.name))
     const description = checked(() => assertThematicGroupDescription(args.description))
+    const country = args.country === undefined ? undefined : checked(() => assertCountryCode(args.country ?? ""))
     const now = Date.now()
     const groupId = await ctx.db.insert("thematicGroups", {
       networkId: ctx.networkId,
       name,
       ...(description !== undefined ? { description } : {}),
+      ...(country !== undefined ? { country } : {}),
       createdByPersonId: ctx.person._id,
       searchText: buildSearchableText(name, description ?? ""),
       idempotencyKey: args.idempotencyKey,
@@ -599,6 +601,8 @@ const groupCardValidator = v.object({
   groupId: v.id("thematicGroups"),
   name: v.string(),
   description: v.union(v.string(), v.null()),
+  /** Le pays du groupe — `null` : tout le réseau. */
+  country: v.union(v.string(), v.null()),
   memberCount: v.number(),
   state: groupStateValidator,
   /** MON rôle — `null` si je n'en suis pas membre vivant. */
@@ -640,6 +644,7 @@ async function toCard(ctx: QueryCtx, group: Doc<"thematicGroups">, states: Await
     groupId: group._id,
     name: group.name,
     description: group.description ?? null,
+    country: group.country ?? null,
     memberCount: await countGroupMembers(ctx, group._id),
     state: stateOf(group),
     myRole: states.roleByGroup.get(group._id) ?? null,
@@ -648,23 +653,45 @@ async function toCard(ctx: QueryCtx, group: Doc<"thematicGroups">, states: Await
   }
 }
 
-/** DÉCOUVRIR les groupes du réseau — les plus récents sans requête, la recherche (nom, description) sinon. */
+/**
+ * DÉCOUVRIR les groupes du réseau — les plus récents sans requête, la recherche
+ * (nom, description) sinon. Avec un PAYS : ses groupes et ceux sans pays (tout
+ * le réseau), jamais ceux d'un autre pays.
+ */
 export const discover = networkQuery({
-  args: { query: v.optional(v.string()) },
+  args: { query: v.optional(v.string()), country: v.optional(v.string()) },
   returns: v.array(groupCardValidator),
   handler: async (ctx, args) => {
     const query = foldSearchQuery(args.query ?? "")
-    const groups =
-      query.length >= DISCOVER_QUERY_MIN
-        ? await ctx.db
-            .query("thematicGroups")
-            .withSearchIndex("search_name", (q) => q.search("searchText", query).eq("networkId", ctx.networkId))
-            .take(DISCOVER_SEARCH_LIMIT)
-        : await ctx.db
-            .query("thematicGroups")
-            .withIndex("by_network_createdAt", (q) => q.eq("networkId", ctx.networkId))
-            .order("desc")
-            .take(DISCOVER_RECENT_LIMIT)
+    const country = args.country === undefined ? undefined : checked(() => assertCountryCode(args.country ?? ""))
+    const inCountry = (group: Doc<"thematicGroups">) => country === undefined || group.country === undefined || group.country === country
+    let groups: Doc<"thematicGroups">[]
+    if (query.length >= DISCOVER_QUERY_MIN) {
+      // Borné avant le filtre de pays : la recherche rend une fenêtre, le pays la restreint.
+      const found = await ctx.db
+        .query("thematicGroups")
+        .withSearchIndex("search_name", (q) => q.search("searchText", query).eq("networkId", ctx.networkId))
+        .take(DISCOVER_SEARCH_LIMIT * 3)
+      groups = found.filter(inCountry).slice(0, DISCOVER_SEARCH_LIMIT)
+    } else if (country !== undefined) {
+      const [ofCountry, everywhere] = await Promise.all(
+        [country, undefined].map(
+          async (value) =>
+            await ctx.db
+              .query("thematicGroups")
+              .withIndex("by_network_country_createdAt", (q) => q.eq("networkId", ctx.networkId).eq("country", value))
+              .order("desc")
+              .take(DISCOVER_RECENT_LIMIT),
+        ),
+      )
+      groups = [...(ofCountry ?? []), ...(everywhere ?? [])].sort((left, right) => right.createdAt - left.createdAt).slice(0, DISCOVER_RECENT_LIMIT)
+    } else {
+      groups = await ctx.db
+        .query("thematicGroups")
+        .withIndex("by_network_createdAt", (q) => q.eq("networkId", ctx.networkId))
+        .order("desc")
+        .take(DISCOVER_RECENT_LIMIT)
+    }
     const states = await myGroupStates(ctx, ctx.networkId, ctx.person._id)
     const cards: GroupCard[] = []
     for (const group of groups) if (isActiveThematicGroup(group)) cards.push(await toCard(ctx, group, states))
@@ -724,6 +751,7 @@ export const getGroup = networkQuery({
       groupId: group._id,
       name: group.name,
       description: group.description ?? null,
+      country: group.country ?? null,
       memberCount: await countGroupMembers(ctx, group._id),
       state: stateOf(group),
       myRole: membership?.role ?? null,

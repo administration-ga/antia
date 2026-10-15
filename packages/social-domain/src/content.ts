@@ -192,6 +192,13 @@ export const REACH_REQUIRING_COUNTRY = "local"
 
 const COUNTRY_CODE = /^[A-Z]{2}$/
 
+/** Un pays, rendu en majuscules : deux lettres (ISO alpha-2), sinon refusé. */
+export function assertCountryCode(raw: string): string {
+  const country = raw.trim().toUpperCase()
+  if (!COUNTRY_CODE.test(country)) throw new DomainViolation("POST_COUNTRY_INVALID")
+  return country
+}
+
 /**
  * La portée (`reach`) et le pays (`country`) d'une publication, jugés contre les
  * portées que le RÉSEAU déclare (`networks.reachValues`) : une portée hors de la

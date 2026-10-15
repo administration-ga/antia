@@ -1,5 +1,5 @@
 // @vitest-environment edge-runtime
-// Dupliqué de socle/convex/modules/reseauPersonnel/groupesThematiques.test.ts @ ad2e7fdc2 — adaptations : personnes et réseaux (graine des fondations) ; codes de refus au lieu des libellés ; effectif lu dans l'agrégat ; cas de suspension (ADR-0087) rendus au statut d'adhésion par le constructeur ; cascade de suppression vérifiée jusqu'à la ligne d'analyse et au blob (D10) ; mur à curseur composite ; tests neufs : un groupe d'un autre réseau est introuvable, une clé rejouée ailleurs est refusée, la lacune du vivier.
+// Dupliqué de socle/convex/modules/reseauPersonnel/groupesThematiques.test.ts @ ad2e7fdc2 — adaptations : personnes et réseaux (graine des fondations) ; codes de refus au lieu des libellés ; effectif lu dans l'agrégat ; cas de suspension (ADR-0087) rendus au statut d'adhésion par le constructeur ; cascade de suppression vérifiée jusqu'à la ligne d'analyse et au blob (D10) ; mur à curseur composite ; tests neufs : un groupe d'un autre réseau est introuvable, la découverte par pays, une clé rejouée ailleurs est refusée, la lacune du vivier.
 import { engineErrorCode, engineErrorRule } from "@antia/social-contracts/errors"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
@@ -435,6 +435,30 @@ describe("découverte", () => {
     expect((await alice.as.query(api.modules.thematicGroups.thematicGroups.myGroups, { networkId: root })).items.map((row) => row.myRole)).toEqual(["owner", "owner"])
     expect(await codeOf(alice.as.query(api.modules.thematicGroups.thematicGroups.getGroup, { networkId: root, groupId: elsewhere }))).toBe("notFound")
     expect(await codeOf(bob.as.mutation(api.modules.thematicGroups.thematicGroups.join, { networkId: root, groupId: elsewhere }))).toBe("notFound")
+  })
+
+  it("un PAYS découvre ses groupes et ceux de tout le réseau, jamais ceux d'un autre pays — sans requête comme avec", async () => {
+    vi.useFakeTimers()
+    vi.setSystemTime(1_760_000_000_000)
+    const t = testConvex()
+    const { root } = await seed(t)
+    const alice = await enter(t, root, "alice")
+    const make = async (name: string, key: string, country?: string) => {
+      vi.setSystemTime(Date.now() + 1000)
+      return (await alice.as.mutation(api.modules.thematicGroups.thematicGroups.create, { networkId: root, name, idempotencyKey: key, ...(country !== undefined ? { country } : {}) })).groupId
+    }
+    const parisCooking = await make("Cuisine de Paris", "k1", "fr")
+    await make("Cuisine de Dakar", "k2", "SN")
+    const everywhereCooking = await make("Cuisine du monde", "k3")
+    const discover = (args: { query?: string; country?: string }) => alice.as.query(api.modules.thematicGroups.thematicGroups.discover, { networkId: root, ...args })
+    expect((await discover({ country: "FR" })).map((row) => row.groupId)).toEqual([everywhereCooking, parisCooking])
+    expect(new Set((await discover({ country: "fr", query: "cuisine" })).map((row) => row.groupId))).toEqual(new Set([parisCooking, everywhereCooking]))
+    expect((await discover({})).length).toBe(3)
+    expect((await discover({ country: "FR" }))[1]).toMatchObject({ country: "FR" })
+    expect(await ruleOf(discover({ country: "France" }))).toBe("POST_COUNTRY_INVALID")
+    // Une autre personne : le budget de création d'alice (trois) est épuisé.
+    const bob = await enter(t, root, "bob")
+    expect(await ruleOf(bob.as.mutation(api.modules.thematicGroups.thematicGroups.create, { networkId: root, name: "Pays inventé", idempotencyKey: "k4", country: "XYZ" }))).toBe("POST_COUNTRY_INVALID")
   })
 })
 
