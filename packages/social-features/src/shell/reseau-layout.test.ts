@@ -1,4 +1,6 @@
-// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/reseau-layout.test.ts @ ad2e7fdc2 — adaptations : dépendance retirée `espace-rail-collapse` — la largeur du rail rétracté de l'hôte devient une constante locale (82 px, mesure du socle, cas le plus contraint) ; libellés lus dans l'i18n du moteur ; cliquets qui relisent la coque de bureau et les volets du socle absents du moteur à ce lot (`ReseauAgentPage`, `PeoplePanel`, `PagesPanel`, `GroupsPanel`, `ReseauMobileTabBar`) retirés, à rétablir avec eux ; ceux qui relisent la feuille mobile gardés, sur la constante qu'elle exporte (`RESEAU_MOBILE_CSS`) au lieu du texte source.
+// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/reseau-layout.test.ts @ ad2e7fdc2 — adaptations : dépendance retirée `espace-rail-collapse` — la largeur du rail rétracté de l'hôte devient une constante locale (82 px, mesure du socle, cas le plus contraint) ; libellés lus dans l'i18n du moteur ; feuilles lues sur les constantes qu'elles exportent (`RESEAU_DESKTOP_CSS` de la page de bureau, `RESEAU_MOBILE_CSS` de la coquille mobile) au lieu des blocs `<style>` du texte source, commentaires retirés, et découpées en règles qui gardent leurs conditions `@container`/`@media` ; composants relus commentaires ôtés (volets dans `features/reseau-personnel/`, barre mobile dans `shell/mobile/`) ; cliquets de la grille de bureau et des volets RÉTABLIS au lot F2 (huit cas, et la seconde moitié du « débordement des sous-menus ») — la grille n'a plus de rail d'hôte : « remplace les onglets par le rail gauche » vérifie le menu vertical et le retrait de la tablist au SEUL palier `COLLAPSED_NAV_MIN`, l'absence de `[data-espace-rail]`, et l'ORDRE des paliers 1 008 → 812 → 1 108 (à spécificité égale, c'est lui qui fait primer le menu vertical) ; l'attribut posé est `data-volet={shownTab}`, le volet MONTRÉ (`servedReseauTab`) ; le bloc conteneur est exigé d'une règle `.rp-scope` inconditionnelle.
+import { readFileSync } from "node:fs"
+
 import { RESEAU_MOBILE_MAX_PX } from "@antia/ui/overlay"
 import { describe, expect, it } from "vitest"
 
@@ -36,6 +38,7 @@ import {
   viewReturnLabel,
   type FeedView,
 } from "./reseau-layout"
+import { RESEAU_DESKTOP_CSS } from "./ReseauAgentPage"
 
 const t = createAppI18n({ locale: "fr", appResources: { fr: {}, en: {} }, defaultNS: "reseau" }).getFixedT("fr")
 
@@ -104,16 +107,20 @@ describe("seuils de la grille", () => {
  * LE CSS DOIT IMPLÉMENTER CE QUE CE MODULE DÉCLARE
  * ═══════════════════════════════════════════════════════════════════════════
  *
- * Les constantes ci-dessus sont REDÉCLARÉES dans la feuille de style de la
- * coquille (une propriété personnalisée n'est pas utilisable dans une
- * condition `@container`) — et c'est très exactement là que les deux peuvent
- * diverger sans qu'aucun typage ne le voie. Ce cliquet lit donc la feuille de
- * style elle-même (la constante exportée par `mobile/mobile-styles.tsx`).
+ * Les constantes ci-dessus sont REDÉCLARÉES dans les feuilles de style des
+ * deux coquilles (une propriété personnalisée n'est pas utilisable dans une
+ * condition `@container`) — et c'est très exactement là que les deux ont
+ * divergé au socle : `THREE_COLUMN_MIN` décrivait un palier à trois colonnes
+ * que le CSS n'a jamais implémenté. `.rp-rail-start` n'était donc affiché
+ * NULLE PART, et trois cartes — identité, « Mon réseau », compteurs — étaient
+ * invisibles pour quiconque avait publié son profil. Aucun test ne pouvait le
+ * voir : les constantes étaient cohérentes entre elles, et le typage ne lit
+ * pas une chaîne.
  *
- * ⚠️ Au socle, il lisait aussi la grille de la page de BUREAU
- * (`ReseauAgentPage.tsx`) et les volets qui se désignent comme collections ;
- * ces fichiers n'existent pas encore dans le moteur. Leurs vérifications
- * reviennent avec eux — celles de la coquille MOBILE, présente, restent.
+ * Ce cliquet lit donc les feuilles elles-mêmes — les constantes qu'exportent
+ * la page de bureau (`RESEAU_DESKTOP_CSS`, `ReseauAgentPage.tsx`) et la
+ * coquille mobile (`RESEAU_MOBILE_CSS`, `mobile/mobile-styles.tsx`) — et, pour
+ * les attributs que ces feuilles visent, le code des composants qui les posent.
  *
  * `cssOf` rend le CSS d'une feuille, et RIEN d'autre : les commentaires, qui
  * contiennent des noms de classe, sont retirés avant toute recherche.
@@ -121,6 +128,174 @@ describe("seuils de la grille", () => {
 function cssOf(sheet: string): string {
   return sheet.replace(/\/\*[\s\S]*?\*\//g, "")
 }
+
+/**
+ * Le CODE d'un composant (chemin relatif à ce fichier), commentaires ôtés : un
+ * commentaire qui cite un attribut ne le pose pas.
+ */
+function codeOf(relativePath: string): string {
+  return readFileSync(new URL(relativePath, import.meta.url), "utf8")
+    .replace(/\{\/\*[\s\S]*?\*\/\}/g, "")
+    .replace(/\/\*[\s\S]*?\*\//g, "")
+    .replace(/^\s*\/\/[^\n]*$/gm, "")
+}
+
+interface CssRule {
+  /** Les règles conditionnelles qui l'englobent (`@container …`, `@media …`), de l'extérieure à l'intérieure. */
+  conditions: readonly string[]
+  selector: string
+  body: string
+}
+
+/**
+ * Découpage en règles, CONDITIONS ENGLOBANTES comprises — suffisant : on
+ * n'interroge que des sélecteurs, leurs déclarations et le palier qui les
+ * porte. Au socle, un découpage à plat suffisait : la condition « rail
+ * rétracté » vivait dans le sélecteur (`[data-espace-rail="collapsed"]`). Le
+ * moteur la porte par le seul palier `@container`, qu'il faut donc garder.
+ */
+function cssRules(source: string, conditions: readonly string[] = []): CssRule[] {
+  const rules: CssRule[] = []
+  let cursor = 0
+  let open = source.indexOf("{", cursor)
+  while (open !== -1) {
+    // L'accolade qui ferme CE bloc, blocs imbriqués compris.
+    let depth = 1
+    let close = open + 1
+    while (close < source.length && depth > 0) {
+      if (source[close] === "{") depth += 1
+      else if (source[close] === "}") depth -= 1
+      close += 1
+    }
+    const prelude = source.slice(cursor, open).trim()
+    const body = source.slice(open + 1, close - 1)
+    if (prelude.startsWith("@")) rules.push(...cssRules(body, [...conditions, prelude]))
+    else rules.push({ conditions, selector: prelude, body })
+    cursor = close
+    open = source.indexOf("{", cursor)
+  }
+  return rules
+}
+
+/** Les sélecteurs d'une liste (`a, b`), un par un. */
+function selectorParts(rule: CssRule): string[] {
+  return rule.selector.split(",").map((part) => part.trim())
+}
+
+describe("la grille implémente les paliers du module", () => {
+  const css = cssOf(RESEAU_DESKTOP_CSS)
+  const rules = cssRules(css)
+
+  it("déclare le palier utile, les largeurs du fil et le rail droit", () => {
+    expect(css).toContain(`min-width: ${TWO_COLUMN_MIN}px`)
+    expect(css).toContain(
+      `minmax(${FEED_COLUMN_MIN}px, ${FEED_COLUMN_MAX}px) ${RAIL_END_WIDTH}px`
+    )
+    expect(css).toContain(`max-width: ${GRID_MAX_WIDTH}px`)
+    expect(css).toContain(`min-width: ${COLLAPSED_NAV_MIN}px`)
+    expect(css).toContain(`min-width: ${COLLAPSED_THREE_COLUMN_MIN}px`)
+    expect(css).toContain(
+      `grid-template-columns: minmax(${RESEAU_NAV_RAIL_MIN_WIDTH}px, ${RESEAU_NAV_RAIL_WIDTH}px) minmax(${COLLAPSED_FEED_MIN}px, ${FEED_COLUMN_MAX}px) minmax(${COLLAPSED_RAIL_END_MIN}px, ${RAIL_END_WIDTH}px)`
+    )
+    expect(css).toContain(`max-width: ${GRID_WITH_NAV_MAX_WIDTH}px`)
+  })
+
+  it("emploie la même gouttière latérale et aligne les cartes en tête", () => {
+    expect(css).toContain(".rp-scope { padding: 14px 16px 0; }")
+    expect(css).toContain("padding-top: 0;")
+  })
+
+  it("ne masque le rappel du profil à AUCUN palier", () => {
+    // La barre de profil est l'en-tête de la page réseau : elle porte
+    // l'identité ET le geste de publication. Une règle qui la masquerait les
+    // emporterait avec elle — et c'est très exactement le défaut du
+    // 2026-08-12 au socle, quand la carte vivait dans un rail que rien
+    // n'affichait.
+    const region = rules.filter((rule) =>
+      rule.selector.includes(".rp-identity-region")
+    )
+    expect(region.length).toBeGreaterThan(0)
+    for (const rule of region) {
+      expect(rule.body).not.toMatch(/display:\s*none/)
+    }
+  })
+
+  it("fait du scroller un BLOC CONTENEUR — le défaut du 2026-08-12", () => {
+    // `.rp-scope` est fermé (`overflow: hidden`) : ce sont ses colonnes qui
+    // défilent. Sans `position: relative`, ses descendants en position
+    // absolue — les `sr-only` du fil en sont — résolvent contre le bloc
+    // conteneur initial : ils échappent au rognage ET rallongent la hauteur
+    // du DOCUMENT. Mesuré au socle : 1553 px pour une fenêtre de 760, le
+    // document devenait défilable et découvrait le fond du body sous la page.
+    // ⚠️ `container-type` ne remplace pas cette règle : le `contain` calculé
+    // reste `none`, il n'établit aucun bloc conteneur. Et la règle est
+    // INCONDITIONNELLE : un bloc conteneur posé à un seul palier laisserait
+    // fuir tous les autres.
+    const regles = rules.filter(
+      (rule) =>
+        rule.conditions.length === 0 &&
+        selectorParts(rule).includes(".rp-scope")
+    )
+    expect(regles.length).toBeGreaterThan(0)
+    expect(regles.some((rule) => /position:\s*relative/.test(rule.body))).toBe(
+      true
+    )
+  })
+
+  it("remplace les onglets par le rail gauche uniquement au palier du menu — sans rail d'hôte, la mise en page « rail rétracté » s'applique d'office", () => {
+    // Au socle, ces règles visaient `[data-espace-rail="collapsed"]` : le menu
+    // vertical ne remplaçait la tablist que sous le rail RÉTRACTÉ de l'espace.
+    // La coque du moteur ne pose aucun rail : une condition sur cet attribut
+    // ne s'appliquerait à rien, et la tablist resterait seule à tous les
+    // paliers.
+    expect(css).not.toContain("data-espace-rail")
+
+    const menuPalier = `@container rp-page (min-width: ${COLLAPSED_NAV_MIN}px)`
+    const auPalierDuMenu = (rule: CssRule) =>
+      rule.conditions.length === 1 && rule.conditions[0] === menuPalier
+
+    // Le menu vertical ne s'affiche QU'À ce palier (la règle de base le
+    // masque)…
+    const railVisible = rules.filter(
+      (rule) =>
+        selectorParts(rule).includes(".rp-rail-start") &&
+        /display:\s*flex/.test(rule.body)
+    )
+    expect(railVisible.length).toBeGreaterThan(0)
+    for (const rule of railVisible) {
+      expect(auPalierDuMenu(rule)).toBe(true)
+    }
+
+    // …et la tablist ne se retire qu'à ce même palier : hors de lui, aucune
+    // règle ne fait perdre la navigation.
+    const hiddenTabs = rules.filter(
+      (rule) =>
+        selectorParts(rule).some((part) =>
+          [".rp-tabs", ".rp-main .rp-tabs"].includes(part)
+        ) && /display:\s*none/.test(rule.body)
+    )
+    expect(hiddenTabs.length).toBeGreaterThan(0)
+    for (const rule of hiddenTabs) {
+      expect(auPalierDuMenu(rule)).toBe(true)
+    }
+
+    // Sans le sélecteur d'attribut, la SPÉCIFICITÉ ne départage plus les
+    // paliers : c'est l'ORDRE. Celui du menu doit suivre celui des deux
+    // colonnes — sinon, de 1 008 à 1 107 px, la grille fil + rail droit
+    // reprendrait la main, menu affiché : trois colonnes pour deux pistes —
+    // et précéder celui des trois colonnes, qui rend le rail droit.
+    const deuxColonnes = css.indexOf(
+      `@container rp-page (min-width: ${TWO_COLUMN_MIN}px)`
+    )
+    const menu = css.indexOf(menuPalier)
+    const troisColonnes = css.indexOf(
+      `@container rp-page (min-width: ${COLLAPSED_THREE_COLUMN_MIN}px)`
+    )
+    expect(deuxColonnes).toBeGreaterThan(-1)
+    expect(deuxColonnes).toBeLessThan(menu)
+    expect(menu).toBeLessThan(troisColonnes)
+  })
+})
 
 describe("une largeur de lecture par TÂCHE (R-15)", () => {
   it("le palier large de la tablette rejoint le plancher du bureau", () => {
@@ -200,8 +375,28 @@ describe("une largeur de lecture par TÂCHE (R-15)", () => {
   })
 })
 
-describe("la coquille mobile implémente les paliers de R-15", () => {
+describe("les deux coquilles implémentent les paliers de R-15", () => {
+  const desktop = cssOf(RESEAU_DESKTOP_CSS)
   const mobile = cssOf(RESEAU_MOBILE_CSS)
+
+  it("le bureau élargit les collections par le volet ouvert", () => {
+    expect(desktop).toContain('.rp-main-col[data-volet="relations"]')
+    expect(desktop).toContain('.rp-main-col[data-volet="pages"]')
+    expect(desktop).toContain('.rp-main-col[data-volet="groupes"]')
+    expect(desktop).toContain('.rp-main-col[data-volet="enregistrements"]')
+    expect(desktop).toContain(`max-width: ${COLLECTION_COLUMN_MAX}px`)
+    // Le fil, lui, garde sa largeur d'article : aucune règle ne le relâche.
+    expect(desktop).not.toContain('.rp-main-col[data-volet="fil"] {')
+  })
+
+  it("l'attribut est POSÉ, faute de quoi la règle ne s'applique à rien", () => {
+    const page = codeOf("./ReseauAgentPage.tsx")
+    // Le volet MONTRÉ, et non le volet demandé : une adresse vers un volet
+    // que la page ne sert pas s'ouvre sur le fil, dont la colonne doit
+    // prendre la largeur d'article.
+    expect(page).toContain("data-volet={shownTab}")
+    expect(page).toContain("const shownTab = servedReseauTab(tab)")
+  })
 
   it("la tablette borne la lecture sans borner les collections", () => {
     expect(mobile).toContain("container-name: rp-page rm-scroll")
@@ -217,10 +412,27 @@ describe("la coquille mobile implémente les paliers de R-15", () => {
     expect(mobile).toContain("max-width: none")
   })
 
-  it("le débordement des sous-menus se VOIT", () => {
-    // Sept sous-menus sur un téléphone : sans dégradé, la dernière
-    // destination est coupée net et rien ne dit qu'il y en a d'autres.
+  it("les trois collections se DÉSIGNENT, sinon la relâche ne trouve personne", () => {
+    for (const [fichier, valeur] of [
+      ["PeoplePanel.tsx", "relations"],
+      ["PagesPanel.tsx", "pages"],
+      ["GroupsPanel.tsx", "groupes"],
+    ] as const) {
+      expect(codeOf(`../features/reseau-personnel/${fichier}`)).toContain(
+        `data-collection="${valeur}"`
+      )
+    }
+  })
+
+  it("le débordement des sous-menus se VOIT et se rattrape", () => {
+    // Un sous-menu par volet servi, sur un téléphone : sans dégradé, la
+    // dernière destination est coupée net et rien ne dit qu'il y en a
+    // d'autres. Et un lien profond vers un volet hors champ ramène l'onglet
+    // actif dans la rangée.
     expect(mobile).toContain("mask-image")
+    const barre = codeOf("./mobile/ReseauMobileTabBar.tsx")
+    expect(barre).toContain('scrollIntoView({ block: "nearest", inline: "nearest" })')
+    expect(barre).toContain('[aria-current="page"]')
   })
 })
 

@@ -1,8 +1,11 @@
-// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/mobile/reseau-mobile-tabs.test.ts @ ad2e7fdc2 — adaptations : adresses et vues immersives jugées sur une table de routes INJECTÉE (celle du test) au lieu des chemins de l'espace ; libellés lus par leurs clés dans l'i18n du moteur ; menu bâti sur des destinations au lieu de la navigation personnelle du socle (`personal-nav` retirée) — les cas qui la vérifiaient (entrées gardées, icône d'une entrée inconnue, non-mutation, menu réel) sont portés sur les destinations ; cliquet de parité qui relisait `ReseauMobilePage.tsx` (absente du moteur à ce lot) retiré, à rétablir avec elle ; cas ajoutés : page réseau à la racine, query et ancre ignorées, composeur qui n'est qu'une feuille, destination absente retirée.
+// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/mobile/reseau-mobile-tabs.test.ts @ ad2e7fdc2 — adaptations : adresses et vues immersives jugées sur une table de routes INJECTÉE (celle du test) au lieu des chemins de l'espace — « Actus » et les lieux hors de la page réseau compris (statuts, messagerie et conférence lus sur la table, « iRéseau » devenu « la page réseau ») ; libellés lus par leurs clés dans l'i18n du moteur ; menu bâti sur des destinations au lieu de la navigation personnelle du socle (`personal-nav` retirée) — les cas qui la vérifiaient (entrées gardées, icône d'une entrée inconnue, non-mutation, menu réel) sont portés sur les destinations ; cliquet de parité RÉTABLI au lot F2 sur `shell/mobile/ReseauMobilePage.tsx`, relue commentaires ôtés (trois cas) — chaque panneau du contrat garde son `case` (switch exhaustif, « Conférences » compris) et le panneau monté est celui du volet MONTRÉ : tout volet est rabattu sur un volet SERVI (`servedReseauTab`) dont la branche rend un composant, « Conférences » n'étant pas servi tant que le direct n'existe pas ; cas ajoutés : page réseau à la racine, query et ancre ignorées, composeur qui n'est qu'une feuille, destination absente retirée.
+import { readFileSync } from "node:fs"
+
 import { describe, expect, it } from "vitest"
 
 import { createAppI18n } from "../../i18n"
-import { RESEAU_AGENT_TAB_IDS, reseauAgentHref } from "../reseau-agent-nav"
+import { mainPanelFor, RESEAU_AGENT_TAB_IDS, reseauAgentHref } from "../reseau-agent-nav"
+import { RESEAU_SERVED_TAB_IDS, servedReseauTab } from "../reseau-menu"
 import {
   activeReseauTab,
   defaultReseauMenuSections,
@@ -104,6 +107,57 @@ describe("reseau-mobile-tabs — la géométrie de la barre", () => {
   })
 })
 
+/**
+ * Le pilote mobile de la page réseau, commentaires ôtés : ce cliquet vérifie du
+ * CODE — un commentaire qui cite un `case` ne le rend pas.
+ */
+const MOBILE_PAGE_SOURCE = readFileSync(new URL("./ReseauMobilePage.tsx", import.meta.url), "utf8")
+  .replace(/\{\/\*[\s\S]*?\*\/\}/g, "")
+  .replace(/\/\*[\s\S]*?\*\//g, "")
+  .replace(/^\s*\/\/[^\n]*$/gm, "")
+
+/** Le corps de la branche `case "<panneau>":` du switch des panneaux, jusqu'à la suivante. */
+function caseBranch(panel: string): string {
+  const label = `case "${panel}":`
+  const start = MOBILE_PAGE_SOURCE.indexOf(label)
+  if (start === -1) return ""
+  const rest = MOBILE_PAGE_SOURCE.slice(start + label.length)
+  const end = rest.search(/\bcase "|\bdefault:/)
+  return end === -1 ? rest : rest.slice(0, end)
+}
+
+describe("ReseauMobilePage — parité des volets", () => {
+  it("rend explicitement chaque panneau métier du contrat de navigation", () => {
+    const panels = RESEAU_AGENT_TAB_IDS.map((tab) => mainPanelFor(tab))
+    expect(new Set(panels).size).toBe(RESEAU_AGENT_TAB_IDS.length)
+    for (const panel of panels) {
+      expect(MOBILE_PAGE_SOURCE).toContain(`case "${panel}":`)
+    }
+    // Le panneau monté est celui du volet MONTRÉ. Un volet que le moteur ne
+    // sert pas encore (« Conférences », en attente du direct) garde son
+    // `case` — le switch reste exhaustif — mais n'est jamais atteint : il est
+    // rabattu sur un volet servi, dont la branche rend un composant.
+    expect(MOBILE_PAGE_SOURCE).toContain("const shownTab = servedReseauTab(tab)")
+    expect(MOBILE_PAGE_SOURCE).toContain("const main = mainPanelFor(shownTab)")
+    for (const tab of RESEAU_AGENT_TAB_IDS) {
+      const shown = servedReseauTab(tab)
+      expect(RESEAU_SERVED_TAB_IDS).toContain(shown)
+      expect(caseBranch(mainPanelFor(shown))).toMatch(/return\s*\(?\s*</)
+    }
+  })
+
+  it("ne retombe sur AUCUN panneau par défaut", () => {
+    // Le `switch` exhaustif reste le garde-fou : un panneau ajouté au contrat
+    // fait échouer le typage tant que son rendu mobile n'est pas décidé.
+    expect(MOBILE_PAGE_SOURCE).toContain("return assertNeverMobilePanel(main)")
+  })
+
+  it("ne monte PLUS le panneau d'activité — la cloche l'a repris (R-03)", () => {
+    expect(MOBILE_PAGE_SOURCE).not.toContain("<NotificationsPanel")
+    expect(MOBILE_PAGE_SOURCE).not.toContain('case "activity":')
+  })
+})
+
 describe("reseau-mobile-tabs — quel onglet est actif", () => {
   it("allume le Fil sur la page réseau nue et sur le volet fil", () => {
     expect(activeReseauTab(HOME, null, HOME)).toBe("fil")
@@ -128,17 +182,22 @@ describe("reseau-mobile-tabs — quel onglet est actif", () => {
     expect(activeReseauTab(HOME, "reseau", HOME)).toBe("relations")
   })
 
-  it("n'allume aucun onglet sur les statuts, qui sont immersifs", () => {
-    expect(activeReseauTab("/actus", null, HOME)).toBeNull()
-    expect(activeReseauTab("/actus/abc", null, HOME)).toBeNull()
+  it("n'allume aucun onglet sur Actus, qui est immersive", () => {
+    // Les statuts — la liste comme chacun d'eux — occupent l'écran entier, au
+    // jugement de la table de routes elle-même.
+    const actus = ROUTES.stories()
+    for (const path of [actus, `${actus}/abc`]) {
+      expect(isImmersiveRoute(path, ROUTES)).toBe(true)
+      expect(activeReseauTab(path, null, HOME)).toBeNull()
+    }
   })
 
   it("n'allume rien hors de la page réseau ni sur les lieux sans onglet", () => {
     expect(activeReseauTab("/profil/awa.ndong", null, HOME)).toBeNull()
-    expect(activeReseauTab("/conference/1", null, HOME)).toBeNull()
+    expect(activeReseauTab(ROUTES.conference("1"), null, HOME)).toBeNull()
     expect(activeReseauTab(`${HOME}/pages`, null, HOME)).toBeNull()
     // La messagerie a sa propre barre : celle-ci n'y est pas rendue.
-    expect(activeReseauTab("/messages", null, HOME)).toBeNull()
+    expect(activeReseauTab(ROUTES.messages(), null, HOME)).toBeNull()
     expect(activeReseauTab(null, null, HOME)).toBeNull()
   })
 

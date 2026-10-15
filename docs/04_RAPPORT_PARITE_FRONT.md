@@ -211,9 +211,12 @@ nommé dans l'en-tête du fichier de test.
 
 ### Reste ouvert
 
-- **Cliquets du bureau à rétablir** : 11 cas de `reseau-layout` (feuille `RESEAU_DESKTOP_CSS` et volets
-  désormais présents), parité de `reseau-mobile-tabs` (`ReseauMobilePage` présente), test
-  `messagerie-floating-contract` (440 × 956).
+- ~~Cliquets du bureau à rétablir~~ : rétablis après F2 — `reseau-layout` (28 cas, comme au socle : feuille
+  `RESEAU_DESKTOP_CSS`, ordre des paliers 1 008 → 812 → 1 108 sans rail d'hôte, attribut `data-volet` posé),
+  `reseau-mobile-tabs` (36 cas, parité de `ReseauMobilePage`), `messagerie-floating-contract` (12 cas, format
+  440 × 956, une seule règle pour l'iCom détaché et la fenêtre d'appel).
+- Hérité du socle : `BookmarksPanel` sans `data-collection` — au téléphone, les signets ne sont pas élargis
+  comme une collection.
 - **Pages en direct** : la création exige une adhésion `verifiee` — aucune page éprouvée au navigateur sur
   le compte de développement (135 cas de test) ; règle de visibilité `root` d'une page non exposée ; libellé
   « Collectif » de la nature `community` à valider ; modération des revendications : à la console.
