@@ -6,7 +6,8 @@
  * d'arrivée plausible, associations bornées), le poste consulaire n'est jamais
  * saisi (il vient de l'attestation), et chaque champ garde son niveau FIN de
  * visibilité. L'annuaire est opt-in : un niveau autre que « personne » exige le
- * consentement `directory` en vigueur.
+ * consentement `directory` en vigueur, et le pré-filtre de l'annuaire du moteur
+ * suit le choix (`syncDirectoryListing`).
  */
 import { parseFacetInput, toEngineFacet } from "@diasporale/domain"
 import { v } from "convex/values"
@@ -15,7 +16,7 @@ import { failAppRule } from "../../lib/errors"
 import { networkMutation } from "../../lib/functions"
 import { enforceRateLimit } from "../../lib/rateLimit"
 import { writeNetworkFacet } from "../people/admission"
-import { assertDiasporaNetwork, consentInForce, facetOf, writePrivacy } from "./facts"
+import { assertDiasporaNetwork, consentInForce, facetOf, syncDirectoryListing, writePrivacy } from "./facts"
 import { directoryVisibilityValidator, facetInputValidator } from "./validators"
 
 /** La personne règle SA facette (membre, même en attente : elle complète son entrée). */
@@ -46,6 +47,7 @@ export const setDirectoryVisibility = networkMutation({
       return failAppRule("consent_directory_required")
     }
     await writePrivacy(ctx, ctx.networkId, ctx.person._id, { directoryVisibility: level })
+    await syncDirectoryListing(ctx, ctx.networkId, ctx.person._id)
     return null
   },
 })

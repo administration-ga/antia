@@ -24,7 +24,7 @@ export const facetProjectionValidator = v.object({
 })
 
 /** La projection du domaine au format des validateurs (listes copiées). */
-function toProjection(projection: FacetProjection) {
+export function toProjection(projection: FacetProjection) {
   return {
     ...(projection.countryOfResidence !== undefined ? { countryOfResidence: projection.countryOfResidence } : {}),
     ...(projection.city !== undefined ? { city: projection.city } : {}),

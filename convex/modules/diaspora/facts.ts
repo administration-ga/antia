@@ -29,7 +29,7 @@ import type { Doc, Id } from "../../_generated/dataModel"
 import type { MutationCtx, QueryCtx } from "../../_generated/server"
 import { getMembership } from "../../lib/access"
 import { notFound } from "../../lib/errors"
-import { setMembershipStatus } from "../people/admission"
+import { setDirectoryListed, setMembershipStatus } from "../people/admission"
 import { liveIdentityLinks } from "../people/persons"
 
 /** Le réseau est-il celui que la tranche gouverne, et actif ? */
@@ -135,6 +135,19 @@ export async function effectiveStatusIn(
     status: effectiveAccessStatus({ networkStatus: membership?.status ?? null, rootStatus, isRoot: false }),
     rootStatus,
   }
+}
+
+/**
+ * Pose le pré-filtre de l'annuaire du moteur (`directoryListed`) selon LA règle
+ * de la tranche : listé si la personne a choisi un niveau visible ET que son
+ * consentement `directory` est en vigueur. La recherche rejuge chaque candidat
+ * (`directory.searchMembers`) : ce drapeau n'ouvre rien à lui seul. À appeler
+ * après tout réglage du niveau ou du consentement d'annuaire.
+ */
+export async function syncDirectoryListing(ctx: MutationCtx, networkId: Id<"networks">, personId: Id<"persons">): Promise<void> {
+  const privacy = await privacyOf(ctx, networkId, personId)
+  const visible = privacy !== null && privacy.directoryVisibility !== "hidden"
+  await setDirectoryListed(ctx, networkId, personId, visible && (await consentInForce(ctx, networkId, personId, "directory")))
 }
 
 /** Un consentement est-il en vigueur pour ce réseau (accordé pour lui, ou sans réseau) ? */

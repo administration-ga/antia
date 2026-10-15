@@ -915,3 +915,113 @@ describe("profil vu par le lecteur (memberFacet, EXF-DG-07)", () => {
     expect(await voisin.as.query(api.modules.diaspora.profile.memberFacet, { networkId: diasporale, handle: "ada" })).toBeNull()
   })
 })
+
+describe("annuaire opt-in de la tranche (EXF-DG-19, EXF-DG-46)", () => {
+  /** Une personne IDN gabonaise (déclarée), au nom affiché choisi, qui entre avec un niveau d'annuaire. */
+  async function member(t: T, diasporale: Id<"networks">, handle: string, displayName: string, country: string, level?: "country" | "network") {
+    const as = t.withIdentity({ subject: `auth-${handle}` })
+    const personId = await as.mutation(api.modules.people.persons.ensureMyPerson, {})
+    await as.mutation(api.modules.people.consents.recordConsent, { purpose: "social_profile", origin: "onboarding" })
+    await as.mutation(api.modules.people.profile.publishMyProfile, { handle, displayName })
+    await linkIdn(t, personId, 1, "GA")
+    if (level) await as.mutation(api.modules.people.consents.recordConsent, { purpose: "directory", origin: "onboarding", networkId: diasporale })
+    await join(as, diasporale, { countryOfResidence: country, city: "Ville" }, level)
+    return { as, personId }
+  }
+
+  async function search(as: As, diasporale: Id<"networks">, query: string, country?: string) {
+    const hits = await as.query(api.modules.diaspora.directory.searchMembers, { networkId: diasporale, query, ...(country ? { country } : {}) })
+    return hits.map((hit) => hit.handle).sort()
+  }
+
+  async function listedFlag(t: T, diasporale: Id<"networks">, personId: Id<"persons">) {
+    return await t.run(async (ctx) => {
+      const row = await ctx.db
+        .query("peopleDirectory")
+        .withIndex("by_network_and_person", (q) => q.eq("networkId", diasporale).eq("personId", personId))
+        .unique()
+      return row?.listed ?? null
+    })
+  }
+
+  it("masqué par défaut ; « réseau » se trouve partout, « pays » par les seuls membres du même pays", async () => {
+    const t = testConvex()
+    const { diasporale } = await seedAll(t)
+    const masquee = await member(t, diasporale, "awa.masquee", "Awa Masquée", "FR")
+    const reseau = await member(t, diasporale, "awa.reseau", "Awa Réseau", "FR", "network")
+    await member(t, diasporale, "awa.pays", "Awa Pays", "FR", "country")
+    const lyon = await member(t, diasporale, "lecteur.lyon", "Lecteur Lyon", "FR")
+    const bruxelles = await member(t, diasporale, "lecteur.bruxelles", "Lecteur Bruxelles", "BE")
+
+    // Le pré-filtre du moteur suit le choix : posé à l'entrée, jamais d'office.
+    expect(await listedFlag(t, diasporale, masquee.personId)).toBe(false)
+    expect(await listedFlag(t, diasporale, reseau.personId)).toBe(true)
+
+    expect(await search(lyon.as, diasporale, "Awa")).toEqual(["awa.pays", "awa.reseau"])
+    expect(await search(bruxelles.as, diasporale, "awa")).toEqual(["awa.reseau"])
+    // Le filtre de pays restreint, il n'ouvre rien.
+    expect(await search(bruxelles.as, diasporale, "awa", "FR")).toEqual(["awa.reseau"])
+    expect(await search(bruxelles.as, diasporale, "awa", "be")).toEqual([])
+    expect(await search(bruxelles.as, diasporale, "awa", "GA")).toEqual([])
+    // Un identifiant exact passe par la même règle : masqué reste masqué, comme un inconnu.
+    expect(await search(lyon.as, diasporale, "awa.masquee")).toEqual([])
+    expect(await search(lyon.as, diasporale, "personne.inconnue")).toEqual([])
+    expect(await search(bruxelles.as, diasporale, "@awa.reseau")).toEqual(["awa.reseau"])
+  })
+
+  it("rien que la facette projetée pour le lecteur, et ni nom de lecteur trop court ni compte en attente", async () => {
+    const t = testConvex()
+    const { diasporale } = await seedAll(t)
+    const reseau = await member(t, diasporale, "awa.reseau", "Awa Réseau", "FR", "network")
+    await reseau.as.mutation(api.modules.diaspora.facet.updateMyFacet, {
+      networkId: diasporale,
+      facet: { countryOfResidence: "FR", city: "Lyon", visibility: { city: "country" } },
+    })
+    const bruxelles = await member(t, diasporale, "lecteur.bruxelles", "Lecteur Bruxelles", "BE")
+    const [hit] = await bruxelles.as.query(api.modules.diaspora.directory.searchMembers, { networkId: diasporale, query: "Awa" })
+    // La ville est réservée au pays : Bruxelles ne la voit pas.
+    expect(hit?.facet).toEqual({ countryOfResidence: "FR" })
+    expect(Object.keys(hit ?? {}).sort()).toEqual(["avatarUrl", "badges", "displayName", "facet", "handle", "headline", "personId"])
+
+    expect(await search(bruxelles.as, diasporale, "A")).toEqual([])
+    const attente = await person(t, "auth-attente", "attente")
+    await join(attente.as, diasporale)
+    expect(await refusal(search(attente.as, diasporale, "Awa"))).toMatchObject({ code: "statusInsufficient" })
+  })
+
+  it("un retrait de consentement compte aussitôt, même par le chemin générique ; « personne » referme le pré-filtre", async () => {
+    const t = testConvex()
+    const { diasporale } = await seedAll(t)
+    const reseau = await member(t, diasporale, "awa.reseau", "Awa Réseau", "FR", "network")
+    const lyon = await member(t, diasporale, "lecteur.lyon", "Lecteur Lyon", "FR")
+    await reseau.as.mutation(api.modules.people.consents.revokeConsent, { purpose: "directory", networkId: diasporale })
+    expect(await search(lyon.as, diasporale, "Awa")).toEqual([])
+
+    await reseau.as.mutation(api.modules.diaspora.facet.setDirectoryVisibility, { networkId: diasporale, level: "hidden" })
+    expect(await listedFlag(t, diasporale, reseau.personId)).toBe(false)
+    // Revenir : le consentement d'abord, puis le niveau.
+    expect(await refusal(reseau.as.mutation(api.modules.diaspora.facet.setDirectoryVisibility, { networkId: diasporale, level: "network" }))).toMatchObject({
+      app: { appRule: "consent_directory_required" },
+    })
+    await reseau.as.mutation(api.modules.people.consents.recordConsent, { purpose: "directory", origin: "settings", networkId: diasporale })
+    await reseau.as.mutation(api.modules.diaspora.facet.setDirectoryVisibility, { networkId: diasporale, level: "network" })
+    expect(await listedFlag(t, diasporale, reseau.personId)).toBe(true)
+    expect(await search(lyon.as, diasporale, "Awa")).toEqual(["awa.reseau"])
+  })
+
+  it("un blocage, dans un sens ou dans l'autre, retire la personne ; soi se trouve si on s'est rendu visible ; un départ efface", async () => {
+    const t = testConvex()
+    const { diasporale } = await seedAll(t)
+    const reseau = await member(t, diasporale, "awa.reseau", "Awa Réseau", "FR", "network")
+    const lyon = await member(t, diasporale, "lecteur.lyon", "Lecteur Lyon", "FR", "network")
+    expect(await search(reseau.as, diasporale, "Awa")).toEqual(["awa.reseau"])
+    await reseau.as.mutation(api.modules.graph.connections.blockPerson, { networkId: diasporale, targetPersonId: lyon.personId })
+    expect(await search(lyon.as, diasporale, "Awa")).toEqual([])
+    expect(await search(reseau.as, diasporale, "Lecteur")).toEqual([])
+    await reseau.as.mutation(api.modules.graph.connections.unblockPerson, { networkId: diasporale, targetPersonId: lyon.personId })
+    expect(await search(lyon.as, diasporale, "Awa")).toEqual(["awa.reseau"])
+
+    await reseau.as.mutation(api.modules.diaspora.membership.leaveDiasporale, { networkId: diasporale })
+    expect(await search(lyon.as, diasporale, "Awa")).toEqual([])
+  })
+})

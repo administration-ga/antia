@@ -60,6 +60,7 @@ import {
   isDiasporaNetwork,
   membershipGrounds,
   privacyOf,
+  syncDirectoryListing,
   writePrivacy,
 } from "./facts"
 import {
@@ -155,6 +156,8 @@ export const joinDiasporale = personMutation({
 
     await writeNetworkFacet(ctx, network, ctx.person._id, toEngineFacet(facet.value))
     await writePrivacy(ctx, network._id, ctx.person._id, { facetLevels: facet.value.visibility, directoryVisibility })
+    // Annuaire opt-in : masqué par défaut, listé au seul choix d'un niveau visible.
+    await syncDirectoryListing(ctx, network._id, ctx.person._id)
     return { status, rootStatus: admitted.rootStatus }
   },
 })
