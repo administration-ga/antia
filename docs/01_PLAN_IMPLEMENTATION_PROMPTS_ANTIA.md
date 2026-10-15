@@ -28,7 +28,7 @@ dependances:
 > | PA2 — fondations multi-réseaux | 2026-10-14 | `f1851fd` |
 > | ↳ tranche verticale testable (priorité du propriétaire : entrer, identifiant, publier, fil, réagir) | 2026-10-15 | `5021401` |
 > | ↳ câblage de DIASPORALE (sa demande PD0 : espaces de travail, catalogue, port 3031) | 2026-10-15 | `5535a63` |
-> | PA3 — duplication du backend | — | — |
+> | PA3 — duplication du backend | en cours : lots 2 → 5 livrés (fichiers ; personnes et médias ; graphe ; cloche et diffusion), parité dans `docs/03` | `344f0fa`, `6ef11f7`, `bfb2db9`, lot 5 |
 > | PA4 — identité | — | — |
 > | PA5 — modération, débit, données, notifications, fédération | — | — |
 > | PA6 — frontend `social-features` | — | — |
@@ -36,6 +36,11 @@ dependances:
 > | PA8 — antia.ga public | — | — |
 > | PA9 — fédération de l'administration | — | — |
 > | PA10 — échelle et lancement | — | — |
+>
+> **Demandes de DIASPORALE reçues pour PA4** (15/10) : remonter une vérification arrivée APRÈS l'entrée
+> (attestation) jusqu'à l'adhésion racine dérivée, qui reste « déclarée » ; une aide serveur qui rende
+> l'empreinte SHA-256 de l'adresse VÉRIFIÉE d'une personne (normalisée : espaces retirés, minuscules), jamais
+> l'adresse elle-même (attestation d'un compte léger, sujet `emailHash`).
 >
 > **Préalables externes manquants au 14/10/2026** (aucun ne bloque le code, tous bloquent une
 > mise en ligne) : projet Convex `antia` (le développement tourne sur un déploiement Convex

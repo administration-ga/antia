@@ -86,7 +86,9 @@ export const peopleTables = {
   })
     .index("by_network_and_person", ["networkId", "personId"])
     .index("by_person_and_status", ["personId", "status"])
-    .index("by_network_and_status", ["networkId", "status"]),
+    .index("by_network_and_status", ["networkId", "status"])
+    // Les modérateurs et administrateurs d'un réseau, sans balayer ses membres.
+    .index("by_network_and_role", ["networkId", "role"]),
 
   personFacets: defineTable({
     networkId: v.id("networks"),

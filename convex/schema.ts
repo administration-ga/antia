@@ -5,6 +5,7 @@ import { engagementTables } from "./modules/engagement/tables"
 import { filesTables } from "./modules/files/tables"
 import { graphTables } from "./modules/graph/tables"
 import { networksTables } from "./modules/networks/tables"
+import { notificationsTables } from "./modules/notifications/tables"
 import { peopleTables } from "./modules/people/tables"
 import { platformTables } from "./modules/platform/tables"
 import { postsTables } from "./modules/posts/tables"
@@ -33,6 +34,7 @@ export default defineSchema(
     ...engagementTables,
     ...filesTables,
     ...graphTables,
+    ...notificationsTables,
     ...diasporaTables,
   },
   { schemaValidation: true },

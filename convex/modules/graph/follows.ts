@@ -20,6 +20,7 @@ import { enforceRateLimit } from "../../lib/rateLimit"
 import { badgeValidator } from "../../lib/validators"
 import { servableUrl } from "../files/storageGuard"
 import { badgesOf } from "../people/persons"
+import { notifyPerson } from "../notifications/notify"
 import { findPublishedPersonByHandle, isDiscoverablePerson, miniProfileCache } from "../people/miniProfile"
 import { acceptedCounterpartIds, isBlockedBetween, isFollowingPerson } from "./graph"
 
@@ -52,6 +53,8 @@ export const follow = networkMutation({
     const followId = await ctx.db.insert("follows", { networkId: ctx.networkId, followerPersonId: ctx.person._id, targetPersonId: target._id, createdAt: Date.now() })
     const row = await ctx.db.get(followId)
     if (row) await followerCounts.insert(ctx, row)
+    // Un abonnement se dit — il n'engage à rien et n'appelle aucune décision.
+    await notifyPerson(ctx, { networkId: ctx.networkId, recipientPersonId: target._id, actorPersonId: ctx.person._id, kind: "new_follower" })
     return { targetPersonId: target._id, following: true as const }
   },
 })

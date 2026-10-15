@@ -4,7 +4,10 @@
  *
  * La paire est stockée UNE fois par réseau, en ordre canonique. Une demande est
  * IDEMPOTENTE : la rejouer sur une relation déjà demandée ou acceptée ne change
- * rien. Le REFUS n'émet rien et ne se distingue pas d'une absence de réponse.
+ * rien. La CLOCHE sonne pour une demande NEUVE (créée, ou rouverte après un
+ * refus) et pour une acceptation — jamais au rejeu ; répondre RÉSOUT la ligne
+ * du destinataire. Le REFUS n'émet rien et ne se distingue pas d'une absence de
+ * réponse.
  * Le BLOCAGE est unilatéral, muet, et vaut pour toute la paire, dans tous les
  * réseaux : seul son auteur le lève.
  */
@@ -23,6 +26,7 @@ import { checked, fail, notFound } from "../../lib/errors"
 import { networkMutation, networkQuery } from "../../lib/functions"
 import { enforceRateLimit } from "../../lib/rateLimit"
 import { badgeValidator } from "../../lib/validators"
+import { notifyPerson, resolveNotifications } from "../notifications/notify"
 import { findPublishedPersonByHandle, isDiscoverablePerson, isPublishedPerson, miniProfileCache } from "../people/miniProfile"
 import { acceptedCounterpartIds, blockerOf, findConnection, isBlockedBetween, pairRows } from "./graph"
 import { connectionStatusValidator } from "./tables"
@@ -67,10 +71,12 @@ export const requestConnection = networkMutation({
         message,
         updatedAt: now,
       })
+      // Rouverte : une demande NEUVE pour le destinataire, sur la même ligne.
+      await notifyPerson(ctx, { networkId: ctx.networkId, recipientPersonId: target, actorPersonId: ctx.person._id, kind: "connection_request", subject: { connection: existing._id } })
       return { status: "requested" as const }
     }
     const { low, high } = canonicalPair(ctx.person._id, target)
-    await ctx.db.insert("connections", {
+    const connectionId = await ctx.db.insert("connections", {
       networkId: ctx.networkId,
       personIdLow: low,
       personIdHigh: high,
@@ -81,6 +87,7 @@ export const requestConnection = networkMutation({
       requestedAt: now,
       updatedAt: now,
     })
+    await notifyPerson(ctx, { networkId: ctx.networkId, recipientPersonId: target, actorPersonId: ctx.person._id, kind: "connection_request", subject: { connection: connectionId } })
     return { status: "requested" as const }
   },
 })
@@ -117,6 +124,24 @@ export const respondToConnection = networkMutation({
     const status = args.accept ? ("accepted" as const) : ("declined" as const)
     const now = Date.now()
     await ctx.db.patch(connection._id, { status, respondedAt: now, updatedAt: now })
+    // MA cloche se résout ici, acceptation ET refus : la demande n'a plus rien à décider.
+    await resolveNotifications(ctx, {
+      networkId: ctx.networkId,
+      recipientPersonId: ctx.person._id,
+      kind: "connection_request",
+      subject: { connection: connection._id },
+      resolution: status,
+      at: now,
+    })
+    if (status === "accepted") {
+      await notifyPerson(ctx, {
+        networkId: ctx.networkId,
+        recipientPersonId: connection.requestedByPersonId,
+        actorPersonId: ctx.person._id,
+        kind: "connection_accepted",
+        subject: { connection: connection._id },
+      })
+    }
     return { status }
   },
 })

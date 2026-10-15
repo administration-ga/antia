@@ -17,10 +17,11 @@ l'owner map), les tests portés et neufs, les écarts assumés. Un module n'entr
 |---|---|---|---|---|
 | 2 | `files` — garde des fichiers, politique de dépôt | `344f0fa` | 6 fichiers convex + 2 domaine + 4 cliquets | D05, D06, D31, D36 |
 | 3 | `people` (profil, annuaire, images, mentions) et `media` | `6ef11f7` | 2 fichiers convex + 1 cas domaine | D05, D14, D36 |
-| 4 | `graph` (connexions, blocages, abonnements) | voir journal git (`feat(graph)`) | 1 fichier convex (15 cas) + 4 cas domaine | D04, D05, D12, D14, D17, D19 |
+| 4 | `graph` (connexions, blocages, abonnements) | `bfb2db9` | 1 fichier convex (15 cas) + 4 cas domaine | D04, D05, D12, D14, D17, D19 |
+| 5 | `notifications` (cloche sociale, diffusion par lots) et avis de verdict des fichiers | voir journal git (`feat(notifications)`) | 1 fichier convex (10 cas) + 1 fichier domaine + 1 cliquet | D07, D18, D19 |
 
 Ordre suivi (owner map §4.2), avec un écart : le lot 1 (modules purs) est porté avec chaque module qui le
-consomme ; l'avis de verdict des fichiers (`files/notify`) arrive avec le module `notifications` (lot 5), dont il
+consomme ; l'avis de verdict des fichiers (`files/notify`) est arrivé avec le module `notifications` (lot 5), dont il
 dépend.
 
 ---
@@ -42,7 +43,7 @@ dépend.
 | `modules/fileGuard/posedUploads.ts` | `convex/modules/files/posedUploads.ts` | tel quel | ✅ (personnes) |
 | `modules/fileGuard/mutations.ts` | `convex/modules/files/mutations.ts` | à adapter | ✅ |
 | `modules/fileGuard/queries.ts` | `convex/modules/files/queries.ts` | à adapter | ✅ |
-| `modules/fileGuard/notify.ts` | `convex/modules/files/notify.ts` | à réécrire | ⏳ avec `notifications` (lot 5) |
+| `modules/fileGuard/notify.ts` | `convex/modules/files/notify.ts` | à réécrire | ✅ au lot 5 (cloche sociale) |
 | `modules/fileGuard/posedImages.ts`, `quarantine.ts`, `triage.ts` | — | exclus | — |
 | `modules/fileGuard/triageModel.ts` | — | option V2 | — |
 | `lib/uploadPolicy.ts` | `packages/social-domain/src/uploadPolicy.ts` (règles) + `convex/lib/uploadPolicy.ts` (stockage) | à adapter | ✅ |
@@ -213,6 +214,77 @@ dépend.
 
 ### Écarts assumés
 
-- **Cloche** (demande, acceptation, nouvel abonné) : arrive avec le module `notifications` (lot 5).
+- **Cloche** (demande, acceptation, nouvel abonné) : branchée au lot 5.
 - **Directs révoqués au blocage** (`revokeConnectionDirects`) : point d'accroche branché avec `live` (lot 16).
 - **Rompre une connexion sans bloquer** : absent du socle, non ajouté (parité).
+
+---
+
+## Lot 5 — `notifications` (cloche sociale, diffusion par lots) et avis de verdict des fichiers
+
+### Parité, fichier par fichier
+
+| Source (`socle/convex/…`) | Cible | Sort | État |
+|---|---|---|---|
+| `reseauPersonnel/notifications.ts` (l. 54-126 : genres, résolutions, clé de sujet) | `packages/social-domain/src/notifications.ts` | pur | ✅ |
+| `reseauPersonnel/notifications.ts` (l. 128-253 : `notifyPersonal`, résolution) et `lib/notify.ts` | `convex/modules/notifications/notify.ts` (`notifyPerson`, `resolveNotifications`) | à adapter | ✅ (push : PA5) |
+| `reseauPersonnel/notifications.ts` (l. 255-499 : liste, non-lus, marquages) | `convex/modules/notifications/bell.ts` | à adapter | ✅ (`myNotifications` → `paginateNotifications`) |
+| `reseauPersonnel/tables.ts` (l. 391-455, `reseauPersonnel_notifications`) | `convex/modules/notifications/tables.ts` | à adapter | ✅ |
+| `schemas/notifications.ts` | — | remplacé | — (table du centre administratif : titre, corps, lien ; la table unique du moteur dérive de la cloche sociale, voir écarts) |
+| `icom/notifyFanout.ts` | `convex/modules/notifications/fanout.ts` | patron | ✅ |
+| `modules/fileGuard/notify.ts` | `convex/modules/files/notify.ts` | à réécrire | ✅ |
+| `tests/notificationsWriterRatchet.test.ts` | `tests/ratchets/notifications-writer.test.ts` | patron | ✅ (zéro exemption) |
+| `actions/push.ts`, `schemas/pushSubscriptions.ts`, `functions/pushSubscriptions.ts` | `M/notifications/push.ts`, `pushSubscriptions.ts` | à adapter | ⏳ PA5 (D20, D29) |
+| `crons/notificationsRetention.ts` | `M/notifications/retention.ts` | à adapter | ⏳ PA5 (D30) |
+| `icom/autoEnroll.ts` | `M/groups/`, `M/thematicGroups/` | patron | ⏳ avec ces modules |
+| `functions/notifications.ts` (centre administratif, 600 l.) | — | exclu | — |
+
+### Adaptations (liste fermée)
+
+- **Une seule table** `notifications`, PAR RÉSEAU (`networkId`, destinataire, acteur facultatif, genre, sujet typé,
+  clé de dédoublonnage `genre|sujet|acteur`). Aucun titre, corps ni lien stocké : l'écran traduit le genre (i18n) et
+  route le sujet ; ouvrir le sujet le relit avec sa garde.
+- **Porte unique** `notifyPerson` : jamais soi-même, jamais un non-membre actif du réseau, jamais à travers un blocage
+  (ces deux gardes sont neuves) ; un même geste rafraîchit la ligne (non lue, non résolue) au lieu d'en empiler une.
+- **Résolution par le serveur** (`resolveNotifications`, préfixe `genre|sujet|`) : toutes les lignes du sujet, quel
+  que soit l'acteur, sont résolues et lues d'office sans écraser une date de lecture ; `markAllRead` ne résout rien.
+- **Sujets** typés au fil des modules (publication, connexion, analyse de fichier pour l'instant) ; le DTO porte
+  l'état VIVANT d'une demande de relation (`inviteState`) et d'une analyse (`fileScanStatus`), et l'acteur par le
+  mini-profil publié (badges calculés).
+- **Diffusion** (`enqueueFanout`) : un job planifié par lots de 150 par la porte unique, replanifié tant que la
+  source n'est pas épuisée ; sources génériques (liste de personnes, abonnés d'une personne dans le réseau) ; aucune
+  écriture sur le document du sujet.
+- **Avis de verdict des fichiers** : le déposant et les modérateurs du réseau (rôles `network_moderator` et
+  `network_admin`, index `by_network_and_role`) au lieu du DSI ; un fichier de profil (sans réseau) est signalé dans
+  la racine ; l'avis ne fait jamais échouer l'analyse.
+- **Cloches du graphe** : demande (création et réouverture), acceptation (résout la demande, prévient le demandeur),
+  refus (résout, silence pour le demandeur), nouvel abonné. Seaux `notification.read` et `notification.readAll`.
+
+### Corrections de dette
+
+- **D18 — liste qui lève** : `myNotifications` (curseur temporel qui levait à égalité de date) non recopiée ;
+  pagination native, aucune ligne sautée (test sur cinq lignes de même date).
+- **D19 — troncature silencieuse** : `unreadCount` rend `{ count, capped }` (99+, l'écran dit la lacune).
+- **D07 — diffusion dans la transaction** : le patron par lots chaînés est en place pour les modules qui notifient
+  en nombre (groupes, messagerie, publications : D08 s'y branchera avec `posts` et `engagement`).
+- Post-filtre `.filter()` de `markAllRead` remplacé par l'index des non-lus borné à la date du clic.
+
+### Tests
+
+- Portés : `reseauPersonnel/notifications.test` (pagination sans saut, continuations de `markAllRead` sans absorber le
+  futur, résolution quel que soit l'acteur sans écraser `readAt`, réouverture remise à zéro, `markAllRead` lit sans
+  résoudre, état vivant de la demande, accepter et refuser, rejeu) ; `tests/notifications.test` (dédoublonnage par
+  clé, jamais soi-même, isolement par destinataire).
+- Neufs : porte fermée au blocage et au non-membre, non-lus bornés avec lacune, diffusion de plus d'un lot (liste et
+  abonnés), avis de verdict au déposant et aux modérateurs ; domaine (`notifications.test.ts`) ; cliquet
+  `notifications-writer`.
+
+### Écarts assumés
+
+- **`unreadCount` sur lecture bornée, pas sur compteur** (owner map §6.4 « sur compteur ») : au plus 100 lignes lues
+  par l'index des non-lus ; un compteur serait un document chaud écrit à chaque notification, en conflit avec la
+  diffusion par lots.
+- **`schemas/notifications.ts` remplacé** par la table de la cloche sociale : la table administrative porte un titre,
+  un corps et un lien, que le moteur ne stocke pas.
+- **Push** (abonnements, envoi sans aperçu, D20, D29) et **rétention** (D30) : PA5.
+- Les genres de messagerie, groupes, évènements et directs sont déclarés au domaine ; ils sonnent avec leur module.

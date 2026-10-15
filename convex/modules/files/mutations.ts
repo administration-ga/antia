@@ -1,4 +1,4 @@
-// Dupliqué de socle/convex/modules/fileGuard/mutations.ts @ ad2e7fdc2 — adaptations : table `fileScans` ; quarantaine iDocument et triage IA retirés (le statut bloquant EST la retenue) ; libération par un MODÉRATEUR du réseau du fichier ou un opérateur (au lieu de `settings.manage` d'une administration), relance par un opérateur (au lieu du superadmin) ; débit sur les gestes humains ; coupe-circuit respecté par l'analyse et le balayeur (fail-closed) ; purge indexée sur `blobPurgedAt` (D31 : une ligne purgée ne bloque plus la file) ; `_ageScanForTests` non recopiée (les tests vieillissent la ligne eux-mêmes) ; refus à code du moteur.
+// Dupliqué de socle/convex/modules/fileGuard/mutations.ts @ ad2e7fdc2 — adaptations : table `fileScans` ; quarantaine iDocument et triage IA retirés (le statut bloquant EST la retenue ; l'avis part par la cloche sociale, `notify.ts`) ; libération par un MODÉRATEUR du réseau du fichier ou un opérateur (au lieu de `settings.manage` d'une administration), relance par un opérateur (au lieu du superadmin) ; débit sur les gestes humains ; coupe-circuit respecté par l'analyse et le balayeur (fail-closed) ; purge indexée sur `blobPurgedAt` (D31 : une ligne purgée ne bloque plus la file) ; `_ageScanForTests` non recopiée (les tests vieillissent la ligne eux-mêmes) ; refus à code du moteur.
 /**
  * Garde des fichiers — MUTATIONS.
  *
@@ -22,6 +22,7 @@ import { getMembership } from "../../lib/access"
 import { fail, notFound } from "../../lib/errors"
 import { operatorMutation, personMutation } from "../../lib/functions"
 import { enforceRateLimit } from "../../lib/rateLimit"
+import { deliverVerdictNotice } from "./notify"
 import {
   FILE_GUARD_MAX_ATTEMPTS,
   FILE_GUARD_RUNNING_STALE_MS,
@@ -92,9 +93,11 @@ async function settleError(ctx: MutationCtx, scan: Doc<"fileScans">, reason: str
     return
   }
   await ctx.db.patch(scan._id, { status: "error", verdictReason: reason, completedAt: now, updatedAt: now })
+  const settled = await ctx.db.get(scan._id)
+  if (settled) await deliverVerdictNotice(ctx, settled)
 }
 
-/** Écrit le résultat de l'analyse. Un verdict bloquant EST la retenue : rien d'autre à déplacer. */
+/** Écrit le résultat de l'analyse. Un verdict bloquant EST la retenue : il est signalé, rien n'est déplacé. */
 export const _record = internalMutation({
   args: { scanId: v.id("fileScans"), outcome: scanOutcomeValidator },
   returns: v.null(),
@@ -132,6 +135,10 @@ export const _record = internalMutation({
       completedAt: now,
       updatedAt: now,
     })
+    if (outcome.status !== "clean") {
+      const settled = await ctx.db.get(scan._id)
+      if (settled) await deliverVerdictNotice(ctx, settled)
+    }
     return null
   },
 })
@@ -223,6 +230,8 @@ export const retryStale = internalMutation({
         const now = Date.now()
         if (scan.attempts >= FILE_GUARD_MAX_ATTEMPTS) {
           await ctx.db.patch(scan._id, { status: "error", verdictReason: "STALE_JOB", completedAt: now, updatedAt: now })
+          const settled = await ctx.db.get(scan._id)
+          if (settled) await deliverVerdictNotice(ctx, settled)
           continue
         }
         await ctx.db.patch(scan._id, { status: "pending", updatedAt: now })
