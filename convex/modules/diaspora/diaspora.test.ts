@@ -719,6 +719,7 @@ describe("attestation consulaire DIASPORA-ATTESTATION-V1 (PD3, côté moteur)", 
     const other = await verifiedSponsor(t, diasporale, "auth-autre", "autre")
     const hidden = await refusal(other.as.query(api.modules.diaspora.attestation.myAttestationRequest, { networkId: diasporale, attestationId }))
     expect(hidden.code).toBe("notFound")
+    expect(await bells(t, diasporale, ada.personId)).toEqual([{ kind: "attestation_verified", actor: null }])
     const consent = await t.run(async (ctx) => (row ? ctx.db.get(row.consentId) : null))
     expect(consent).toMatchObject({ purpose: "consular_attestation", origin: "prompt", networkId: diasporale })
   })
@@ -737,6 +738,7 @@ describe("attestation consulaire DIASPORA-ATTESTATION-V1 (PD3, côté moteur)", 
     expect(mine?.attestation).toMatchObject({ outcome: "not_confirmed", postSlug: null })
     const links = await t.run(async (ctx) => ctx.db.query("identityLinks").take(10))
     expect(links.map((link) => link.provider)).toEqual(["idn"])
+    expect(await bells(t, diasporale, ada.personId)).toEqual([{ kind: "attestation_not_confirmed", actor: null }])
   })
 
   it("une réponse hors contrat est refusée : échec technique, rien de consulaire n'entre", async () => {
@@ -760,6 +762,8 @@ describe("attestation consulaire DIASPORA-ATTESTATION-V1 (PD3, côté moteur)", 
     expect(row).toMatchObject({ result: "failed" })
     expect(row?.country).toBeUndefined()
     expect(JSON.stringify(row)).not.toContain("jamais")
+    // Un échec technique ne sonne pas : l'écran le dit déjà.
+    expect(await bells(t, diasporale, ada.personId)).toEqual([])
     expect(await membership(t, diasporale, ada.personId)).toMatchObject({ status: "declaree" })
   })
 
@@ -805,5 +809,93 @@ describe("attestation consulaire DIASPORA-ATTESTATION-V1 (PD3, côté moteur)", 
     await expect(
       light.as.mutation(api.modules.diaspora.attestation.requestConsularAttestation, { networkId: diasporale, consent: false as never }),
     ).rejects.toThrow()
+  })
+})
+
+/** Les cloches d'une personne dans le réseau, du moteur (genre et acteur seulement). */
+async function bells(t: T, networkId: Id<"networks">, personId: Id<"persons">) {
+  const rows = await t.run(async (ctx) =>
+    ctx.db
+      .query("notifications")
+      .withIndex("by_network_recipient_dedupKey", (q) => q.eq("networkId", networkId).eq("recipientPersonId", personId))
+      .take(20),
+  )
+  return rows.map((row) => ({ kind: row.kind, actor: row.actorPersonId ?? null }))
+}
+
+describe("cloche DIASPORALE (genres de la tranche)", () => {
+  it("parrainage reçu (avec le parrain), puis retiré (par lui, ou par la modération sans la désigner)", async () => {
+    const t = testConvex()
+    const { diasporale } = await seedAll(t)
+    const sponsor = await verifiedSponsor(t, diasporale, "auth-parrain", "parrain")
+    const light = await person(t, "auth-light", "compte.leger")
+    await join(light.as, diasporale)
+    const { sponsorshipId } = await sponsor.as.mutation(api.modules.diaspora.membership.sponsor, { networkId: diasporale, handle: "compte.leger" })
+    expect(await bells(t, diasporale, light.personId)).toEqual([{ kind: "sponsorship_received", actor: sponsor.personId }])
+    await sponsor.as.mutation(api.modules.diaspora.membership.revokeSponsorship, { networkId: diasporale, sponsorshipId })
+    expect(await bells(t, diasporale, light.personId)).toContainEqual({ kind: "sponsorship_withdrawn", actor: sponsor.personId })
+
+    const moderator = await verifiedSponsor(t, diasporale, "auth-moderation", "moderation")
+    const moderatorRow = await membership(t, diasporale, moderator.personId)
+    await t.run(async (ctx) => {
+      if (moderatorRow) await ctx.db.patch(moderatorRow._id, { role: "network_moderator" })
+    })
+    const second = await sponsor.as.mutation(api.modules.diaspora.membership.sponsor, { networkId: diasporale, handle: "compte.leger" })
+    await moderator.as.mutation(api.modules.diaspora.membership.revokeSponsorship, { networkId: diasporale, sponsorshipId: second.sponsorshipId })
+    expect(await bells(t, diasporale, light.personId)).toContainEqual({ kind: "sponsorship_withdrawn", actor: null })
+    expect((await bells(t, diasporale, light.personId)).some((bell) => bell.actor === moderator.personId)).toBe(false)
+  })
+})
+
+describe("profil vu par le lecteur (memberFacet, EXF-DG-07)", () => {
+  /** Une personne IDN gabonaise (déclarée) résidant dans `country`. */
+  async function member(t: T, diasporale: Id<"networks">, handle: string, country: string, facet: Record<string, unknown> = {}) {
+    const someone = await person(t, `auth-${handle}`, handle)
+    await linkIdn(t, someone.personId, 1, "GA")
+    await join(someone.as, diasporale, { countryOfResidence: country, ...facet })
+    return someone
+  }
+
+  it("chaque champ selon son niveau fin : soi voit tout, le pays voit le pays, l'ailleurs voit le réseau", async () => {
+    const t = testConvex()
+    const { diasporale } = await seedAll(t)
+    const ada = await member(t, diasporale, "ada", "FR", {
+      city: "Lyon",
+      arrivedAt: 2016,
+      helpAvailable: true,
+      visibility: { city: "country", arrivedAt: "only_me" },
+    })
+    const voisin = await member(t, diasporale, "voisin", "FR")
+    const ailleurs = await member(t, diasporale, "ailleurs", "BE")
+    const attente = await person(t, "auth-attente", "attente")
+    await join(attente.as, diasporale)
+
+    const self = await ada.as.query(api.modules.diaspora.profile.memberFacet, { networkId: diasporale, handle: "@ada" })
+    expect(self?.facet).toEqual({ countryOfResidence: "FR", city: "Lyon", arrivedAt: 2016, helpAvailable: true })
+    // L'aperçu « vu par un membre d'un autre pays » : pour soi seulement.
+    expect(self?.preview).toEqual({ countryOfResidence: "FR", helpAvailable: true })
+
+    expect(await voisin.as.query(api.modules.diaspora.profile.memberFacet, { networkId: diasporale, handle: "ada" })).toEqual({
+      facet: { countryOfResidence: "FR", city: "Lyon", helpAvailable: true },
+      preview: null,
+    })
+    expect((await ailleurs.as.query(api.modules.diaspora.profile.memberFacet, { networkId: diasporale, handle: "ada" }))?.facet).toEqual({
+      countryOfResidence: "FR",
+      helpAvailable: true,
+    })
+    // Un compte en attente n'est pas un membre actif : le niveau « réseau » ne lui ouvre rien.
+    expect((await attente.as.query(api.modules.diaspora.profile.memberFacet, { networkId: diasporale, handle: "ada" }))?.facet).toEqual({})
+  })
+
+  it("identifiant inconnu, non-membre ou blocage : le même null", async () => {
+    const t = testConvex()
+    const { diasporale } = await seedAll(t)
+    const ada = await member(t, diasporale, "ada", "FR")
+    const voisin = await member(t, diasporale, "voisin", "FR")
+    await person(t, "auth-dehors", "dehors")
+    expect(await voisin.as.query(api.modules.diaspora.profile.memberFacet, { networkId: diasporale, handle: "inconnu" })).toBeNull()
+    expect(await voisin.as.query(api.modules.diaspora.profile.memberFacet, { networkId: diasporale, handle: "dehors" })).toBeNull()
+    await ada.as.mutation(api.modules.graph.connections.blockPerson, { networkId: diasporale, targetPersonId: voisin.personId })
+    expect(await voisin.as.query(api.modules.diaspora.profile.memberFacet, { networkId: diasporale, handle: "ada" })).toBeNull()
   })
 })

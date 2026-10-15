@@ -44,6 +44,7 @@ import { enforceRateLimit } from "../../lib/rateLimit"
 import { membershipRoleValidator, membershipStatusValidator } from "../../lib/validators"
 import { isBlockedBetween } from "../graph/graph"
 import { admitToNetwork, setMembershipStatus, writeNetworkFacet } from "../people/admission"
+import { notifyPerson } from "../notifications/notify"
 import { findPublishedPersonByHandle } from "../people/miniProfile"
 import { hasStrongIdentityFor, liveIdentityLinks } from "../people/persons"
 import {
@@ -226,6 +227,8 @@ export const sponsor = networkMutation({
     })
     const grounds = await membershipGrounds(ctx, ctx.networkId, target._id, targetAccess.membership)
     await applyDerivedStatus(ctx, targetAccess.membership, grounds, ctx.person._id, now)
+    // La cloche de la personne parrainée : qui l'a admise (mini-profil publié du parrain).
+    await notifyPerson(ctx, { networkId: ctx.networkId, recipientPersonId: target._id, actorPersonId: ctx.person._id, kind: "sponsorship_received" })
     return { sponsorshipId }
   },
 })
@@ -261,6 +264,13 @@ export const revokeSponsorship = networkMutation({
       const grounds = await membershipGrounds(ctx, ctx.networkId, sponsorship.sponsoredPersonId, target)
       await applyDerivedStatus(ctx, target, grounds, null, now)
     }
+    // La cloche de la personne parrainée ; une modération ne se désigne pas.
+    await notifyPerson(ctx, {
+      networkId: ctx.networkId,
+      recipientPersonId: sponsorship.sponsoredPersonId,
+      ...(actor === "sponsor" ? { actorPersonId: ctx.person._id } : {}),
+      kind: "sponsorship_withdrawn",
+    })
     return null
   },
 })

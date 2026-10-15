@@ -43,6 +43,7 @@ import { failAppRule, notFound } from "../../lib/errors"
 import { networkMutation, networkQuery } from "../../lib/functions"
 import { enforceRateLimit } from "../../lib/rateLimit"
 import { literals } from "../../lib/validators"
+import { notifyPerson } from "../notifications/notify"
 import { writeNetworkFacet } from "../people/admission"
 import { liveIdentityLinks } from "../people/persons"
 import { activeSponsorshipOf, applyDerivedStatus, assertDiasporaNetwork, facetOf, isDiasporaNetwork, membershipGrounds, privacyOf, writePrivacy } from "./facts"
@@ -280,7 +281,11 @@ export const recordAttestation = internalMutation({
       attestedAt: response.attestedAt,
       respondedAt: now,
     })
-    if (!confirmed) return null
+    if (!confirmed) {
+      // « Nous n'avons pas pu confirmer » — sans aucune raison consulaire.
+      await notifyPerson(ctx, { networkId: row.networkId, recipientPersonId: row.personId, kind: "attestation_not_confirmed" })
+      return null
+    }
 
     const network = await ctx.db.get(row.networkId)
     if (!isDiasporaNetwork(network)) return null
@@ -298,6 +303,7 @@ export const recordAttestation = internalMutation({
       const sponsorship = await activeSponsorshipOf(ctx, network._id, row.personId)
       await applyDerivedStatus(ctx, membership, grounds, sponsorship?.sponsorPersonId ?? null, now)
     }
+    await notifyPerson(ctx, { networkId: network._id, recipientPersonId: row.personId, kind: "attestation_verified" })
     return null
   },
 })
