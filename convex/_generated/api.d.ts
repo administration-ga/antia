@@ -94,6 +94,7 @@ import type * as modules_files_scan from "../modules/files/scan.js";
 import type * as modules_files_storageGuard from "../modules/files/storageGuard.js";
 import type * as modules_files_tables from "../modules/files/tables.js";
 import type * as modules_files_verdict from "../modules/files/verdict.js";
+import type * as modules_graph_blocks from "../modules/graph/blocks.js";
 import type * as modules_graph_connections from "../modules/graph/connections.js";
 import type * as modules_graph_follows from "../modules/graph/follows.js";
 import type * as modules_graph_graph from "../modules/graph/graph.js";
@@ -307,6 +308,7 @@ declare const fullApi: ApiFromModules<{
   "modules/files/storageGuard": typeof modules_files_storageGuard;
   "modules/files/tables": typeof modules_files_tables;
   "modules/files/verdict": typeof modules_files_verdict;
+  "modules/graph/blocks": typeof modules_graph_blocks;
   "modules/graph/connections": typeof modules_graph_connections;
   "modules/graph/follows": typeof modules_graph_follows;
   "modules/graph/graph": typeof modules_graph_graph;

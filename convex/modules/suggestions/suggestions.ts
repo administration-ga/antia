@@ -184,6 +184,7 @@ export type SentInvitationDto = {
  * par un index du demandeur et paginée.
  */
 export const paginateSentInvitations = networkQuery({
+  minStatus: "en_attente",
   args: { paginationOpts: paginationOptsValidator },
   handler: async (ctx, args): Promise<PaginationResult<SentInvitationDto>> => {
     const result = await ctx.db

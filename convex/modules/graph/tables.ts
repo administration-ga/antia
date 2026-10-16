@@ -32,6 +32,8 @@ export const graphTables = {
     blockedByPersonId: v.optional(v.id("persons")),
     message: v.optional(v.string()),
     requestedAt: v.number(),
+    /** Version de demande annulée par son auteur, pour le seul rejeu de cette annulation. */
+    cancelledRequestedAt: v.optional(v.number()),
     respondedAt: v.optional(v.number()),
     updatedAt: v.number(),
   })
@@ -45,7 +47,20 @@ export const graphTables = {
     .index("by_network_requester_status", ["networkId", "requestedByPersonId", "status"])
     // Les blocages d'une personne, tous réseaux (filtres du fil, des suggestions).
     .index("by_low_status", ["personIdLow", "status"])
-    .index("by_high_status", ["personIdHigh", "status"]),
+    .index("by_high_status", ["personIdHigh", "status"])
+    .index("by_blocker_status_updatedAt", ["blockedByPersonId", "status", "updatedAt"]),
+
+  /** Intentions personnelles indépendantes ; le réseau est seulement la porte d'entrée autorisée. */
+  personBlocks: defineTable({
+    networkId: v.id("networks"),
+    blockerPersonId: v.id("persons"),
+    targetPersonId: v.id("persons"),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_blocker_target", ["blockerPersonId", "targetPersonId"])
+    .index("by_blocker_createdAt", ["blockerPersonId", "createdAt"])
+    .index("by_target_createdAt", ["targetPersonId", "createdAt"]),
 
   /**
    * Abonnement : suivre quelqu'un sans son accord. Il N'EST PAS une connexion —

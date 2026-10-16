@@ -95,7 +95,12 @@ export function exportableRecord(table: string, row: DataRecord, personId: strin
   if (table === "persons") return row._id === personId ? redactExportValue(row) as Record<string, unknown> : null
   if (table === "personalThreads") return row.personLow === personId || row.personHigh === personId ? projectedRecord(row, THREAD_METADATA) : null
   if (table === "groupThreads") return row.createdByPersonId === personId ? projectedRecord(row, THREAD_METADATA) : null
-  if (table === "connections") return row.personIdLow === personId || row.personIdHigh === personId ? projectedRecord(row, [...RECORD_METADATA, "personIdLow", "personIdHigh", "requestedByPersonId", "recipientPersonId", "status", "requestedAt", "respondedAt"]) : null
+  if (table === "connections") {
+    // Le blocage reçu n'est ni une donnée divulguée par la relation ni une émission propre.
+    if (row.status === "blocked" && row.blockedByPersonId !== personId) return null
+    return row.personIdLow === personId || row.personIdHigh === personId ? projectedRecord(row, [...RECORD_METADATA, "personIdLow", "personIdHigh", "requestedByPersonId", "recipientPersonId", "status", "requestedAt", "respondedAt", "cancelledRequestedAt"]) : null
+  }
+  if (table === "personBlocks") return row.blockerPersonId === personId ? projectedRecord(row, [...RECORD_METADATA, "blockerPersonId", "targetPersonId"]) : null
   if (table === "follows") return row.followerPersonId === personId || row.targetPersonId === personId ? projectedRecord(row, [...RECORD_METADATA, "followerPersonId", "targetPersonId"]) : null
   if (table === "reports" || table === "contentReports") {
     if (row.reporterPersonId === personId) return projectedRecord(row, [...REPORT_REFERENCE_FIELDS, "reason", "note", "source"])

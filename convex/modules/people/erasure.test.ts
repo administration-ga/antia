@@ -48,6 +48,13 @@ describe("PA5 — inventaire des données", () => {
     expect(copy).not.toHaveProperty("content")
     expect(copy).not.toHaveProperty("attachmentFiles")
     expect(copy).not.toHaveProperty("forwardedFrom")
+    const incoming = { ...metadata, personIdLow: "person", personIdHigh: "other", status: "blocked", blockedByPersonId: "other" }
+    expect(exportableRecord("connections", incoming, "person")).toBeNull()
+    expect(exportableRecord("connections", { ...incoming, blockedByPersonId: "person" }, "person")).not.toBeNull()
+    const intention = { ...metadata, blockerPersonId: "other", targetPersonId: "person" }
+    expect(exportableRecord("personBlocks", intention, "person")).toBeNull()
+    expect(exportableRecord("personBlocks", { ...intention, blockerPersonId: "person", targetPersonId: "other" }, "person")).not.toBeNull()
+    expect(directlyOwned("personBlocks", intention, "person")).toBe(true)
   })
 
 })

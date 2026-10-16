@@ -19,6 +19,7 @@ export const DATA_TABLE_POLICIES: Record<string, { shared?: boolean; owners?: re
   postReactionShards: {parents: ["postId"]},
   fileScans: {owners: ["uploadedByPersonId"]},
   connections: {},
+  personBlocks: {owners: ["blockerPersonId", "targetPersonId"]},
   follows: {},
   notifications: {owners: ["recipientPersonId"]},
   thematicGroups: {shared: true},

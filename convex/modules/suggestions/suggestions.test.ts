@@ -183,6 +183,24 @@ describe("masquage d'une suggestion", () => {
 })
 
 describe("état relationnel et invitations envoyées", () => {
+  it("un membre en attente relit ses demandes envoyées, sans ouvrir le droit d'en émettre une autre", async () => {
+    const t = testConvex()
+    const { root } = await seed(t)
+    const me = await enter(t, root, "moi")
+    const other = await enter(t, root, "autre")
+    await me.as.mutation(api.modules.graph.connections.requestConnection, { networkId: root, handle: other.handle })
+    const row = await t.run(async (ctx) => {
+      const membership = await ctx.db.query("networkMemberships").withIndex("by_network_and_person", (q) => q.eq("networkId", root).eq("personId", me.personId)).unique()
+      if (!membership) throw new Error("Adhésion de test absente")
+      await ctx.db.patch(membership._id, { status: "en_attente" })
+      return await ctx.db.query("connections").withIndex("by_network_requester_status", (q) => q.eq("networkId", root).eq("requestedByPersonId", me.personId).eq("status", "requested")).unique()
+    })
+
+    const sent = await me.as.query(SG.paginateSentInvitations, { networkId: root, paginationOpts: { numItems: 1, cursor: null } })
+    expect(sent.page).toMatchObject([{ connectionId: row!._id, otherPersonId: other.personId, at: row!.requestedAt }])
+    expect(await codeOf(me.as.mutation(api.modules.graph.connections.requestConnection, { networkId: root, handle: other.handle }))).toBe("statusInsufficient")
+  })
+
   it("une demande sortante se dit « requested_by_me » chez le demandeur, « requested_by_them » chez le destinataire ; acceptée, elle sort du catalogue", async () => {
     const t = testConvex()
     const { root } = await seed(t)

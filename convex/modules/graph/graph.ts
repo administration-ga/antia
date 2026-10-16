@@ -21,6 +21,7 @@ type ReadCtx = Pick<QueryCtx, "db">
  */
 export const CONNECTIONS_SCAN = 500
 export const FOLLOWS_SCAN = 500
+export const PAIR_ROWS_MAX = 100
 
 export type BoundedIds = { ids: Set<string>; truncated: boolean }
 
@@ -40,7 +41,27 @@ export async function pairRows(ctx: ReadCtx, a: Id<"persons">, b: Id<"persons">)
   return await ctx.db
     .query("connections")
     .withIndex("by_pair", (q) => q.eq("personIdLow", low).eq("personIdHigh", high))
-    .take(100)
+    .take(PAIR_ROWS_MAX + 1)
+}
+
+/** Mon intention propre, jamais l'intention inverse. Aide privée, sans fonction publique. */
+export async function ownBlockIntent(ctx: ReadCtx, blockerPersonId: Id<"persons">, targetPersonId: Id<"persons">): Promise<Doc<"personBlocks"> | null> {
+  return await ctx.db.query("personBlocks")
+    .withIndex("by_blocker_target", (q) => q.eq("blockerPersonId", blockerPersonId).eq("targetPersonId", targetPersonId))
+    .unique()
+}
+
+/** Intentions et marqueurs hérités : une paire trop grande reste fermée en lecture. */
+export async function pairBlockState(ctx: ReadCtx, first: Id<"persons">, second: Id<"persons">) {
+  const [rows, firstIntent, secondIntent] = await Promise.all([
+    pairRows(ctx, first, second),
+    ownBlockIntent(ctx, first, second),
+    ownBlockIntent(ctx, second, first),
+  ])
+  const byFirst = firstIntent !== null || rows.some((row) => row.status === "blocked" && row.blockedByPersonId === first)
+  const bySecond = secondIntent !== null || rows.some((row) => row.status === "blocked" && row.blockedByPersonId === second)
+  const overflow = rows.length > PAIR_ROWS_MAX
+  return { rows, firstIntent, secondIntent, byFirst, bySecond, overflow, blocked: overflow || firstIntent !== null || secondIntent !== null || rows.some((row) => row.status === "blocked") }
 }
 
 /**
@@ -50,12 +71,7 @@ export async function pairRows(ctx: ReadCtx, a: Id<"persons">, b: Id<"persons">)
  */
 export async function isBlockedBetween(ctx: ReadCtx, a: Id<"persons">, b: Id<"persons">): Promise<boolean> {
   if (a === b) return false
-  return (await pairRows(ctx, a, b)).some((row) => row.status === "blocked")
-}
-
-/** Qui a bloqué, dans la paire (le blocage le plus ancien fait foi), ou `null`. */
-export function blockerOf(rows: readonly Doc<"connections">[]): Id<"persons"> | null {
-  return rows.find((row) => row.status === "blocked")?.blockedByPersonId ?? null
+  return (await pairBlockState(ctx, a, b)).blocked
 }
 
 async function sidesWithStatus(ctx: ReadCtx, networkId: Id<"networks">, personId: Id<"persons">, status: Doc<"connections">["status"]) {
@@ -79,9 +95,11 @@ async function sidesWithStatus(ctx: ReadCtx, networkId: Id<"networks">, personId
  */
 export async function acceptedCounterpartIds(ctx: ReadCtx, networkId: Id<"networks">, personId: Id<"persons">): Promise<BoundedIds> {
   const { asLow, asHigh, truncated } = await sidesWithStatus(ctx, networkId, personId, "accepted")
+  const blocked = await blockedCounterpartIds(ctx, personId)
+  if (blocked.truncated) return { ids: new Set(), truncated: true }
   const ids = new Set<string>()
-  for (const row of asLow.slice(0, CONNECTIONS_SCAN)) ids.add(row.personIdHigh)
-  for (const row of asHigh.slice(0, CONNECTIONS_SCAN)) ids.add(row.personIdLow)
+  for (const row of asLow.slice(0, CONNECTIONS_SCAN)) if (!blocked.ids.has(row.personIdHigh)) ids.add(row.personIdHigh)
+  for (const row of asHigh.slice(0, CONNECTIONS_SCAN)) if (!blocked.ids.has(row.personIdLow)) ids.add(row.personIdLow)
   return { ids, truncated }
 }
 
@@ -92,10 +110,13 @@ export async function pendingCounterpartIds(
   personId: Id<"persons">,
 ): Promise<{ byMe: Set<string>; byThem: Set<string>; truncated: boolean }> {
   const { asLow, asHigh, truncated } = await sidesWithStatus(ctx, networkId, personId, "requested")
+  const blocked = await blockedCounterpartIds(ctx, personId)
   const byMe = new Set<string>()
   const byThem = new Set<string>()
+  if (blocked.truncated) return { byMe, byThem, truncated: true }
   for (const row of [...asLow.slice(0, CONNECTIONS_SCAN), ...asHigh.slice(0, CONNECTIONS_SCAN)]) {
     const other = row.personIdLow === personId ? row.personIdHigh : row.personIdLow
+    if (blocked.ids.has(other)) continue
     if (row.requestedByPersonId === personId) byMe.add(other)
     else byThem.add(other)
   }
@@ -104,7 +125,7 @@ export async function pendingCounterpartIds(
 
 /** Suis-je connecté à cette personne dans le réseau ? (une paire, une lecture) */
 export async function isConnectedTo(ctx: ReadCtx, networkId: Id<"networks">, personId: Id<"persons">, otherPersonId: Id<"persons">): Promise<boolean> {
-  return (await findConnection(ctx, networkId, personId, otherPersonId))?.status === "accepted"
+  return (await findConnection(ctx, networkId, personId, otherPersonId))?.status === "accepted" && !(await isBlockedBetween(ctx, personId, otherPersonId))
 }
 
 /**
@@ -112,7 +133,7 @@ export async function isConnectedTo(ctx: ReadCtx, networkId: Id<"networks">, per
  * réseaux confondus — le pendant ensembliste d'`isBlockedBetween`.
  */
 export async function blockedCounterpartIds(ctx: ReadCtx, personId: Id<"persons">): Promise<BoundedIds> {
-  const [asLow, asHigh] = await Promise.all([
+  const [asLow, asHigh, outgoing, incoming] = await Promise.all([
     ctx.db
       .query("connections")
       .withIndex("by_low_status", (q) => q.eq("personIdLow", personId).eq("status", "blocked"))
@@ -121,11 +142,15 @@ export async function blockedCounterpartIds(ctx: ReadCtx, personId: Id<"persons"
       .query("connections")
       .withIndex("by_high_status", (q) => q.eq("personIdHigh", personId).eq("status", "blocked"))
       .take(CONNECTIONS_SCAN + 1),
+    ctx.db.query("personBlocks").withIndex("by_blocker_createdAt", (q) => q.eq("blockerPersonId", personId)).take(CONNECTIONS_SCAN + 1),
+    ctx.db.query("personBlocks").withIndex("by_target_createdAt", (q) => q.eq("targetPersonId", personId)).take(CONNECTIONS_SCAN + 1),
   ])
   const ids = new Set<string>()
   for (const row of asLow.slice(0, CONNECTIONS_SCAN)) ids.add(row.personIdHigh)
   for (const row of asHigh.slice(0, CONNECTIONS_SCAN)) ids.add(row.personIdLow)
-  return { ids, truncated: asLow.length > CONNECTIONS_SCAN || asHigh.length > CONNECTIONS_SCAN }
+  for (const row of outgoing.slice(0, CONNECTIONS_SCAN)) ids.add(row.targetPersonId)
+  for (const row of incoming.slice(0, CONNECTIONS_SCAN)) ids.add(row.blockerPersonId)
+  return { ids, truncated: [asLow, asHigh, outgoing, incoming].some((rows) => rows.length > CONNECTIONS_SCAN) }
 }
 
 /**

@@ -69,6 +69,7 @@ const RATE_LIMITS = {
   // Graphe (PA3 lot 4)
   "connection.request": { kind: "token bucket", rate: 30, period: HOUR, capacity: 10 },
   "connection.respond": { kind: "token bucket", rate: 60, period: HOUR, capacity: 20 },
+  "connection.cancel": { kind: "token bucket", rate: 120, period: HOUR, capacity: 30 },
   "connection.block": { kind: "token bucket", rate: 30, period: HOUR, capacity: 10 },
   "follow.toggle": { kind: "token bucket", rate: 60, period: HOUR, capacity: 20 },
   "mark.toggle": { kind: "token bucket", rate: 240, period: HOUR, capacity: 60 },

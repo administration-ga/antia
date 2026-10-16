@@ -30,7 +30,7 @@ import { onPairBlockChangedInGroups } from "../groups/unread"
 import { onPairBlockChanged } from "../messaging/threads"
 import { notifyPerson, resolveNotifications } from "../notifications/notify"
 import { findPublishedPersonByHandle, isDiscoverablePerson, isPublishedPerson, miniProfileCache } from "../people/miniProfile"
-import { acceptedCounterpartIds, blockerOf, findConnection, isBlockedBetween, pairRows } from "./graph"
+import { acceptedCounterpartIds, findConnection, isBlockedBetween, pairBlockState } from "./graph"
 import { connectionStatusValidator } from "./tables"
 
 // ═══════════════════════════════════════════════════════════════
@@ -68,7 +68,8 @@ export const requestConnection = networkMutation({
         status: "requested",
         requestedByPersonId: ctx.person._id,
         recipientPersonId: target,
-        requestedAt: now,
+        requestedAt: Math.max(now, existing.requestedAt + 1),
+        cancelledRequestedAt: undefined,
         respondedAt: undefined,
         message,
         updatedAt: now,
@@ -123,6 +124,8 @@ export const respondToConnection = networkMutation({
     if (connection.personIdLow !== ctx.person._id && connection.personIdHigh !== ctx.person._id) return notFound()
     if (connection.requestedByPersonId === ctx.person._id) return fail("invalidArgument", { field: "connectionId" })
     if (connection.status !== "requested") return fail("conflict")
+    const other = connection.personIdLow === ctx.person._id ? connection.personIdHigh : connection.personIdLow
+    if (await isBlockedBetween(ctx, ctx.person._id, other)) return notFound()
     const status = args.accept ? ("accepted" as const) : ("declined" as const)
     const now = Date.now()
     await ctx.db.patch(connection._id, { status, respondedAt: now, updatedAt: now })
@@ -148,6 +151,33 @@ export const respondToConnection = networkMutation({
   },
 })
 
+/** Annuler MA demande à sa version exacte, sans retirer une relation acceptée. */
+export const cancelSentRequest = networkMutation({
+  minStatus: "en_attente",
+  args: { connectionId: v.id("connections"), expectedRequestedAt: v.number() },
+  returns: v.null(),
+  handler: async (ctx, { connectionId, expectedRequestedAt }) => {
+    await enforceRateLimit(ctx, "connection.cancel", ctx.person._id)
+    const connection = await ctx.db.get(connectionId)
+    if (!connection || connection.networkId !== ctx.networkId || connection.requestedByPersonId !== ctx.person._id || (connection.personIdLow !== ctx.person._id && connection.personIdHigh !== ctx.person._id) || connection.requestedAt !== expectedRequestedAt) return notFound()
+    if (connection.cancelledRequestedAt === expectedRequestedAt) return null
+    const other = connection.personIdLow === ctx.person._id ? connection.personIdHigh : connection.personIdLow
+    if (await isBlockedBetween(ctx, ctx.person._id, other)) return notFound()
+    if (connection.status !== "requested") return notFound()
+    const now = Date.now()
+    await ctx.db.patch(connection._id, { status: "declined", cancelledRequestedAt: expectedRequestedAt, updatedAt: now })
+    await resolveNotifications(ctx, {
+      networkId: ctx.networkId,
+      recipientPersonId: connection.recipientPersonId,
+      kind: "connection_request",
+      subject: { connection: connection._id },
+      resolution: "cancelled",
+      at: now,
+    })
+    return null
+  },
+})
+
 // ═══════════════════════════════════════════════════════════════
 // Bloquer
 // ═══════════════════════════════════════════════════════════════
@@ -165,10 +195,16 @@ export const blockPerson = networkMutation({
   handler: async (ctx, { targetPersonId }) => {
     await enforceRateLimit(ctx, "connection.block", ctx.person._id)
     if (targetPersonId === ctx.person._id) return fail("invalidArgument", { field: "targetPersonId" })
-    if (!(await ctx.db.get(targetPersonId))) return notFound()
+    const target = await ctx.db.get(targetPersonId)
+    if (!target || target.deletionRequestedAt !== undefined || target.erasedAt !== undefined) return notFound()
     const now = Date.now()
-    const rows = await pairRows(ctx, ctx.person._id, targetPersonId)
-    const wasBlocked = rows.some((row) => row.status === "blocked")
+    const pair = await pairBlockState(ctx, ctx.person._id, targetPersonId)
+    if (pair.overflow) return fail("conflict")
+    const rows = pair.rows
+    const wasBlocked = pair.blocked
+    if (!pair.firstIntent) {
+      await ctx.db.insert("personBlocks", { networkId: ctx.networkId, blockerPersonId: ctx.person._id, targetPersonId, createdAt: now, updatedAt: now })
+    }
     for (const row of rows) {
       // Un blocage déjà posé par l'autre reste le sien : la paire est fermée de toute façon.
       if (row.status === "blocked") continue
@@ -209,9 +245,12 @@ export const unblockPerson = networkMutation({
   returns: v.null(),
   handler: async (ctx, { targetPersonId }) => {
     await enforceRateLimit(ctx, "connection.block", ctx.person._id)
-    const mine = (await pairRows(ctx, ctx.person._id, targetPersonId)).filter((row) => row.status === "blocked" && row.blockedByPersonId === ctx.person._id)
-    if (mine.length === 0) return notFound()
+    const pair = await pairBlockState(ctx, ctx.person._id, targetPersonId)
+    if (pair.overflow) return fail("conflict")
+    const mine = pair.rows.filter((row) => row.status === "blocked" && row.blockedByPersonId === ctx.person._id)
+    if (!pair.firstIntent && mine.length === 0) return notFound()
     const now = Date.now()
+    if (pair.firstIntent) await ctx.db.delete(pair.firstIntent._id)
     for (const row of mine) await ctx.db.patch(row._id, { status: "declined", blockedByPersonId: undefined, updatedAt: now })
     // La paire ne se ROUVRE que si l'autre ne bloque pas de son côté : la pastille retrouve alors ses non-lus.
     if (!(await isBlockedBetween(ctx, ctx.person._id, targetPersonId))) {
@@ -232,8 +271,10 @@ const connectionViewValidator = v.union(
   v.object({ state: v.literal("requested_by_them"), connectionId: v.id("connections"), message: v.optional(v.string()) }),
   v.object({ state: v.literal("connected"), connectionId: v.id("connections"), since: v.number() }),
   v.object({ state: v.literal("declined"), connectionId: v.id("connections") }),
-  v.object({ state: v.literal("blocked_by_me"), connectionId: v.id("connections") }),
+  v.object({ state: v.literal("blocked_by_me"), connectionId: v.union(v.id("connections"), v.null()) }),
 )
+
+type CurrentConnectionView = Exclude<ConnectionView<Id<"connections">>, { state: "blocked_by_me" }> | { state: "blocked_by_me"; connectionId: Id<"connections"> | null }
 
 /**
  * L'état de ma relation avec une personne, dans le réseau. Un blocage posé dans
@@ -242,14 +283,14 @@ const connectionViewValidator = v.union(
 export const connectionWith = networkQuery({
   args: { otherPersonId: v.id("persons") },
   returns: connectionViewValidator,
-  handler: async (ctx, { otherPersonId }): Promise<ConnectionView<Id<"connections">>> => {
-    const rows = await pairRows(ctx, ctx.person._id, otherPersonId)
-    const blocker = blockerOf(rows)
-    if (blocker !== null) {
-      const blocked = rows.find((row) => row.status === "blocked")
-      return blocker === ctx.person._id && blocked ? { state: "blocked_by_me", connectionId: blocked._id } : { state: "none" }
-    }
-    return viewConnection(rows.find((row) => row.networkId === ctx.networkId) ?? null, ctx.person._id)
+  handler: async (ctx, { otherPersonId }): Promise<CurrentConnectionView> => {
+    const [pair, current] = await Promise.all([
+      pairBlockState(ctx, ctx.person._id, otherPersonId),
+      findConnection(ctx, ctx.networkId, ctx.person._id, otherPersonId),
+    ])
+    if (pair.byFirst) return { state: "blocked_by_me", connectionId: current?._id ?? null }
+    if (pair.blocked) return { state: "none" }
+    return viewConnection(current, ctx.person._id)
   },
 })
 
@@ -265,7 +306,9 @@ export const pendingState = networkQuery({
     if (!row) return { status: "missing" as const, iAmRecipient: false }
     if (row.networkId !== ctx.networkId || (row.personIdLow !== ctx.person._id && row.personIdHigh !== ctx.person._id)) return notFound()
     // Le bloqué ne voit pas le blocage : pour lui, la demande n'a pas de suite.
-    const status = row.status === "blocked" && row.blockedByPersonId !== ctx.person._id ? ("declined" as const) : row.status
+    const other = row.personIdLow === ctx.person._id ? row.personIdHigh : row.personIdLow
+    const pair = await pairBlockState(ctx, ctx.person._id, other)
+    const status = pair.byFirst ? ("blocked" as const) : pair.blocked ? ("declined" as const) : row.status
     return { status, iAmRecipient: row.recipientPersonId === ctx.person._id }
   },
 })
@@ -318,6 +361,7 @@ export const paginateMineSide = networkQuery({
     const page: ConnectionPersonDto[] = []
     for (const row of result.page) {
       const other = row.personIdLow === me ? row.personIdHigh : row.personIdLow
+      if (await isBlockedBetween(ctx, me, other)) continue
       const person = await profileOf(other)
       page.push({
         connectionId: row._id,
@@ -358,6 +402,7 @@ export const paginatePendingForMe = networkQuery({
     const profileOf = miniProfileCache(ctx)
     const page: ConnectionPersonDto[] = []
     for (const row of result.page) {
+      if (await isBlockedBetween(ctx, ctx.person._id, row.requestedByPersonId)) continue
       const person = await profileOf(row.requestedByPersonId)
       page.push({
         connectionId: row._id,
@@ -463,6 +508,7 @@ export const searchMine = networkQuery({
     for (const person of relations) {
       const link = await findConnection(ctx, ctx.networkId, me, person._id)
       if (!link || link.status !== "accepted") continue
+      if (await isBlockedBetween(ctx, me, person._id)) continue
       const mini = await profileOf(person._id)
       hits.push({
         connectionId: link._id,
