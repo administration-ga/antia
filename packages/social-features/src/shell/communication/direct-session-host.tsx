@@ -50,7 +50,7 @@ function ActiveDirect({ sessionId }: { sessionId: Id<"liveSessions"> }) {
   useEffect(() => {
     if (session.isError || session.data?.status === "ended") directSessionStore.leave()
     else if (role) directSessionStore.syncSessionRole(sessionId, role)
-  }, [session.isError, session.data?.status, sessionId, role])
+  }, [session.isError, session.data?.status, sessionId, role, state.credentials?.role, state.lastCredentialRole])
   useEffect(() => {
     if (role !== "host" || hostState === null || session.data?.status !== "live") return
     const beat = () => { void hostHeartbeat({ networkId, sessionId, state: hostState }).catch(() => undefined) }

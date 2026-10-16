@@ -42,7 +42,7 @@ import "@livekit/components-styles"
 import { LIVEKIT_CALL_ROOM_OPTIONS } from "../../lib/livekit/room-options"
 import { useLiveKitDisconnectGuard } from "../../lib/livekit/use-livekit-disconnect-guard"
 import { ConnectionState } from "livekit-client"
-import { useCallback, useEffect } from "react"
+import { useCallback, useEffect, useRef } from "react"
 import { toast } from "sonner"
 import { useTranslation } from "react-i18next"
 import {
@@ -56,6 +56,7 @@ import {
   isCallBusy,
 } from "../../features/direct/direct-call-coexistence"
 import { useCallStore } from "../../stores/call-store"
+import { DIRECT_INTENT_UNCONVERGED, reconcileMediaIntent, type DirectIntentConvergence } from "../../features/direct/direct-intent-sync"
 import { directRoomRegistry } from "../../stores/direct-room-registry"
 import {
   directSessionStore,
@@ -169,6 +170,24 @@ function DirectMediaIntentController({
   return null
 }
 
+/** Adopte une piste coupée à distance sans rallumer le micro à la reconnexion.
+ * Vit avec la salle, donc reste actif après la navigation hors du studio. */
+function DirectIntentSync({ role }: { role: "viewer" | "speaker" }) {
+  const { isMicrophoneEnabled, isCameraEnabled } = useLocalParticipant()
+  const connected = useConnectionState() === ConnectionState.Connected
+  const { intent } = useDirectSessionStore()
+  const convergence = useRef<DirectIntentConvergence>(DIRECT_INTENT_UNCONVERGED)
+  const wantsMic = directWantsAudio(role, intent)
+  const wantsCamera = directWantsVideo(role, intent)
+  useEffect(() => {
+    if (!connected || role !== "speaker") { convergence.current = DIRECT_INTENT_UNCONVERGED; return }
+    const result = reconcileMediaIntent({ wants: { mic: wantsMic, camera: wantsCamera }, actual: { mic: isMicrophoneEnabled, camera: isCameraEnabled }, converged: convergence.current })
+    convergence.current = result.converged
+    if (result.patch) directSessionStore.setIntent(result.patch)
+  }, [connected, role, wantsMic, wantsCamera, isMicrophoneEnabled, isCameraEnabled])
+  return null
+}
+
 export function DirectRoomMount({ sessionId }: { sessionId: DirectSessionId }) {
   const { t } = useTranslation("direct")
   const { sessionId: heldSessionId, credentials, intent } = useDirectSessionStore()
@@ -250,6 +269,7 @@ export function DirectRoomMount({ sessionId }: { sessionId: DirectSessionId }) {
       <DirectRoomRegistrar sessionId={sessionId} />
       <DirectConnectionPhase />
       <DirectMediaIntentController wantsAudio={wantsAudio} wantsVideo={wantsVideo} />
+      <DirectIntentSync role={credentials.role} />
       {/* UNIQUE dans toute la page : deux `RoomAudioRenderer` sur la même
           salle, c'est deux `<audio>` sur les mêmes pistes. Son volume suit
           la ligne d'appel : baissé pendant un appel, plein sinon. */}

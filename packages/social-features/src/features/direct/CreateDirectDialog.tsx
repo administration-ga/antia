@@ -22,6 +22,8 @@ const schema = z.object({
   maxViewers: z.number().int().min(1).max(DIRECT_MAX_VIEWERS_CAP),
   replay: z.boolean(),
   announce: z.boolean(),
+  stageFormat: z.enum(["computer", "television", "mobile"]),
+  stageLayout: z.enum(["adaptive", "fixed"]),
 })
 type Draft = z.infer<typeof schema>
 export type ConferencePrefill = {
@@ -47,6 +49,8 @@ export function CreateDirectDialog({ onClose, prefill }: { onClose: () => void; 
       maxViewers: DIRECT_DEFAULT_MAX_VIEWERS,
       replay: false,
       announce: false,
+      stageFormat: "computer",
+      stageLayout: "adaptive",
     },
   })
   const audience = useWatch({ control, name: "audience" })
@@ -59,7 +63,8 @@ export function CreateDirectDialog({ onClose, prefill }: { onClose: () => void; 
         title: draft.title,
         audience: draft.audience,
         chatMode: "open",
-        stageFormat: "computer",
+        stageFormat: draft.stageFormat,
+        stageLayout: draft.stageLayout,
         maxViewers: draft.maxViewers,
         replay: draft.replay,
         announce: draft.audience !== "invitees" && draft.announce,
@@ -90,6 +95,8 @@ export function CreateDirectDialog({ onClose, prefill }: { onClose: () => void; 
           </select>
         </label>
         <p className="text-sm text-muted-foreground">{t("create.networkOnly")}</p>
+        <label className="flex flex-col gap-2 text-sm">{t("studio.emission")}<select {...register("stageFormat")} className="min-h-11 rounded-lg border border-input bg-background px-3">{(["computer", "television", "mobile"] as const).map((format) => <option key={format} value={format}>{t(`studio.formats.${format}`)}</option>)}</select></label>
+        <label className="flex flex-col gap-2 text-sm">{t("studio.layout")}<select {...register("stageLayout")} className="min-h-11 rounded-lg border border-input bg-background px-3"><option value="adaptive">{t("studio.adaptive")}</option><option value="fixed">{t("studio.fixed")}</option></select></label>
         <label htmlFor={`${id}-capacity`} className="flex flex-col gap-2 text-sm">
           {t("create.capacity")}
           <input id={`${id}-capacity`} type="number" min={1} max={DIRECT_MAX_VIEWERS_CAP} {...register("maxViewers", { valueAsNumber: true })} aria-invalid={!!errors.maxViewers} className="min-h-11 rounded-lg border border-input bg-background px-3" />

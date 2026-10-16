@@ -1,0 +1,44 @@
+// Dupliqué de socle/packages/agent-features/src/features/direct/DirectCommentsPanel.tsx @ ad2e7fdc2 — adaptations : commentaires et réactions abonnés seulement dans le volet ouvert, API moteur et réseau, formulaire RHF/Zod, modération par permission serveur et i18n.
+"use client"
+
+import { api } from "@antia/api/engine"
+import { useAuthenticatedConvexQuery } from "@antia/api/hooks"
+import { useNetwork } from "@antia/api/network"
+import { DIRECT_COMMENT_MAX_LENGTH } from "@antia/social-domain/live/domain"
+import { Button } from "@antia/ui"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useMutation } from "convex/react"
+import { useForm } from "react-hook-form"
+import { useTranslation } from "react-i18next"
+import { z } from "zod"
+import type { DirectSession } from "./DirectPage"
+import { useDirectCommand } from "./use-direct-command"
+
+const commentSchema = z.object({ body: z.string().trim().min(1).max(DIRECT_COMMENT_MAX_LENGTH) })
+const reactionKinds = ["like", "bravo", "soutien", "instructif"] as const
+
+export function DirectDiscussionPanel({ session }: { session: DirectSession }) {
+  const { t } = useTranslation("direct")
+  const { networkId } = useNetwork()
+  const query = useAuthenticatedConvexQuery(api.modules.live.comments.list, { networkId, sessionId: session.sessionId })
+  const reactions = useAuthenticatedConvexQuery(api.modules.live.reactions.summary, { networkId, sessionId: session.sessionId })
+  const send = useMutation(api.modules.live.comments.send)
+  const remove = useMutation(api.modules.live.comments.remove)
+  const react = useMutation(api.modules.live.reactions.react)
+  const chat = useMutation(api.modules.live.sessions.setChatMode)
+  const command = useDirectCommand()
+  const { register, handleSubmit, reset, formState: { errors } } = useForm<z.infer<typeof commentSchema>>({ resolver: zodResolver(commentSchema), defaultValues: { body: "" } })
+  if (query.isError) return <div role="alert"><p>{t("discussion.failed")}</p><Button variant="ghost" onClick={() => void query.refetch()}>{t("retry")}</Button></div>
+  if (!query.data) return <p role="status">{t("loading")}</p>
+  return <div className="flex flex-col gap-4">
+    {session.permissions.closeChat ? <Button variant="ghost" disabled={command.pending} onClick={() => void command.run(() => chat({ networkId, sessionId: session.sessionId, chatMode: session.chatMode === "open" ? "closed" : "open" }))}>{t(session.chatMode === "open" ? "discussion.close" : "discussion.open")}</Button> : null}
+    <div aria-label={t("discussion.comments")} className="max-h-96 overflow-y-auto">
+      {query.data.length === 0 ? <p className="text-sm text-muted-foreground">{t("discussion.empty")}</p> : <ol className="flex flex-col gap-3">{query.data.map((comment) => <li key={comment.commentId} className="flex flex-col gap-1 border-b border-border pb-2"><span className="text-sm font-medium">{comment.author.displayName ?? t("person")}</span><p className="whitespace-pre-wrap break-words">{comment.body}</p>{comment.isMine || session.permissions.moderateChat ? <Button size="sm" variant="ghost" disabled={command.pending} onClick={() => void command.run(() => remove({ networkId, commentId: comment.commentId }))}>{t("discussion.remove")}</Button> : null}</li>)}</ol>}
+    </div>
+    {session.chatMode === "closed" ? <p role="status">{t("discussion.closed")}</p> : <form onSubmit={handleSubmit(async ({ body }) => { if (await command.run(() => send({ networkId, sessionId: session.sessionId, body }))) reset() })} className="flex flex-col gap-2"><label className="flex flex-col gap-2">{t("discussion.write")}<textarea {...register("body")} maxLength={DIRECT_COMMENT_MAX_LENGTH} rows={3} aria-invalid={!!errors.body} className="min-h-24 rounded-lg border border-input bg-background p-3" /></label>{errors.body ? <p role="alert">{t("discussion.invalid", { max: DIRECT_COMMENT_MAX_LENGTH })}</p> : null}<Button type="submit" disabled={command.pending}>{t("discussion.send")}</Button></form>}
+    <div className="flex flex-wrap gap-2" aria-label={t("discussion.reactions")}>
+      {reactions.isError ? <p role="alert">{t("discussion.reactionsFailed")}</p> : !reactions.data ? <p role="status">{t("loading")}</p> : reactionKinds.map((kind) => <Button key={kind} size="sm" variant="ghost" disabled={command.pending} onClick={() => void command.run(() => react({ networkId, sessionId: session.sessionId, kind, burst: 1 }))}>{t(`discussion.reaction.${kind}`, { count: reactions.data!.byKind.find((row) => row.kind === kind)?.count ?? 0 })}</Button>)}
+    </div>
+    {command.error ? <p role="alert">{command.error}</p> : null}
+  </div>
+}

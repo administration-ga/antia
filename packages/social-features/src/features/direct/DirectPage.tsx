@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/direct/DirectPage.tsx @ ad2e7fdc2 — adaptations : première tranche réécrite sur le DTO du moteur, préflight local avant démarrage, salle consommée depuis la coque persistante, i18n et routes injectées ; studio avancé et commandes d'antenne différés.
+// Dupliqué de socle/packages/agent-features/src/features/direct/DirectPage.tsx @ ad2e7fdc2 — adaptations : DTO moteur, préflight avant démarrage, studio consommant la salle persistante et gestion d’antenne par permissions serveur, i18n et routes injectées.
 "use client"
 
 import { api, type Id } from "@antia/api/engine"
@@ -6,7 +6,7 @@ import { useAuthenticatedConvexQuery } from "@antia/api/hooks"
 import { useNetwork, useRoutes } from "@antia/api/network"
 import { Link } from "@antia/api/routing"
 import { Button } from "@antia/ui"
-import { ParticipantTile, RoomContext, useTracks } from "@livekit/components-react"
+import { RoomContext } from "@livekit/components-react"
 import { useAction, useMutation } from "convex/react"
 import type { FunctionReturnType } from "convex/server"
 import { createLocalTracks, Track, type LocalTrack } from "livekit-client"
@@ -17,6 +17,8 @@ import { useDirectRoom } from "../../stores/direct-room-registry"
 import { directSessionStore, useDirectSessionStore } from "../../stores/direct-session-store"
 import { postEngineErrorText } from "../reseau-personnel/post-overflow"
 import { describeCallMediaError } from "../iappel/media-errors"
+import { DirectStudio } from "./DirectStudio"
+import { DirectManagement } from "./DirectManagement"
 
 export type DirectSession = FunctionReturnType<typeof api.modules.live.sessions.get>
 
@@ -27,7 +29,7 @@ export function DirectPage({ sessionId }: { sessionId: Id<"liveSessions"> }) {
   const query = useAuthenticatedConvexQuery(api.modules.live.sessions.get, { networkId, sessionId })
   if (query.isError) return <div role="alert" className="flex flex-col gap-3"><p>{postEngineErrorText(query.error, "direct:failed", t)}</p><Link href={routes.home()}>{t("back")}</Link></div>
   if (!query.data) return <p role="status">{t("loading")}</p>
-  return <DirectSessionView key={sessionId} session={query.data} />
+  return <DirectSessionView key={`${networkId}:${sessionId}`} session={query.data} />
 }
 
 function DirectSessionView({ session }: { session: DirectSession }) {
@@ -49,6 +51,8 @@ function DirectSessionView({ session }: { session: DirectSession }) {
   const [checked, setChecked] = useState(false)
   const preview = useRef<HTMLVideoElement>(null)
   const preflightVersion = useRef(0)
+  const currentSession = useRef(session)
+  useEffect(() => { currentSession.current = session }, [session])
   const held = state.sessionId === session.sessionId
   const anotherRoom = state.sessionId !== null && !held && state.credentials !== null
 
@@ -72,6 +76,18 @@ function DirectSessionView({ session }: { session: DirectSession }) {
     directSessionStore.setPhase("connecting")
     try {
       const credentials = await requestToken({ networkId, sessionId: session.sessionId })
+      // Un rôle peut être retiré pendant la requête : aucune piste ne doit
+      // démarrer avec un jeton reçu avant cette décision du serveur.
+      if (directSessionStore.getState().sessionId !== session.sessionId || currentSession.current.status === "ended") {
+        if (credentials.role === "viewer") void leaveViewer({ networkId, sessionId: session.sessionId }).catch(() => undefined)
+        return
+      }
+      if (credentials.role !== (currentSession.current.viewerRole === "viewer" ? "viewer" : "speaker")) {
+        directSessionStore.setPhase("ready")
+        setError(t("antenna.roleChanged"))
+        if (credentials.role === "viewer") void leaveViewer({ networkId, sessionId: session.sessionId }).catch(() => undefined)
+        return
+      }
       directSessionStore.setCredentials({ sessionId: session.sessionId, ...credentials })
     } catch (failure) {
       // Le jeton peut avoir admis un spectateur avant un refus de configuration.
@@ -121,6 +137,8 @@ function DirectSessionView({ session }: { session: DirectSession }) {
       {anotherRoom ? <p role="alert">{t("anotherRoom")} <Link href={routes.conference(state.sessionId!)}>{t("returnToRoom")}</Link></p> : null}
       {error ? <p role="alert" className="text-sm text-destructive">{error}</p> : null}
       {held && state.error && state.error !== error ? <p role="alert" className="text-sm text-destructive">{state.error}</p> : null}
+      <div className="grid min-w-0 items-start gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(18rem,22rem)]">
+      <div className="flex min-w-0 flex-col gap-4">
       {session.status === "scheduled" && session.viewerRole === "host" ? <div className="flex flex-col gap-4 rounded-xl border border-border bg-card p-5">
         <p>{t("preflight.description")}</p>
         <label className="flex min-h-11 items-center gap-3"><input type="checkbox" checked={state.intent.audioOnly} disabled={pending} onChange={(event) => { preflightVersion.current += 1; directSessionStore.setIntent({ audioOnly: event.target.checked }); setChecked(false); setLocalTracks([]) }} />{t("preflight.audioOnly")}</label>
@@ -131,7 +149,7 @@ function DirectSessionView({ session }: { session: DirectSession }) {
       {session.status === "scheduled" && session.viewerRole !== "host" ? <p>{t("waiting")}</p> : null}
       {session.status === "live" ? <>
         {held && room ? (
-          <RoomContext.Provider value={room}><DirectStage /></RoomContext.Provider>
+          <RoomContext.Provider value={room}><DirectStudio session={session} onLeave={quit} onEnd={session.permissions.endOrTransfer ? () => setExit(true) : undefined} /></RoomContext.Provider>
         ) : (
           <div className="flex flex-col gap-3 rounded-xl border border-border bg-card p-6">
             <p>{t(session.viewerRole === "viewer" ? "joinDescription" : "joinPublisherDescription")}</p>
@@ -144,15 +162,14 @@ function DirectSessionView({ session }: { session: DirectSession }) {
         )}
         {held && state.credentials ? <div className="flex flex-wrap items-center gap-3">
           <p role="status" className="text-sm">{t(`phase.${state.phase}`)}</p>
-          {state.credentials.role === "speaker" ? <>
-            <Button variant="ghost" aria-pressed={state.intent.micEnabled} onClick={() => directSessionStore.setIntent({ micEnabled: !state.intent.micEnabled })}>{t(state.intent.micEnabled ? "microphoneOff" : "microphoneOn")}</Button>
-            <Button variant="ghost" aria-pressed={state.intent.cameraEnabled && !state.intent.audioOnly} onClick={() => directSessionStore.setIntent({ cameraEnabled: !state.intent.cameraEnabled, audioOnly: false })}>{t(state.intent.cameraEnabled && !state.intent.audioOnly ? "cameraOff" : "cameraOn")}</Button>
-          </> : null}
-          <Button variant="ghost" onClick={quit}>{t("leave")}</Button>
+          {!room ? <Button variant="ghost" onClick={quit}>{t("leave")}</Button> : null}
         </div> : null}
         <p className="text-sm text-muted-foreground">{t("counters", { present: session.counters.present, admitted: session.counters.viewers })}</p>
         {session.replay ? <p className="text-sm">{t("recording")}</p> : null}
       </> : null}
+      </div>
+      {session.status !== "ended" ? <DirectManagement session={session} admitted={held && state.credentials?.role === "viewer" && state.phase === "connected"} /> : null}
+      </div>
       {session.status === "ended" ? <DirectReplay session={session} /> : null}
       {session.status !== "ended" && session.permissions.endOrTransfer ? <>
         <Button variant="ghost" disabled={pending} onClick={() => setExit(true)}>{t(session.status === "scheduled" ? "cancel" : "end")}</Button>
@@ -160,15 +177,6 @@ function DirectSessionView({ session }: { session: DirectSession }) {
       </> : null}
     </section>
   )
-}
-
-function DirectStage() {
-  const { t } = useTranslation("direct")
-  const tracks = useTracks([{ source: Track.Source.Camera, withPlaceholder: true }, { source: Track.Source.ScreenShare, withPlaceholder: false }])
-  return <div className="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2" aria-label={t("stage")}>
-    {tracks.map((track) => <ParticipantTile key={`${track.participant.identity}-${track.source}`} trackRef={track} className="aspect-video min-w-0 overflow-hidden rounded-xl" />)}
-    {tracks.length === 0 ? <p className="rounded-xl border border-border p-6">{t("emptyStage")}</p> : null}
-  </div>
 }
 
 function DirectReplay({ session }: { session: DirectSession }) {

@@ -156,6 +156,19 @@ describe("direct F3a — entrée et durée de vie de la salle", () => {
     expect(directSessionStore.getState().credentials).toBeNull()
     expect(mocks.token).toHaveBeenCalledTimes(1)
   })
+
+  it("rejette un jeton publiant reçu après une rétrogradation pendant la requête", async () => {
+    mocks.session = session({ viewerRole: "speaker" })
+    let answer!: (value: { token: string; wsUrl: string; role: "speaker" }) => void
+    mocks.token.mockReturnValue(new Promise((resolve) => { answer = resolve }))
+    const view = render(tree())
+    fireEvent.click(screen.getByRole("button", { name: "Rejoindre la salle" }))
+    mocks.session = session({ viewerRole: "viewer" }); view.rerender(tree())
+    await act(async () => { answer({ token: "late-speaker", wsUrl: "wss://test.invalid", role: "speaker" }) })
+    expect(directSessionStore.getState().credentials).toBeNull()
+    expect(directSessionStore.getState().phase).toBe("ready")
+    expect(mocks.token).toHaveBeenCalledTimes(1)
+  })
 })
 
 describe("direct F3a — matériel avant notification de l'audience", () => {

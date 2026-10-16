@@ -67,6 +67,35 @@ async function scene() {
   return { t, root, testClosed, sessionId, alice, bob }
 }
 
+describe("F3b — candidats privés et règles partagées avec grant", () => {
+  const candidates = async (host: Person, networkId: Id<"networks">, sessionId: Id<"liveSessions">) => {
+    const pages = await Promise.all((["low", "high"] as const).map((side) => host.as.query(D.searchCandidates, { networkId, sessionId, side, search: "", paginationOpts: { cursor: null, numItems: 25 } })))
+    return pages.flatMap((page) => page.page)
+  }
+  it("conserve une relation déjà invitée et à l’antenne", async () => {
+    const { root, sessionId, alice, bob } = await scene()
+    await alice.as.mutation(api.modules.live.invitees.add, { networkId: root, sessionId, personId: bob.personId, stageRole: "speaker" })
+    expect((await candidates(alice, root, sessionId)).map((row) => row.personId)).toContain(bob.personId)
+  })
+  it("écarte les membres en attente, puis les exclus, avec la même garde que grant", async () => {
+    const { t, root, sessionId, alice, bob } = await scene()
+    await setMembershipStatus(t, root, bob, "en_attente")
+    expect(await candidates(alice, root, sessionId)).toEqual([])
+    await setMembershipStatus(t, root, bob, "declaree")
+    expect(await candidates(alice, root, sessionId)).toHaveLength(1)
+    await alice.as.mutation(api.modules.live.moderation.ban, { networkId: root, sessionId, targetPersonId: bob.personId })
+    expect(await candidates(alice, root, sessionId)).toEqual([])
+  })
+  it("réserve les candidats au titulaire, même contre un cohôte, et isole les réseaux", async () => {
+    const { t, root, testClosed, sessionId, alice, bob } = await scene()
+    await alice.as.mutation(D.grant, { networkId: root, sessionId, targetPersonId: bob.personId, kind: "cohost" })
+    const args = { networkId: root, sessionId, side: "low" as const, search: "", paginationOpts: { cursor: null, numItems: 25 } }
+    expect(await codeOf(bob.as.query(D.searchCandidates, args))).toBe("liveRoleRequired")
+    await joinAlso(t, testClosed, alice)
+    expect(await codeOf(alice.as.query(D.searchCandidates, { ...args, networkId: testClosed }))).toBe("notFound")
+  })
+})
+
 describe("accorder — l'hôte seul, sur une relation acceptée", () => {
   it("accorde, puis la matrice du DTO le dit à l'intéressé", async () => {
     const { root, sessionId, alice, bob } = await scene()

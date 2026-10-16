@@ -263,7 +263,7 @@ l'`origin/main` local du socle (`25398f565`) est vide. Copies dans les fichiers 
   l’hôte. Test de l’absence de capacité par défaut.
 - Textes français et anglais ; jetons existants, aucun changement de primitive ui.
 
-### Parité restante pour F3b
+### Parité restante après F3a
 
 Studio complet (présentation, spotlight, partage d'écran et disposition), commentaires et
 réactions, invitations et demandes d'antenne, participants, exclusions/sourdines, délégations,
@@ -289,3 +289,83 @@ compact du fil. Une publication `root` ne devient pas un direct hors réseau.
   et assertions restent inchangés.
 - Contrôle de configuration aussi éprouvé au navigateur : refus traduit du service média
   absent, aucun démarrage ; vidéo/audio réelle non validée.
+
+## F3b — Studio et gestion avancée d'antenne (16/10/2026)
+
+Tranche branchée dans `DirectPage` sur la route existante d'ANTIA. La salle reste
+possédée par la coque du membre ; aucune connexion ni piste audio supplémentaire.
+Sources relues sur `origin/main` du socle, sans différence pour les fichiers portés
+depuis `ad2e7fdc2`. Décision : [ADR-0005](adr/0005-studio-persistant-et-droits-d-antenne.md).
+
+### Parité de cette tranche
+
+- Scène : solo/duo/grille, vue orateur et cinéma, épingle locale, programme de l'hôte,
+  écran partagé dominant avec caméra conservée, choix du format et grille fixe à la
+  création. Géométrie pure du socle et tests portés ; conteneur de hauteur définie,
+  bandeau de côté dans un conteneur bas, commandes hors scène et plein écran.
+- Appariement au `personId` du jeton et au roster serveur ; homonymes distincts,
+  pistes de spectateurs et rôles retirés écartés. Nom neutre du DTO et légendes i18n
+  remplacent les libellés techniques/anglais de LiveKit. Charte existante réutilisée.
+- Micro/caméra par l'intention persistante ; partage d'écran déclenché explicitement,
+  sans audio capturé. Convergence du socle dans le propriétaire de salle : une coupure
+  distante de micro reste fermée après navigation ou reconnexion. Le partage peut
+  s'arrêter à la reconnexion ; sa reprise exige un nouveau geste.
+- Antenne : main après admission, annulation, acceptation/refus, proposition à une
+  relation de l'hôte ou par identifiant pour un délégué, révocation et expiration
+  effective. Plafond de huit (hôte inclus). Retirer de l'antenne, couper le micro,
+  mettre en avant pour tous ; nouveau jeton après changement de rôle, reçu tardif rejugé.
+- Admissions paginées : personnes silencieuses modérables, chat coupé/rétabli,
+  exclusion confirmée/réintégration. Historique d'admissions nommé sans promettre
+  une présence actuelle. Une confirmation ne survit pas au retrait du droit d'exclure.
+- Délégations : rôle, capacités explicites (antenne, exclusion, fin), édition/retrait,
+  limite de huit. Nouvelle query `delegations.searchCandidates`, deux côtés paginés du
+  graphe, même règle que `grant` ; membres en attente/exclus/inéligibles écartés,
+  personnes déjà invitées ou à l'antenne toujours proposées si éligibles.
+- Invités désignés après création : recherche parmi les relations/fil source,
+  ajout, changement du rôle proposé, retrait, relance d'un intervenant hors antenne ;
+  `canManage` relu, plafonds de 200 invités et sept intervenants invités conservés.
+- Discussion et quatre réactions : abonnement seulement dans le volet ouvert,
+  formulaire RHF/Zod, derniers commentaires, retrait selon droit serveur,
+  fermeture/réouverture du chat et erreurs traduites. Aucun annuaire de gestion
+  souscrit chez un spectateur ; perte de droit/réseau referme le volet concerné.
+
+### Limites de parité
+
+Cette tranche couvre le studio et l'antenne demandés. F3 reste ouvert pour la création
+au nom d'une page et `followers`, la sélection nominative au formulaire initial,
+la reprise/retrait avancé et les sous-titres des replays, la carte flottante complète
+et le rail compact des directs. Le retour flottant de F3a garde la connexion en place.
+
+La diffusion audio/vidéo/SFU/Egress réelle nécessite la configuration LiveKit du
+propriétaire. Les tests de scène/contrôles avec une salle simulée ne la prouvent pas.
+
+### Vérification et recette de F3b
+
+- Toutes les étapes de `verify` validées, reprises séquentiellement après saturation
+  et coordonnées avec la session DIASPORALE : codegen sous Node 22, typage Convex/tests
+  et des dix espaces de travail, 1 104 cas Convex, 53 cliquets, 24 cas scripts,
+  2 869 cas social-features (173 fichiers, délai fonctionnel de 5 s conservé), tests
+  des autres paquets/apps et lint des neuf paquets sans erreur. Avertissements hérités
+  conservés (69 social-features, 6 ui). Les premières chaînes `verify` ont échoué
+  sur des délais de scans ou ont été interrompues ; leur code de sortie n'est pas
+  présenté comme un succès. Les reprises couvrent les mêmes étapes sur les sources finales.
+- Cliquets statiques : un worker, délai de 60 s réservé à leurs analyses AST du dépôt
+  (un scan valide prenait 36 s sous swap). Assertions et délais des suites fonctionnelles
+  inchangés. Aucun cache ni donnée supprimé par la session ANTIA ; son serveur Next
+  a été redémarré après un verrou de compaction provoqué par le disque plein.
+- 77 cas front nouveaux : géométrie du socle, identités exactes/homonymes, écran et
+  caméra distincts, JWT tardif après rétrogradation, retour d'audio seul vers caméra,
+  mise en avant d'un rôle hors connexion, intentions et reconnexion, droits retirés,
+  consentement, invitations expirées, plafond d'antenne, curseurs vides et `canManage`.
+- Trois cas backend neufs : invités/intervenants encore délégables, membres en
+  attente/exclus écartés, candidats réservés au titulaire et isolés par réseau.
+- Chrome réel sur le serveur local : compte et personne fictifs, création programmée
+  avec format télévision et grille fixe, ajout d'un invité spectateur puis attribution
+  d'une délégation cohôte limitée à l'antenne ; absence des capacités d'exclusion/fin
+  confirmée dans l'écran. Déjà invité, le candidat reste proposé pour la délégation.
+- Gestion vérifiée à 320, 375 et 1 280 px sans débordement horizontal ; viewport remis
+  à sa valeur initiale. Préflight : refus traduit du média absent, démarrage désactivé,
+  conférence restant à venir. Captures de recette dans le dossier de visualisations
+  Codex du 16/10, `antia-f3b-delegations.png` et `antia-f3b-mobile.png`.
+- Reste : média réel, scène de plusieurs appareils, écran partagé réel, plein écran
+  réel avec SFU, Egress, passe sombre exhaustive et audit AA complet.

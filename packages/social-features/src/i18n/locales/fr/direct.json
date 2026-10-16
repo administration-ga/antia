@@ -108,5 +108,186 @@
     "microphoneMuted": "Appel en cours : le micro du direct est coupé, le son est baissé.",
     "volumeReduced": "Appel en cours : le son du direct est baissé."
   },
-  "joinPublisherDescription": "Vous allez rejoindre l'antenne. Choisissez le micro et la caméra que vous souhaitez activer en entrant."
+  "joinPublisherDescription": "Vous allez rejoindre l'antenne. Choisissez le micro et la caméra que vous souhaitez activer en entrant.",
+  "studio": {
+    "view": "Disposition de mon écran",
+    "views": {
+      "auto": "Auto",
+      "gallery": "Grille",
+      "speaker": "Orateur",
+      "cinema": "Cinéma"
+    },
+    "pin": "Épingler",
+    "unpin": "Désépingler",
+    "pinPerson": "Épingler {{name}} sur mon écran",
+    "unpinPerson": "Désépingler {{name}} de mon écran",
+    "notConnected": "Antenne accordée, salle non rejointe",
+    "presentation": "Présentation partagée",
+    "fullscreen": "Plein écran",
+    "exitFullscreen": "Sortir du plein écran",
+    "hidden": "{{count}} autres intervenants non affichés",
+    "freePlace": "Place libre",
+    "controls": "Commandes du studio",
+    "shareScreen": "Partager mon écran",
+    "stopSharing": "Arrêter le partage",
+    "emission": "Format de diffusion",
+    "formats": {
+      "computer": "Ordinateur (4:3)",
+      "television": "Télévision (16:9)",
+      "mobile": "Mobile (9:16)"
+    },
+    "layout": "Disposition du plateau",
+    "adaptive": "Adapter au nombre d’intervenants",
+    "fixed": "Grille fixe de huit places",
+    "scene": {
+      "solo": "Scène : un intervenant",
+      "duo": "Scène : deux intervenants",
+      "grid": "Scène : grille de {{count}} intervenants",
+      "presentation": "Scène : présentation et intervenants en bandeau",
+      "pinned": "Scène : personne mise en avant",
+      "fixed": "Scène : huit places",
+      "speaker": "Scène : personne qui parle en grand",
+      "cinema": "Scène : une seule image"
+    }
+  },
+  "management": {
+    "title": "Studio et gestion de la conférence",
+    "panels": "Volets de la conférence",
+    "discussion": "Discussion",
+    "antenna": "Antenne",
+    "participants": "Admissions",
+    "delegations": "Délégations",
+    "guests": "Invités"
+  },
+  "antenna": {
+    "failed": "L’antenne ne peut pas être chargée.",
+    "consent": "Recevoir l’antenne autorise à intervenir. Votre micro et votre caméra restent à votre choix lors de la nouvelle entrée dans la salle.",
+    "speakerReady": "Vous pouvez intervenir. Rejoignez de nouveau la salle pour appliquer ce rôle.",
+    "leave": "Rendre l’antenne",
+    "invited": "L’hôte vous propose de prendre la parole.",
+    "accept": "Accepter",
+    "decline": "Refuser",
+    "handPending": "Votre demande de parole attend une réponse.",
+    "cancelHand": "Annuler ma demande",
+    "raiseHand": "Demander la parole",
+    "joinFirst": "Rejoignez d’abord la salle pour demander la parole.",
+    "capacity": "{{count}} / {{max}} places accordées à l’antenne",
+    "onStage": "À l’antenne",
+    "host": "Hôte",
+    "spotlight": "Mettre en avant pour tous",
+    "unspotlight": "Retirer la mise en avant",
+    "muteMicrophone": "Couper son micro",
+    "demote": "Retirer de l’antenne",
+    "requests": "Demandes de parole",
+    "noRequests": "Aucune demande en attente.",
+    "full": "L’antenne est pleine. Libérez une place avant d’accepter ou d’inviter.",
+    "invitations": "Propositions d’antenne",
+    "noInvitations": "Aucune proposition d’antenne.",
+    "revokeInvitation": "Retirer la proposition",
+    "handle": "Identifiant de la personne liée à l’hôte",
+    "invite": "Proposer l’antenne",
+    "search": "Rechercher parmi mes relations",
+    "noCandidates": "Aucune autre relation à proposer.",
+    "emptyPage": "Aucune relation sur cette page. Vous pouvez poursuivre la recherche.",
+    "candidate": {
+      "pending": "Proposition en attente",
+      "on_stage": "Déjà à l’antenne",
+      "requested": "Demande de parole en attente",
+      "unavailable": "Indisponible"
+    },
+    "invitationStatus": {
+      "pending": "En attente",
+      "accepted": "Proposition acceptée",
+      "declined": "Proposition refusée",
+      "revoked": "Proposition retirée",
+      "expired": "Proposition expirée"
+    },
+    "requestStatus": {
+      "pending": "En attente",
+      "accepted": "Demande acceptée",
+      "declined": "Demande refusée",
+      "cancelled": "Demande annulée"
+    },
+    "speakerConnected": "Vous êtes à l’antenne.",
+    "invalidHandle": "Saisissez un identifiant de 1 à 80 caractères.",
+    "roleChanged": "Votre rôle a changé pendant la connexion. Rejoignez de nouveau la salle."
+  },
+  "participants": {
+    "failed": "Les admissions ne peuvent pas être chargées.",
+    "description": "Ces personnes ont été admises depuis le début. Cette liste ne décrit pas la présence actuelle ; les intervenants sans admission spectateur figurent dans l’antenne.",
+    "empty": "Aucune admission sur cette page.",
+    "emptyPage": "Aucune admission visible sur cette page. Poursuivez avec « Voir plus ».",
+    "banned": "Exclusion en vigueur",
+    "muted": "Chat coupé",
+    "unmute": "Rétablir le chat",
+    "mute": "Couper le chat",
+    "reinstate": "Lever l’exclusion",
+    "exclude": "Exclure de la conférence",
+    "previous": "Page précédente",
+    "excludeTitle": "Exclure une personne",
+    "excludeConfirm": "Exclure {{name}} ferme son accès et retire son antenne et sa délégation. Vous pourrez lever l’exclusion ensuite.",
+    "keep": "Garder dans la conférence"
+  },
+  "delegations": {
+    "failed": "Les délégations ne peuvent pas être chargées.",
+    "description": "Déléguer la gestion n’ouvre aucun micro. Chaque capacité accordée reste distincte du rôle d’intervenant.",
+    "capacity": "{{count}} / {{max}} délégations actives",
+    "person": "Personne liée à l’hôte",
+    "choose": "Choisir une personne",
+    "role": "Rôle de gestion",
+    "kind": {
+      "cohost": "Cohôte",
+      "moderator": "Modérateur"
+    },
+    "chatIncluded": "Modérer et fermer la discussion sont inclus. Choisissez les capacités supplémentaires.",
+    "flags": {
+      "canAdmitToStage": "Gérer l’antenne et la mise en avant",
+      "canExclude": "Exclure et lever les exclusions",
+      "canEndOrTransfer": "Terminer la conférence"
+    },
+    "grant": "Enregistrer la délégation",
+    "empty": "Aucune délégation active.",
+    "revoke": "Retirer la délégation",
+    "search": "Rechercher une personne délégable",
+    "moreCandidates": "Autres personnes éligibles"
+  },
+  "guests": {
+    "failed": "La liste des invités ne peut pas être chargée.",
+    "unavailable": "La gestion des invités n’est pas disponible.",
+    "description": "Les invités désignés auront accès selon l’audience de la conférence. Un intervenant proposé devra entrer lui-même dans la salle pour publier.",
+    "capacity": "{{count}} / {{max}} invités désignés",
+    "search": "Rechercher une relation ou un membre du fil source",
+    "role": "Rôle proposé à l’ajout",
+    "viewer": "Spectateur",
+    "speaker": "Intervenant",
+    "noCandidates": "Aucun autre invité éligible dans cette recherche.",
+    "add": "Ajouter l’invité",
+    "list": "Invités désignés",
+    "empty": "Aucun invité désigné.",
+    "proposedSpeaker": "Intervenant proposé, hors antenne",
+    "asViewer": "Proposer comme spectateur",
+    "asSpeaker": "Proposer comme intervenant",
+    "restoreStage": "Rendre l’antenne proposée",
+    "revoke": "Retirer l’invitation"
+  },
+  "discussion": {
+    "failed": "La discussion ne peut pas être chargée.",
+    "close": "Fermer la discussion",
+    "open": "Rouvrir la discussion",
+    "comments": "Derniers commentaires",
+    "empty": "Aucun commentaire pour le moment.",
+    "remove": "Retirer le commentaire",
+    "closed": "La discussion est fermée par un responsable.",
+    "write": "Mon commentaire",
+    "invalid": "Saisissez de 1 à 500 caractères.",
+    "send": "Envoyer",
+    "reactions": "Réagir au direct",
+    "reactionsFailed": "Les réactions ne peuvent pas être chargées.",
+    "reaction": {
+      "like": "J’aime · {{count}}",
+      "bravo": "Bravo · {{count}}",
+      "soutien": "Soutien · {{count}}",
+      "instructif": "Instructif · {{count}}"
+    }
+  }
 }

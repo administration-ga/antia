@@ -108,5 +108,186 @@
     "microphoneMuted": "Call in progress: the broadcast microphone is muted and its audio is lowered.",
     "volumeReduced": "Call in progress: the broadcast audio is lowered."
   },
-  "joinPublisherDescription": "You are about to join the stage. Choose the microphone and camera you want to enable on entry."
+  "joinPublisherDescription": "You are about to join the stage. Choose the microphone and camera you want to enable on entry.",
+  "studio": {
+    "view": "My screen layout",
+    "views": {
+      "auto": "Auto",
+      "gallery": "Gallery",
+      "speaker": "Speaker",
+      "cinema": "Cinema"
+    },
+    "pin": "Pin",
+    "unpin": "Unpin",
+    "pinPerson": "Pin {{name}} on my screen",
+    "unpinPerson": "Unpin {{name}} from my screen",
+    "notConnected": "Stage role granted, room not joined",
+    "presentation": "Shared presentation",
+    "fullscreen": "Fullscreen",
+    "exitFullscreen": "Exit fullscreen",
+    "hidden": "{{count}} other speakers not shown",
+    "freePlace": "Free place",
+    "controls": "Studio controls",
+    "shareScreen": "Share my screen",
+    "stopSharing": "Stop sharing",
+    "emission": "Broadcast format",
+    "formats": {
+      "computer": "Computer (4:3)",
+      "television": "Television (16:9)",
+      "mobile": "Mobile (9:16)"
+    },
+    "layout": "Stage layout",
+    "adaptive": "Adapt to the number of speakers",
+    "fixed": "Fixed grid of eight places",
+    "scene": {
+      "solo": "Stage: one speaker",
+      "duo": "Stage: two speakers",
+      "grid": "Stage: grid of {{count}} speakers",
+      "presentation": "Stage: presentation and speaker strip",
+      "pinned": "Stage: highlighted person",
+      "fixed": "Stage: eight places",
+      "speaker": "Stage: active speaker in focus",
+      "cinema": "Stage: a single image"
+    }
+  },
+  "management": {
+    "title": "Conference studio and management",
+    "panels": "Conference panels",
+    "discussion": "Discussion",
+    "antenna": "Stage",
+    "participants": "Admissions",
+    "delegations": "Delegations",
+    "guests": "Invitees"
+  },
+  "antenna": {
+    "failed": "The stage could not be loaded.",
+    "consent": "A stage role lets you speak. Your microphone and camera remain your choice when you rejoin the room.",
+    "speakerReady": "You may speak. Rejoin the room to apply this role.",
+    "leave": "Leave the stage",
+    "invited": "The host invites you to speak.",
+    "accept": "Accept",
+    "decline": "Decline",
+    "handPending": "Your request to speak awaits a response.",
+    "cancelHand": "Cancel my request",
+    "raiseHand": "Request to speak",
+    "joinFirst": "Join the room first to request to speak.",
+    "capacity": "{{count}} / {{max}} stage places granted",
+    "onStage": "On stage",
+    "host": "Host",
+    "spotlight": "Highlight for everyone",
+    "unspotlight": "Remove highlight",
+    "muteMicrophone": "Mute their microphone",
+    "demote": "Remove from stage",
+    "requests": "Requests to speak",
+    "noRequests": "No pending requests.",
+    "full": "The stage is full. Free a place before accepting or inviting.",
+    "invitations": "Stage invitations",
+    "noInvitations": "No stage invitations.",
+    "revokeInvitation": "Withdraw invitation",
+    "handle": "Handle of a person connected to the host",
+    "invite": "Invite to stage",
+    "search": "Search my connections",
+    "noCandidates": "No more connections to suggest.",
+    "emptyPage": "No connections on this page. You may continue searching.",
+    "candidate": {
+      "pending": "Invitation pending",
+      "on_stage": "Already on stage",
+      "requested": "Request to speak pending",
+      "unavailable": "Unavailable"
+    },
+    "invitationStatus": {
+      "pending": "Pending",
+      "accepted": "Invitation accepted",
+      "declined": "Invitation declined",
+      "revoked": "Invitation withdrawn",
+      "expired": "Invitation expired"
+    },
+    "requestStatus": {
+      "pending": "Pending",
+      "accepted": "Request accepted",
+      "declined": "Request declined",
+      "cancelled": "Request cancelled"
+    },
+    "speakerConnected": "You are on stage.",
+    "invalidHandle": "Enter a handle of 1 to 80 characters.",
+    "roleChanged": "Your role changed while connecting. Rejoin the room."
+  },
+  "participants": {
+    "failed": "Admissions could not be loaded.",
+    "description": "These people have been admitted since the start. This list does not describe current presence; speakers without viewer admission appear on the stage.",
+    "empty": "No admissions on this page.",
+    "emptyPage": "No visible admissions on this page. Continue with Show more.",
+    "banned": "Currently excluded",
+    "muted": "Chat muted",
+    "unmute": "Restore chat",
+    "mute": "Mute chat",
+    "reinstate": "Lift exclusion",
+    "exclude": "Exclude from conference",
+    "previous": "Previous page",
+    "excludeTitle": "Exclude a person",
+    "excludeConfirm": "Excluding {{name}} closes their access and removes their stage role and delegation. You may lift the exclusion later.",
+    "keep": "Keep in conference"
+  },
+  "delegations": {
+    "failed": "Delegations could not be loaded.",
+    "description": "Delegating management does not open a microphone. Each granted capability is separate from a speaker role.",
+    "capacity": "{{count}} / {{max}} active delegations",
+    "person": "Person connected to the host",
+    "choose": "Choose a person",
+    "role": "Management role",
+    "kind": {
+      "cohost": "Co-host",
+      "moderator": "Moderator"
+    },
+    "chatIncluded": "Moderating and closing the discussion are included. Choose extra capabilities.",
+    "flags": {
+      "canAdmitToStage": "Manage stage and highlight",
+      "canExclude": "Exclude and lift exclusions",
+      "canEndOrTransfer": "End the conference"
+    },
+    "grant": "Save delegation",
+    "empty": "No active delegations.",
+    "revoke": "Revoke delegation",
+    "search": "Search eligible delegates",
+    "moreCandidates": "More eligible people"
+  },
+  "guests": {
+    "failed": "Invitees could not be loaded.",
+    "unavailable": "Invitee management is unavailable.",
+    "description": "Named invitees gain access within the conference audience. Proposed speakers must join the room themselves to publish.",
+    "capacity": "{{count}} / {{max}} named invitees",
+    "search": "Search a connection or source thread member",
+    "role": "Role proposed when adding",
+    "viewer": "Viewer",
+    "speaker": "Speaker",
+    "noCandidates": "No other eligible invitees in this search.",
+    "add": "Add invitee",
+    "list": "Named invitees",
+    "empty": "No named invitees.",
+    "proposedSpeaker": "Proposed speaker, off stage",
+    "asViewer": "Propose as viewer",
+    "asSpeaker": "Propose as speaker",
+    "restoreStage": "Restore proposed stage role",
+    "revoke": "Revoke invitation"
+  },
+  "discussion": {
+    "failed": "The discussion could not be loaded.",
+    "close": "Close discussion",
+    "open": "Reopen discussion",
+    "comments": "Recent comments",
+    "empty": "No comments yet.",
+    "remove": "Remove comment",
+    "closed": "A manager has closed the discussion.",
+    "write": "My comment",
+    "invalid": "Enter 1 to 500 characters.",
+    "send": "Send",
+    "reactions": "React to the broadcast",
+    "reactionsFailed": "Reactions could not be loaded.",
+    "reaction": {
+      "like": "Like · {{count}}",
+      "bravo": "Bravo · {{count}}",
+      "soutien": "Support · {{count}}",
+      "instructif": "Informative · {{count}}"
+    }
+  }
 }

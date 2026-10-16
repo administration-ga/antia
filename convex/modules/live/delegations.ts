@@ -26,6 +26,7 @@
  * profil publié.
  */
 import { v } from "convex/values"
+import { paginationOptsValidator, paginationResultValidator, type PaginationResult } from "convex/server"
 
 import type { Doc, Id } from "../../_generated/dataModel"
 import type { QueryCtx } from "../../_generated/server"
@@ -49,33 +50,77 @@ function cannotDelegate(): never {
  * Relit tout ce qui rend une personne délégable — les mêmes faits que
  * l'invitation à l'antenne, jugés maintenant et jamais hérités d'hier.
  */
-async function assertDelegableTarget(ctx: ReadCtx, session: Doc<"liveSessions">, targetPersonId: Id<"persons">): Promise<void> {
-  if (String(targetPersonId) === String(session.hostPersonId)) cannotDelegate()
+async function isDelegableTarget(ctx: ReadCtx, session: Doc<"liveSessions">, targetPersonId: Id<"persons">): Promise<boolean> {
+  if (targetPersonId === session.hostPersonId) return false
 
   const person = await ctx.db.get(targetPersonId)
   if (!person || person.deletionRequestedAt !== undefined) {
-    cannotDelegate()
+    return false
   }
   const profile = await publishedMiniProfile(ctx, targetPersonId)
-  if (!profile.hasPublishedProfile) cannotDelegate()
+  if (!profile.hasPublishedProfile) return false
   // On ne confie pas un rôle qu'on ne peut pas exercer : gérer la salle, c'est
   // écrire, et toute écriture exige une adhésion DÉCLARÉE au réseau de la
   // session (même aide que les appels). Un membre en attente voit la
   // conférence, il n'y gère rien — même refus que toute cible non délégable.
-  if (!(await memberHasStatus(ctx, session.networkId, targetPersonId, "declaree"))) cannotDelegate()
+  if (!(await memberHasStatus(ctx, session.networkId, targetPersonId, "declaree"))) return false
 
   if ((await directSessionAccessDecision(ctx, targetPersonId, session)) !== "allowed") {
-    cannotDelegate()
+    return false
   }
   // ADR-0061 : le lien NÉGOCIÉ reste exigé, même sur un direct public.
   if (!(await isConnectedTo(ctx, session.networkId, session.hostPersonId, targetPersonId))) {
-    cannotDelegate()
+    return false
   }
   if (await isBlockedBetween(ctx, session.hostPersonId, targetPersonId)) {
-    cannotDelegate()
+    return false
   }
-  if (await banRow(ctx, session._id, targetPersonId)) cannotDelegate()
+  if (await banRow(ctx, session._id, targetPersonId)) return false
+  return true
 }
+
+async function assertDelegableTarget(ctx: ReadCtx, session: Doc<"liveSessions">, targetPersonId: Id<"persons">): Promise<void> {
+  if (!(await isDelegableTarget(ctx, session, targetPersonId))) cannotDelegate()
+}
+
+/** Candidats privés de l'hôte, jugés avec les mêmes règles que grant.
+ * Une page de relations par côté : pas d'annuaire ni de balayage illimité.
+ * Les invités et intervenants déjà liés restent candidats, sans faux refus. */
+export const searchCandidates = networkQuery({
+  args: {
+    sessionId: v.id("liveSessions"),
+    side: v.union(v.literal("low"), v.literal("high")),
+    search: v.string(),
+    paginationOpts: paginationOptsValidator,
+  },
+  returns: paginationResultValidator(v.object({
+    personId: v.id("persons"),
+    displayName: v.union(v.string(), v.null()),
+    handle: v.union(v.string(), v.null()),
+    avatarUrl: v.union(v.string(), v.null()),
+  })),
+  handler: async (ctx, args): Promise<PaginationResult<Pick<DirectDelegationDto, "personId" | "displayName" | "handle" | "avatarUrl">>> => {
+    const session = await assertVisibleDirectSession(ctx, directCaller(ctx), args.sessionId)
+    await requireDirectPermission(ctx, session, ctx.person._id, "delegate")
+    if (session.status === "ended") return { page: [], isDone: true, continueCursor: "" }
+    const opts = { ...args.paginationOpts, numItems: Math.min(Math.max(args.paginationOpts.numItems, 1), 25) }
+    const rows = await (args.side === "low"
+      ? ctx.db.query("connections").withIndex("by_network_low_status", (q) => q.eq("networkId", ctx.networkId).eq("personIdLow", ctx.person._id).eq("status", "accepted"))
+      : ctx.db.query("connections").withIndex("by_network_high_status", (q) => q.eq("networkId", ctx.networkId).eq("personIdHigh", ctx.person._id).eq("status", "accepted")))
+      .order("desc").paginate(opts)
+    const profileOf = miniProfileCache(ctx)
+    const needle = args.search.trim().replace(/^@/, "").toLocaleLowerCase()
+    const page: Pick<DirectDelegationDto, "personId" | "displayName" | "handle" | "avatarUrl">[] = []
+    for (const connection of rows.page) {
+      const personId = connection.personIdLow === ctx.person._id ? connection.personIdHigh : connection.personIdLow
+      if (!(await isDelegableTarget(ctx, session, personId))) continue
+      const profile = await profileOf(personId)
+      if (needle && !(profile.displayName ?? "").toLocaleLowerCase().includes(needle) && !(profile.handle ?? "").toLocaleLowerCase().includes(needle)) continue
+      page.push({ personId, displayName: profile.displayName, handle: profile.handle, avatarUrl: profile.avatarUrl })
+    }
+    return { ...rows, page }
+  },
+})
 
 export type DirectDelegationDto = {
   personId: Id<"persons">
