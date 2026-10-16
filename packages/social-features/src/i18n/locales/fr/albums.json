@@ -94,7 +94,14 @@
     "back": "Retour",
     "cancel": "Annuler",
     "publishing": "Publication…",
-    "publish": "Publier l'album"
+    "publish": "Publier l'album",
+    "resumeTitle": "Modifier l’album",
+    "editingPublished": "Cet album est déjà publié. Enregistrer vos changements modifie ce que ses lecteurs voient.",
+    "saveDraft": "Enregistrer le brouillon",
+    "saveChanges": "Enregistrer les modifications",
+    "saving": "Enregistrement…",
+    "saved": "Album enregistré.",
+    "saveFailed": "L’enregistrement a échoué. Vos changements sont conservés ici."
   },
   "albumPage": {
     "errorTitle": "Album indisponible",
@@ -110,12 +117,17 @@
     "withdrawn": "Album retiré.",
     "withdrawFailed": "Le retrait n'a pas abouti.",
     "empty": "Cet album ne contient aucune photo.",
-    "photoUnavailable": "Photo indisponible."
+    "photoUnavailable": "Photo indisponible.",
+    "edit": "Modifier l’album",
+    "close": "Fermer",
+    "confirmWithdraw": "Confirmer le retrait"
   },
   "albumsSection": {
     "errorTitle": "Albums indisponibles",
     "errorMessage": "Les albums n'ont pas pu être chargés.",
     "create": "Créer un album",
-    "photosHint": "Ouvrez un album pour voir toutes ses photos."
+    "photosHint": "Ouvrez un album pour voir toutes ses photos.",
+    "loadMore": "Voir plus d’albums",
+    "loadingMore": "Chargement…"
   }
 }

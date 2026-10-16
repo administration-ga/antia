@@ -74,20 +74,23 @@ export const STORIES_AUTHOR_PARAM = "auteur"
 export interface StoriesViewerPageProps {
 	/** Ouvrir le composeur au montage — la route « nouvelle actu ». */
 	openCreate?: boolean
+	/** Le droit de créer ; ne modifie ni les lectures ni le comptage des vues. */
+	canCreate?: boolean
 }
 
 /** `useSearchParams` impose la frontière Suspense (même règle que le fil). */
 export function StoriesViewerPage({
 	openCreate = false,
+	canCreate = true,
 }: StoriesViewerPageProps = {}) {
 	return (
 		<Suspense fallback={null}>
-			<StoriesViewerInner openCreate={openCreate} />
+			<StoriesViewerInner openCreate={openCreate} canCreate={canCreate} />
 		</Suspense>
 	)
 }
 
-function StoriesViewerInner({ openCreate }: { openCreate: boolean }) {
+function StoriesViewerInner({ openCreate, canCreate }: { openCreate: boolean; canCreate: boolean }) {
 	const { t } = useTranslation("stories")
 	const router = useRouter()
 	const routes = useRoutes()
@@ -100,7 +103,12 @@ function StoriesViewerInner({ openCreate }: { openCreate: boolean }) {
 	// L'instant des lectures, FIGÉ au montage (cf. l'en-tête).
 	const [queryNow] = useState(() => storyQueryInstant(Date.now()))
 	const [index, setIndex] = useState<number | null>(null)
-	const [createOpen, setCreateOpen] = useState(openCreate)
+	const [createOpen, setCreateOpen] = useState(openCreate && canCreate)
+	// La feuille est démontée dès le refus, et une réautorisation ne reprend
+	// pas une ancienne intention de création ni les fichiers du composeur.
+	useEffect(() => {
+		if (!canCreate) setCreateOpen(false)
+	}, [canCreate])
 
 	const tray = useAuthenticatedConvexQuery(api.modules.stories.stories.tray, {
 		networkId,
@@ -245,10 +253,14 @@ function StoriesViewerInner({ openCreate }: { openCreate: boolean }) {
 			<div className="st-frame">
 				<div className="st-empty" style={{ background: "var(--background)" }}>
 					<p className="st-empty-title">{t("storiesViewerPage.empty.title")}</p>
-					<p className="st-empty-text">{t("storiesViewerPage.empty.text")}</p>
-					<Button icon="camera" onClick={() => setCreateOpen(true)}>
-						{t("storiesViewerPage.publish")}
-					</Button>
+					{canCreate ? (
+						<>
+							<p className="st-empty-text">{t("storiesViewerPage.empty.text")}</p>
+							<Button icon="camera" onClick={() => setCreateOpen(true)}>
+								{t("storiesViewerPage.publish")}
+							</Button>
+						</>
+					) : null}
 					<Button variant="ghost" icon="arrowLeft" onClick={close}>
 						{t("storiesViewerPage.backToFeed")}
 					</Button>
@@ -275,7 +287,7 @@ function StoriesViewerInner({ openCreate }: { openCreate: boolean }) {
 			</div>
 		)
 
-	const composer = (
+	const composer = canCreate ? (
 		<StoryCreateSheet
 			open={createOpen}
 			onClose={() => setCreateOpen(false)}
@@ -284,7 +296,7 @@ function StoriesViewerInner({ openCreate }: { openCreate: boolean }) {
 			// portera déjà.
 			onPublished={close}
 		/>
-	)
+	) : null
 
 	// ⚠️ `mobile === null` ne rend NI l'un NI l'autre : rendre l'arbre du bureau
 	// « en attendant » ouvrirait un overlay portalé au premier rendu du

@@ -1,4 +1,5 @@
 // Dupliqué de socle/packages/agent-features/src/features/reseau-albums/AlbumComposer.test.tsx @ ad2e7fdc2 — adaptations : références TYPÉES du moteur reconnues par leur nom généré (`modules/albums/albums:*`, dépôt `modules/media/media:generateUploadUrl`) ; rendu dans l'enveloppe du moteur (`renderWithEngine` : i18n français, réseau de test) ; chaque appel porte le réseau courant, le dépôt l'usage `album_image` ; refus serveur à la forme du moteur (`error.data` porte une règle et ses bornes, traduite) ; barre de progression rendue sur place (plus de `Progress` à simuler) ; adresses de dépôt neutres ; les 15 cas sont gardés ; cas ajoutés : au-delà de douze photos l'enregistrement part par lots, et un refus à la publication se dit traduit sans publier.
+// Adaptations PD4 : lecture et garde propriétaire, reprise sans nouvel upload, sauvegarde vide/métadonnées/ordre/couverture/légendes, publication conditionnelle et concurrence, remise à zéro réseau/personne/album.
 // @vitest-environment jsdom
 
 /**
@@ -7,8 +8,8 @@
  * Cinq choses que seul un test MONTÉ peut prouver — le module pur
  * (`album-model.test.ts`) décide, mais il ne branche rien :
  *
- *  1. le brouillon SERVEUR naît à l'envoi des photos, pas à l'ouverture : rien
- *     n'existe tant qu'on n'a pas déposé un octet ;
+ *  1. le brouillon SERVEUR naît à l'envoi des photos ou à la sauvegarde
+ *     explicite, jamais au seul montage du composeur ;
  *  2. les métadonnées EXIF partent AVANT le téléversement (ré-encodage), et un
  *     ré-encodage impossible REFUSE le fichier au lieu d'envoyer l'original ;
  *  3. la REPRISE : un renvoi après une coupure ne re-téléverse que le reste, et
@@ -16,11 +17,14 @@
  *  4. l'ordre et la couverture partent AVEC la publication, en une fois ;
  *  5. un refus serveur est lu dans `error.data` — jamais inventé.
  */
-import { cleanup, fireEvent, screen, waitFor } from "@testing-library/react"
+import { NetworkProvider } from "@antsia/api/network"
+import type { Id } from "@antsia/api/engine"
+import { act, cleanup, fireEvent, screen, waitFor } from "@testing-library/react"
 import type { ButtonHTMLAttributes, InputHTMLAttributes, ReactNode } from "react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
-import { renderWithEngine, TEST_NETWORK_ID } from "../../tests/engine-wrapper"
+import { renderWithEngine, TEST_NETWORK_ID, TEST_PERSON_ID, TEST_ROUTES } from "../../tests/engine-wrapper"
+import type { AlbumDetail, AlbumId, AlbumItemId, DeclaredAlbumItem } from "./albums-api"
 
 const mocks = vi.hoisted(() => ({
   /** Tous les appels serveur, dans l'ordre : `[nom, arguments]`. */
@@ -29,11 +33,26 @@ const mocks = vi.hoisted(() => ({
   replies: {} as Record<string, (args: unknown) => unknown>,
   toastSuccess: vi.fn(),
   toastError: vi.fn(),
+  readData: undefined as AlbumDetail | null | undefined,
+  readError: false,
+  read: vi.fn(),
+  refetch: vi.fn(),
+  server: null as AlbumDetail | null,
+  serverRead: vi.fn(),
+  known: new Map<string, AlbumItemId>(),
+}))
+
+vi.mock("@antsia/api/hooks", () => ({
+  useAuthenticatedConvexQuery: (reference: unknown, args: unknown) => {
+    mocks.read(reference, args)
+    return { data: args === "skip" ? undefined : mocks.readData, isError: args !== "skip" && mocks.readError, refetch: mocks.refetch }
+  },
 }))
 
 vi.mock("convex/react", async () => {
   const { getFunctionName } = await import("convex/server")
   return {
+    useConvex: () => ({ query: mocks.serverRead }),
     useMutation: (reference: unknown) => (args: unknown) => {
       const name = getFunctionName(reference as never)
       mocks.calls.push({ name, args })
@@ -70,6 +89,7 @@ vi.mock("@antsia/ui", () => ({
   }) => <button type="button" {...props}>{children}</button>,
   Card: ({ children }: { children: ReactNode }) => <div>{children}</div>,
   Icon: () => null,
+  SkeletonCard: () => <div role="status" aria-label="Chargement de l'album" />,
   TextArea: (props: InputHTMLAttributes<HTMLTextAreaElement>) => (
     <textarea {...(props as object)} />
   ),
@@ -152,6 +172,24 @@ async function choisir(...fichiers: File[]) {
 
 let compteurStorage = 0
 
+function albumDetail(): AlbumDetail {
+  return {
+    album: { albumId: "al-1" as AlbumId, title: "Mission conservée", description: "Description existante", audience: "public", status: "draft", itemCount: 2, cover: null, updatedAt: 1, publishedAt: null, isOwner: true },
+    owner: { personId: TEST_PERSON_ID, handle: "awa", displayName: "Awa", avatarUrl: null },
+    items: [
+      { itemId: "it-1" as AlbumItemId, url: "blob:photo-1", withheld: null, mimeType: "image/jpeg", width: null, height: null, altText: "Alternative conservée", caption: "Légende conservée", position: 0 },
+      { itemId: "it-2" as AlbumItemId, url: "blob:photo-2", withheld: null, mimeType: "image/jpeg", width: null, height: null, altText: null, caption: null, position: 1 },
+    ],
+    coverItemId: "it-2" as AlbumItemId,
+  }
+}
+
+function resume(detail = albumDetail()) {
+  mocks.readData = detail
+  mocks.server = detail
+  return detail
+}
+
 beforeEach(() => {
   mocks.calls = []
   mocks.replies = {}
@@ -159,6 +197,15 @@ beforeEach(() => {
   mocks.toastError.mockReset()
   reencodeOk.mockClear()
   compteurStorage = 0
+  mocks.readData = undefined
+  mocks.readError = false
+  mocks.read.mockReset()
+  mocks.refetch.mockReset()
+  mocks.known.clear()
+  const empty = albumDetail()
+  mocks.server = { ...empty, album: { ...empty.album, itemCount: 0, description: null, audience: "connections" }, items: [], coverItemId: null }
+  mocks.serverRead.mockReset()
+  mocks.serverRead.mockImplementation(async () => mocks.server)
 
   // jsdom n'implémente ni les URL d'objet ni `fetch`.
   URL.createObjectURL = vi.fn(() => "blob:apercu")
@@ -174,18 +221,27 @@ beforeEach(() => {
     }),
   )
 
-  mocks.replies[`${ALBUMS}:create`] = () => ({
-    albumId: "al-1",
-    created: true,
-  })
+  mocks.replies[`${ALBUMS}:create`] = (args) => {
+    const fields = args as { title: string; description: string; audience: "public" | "connections" }
+    if (mocks.server) mocks.server = { ...mocks.server, album: { ...mocks.server.album, ...fields } }
+    return { albumId: "al-1", created: true }
+  }
+  mocks.replies[`${ALBUMS}:update`] = (args) => {
+    const fields = args as { title: string; description: string; audience: "public" | "connections" }
+    if (mocks.server) mocks.server = { ...mocks.server, album: { ...mocks.server.album, ...fields } }
+    return { updated: true }
+  }
   mocks.replies[DEPOT] = () => "blob:depot-album"
   mocks.replies[`${ALBUMS}:addItems`] = (args) => {
-    const items = (args as { items: { idempotencyKey: string }[] }).items
-    return {
-      added: items.length,
-      skipped: 0,
-      itemIds: items.map((_, index) => `it-${index + 1}`),
-    }
+    const items = (args as { items: DeclaredAlbumItem[] }).items
+    const fresh = items.filter((item) => !mocks.known.has(item.idempotencyKey))
+    const next = fresh.map((item, index) => {
+      const itemId = `it-${(mocks.server?.items.length ?? 0) + index + 1}` as AlbumItemId
+      mocks.known.set(item.idempotencyKey, itemId)
+      return { itemId, url: `blob:${itemId}`, withheld: null, mimeType: item.mimeType, width: null, height: null, caption: item.caption ?? null, altText: item.altText ?? null, position: (mocks.server?.items.length ?? 0) + index }
+    })
+    if (mocks.server) mocks.server = { ...mocks.server, album: { ...mocks.server.album, itemCount: mocks.server.items.length + next.length }, items: [...mocks.server.items, ...next], coverItemId: mocks.server.coverItemId ?? next[0]?.itemId ?? null }
+    return { added: fresh.length, skipped: items.length - fresh.length, itemIds: next.length > 0 ? next.map((item) => item.itemId) : items.map((item) => mocks.known.get(item.idempotencyKey)) }
   }
 })
 
@@ -310,30 +366,20 @@ describe("AlbumComposer — envoyer, reprendre, ordonner, publier", () => {
     await attendreEtapeOrdre()
     const apresPremier = (global.fetch as ReturnType<typeof vi.fn>).mock.calls.length
 
-    // Revenir sur les photos et renvoyer : les octets déjà déposés sont acquis.
+    // Revenir sur les photos : les photos confirmées sont devenues serveur.
     fireEvent.click(screen.getByRole("button", { name: "Retour" }))
     fireEvent.click(screen.getByRole("button", { name: "Continuer" }))
-    await waitFor(() =>
-      expect(nomsAppeles().filter((nom) => nom === "addItems").length).toBe(2),
-    )
+    await attendreEtapeOrdre()
 
     expect((global.fetch as ReturnType<typeof vi.fn>).mock.calls.length).toBe(
       apresPremier,
     )
     // Et la MÊME clé d'idempotence d'album : un seul `create`.
     expect(nomsAppeles().filter((nom) => nom === "create").length).toBe(1)
-    const [premier, second] = mocks.calls
-      .filter((call) => call.name.endsWith(":addItems"))
-      .map((call) => (call.args as { items: { idempotencyKey: string }[] }).items)
-    expect(second![0]!.idempotencyKey).toBe(premier![0]!.idempotencyKey)
+    expect(nomsAppeles().filter((nom) => nom === "addItems").length).toBe(1)
   })
 
   it("au-delà de douze photos, l'enregistrement part par LOTS — le moteur refuse un lot plus grand", async () => {
-    let suivant = 0
-    mocks.replies[`${ALBUMS}:addItems`] = (args) => {
-      const items = (args as { items: unknown[] }).items
-      return { added: items.length, skipped: 0, itemIds: items.map(() => `it-${(suivant += 1)}`) }
-    }
     renderWithEngine(<AlbumComposer handle="awa" reencode={reencodeOk} />)
     ouvrirEtapePhotos()
     await choisir(...Array.from({ length: 13 }, (_, index) => photo(`p${index + 1}.jpg`)))
@@ -494,5 +540,344 @@ describe("AlbumComposer — un refus se LIT", () => {
         "n'est pas une image acceptée",
       ),
     )
+  })
+})
+
+function allerAuxPhotosReprises() {
+  fireEvent.click(screen.getByRole("button", { name: "Continuer" }))
+}
+
+function allerALOrdreRepris() {
+  allerAuxPhotosReprises()
+  fireEvent.click(screen.getByRole("button", { name: "Continuer" }))
+}
+
+describe("AlbumComposer — reprendre et enregistrer le même album", () => {
+  it("hydrate les champs, les photos, les légendes et la couverture sans recréer ni renvoyer un fichier", () => {
+    resume()
+    renderWithEngine(<AlbumComposer handle="awa" albumId="al-1" reencode={reencodeOk} />)
+
+    expect((screen.getByLabelText("Titre de l'album") as HTMLInputElement).value).toBe("Mission conservée")
+    expect((screen.getByLabelText("Description (facultative)") as HTMLTextAreaElement).value).toBe("Description existante")
+    expect((screen.getByLabelText(/Tout le réseau/) as HTMLInputElement).checked).toBe(true)
+    allerAuxPhotosReprises()
+    expect(screen.getByAltText("Alternative conservée").getAttribute("src")).toBe("blob:photo-1")
+    expect(screen.getByText("Légende conservée")).toBeTruthy()
+    fireEvent.click(screen.getByRole("button", { name: "Continuer" }))
+    expect((screen.getByLabelText("Légende de la photo 1") as HTMLInputElement).value).toBe("Légende conservée")
+    expect(screen.getByRole("button", { name: "Définir la photo 2 comme couverture" }).getAttribute("aria-pressed")).toBe("true")
+    expect(nomsAppeles()).toEqual([])
+    expect(reencodeOk).not.toHaveBeenCalled()
+    expect(global.fetch).not.toHaveBeenCalled()
+    expect(mocks.read).toHaveBeenCalledWith(expect.anything(), { networkId: TEST_NETWORK_ID, albumId: "al-1" })
+  })
+
+  it("enregistre titre, description vide et audience sur l'album repris sans republier", async () => {
+    resume()
+    const saved = vi.fn()
+    renderWithEngine(<AlbumComposer handle="awa" albumId="al-1" onSaved={saved} reencode={reencodeOk} />)
+    fireEvent.change(screen.getByLabelText("Titre de l'album"), { target: { value: "Titre corrigé" } })
+    fireEvent.change(screen.getByLabelText("Description (facultative)"), { target: { value: "" } })
+    fireEvent.click(screen.getByLabelText(/Mes connexions/))
+    fireEvent.click(screen.getByRole("button", { name: "Enregistrer le brouillon" }))
+
+    await waitFor(() => expect(saved).toHaveBeenCalledExactlyOnceWith("al-1"))
+    expect(argsDe(":update")).toMatchObject({ networkId: TEST_NETWORK_ID, albumId: "al-1", title: "Titre corrigé", description: "", audience: "connections" })
+    expect(argsDe(":reorder")).toEqual({ networkId: TEST_NETWORK_ID, albumId: "al-1", itemIds: ["it-1", "it-2"] })
+    expect(argsDe(":setCover")).toEqual({ networkId: TEST_NETWORK_ID, albumId: "al-1", itemId: "it-2" })
+    expect(nomsAppeles()).not.toContain("create")
+    expect(nomsAppeles()).not.toContain("addItems")
+    expect(nomsAppeles()).not.toContain("setCaption")
+    expect(nomsAppeles()).not.toContain("publish")
+    expect(global.fetch).not.toHaveBeenCalled()
+  })
+
+  it("corrige une légende sans effacer le texte alternatif existant", async () => {
+    resume()
+    renderWithEngine(<AlbumComposer handle="awa" albumId="al-1" reencode={reencodeOk} />)
+    allerALOrdreRepris()
+    fireEvent.change(screen.getByLabelText("Légende de la photo 1"), { target: { value: "Légende corrigée" } })
+    fireEvent.click(screen.getByRole("button", { name: "Enregistrer le brouillon" }))
+
+    await waitFor(() => expect(nomsAppeles()).toContain("setCaption"))
+    expect(argsDe(":setCaption")).toEqual({ networkId: TEST_NETWORK_ID, itemId: "it-1", caption: "Légende corrigée", altText: "Alternative conservée" })
+  })
+
+  it("ajoute une nouvelle photo, conserve les identifiants, l'ordre choisi et l'ancienne couverture", async () => {
+    resume()
+    const published = vi.fn()
+    renderWithEngine(<AlbumComposer handle="awa" albumId="al-1" reencode={reencodeOk} onPublished={published} />)
+    allerALOrdreRepris()
+    fireEvent.click(screen.getByRole("button", { name: "Descendre la photo 1" }))
+    fireEvent.click(screen.getByRole("button", { name: "Retour" }))
+    await choisir(photo("nouvelle.jpg"))
+    fireEvent.click(screen.getByRole("button", { name: "Envoyer les photos" }))
+    await attendreEtapeOrdre()
+    expect(screen.getByText("Photo 3 sur 3")).toBeTruthy()
+    fireEvent.click(screen.getByRole("button", { name: "Continuer" }))
+    fireEvent.click(screen.getByRole("button", { name: "Publier l'album" }))
+
+    await waitFor(() => expect(published).toHaveBeenCalledExactlyOnceWith("al-1"))
+    expect(argsDe(":reorder")).toEqual({ networkId: TEST_NETWORK_ID, albumId: "al-1", itemIds: ["it-2", "it-1", "it-3"] })
+    expect(argsDe(":setCover")).toEqual({ networkId: TEST_NETWORK_ID, albumId: "al-1", itemId: "it-2" })
+    expect(nomsAppeles()).not.toContain("create")
+    expect(global.fetch).toHaveBeenCalledTimes(1)
+    expect(reencodeOk).toHaveBeenCalledTimes(1)
+  })
+
+  it("compte les photos déjà serveur dans la limite de soixante", async () => {
+    const detail = albumDetail()
+    const items = Array.from({ length: 59 }, (_, index) => ({ ...detail.items[0]!, itemId: `it-${index + 1}` as AlbumItemId, position: index }))
+    resume({ ...detail, album: { ...detail.album, itemCount: 59 }, items })
+    renderWithEngine(<AlbumComposer handle="awa" albumId="al-1" reencode={reencodeOk} />)
+    allerAuxPhotosReprises()
+    const input = screen.getByLabelText("Choisir des photos")
+    fireEvent.change(input, { target: { files: [photo("a.jpg"), photo("b.jpg")] } })
+    await waitFor(() => expect(screen.getByRole("alert").textContent).toContain("Un album porte au plus 60 photos."))
+    fireEvent.click(screen.getByRole("button", { name: "Envoyer les photos" }))
+    await attendreEtapeOrdre()
+
+    expect(screen.getByText("Photo 60 sur 60")).toBeTruthy()
+    expect((argsDe(":addItems") as { items: unknown[] }).items).toHaveLength(1)
+    expect(global.fetch).toHaveBeenCalledTimes(1)
+  })
+
+  it("enregistre un nouveau brouillon titré sans aucune photo et ouvre sa galerie", async () => {
+    const gallery = vi.fn()
+    renderWithEngine(<AlbumComposer handle="awa" reencode={reencodeOk} onPublished={gallery} />)
+    fireEvent.change(screen.getByLabelText("Titre de l'album"), { target: { value: "Brouillon retrouvé" } })
+    fireEvent.click(screen.getByRole("button", { name: "Enregistrer le brouillon" }))
+
+    await waitFor(() => expect(gallery).toHaveBeenCalledExactlyOnceWith("al-1"))
+    expect(nomsAppeles()).toEqual(["create"])
+    expect(argsDe(":create")).toMatchObject({ title: "Brouillon retrouvé", audience: "connections", networkId: TEST_NETWORK_ID })
+    expect(global.fetch).not.toHaveBeenCalled()
+  })
+
+  it("persiste les corrections après la première création avant de publier", async () => {
+    renderWithEngine(<AlbumComposer handle="awa" reencode={reencodeOk} />)
+    ouvrirEtapePhotos()
+    await choisir(photo("a.jpg"))
+    fireEvent.click(screen.getByRole("button", { name: "Envoyer les photos" }))
+    await attendreEtapeOrdre()
+    fireEvent.click(screen.getByRole("button", { name: "Retour" }))
+    fireEvent.click(screen.getByRole("button", { name: "Retour" }))
+    fireEvent.change(screen.getByLabelText("Titre de l'album"), { target: { value: "Titre après création" } })
+    fireEvent.change(screen.getByLabelText("Description (facultative)"), { target: { value: "Description corrigée" } })
+    fireEvent.click(screen.getByLabelText(/Tout le réseau/))
+    fireEvent.click(screen.getByRole("button", { name: "Continuer" }))
+    fireEvent.click(screen.getByRole("button", { name: "Continuer" }))
+    fireEvent.click(screen.getByRole("button", { name: "Continuer" }))
+    fireEvent.click(screen.getByRole("button", { name: "Publier l'album" }))
+
+    await waitFor(() => expect(nomsAppeles()).toContain("publish"))
+    expect(nomsAppeles().filter((name) => name === "create")).toHaveLength(1)
+    expect(argsDe(":update")).toMatchObject({ albumId: "al-1", title: "Titre après création", description: "Description corrigée", audience: "public" })
+    expect(nomsAppeles().indexOf("update")).toBeLessThan(nomsAppeles().indexOf("publish"))
+  })
+
+  it("après une relecture échouée, réessaie le rattachement sans renvoyer les octets ni doubler les photos", async () => {
+    mocks.serverRead.mockRejectedValueOnce(new Error("PRIVATE_READ_FAILURE"))
+    renderWithEngine(<AlbumComposer handle="awa" reencode={reencodeOk} />)
+    ouvrirEtapePhotos()
+    await choisir(photo("a.jpg"))
+    fireEvent.click(screen.getByRole("button", { name: "Envoyer les photos" }))
+    await waitFor(() => expect(screen.getByRole("alert").textContent).toContain("L'envoi a échoué"))
+    fireEvent.click(screen.getByRole("button", { name: "Continuer" }))
+    await attendreEtapeOrdre()
+
+    const additions = mocks.calls.filter((call) => call.name.endsWith(":addItems"))
+    expect(additions).toHaveLength(2)
+    expect(additions[1]?.args).toEqual(additions[0]?.args)
+    expect(global.fetch).toHaveBeenCalledTimes(1)
+    expect(mocks.server?.items).toHaveLength(1)
+    expect(screen.queryByText("PRIVATE_READ_FAILURE")).toBeNull()
+  })
+
+  it("enregistre un album publié comme modifications visibles, sans commande de publication ni promesse de brouillon privé", async () => {
+    const detail = albumDetail()
+    resume({ ...detail, album: { ...detail.album, status: "published", publishedAt: 1 } })
+    const saved = vi.fn()
+    renderWithEngine(<AlbumComposer handle="awa" albumId="al-1" onSaved={saved} />)
+    expect(screen.queryByText(/Rien n'est visible/)).toBeNull()
+    expect(screen.getByText(/Cet album est déjà publié/)).toBeTruthy()
+    allerALOrdreRepris()
+    fireEvent.click(screen.getByRole("button", { name: "Continuer" }))
+    expect(screen.queryByRole("button", { name: "Publier l'album" })).toBeNull()
+    fireEvent.click(screen.getByRole("button", { name: "Enregistrer les modifications" }))
+
+    await waitFor(() => expect(saved).toHaveBeenCalledExactlyOnceWith("al-1"))
+    expect(nomsAppeles()).not.toContain("publish")
+    expect(nomsAppeles()).not.toContain("create")
+  })
+
+  it("reprend un album retiré sans changer son état à la sauvegarde", async () => {
+    const detail = albumDetail()
+    resume({ ...detail, album: { ...detail.album, status: "withdrawn" } })
+    const saved = vi.fn()
+    renderWithEngine(<AlbumComposer handle="awa" albumId="al-1" onSaved={saved} />)
+    fireEvent.click(screen.getByRole("button", { name: "Enregistrer le brouillon" }))
+
+    await waitFor(() => expect(saved).toHaveBeenCalledWith("al-1"))
+    expect(nomsAppeles()).not.toContain("publish")
+    expect(mocks.server?.album.status).toBe("withdrawn")
+  })
+
+  it("une photo retenue est annoncée sans image ni nouvel envoi", () => {
+    const detail = albumDetail()
+    resume({ ...detail, items: [{ ...detail.items[0]!, url: null, withheld: "fileScanPending" }], coverItemId: "it-1" as AlbumItemId })
+    renderWithEngine(<AlbumComposer handle="awa" albumId="al-1" />)
+    allerAuxPhotosReprises()
+
+    expect(screen.queryByRole("img")).toBeNull()
+    expect(screen.queryByAltText("Alternative conservée")).toBeNull()
+    expect(screen.getByText(/analyse/i)).toBeTruthy()
+    expect(global.fetch).not.toHaveBeenCalled()
+  })
+
+  it("une retenue prime sur une URL présente dans un DTO incohérent", () => {
+    const detail = albumDetail()
+    resume({ ...detail, items: [{ ...detail.items[0]!, withheld: "fileQuarantined" }], coverItemId: "it-1" as AlbumItemId })
+    renderWithEngine(<AlbumComposer handle="awa" albumId="al-1" />)
+    allerAuxPhotosReprises()
+
+    expect(screen.queryByRole("img")).toBeNull()
+    expect(screen.queryByAltText("Alternative conservée")).toBeNull()
+    expect(global.fetch).not.toHaveBeenCalled()
+  })
+
+  it("valide la description avant toute sauvegarde et ne crée rien pour une forme invalide", async () => {
+    renderWithEngine(<AlbumComposer handle="awa" />)
+    fireEvent.change(screen.getByLabelText("Titre de l'album"), { target: { value: "Titre" } })
+    fireEvent.change(screen.getByLabelText("Description (facultative)"), { target: { value: "x".repeat(601) } })
+    await waitFor(() => expect(screen.getByRole("alert").textContent).toContain("600"))
+    expect(screen.getByRole("button", { name: "Enregistrer le brouillon" }).hasAttribute("disabled")).toBe(true)
+    expect(nomsAppeles()).toEqual([])
+  })
+})
+
+describe("AlbumComposer — gardes de lecture, de session et de concurrence", () => {
+  it.each(["inconnu", "autrui", "identifiant périmé", "autre propriétaire"])("ferme le composeur pour un détail %s", (kind) => {
+    const detail = albumDetail()
+    mocks.readData = kind === "inconnu" ? null : kind === "autrui" ? { ...detail, album: { ...detail.album, isOwner: false } } : kind === "identifiant périmé" ? { ...detail, album: { ...detail.album, albumId: "autre" as AlbumId } } : { ...detail, owner: { ...detail.owner, personId: "persons_autre" as Id<"persons"> } }
+    renderWithEngine(<AlbumComposer handle="awa" albumId="al-1" />)
+
+    expect(screen.getByRole("alert").textContent).toContain("Cet album n'est pas accessible")
+    expect(screen.queryByLabelText("Titre de l'album")).toBeNull()
+    expect(nomsAppeles()).toEqual([])
+  })
+
+  it("distingue la lecture en cours d'une erreur et permet une reprise explicite", () => {
+    const { rerender } = renderWithEngine(<AlbumComposer handle="awa" albumId="al-1" />)
+    expect(screen.getByRole("status", { name: "Chargement de l'album" })).toBeTruthy()
+    expect(screen.queryByRole("alert")).toBeNull()
+    mocks.readError = true
+    rerender(<AlbumComposer handle="awa" albumId="al-1" />)
+    expect(screen.queryByRole("status", { name: "Chargement de l'album" })).toBeNull()
+    fireEvent.click(screen.getByRole("button", { name: "Réessayer" }))
+    expect(mocks.refetch).toHaveBeenCalledTimes(1)
+    expect(screen.queryByLabelText("Titre de l'album")).toBeNull()
+    mocks.readError = false
+    resume()
+    rerender(<AlbumComposer handle="awa" albumId="al-1" />)
+    expect((screen.getByLabelText("Titre de l'album") as HTMLInputElement).value).toBe("Mission conservée")
+  })
+
+  it("garde les corrections sur une panne de relecture, mais verrouille les commandes", () => {
+    resume()
+    const { rerender } = renderWithEngine(<AlbumComposer handle="awa" albumId="al-1" />)
+    fireEvent.change(screen.getByLabelText("Titre de l'album"), { target: { value: "Correction locale" } })
+    mocks.readError = true
+    rerender(<AlbumComposer handle="awa" albumId="al-1" />)
+
+    expect(screen.getByRole("alert").textContent).toContain("Cet album n'a pas pu être chargé")
+    expect((screen.getByLabelText("Titre de l'album") as HTMLInputElement).value).toBe("Correction locale")
+    expect(screen.getByLabelText("Titre de l'album").hasAttribute("disabled")).toBe(true)
+    expect(screen.getByRole("button", { name: "Enregistrer le brouillon" }).hasAttribute("disabled")).toBe(true)
+    expect(nomsAppeles()).toEqual([])
+  })
+
+  it.each(["réseau", "personne", "album"])("réinitialise les changements locaux au changement de %s", (scope) => {
+    const detail = resume()
+    const scoped = (changed: boolean) => (
+      <NetworkProvider networkId={(changed && scope === "réseau" ? "networks_autre" : TEST_NETWORK_ID) as Id<"networks">} personId={(changed && scope === "personne" ? "persons_autre" : TEST_PERSON_ID) as Id<"persons">} slug="test" charte="antsia" routes={TEST_ROUTES}>
+        <AlbumComposer handle="awa" albumId={changed && scope === "album" ? "al-2" : "al-1"} />
+      </NetworkProvider>
+    )
+    const { rerender } = renderWithEngine(scoped(false))
+    fireEvent.change(screen.getByLabelText("Titre de l'album"), { target: { value: "Changement non enregistré" } })
+    mocks.readData = { ...detail, album: { ...detail.album, title: "Autre contexte", albumId: (scope === "album" ? "al-2" : "al-1") as AlbumId }, owner: { ...detail.owner, personId: (scope === "personne" ? "persons_autre" : TEST_PERSON_ID) as Id<"persons"> } }
+    rerender(scoped(true))
+
+    expect((screen.getByLabelText("Titre de l'album") as HTMLInputElement).value).toBe("Autre contexte")
+    expect(nomsAppeles()).toEqual([])
+  })
+
+  it("masque la publication sans droit tout en permettant d'enregistrer son brouillon", async () => {
+    resume()
+    const saved = vi.fn()
+    renderWithEngine(<AlbumComposer handle="awa" albumId="al-1" canPublish={false} onSaved={saved} />)
+    allerALOrdreRepris()
+    fireEvent.click(screen.getByRole("button", { name: "Continuer" }))
+    expect(screen.queryByRole("button", { name: "Publier l'album" })).toBeNull()
+    fireEvent.click(screen.getByRole("button", { name: "Enregistrer le brouillon" }))
+
+    await waitFor(() => expect(saved).toHaveBeenCalledWith("al-1"))
+    expect(nomsAppeles()).not.toContain("publish")
+  })
+
+  it("verrouille immédiatement une sauvegarde et ses champs contre le double clic", async () => {
+    resume()
+    let resolveUpdate: (() => void) | undefined
+    mocks.replies[`${ALBUMS}:update`] = () => new Promise<void>((resolve) => { resolveUpdate = resolve })
+    const saved = vi.fn()
+    const published = vi.fn()
+    renderWithEngine(<AlbumComposer handle="awa" albumId="al-1" onSaved={saved} onPublished={published} />)
+    const save = screen.getByRole("button", { name: "Enregistrer le brouillon" })
+    fireEvent.click(save)
+    fireEvent.click(save)
+    expect(nomsAppeles().filter((name) => name === "update")).toHaveLength(1)
+    expect(screen.getByLabelText("Titre de l'album").hasAttribute("disabled")).toBe(true)
+    fireEvent.change(screen.getByLabelText("Titre de l'album"), { target: { value: "Trop tard" } })
+    expect((screen.getByLabelText("Titre de l'album") as HTMLInputElement).value).toBe("Mission conservée")
+    await act(async () => { resolveUpdate?.() })
+
+    await waitFor(() => expect(saved).toHaveBeenCalledExactlyOnceWith("al-1"))
+    expect(published).not.toHaveBeenCalled()
+  })
+
+  it("recontrôle le droit de publier après les sauvegardes asynchrones", async () => {
+    resume()
+    let resolveUpdate: (() => void) | undefined
+    mocks.replies[`${ALBUMS}:update`] = () => new Promise<void>((resolve) => { resolveUpdate = resolve })
+    const published = vi.fn()
+    const { rerender } = renderWithEngine(<AlbumComposer handle="awa" albumId="al-1" onPublished={published} />)
+    allerALOrdreRepris()
+    fireEvent.click(screen.getByRole("button", { name: "Continuer" }))
+    const publish = screen.getByRole("button", { name: "Publier l'album" })
+    fireEvent.click(publish)
+    fireEvent.click(publish)
+    rerender(<AlbumComposer handle="awa" albumId="al-1" canPublish={false} onPublished={published} />)
+    await act(async () => { resolveUpdate?.() })
+
+    await waitFor(() => expect(screen.getByRole("button", { name: "Enregistrer le brouillon" }).hasAttribute("disabled")).toBe(false))
+    expect(nomsAppeles().filter((name) => name === "update")).toHaveLength(1)
+    expect(nomsAppeles()).not.toContain("publish")
+    expect(published).not.toHaveBeenCalled()
+  })
+
+  it("ne rappelle pas un ancien écran après son démontage pendant la création", async () => {
+    let resolveCreate: ((value: { albumId: string; created: boolean }) => void) | undefined
+    mocks.replies[`${ALBUMS}:create`] = () => new Promise((resolve) => { resolveCreate = resolve })
+    const saved = vi.fn()
+    const { unmount } = renderWithEngine(<AlbumComposer handle="awa" onSaved={saved} />)
+    fireEvent.change(screen.getByLabelText("Titre de l'album"), { target: { value: "Brouillon" } })
+    fireEvent.click(screen.getByRole("button", { name: "Enregistrer le brouillon" }))
+    unmount()
+    await act(async () => { resolveCreate?.({ albumId: "al-1", created: true }) })
+
+    expect(saved).not.toHaveBeenCalled()
+    expect(mocks.serverRead).not.toHaveBeenCalled()
+    expect(mocks.toastSuccess).not.toHaveBeenCalled()
   })
 })

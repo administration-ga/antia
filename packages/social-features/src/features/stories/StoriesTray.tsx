@@ -67,6 +67,8 @@ export interface StoriesTrayProps {
 	onOpen: (handle: string | null) => void
 	/** Ouvrir le composeur de story. */
 	onCreate: () => void
+	/** Le droit de créer, fourni par l'application ; la lecture reste ouverte. */
+	canCreate?: boolean
 	/** L'horloge de l'écran — passée, jamais lue ici (cf. `storyAgeLabel`). */
 	now: number
 	/**
@@ -81,29 +83,31 @@ export function StoriesTray({
 	myHandle,
 	onOpen,
 	onCreate,
+	canCreate = true,
 	now,
 	myAvatarUrl = null,
 }: StoriesTrayProps) {
 	const { t } = useTranslation("stories")
-	const { networkId } = useNetwork()
+	const { networkId, personId } = useNetwork()
 	const tray = useAuthenticatedConvexQuery(api.modules.stories.stories.tray, {
 		networkId,
 		now: storyQueryInstant(now),
 	})
 
 	// Le plateau du pas PRÉCÉDENT, gardé pendant que le nouveau pas s'abonne —
-	// et jamais celui d'un AUTRE réseau, si l'application change de réseau sans
-	// démonter la barre.
+	// et jamais celui d'un AUTRE réseau ou lecteur, même sans démontage.
 	const [settled, setSettled] = useState<{
 		networkId: string
+		personId: string
 		data: TrayResult
 	} | null>(null)
 	useEffect(() => {
-		if (tray.data !== undefined) setSettled({ networkId, data: tray.data })
-	}, [tray.data, networkId])
+		if (tray.data !== undefined) setSettled({ networkId, personId, data: tray.data })
+		else setSettled((previous) => previous?.networkId === networkId && previous.personId === personId ? previous : null)
+	}, [tray.data, networkId, personId])
 	const data =
 		tray.data ??
-		(settled !== null && settled.networkId === networkId
+		(settled !== null && settled.networkId === networkId && settled.personId === personId
 			? settled.data
 			: undefined)
 
@@ -112,44 +116,40 @@ export function StoriesTray({
 	// l'écran qu'il n'y a aucune story pendant que la réponse est en vol.
 	if (data === undefined) return null
 	const groups: StoryTrayGroup[] = data.groups
-	// Publier une story = toute personne dont l'adhésion le permet
-	// (`stories.publish`, statut minimal du moteur) : un refus de statut se dit
-	// au composeur, à la publication. La constante nommée existe pour un
-	// gating futur — ce point d'appel serait alors le seul à changer.
-	const canCreate = true
 	if (!trayVisible(groups, canCreate)) return null
 
 	const ordered = orderTray(groups, myHandle)
 
 	return (
 		<div className="st-tray" role="group" aria-label={t("storiesTray.label")}>
-			{/* La carte de création vient TOUJOURS en premier, même quand j'ai
-			    déjà une série : c'est le geste, pas le contenu. */}
-			<button
-				type="button"
-				className="st-tray-tile st-tray-create"
-				aria-label={t("storiesTray.create")}
-				onClick={onCreate}
-			>
-				<span className="st-card">
-					{myAvatarUrl !== null ? (
-						<img
-							className="st-card-media"
-							src={myAvatarUrl}
-							alt=""
-							aria-hidden="true"
-						/>
-					) : null}
-					<span className="st-card-foot">
-						<span className="st-card-plus" aria-hidden="true">
-							<Icon name="plus" size={17} />
-						</span>
-						<span className="st-card-foot-label" aria-hidden="true">
-							{t("storiesTray.createShort")}
+			{/* Si elle est autorisée, la carte de création précède les séries. */}
+			{canCreate ? (
+				<button
+					type="button"
+					className="st-tray-tile st-tray-create"
+					aria-label={t("storiesTray.create")}
+					onClick={onCreate}
+				>
+					<span className="st-card">
+						{myAvatarUrl !== null ? (
+							<img
+								className="st-card-media"
+								src={myAvatarUrl}
+								alt=""
+								aria-hidden="true"
+							/>
+						) : null}
+						<span className="st-card-foot">
+							<span className="st-card-plus" aria-hidden="true">
+								<Icon name="plus" size={17} />
+							</span>
+							<span className="st-card-foot-label" aria-hidden="true">
+								{t("storiesTray.createShort")}
+							</span>
 						</span>
 					</span>
-				</span>
-			</button>
+				</button>
+			) : null}
 
 			{ordered.map((group) => {
 				const ring = ringStateFor(group, myHandle)

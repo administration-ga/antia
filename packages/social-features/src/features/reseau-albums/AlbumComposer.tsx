@@ -1,4 +1,5 @@
 // Dupliqué de socle/packages/agent-features/src/features/reseau-albums/AlbumComposer.tsx @ ad2e7fdc2 — adaptations : fonctions TYPÉES du moteur (`albums.albums.*`, dépôt par `media.media.generateUploadUrl` sous l'usage `album_image`) appelées avec le réseau courant (`useNetwork().networkId`) ; identifiants d'album et de photo typés ; phrases par l'i18n (espace de noms `albums`, clés `albumComposer.*`, et `album-model` avec `t`) ; pourcentage dit dans la langue courante (`Intl.NumberFormat`) ; refus du moteur traduits par leur règle ou leur code (`albumEngineErrorText`), jamais le texte brut ; `ReencodeImage` reçoit `t` en second paramètre ; ajout des photos par lots de `ALBUM_ADD_BATCH_MAX` (le moteur refuse un lot plus grand, quand le composeur en propose jusqu'à soixante) ; barre de progression rendue sur place (`Progress` n'existe pas dans `@antsia/ui`) ; bornes lues au domaine du moteur.
+// Adaptations PD4 : reprise propriétaire via `getAlbum` typé, formulaire RHF/Zod, sauvegarde explicite du même album (même vide), photos serveur séparées des fichiers locaux et relecture après rattachement, ordre/couverture/légendes conservés, commandes verrouillées et publication conditionnée au droit de l'application.
 "use client"
 
 /**
@@ -15,8 +16,9 @@
  * · Les REFUS de fond restent au SERVEUR, qui relit les métadonnées réelles du
  *   stockage. Les refus d'ici évitent un téléversement perdu, rien de plus.
  * · Le brouillon d'album est le brouillon SERVEUR (`status: "draft"`), pas un
- *   état de composant : l'album est créé à l'envoi des photos, et reste privé
- *   jusqu'à « Publier ». Fermer la fenêtre ne perd donc rien.
+ *   état de composant : l'album est créé à l'envoi des photos ou à la
+ *   sauvegarde explicite. Les changements encore locaux restent à enregistrer.
+ *   Un album déjà publié conserve son audience pendant son édition.
  *
  * ⚠️ Les métadonnées EXIF partent AVANT le téléversement : chaque image est
  * ré-encodée sur un `<canvas>`, et un ré-encodage impossible REFUSE le fichier
@@ -25,14 +27,19 @@
  * vérifiable sans navigateur.
  */
 
+import { useAuthenticatedConvexQuery } from "@antsia/api/hooks"
 import { useNetwork } from "@antsia/api/network"
-import { ALBUM_ITEMS_MAX } from "@antsia/social-domain/albums"
-import { Alert, Badge, Button, Card, Icon, TextArea, TextInput } from "@antsia/ui"
-import { useMutation } from "convex/react"
+import { ALBUM_DESCRIPTION_MAX, ALBUM_ITEMS_MAX, ALBUM_TITLE_MAX } from "@antsia/social-domain/albums"
+import { Alert, Badge, Button, Card, Icon, SkeletonCard, TextArea, TextInput } from "@antsia/ui"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useConvex, useMutation } from "convex/react"
 import type { TFunction } from "i18next"
-import { useCallback, useMemo, useRef, useState } from "react"
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react"
+import { useForm, useWatch } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
+import { z } from "zod"
+import { ReseauQueryError } from "../../shell/ReseauQueryError"
 import {
   IMAGE_ONLY_ACCEPT,
   useMediaDraft,
@@ -42,7 +49,9 @@ import {
   albumsApi,
   albumUploadUrlRef,
   type AlbumAudienceValue,
+  type AlbumDetail,
   type AlbumId,
+  type AlbumItem,
   type AlbumItemId,
   type DeclaredAlbumItem,
 } from "./albums-api"
@@ -205,29 +214,97 @@ const ALBUM_COMPOSER_CSS = `
 export interface AlbumComposerProps {
   /** Le handle du propriétaire — sert au retour vers la galerie publiée. */
   handle: string
+  /** Reprendre cet album, sans recréer ni téléverser ses photos existantes. */
+  albumId?: string
+  /** Le droit de publication de l'application ; le serveur le revérifie. */
+  canPublish?: boolean
   /** Appelé après publication, avec l'identifiant de l'album créé. */
   onPublished?: (albumId: string) => void
+  /** Après sauvegarde ; par défaut, utilise le retour vers la galerie. */
+  onSaved?: (albumId: string) => void
   onCancel?: () => void
   /** Injecté par les tests : le canvas n'existe pas en `jsdom`. */
   reencode?: ReencodeImage
 }
 
-export function AlbumComposer({
-  handle: _handle,
+export function AlbumComposer(props: AlbumComposerProps) {
+  const { networkId, personId } = useNetwork()
+  return <AlbumComposerSession key={JSON.stringify([networkId, personId, props.albumId ?? null])} {...props} />
+}
+
+function AlbumComposerSession(props: AlbumComposerProps) {
+  const { networkId, personId } = useNetwork()
+  const { t } = useTranslation("albums")
+  const [createdId, setCreatedId] = useState<AlbumId | null>(null)
+  const activeId = props.albumId === undefined ? createdId : props.albumId as AlbumId
+  const detail = useAuthenticatedConvexQuery(albumsApi.getAlbum, activeId === null ? "skip" : { networkId, albumId: activeId })
+  const needsInitialRead = props.albumId !== undefined && detail.data === undefined
+
+  if (needsInitialRead) {
+    return detail.isError ? (
+      <ReseauQueryError title={t("albumPage.errorTitle")} message={t("albumPage.errorMessage")} onRetry={() => void detail.refetch()} />
+    ) : <SkeletonCard />
+  }
+  // Le réseau est porté par la requête ; la propriété et l'identifiant sont
+  // recontrôlés avant de monter la moindre commande, y compris en relecture.
+  if (activeId !== null && detail.data !== undefined && (
+    detail.data === null || !detail.data.album.isOwner || detail.data.owner.personId !== personId || detail.data.album.albumId !== activeId
+  )) return <Alert tone="danger" title={t("albumPage.inaccessibleTitle")}>{t("albumPage.inaccessibleText")}</Alert>
+
+  return (
+    <>
+      {activeId !== null && detail.isError ? (
+        <ReseauQueryError title={t("albumPage.errorTitle")} message={t("albumPage.errorMessage")} onRetry={() => void detail.refetch()} />
+      ) : null}
+      <AlbumComposerBody {...props} initialDetail={detail.data ?? undefined} disabled={activeId !== null && detail.isError} onCreated={setCreatedId} />
+    </>
+  )
+}
+
+type AlbumFields = { title: string; description: string; audience: AlbumAudienceValue }
+
+function AlbumComposerBody({
+  albumId: requestedId,
+  canPublish = true,
   onPublished,
+  onSaved,
   onCancel,
   reencode = reencodeOnCanvas,
-}: AlbumComposerProps) {
-  const { networkId } = useNetwork()
+  initialDetail,
+  disabled,
+  onCreated,
+}: AlbumComposerProps & { initialDetail: AlbumDetail | undefined; disabled: boolean; onCreated: (id: AlbumId) => void }) {
+  const { networkId, personId } = useNetwork()
+  const convex = useConvex()
   const { t, i18n } = useTranslation("albums")
   const [step, setStep] = useState<AlbumStep>("identite")
-  const [title, setTitle] = useState("")
-  const [description, setDescription] = useState("")
-  const [audience, setAudience] = useState<AlbumAudienceValue>("connections")
-  const [albumId, setAlbumId] = useState<AlbumId | null>(null)
-  const [order, setOrder] = useState<readonly AlbumItemId[]>([])
-  const [coverId, setCoverId] = useState<AlbumItemId | null>(null)
+  const schema = useMemo(() => z.object({
+    title: z.string().trim().min(1, t("albumModel.blocker.titleRequired")).max(ALBUM_TITLE_MAX, t("albumModel.blocker.titleTooLong", { max: ALBUM_TITLE_MAX })),
+    description: z.string().trim().max(ALBUM_DESCRIPTION_MAX, t("rules:ALBUM_DESCRIPTION_TOO_LONG", { max: ALBUM_DESCRIPTION_MAX })),
+    audience: z.enum(AUDIENCE_CHOICES),
+  }).strict(), [t])
+  const form = useForm<AlbumFields>({
+    resolver: zodResolver(schema),
+    defaultValues: { title: initialDetail?.album.title ?? "", description: initialDetail?.album.description ?? "", audience: initialDetail?.album.audience ?? "connections" },
+    mode: "onChange",
+  })
+  const [title, description, audience] = useWatch({ control: form.control, name: ["title", "description", "audience"] })
+  const albumId = useRef<AlbumId | null>(requestedId === undefined ? null : requestedId as AlbumId)
+  const [serverItems, setServerItems] = useState<readonly AlbumItem[]>(initialDetail?.items ?? [])
+  const [order, setOrder] = useState<readonly AlbumItemId[]>(() => initialDetail?.items.map((item) => item.itemId) ?? [])
+  const [coverId, setCoverId] = useState<AlbumItemId | null>(initialDetail?.coverItemId ?? null)
+  const [captions, setCaptions] = useState<Record<string, string>>({})
   const [busy, setBusy] = useState(false)
+  const busyRef = useRef(false)
+  const mounted = useRef(true)
+  const permission = useRef({ disabled, canPublish })
+  useLayoutEffect(() => {
+    permission.current = { disabled, canPublish }
+  }, [disabled, canPublish])
+  useEffect(() => {
+    mounted.current = true
+    return () => { mounted.current = false }
+  }, [])
   const [announcement, setAnnouncement] = useState("")
   const [refusal, setRefusal] = useState<string | null>(null)
 
@@ -248,12 +325,13 @@ export function AlbumComposer({
   // l'album lui-même (créé côté serveur à l'envoi des photos), pas une clé
   // de `post-draft` — l'album n'est pas une publication.
   const draft = useMediaDraft(undefined, {
-    maxCount: ALBUM_ITEMS_MAX,
+    maxCount: Math.max(0, ALBUM_ITEMS_MAX - serverItems.length),
     imagesOnly: true,
-    tooManyMessage: (max) => t("albumComposer.tooMany", { max }),
+    tooManyMessage: () => t("albumComposer.tooMany", { max: ALBUM_ITEMS_MAX }),
   })
 
   const create = useMutation(albumsApi.create)
+  const update = useMutation(albumsApi.update)
   const addItems = useMutation(albumsApi.addItems)
   const publish = useMutation(albumsApi.publish)
   const reorder = useMutation(albumsApi.reorder)
@@ -277,24 +355,50 @@ export function AlbumComposer({
     {
       step,
       title,
-      photoCount: draft.items.length,
+      photoCount: serverItems.length + draft.items.length,
     },
     t,
   )
 
   /** Le brouillon SERVEUR — créé une fois, repris ensuite. */
+  const ensureCurrent = useCallback(() => {
+    if (!mounted.current || permission.current.disabled) throw new Error()
+  }, [])
+
+  const begin = useCallback(() => {
+    if (!mounted.current || permission.current.disabled || busyRef.current) return false
+    busyRef.current = true
+    setBusy(true)
+    setRefusal(null)
+    return true
+  }, [])
+  const finish = useCallback(() => {
+    busyRef.current = false
+    if (mounted.current) setBusy(false)
+  }, [])
+
   const ensureAlbum = useCallback(async (): Promise<AlbumId> => {
-    if (albumId !== null) return albumId
+    ensureCurrent()
+    const fields = schema.safeParse(form.getValues())
+    if (!fields.success) {
+      await form.trigger()
+      throw new Error()
+    }
+    if (albumId.current !== null) {
+      await update({ networkId, albumId: albumId.current, ...fields.data })
+      ensureCurrent()
+      return albumId.current
+    }
     const created = await create({
       networkId,
-      title: title.trim(),
-      ...(description.trim().length > 0 ? { description: description.trim() } : {}),
-      audience,
+      ...fields.data,
       idempotencyKey: idempotencyKey.current,
     })
-    setAlbumId(created.albumId)
+    ensureCurrent()
+    albumId.current = created.albumId
+    onCreated(created.albumId)
     return created.albumId
-  }, [albumId, create, networkId, title, description, audience])
+  }, [create, ensureCurrent, form, networkId, onCreated, schema, update])
 
   /**
    * Les fichiers choisis : ré-encodés d'abord, ajoutés au brouillon ensuite.
@@ -304,18 +408,25 @@ export function AlbumComposer({
    */
   const onFiles = useCallback(
     async (files: readonly File[]) => {
-      setRefusal(null)
-      const prets: File[] = []
-      const refus: string[] = []
-      for (const file of files) {
-        const result = await reencode(file, t)
-        if (result.ok) prets.push(result.file)
-        else refus.push(result.reason)
+      if (!begin()) return
+      try {
+        const prets: File[] = []
+        const refus: string[] = []
+        for (const file of files) {
+          const result = await reencode(file, t)
+          ensureCurrent()
+          if (result.ok) prets.push(result.file)
+          else refus.push(result.reason)
+        }
+        if (prets.length > 0) draft.add(prets)
+        if (refus.length > 0) setRefusal(refus[0]!)
+      } catch (error) {
+        if (mounted.current) setRefusal(albumEngineErrorText(error, "albums:albumComposer.uploadFailed", t))
+      } finally {
+        finish()
       }
-      if (prets.length > 0) draft.add(prets)
-      if (refus.length > 0) setRefusal(refus[0]!)
     },
-    [draft, reencode, t],
+    [begin, draft, ensureCurrent, finish, reencode, t],
   )
 
   /**
@@ -330,14 +441,14 @@ export function AlbumComposer({
    * appel de plus de `ALBUM_ADD_BATCH_MAX` photos. Un même brouillon donne
    * toujours les mêmes lots, dans le même ordre — la reprise reste exacte.
    */
-  const onUpload = useCallback(async () => {
-    setBusy(true)
-    setRefusal(null)
-    try {
-      const id = await ensureAlbum()
+  const uploadSelected = useCallback(async (id: AlbumId) => {
+    ensureCurrent()
+    let skipped = 0
+    if (draft.items.length > 0) {
       const uploaded = await draft.upload(() =>
         generateUploadUrl({ networkId, usage: ALBUM_UPLOAD_USAGE }),
       )
+      ensureCurrent()
       const items: DeclaredAlbumItem[] = uploaded.map((media, index) => {
         const localId = draft.items[index]?.localId ?? `${index}`
         let key = itemKeys.current.get(localId)
@@ -355,32 +466,53 @@ export function AlbumComposer({
           idempotencyKey: key,
         }
       })
-      const itemIds: AlbumItemId[] = []
-      let skipped = 0
       for (const batch of albumAddBatches(items)) {
+        ensureCurrent()
         const result = await addItems({ networkId, albumId: id, items: batch })
-        itemIds.push(...result.itemIds)
         skipped += result.skipped
       }
-      setOrder(itemIds)
-      setCoverId((current) => current ?? itemIds[0] ?? null)
+    }
+    ensureCurrent()
+    // Les réponses d'un lot mixte peuvent omettre ses identifiants rejoués.
+    // Le détail typé rend la collection complète, y compris après une coupure.
+    const saved = await convex.query(albumsApi.getAlbum, { networkId, albumId: id })
+    ensureCurrent()
+    if (!saved || !saved.album.isOwner || saved.owner.personId !== personId || saved.album.albumId !== id) throw new Error()
+    const ids = new Set(saved.items.map((item) => item.itemId))
+    const nextOrder = [...order.filter((itemId) => ids.has(itemId)), ...saved.items.map((item) => item.itemId).filter((itemId) => !order.includes(itemId))]
+    const nextCover = coverId !== null && ids.has(coverId) ? coverId : saved.coverItemId
+    setServerItems(saved.items)
+    setOrder(nextOrder)
+    setCoverId(nextCover)
+    // Seuls les fichiers dont le rattachement vient d'être relu sont libérés.
+    // Un échec garde leurs octets déjà déposés et leurs clés d'idempotence.
+    draft.clear()
+    return { order: nextOrder, coverId: nextCover, items: saved.items, skipped }
+  }, [addItems, convex, coverId, draft, ensureCurrent, generateUploadUrl, networkId, order, personId])
+
+  const onUpload = useCallback(async () => {
+    if (!begin()) return
+    try {
+      const id = await ensureAlbum()
+      const saved = await uploadSelected(id)
       setStep("ordre")
       setAnnouncement(
         t("albumComposer.addedAnnouncement", {
-          photos: albumCountLabel(itemIds.length, t),
-        }) + (skipped > 0 ? ` ${t("albumComposer.notDuplicated")}` : ""),
+          photos: albumCountLabel(saved.order.length, t),
+        }) + (saved.skipped > 0 ? ` ${t("albumComposer.notDuplicated")}` : ""),
       )
     } catch (error) {
       // ⚠️ Le refus du moteur voyage dans `error.data` (une règle ou un code) :
       // on le traduit, on ne montre jamais le texte brut du serveur.
-      setRefusal(albumEngineErrorText(error, "albums:albumComposer.uploadFailed", t))
+      if (mounted.current) setRefusal(albumEngineErrorText(error, "albums:albumComposer.uploadFailed", t))
     } finally {
-      setBusy(false)
+      finish()
     }
-  }, [addItems, draft, ensureAlbum, generateUploadUrl, networkId, t])
+  }, [begin, ensureAlbum, finish, t, uploadSelected])
 
   const move = useCallback(
     (itemId: AlbumItemId, direction: "up" | "down") => {
+      if (busyRef.current || permission.current.disabled) return
       const next = moveAlbumItem(order, itemId, direction)
       if (!orderChanged(order, next)) return
       setOrder(next)
@@ -397,25 +529,68 @@ export function AlbumComposer({
     [order, t],
   )
 
-  const onPublish = useCallback(async () => {
-    if (albumId === null) return
-    setBusy(true)
-    setRefusal(null)
-    try {
-      await reorder({ networkId, albumId, itemIds: [...order] })
-      if (coverId !== null) await setCoverMutation({ networkId, albumId, itemId: coverId })
-      await publish({ networkId, albumId })
-      toast.success(t("albumComposer.published"))
-      draft.clear()
-      onPublished?.(albumId)
-    } catch (error) {
-      setRefusal(albumEngineErrorText(error, "albums:albumComposer.publishFailed", t))
-    } finally {
-      setBusy(false)
+  const persistLayout = useCallback(async (id: AlbumId, saved: { order: readonly AlbumItemId[]; coverId: AlbumItemId | null; items: readonly AlbumItem[] }) => {
+    ensureCurrent()
+    if (saved.order.length > 0) {
+      await reorder({ networkId, albumId: id, itemIds: [...saved.order] })
+      ensureCurrent()
+      if (saved.coverId !== null) await setCoverMutation({ networkId, albumId: id, itemId: saved.coverId })
     }
-  }, [albumId, coverId, draft, networkId, onPublished, order, publish, reorder, setCoverMutation, t])
+    for (const item of saved.items) {
+      const caption = captions[item.itemId]
+      if (caption === undefined || caption.trim() === (item.caption ?? "")) continue
+      ensureCurrent()
+      await setCaption({ networkId, itemId: item.itemId, caption: caption.trim() || undefined, altText: item.altText ?? undefined })
+    }
+    ensureCurrent()
+  }, [captions, ensureCurrent, networkId, reorder, setCaption, setCoverMutation])
+
+  const onSave = useCallback(async () => {
+    if (!begin()) return
+    try {
+      const id = await ensureAlbum()
+      const saved = await uploadSelected(id)
+      await persistLayout(id, saved)
+      ensureCurrent()
+      toast.success(t("albumComposer.saved"))
+      const notifySaved = onSaved ?? onPublished
+      notifySaved?.(id)
+    } catch (error) {
+      if (mounted.current) setRefusal(albumEngineErrorText(error, "albums:albumComposer.saveFailed", t))
+    } finally {
+      finish()
+    }
+  }, [begin, ensureAlbum, ensureCurrent, finish, onPublished, onSaved, persistLayout, t, uploadSelected])
+
+  const onPublish = useCallback(async () => {
+    if (!permission.current.canPublish || !begin()) return
+    try {
+      const id = await ensureAlbum()
+      const saved = await uploadSelected(id)
+      await persistLayout(id, saved)
+      ensureCurrent()
+      if (!permission.current.canPublish) return
+      await publish({ networkId, albumId: id })
+      ensureCurrent()
+      toast.success(t("albumComposer.published"))
+      onPublished?.(id)
+    } catch (error) {
+      if (mounted.current) setRefusal(albumEngineErrorText(error, "albums:albumComposer.publishFailed", t))
+    } finally {
+      finish()
+    }
+  }, [begin, ensureAlbum, ensureCurrent, finish, networkId, onPublished, persistLayout, publish, t, uploadSelected])
 
   const stepIndex = ALBUM_STEPS.indexOf(step)
+  const locked = busy || disabled
+  const isPublished = initialDetail?.album.status === "published"
+  const metadataValid = schema.safeParse({ title, description, audience }).success
+  const itemById = new Map(serverItems.map((item) => [item.itemId, initialDetail?.items.find((latest) => latest.itemId === item.itemId) ?? item]))
+  const photoPreview = (item: AlbumItem) => item.withheld === null && item.url !== null ? (
+    <img src={item.url} alt={item.altText ?? ""} loading="lazy" />
+  ) : (
+    <p style={{ padding: 12, fontSize: 12, color: "var(--ink-600)" }}>{item.withheld ? t(`errors:${item.withheld}`) : t("albumPage.photoUnavailable")}</p>
+  )
 
   return (
     <Card style={{ display: "flex", flexDirection: "column", gap: 16 }}>
@@ -425,7 +600,7 @@ export function AlbumComposer({
 
       <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
         <h2 style={{ margin: 0, fontSize: 18, color: "var(--ink-900)" }}>
-          {t("albumComposer.title")}
+          {t(requestedId === undefined ? "albumComposer.title" : "albumComposer.resumeTitle")}
         </h2>
         <ol className="ac-steps">
           {ALBUM_STEPS.map((value, index) => (
@@ -460,9 +635,13 @@ export function AlbumComposer({
             {t("albumComposer.titleLabel")}
           </label>
           <TextInput
+            {...form.register("title")}
             id="ac-titre"
             value={title}
-            onChange={(event) => setTitle(event.target.value)}
+            onChange={(event) => {
+              if (!busyRef.current && !permission.current.disabled) form.setValue("title", event.target.value, { shouldValidate: true })
+            }}
+            disabled={locked}
             placeholder={t("albumComposer.titlePlaceholder")}
           />
           <label
@@ -472,13 +651,19 @@ export function AlbumComposer({
             {t("albumComposer.descriptionLabel")}
           </label>
           <TextArea
+            {...form.register("description")}
             id="ac-description"
             value={description}
-            onChange={(event) => setDescription(event.target.value)}
+            onChange={(event) => {
+              if (!busyRef.current && !permission.current.disabled) form.setValue("description", event.target.value, { shouldValidate: true })
+            }}
+            disabled={locked}
           />
+          {form.formState.errors.description ? <p role="alert">{form.formState.errors.description.message}</p> : null}
           <fieldset
             className="ac-audience"
             style={{ border: 0, margin: 0, padding: 0 }}
+            disabled={locked}
           >
             <legend style={{ fontSize: 13, color: "var(--ink-700)", padding: 0 }}>
               {t("albumComposer.audienceLegend")}
@@ -486,12 +671,14 @@ export function AlbumComposer({
             {AUDIENCE_CHOICES.map((value) => (
               <label key={value} htmlFor={`ac-audience-${value}`}>
                 <input
+                  {...form.register("audience")}
                   id={`ac-audience-${value}`}
                   type="radio"
-                  name="ac-audience"
                   value={value}
                   checked={audience === value}
-                  onChange={() => setAudience(value)}
+                  onChange={() => {
+                    if (!busyRef.current && !permission.current.disabled) form.setValue("audience", value, { shouldValidate: true })
+                  }}
                 />
                 <span>
                   <strong style={{ color: "var(--ink-900)" }}>
@@ -506,7 +693,7 @@ export function AlbumComposer({
             ))}
           </fieldset>
           <p style={{ margin: 0, fontSize: 12, color: "var(--ink-600)" }}>
-            <Icon name="lock" size={12} /> {t("albumComposer.nothingVisible")}
+            <Icon name="lock" size={12} /> {t(initialDetail?.album.status === "published" ? "albumComposer.editingPublished" : "albumComposer.nothingVisible")}
           </p>
         </div>
       ) : null}
@@ -518,6 +705,7 @@ export function AlbumComposer({
             type="file"
             multiple
             accept={IMAGE_ONLY_ACCEPT}
+            disabled={locked || serverItems.length + draft.items.length >= ALBUM_ITEMS_MAX}
             aria-label={t("albumComposer.choosePhotos")}
             onChange={(event) => {
               const files = Array.from(event.target.files ?? [])
@@ -527,8 +715,8 @@ export function AlbumComposer({
           />
           <p style={{ margin: 0, fontSize: 12, color: "var(--ink-600)" }}>
             {t("albumComposer.photosHint", {
-              photos: albumCountLabel(draft.items.length, t),
-              count: remainingSlots(draft.items.length),
+              photos: albumCountLabel(serverItems.length + draft.items.length, t),
+              count: remainingSlots(serverItems.length + draft.items.length),
             })}
           </p>
           {progress.total > 0 ? (
@@ -549,6 +737,12 @@ export function AlbumComposer({
             </>
           ) : null}
           <div className="ac-grid">
+            {serverItems.map((item) => (
+              <figure key={item.itemId} className="ac-tile" style={{ margin: 0 }}>
+                {photoPreview(itemById.get(item.itemId) ?? item)}
+                {item.caption ? <figcaption className="ac-tile-body">{item.caption}</figcaption> : null}
+              </figure>
+            ))}
             {draft.items.map((item) => (
               <figure key={item.localId} className="ac-tile" style={{ margin: 0 }}>
                 {item.previewUrl ? (
@@ -575,7 +769,10 @@ export function AlbumComposer({
                       variant="ghost"
                       size="sm"
                       icon="trash"
-                      onClick={() => draft.remove(item.localId)}
+                      disabled={locked}
+                      onClick={() => {
+                        if (!busyRef.current && !permission.current.disabled) draft.remove(item.localId)
+                      }}
                       aria-label={t("albumComposer.removeFile", { name: item.fileName })}
                     >
                       {t("albumComposer.remove")}
@@ -588,17 +785,21 @@ export function AlbumComposer({
           <div className="ac-actions">
             <Button
               icon="upload"
-              disabled={busy || draft.items.length === 0 || !progress.hasWork}
+              disabled={locked || draft.items.length === 0 || !progress.hasWork || !metadataValid}
               onClick={() => void onUpload()}
             >
               {busy ? t("albumComposer.sending") : t("albumComposer.send")}
             </Button>
-            {!progress.hasWork && progress.total > 0 ? (
+            {serverItems.length > 0 || (!progress.hasWork && progress.total > 0) ? (
               <Button
                 variant="secondary"
                 icon="arrowRight"
-                onClick={() => void onUpload()}
-                disabled={busy}
+                onClick={() => {
+                  if (busyRef.current || permission.current.disabled) return
+                  if (draft.items.length > 0) void onUpload()
+                  else setStep("ordre")
+                }}
+                disabled={locked || !metadataValid}
               >
                 {t("albumComposer.continue")}
               </Button>
@@ -618,6 +819,7 @@ export function AlbumComposer({
           >
             {order.map((itemId, index) => (
               <li key={itemId} className="ac-tile">
+                {itemById.has(itemId) ? photoPreview(itemById.get(itemId)!) : null}
                 <div className="ac-tile-body">
                   <span style={{ fontSize: 12, color: "var(--ink-700)" }}>
                     {t("albumComposer.photoPosition", { position: index + 1, total: order.length })}
@@ -630,12 +832,11 @@ export function AlbumComposer({
                   <input
                     aria-label={t("albumComposer.captionLabel", { position: index + 1 })}
                     placeholder={t("albumComposer.captionPlaceholder")}
-                    onBlur={(event) => {
-                      const value = event.target.value.trim()
-                      if (value.length === 0) return
-                      void setCaption({ networkId, itemId, caption: value }).catch(() => {
-                        toast.error(t("albumComposer.captionFailed"))
-                      })
+                    value={captions[itemId] ?? itemById.get(itemId)?.caption ?? ""}
+                    disabled={locked}
+                    onChange={(event) => {
+                      const value = event.target.value
+                      if (!busyRef.current && !permission.current.disabled) setCaptions((current) => ({ ...current, [itemId]: value }))
                     }}
                   />
                   <div className="ac-tile-actions">
@@ -644,7 +845,7 @@ export function AlbumComposer({
                       size="sm"
                       icon="arrowUp"
                       aria-label={t("albumComposer.moveUpLabel", { position: index + 1 })}
-                      disabled={index === 0}
+                      disabled={locked || index === 0}
                       onClick={() => move(itemId, "up")}
                     >
                       {t("albumComposer.moveUp")}
@@ -654,7 +855,7 @@ export function AlbumComposer({
                       size="sm"
                       icon="arrowDown"
                       aria-label={t("albumComposer.moveDownLabel", { position: index + 1 })}
-                      disabled={index === order.length - 1}
+                      disabled={locked || index === order.length - 1}
                       onClick={() => move(itemId, "down")}
                     >
                       {t("albumComposer.moveDown")}
@@ -665,7 +866,10 @@ export function AlbumComposer({
                       icon="star"
                       aria-label={t("albumComposer.setCoverLabel", { position: index + 1 })}
                       aria-pressed={coverId === itemId}
-                      onClick={() => setCoverId(itemId)}
+                      disabled={locked}
+                      onClick={() => {
+                        if (!busyRef.current && !permission.current.disabled) setCoverId(itemId)
+                      }}
                     >
                       {t("albumComposer.cover")}
                     </Button>
@@ -694,9 +898,9 @@ export function AlbumComposer({
           <p style={{ margin: 0, fontSize: 13, color: "var(--ink-700)" }}>
             <Icon name="image" size={14} /> {albumCountLabel(order.length, t)}
           </p>
-          <Alert tone="info" title={t("albumComposer.beforePublishTitle")}>
+          {!isPublished ? <Alert tone="info" title={t("albumComposer.beforePublishTitle")}>
             {t("albumComposer.beforePublishText")}
-          </Alert>
+          </Alert> : null}
         </div>
       ) : null}
 
@@ -709,26 +913,36 @@ export function AlbumComposer({
           <Button
             variant="secondary"
             icon="arrowLeft"
-            disabled={busy}
-            onClick={() => setStep(previousAlbumStep(step))}
+            disabled={locked}
+            onClick={() => {
+              if (!busyRef.current && !permission.current.disabled) setStep(previousAlbumStep(step))
+            }}
           >
             {t("albumComposer.back")}
           </Button>
         ) : onCancel ? (
-          <Button variant="ghost" disabled={busy} onClick={onCancel}>
+          <Button variant="ghost" disabled={locked} onClick={() => {
+            if (!busyRef.current && !permission.current.disabled) onCancel()
+          }}>
             {t("albumComposer.cancel")}
           </Button>
         ) : null}
 
-        {step === "apercu" ? (
-          <Button icon="check" disabled={busy} onClick={() => void onPublish()}>
+        <Button variant="secondary" disabled={locked || !metadataValid} onClick={() => void onSave()}>
+          {busy ? t("albumComposer.saving") : t(isPublished ? "albumComposer.saveChanges" : "albumComposer.saveDraft")}
+        </Button>
+
+        {step === "apercu" ? canPublish && !isPublished ? (
+          <Button icon="check" disabled={locked || !metadataValid || order.length === 0} onClick={() => void onPublish()}>
             {busy ? t("albumComposer.publishing") : t("albumComposer.publish")}
           </Button>
-        ) : step === "photos" ? null : (
+        ) : null : step === "photos" ? null : (
           <Button
             icon="arrowRight"
-            disabled={busy || blocker !== null}
-            onClick={() => setStep(nextAlbumStep(step))}
+            disabled={locked || blocker !== null || (step === "identite" && !metadataValid)}
+            onClick={() => {
+              if (!busyRef.current && !permission.current.disabled) setStep(nextAlbumStep(step))
+            }}
           >
             {t("albumComposer.continue")}
           </Button>

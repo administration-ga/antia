@@ -15,7 +15,7 @@
  *     interface qui laisse croire à une révocation ment.
  */
 import type { EngineRoutes } from "@antsia/api/network"
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react"
+import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react"
 import { getFunctionName } from "convex/server"
 import type { ButtonHTMLAttributes, ReactNode } from "react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
@@ -193,13 +193,13 @@ describe("AlbumPage — la galerie", () => {
     expect(router.calls[0]?.href).toBe("/profil/a%20wa")
   })
 
-  it("une photo RETENUE par la garde se dit à son propriétaire, sans image", () => {
+  it.each([null, "blob:retenu"])("une photo RETENUE par la garde se dit à son propriétaire, sans image (%s)", (url) => {
     mocks.result = ok({
       ...DETAIL,
       album: { ...DETAIL.album, isOwner: true },
       items: [
         DETAIL.items[0],
-        { ...DETAIL.items[1], url: null, withheld: "fileScanPending" as const },
+        { ...DETAIL.items[1], url, withheld: "fileScanPending" as const },
       ],
     })
     const { container } = renderWithEngine(<AlbumPage handle="awa" albumId="al-1" />)
@@ -283,6 +283,8 @@ describe("AlbumPage — ce que seul le propriétaire voit", () => {
     renderWithEngine(<AlbumPage handle="awa" albumId="al-1" />)
 
     fireEvent.click(screen.getByRole("button", { name: "Retirer cet album" }))
+    expect(mocks.withdraw).not.toHaveBeenCalled()
+    fireEvent.click(within(screen.getByRole("dialog")).getByRole("button", { name: "Confirmer le retrait" }))
     expect(mocks.withdraw).toHaveBeenCalledWith({ networkId: TEST_NETWORK_ID, albumId: "al-1" })
     await waitFor(() => expect(mocks.toastSuccess).toHaveBeenCalledWith("Album retiré."))
   })
@@ -295,6 +297,7 @@ describe("AlbumPage — ce que seul le propriétaire voit", () => {
     renderWithEngine(<AlbumPage handle="awa" albumId="al-1" />)
 
     fireEvent.click(screen.getByRole("button", { name: "Retirer cet album" }))
+    fireEvent.click(within(screen.getByRole("dialog")).getByRole("button", { name: "Confirmer le retrait" }))
     await waitFor(() =>
       expect(mocks.toastError).toHaveBeenCalledWith("Cet album n'est pas publié."),
     )
@@ -308,5 +311,48 @@ describe("AlbumPage — ce que seul le propriétaire voit", () => {
     renderWithEngine(<AlbumPage handle="awa" albumId="al-1" />)
     expect(screen.getByText("Retiré")).toBeTruthy()
     expect(screen.queryByRole("button", { name: "Retirer cet album" })).toBeNull()
+  })
+
+  it("annuler le retrait conserve l’album et n’appelle aucune mutation", () => {
+    mocks.result = ok(MIEN)
+    renderWithEngine(<AlbumPage handle="awa" albumId="al-1" />)
+    fireEvent.click(screen.getByRole("button", { name: "Retirer cet album" }))
+    fireEvent.click(within(screen.getByRole("dialog")).getByRole("button", { name: "Annuler" }))
+    expect(screen.queryByRole("dialog")).toBeNull()
+    expect(mocks.withdraw).not.toHaveBeenCalled()
+    expect(screen.getByRole("heading", { name: MIEN.album.title })).toBeTruthy()
+  })
+
+  it.each(["draft", "published", "withdrawn"] as const)("ouvre le même album propriétaire pour édition (%s)", (status) => {
+    mocks.result = ok({ ...MIEN, album: { ...MIEN.album, status } })
+    const onEdit = vi.fn()
+    renderWithEngine(<AlbumPage handle="awa" albumId="al-1" onEdit={onEdit} />)
+    fireEvent.click(screen.getByRole("button", { name: "Modifier l’album" }))
+    expect(onEdit).toHaveBeenCalledExactlyOnceWith("al-1")
+    expect(mocks.withdraw).not.toHaveBeenCalled()
+  })
+
+  it.each([false, true])("aucune édition sans propriété ou capacité (%s)", (isOwner) => {
+    mocks.result = ok({ ...MIEN, album: { ...MIEN.album, isOwner } })
+    renderWithEngine(<AlbumPage handle="awa" albumId="al-1" canEdit={false} onEdit={vi.fn()} />)
+    expect(screen.queryByRole("button", { name: "Modifier l’album" })).toBeNull()
+  })
+
+  it("empêche deux confirmations pendant le retrait et permet de reprendre après erreur", async () => {
+    mocks.result = ok(MIEN)
+    let reject!: (reason: unknown) => void
+    mocks.withdraw.mockImplementationOnce(() => new Promise((_resolve, rejectPromise) => { reject = rejectPromise }))
+    renderWithEngine(<AlbumPage handle="awa" albumId="al-1" />)
+    fireEvent.click(screen.getByRole("button", { name: "Retirer cet album" }))
+    const confirm = within(screen.getByRole("dialog")).getByRole("button", { name: "Confirmer le retrait" })
+    fireEvent.click(confirm)
+    fireEvent.click(confirm)
+    expect(mocks.withdraw).toHaveBeenCalledOnce()
+    reject(new Error("private server detail"))
+    await waitFor(() => expect(mocks.toastError).toHaveBeenCalledWith("Le retrait n'a pas abouti."))
+    expect(screen.queryByText("private server detail")).toBeNull()
+    fireEvent.click(within(screen.getByRole("dialog")).getByRole("button", { name: "Confirmer le retrait" }))
+    await waitFor(() => expect(mocks.toastSuccess).toHaveBeenCalledWith("Album retiré."))
+    expect(mocks.withdraw).toHaveBeenCalledTimes(2)
   })
 })

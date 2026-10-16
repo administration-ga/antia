@@ -66,6 +66,10 @@ async function posts(t: T) {
   return await t.run(async (ctx) => await ctx.db.query("posts").take(100))
 }
 
+async function albums(t: T) {
+  return await t.run(async (ctx) => await ctx.db.query("albums").take(100))
+}
+
 describe("diaspora/seed:profilePostsForRecette", () => {
   it("refuse sans confirmation avant toute écriture", async () => {
     const t = testConvex()
@@ -183,5 +187,146 @@ describe("diaspora/seed:profilePostsForRecette", () => {
     expect(secondPage.nextCursor).toBeNull()
     expect(new Set([...firstPage.items, ...secondPage.items].map((post) => post._id)).size).toBe(35)
     expect((await reader.query(api.modules.posts.posts.myFeed, { networkId: root, scope: "recents" })).items).toEqual([])
+  })
+})
+
+describe("diaspora/seed:albumDraftsForRecette", () => {
+  it("refuse sans confirmation avant toute écriture", async () => {
+    const t = testConvex()
+    await expect(t.mutation(internal.modules.diaspora.seed.albumDraftsForRecette, { confirmNonProduction: "oui" })).rejects.toThrow(/hors production/)
+    expect(await albums(t)).toEqual([])
+  })
+
+  it("refuse le nuage même si les graines y sont autorisées", async () => {
+    vi.stubEnv("CONVEX_CLOUD_URL", "https://recette.convex.cloud")
+    vi.stubEnv("ANTSIA_SEEDS_ALLOWED", "true")
+    const t = testConvex()
+    await expect(t.mutation(internal.modules.diaspora.seed.albumDraftsForRecette, ARGS)).rejects.toThrow(/backend local obligatoire/)
+    expect(await albums(t)).toEqual([])
+  })
+
+  it("ne crée ni réseau ni profil quand les prérequis manquent", async () => {
+    const t = testConvex()
+    await expect(t.mutation(internal.modules.diaspora.seed.albumDraftsForRecette, ARGS)).rejects.toThrow(/réseau diasporale actif/)
+    expect(await t.run(async (ctx) => await ctx.db.query("networks").take(5))).toEqual([])
+    await seedNetworks(t)
+    await expect(t.mutation(internal.modules.diaspora.seed.albumDraftsForRecette, ARGS)).rejects.toThrow(/profil fictif préexistant/)
+    expect(await t.run(async (ctx) => await ctx.db.query("persons").take(5))).toEqual([])
+    expect(await albums(t)).toEqual([])
+  })
+
+  it.each([
+    { name: "autre identifiant", options: { handle: "autre.recette" }, error: /profil fictif préexistant/ },
+    { name: "profil retiré", options: { withdrawn: true }, error: /profil fictif préexistant/ },
+    { name: "sans adhésion", options: { withMembership: false }, error: /adhésion préexistante/ },
+    { name: "en attente", options: { status: "en_attente" as const }, error: /adhésion préexistante/ },
+    { name: "suspendu", options: { status: "suspendue" as const }, error: /adhésion préexistante/ },
+    { name: "racine en attente", options: { rootStatus: "en_attente" as const }, error: /adhésion préexistante/ },
+    { name: "racine suspendue", options: { rootStatus: "suspendue" as const }, error: /adhésion préexistante/ },
+    { name: "racine quittée", options: { rootStatus: "partie" as const }, error: /adhésion préexistante/ },
+    { name: "adresse différente", options: { email: "autre.recette@exemple.test" }, error: /identité fictive vérifiée/ },
+    { name: "identité non vérifiée", options: { verified: false }, error: /identité fictive vérifiée/ },
+  ])("ne sème aucun album si la cible est $name", async ({ options, error }) => {
+    const t = testConvex()
+    const { personId } = await fixture(t, options)
+    const before = await t.run(async (ctx) => ({
+      person: await ctx.db.get(personId),
+      memberships: await ctx.db.query("networkMemberships").take(5),
+    }))
+    await expect(t.mutation(internal.modules.diaspora.seed.albumDraftsForRecette, ARGS)).rejects.toThrow(error)
+    expect(await albums(t)).toEqual([])
+    expect(await t.run(async (ctx) => ({
+      person: await ctx.db.get(personId),
+      memberships: await ctx.db.query("networkMemberships").take(5),
+    }))).toEqual(before)
+  })
+
+  it("refuse un profil sans utilisateur d'authentification vérifiable", async () => {
+    const t = testConvex()
+    const { personId } = await fixture(t)
+    await t.run(async (ctx) => await ctx.db.patch(personId, { authUserId: "missing-recette-auth-user" }))
+
+    await expect(t.mutation(internal.modules.diaspora.seed.albumDraftsForRecette, ARGS)).rejects.toThrow(/identité fictive vérifiée/)
+    expect(await albums(t)).toEqual([])
+  })
+
+  it("crée treize brouillons privés, vides, distincts et idempotents sans toucher aux identités", async () => {
+    const t = testConvex()
+    const { network, personId, authUserId } = await fixture(t)
+    const other = await fixture(t, { handle: "autre.recette", email: "autre.recette@exemple.test" })
+    const snapshot = async () => await t.run(async (ctx) => ({
+      persons: await ctx.db.query("persons").take(5),
+      memberships: await ctx.db.query("networkMemberships").take(5),
+      identities: await ctx.db.query("identityLinks").take(5),
+      networks: await ctx.db.query("networks").take(5),
+    }))
+    const before = await snapshot()
+
+    expect(await t.mutation(internal.modules.diaspora.seed.albumDraftsForRecette, ARGS)).toEqual({ handle: HANDLE, created: 13, existing: 0 })
+    const first = await albums(t)
+    expect(first).toHaveLength(13)
+    expect(new Set(first.map((album) => album.createdAt)).size).toBe(13)
+    expect(new Set(first.map((album) => album.updatedAt)).size).toBe(13)
+    expect(new Set(first.map((album) => album.idempotencyKey)).size).toBe(13)
+    expect(first.map((album) => album.title).sort()).toEqual(Array.from({ length: 13 }, (_, index) => `PD4 album recette ${String(index + 1).padStart(2, "0")}/13`))
+    for (const album of first) {
+      expect(album).toMatchObject({ networkId: network, ownerPersonId: personId, audience: "connections", status: "draft", itemCount: 0 })
+      expect(album.idempotencyKey).toMatch(/^diasporale:pd4-album-recette:relations\.recette:\d{2}$/)
+      expect(album.coverItemId).toBeUndefined()
+      expect(album.publishedAt).toBeUndefined()
+      expect(album.deletingAt).toBeUndefined()
+      expect(album.updatedAt).toBe(album.createdAt)
+    }
+    expect(await t.run(async (ctx) => await ctx.db.query("albumItems").take(5))).toEqual([])
+    expect(await posts(t)).toEqual([])
+    expect(await t.mutation(internal.modules.diaspora.seed.albumDraftsForRecette, ARGS)).toEqual({ handle: HANDLE, created: 0, existing: 13 })
+    expect(await albums(t)).toEqual(first)
+    expect(await snapshot()).toEqual(before)
+
+    const owner = t.withIdentity({ subject: authUserId })
+    const page = await owner.query(api.modules.albums.albums.paginateMyAlbums, { networkId: network, paginationOpts: { numItems: 12, cursor: null } })
+    expect(page.page).toHaveLength(12)
+    expect(page.isDone).toBe(false)
+    const tail = await owner.query(api.modules.albums.albums.paginateMyAlbums, { networkId: network, paginationOpts: { numItems: 12, cursor: page.continueCursor } })
+    expect(tail.page).toHaveLength(1)
+    expect(tail.isDone).toBe(true)
+    expect(new Set([...page.page, ...tail.page].map((album) => album.albumId)).size).toBe(13)
+    const reader = t.withIdentity({ subject: other.authUserId })
+    expect((await reader.query(api.modules.albums.albums.paginatePersonAlbums, { networkId: network, handle: HANDLE, paginationOpts: { numItems: 12, cursor: null } })).page).toEqual([])
+    expect(await reader.query(api.modules.albums.albums.getAlbum, { networkId: network, albumId: first[0]!._id })).toBeNull()
+  })
+
+  it.each(["draft", "published", "withdrawn"] as const)("préserve le titre, l'audience et l'état modifiés pendant la recette (%s)", async (status) => {
+    const t = testConvex()
+    await fixture(t)
+    await t.mutation(internal.modules.diaspora.seed.albumDraftsForRecette, ARGS)
+    const album = (await albums(t))[0]!
+    await t.run(async (ctx) => await ctx.db.patch(album._id, { title: "Album corrigé pendant la recette", audience: "public", status, updatedAt: NOW + 60_000 }))
+    const before = await albums(t)
+
+    expect(await t.mutation(internal.modules.diaspora.seed.albumDraftsForRecette, ARGS)).toEqual({ handle: HANDLE, created: 0, existing: 13 })
+    expect(await albums(t)).toEqual(before)
+  })
+
+  it.each(["autre réseau", "suppression en cours"] as const)("refuse une clé portant un album hors périmètre et annule les insertions précédentes (%s)", async (state) => {
+    const t = testConvex()
+    const { network, root, personId } = await fixture(t)
+    await t.run(async (ctx) => await ctx.db.insert("albums", {
+      networkId: state === "autre réseau" ? root : network,
+      ownerPersonId: personId,
+      title: "Album préexistant conservé",
+      audience: "connections",
+      status: "draft",
+      itemCount: 0,
+      idempotencyKey: `diasporale:pd4-album-recette:${HANDLE}:13`,
+      ...(state === "suppression en cours" ? { deletingAt: NOW } : {}),
+      createdAt: NOW,
+      updatedAt: NOW,
+    }))
+    const before = await albums(t)
+
+    await expect(t.mutation(internal.modules.diaspora.seed.albumDraftsForRecette, ARGS)).rejects.toThrow(/album existant hors du périmètre/)
+    expect(await albums(t)).toEqual(before)
+    expect(await posts(t)).toEqual([])
   })
 })

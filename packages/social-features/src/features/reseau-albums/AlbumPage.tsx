@@ -25,8 +25,9 @@ import { useAuthenticatedConvexQuery } from "@antsia/api/hooks"
 import { useNetwork, useRoutes } from "@antsia/api/network"
 import { useRouter } from "@antsia/api/routing"
 import { Alert, Badge, Button, Card, Icon, SkeletonCard } from "@antsia/ui"
+import { EspaceDialog, EspaceKitStyles } from "@antsia/ui/espace-kit"
 import { useMutation } from "convex/react"
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { ProfilFrame } from "../reseau-personnel/ProfilFrame"
@@ -44,6 +45,8 @@ import {
 export interface AlbumPageProps {
   handle: string
   albumId: string
+  canEdit?: boolean
+  onEdit?: (albumId: string) => void
 }
 
 /**
@@ -76,23 +79,47 @@ const ALBUM_PAGE_CSS = `
     background: var(--ink-150); color: var(--ink-600); font-size: 12px;
   }
   .ap-caption { padding: 8px 10px; font-size: 12px; color: var(--ink-600); }
-  .ap-head { display: flex; flex-direction: column; gap: 8px; }
+  .ap-head { display: flex; flex-direction: column; gap: 8px; min-width: 0; overflow-wrap: anywhere; }
   .ap-actions { display: flex; gap: 8px; flex-wrap: wrap; }
   .ap-actions button { min-height: 44px; }
 `
 
-export function AlbumPage({ handle, albumId }: AlbumPageProps) {
+export function AlbumPage(props: AlbumPageProps) {
+  const { networkId, personId } = useNetwork()
+  return <AlbumPageBody key={`${networkId}:${personId}:${props.albumId}`} {...props} />
+}
+
+function AlbumPageBody({ handle, albumId, canEdit = true, onEdit }: AlbumPageProps) {
   const router = useRouter()
   const routes = useRoutes()
   const { networkId } = useNetwork()
   const { t } = useTranslation("albums")
   const [busy, setBusy] = useState(false)
+  const [confirmWithdraw, setConfirmWithdraw] = useState(false)
+  const running = useRef(false)
   // L'identifiant vient de l'adresse : le serveur le valide (`v.id`), et un
   // identifiant mal formé se dit comme une panne de lecture, sans rien révéler.
   const id = albumId as AlbumId
   const detail = useAuthenticatedConvexQuery(albumsApi.getAlbum, { networkId, albumId: id })
   const withdraw = useMutation(albumsApi.withdraw)
   const backHref = albumBackHref(routes.profile(handle))
+  useEffect(() => { setConfirmWithdraw(false) }, [detail.data?.album.status])
+
+  const onWithdraw = async () => {
+    if (running.current || detail.isError || !detail.data?.album.isOwner || detail.data.album.status !== "published") return
+    running.current = true
+    setBusy(true)
+    try {
+      await withdraw({ networkId, albumId: id })
+      setConfirmWithdraw(false)
+      toast.success(t("albumPage.withdrawn"))
+    } catch (error) {
+      toast.error(albumEngineErrorText(error, "albums:albumPage.withdrawFailed", t))
+    } finally {
+      running.current = false
+      setBusy(false)
+    }
+  }
 
   // La panne AVANT le squelette : sans rien à montrer, la carte d'erreur —
   // jamais un squelette éternel, jamais la phrase du refus (R-08).
@@ -144,6 +171,7 @@ export function AlbumPage({ handle, albumId }: AlbumPageProps) {
 
   return (
     <ProfilFrame>
+      <EspaceKitStyles />
       <style href="album-page" precedence="default">
         {ALBUM_PAGE_CSS}
       </style>
@@ -201,6 +229,14 @@ export function AlbumPage({ handle, albumId }: AlbumPageProps) {
             ) : null}
           </div>
 
+          {album.isOwner && canEdit && onEdit ? (
+            <div className="ap-actions">
+              <Button disabled={busy || detail.isError} onClick={() => onEdit(albumId)}>
+                {t("albumPage.edit")}
+              </Button>
+            </div>
+          ) : null}
+
           {album.isOwner && album.status === "published" ? (
             <>
               <Alert tone="info" title={t("albumPage.withdrawTitle")}>
@@ -210,22 +246,25 @@ export function AlbumPage({ handle, albumId }: AlbumPageProps) {
                 <Button
                   variant="secondary"
                   icon="eyeOff"
-                  disabled={busy}
-                  onClick={() => {
-                    setBusy(true)
-                    void withdraw({ networkId, albumId: id })
-                      .then(() => toast.success(t("albumPage.withdrawn")))
-                      .catch((error: unknown) => {
-                        // ⚠️ Le refus voyage dans `error.data` (une règle ou un
-                        // code du moteur) : on le traduit, on ne l'invente pas.
-                        toast.error(albumEngineErrorText(error, "albums:albumPage.withdrawFailed", t))
-                      })
-                      .finally(() => setBusy(false))
-                  }}
+                  disabled={busy || detail.isError}
+                  onClick={() => setConfirmWithdraw(true)}
                 >
                   {busy ? t("albumPage.withdrawing") : t("albumPage.withdraw")}
                 </Button>
               </div>
+              {confirmWithdraw ? (
+                <EspaceDialog
+                  title={t("albumPage.withdrawTitle")}
+                  closeLabel={t("albumPage.close")}
+                  onClose={() => { if (!running.current) setConfirmWithdraw(false) }}
+                  footer={<>
+                    <Button variant="secondary" disabled={busy} onClick={() => setConfirmWithdraw(false)}>{t("albumComposer.cancel")}</Button>
+                    <Button disabled={busy || detail.isError} onClick={() => void onWithdraw()}>{busy ? t("albumPage.withdrawing") : t("albumPage.confirmWithdraw")}</Button>
+                  </>}
+                >
+                  <p>{albumWithdrawNotice(t)}</p>
+                </EspaceDialog>
+              ) : null}
             </>
           ) : null}
 
@@ -238,7 +277,7 @@ export function AlbumPage({ handle, albumId }: AlbumPageProps) {
               {items.map((item, index) => (
                 <li key={item.itemId}>
                   <figure className="ap-figure">
-                    {item.url !== null ? (
+                    {item.withheld === null && item.url !== null ? (
                       <img
                         src={item.url}
                         /* Le texte alternatif PUBLIÉ, ou rien : une chaîne

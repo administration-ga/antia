@@ -2,9 +2,12 @@
 // @vitest-environment jsdom
 
 import { fireEvent, screen } from "@testing-library/react"
+import { NetworkProvider } from "@antsia/api/network"
+import { I18nextProvider } from "react-i18next"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
-import { renderWithEngine, TEST_NETWORK_ID } from "../../tests/engine-wrapper"
+import { createAppI18n } from "../../i18n"
+import { renderWithEngine, TEST_NETWORK_ID, TEST_PERSON_ID, TEST_ROUTES } from "../../tests/engine-wrapper"
 
 type TrayArgs = { networkId: string; now: number } | "skip"
 type TrayGroupFixture = {
@@ -138,5 +141,61 @@ describe("StoriesTray — branchement sur le plateau du moteur", () => {
 		const video = container.querySelector("video.st-card-media")
 		expect(video).not.toBeNull()
 		expect(video?.getAttribute("src")).toBe("clip.mp4#t=0.1")
+	})
+
+	it.each([
+		{ locale: "fr" as const, label: "Actus", create: "Publier une actu", author: /^Actus de Nom marie/ },
+		{ locale: "en" as const, label: "Stories", create: "Post a story", author: /^Stories by Nom marie/ },
+	])("garde les séries lisibles sans geste de création ($locale)", ({ locale, label, create, author }) => {
+		mocks.byInstant.set(BASE, { groups: [group("marie")], truncated: false })
+		const onOpen = vi.fn()
+		const onCreate = vi.fn()
+		const i18n = createAppI18n({ locale, appResources: { fr: {}, en: {} }, defaultNS: "social" })
+		renderWithEngine(
+			<I18nextProvider i18n={i18n}>
+				<StoriesTray myHandle="moi" now={BASE} canCreate={false} onOpen={onOpen} onCreate={onCreate} />
+			</I18nextProvider>,
+		)
+
+		expect(screen.getByRole("group", { name: label })).toBeInTheDocument()
+		expect(screen.queryByRole("button", { name: create })).not.toBeInTheDocument()
+		fireEvent.click(screen.getByRole("button", { name: author }))
+		expect(onOpen).toHaveBeenCalledExactlyOnceWith("marie")
+		expect(onCreate).not.toHaveBeenCalled()
+	})
+
+	it("ne rend pas un bandeau vide lorsque la création est refusée", () => {
+		mocks.byInstant.set(BASE, { groups: [], truncated: false })
+		const { container } = renderWithEngine(
+			<StoriesTray myHandle="moi" now={BASE} canCreate={false} onOpen={vi.fn()} onCreate={vi.fn()} />,
+		)
+		expect(container.querySelector(".st-tray")).toBeNull()
+	})
+
+	it.each(["personne", "réseau"] as const)("ne garde pas le plateau d'un autre lecteur au changement de %s", (scope) => {
+		const scopedTray = (changed: boolean) => (
+			<NetworkProvider
+				networkId={changed && scope === "réseau" ? "networks_other" as typeof TEST_NETWORK_ID : TEST_NETWORK_ID}
+				personId={changed && scope === "personne" ? "persons_other" as typeof TEST_PERSON_ID : TEST_PERSON_ID}
+				slug="stories-scope"
+				charte="antsia"
+				routes={TEST_ROUTES}
+			>
+				<StoriesTray myHandle="moi" now={BASE} canCreate={false} onOpen={vi.fn()} onCreate={vi.fn()} />
+			</NetworkProvider>
+		)
+		mocks.byInstant.set(BASE, { groups: [group("marie")], truncated: false })
+		const view = renderWithEngine(scopedTray(false))
+		expect(screen.getByText("Nom marie")).toBeInTheDocument()
+
+		mocks.byInstant.clear()
+		view.rerender(scopedTray(true))
+		expect(screen.queryByText("Nom marie")).not.toBeInTheDocument()
+		view.rerender(scopedTray(false))
+		expect(screen.queryByText("Nom marie")).not.toBeInTheDocument()
+
+		mocks.byInstant.set(BASE, { groups: [group("paul")], truncated: false })
+		view.rerender(scopedTray(false))
+		expect(screen.getByText("Nom paul")).toBeInTheDocument()
 	})
 })

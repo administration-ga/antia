@@ -94,7 +94,14 @@
     "back": "Back",
     "cancel": "Cancel",
     "publishing": "Publishing…",
-    "publish": "Publish the album"
+    "publish": "Publish the album",
+    "resumeTitle": "Edit album",
+    "editingPublished": "This album is already published. Saving your changes updates what its readers see.",
+    "saveDraft": "Save draft",
+    "saveChanges": "Save changes",
+    "saving": "Saving…",
+    "saved": "Album saved.",
+    "saveFailed": "Saving failed. Your changes are kept here."
   },
   "albumPage": {
     "errorTitle": "Album unavailable",
@@ -110,12 +117,17 @@
     "withdrawn": "Album withdrawn.",
     "withdrawFailed": "The withdrawal did not go through.",
     "empty": "This album contains no photos.",
-    "photoUnavailable": "Photo unavailable."
+    "photoUnavailable": "Photo unavailable.",
+    "edit": "Edit album",
+    "close": "Close",
+    "confirmWithdraw": "Confirm withdrawal"
   },
   "albumsSection": {
     "errorTitle": "Albums unavailable",
     "errorMessage": "The albums could not be loaded.",
     "create": "Create an album",
-    "photosHint": "Open an album to see all its photos."
+    "photosHint": "Open an album to see all its photos.",
+    "loadMore": "Load more albums",
+    "loadingMore": "Loading…"
   }
 }

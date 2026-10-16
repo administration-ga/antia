@@ -2,10 +2,12 @@
 // @vitest-environment jsdom
 
 import { fireEvent, screen } from "@testing-library/react"
-import type { ReactNode } from "react"
+import { useState, type ReactNode } from "react"
+import { I18nextProvider, useTranslation } from "react-i18next"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 import { memoryRouter, renderWithEngine, TEST_NETWORK_ID, TEST_ROUTES } from "../../tests/engine-wrapper"
+import { createAppI18n } from "../../i18n"
 
 type QueryCall = { reference: string; args: unknown }
 
@@ -14,6 +16,7 @@ const mocks = vi.hoisted(() => ({
 	tray: undefined as { groups: unknown[]; truncated: boolean } | undefined,
 	me: null as null | { handle?: string; published: boolean },
 	live: { items: [] as unknown[] },
+	composer: vi.fn(),
 }))
 
 vi.mock("@antsia/api/engine", () => ({
@@ -51,6 +54,22 @@ vi.mock("@antsia/api/hooks", () => ({
 }))
 
 vi.mock("convex/react", () => ({ useMutation: () => vi.fn(() => Promise.resolve()) }))
+
+// La sonde garde un brouillon local : la révocation doit réellement démonter
+// la feuille, pas seulement cacher son dialogue et laisser ses fichiers vivre.
+vi.mock("./StoryCreateSheet", () => ({
+	StoryCreateSheet: (props: { open: boolean; onClose: () => void }) => {
+		const { t } = useTranslation("stories")
+		const [draft, setDraft] = useState("")
+		mocks.composer({ open: props.open })
+		return props.open ? (
+			<div role="dialog" aria-label={t("storyCreateSheet.title")}>
+				<input aria-label="Repère du brouillon" value={draft} onChange={(event) => setDraft(event.target.value)} />
+				<button type="button" onClick={props.onClose}>{t("storyCreateSheet.close")}</button>
+			</div>
+		) : null
+	},
+}))
 
 // Le téléphone : la pile est rendue en place, sans portail.
 vi.mock("@antsia/ui/overlay", () => ({
@@ -104,6 +123,7 @@ beforeEach(() => {
 	mocks.tray = undefined
 	mocks.me = null
 	mocks.live = { items: [] }
+	mocks.composer.mockClear()
 })
 
 afterEach(() => {
@@ -172,5 +192,69 @@ describe("StoriesViewerPage", () => {
 		renderWithEngine(<StoriesViewerPage />)
 		expect(argsOf("myActive")).toEqual([])
 		expect(argsOf("listByAuthor").at(-1)).toMatchObject({ handle: "paul" })
+	})
+
+	it.each([
+		{ locale: "fr" as const, loading: "Chargement…", create: "Publier une actu" },
+		{ locale: "en" as const, loading: "Loading…", create: "Post a story" },
+	])("lit l'auteur sans monter le composeur malgré l'adresse nouvelle ($locale)", ({ locale, loading, create }) => {
+		mocks.tray = { groups: [group("paul")], truncated: false }
+		const router = memoryRouter({ pathname: `${TEST_ROUTES.stories()}/nouvelle`, search: "auteur=paul" })
+		const i18n = createAppI18n({ locale, appResources: { fr: {}, en: {} }, defaultNS: "social" })
+		renderWithEngine(
+			<I18nextProvider i18n={i18n}><StoriesViewerPage canCreate={false} openCreate /></I18nextProvider>,
+			{ router: router.implementation },
+		)
+
+		expect(argsOf("listByAuthor").at(-1)).toMatchObject({ networkId: TEST_NETWORK_ID, handle: "paul" })
+		expect(screen.getByText(loading)).toBeInTheDocument()
+		expect(screen.queryByRole("button", { name: create })).not.toBeInTheDocument()
+		expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
+		expect(mocks.composer).not.toHaveBeenCalled()
+	})
+
+	it.each([
+		{ locale: "fr" as const, empty: "Aucune actu pour l'instant", create: "Publier une actu", back: "Revenir au fil" },
+		{ locale: "en" as const, empty: "No stories for now", create: "Post a story", back: "Back to the feed" },
+	])("rend l'état vide sans invitation à publier quand la création est refusée ($locale)", ({ locale, empty, create, back }) => {
+		mocks.tray = { groups: [], truncated: false }
+		const i18n = createAppI18n({ locale, appResources: { fr: {}, en: {} }, defaultNS: "social" })
+		renderWithEngine(
+			<I18nextProvider i18n={i18n}><StoriesViewerPage canCreate={false} /></I18nextProvider>,
+		)
+
+		expect(screen.getByText(empty)).toBeInTheDocument()
+		expect(screen.getByRole("button", { name: back })).toBeInTheDocument()
+		expect(screen.queryByRole("button", { name: create })).not.toBeInTheDocument()
+		expect(screen.queryByText(/Publiez la première|Post the first one/)).not.toBeInTheDocument()
+		expect(mocks.composer).not.toHaveBeenCalled()
+	})
+
+	it("conserve l'ouverture explicite du composeur lorsque le droit n'est pas précisé", () => {
+		mocks.tray = { groups: [], truncated: false }
+		renderWithEngine(<StoriesViewerPage openCreate />)
+		expect(screen.getByRole("dialog", { name: "Publier une actu" })).toBeInTheDocument()
+	})
+
+	it.each([
+		{ locale: "fr" as const, create: "Publier une actu" },
+		{ locale: "en" as const, create: "Post a story" },
+	])("démonte le composeur à la révocation et repart avec un brouillon neuf après réautorisation ($locale)", ({ locale, create }) => {
+		mocks.tray = { groups: [], truncated: false }
+		const i18n = createAppI18n({ locale, appResources: { fr: {}, en: {} }, defaultNS: "social" })
+		const viewer = (canCreate: boolean) => <I18nextProvider i18n={i18n}><StoriesViewerPage canCreate={canCreate} openCreate /></I18nextProvider>
+		const view = renderWithEngine(viewer(true))
+		fireEvent.change(screen.getByRole("textbox", { name: "Repère du brouillon" }), { target: { value: "ancien fichier" } })
+
+		mocks.composer.mockClear()
+		view.rerender(viewer(false))
+		expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
+		expect(mocks.composer).not.toHaveBeenCalled()
+
+		view.rerender(viewer(true))
+		expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
+		fireEvent.click(screen.getByRole("button", { name: create }))
+		expect(screen.getByRole("dialog", { name: create })).toBeInTheDocument()
+		expect(screen.getByRole("textbox", { name: "Repère du brouillon" })).toHaveValue("")
 	})
 })
