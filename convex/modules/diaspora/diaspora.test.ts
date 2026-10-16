@@ -9,12 +9,13 @@ import { validateFacetSchema } from "@antsia/social-domain/facets"
 import { ATTESTATION_PATH, canonicalAttestationString, DAY_MS, DEFAULT_FACET_VISIBILITY, MEMBER_COUNTER_DISPLAY_THRESHOLD, SPONSORSHIPS_PER_WINDOW } from "@diasporale/domain"
 import { afterEach, describe, expect, it, vi } from "vitest"
 
-import { api, internal } from "../../_generated/api"
+import { api, components, internal } from "../../_generated/api"
 import type { Id } from "../../_generated/dataModel"
 import schema from "../../schema"
 import { SEED_CONFIRMATION } from "../../seeds/foundations"
-import { testConvex } from "../../test.setup"
+import { createTestSession, testConvex } from "../../test.setup"
 import { sha256Hex, signAttestation } from "./attestation"
+import { applyDerivedStatus, membershipGrounds } from "./facts"
 import { DIASPORA_SLICE_MANIFEST } from "./manifest"
 import { diasporaTables } from "./tables"
 
@@ -106,6 +107,15 @@ async function join(as: As, networkId: Id<"networks">, facet: Record<string, unk
     networkId,
     facet: facet as { countryOfResidence: string },
     ...(directoryVisibility ? { directoryVisibility } : {}),
+  })
+}
+
+/** Rejoue le raccord de la tranche après un fait nouveau, avec les faits réellement stockés. */
+async function reconcileDerivedStatus(t: T, networkId: Id<"networks">, personId: Id<"persons">) {
+  return await t.run(async (ctx) => {
+    const row = await ctx.db.query("networkMemberships").withIndex("by_network_and_person", (q) => q.eq("networkId", networkId).eq("personId", personId)).unique()
+    if (!row) throw new Error("Adhésion de fixture absente")
+    return await applyDerivedStatus(ctx, row, await membershipGrounds(ctx, networkId, personId, row), null, Date.now())
   })
 }
 
@@ -240,6 +250,107 @@ describe("entrer dans DIASPORALE (R1, R3)", () => {
     expect((await refusal(join(ada.as, testClosed))).code).toBe("notFound")
     expect((await refusal(join(ada.as, root))).code).toBe("notFound")
     expect(await ada.as.query(api.modules.diaspora.membership.myMembership, { networkId: root })).toBeNull()
+  })
+})
+
+describe("vérification tardive de DIASPORALE — adhésion racine dérivée (PA4)", () => {
+  it.each([
+    { childStatus: "en_attente", rootStatus: "declaree" },
+    { childStatus: "declaree", rootStatus: "en_attente" },
+    { childStatus: "verifiee", rootStatus: "declaree" },
+  ] as const)("élève la racine existante $rootStatus après le fait consulaire de l'enfant $childStatus", async ({ childStatus, rootStatus }) => {
+    const t = testConvex()
+    const { root, testClosed, diasporale } = await seedAll(t)
+    const light = await person(t, "auth-light", "compte.leger")
+    await join(light.as, diasporale)
+    const rootBefore = await membership(t, root, light.personId)
+    const child = await membership(t, diasporale, light.personId)
+    if (!rootBefore || !child) throw new Error("Adhésions de fixture absentes")
+    await t.run(async (ctx) => {
+      await ctx.db.patch(rootBefore._id, { status: rootStatus, role: "network_admin", derivedFrom: testClosed })
+      await ctx.db.patch(child._id, { status: childStatus })
+    })
+    await linkConsularAttestation(t, light.personId)
+
+    expect(await reconcileDerivedStatus(t, diasporale, light.personId)).toBe("verifiee")
+    expect(await membership(t, diasporale, light.personId)).toMatchObject({ status: "verifiee", verifiedBy: "consulat" })
+    expect(await membership(t, root, light.personId)).toMatchObject({
+      _id: rootBefore._id,
+      status: "verifiee",
+      verifiedBy: "consulat",
+      role: "network_admin",
+      derivedFrom: testClosed,
+      joinedAt: rootBefore.joinedAt,
+    })
+    expect(await t.run(async (ctx) => ctx.db.query("networkMemberships").withIndex("by_person_and_status", (q) => q.eq("personId", light.personId)).take(5))).toHaveLength(2)
+  })
+
+  it.each(["suspendue", "partie", "absente"] as const)("ne réactive ni ne recrée une racine %s", async (status) => {
+    const t = testConvex()
+    const { root, diasporale } = await seedAll(t)
+    const light = await person(t, "auth-light", "compte.leger")
+    await join(light.as, diasporale)
+    const rootRow = await membership(t, root, light.personId)
+    if (!rootRow) throw new Error("Racine de fixture absente")
+    await t.run(async (ctx) => {
+      if (status === "absente") await ctx.db.delete(rootRow._id)
+      else await ctx.db.patch(rootRow._id, { status, ...(status === "partie" ? { leftAt: Date.now() } : { statusBeforeSuspension: "declaree" as const }) })
+    })
+    const before = await membership(t, root, light.personId)
+    await linkConsularAttestation(t, light.personId)
+
+    expect(await reconcileDerivedStatus(t, diasporale, light.personId)).toBe("verifiee")
+    expect(await membership(t, root, light.personId)).toEqual(before)
+    expect(await t.run(async (ctx) => ctx.db.query("networkMemberships").withIndex("by_person_and_status", (q) => q.eq("personId", light.personId)).take(5))).toHaveLength(status === "absente" ? 1 : 2)
+  })
+
+  it.each(["suspendue", "partie"] as const)("n'élève pas la racine quand l'enfant est %s", async (status) => {
+    const t = testConvex()
+    const { root, diasporale } = await seedAll(t)
+    const light = await person(t, "auth-light", "compte.leger")
+    await join(light.as, diasporale)
+    const child = await membership(t, diasporale, light.personId)
+    if (!child) throw new Error("Enfant de fixture absent")
+    await t.run(async (ctx) => ctx.db.patch(child._id, { status, ...(status === "partie" ? { leftAt: Date.now() } : { statusBeforeSuspension: "en_attente" as const }) }))
+    const before = await membership(t, root, light.personId)
+    await linkConsularAttestation(t, light.personId)
+
+    expect(await reconcileDerivedStatus(t, diasporale, light.personId)).toBe(status)
+    expect(await membership(t, root, light.personId)).toEqual(before)
+    expect(await membership(t, diasporale, light.personId)).toMatchObject({ status, ...(status === "suspendue" ? { statusBeforeSuspension: "verifiee" } : {}) })
+  })
+
+  it("conserve la source, le rôle et l'origine d'une racine déjà vérifiée", async () => {
+    const t = testConvex()
+    const { root, testClosed, diasporale } = await seedAll(t)
+    const light = await person(t, "auth-light", "compte.leger")
+    await join(light.as, diasporale)
+    const rootRow = await membership(t, root, light.personId)
+    if (!rootRow) throw new Error("Racine de fixture absente")
+    await t.run(async (ctx) => ctx.db.patch(rootRow._id, { status: "verifiee", verifiedBy: "operator", role: "network_moderator", derivedFrom: testClosed }))
+    const before = await membership(t, root, light.personId)
+    await linkConsularAttestation(t, light.personId)
+
+    expect(await reconcileDerivedStatus(t, diasporale, light.personId)).toBe("verifiee")
+    expect(await membership(t, root, light.personId)).toEqual(before)
+  })
+
+  it.each(["declaree", "verifiee"] as const)("sans preuve courante de l'enfant, ne change pas la racine %s", async (rootStatus) => {
+    const t = testConvex()
+    const { root, diasporale } = await seedAll(t)
+    const light = await person(t, "auth-light", "compte.leger")
+    await join(light.as, diasporale)
+    const rootRow = await membership(t, root, light.personId)
+    const child = await membership(t, diasporale, light.personId)
+    if (!rootRow || !child) throw new Error("Adhésions de fixture absentes")
+    await t.run(async (ctx) => {
+      await ctx.db.patch(rootRow._id, { status: rootStatus, verifiedBy: rootStatus === "verifiee" ? "operator" : undefined })
+      await ctx.db.patch(child._id, { status: "verifiee", verifiedBy: "consulat" })
+    })
+    const before = await membership(t, root, light.personId)
+
+    expect(await reconcileDerivedStatus(t, diasporale, light.personId)).toBe("en_attente")
+    expect(await membership(t, root, light.personId)).toEqual(before)
   })
 })
 
@@ -675,9 +786,200 @@ describe("attestation consulaire DIASPORA-ATTESTATION-V1 (PD3, côté moteur)", 
     return ada
   }
 
+  /** Compte du vrai composant Better Auth, sans attribut d'identité fourni par le client. */
+  async function emailMember(t: T, diasporale: Id<"networks">, options: { emailVerified?: boolean; phoneVerified?: boolean } = {}) {
+    const email = "Awa.Email@Exemple.test"
+    const now = Date.now()
+    const user: unknown = await t.mutation(components.betterAuth.adapter.create, {
+      input: {
+        model: "user",
+        data: {
+          name: "Compte de recette",
+          email,
+          emailVerified: options.emailVerified ?? true,
+          ...(options.phoneVerified ? { phoneNumber: "+241060000000", phoneNumberVerified: true } : {}),
+          createdAt: now,
+          updatedAt: now,
+        },
+      },
+    })
+    if (typeof user !== "object" || user === null || !("_id" in user) || typeof user._id !== "string") throw new Error("Compte Better Auth de fixture absent")
+    const userId = user._id
+    const sessionId = await createTestSession(t, userId)
+    const as = t.withIdentity({ subject: userId, sessionId, issuer: "fixture-engine", applicationOrigin: "diasporale" })
+    const personId = await as.mutation(api.modules.people.persons.ensureMyPerson, {})
+    await as.mutation(api.modules.people.consents.recordConsent, { purpose: "social_profile", origin: "onboarding" })
+    await as.mutation(api.modules.people.profile.publishMyProfile, { handle: "compte.email", displayName: "Compte de recette" })
+    await join(as, diasporale)
+    return { as, personId, userId, email }
+  }
+
   afterEach(() => {
     vi.unstubAllEnvs()
     vi.unstubAllGlobals()
+  })
+
+  it("présente seulement l'empreinte d'un e-mail vérifié par Better Auth et vérifie ensuite enfant et racine", async () => {
+    vi.useFakeTimers()
+    configure()
+    const t = testConvex({ automaticSessions: false })
+    const { root, diasporale } = await seedAll(t)
+    const light = await emailMember(t, diasporale)
+    const emailHash = await sha256Hex(light.email.toLowerCase())
+    const seen: Record<string, unknown>[] = []
+    fakeConsulate(() => ({ contract: "DIASPORA-ATTESTATION-V1", verified: true, registrationStatus: "active", countryOfResidence: "FR", postSlug: "consulat-general-paris", attestedAt: Date.now() }), seen)
+
+    const { attestationId } = await light.as.mutation(api.modules.diaspora.attestation.requestConsularAttestation, { networkId: diasporale, consent: true })
+    const pending = await t.run(async (ctx) => ctx.db.get(attestationId))
+    expect(pending).toMatchObject({ subjectKind: "emailHash", subjectHash: await sha256Hex(emailHash), result: "pending" })
+    expect(JSON.stringify(pending)).not.toContain(light.email)
+    expect(JSON.stringify(pending)).not.toContain(light.email.toLowerCase())
+    expect(await t.query(internal.modules.diaspora.attestation.attestationRequest, { attestationId })).toMatchObject({ subjectKind: "emailHash", subject: emailHash })
+    await settle(t)
+
+    expect(seen).toHaveLength(1)
+    expect(seen[0]).toMatchObject({ subjectKind: "emailHash", subject: emailHash })
+    expect(JSON.stringify(seen)).not.toContain(light.email.toLowerCase())
+    expect(await membership(t, diasporale, light.personId)).toMatchObject({ status: "verifiee", verifiedBy: "consulat" })
+    expect(await membership(t, root, light.personId)).toMatchObject({ status: "verifiee", verifiedBy: "consulat", derivedFrom: diasporale })
+    const saved = await t.run(async (ctx) => ctx.db.get(attestationId))
+    expect(JSON.stringify(saved)).not.toContain(light.email.toLowerCase())
+  })
+
+  it.each(["non_verifie", "telephone_seulement", "lien_sans_preuve"] as const)("refuse un sujet e-mail sans preuve courante du composant (%s)", async (kind) => {
+    vi.useFakeTimers()
+    configure()
+    const t = testConvex({ automaticSessions: false })
+    const { diasporale } = await seedAll(t)
+    const light = await emailMember(t, diasporale, { emailVerified: false, phoneVerified: kind === "telephone_seulement" })
+    if (kind === "lien_sans_preuve") {
+      await t.run(async (ctx) => ctx.db.insert("identityLinks", { personId: light.personId, provider: "local", channel: "email", subject: "f".repeat(64), linkedAt: Date.now() }))
+    }
+    const fetchMock = fakeConsulate(() => ({}))
+
+    expect((await refusal(light.as.mutation(api.modules.diaspora.attestation.requestConsularAttestation, { networkId: diasporale, consent: true }))).app?.appRule).toBe("attestation_unavailable")
+    expect(await t.run(async (ctx) => ctx.db.query("consularAttestations").take(5))).toEqual([])
+    expect(fetchMock).not.toHaveBeenCalled()
+  })
+
+  it.each(["verification_retiree", "adresse_changee"] as const)("relit le canal avant l'action et n'envoie rien après %s", async (kind) => {
+    vi.useFakeTimers()
+    configure()
+    const t = testConvex({ automaticSessions: false })
+    const { diasporale } = await seedAll(t)
+    const light = await emailMember(t, diasporale)
+    const fetchMock = fakeConsulate(() => ({}))
+    const { attestationId } = await light.as.mutation(api.modules.diaspora.attestation.requestConsularAttestation, { networkId: diasporale, consent: true })
+    await t.mutation(components.betterAuth.adapter.updateOne, {
+      input: { model: "user", where: [{ field: "_id", value: light.userId }], update: kind === "verification_retiree" ? { emailVerified: false } : { email: "autre.adresse@exemple.test" } },
+    })
+
+    expect(await t.query(internal.modules.diaspora.attestation.attestationRequest, { attestationId })).toBeNull()
+    await settle(t)
+    expect(fetchMock).not.toHaveBeenCalled()
+    expect(await t.run(async (ctx) => ctx.db.get(attestationId))).toMatchObject({ result: "failed" })
+  })
+
+  it.each(["avant_envoi", "apres_depart", "nouveau_consentement"] as const)("le retrait du consentement initial ferme la demande (%s)", async (kind) => {
+    vi.useFakeTimers()
+    configure()
+    const t = testConvex({ automaticSessions: false })
+    const { root, diasporale } = await seedAll(t)
+    const light = await emailMember(t, diasporale)
+    const fetchMock = fakeConsulate(() => ({}))
+    const { attestationId } = await light.as.mutation(api.modules.diaspora.attestation.requestConsularAttestation, { networkId: diasporale, consent: true })
+    const initial = await t.run(async (ctx) => ctx.db.get(attestationId))
+    if (!initial) throw new Error("Demande de fixture absente")
+    if (kind !== "avant_envoi") expect(await t.query(internal.modules.diaspora.attestation.attestationRequest, { attestationId })).not.toBeNull()
+    const childBefore = await membership(t, diasporale, light.personId)
+    const rootBefore = await membership(t, root, light.personId)
+    await light.as.mutation(api.modules.people.consents.revokeConsent, { purpose: "consular_attestation", networkId: diasporale })
+    if (kind === "nouveau_consentement") {
+      await light.as.mutation(api.modules.people.consents.recordConsent, { purpose: "consular_attestation", origin: "prompt", networkId: diasporale })
+      const consents = await t.run(async (ctx) => ctx.db.query("consents").withIndex("by_person_and_purpose", (q) => q.eq("personId", light.personId).eq("purpose", "consular_attestation")).take(5))
+      expect(consents.some((consent) => consent._id !== initial.consentId && consent.revokedAt === undefined)).toBe(true)
+    }
+
+    expect(await t.query(internal.modules.diaspora.attestation.attestationRequest, { attestationId })).toBeNull()
+    if (kind !== "avant_envoi") await t.mutation(internal.modules.diaspora.attestation.recordAttestation, {
+      attestationId,
+      response: { verified: true, countryOfResidence: "FR", postSlug: "consulat-general-paris", registrationStatus: "active", attestedAt: Date.now() },
+    })
+    await settle(t)
+    const row = await t.run(async (ctx) => ctx.db.get(attestationId))
+    expect(row).toMatchObject({ result: "failed", respondedAt: expect.any(Number), consentId: initial.consentId })
+    expect(row?.country).toBeUndefined()
+    expect(row?.postSlug).toBeUndefined()
+    expect(row?.attestedAt).toBeUndefined()
+    expect(await t.run(async (ctx) => ctx.db.query("identityLinks").withIndex("by_person_and_provider", (q) => q.eq("personId", light.personId).eq("provider", "consular_attestation")).unique())).toBeNull()
+    expect(await membership(t, diasporale, light.personId)).toEqual(childBefore)
+    expect(await membership(t, root, light.personId)).toEqual(rootBefore)
+    expect((await light.as.query(api.modules.people.persons.getMyPerson, {}))?.badges).not.toContain("verified")
+    expect(await bells(t, diasporale, light.personId)).toEqual([])
+    expect(fetchMock).not.toHaveBeenCalled()
+  })
+
+  it.each(["adresse_changee", "verification_retiree", "idn_changee", "idn_retiree"] as const)("refuse une réponse positive si le sujet consenti change après le départ (%s)", async (kind) => {
+    vi.useFakeTimers()
+    configure()
+    const t = testConvex({ automaticSessions: false })
+    const { root, diasporale } = await seedAll(t)
+    const light = await emailMember(t, diasporale)
+    const usesIdn = kind === "idn_changee" || kind === "idn_retiree"
+    if (usesIdn) await linkIdn(t, light.personId, 1, "GA")
+    const fetchMock = fakeConsulate(() => ({}))
+    const { attestationId } = await light.as.mutation(api.modules.diaspora.attestation.requestConsularAttestation, { networkId: diasporale, consent: true })
+    // L'action a déjà récupéré sa requête, avant la modification du canal.
+    expect(await t.query(internal.modules.diaspora.attestation.attestationRequest, { attestationId })).toMatchObject({ subjectKind: usesIdn ? "idnSub" : "emailHash" })
+    const childBefore = await membership(t, diasporale, light.personId)
+    const rootBefore = await membership(t, root, light.personId)
+    if (usesIdn) {
+      await t.run(async (ctx) => {
+        const link = await ctx.db.query("identityLinks").withIndex("by_person_and_provider", (q) => q.eq("personId", light.personId).eq("provider", "idn")).unique()
+        if (!link) throw new Error("Lien IDN de fixture absent")
+        await ctx.db.patch(link._id, kind === "idn_retiree" ? { revokedAt: Date.now() } : { subject: "idn-nouveau-sujet" })
+      })
+    } else {
+      await t.mutation(components.betterAuth.adapter.updateOne, {
+        input: { model: "user", where: [{ field: "_id", value: light.userId }], update: kind === "verification_retiree" ? { emailVerified: false } : { email: "autre.adresse@exemple.test" } },
+      })
+    }
+
+    await t.mutation(internal.modules.diaspora.attestation.recordAttestation, {
+      attestationId,
+      response: { verified: true, countryOfResidence: "FR", postSlug: "consulat-general-paris", registrationStatus: "active", attestedAt: Date.now() },
+    })
+    const row = await t.run(async (ctx) => ctx.db.get(attestationId))
+    expect(row).toMatchObject({ result: "failed", respondedAt: expect.any(Number) })
+    expect(row?.country).toBeUndefined()
+    expect(row?.postSlug).toBeUndefined()
+    expect(row?.attestedAt).toBeUndefined()
+    expect(await t.run(async (ctx) => ctx.db.query("identityLinks").withIndex("by_person_and_provider", (q) => q.eq("personId", light.personId).eq("provider", "consular_attestation")).unique())).toBeNull()
+    expect(await membership(t, diasporale, light.personId)).toEqual(childBefore)
+    expect(await membership(t, root, light.personId)).toEqual(rootBefore)
+    expect((await light.as.query(api.modules.people.persons.getMyPerson, {}))?.badges).not.toContain("verified")
+    expect(await bells(t, diasporale, light.personId)).toEqual([])
+    await settle(t)
+    expect(fetchMock).not.toHaveBeenCalled()
+  })
+
+  it("garde le sujet IDN prioritaire même si l'e-mail vérifié change avant l'action", async () => {
+    vi.useFakeTimers()
+    configure()
+    const t = testConvex({ automaticSessions: false })
+    const { diasporale } = await seedAll(t)
+    const light = await emailMember(t, diasporale)
+    await linkIdn(t, light.personId, 1, "GA")
+    const seen: Record<string, unknown>[] = []
+    fakeConsulate(() => ({ contract: "DIASPORA-ATTESTATION-V1", verified: false, registrationStatus: "none", attestedAt: Date.now() }), seen)
+    const { attestationId } = await light.as.mutation(api.modules.diaspora.attestation.requestConsularAttestation, { networkId: diasporale, consent: true })
+    await t.mutation(components.betterAuth.adapter.updateOne, { input: { model: "user", where: [{ field: "_id", value: light.userId }], update: { email: "nouvelle.adresse@exemple.test" } } })
+
+    expect(await t.query(internal.modules.diaspora.attestation.attestationRequest, { attestationId })).toMatchObject({ subjectKind: "idnSub", subject: `idn-${light.personId}` })
+    await settle(t)
+    expect(seen).toHaveLength(1)
+    expect(seen[0]).toMatchObject({ subjectKind: "idnSub", subject: `idn-${light.personId}` })
+    expect(await t.run(async (ctx) => ctx.db.get(attestationId))).toMatchObject({ subjectKind: "idnSub", subjectHash: await sha256Hex(`idn-${light.personId}`) })
   })
 
   it("confirmée : lien d'attestation (empreinte), poste sur la facette, statut vérifié — et rien d'autre", async () => {

@@ -45,6 +45,7 @@ import { enforceRateLimit } from "../../lib/rateLimit"
 import { literals } from "../../lib/validators"
 import { notifyPerson } from "../notifications/notify"
 import { writeNetworkFacet } from "../people/admission"
+import { verifiedEmailHashOf } from "../people/identity"
 import { liveIdentityLinks } from "../people/persons"
 import { activeSponsorshipOf, applyDerivedStatus, assertDiasporaNetwork, facetOf, isDiasporaNetwork, membershipGrounds, privacyOf, writePrivacy } from "./facts"
 import { ATTESTATION_RESULTS } from "./tables"
@@ -84,13 +85,15 @@ export async function signAttestation(secretBase64: string, canonical: string): 
 }
 
 /**
- * Le sujet présenté à consulat.ga : le subject IDN de la personne. L'empreinte de
- * l'adresse vérifiée d'un compte léger (`emailHash`) attend l'identité du moteur
- * (PA4) ; d'ici là, un compte léger n'a pas de sujet à présenter.
+ * Le sujet présenté à consulat.ga : le subject IDN en priorité, sinon
+ * l'empreinte du canal e-mail actuellement vérifié par le composant d'identité.
+ * Aucune adresse brute ne quitte cette frontière.
  */
 async function subjectOf(ctx: QueryCtx, personId: Id<"persons">): Promise<{ kind: AttestationSubjectKind; subject: string } | null> {
   const idn = (await liveIdentityLinks(ctx, personId)).find((link) => link.provider === "idn")
-  return idn ? { kind: "idnSub", subject: idn.subject } : null
+  if (idn) return { kind: "idnSub", subject: idn.subject }
+  const emailHash = await verifiedEmailHashOf(ctx, personId)
+  return emailHash === null ? null : { kind: "emailHash", subject: emailHash }
 }
 
 /**
@@ -167,6 +170,13 @@ export const myAttestationRequest = networkQuery({
   },
 })
 
+/** Seul le consentement initial, toujours valable et lié à cette demande, autorise sa suite. */
+async function requestConsentInForce(ctx: QueryCtx, request: Doc<"consularAttestations">): Promise<boolean> {
+  const consent = await ctx.db.get(request.consentId)
+  return consent !== null && consent.personId === request.personId && consent.networkId === request.networkId
+    && consent.purpose === "consular_attestation" && isConsentInForce([consent], "consular_attestation")
+}
+
 /** La requête à envoyer, recomposée au moment de l'appel : le sujet n'est jamais stocké. */
 export const attestationRequest = internalQuery({
   args: { attestationId: v.id("consularAttestations") },
@@ -177,6 +187,7 @@ export const attestationRequest = internalQuery({
   handler: async (ctx, { attestationId }) => {
     const row = await ctx.db.get(attestationId)
     if (!row || row.result !== "pending") return null
+    if (!(await requestConsentInForce(ctx, row))) return null
     const subject = await subjectOf(ctx, row.personId)
     // Le lien a changé depuis la demande : on n'envoie pas un autre sujet que celui consenti.
     if (!subject || subject.kind !== row.subjectKind || (await sha256Hex(subject.subject)) !== row.subjectHash) return null
@@ -271,6 +282,17 @@ export const recordAttestation = internalMutation({
     const row = await ctx.db.get(attestationId)
     if (!row || row.result !== "pending") return null
     const now = Date.now()
+    if (!(await requestConsentInForce(ctx, row))) {
+      await ctx.db.patch(attestationId, { result: "failed", respondedAt: now })
+      return null
+    }
+    const subject = await subjectOf(ctx, row.personId)
+    // Le canal peut changer pendant l'appel : seule la preuve consentie peut
+    // encore produire un lien, et la raison du refus ne quitte pas le moteur.
+    if (!subject || subject.kind !== row.subjectKind || (await sha256Hex(subject.subject)) !== row.subjectHash) {
+      await ctx.db.patch(attestationId, { result: "failed", respondedAt: now })
+      return null
+    }
     const country = response.countryOfResidence
     const postSlug = response.postSlug
     const confirmed = response.verified && country !== undefined && isResidenceCountry(country) && postSlug !== undefined
