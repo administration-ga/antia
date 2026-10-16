@@ -19,7 +19,7 @@ import { Badge, Button, Card, Field, TextInput } from "@antsia/ui"
 import { EspaceDossierTabs, EspaceEmptyState, EspaceKitStyles } from "@antsia/ui/espace-kit"
 import { useMutation } from "convex/react"
 import type { FunctionReference, FunctionReturnType } from "convex/server"
-import { useCallback, useEffect, useId, useMemo, useState, type ReactNode } from "react"
+import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 
@@ -33,6 +33,16 @@ import { draftKey } from "../messagerie/messagerie-dock"
 import { conversationHref } from "../messagerie/messagerie-routes"
 import { personHref } from "./author-link"
 import { Avatar } from "./Avatar"
+import {
+  appendFollowPage,
+  initialFollowsPages,
+  mergedFollowRows,
+  nextFollowsCursor,
+  recordFollowPage,
+  removeFollowRow,
+  type FollowPageMount,
+  type FollowPageSnapshot,
+} from "./follows-pagination"
 import { reseauEmptyState, type ReseauEmptyStateId } from "./empty-states"
 import {
   PEOPLE_VIEW_DEFAULT,
@@ -74,8 +84,8 @@ function ReseauEmptyCard({ id }: { id: ReseauEmptyStateId }) {
   )
 }
 
-/** Trois listes, trois tailles — chacune bornée en mémoire, une page de
- *  serveur à la fois (pagination native du moteur). */
+/** Tailles des pages natives du moteur : les pages suivantes gardent la
+ * même taille, sans gonfler la fenêtre de lecture du serveur. */
 const CONNECTIONS_PAGE_SIZE = 12
 const FOLLOWS_PAGE_SIZE = 12
 const PENDING_REQUESTS_PAGE_SIZE = 10
@@ -119,9 +129,6 @@ type SentInvitationRow = FunctionReturnType<typeof api.modules.suggestions.sugge
 /** Une carte du catalogue des suggestions. */
 type SuggestionCatalogRow = FunctionReturnType<typeof api.modules.suggestions.suggestions.paginate>["page"][number]
 
-/** Une personne que je suis. */
-type FollowRow = FunctionReturnType<typeof api.modules.graph.follows.paginateMyFollows>["page"][number]
-
 const SENT_INVITATIONS_SOURCE: PagedSource<typeof api.modules.suggestions.suggestions.paginateSentInvitations, SentInvitationRow> = {
   query: api.modules.suggestions.suggestions.paginateSentInvitations,
   page: (data) => data,
@@ -134,16 +141,11 @@ const SUGGESTIONS_SOURCE: PagedSource<typeof api.modules.suggestions.suggestions
   key: (row) => row.handle,
 }
 
-const FOLLOWS_SOURCE: PagedSource<typeof api.modules.graph.follows.paginateMyFollows, FollowRow> = {
-  query: api.modules.graph.follows.paginateMyFollows,
-  page: (data) => data,
-  key: (row) => String(row.targetPersonId),
-}
-
 /**
  * La chaîne des pages d'une liste paginée — le patron du catalogue (R-05),
- * partagé par les trois listes paginées du volet. Chaque page remplace la
- * sienne par clé, et l'ensemble se dédoublonne par `source.key`.
+ * partagé par les invitations envoyées et le catalogue. Chaque page remplace
+ * la sienne par clé, et l'ensemble se dédoublonne par `source.key`. Les suivis
+ * ont leur chaîne réactive dédiée dans `follows-pagination.ts`.
  *
  * Seule la DERNIÈRE page montée est abonnée : les précédentes sont des
  * instantanés, que les gestes locaux corrigent (`update`) en attendant le
@@ -1008,44 +1010,122 @@ function ConnectionsCard() {
   )
 }
 
-function FollowsCard() {
+export interface FollowsSectionProps {
+  /** Sortie vers la découverte propre au réseau, sans monter son annuaire. */
+  discover?: { href: string; label: string }
+}
+
+/** La même carte, autonome : aucune recherche ni liste d'abonnés montée. */
+export function FollowsSection(props: FollowsSectionProps) {
+  return (
+    <div className="rp-people-panel" data-collection="relations">
+      <PeoplePanelStyles />
+      <EspaceKitStyles />
+      <FollowsCard {...props} />
+    </div>
+  )
+}
+
+function FollowsCard(props: FollowsSectionProps) {
+  const { networkId, personId } = useNetwork()
+  // PeoplePanel bénéficie du même reset que la section montée seule.
+  return <FollowsPages key={JSON.stringify([networkId, personId])} {...props} />
+}
+
+type RetryFollowPage = () => Promise<unknown>
+
+function FollowsQueryPage(props: {
+  mount: FollowPageMount
+  report: (mount: FollowPageMount, page: FollowPageSnapshot) => void
+  registerRetry: (id: number, retry: RetryFollowPage) => () => void
+}) {
+  const { networkId } = useNetwork()
+  const { mount, report, registerRetry } = props
+  const query = useAuthenticatedConvexQuery(api.modules.graph.follows.paginateMyFollows, {
+    networkId,
+    paginationOpts: { numItems: FOLLOWS_PAGE_SIZE, cursor: mount.cursor },
+  })
+  useEffect(() => {
+    report(mount, { data: query.data ?? undefined, isPending: query.isPending, isError: query.isError })
+  }, [mount, query.data, query.isPending, query.isError, report])
+  useEffect(() => registerRetry(mount.id, query.refetch), [mount.id, query.refetch, registerRetry])
+  return null
+}
+
+function FollowsPages({ discover }: FollowsSectionProps) {
   const { t } = useTranslation("reseau")
   const { networkId } = useNetwork()
   const routes = useRoutes()
-  const follows = usePagedList(FOLLOWS_SOURCE, (cursor) => ({
-    networkId,
-    paginationOpts: { numItems: FOLLOWS_PAGE_SIZE, cursor },
-  }))
+  const [state, setState] = useState(initialFollowsPages)
+  const retries = useRef(new Map<number, RetryFollowPage>())
+  const pendingTargets = useRef(new Set<string>())
+  const [busyTargets, setBusyTargets] = useState<ReadonlySet<string>>(new Set())
+  const active = useRef(false)
+  useLayoutEffect(() => {
+    active.current = true
+    return () => { active.current = false }
+  }, [])
+  const report = useCallback((mount: FollowPageMount, page: FollowPageSnapshot) => {
+    setState((previous) => recordFollowPage(previous, mount, page))
+  }, [])
+  const registerRetry = useCallback((id: number, retry: RetryFollowPage) => {
+    retries.current.set(id, retry)
+    return () => {
+      if (retries.current.get(id) === retry) retries.current.delete(id)
+    }
+  }, [])
+  const retry = () => {
+    for (const refetch of retries.current.values()) {
+      void (async () => { try { await refetch() } catch { /* Le hook porte la panne. */ } })()
+    }
+  }
   const followerCount = useAuthenticatedConvexQuery(api.modules.graph.follows.myFollowerCount, { networkId })
   const unfollow = useMutation(api.modules.graph.follows.unfollow)
-  const items = follows.items
-  const { update } = follows
+  const items = mergedFollowRows(state)
+  const last = state.mounts[state.mounts.length - 1]!
+  const current = state.pages[last.id]
+  const hasError = state.mounts.some((mount) => state.pages[mount.id]?.isError)
+  const initialLoading = state.pages[0]?.data === undefined && !hasError
+  const loadingMore = state.mounts.length > 1 && (!current?.data || current.isPending) && !current?.isError
+  const hasMore = nextFollowsCursor(state) !== null
+  const countIsFloor = hasMore || loadingMore || hasError
+  const empty = !initialLoading && !hasError && items.length === 0 && !hasMore && !loadingMore
 
   const stopFollowing = async (targetPersonId: Id<"persons">) => {
+    if (pendingTargets.current.has(targetPersonId)) return
+    pendingTargets.current.add(targetPersonId)
+    setBusyTargets(new Set(pendingTargets.current))
     try {
       await unfollow({ networkId, targetPersonId })
-      // La carte part des pages tenues : seule la dernière page est abonnée.
-      update((row) => (row.targetPersonId === targetPersonId ? null : row))
+      if (!active.current) return
+      setState((previous) => removeFollowRow(previous, targetPersonId))
       toast.success(t("peoplePanel.follows.unfollowed"))
     } catch (error) {
+      if (!active.current) return
       toast.error(relationErrorText(error, "reseau:peoplePanel.follows.unfollowFailed", t))
+    } finally {
+      pendingTargets.current.delete(targetPersonId)
+      if (active.current) setBusyTargets(new Set(pendingTargets.current))
     }
   }
 
   return (
-    <PanelCard title={t("peoplePanel.follows.title")} count={items.length} countIsFloor={follows.hasMore}>
-      <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+    <PanelCard title={t("peoplePanel.follows.title")} count={items.length} countIsFloor={countIsFloor}>
+      {state.mounts.map((mount) => <FollowsQueryPage key={mount.id} mount={mount} report={report} registerRetry={registerRetry} />)}
+      <div style={{ display: "flex", flexDirection: "column", gap: 12 }} aria-busy={initialLoading || loadingMore}>
         <EmptyLine>{followerCount.data === undefined ? " " : t("peoplePanel.follows.followers", { count: followerCount.data })}</EmptyLine>
         {/* La panne se dit et ne vide pas la liste tenue (R-08). */}
-        {follows.isError ? (
-          <ReseauQueryError title={t("peoplePanel.follows.errorTitle")} message={t("peoplePanel.follows.errorMessage")} onRetry={follows.retry} />
+        {hasError ? (
+          <ReseauQueryError title={t("peoplePanel.follows.errorTitle")} message={t("peoplePanel.follows.errorMessage")} onRetry={retry} />
         ) : null}
-        {montreSquelette(follows.etat) ? (
+        {initialLoading ? (
           <EmptyLine>{t("peoplePanel.loading")}</EmptyLine>
-        ) : montreEtatVide(follows.etat, items.length) ? (
-          <ReseauEmptyCard id="relations-abonnements" />
-        ) : !montreElements(follows.etat, items.length) ? null : (
-          <>
+        ) : empty ? (
+          discover ? (
+            <EspaceEmptyState compact text={reseauEmptyState("relations-abonnements", routes.home(), t).text} action={<Link href={discover.href}>{discover.label}</Link>} />
+          ) : <ReseauEmptyCard id="relations-abonnements" />
+        ) : null}
+        {items.length > 0 ? (
             <ul
               className="rp-person-tiles"
               style={{
@@ -1073,6 +1153,8 @@ function FollowsCard() {
                       variant="link"
                       size="sm"
                       style={{ ...RESEAU_PILL_ACTION_STYLE, minHeight: 44 }}
+                      disabled={busyTargets.has(person.targetPersonId)}
+                      aria-busy={busyTargets.has(person.targetPersonId)}
                       onClick={() => void stopFollowing(person.targetPersonId)}
                     >
                       {t("peoplePanel.follows.unfollow")}
@@ -1081,13 +1163,12 @@ function FollowsCard() {
                 </li>
               ))}
             </ul>
-            {follows.hasMore ? (
-              <Button variant="secondary" size="sm" onClick={follows.loadMore}>
-                {t("peoplePanel.follows.loadMore")}
-              </Button>
-            ) : null}
-          </>
-        )}
+        ) : null}
+        {hasMore || loadingMore ? (
+          <Button variant="secondary" size="sm" disabled={loadingMore || hasError} onClick={() => setState(appendFollowPage)}>
+            {t(loadingMore ? "peoplePanel.loading" : "peoplePanel.follows.loadMore")}
+          </Button>
+        ) : null}
       </div>
     </PanelCard>
   )

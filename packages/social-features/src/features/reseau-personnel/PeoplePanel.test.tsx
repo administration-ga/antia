@@ -16,10 +16,11 @@
  * gestes ; et le catalogue de suggestions tient son état — « Demande envoyée »
  * comme le masquage — du SERVEUR, plus d'un `useState`.
  */
-import { cleanup, fireEvent, screen } from "@testing-library/react"
+import type { Id } from "@antsia/api/engine"
+import { cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
-import { memoryRouter, renderWithEngine, TEST_NETWORK_ID } from "../../tests/engine-wrapper"
+import { EngineTestWrapper, memoryRouter, renderWithEngine, TEST_NETWORK_ID } from "../../tests/engine-wrapper"
 
 type QueryMock = {
   data: unknown
@@ -216,6 +217,16 @@ describe("PeoplePanel — personnes suivies (R-08)", () => {
     const args = mocks.queryArgs.paginateMyFollows ?? []
     expect(args[0]).toMatchObject({ networkId: TEST_NETWORK_ID, paginationOpts: { cursor: null } })
     expect(args.at(-1)).toMatchObject({ networkId: TEST_NETWORK_ID, paginationOpts: { cursor: "curseur-2" } })
+  })
+
+  it("réinitialise aussi la carte des suivis intégrée au volet quand le lecteur change", () => {
+    mocks.queries.paginateMyFollows = ok({ page: [followed("awa", "Awa Ndong")], isDone: false, continueCursor: "curseur-2" })
+    const view = render(<EngineTestWrapper><PeoplePanel /></EngineTestWrapper>)
+    fireEvent.click(screen.getByRole("button", { name: "Voir plus de personnes suivies" }))
+    mocks.queries.paginateMyFollows = { ...ok(undefined), isPending: true, isFetching: true, fetchStatus: "fetching" }
+    view.rerender(<EngineTestWrapper personId={"persons_other" as Id<"persons">}><PeoplePanel /></EngineTestWrapper>)
+    expect(screen.queryByText("Awa Ndong")).toBeNull()
+    expect((mocks.queryArgs.paginateMyFollows ?? []).at(-1)).toMatchObject({ paginationOpts: { cursor: null } })
   })
 })
 

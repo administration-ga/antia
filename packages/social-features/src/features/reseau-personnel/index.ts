@@ -91,7 +91,8 @@ export { Avatar, initialsOf } from "./Avatar"
 export { SharePostDialog } from "./SharePostDialog"
 
 // ── Relations et groupes ────────────────────────────────────────────────────
-export { PeoplePanel, PeopleSearchPanel } from "./PeoplePanel"
+export { PeoplePanel, PeopleSearchPanel, FollowsSection } from "./PeoplePanel"
+export type { FollowsSectionProps } from "./PeoplePanel"
 // Les décisions PURES du volet Relations : sous-vues et leur adresse, ligne de
 // titre d'une carte, droit d'affichage de la présence. Exportées pour qu'un
 // chrome et les tests les lisent sans monter l'écran.
