@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/iappel/CallSurface.tsx @ ad2e7fdc2 — adaptations : appel `Id<"calls">` (table `meetings` → `calls`) ; noms accessibles et aide de déplacement traduits (i18n `iappel`) ; clé de placement préfixée par le réseau (`storagePrefix`) ; `ImmersiveOverlay` de @antia/ui (charte de l'application).
+// Dupliqué de socle/packages/agent-features/src/features/iappel/CallSurface.tsx @ ad2e7fdc2 — adaptations : appel `Id<"calls">` (table `meetings` → `calls`) ; noms accessibles et aide de déplacement traduits (i18n `iappel`) ; clé de placement préfixée par le réseau (`storagePrefix`) ; `ImmersiveOverlay` de @antsia/ui (charte de l'application).
 "use client"
 
 /**
@@ -40,8 +40,8 @@
  * (`host` en prop, comme `plan`) : cette surface ne choisit toujours rien.
  */
 
-import { useNetwork } from "@antia/api/network"
-import { ImmersiveOverlay } from "@antia/ui/overlay"
+import { useNetwork } from "@antsia/api/network"
+import { ImmersiveOverlay } from "@antsia/ui/overlay"
 import { RoomContext } from "@livekit/components-react"
 import { createPortal } from "react-dom"
 import { useTranslation } from "react-i18next"
@@ -53,7 +53,7 @@ import type { CallHost } from "./call-host-store"
 import type { CallPresentation, CallSurfacePlan } from "./call-surface-plan"
 import { CallMinimizedPill } from "./CallMinimizedPill"
 import { useSurfaceDrag } from "./use-surface-drag"
-import type { Id } from "@antia/api/engine"
+import type { Id } from "@antsia/api/engine"
 
 export interface CallSurfaceProps {
 	/** `null` au rendu serveur : on n'affiche rien plutôt que de deviner. */

@@ -58,7 +58,7 @@ export type ReseauAgentTabId = (typeof RESEAU_AGENT_TAB_IDS)[number]
 
 /**
  * Le paramètre de query est `tab` : c'est le contrat par lequel un lien ouvre
- * un volet précis (`useTabQueryState` de `@antia/api/routing`). Le renommer
+ * un volet précis (`useTabQueryState` de `@antsia/api/routing`). Le renommer
  * rendrait la page inatteignable en profondeur.
  */
 export const RESEAU_AGENT_TAB_PARAM = "tab"

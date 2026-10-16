@@ -10,8 +10,8 @@
  * pas de `contentType` : le type DÉCLARÉ à l'admission sert de repli, et c'est
  * précisément ce que l'inspection des octets vient confronter.
  */
-import { engineErrorCode, engineErrorRule } from "@antia/social-contracts/errors"
-import type { UploadUsage } from "@antia/social-domain/uploadPolicy"
+import { engineErrorCode, engineErrorRule } from "@antsia/social-contracts/errors"
+import type { UploadUsage } from "@antsia/social-domain/uploadPolicy"
 import JSZip from "jszip"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 

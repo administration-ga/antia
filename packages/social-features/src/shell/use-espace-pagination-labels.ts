@@ -1,7 +1,7 @@
 "use client"
 
 /**
- * Les phrases de la pagination du kit d'espace (`@antia/ui/espace-kit`),
+ * Les phrases de la pagination du kit d'espace (`@antsia/ui/espace-kit`),
  * traduites UNE fois pour tous les volets du réseau personnel.
  *
  * Le paquet d'interface n'a pas d'i18n : `EspacePagination` exige ses phrases
@@ -13,7 +13,7 @@
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 
-import type { EspacePaginationLabels } from "@antia/ui/espace-kit"
+import type { EspacePaginationLabels } from "@antsia/ui/espace-kit"
 
 export function useEspacePaginationLabels(): EspacePaginationLabels {
   const { t } = useTranslation("reseau")

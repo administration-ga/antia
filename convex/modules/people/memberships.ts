@@ -10,9 +10,9 @@
  * - Un réseau gouverné par une tranche (`networks.managedBy`) n'entre que par
  *   elle (aides partagées : `./admission`) ; le quitter reste toujours possible.
  */
-import { assertDecisionReason } from "@antia/social-domain/audit"
-import { missingConsentsToJoin } from "@antia/social-domain/consent"
-import { type EntryEvidence, entryStatusFor, leaveCascades, nextMembershipStatus } from "@antia/social-domain/membership"
+import { assertDecisionReason } from "@antsia/social-domain/audit"
+import { missingConsentsToJoin } from "@antsia/social-domain/consent"
+import { type EntryEvidence, entryStatusFor, leaveCascades, nextMembershipStatus } from "@antsia/social-domain/membership"
 import { v } from "convex/values"
 
 import type { Doc } from "../../_generated/dataModel"

@@ -11,12 +11,12 @@
  * imports ci-dessous sont des TYPES seulement.
  */
 
-import type { api, Id } from "@antia/api/engine"
-import type { GroupParticipantState } from "@antia/social-contracts/callGroup"
+import type { api, Id } from "@antsia/api/engine"
+import type { GroupParticipantState } from "@antsia/social-contracts/callGroup"
 import type {
 	CallAdmissionReason as EngineCallAdmissionReason,
 	CallKind as EngineCallKind,
-} from "@antia/social-domain/callJournal"
+} from "@antsia/social-domain/callJournal"
 import type { FunctionReturnType } from "convex/server"
 
 /**
@@ -80,7 +80,7 @@ export interface CallGroupIdentity {
  * L'état d'UN interlocuteur dans un appel de groupe.
  *
  * Miroir exact de `GroupParticipantState` côté moteur
- * (`@antia/social-contracts/callGroup`) : c'est le même type, si bien qu'une
+ * (`@antsia/social-contracts/callGroup`) : c'est le même type, si bien qu'une
  * valeur ne peut pas exister d'un seul côté.
  */
 export type CallParticipantState = GroupParticipantState

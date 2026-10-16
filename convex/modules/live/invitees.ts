@@ -28,7 +28,7 @@
  * (connexion, fil, blocage, adhésion, cercle de la page) apprendrait quelque
  * chose sur le lien entre deux personnes.
  */
-import { foldDiacritics } from "@antia/social-domain/searchText"
+import { foldDiacritics } from "@antsia/social-domain/searchText"
 import { v } from "convex/values"
 
 import { internal } from "../../_generated/api"

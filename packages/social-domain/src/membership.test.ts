@@ -82,7 +82,7 @@ describe("nextMembershipStatus — toutes les transitions", () => {
 })
 
 describe("entryStatusFor — statut d'entrée par politique", () => {
-  it("open (ANTIA) : déclarée, vérifiée avec une identité forte ou une vérification externe", () => {
+  it("open (ANTSIA) : déclarée, vérifiée avec une identité forte ou une vérification externe", () => {
     expect(entryStatusFor("open", none)).toBe("declaree")
     expect(entryStatusFor("open", { ...none, strongIdentity: true })).toBe("verifiee")
     expect(entryStatusFor("open", { ...none, externalVerification: true })).toBe("verifiee")

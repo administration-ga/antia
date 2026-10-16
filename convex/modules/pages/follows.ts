@@ -4,7 +4,7 @@
  * Aucune fonction Convex ici : des lectures partagées par le fil, l'annuaire,
  * le mur d'une page et les rappels.
  */
-import { PAGE_FOLLOWS_SCAN } from "@antia/social-domain/pages"
+import { PAGE_FOLLOWS_SCAN } from "@antsia/social-domain/pages"
 
 import type { Doc, Id } from "../../_generated/dataModel"
 import type { QueryCtx } from "../../_generated/server"

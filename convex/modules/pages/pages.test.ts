@@ -1,6 +1,6 @@
 // @vitest-environment edge-runtime
 // Dupliqué de socle/convex/modules/reseauPages/pages.test.ts @ ad2e7fdc2 — adaptations : personnes et réseaux (graine des fondations) ; l'ACTIVATION par le superadmin remplacée par la CRÉATION par un membre vérifié et par la console (page d'institution « Officiel ») ; l'accord `communication.publish` remplacé par le SIGNATAIRE VIVANT (habilitation acceptée) ; la note de service (`organisation`) devenue la note aux abonnés (`followers`) ; la portée « mon_administration » retirée (ses cas deviennent ceux des voies et de la lecture depuis la racine) ; avertissement « module Actualités » sans objet ; compteurs lus dans l'agrégat ; codes et règles au lieu des libellés ; tests neufs : pays et portée d'une publication de page, règle `root`, page d'un réseau fermé lue depuis la racine, cloche des abonnés, signets d'une publication de page, identité modifiée avec historique, retour à la réactivation.
-import { engineErrorCode, engineErrorRule } from "@antia/social-contracts/errors"
+import { engineErrorCode, engineErrorRule } from "@antsia/social-contracts/errors"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 import { api, internal } from "../../_generated/api"

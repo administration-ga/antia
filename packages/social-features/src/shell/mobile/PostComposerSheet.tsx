@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/mobile/PostComposerSheet.tsx @ ad2e7fdc2 — adaptations : déplacé dans la coque (`shell/mobile/`) ; surface plein écran et seuil mobile de `@antia/ui/overlay` (la surface porte la charte de l'application, plus celle de l'espace personnel) ; titre, boutons, annonce et nom accessible par l'i18n (clés `reseau:postComposerSheet.*`) ; commentaires sans la conférence (le direct n'existe pas encore dans le moteur) ; comportement inchangé (fermer conserve, abandonner se confirme en place).
+// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/mobile/PostComposerSheet.tsx @ ad2e7fdc2 — adaptations : déplacé dans la coque (`shell/mobile/`) ; surface plein écran et seuil mobile de `@antsia/ui/overlay` (la surface porte la charte de l'application, plus celle de l'espace personnel) ; titre, boutons, annonce et nom accessible par l'i18n (clés `reseau:postComposerSheet.*`) ; commentaires sans la conférence (le direct n'existe pas encore dans le moteur) ; comportement inchangé (fermer conserve, abandonner se confirme en place).
 "use client"
 
 /**
@@ -42,8 +42,8 @@
  * SOUS cette surface (`z-index`), et l'usager cliquerait dans le vide.
  */
 
-import { Button } from "@antia/ui"
-import { ImmersiveOverlay, useIsReseauMobile } from "@antia/ui/overlay"
+import { Button } from "@antsia/ui"
+import { ImmersiveOverlay, useIsReseauMobile } from "@antsia/ui/overlay"
 import { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 

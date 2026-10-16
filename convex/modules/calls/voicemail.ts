@@ -6,8 +6,8 @@
  * le fichier — aucun pipeline serveur. Un appel n'accepte qu'UN message : un
  * second dépôt (réseau qui rejoue, double clic) rend celui qui existe.
  */
-import { MAX_VOICEMAIL_DURATION_MS } from "@antia/social-contracts/calls"
-import type { CounterpartLabel } from "@antia/social-contracts/counterpart"
+import { MAX_VOICEMAIL_DURATION_MS } from "@antsia/social-contracts/calls"
+import type { CounterpartLabel } from "@antsia/social-contracts/counterpart"
 import { v } from "convex/values"
 
 import type { Doc, Id } from "../../_generated/dataModel"

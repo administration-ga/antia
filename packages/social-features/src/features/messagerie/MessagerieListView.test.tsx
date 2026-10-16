@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/messagerie/MessagerieListView.test.tsx @ ad2e7fdc2 — adaptations : montage dans l'enveloppe du moteur (`renderWithEngine` : i18n fr, réseau, routes) ; fils au DTO du moteur (`threadId`, `counterpart.personId`, sans `poste`) ; références simulées du moteur ; `@antia/ui` non simulé (vrais `Alert`/`Button`) ; cas de la source de poste (« une liste désactivée n'attend rien ») porté sur une source factice désactivée, la source de poste étant retirée ; deux cas ajoutés — aperçu d'un vocal et correspondant sans nom ; les sept autres cas tels quels.
+// Dupliqué de socle/packages/agent-features/src/features/messagerie/MessagerieListView.test.tsx @ ad2e7fdc2 — adaptations : montage dans l'enveloppe du moteur (`renderWithEngine` : i18n fr, réseau, routes) ; fils au DTO du moteur (`threadId`, `counterpart.personId`, sans `poste`) ; références simulées du moteur ; `@antsia/ui` non simulé (vrais `Alert`/`Button`) ; cas de la source de poste (« une liste désactivée n'attend rien ») porté sur une source factice désactivée, la source de poste étant retirée ; deux cas ajoutés — aperçu d'un vocal et correspondant sans nom ; les sept autres cas tels quels.
 // @vitest-environment jsdom
 
 /**
@@ -16,7 +16,7 @@ import { afterEach, describe, expect, it, vi } from "vitest"
 
 import { renderWithEngine } from "../../tests/engine-wrapper"
 
-vi.mock("@antia/api/engine", () => ({
+vi.mock("@antsia/api/engine", () => ({
 	api: {
 		modules: {
 			messaging: {
@@ -37,7 +37,7 @@ vi.mock("@antia/api/engine", () => ({
 	},
 }))
 
-vi.mock("@antia/api/hooks", () => ({
+vi.mock("@antsia/api/hooks", () => ({
 	useAuthenticatedConvexQuery: () => ({
 		data: undefined,
 		isLoading: true,

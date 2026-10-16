@@ -4,7 +4,7 @@ import {
   DIRECT_PRESENCE_TTL_MS as SERVER_TTL,
   DIRECT_PRESENCE_HEARTBEAT_MS as SERVER_HEARTBEAT,
   isViewerPresent as serverIsViewerPresent,
-} from "@antia/social-domain/live/domain"
+} from "@antsia/social-domain/live/domain"
 import {
   DIRECT_PRESENCE_HEARTBEAT_MS,
   DIRECT_PRESENCE_TTL_MS,

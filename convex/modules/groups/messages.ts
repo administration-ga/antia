@@ -9,11 +9,11 @@
  *    bloqué, dans les deux sens — la ligne reste, `masked` le dit ;
  *  - un message cité qui m'est caché rend `deleted` sans son texte.
  */
-import { replyExcerpt } from "@antia/social-contracts/attachments"
-import type { CounterpartLabel } from "@antia/social-contracts/counterpart"
-import { applyMessageReactionDelta, emptyMessageReactionCounts, type MessageReactionCounts, type MessageReactionKind, nextMessageReactionKind } from "@antia/social-contracts/messageReactions"
-import { assertMessageContent, isWithinEditWindow, MESSAGE_EDIT_WINDOW_MS } from "@antia/social-contracts/messaging"
-import { isGroupThreadManager } from "@antia/social-domain/groupThreads"
+import { replyExcerpt } from "@antsia/social-contracts/attachments"
+import type { CounterpartLabel } from "@antsia/social-contracts/counterpart"
+import { applyMessageReactionDelta, emptyMessageReactionCounts, type MessageReactionCounts, type MessageReactionKind, nextMessageReactionKind } from "@antsia/social-contracts/messageReactions"
+import { assertMessageContent, isWithinEditWindow, MESSAGE_EDIT_WINDOW_MS } from "@antsia/social-contracts/messaging"
+import { isGroupThreadManager } from "@antsia/social-domain/groupThreads"
 import { paginationOptsValidator, type PaginationResult } from "convex/server"
 import { type Infer, v } from "convex/values"
 

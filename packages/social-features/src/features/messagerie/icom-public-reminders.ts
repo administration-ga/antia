@@ -13,7 +13,7 @@
  * pas : une branche inconnue ne doit jamais devenir un faux canal par défaut.
  */
 
-import type { Badge } from "@antia/social-domain/badges"
+import type { Badge } from "@antsia/social-domain/badges"
 import type { TFunction } from "i18next"
 import { authorHref, type AuthorRoutes } from "../reseau-personnel/author-link"
 import { formatRelativeDate } from "../reseau-personnel/shared"

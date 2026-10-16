@@ -1,10 +1,10 @@
-// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/Avatar.test.tsx @ ad2e7fdc2 — adaptations : mock de `@antia/ui` ; photo servie par une adresse relative (aucune origine en dur) ; cas inchangé.
+// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/Avatar.test.tsx @ ad2e7fdc2 — adaptations : mock de `@antsia/ui` ; photo servie par une adresse relative (aucune origine en dur) ; cas inchangé.
 // @vitest-environment jsdom
 
 import { cleanup, render } from "@testing-library/react"
 import { afterEach, describe, expect, it, vi } from "vitest"
 
-vi.mock("@antia/ui", () => ({
+vi.mock("@antsia/ui", () => ({
   Icon: () => <span data-testid="fallback-icon" />,
 }))
 

@@ -1,7 +1,7 @@
 /* Dupliqué de socle/packages/ui/src/styles/globals.css (l. 444-908 et 1061-1210) @ ad2e7fdc2 — adaptations : sélecteurs `[data-charte="espace-personnel"], [data-charte="espace-structure"]` → `[data-charte]` (toute charte d'application du moteur hérite de cette base, qu'un fichier de thème surcharge ensuite) ; bloc sombre `.dark [data-charte=…]` → `.dark[data-charte], .dark [data-charte]` (la charte est posée sur <html>, qui porte aussi `.dark`) ; la charte du compte « Poste » (l. 909-1059) et le contrat `.dash-v2` ne sont pas repris (administration).
 
    ═════════════════════════════════════════════════════════════════════════
-   BASE DES CHARTES DU MOTEUR ANTIA
+   BASE DES CHARTES DU MOTEUR ANTSIA
    ─────────────────────────────────────────────────────────────────────────
    Cette feuille est la charte « Personnel » (parchemin) de l'espace agent
    d'administration.ga, devenue la BASE de toute application du moteur. Les
@@ -482,7 +482,7 @@
   --esp-tone-green: var(--esp-green);
   --esp-tone-green-bg: var(--esp-green-bg);
 
-  /* ── Primitives d'ui-v2 et du tiroir, dupliquées pour le moteur (ANTIA) ──
+  /* ── Primitives d'ui-v2 et du tiroir, dupliquées pour le moteur (ANTSIA) ──
      Les valeurs du socle, en jetons : voile du tiroir (`bg-black/10` du
      socle, identique dans les deux thèmes) et ombre du curseur de
      l'interrupteur (`Toggle`). */

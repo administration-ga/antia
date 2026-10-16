@@ -26,7 +26,7 @@ export interface EspaceDossierTab {
 
 /**
  * Le tablist « chemise » du kit d'espace — mêmes règles ARIA et clavier que
- * `ReseauAgentTabs` (`shell/ReseauAgentPage.tsx` de `@antia/social-features`) :
+ * `ReseauAgentTabs` (`shell/ReseauAgentPage.tsx` de `@antsia/social-features`) :
  * flèches droite/bas → suivant (cyclique), gauche/haut → précédent,
  * Home/End → premier/dernier, et le focus SUIT toujours la sélection.
  *

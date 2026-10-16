@@ -12,11 +12,11 @@
  *  · la confiance (« Officiel », « Vérifié ») ne se déclare pas : une page
  *    créée ici est `community`, et seule une décision tracée la change.
  */
-import { pageTrustRank, assertMemberCreatableOwnerKind, assertPageHandle, assertPageName, normalizePageDescription, normalizePageShortName, PAGE_SIGNATORIES_MAX } from "@antia/social-domain/pages"
-import { assertCountryCode, assertPostContent, assertPostMedia, assertPostReach, REACH_REQUIRING_COUNTRY } from "@antia/social-domain/content"
-import { cursorForFeedPost } from "@antia/social-domain/feedScale"
-import { effectiveVisibility } from "@antia/social-domain/network"
-import { foldSearchQuery } from "@antia/social-domain/searchText"
+import { pageTrustRank, assertMemberCreatableOwnerKind, assertPageHandle, assertPageName, normalizePageDescription, normalizePageShortName, PAGE_SIGNATORIES_MAX } from "@antsia/social-domain/pages"
+import { assertCountryCode, assertPostContent, assertPostMedia, assertPostReach, REACH_REQUIRING_COUNTRY } from "@antsia/social-domain/content"
+import { cursorForFeedPost } from "@antsia/social-domain/feedScale"
+import { effectiveVisibility } from "@antsia/social-domain/network"
+import { foldSearchQuery } from "@antsia/social-domain/searchText"
 import { paginationOptsValidator, type PaginationResult } from "convex/server"
 import { type Infer, v } from "convex/values"
 

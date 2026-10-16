@@ -1,13 +1,13 @@
 ---
-title: "ANTIA — Rapport de parité du backend (PA3)"
+title: "ANTSIA — Rapport de parité du backend (PA3)"
 version: "0.1"
 date: "2026-10-15"
 statut: "En cours — un chapitre par module dupliqué, dans l'ordre de l'owner map (docs/02 §4.2)"
-projet: "ANTIA"
+projet: "ANTSIA"
 source: "socle administration.ga, origin/main = ad2e7fdc2"
 ---
 
-# ANTIA — Rapport de parité du backend
+# ANTSIA — Rapport de parité du backend
 
 Pour chaque module dupliqué du socle (`docs/02_OWNER_MAP_DUPLICATION.md` §6) : la liste de parité cochée
 (fichier par fichier), les adaptations (liste fermée du préambule de PA3), les corrections de dette (§5 de
@@ -394,11 +394,11 @@ dépend.
   factorisés (réseau, racine, auteur) ; portée « mon_administration », collègues, organisations et notes de service
   retirés ; `lacunar` rendu à l'écran.
 - **Publier** : groupe (appartenance vivante, forme, pas de partage), médias sous la garde des fichiers, partage aplati
-  sur l'original, portée et pays jugés contre le réseau (`assertPostReach`), « aussi sur ANTIA » ; idempotence par
+  sur l'original, portée et pays jugés contre le réseau (`assertPostReach`), « aussi sur ANTSIA » ; idempotence par
   auteur (une clé rejouée dans un autre réseau est refusée) ; cloches du partage et des citations par la porte unique.
 - **Épingle** par réseau, posée sur l'adhésion, rendue à part en première page du mur.
 - **Marques et sourdines par réseau** (celui où elles sont posées) ; listes paginées seules.
-- **`feed`** (fil « Récents » à curseur natif de la tranche verticale) gardé pour les écrans existants (antia.ga,
+- **`feed`** (fil « Récents » à curseur natif de la tranche verticale) gardé pour les écrans existants (antsia.ga,
   DIASPORALE), DTO étendu sans retrait.
 - **Réaction** sous la même garde (`assertVisiblePost`).
 - Débit : `post.edit`, `post.remove`, `mark.toggle`, `mute.toggle`.
@@ -420,7 +420,7 @@ dépend.
   retenue, poids réel, vidéo seule, cinq images), partage (garde du lecteur, aplatissement, décompte), recherche
   (accents, inconnu, garde, retrait, requête courte, partage sans corps), citations, mur (audiences, retirées, refus
   indistinct, continuation de 75 publications), masquer, enregistrer, suivre, sourdine, pagination de plus de 50 marques.
-- Neufs : contexte de lecture (R4, « aussi sur ANTIA » avec origine, natif de la racine), blocage qui l'emporte sur
+- Neufs : contexte de lecture (R4, « aussi sur ANTSIA » avec origine, natif de la racine), blocage qui l'emporte sur
   `public`, portée et pays, groupe (forme, appartenance, départ), édition, épingle, lacune, fil natif compatible,
   marque par réseau ; domaine : `assertPostReach`, blocage dans `isVisibleTo`.
 

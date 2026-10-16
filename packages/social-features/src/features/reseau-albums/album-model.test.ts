@@ -7,7 +7,7 @@
  * déplacement au clavier, et la décision de ré-encodage qui débarrasse une
  * photo de ses métadonnées avant qu'elle ne parte.
  */
-import { ALBUM_ADD_BATCH_MAX, ALBUM_ITEMS_MAX, ALBUM_TITLE_MAX } from "@antia/social-domain/albums"
+import { ALBUM_ADD_BATCH_MAX, ALBUM_ITEMS_MAX, ALBUM_TITLE_MAX } from "@antsia/social-domain/albums"
 import { ConvexError } from "convex/values"
 import { describe, expect, it } from "vitest"
 

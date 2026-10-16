@@ -6,9 +6,9 @@
  * ni d'une adresse. Sans profil publié (jamais publié, retiré, effacé), un nom
  * NEUTRE (`displayName: null`), que l'écran traduit, plutôt qu'une devinette.
  */
-import type { Badge } from "@antia/social-domain/badges"
-import { isProfileDiscoverable, isProfilePublished, normalizeHandle } from "@antia/social-domain/content"
-import { extractMentionHandles } from "@antia/social-domain/richText"
+import type { Badge } from "@antsia/social-domain/badges"
+import { isProfileDiscoverable, isProfilePublished, normalizeHandle } from "@antsia/social-domain/content"
+import { extractMentionHandles } from "@antsia/social-domain/richText"
 
 import type { Doc, Id } from "../../_generated/dataModel"
 import type { QueryCtx } from "../../_generated/server"

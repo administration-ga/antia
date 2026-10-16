@@ -5,7 +5,7 @@
 import {
   AVATAR_MAX_BYTES as DOMAIN_AVATAR_MAX_BYTES,
   PERSONAL_POST_MAX_LENGTH,
-} from "@antia/social-domain/content"
+} from "@antsia/social-domain/content"
 import { describe, expect, it } from "vitest"
 
 import { createAppI18n } from "../../i18n"

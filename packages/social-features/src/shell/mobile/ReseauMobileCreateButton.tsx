@@ -27,9 +27,9 @@
  * barre. Même mesure que `CallMinimizedPill`.
  */
 
-import { useRoutes } from "@antia/api/network"
-import { usePathname } from "@antia/api/routing"
-import { Icon } from "@antia/ui"
+import { useRoutes } from "@antsia/api/network"
+import { usePathname } from "@antsia/api/routing"
+import { Icon } from "@antsia/ui"
 import { Plus } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"

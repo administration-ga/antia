@@ -1,7 +1,7 @@
-// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/DiscoveryEmptyCard.tsx @ ad2e7fdc2 — adaptations : primitives de `@antia/ui`, surfaces de la coque (`shell/design-styles`) ; « l'agent » devient « la personne » dans la doc ; code inchangé (titre et message déjà traduits par l'appelant).
+// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/DiscoveryEmptyCard.tsx @ ad2e7fdc2 — adaptations : primitives de `@antsia/ui`, surfaces de la coque (`shell/design-styles`) ; « l'agent » devient « la personne » dans la doc ; code inchangé (titre et message déjà traduits par l'appelant).
 "use client"
 
-import { Card } from "@antia/ui"
+import { Card } from "@antsia/ui"
 
 import { RESEAU_SURFACE_STYLE } from "../../shell/design-styles"
 import type { DiscoveryPresentation } from "./suggestions-actions"

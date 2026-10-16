@@ -9,7 +9,7 @@ const mocks = vi.hoisted(() => ({
   calls: [] as { ref: string; args: unknown }[],
 }))
 
-vi.mock("@antia/api/engine", () => ({
+vi.mock("@antsia/api/engine", () => ({
   api: {
     modules: {
       engagement: { engagement: { toggleReaction: "toggleReaction", paginateComments: "paginateComments", paginateReplies: "paginateReplies", comment: "comment", removeComment: "removeComment", editComment: "editComment" } },

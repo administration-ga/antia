@@ -30,7 +30,7 @@
  * la table des routes en dernier paramètre.
  */
 
-import type { IconName } from "@antia/ui"
+import type { IconName } from "@antsia/ui"
 
 import { albumsTabHref } from "../reseau-albums/album-model"
 import { buildAgendaCreateHref } from "./agenda-create-intent"
@@ -108,7 +108,7 @@ export interface CreationEntry {
   labelKey: string
   /** Clé i18n qualifiée de ce que le format produit, en une ligne : un choix ne se devine pas. */
   descriptionKey: string
-  /** Nom d'icône `@antia/ui` — une seule famille dans la carte. */
+  /** Nom d'icône `@antsia/ui` — une seule famille dans la carte. */
   icon: IconName
 }
 

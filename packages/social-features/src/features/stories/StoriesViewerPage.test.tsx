@@ -16,7 +16,7 @@ const mocks = vi.hoisted(() => ({
 	live: { items: [] as unknown[] },
 }))
 
-vi.mock("@antia/api/engine", () => ({
+vi.mock("@antsia/api/engine", () => ({
 	api: {
 		modules: {
 			stories: {
@@ -37,7 +37,7 @@ vi.mock("@antia/api/engine", () => ({
 	},
 }))
 
-vi.mock("@antia/api/hooks", () => ({
+vi.mock("@antsia/api/hooks", () => ({
 	useAuthenticatedConvexQuery: (reference: string, args: unknown) => {
 		mocks.calls.push({ reference, args })
 		if (args === "skip") return { data: undefined, isError: false, refetch: vi.fn() }
@@ -53,7 +53,7 @@ vi.mock("@antia/api/hooks", () => ({
 vi.mock("convex/react", () => ({ useMutation: () => vi.fn(() => Promise.resolve()) }))
 
 // Le téléphone : la pile est rendue en place, sans portail.
-vi.mock("@antia/ui/overlay", () => ({
+vi.mock("@antsia/ui/overlay", () => ({
 	useIsReseauMobile: () => true,
 	ImmersiveOverlay: (props: { open: boolean; label: string; children: ReactNode }) =>
 		props.open ? (

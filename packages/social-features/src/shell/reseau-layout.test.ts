@@ -1,7 +1,7 @@
 // Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/reseau-layout.test.ts @ ad2e7fdc2 — adaptations : dépendance retirée `espace-rail-collapse` — la largeur du rail rétracté de l'hôte devient une constante locale (82 px, mesure du socle, cas le plus contraint) ; libellés lus dans l'i18n du moteur ; feuilles lues sur les constantes qu'elles exportent (`RESEAU_DESKTOP_CSS` de la page de bureau, `RESEAU_MOBILE_CSS` de la coquille mobile) au lieu des blocs `<style>` du texte source, commentaires retirés, et découpées en règles qui gardent leurs conditions `@container`/`@media` ; composants relus commentaires ôtés (volets dans `features/reseau-personnel/`, barre mobile dans `shell/mobile/`) ; cliquets de la grille de bureau et des volets RÉTABLIS au lot F2 (huit cas, et la seconde moitié du « débordement des sous-menus ») — la grille n'a plus de rail d'hôte : « remplace les onglets par le rail gauche » vérifie le menu vertical et le retrait de la tablist au SEUL palier `COLLAPSED_NAV_MIN`, l'absence de `[data-espace-rail]`, et l'ORDRE des paliers 1 008 → 812 → 1 108 (à spécificité égale, c'est lui qui fait primer le menu vertical) ; l'attribut posé est `data-volet={shownTab}`, le volet MONTRÉ (`servedReseauTab`) ; le bloc conteneur est exigé d'une règle `.rp-scope` inconditionnelle.
 import { readFileSync } from "node:fs"
 
-import { RESEAU_MOBILE_MAX_PX } from "@antia/ui/overlay"
+import { RESEAU_MOBILE_MAX_PX } from "@antsia/ui/overlay"
 import { describe, expect, it } from "vitest"
 
 import { storyComposePose } from "../features/stories/story-create"

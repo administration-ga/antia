@@ -34,7 +34,7 @@
  * dans `icom-mobile-tabs.test.ts` ; `IcomMobileTabBar` ne fait que rendre.
  */
 
-import type { IconName } from "@antia/ui"
+import type { IconName } from "@antsia/ui"
 import type { TFunction } from "i18next"
 import { formatUnreadBadge } from "../reseau-personnel/shared"
 import {

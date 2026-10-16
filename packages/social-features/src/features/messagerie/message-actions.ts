@@ -30,7 +30,7 @@
  * `messaging.messages.editMessage`, `messaging.messages.deleteMessage`,
  * `groups.messages.editGroupMessage` et `groups.messages.deleteGroupMessage`
  * refusent tous au-delà de `MESSAGE_EDIT_WINDOW_MS`
- * (`@antia/social-contracts/messaging`). L'offrir quand même, c'est promettre
+ * (`@antsia/social-contracts/messaging`). L'offrir quand même, c'est promettre
  * un geste qui échouera une seconde plus tard.
  *
  * ⚠️ La valeur n'est pas RECOPIÉE ici : elle arrive par le contexte
@@ -131,7 +131,7 @@ export interface MessageActionContext {
 	/**
 	 * La durée de la fenêtre — `MESSAGE_EDIT_WINDOW_MS`, jamais un nombre
 	 * écrit ici : c'est la valeur que le serveur applique, importée par
-	 * l'appelant depuis `@antia/social-contracts/messaging`.
+	 * l'appelant depuis `@antsia/social-contracts/messaging`.
 	 */
 	editWindowMs?: number
 	/**

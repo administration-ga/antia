@@ -1,10 +1,10 @@
-// Dupliqué de socle/packages/agent-features/src/features/messagerie/MessageActionsSheet.tsx @ ad2e7fdc2 — adaptations : vocabulaire des réactions lu au contrat du moteur (`@antia/social-contracts/messageReactions`, emojis seuls) — les noms accessibles des réactions (`MESSAGE_REACTION_LABEL`, retiré du contrat) deviennent des clés i18n (`messageActionsSheet.reactions.*`) ; tiroir du paquet `@antia/ui/sheet` (croix nommée par `closeLabel` traduit) ; titre traduit ; `actionsFor(…, t)`.
+// Dupliqué de socle/packages/agent-features/src/features/messagerie/MessageActionsSheet.tsx @ ad2e7fdc2 — adaptations : vocabulaire des réactions lu au contrat du moteur (`@antsia/social-contracts/messageReactions`, emojis seuls) — les noms accessibles des réactions (`MESSAGE_REACTION_LABEL`, retiré du contrat) deviennent des clés i18n (`messageActionsSheet.reactions.*`) ; tiroir du paquet `@antsia/ui/sheet` (croix nommée par `closeLabel` traduit) ; titre traduit ; `actionsFor(…, t)`.
 "use client"
 
 /**
  * MessageActionsSheet — ce qu'un appui long sur une bulle ouvre.
  *
- * Une feuille basse (`Sheet side="bottom"` d'`@antia/ui/sheet`, le même
+ * Une feuille basse (`Sheet side="bottom"` d'`@antsia/ui/sheet`, le même
  * gabarit que le menu du réseau) : barre d'emojis en haut, actions en dessous. C'est
  * le geste des messageries, et il vaut aussi au clavier — la bulle est un
  * bouton, `Entrée` ouvre la même feuille.
@@ -14,7 +14,7 @@
  * que sur MON message d'un fil 1:1, et le proposer ailleurs promettrait un
  * geste que le serveur refuse — ou qui n'existe pas du tout côté groupes.
  *
- * ⚠️ Les emojis viennent de `@antia/social-contracts/messageReactions`, le
+ * ⚠️ Les emojis viennent de `@antsia/social-contracts/messageReactions`, le
  * vocabulaire que le SERVEUR valide. Les recopier ici ferait afficher un
  * emoji que la mutation refuserait, ou un emoji différent de celui qui a été
  * enregistré. Leurs NOMS accessibles, eux, sont du texte d'écran : ils vivent
@@ -29,14 +29,14 @@ import {
 	MESSAGE_REACTION_EMOJI,
 	MESSAGE_REACTION_KINDS,
 	type MessageReactionKind,
-} from "@antia/social-contracts/messageReactions"
+} from "@antsia/social-contracts/messageReactions"
 import {
 	Sheet,
 	SheetBody,
 	SheetContent,
 	SheetHeader,
 	SheetTitle,
-} from "@antia/ui/sheet"
+} from "@antsia/ui/sheet"
 import { useTranslation } from "react-i18next"
 import { actionsFor, type MessageActionContext, type MessageActionId } from "./message-actions"
 

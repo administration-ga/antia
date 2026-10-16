@@ -189,7 +189,7 @@ describe("reseauAgentHref", () => {
   it("respecte une base qui porte déjà une query ou une ancre", () => {
     // La table des routes reste libre de sa forme : les paramètres de vue
     // s'ajoutent après sa query et avant son ancre.
-    expect(reseauAgentHref("relations", `${BASE}?reseau=antia`)).toBe(`${BASE}?reseau=antia&tab=relations`)
+    expect(reseauAgentHref("relations", `${BASE}?reseau=antsia`)).toBe(`${BASE}?reseau=antsia&tab=relations`)
     expect(reseauAgentHref("relations", `${BASE}#haut`)).toBe(`${BASE}?tab=relations#haut`)
   })
 })

@@ -15,7 +15,7 @@
  * ⚠️ Comme au socle, on ne fait JAMAIS tourner le planificateur : on lit
  * `_scheduled_functions`, la seule chose qu'une mutation puisse promettre.
  */
-import { DIRECT_INVITATION_TTL_MS } from "@antia/social-domain/live/domain"
+import { DIRECT_INVITATION_TTL_MS } from "@antsia/social-domain/live/domain"
 import type { FunctionReturnType } from "convex/server"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 

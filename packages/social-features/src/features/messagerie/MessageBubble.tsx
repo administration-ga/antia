@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/messagerie/MessageBubble.tsx @ ad2e7fdc2 — adaptations : iDocument retiré (`canSaveToVault`) ; fenêtre d'édition et réactions lues aux contrats du moteur (`@antia/social-contracts/messaging`, `…/messageReactions`), noms des réactions par les clés de `MessageActionsSheet` (`reactionLabelKey`) ; libellés traduits (espace de noms `messagerie`, clés `messageBubble.*`), corps par `bubbleText(…, t)`, heure dans la langue courante (`bubbleTime(at, locale)`) ; geste de glissement du paquet (`shell/mobile/gestures`).
+// Dupliqué de socle/packages/agent-features/src/features/messagerie/MessageBubble.tsx @ ad2e7fdc2 — adaptations : iDocument retiré (`canSaveToVault`) ; fenêtre d'édition et réactions lues aux contrats du moteur (`@antsia/social-contracts/messaging`, `…/messageReactions`), noms des réactions par les clés de `MessageActionsSheet` (`reactionLabelKey`) ; libellés traduits (espace de noms `messagerie`, clés `messageBubble.*`), corps par `bubbleText(…, t)`, heure dans la langue courante (`bubbleTime(at, locale)`) ; geste de glissement du paquet (`shell/mobile/gestures`).
 "use client"
 
 /**
@@ -37,12 +37,12 @@
  * feuille que l'appui long, sinon les actions n'existent pas au clavier.
  */
 
-import { MESSAGE_EDIT_WINDOW_MS } from "@antia/social-contracts/messaging"
+import { MESSAGE_EDIT_WINDOW_MS } from "@antsia/social-contracts/messaging"
 import {
 	MESSAGE_REACTION_EMOJI,
 	MESSAGE_REACTION_KINDS,
 	type MessageReactionKind,
-} from "@antia/social-contracts/messageReactions"
+} from "@antsia/social-contracts/messageReactions"
 import { Check, CheckCheck, Forward, Pin } from "lucide-react"
 import { useCallback, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"

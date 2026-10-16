@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/GroupsPanel.tsx @ ad2e7fdc2 — adaptations : groupes thématiques du réseau courant (`thematicGroups.thematicGroups.*`, `networkId` par `useNetwork()`) ; invitations reçues et membres PAGINÉS par le moteur (`paginateMyInvites`, `paginateMembers`, pannes dites par `ReseauPaginatedErrorBoundary`, « Voir plus ») ; `myGroups` borné qui dit sa lacune (`truncated`) ; vivier d'invitation `{ items, truncated }` du moteur passé tel quel au sélecteur ; mur à curseur COMPOSITE (`FeedCursor`, clé de page par `feedCursorKey`) et publications au DTO du fil (`_id`) rendues par `PostCard` ; membres et invitants nommés par la personne (`personId`, nom neutre quand le profil n'est pas publié) ; refus du moteur lus par code (`groupActionErrorText`), et le refus indistinct de la fiche (`notFound`) dit « plus accessible » ; états vides par `reseauEmptyState(id, home, t)` ; toutes les chaînes par l'i18n (espace `reseau`, clés `groupsPanel.*` et `groupesThematiques.*`) ; « agents » → le réseau ; primitives de `@antia/ui`, kit d'espace de `@antia/ui/espace-kit` (phrases de la pagination par `useEspacePaginationLabels`).
+// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/GroupsPanel.tsx @ ad2e7fdc2 — adaptations : groupes thématiques du réseau courant (`thematicGroups.thematicGroups.*`, `networkId` par `useNetwork()`) ; invitations reçues et membres PAGINÉS par le moteur (`paginateMyInvites`, `paginateMembers`, pannes dites par `ReseauPaginatedErrorBoundary`, « Voir plus ») ; `myGroups` borné qui dit sa lacune (`truncated`) ; vivier d'invitation `{ items, truncated }` du moteur passé tel quel au sélecteur ; mur à curseur COMPOSITE (`FeedCursor`, clé de page par `feedCursorKey`) et publications au DTO du fil (`_id`) rendues par `PostCard` ; membres et invitants nommés par la personne (`personId`, nom neutre quand le profil n'est pas publié) ; refus du moteur lus par code (`groupActionErrorText`), et le refus indistinct de la fiche (`notFound`) dit « plus accessible » ; états vides par `reseauEmptyState(id, home, t)` ; toutes les chaînes par l'i18n (espace `reseau`, clés `groupsPanel.*` et `groupesThematiques.*`) ; « agents » → le réseau ; primitives de `@antsia/ui`, kit d'espace de `@antsia/ui/espace-kit` (phrases de la pagination par `useEspacePaginationLabels`).
 "use client"
 
 /**
@@ -19,12 +19,12 @@
  * `var(--…)` uniquement (cliquet `no-hardcoded-colors`).
  */
 
-import { api, type Id } from "@antia/api/engine"
-import { useAuthenticatedConvexQuery, useAuthenticatedPaginatedQuery } from "@antia/api/hooks"
-import { useNetwork, useRoutes } from "@antia/api/network"
-import { engineErrorCode } from "@antia/social-contracts/errors"
-import { Alert, Badge, Button, Card, SkeletonCard, TextArea, TextInput } from "@antia/ui"
-import { clampPage, EspaceEmptyState, EspacePagination, pageSlice } from "@antia/ui/espace-kit"
+import { api, type Id } from "@antsia/api/engine"
+import { useAuthenticatedConvexQuery, useAuthenticatedPaginatedQuery } from "@antsia/api/hooks"
+import { useNetwork, useRoutes } from "@antsia/api/network"
+import { engineErrorCode } from "@antsia/social-contracts/errors"
+import { Alert, Badge, Button, Card, SkeletonCard, TextArea, TextInput } from "@antsia/ui"
+import { clampPage, EspaceEmptyState, EspacePagination, pageSlice } from "@antsia/ui/espace-kit"
 import { useMutation } from "convex/react"
 import { type ReactNode, useEffect, useRef, useState } from "react"
 import { Trans, useTranslation } from "react-i18next"

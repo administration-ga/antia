@@ -13,7 +13,7 @@
  * ligne d'antenne de son hôte, une page et son cercle, un invité, une
  * exclusion, un intervenant, une admission de spectateur.
  */
-import type { DirectAudience } from "@antia/social-domain/live/domain"
+import type { DirectAudience } from "@antsia/social-domain/live/domain"
 
 import type { Doc, Id } from "../../_generated/dataModel"
 import type { Person, T } from "../calls/fixtures.setup"

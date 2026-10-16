@@ -12,7 +12,7 @@
  *    annoncée : saturée, elle ne rabote jamais un compteur plus haut qu'elle —
  *    un total dégradé, jamais un mensonge vers le bas.
  */
-import { engineErrorRule } from "@antia/social-contracts/errors"
+import { engineErrorRule } from "@antsia/social-contracts/errors"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 import { api, internal } from "../../_generated/api"

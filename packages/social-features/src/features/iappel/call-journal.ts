@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/iappel/call-journal.ts @ ad2e7fdc2 — adaptations : ligne d'historique = le DTO du moteur (`calls.history.listCallHistory`, type tiré de l'API) au lieu de la ligne `meetings` reconvertie champ à champ ; le CLASSEMENT (qui a composé, refus automatique, manqué, ticket de groupe) est fait par le serveur avec la règle pure du domaine (`categorizeCall` de `@antia/social-domain/callJournal`) — l'écran le relit et revérifie seulement qu'un « refus automatique » porte bien une raison de réglage (`isAutoDeclineReason`) ; environnement back-office (`callerEnvironment`, `callSideOf` à trois termes) retiré ; branche poste élaguée (portée, fonction, administration, renvoi au secrétariat, appel prioritaire ADR-0217) ; correspondant nommé par le contrat `counterpartLabel` (appelant d'un appel de groupe compris) ; `groupCallJournal` sans identité de lecteur (le serveur dit `createdByMe`).
+// Dupliqué de socle/packages/agent-features/src/features/iappel/call-journal.ts @ ad2e7fdc2 — adaptations : ligne d'historique = le DTO du moteur (`calls.history.listCallHistory`, type tiré de l'API) au lieu de la ligne `meetings` reconvertie champ à champ ; le CLASSEMENT (qui a composé, refus automatique, manqué, ticket de groupe) est fait par le serveur avec la règle pure du domaine (`categorizeCall` de `@antsia/social-domain/callJournal`) — l'écran le relit et revérifie seulement qu'un « refus automatique » porte bien une raison de réglage (`isAutoDeclineReason`) ; environnement back-office (`callerEnvironment`, `callSideOf` à trois termes) retiré ; branche poste élaguée (portée, fonction, administration, renvoi au secrétariat, appel prioritaire ADR-0217) ; correspondant nommé par le contrat `counterpartLabel` (appelant d'un appel de groupe compris) ; `groupCallJournal` sans identité de lecteur (le serveur dit `createdByMe`).
 /**
  * call-journal — le JOURNAL des appels (écran « iAppel » : appels récents et
  * appels manqués).
@@ -31,9 +31,9 @@
  * partagée avec le serveur (`isAutoDeclineReason`).
  */
 
-import type { api } from "@antia/api/engine"
-import type { CounterpartLabel } from "@antia/social-contracts/counterpart"
-import { isAutoDeclineReason, type CallCategory } from "@antia/social-domain/callJournal"
+import type { api } from "@antsia/api/engine"
+import type { CounterpartLabel } from "@antsia/social-contracts/counterpart"
+import { isAutoDeclineReason, type CallCategory } from "@antsia/social-domain/callJournal"
 import type { FunctionReturnType } from "convex/server"
 
 import type { CallScope } from "./call-types"

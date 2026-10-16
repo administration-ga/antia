@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/use-relation-search.ts @ ad2e7fdc2 — adaptations : `reseauPersonnel.connections.searchMine` → `graph.connections.searchMine` du moteur (mes relations acceptées DANS le réseau courant, `networkId` par `useNetwork()`) ; `RelationSearchHit` = `ConnectionPersonDto` du moteur (badges calculés, sans fonction ni administration) ; `useDebouncedValue` de `@antia/ui` ; contrat du hook inchangé.
+// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/use-relation-search.ts @ ad2e7fdc2 — adaptations : `reseauPersonnel.connections.searchMine` → `graph.connections.searchMine` du moteur (mes relations acceptées DANS le réseau courant, `networkId` par `useNetwork()`) ; `RelationSearchHit` = `ConnectionPersonDto` du moteur (badges calculés, sans fonction ni administration) ; `useDebouncedValue` de `@antsia/ui` ; contrat du hook inchangé.
 "use client"
 
 /**
@@ -24,10 +24,10 @@
  * à leur tour : un seul sélecteur de relations, trois points d'entrée.
  */
 
-import { api } from "@antia/api/engine"
-import { useAuthenticatedConvexQuery } from "@antia/api/hooks"
-import { useNetwork } from "@antia/api/network"
-import { useDebouncedValue } from "@antia/ui"
+import { api } from "@antsia/api/engine"
+import { useAuthenticatedConvexQuery } from "@antsia/api/hooks"
+import { useNetwork } from "@antsia/api/network"
+import { useDebouncedValue } from "@antsia/ui"
 import type { FunctionReturnType } from "convex/server"
 import { useCallback } from "react"
 

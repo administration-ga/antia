@@ -4,7 +4,7 @@
  * Le graphe : connexions symétriques par réseau, blocage unilatéral et muet
  * sur toute la paire, abonnements unilatéraux comptés par agrégat.
  */
-import { engineErrorCode, engineErrorRule } from "@antia/social-contracts/errors"
+import { engineErrorCode, engineErrorRule } from "@antsia/social-contracts/errors"
 import { describe, expect, it } from "vitest"
 
 import { api, internal } from "../../_generated/api"

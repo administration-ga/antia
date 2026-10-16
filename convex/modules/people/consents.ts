@@ -3,7 +3,7 @@
  * version de texte, révocables en un geste (EXF-AN-08). Jamais de case
  * précochée : une ligne n'existe que parce que la personne l'a voulue.
  */
-import { CONSENT_TEXT_VERSIONS, isConsentInForce } from "@antia/social-domain/consent"
+import { CONSENT_TEXT_VERSIONS, isConsentInForce } from "@antsia/social-domain/consent"
 import { v } from "convex/values"
 
 import { notFound } from "../../lib/errors"

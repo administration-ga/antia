@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/iappel/CallControlButton.tsx @ ad2e7fdc2 — adaptations : aucune hors provenance (libellés et raisons fournis traduits par l'appelant ; classes `.iappel-ctl` et jeton de scène fournis par la feuille d'appel de @antia/ui).
+// Dupliqué de socle/packages/agent-features/src/features/iappel/CallControlButton.tsx @ ad2e7fdc2 — adaptations : aucune hors provenance (libellés et raisons fournis traduits par l'appelant ; classes `.iappel-ctl` et jeton de scène fournis par la feuille d'appel de @antsia/ui).
 "use client"
 
 /**
@@ -6,7 +6,7 @@
  * haut-parleur, répondre, raccrocher…).
  *
  * Toute la couleur vient de la classe `.iappel-ctl` (feuille d'appel de
- * @antia/ui) pilotée par `data-tone` / `data-active` : ce composant ne
+ * @antsia/ui) pilotée par `data-tone` / `data-active` : ce composant ne
  * connaît AUCUNE couleur, il ne fait que poser les data-attributes qui la
  * déclenchent en CSS. C'est ce qui le distingue de son ancêtre
  * `DirectCallControl` (components/meetings/DirectCallView.tsx), qui portait

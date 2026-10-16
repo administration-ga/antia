@@ -44,17 +44,17 @@
  * un fil d'ailleurs et un fil inventé.
  */
 
-import { api, type Id } from "@antia/api/engine"
+import { api, type Id } from "@antsia/api/engine"
 import {
 	useAuthenticatedConvexQuery,
 	useConvexMutationQuery,
-} from "@antia/api/hooks"
-import { useNetwork } from "@antia/api/network"
-import { REPLY_EXCERPT_MAX_LENGTH } from "@antia/social-contracts/attachments"
-import { GROUP_CALL_MAX_PARTICIPANTS } from "@antia/social-contracts/callGroup"
-import type { MessageReactionKind } from "@antia/social-contracts/messageReactions"
-import { isGroupThreadManager } from "@antia/social-domain/groupThreads"
-import { useVisualViewport } from "@antia/ui/overlay"
+} from "@antsia/api/hooks"
+import { useNetwork } from "@antsia/api/network"
+import { REPLY_EXCERPT_MAX_LENGTH } from "@antsia/social-contracts/attachments"
+import { GROUP_CALL_MAX_PARTICIPANTS } from "@antsia/social-contracts/callGroup"
+import type { MessageReactionKind } from "@antsia/social-contracts/messageReactions"
+import { isGroupThreadManager } from "@antsia/social-domain/groupThreads"
+import { useVisualViewport } from "@antsia/ui/overlay"
 import { useConvexAuth, usePaginatedQuery } from "convex/react"
 import type { FunctionReturnType } from "convex/server"
 import { History } from "lucide-react"

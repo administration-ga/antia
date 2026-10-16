@@ -6,8 +6,8 @@
  * (raccrocher, refuser, expirer, nettoyer, quitter un fil). Une fin d'appel
  * écrite à deux endroits divergerait au premier oubli.
  */
-import { groupCallShouldEnd } from "@antia/social-contracts/callGroup"
-import type { CallEndReason } from "@antia/social-domain/callJournal"
+import { groupCallShouldEnd } from "@antsia/social-contracts/callGroup"
+import type { CallEndReason } from "@antsia/social-domain/callJournal"
 
 import type { Doc, Id } from "../../_generated/dataModel"
 import type { MutationCtx } from "../../_generated/server"

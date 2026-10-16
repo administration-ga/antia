@@ -1,8 +1,8 @@
-// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/ReportContentDialog.tsx @ ad2e7fdc2 — adaptations : motifs et borne de la précision lus dans le domaine du moteur (`CONTENT_REPORT_REASONS`, `CONTENT_REPORT_NOTE_MAX` de `@antia/social-domain/moderation`, type `ReportReason` = `ContentReportReason`) ; libellés par l'i18n (clés `reseau:reportContentDialog.*`, le motif par sa clé) ; voile et ombre par les jetons (`--ui2-scrim`, `--shadow-xl`) au lieu de couleurs littérales ; titre accordé (« Signaler cette publication » — le socle écrivait « ce publication ») ; un échec de transmission ne laisse plus de promesse rejetée sans lecteur (l’appelant le dit, la boîte reste ouverte).
+// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/ReportContentDialog.tsx @ ad2e7fdc2 — adaptations : motifs et borne de la précision lus dans le domaine du moteur (`CONTENT_REPORT_REASONS`, `CONTENT_REPORT_NOTE_MAX` de `@antsia/social-domain/moderation`, type `ReportReason` = `ContentReportReason`) ; libellés par l'i18n (clés `reseau:reportContentDialog.*`, le motif par sa clé) ; voile et ombre par les jetons (`--ui2-scrim`, `--shadow-xl`) au lieu de couleurs littérales ; titre accordé (« Signaler cette publication » — le socle écrivait « ce publication ») ; un échec de transmission ne laisse plus de promesse rejetée sans lecteur (l’appelant le dit, la boîte reste ouverte).
 "use client"
 
-import { Button, TextArea } from "@antia/ui"
-import { CONTENT_REPORT_NOTE_MAX, CONTENT_REPORT_REASONS, type ContentReportReason } from "@antia/social-domain/moderation"
+import { Button, TextArea } from "@antsia/ui"
+import { CONTENT_REPORT_NOTE_MAX, CONTENT_REPORT_REASONS, type ContentReportReason } from "@antsia/social-domain/moderation"
 import { useState } from "react"
 import { createPortal } from "react-dom"
 import { useTranslation } from "react-i18next"

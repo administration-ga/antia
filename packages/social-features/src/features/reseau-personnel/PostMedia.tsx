@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/PostMedia.tsx @ ad2e7fdc2 — adaptations : type `PostMediaDto` du contrat `@antia/social-contracts/media` ; un média RETENU par la garde des fichiers (`url` nulle, `withheld` : analyse en cours ou bloqué) garde sa place et dit pourquoi (textes du code, espace `errors`) au lieu d'un lien mort — image, vidéo et carrousel ; libellés et annonces par l'i18n (clés `reseau:postMedia.*`) ; surface plein écran de `@antia/ui/overlay` (charte de l'application) ; cadre, carrousel et gestes inchangés ; feuille de style sortie du JSX dans une constante de module (`POST_MEDIA_CSS`) — un littéral enfant de `<style>` passerait pour une chaîne d'interface — règles inchangées.
+// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/PostMedia.tsx @ ad2e7fdc2 — adaptations : type `PostMediaDto` du contrat `@antsia/social-contracts/media` ; un média RETENU par la garde des fichiers (`url` nulle, `withheld` : analyse en cours ou bloqué) garde sa place et dit pourquoi (textes du code, espace `errors`) au lieu d'un lien mort — image, vidéo et carrousel ; libellés et annonces par l'i18n (clés `reseau:postMedia.*`) ; surface plein écran de `@antsia/ui/overlay` (charte de l'application) ; cadre, carrousel et gestes inchangés ; feuille de style sortie du JSX dans une constante de module (`POST_MEDIA_CSS`) — un littéral enfant de `<style>` passerait pour une chaîne d'interface — règles inchangées.
 "use client"
 
 /**
@@ -28,8 +28,8 @@
  * de l'auteur le précède, la barre de réactions le suit toujours.
  */
 
-import type { MediaWithheld, PostMediaDto } from "@antia/social-contracts/media"
-import { ImmersiveOverlay } from "@antia/ui/overlay"
+import type { MediaWithheld, PostMediaDto } from "@antsia/social-contracts/media"
+import { ImmersiveOverlay } from "@antsia/ui/overlay"
 import { ChevronLeft, ChevronRight, Maximize2, X } from "lucide-react"
 import {
   useEffect,

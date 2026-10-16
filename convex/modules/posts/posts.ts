@@ -31,7 +31,7 @@ import {
   type PersonalPostAudience,
   viewingReasonFor,
   addedMentionedIds,
-} from "@antia/social-domain/content"
+} from "@antsia/social-domain/content"
 import {
   boundedFeedSourceIds,
   cursorForFeedPost,
@@ -40,12 +40,12 @@ import {
   mergeFeedWindows,
   PERSONAL_FEED_AUTHORS_MAX,
   type PersonalFeedCursor,
-} from "@antia/social-domain/feedScale"
-import { DIRECT_STATUSES } from "@antia/social-domain/live/domain"
-import { effectiveVisibility } from "@antia/social-domain/network"
-import { pageFeedAdmissionFor, PAGES_FEED_MAX } from "@antia/social-domain/pages"
-import { extractHashtags } from "@antia/social-domain/richText"
-import { buildSearchableText, foldSearchQuery } from "@antia/social-domain/searchText"
+} from "@antsia/social-domain/feedScale"
+import { DIRECT_STATUSES } from "@antsia/social-domain/live/domain"
+import { effectiveVisibility } from "@antsia/social-domain/network"
+import { pageFeedAdmissionFor, PAGES_FEED_MAX } from "@antsia/social-domain/pages"
+import { extractHashtags } from "@antsia/social-domain/richText"
+import { buildSearchableText, foldSearchQuery } from "@antsia/social-domain/searchText"
 import { type IndexRange, paginationOptsValidator } from "convex/server"
 import { type Infer, v } from "convex/values"
 
@@ -538,7 +538,7 @@ export async function pageViewingReason(ctx: ReadCtx, reader: ReaderContext, pag
  * idempotence (rejouer la clé rend la publication EXISTANTE) ; forme et
  * appartenance au groupe ; partage par la garde de visibilité (aplati sur
  * l'original) ; vérité du STOCKAGE pour les médias ; le domaine juge l'ensemble.
- * `alsoOnRoot` est le geste explicite « publier aussi sur ANTIA », qui ne vaut
+ * `alsoOnRoot` est le geste explicite « publier aussi sur ANTSIA », qui ne vaut
  * que pour une audience publique dans un réseau fermé.
  */
 export const publish = networkMutation({

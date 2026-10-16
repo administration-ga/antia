@@ -18,7 +18,7 @@ import type { TFunction } from "i18next";
 import { useCallback, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
-import type { Id } from "@antia/api/engine";
+import type { Id } from "@antsia/api/engine";
 import { callRoomRegistry } from "../../stores/call-room-registry";
 import {
   callStore,

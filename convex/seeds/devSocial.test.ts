@@ -26,13 +26,13 @@ describe("seeds/devSocial:demoPerson — une personne de démonstration", () => 
   it("refuse sans l'argument de confirmation", async () => {
     const t = testConvex()
     await seed(t)
-    await expect(t.mutation(internal.seeds.devSocial.demoPerson, { confirmNonProduction: "oui", networkSlug: "antia", handle: "awa.demo", displayName: "Awa" })).rejects.toThrow(/hors production/)
+    await expect(t.mutation(internal.seeds.devSocial.demoPerson, { confirmNonProduction: "oui", networkSlug: "antsia", handle: "awa.demo", displayName: "Awa" })).rejects.toThrow(/hors production/)
   })
 
   it("partage la garde des fondations : refusée hors d'un déploiement local sans autorisation explicite", () => {
     // Le harnais fige l'environnement du déploiement à sa création : la garde (pure) se lit directement.
     expect(seedsAllowed({ CONVEX_CLOUD_URL: "https://exemple.convex.cloud" })).toBe(false)
-    expect(seedsAllowed({ CONVEX_CLOUD_URL: "https://exemple.convex.cloud", ANTIA_SEEDS_ALLOWED: "true" })).toBe(true)
+    expect(seedsAllowed({ CONVEX_CLOUD_URL: "https://exemple.convex.cloud", ANTSIA_SEEDS_ALLOWED: "true" })).toBe(true)
     expect(seedsAllowed({ CONVEX_CLOUD_URL: "http://127.0.0.1:3210" })).toBe(true)
   })
 
@@ -40,7 +40,7 @@ describe("seeds/devSocial:demoPerson — une personne de démonstration", () => 
     const t = testConvex()
     const { root } = await seed(t)
     const lynda = await enter(t, root, "lynda")
-    const args = { confirmNonProduction: SEED_CONFIRMATION, networkSlug: "antia", handle: "awa.demo", displayName: "Awa Démo", connectToHandle: "lynda" }
+    const args = { confirmNonProduction: SEED_CONFIRMATION, networkSlug: "antsia", handle: "awa.demo", displayName: "Awa Démo", connectToHandle: "lynda" }
 
     const first = await t.mutation(internal.seeds.devSocial.demoPerson, args)
     expect(first).toMatchObject({ created: true, connected: true })
@@ -61,6 +61,6 @@ describe("seeds/devSocial:demoPerson — une personne de démonstration", () => 
     const t = testConvex()
     const { root } = await seed(t)
     await enter(t, root, "lynda")
-    await expect(t.mutation(internal.seeds.devSocial.demoPerson, { confirmNonProduction: SEED_CONFIRMATION, networkSlug: "antia", handle: "lynda", displayName: "Fausse Lynda" })).rejects.toThrow(/vraie personne/)
+    await expect(t.mutation(internal.seeds.devSocial.demoPerson, { confirmNonProduction: SEED_CONFIRMATION, networkSlug: "antsia", handle: "lynda", displayName: "Fausse Lynda" })).rejects.toThrow(/vraie personne/)
   })
 })

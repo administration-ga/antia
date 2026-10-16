@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/stories/story-video-policy.ts @ ad2e7fdc2 — adaptations : destinations `reseau`/`icom` (ADR-0079 du socle) retirées avec le moteur — une seule borne vidéo (`STORY_VIDEO_LIMITS` de `@antia/social-domain/stories`), paramètre `surfaces` supprimé ; refus traduits par i18n (`t` en dernier paramètre de `storyVideoPlan`, clés `stories:storyVideoPolicy.*`, durées dites par `storyDurationLabel`) au lieu des phrases du domaine du socle.
+// Dupliqué de socle/packages/agent-features/src/features/stories/story-video-policy.ts @ ad2e7fdc2 — adaptations : destinations `reseau`/`icom` (ADR-0079 du socle) retirées avec le moteur — une seule borne vidéo (`STORY_VIDEO_LIMITS` de `@antsia/social-domain/stories`), paramètre `surfaces` supprimé ; refus traduits par i18n (`t` en dernier paramètre de `storyVideoPlan`, clés `stories:storyVideoPolicy.*`, durées dites par `storyDurationLabel`) au lieu des phrases du domaine du socle.
 /**
  * story-video-policy — ce qu'on FAIT d'une vidéo choisie pour une actu.
  *
@@ -36,7 +36,7 @@
 
 import type { TFunction } from "i18next"
 
-import { STORY_VIDEO_LIMITS } from "@antia/social-domain/stories"
+import { STORY_VIDEO_LIMITS } from "@antsia/social-domain/stories"
 
 import { storyDurationLabel } from "./story-create"
 

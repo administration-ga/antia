@@ -1,9 +1,9 @@
 /**
- * @antia/ui — jetons, charte de base, thèmes d'application et primitives du
+ * @antsia/ui — jetons, charte de base, thèmes d'application et primitives du
  * moteur. Les primitives viennent d'ui-v2 (bouton, icône, badge, champs,
  * alerte, carte, tableau, squelettes, accessibilité des surfaces modales),
- * dupliquées du socle ; le tiroir (`@antia/ui/sheet`) et les surfaces plein
- * écran (`@antia/ui/overlay`) ont leur propre point d'entrée.
+ * dupliquées du socle ; le tiroir (`@antsia/ui/sheet`) et les surfaces plein
+ * écran (`@antsia/ui/overlay`) ont leur propre point d'entrée.
  */
 export { cn } from "./lib/cn"
 export { APPLICATION_THEMES, type ApplicationTheme } from "./themes"

@@ -1,10 +1,10 @@
-// Réécrit d'après socle/packages/agent-features/src/features/messagerie/IcomMobileTabBar.test.tsx @ ad2e7fdc2 — le menu principal de l'espace agent n'existe plus : le premier emplacement est un LIEN fixe vers l'accueil du réseau (le cas « Menu fixe pendant que le niveau de droite bascule » devient « Menu fixe qui ramène à l'accueil, briques défilantes ») ; montage dans l'enveloppe du moteur (routeur, routes et i18n réels) au lieu de simuler le routage, `@antia/ui` et le chrome de l'espace ; cas ajoutés — adresses injectées, pastilles et leur phrase, repères DOM et seuil mobile.
+// Réécrit d'après socle/packages/agent-features/src/features/messagerie/IcomMobileTabBar.test.tsx @ ad2e7fdc2 — le menu principal de l'espace agent n'existe plus : le premier emplacement est un LIEN fixe vers l'accueil du réseau (le cas « Menu fixe pendant que le niveau de droite bascule » devient « Menu fixe qui ramène à l'accueil, briques défilantes ») ; montage dans l'enveloppe du moteur (routeur, routes et i18n réels) au lieu de simuler le routage, `@antsia/ui` et le chrome de l'espace ; cas ajoutés — adresses injectées, pastilles et leur phrase, repères DOM et seuil mobile.
 // @vitest-environment jsdom
 
 import { screen, within } from "@testing-library/react"
 import { beforeAll, describe, expect, it, vi } from "vitest"
 
-import { MOBILE_ONLY_CLASS } from "@antia/ui/overlay"
+import { MOBILE_ONLY_CLASS } from "@antsia/ui/overlay"
 import { renderWithEngine } from "../../tests/engine-wrapper"
 import { IcomMobileTabBar } from "./IcomMobileTabBar"
 

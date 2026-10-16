@@ -7,9 +7,9 @@
  * nom » : deux définitions divergeraient au premier oubli, et c'est sur cette
  * différence que reposerait une fuite depuis une page retirée.
  */
-import { computePageBadge } from "@antia/social-domain/badges"
-import { derivePageHandle, PAGE_SIGNATORIES_MAX, type PageRole } from "@antia/social-domain/pages"
-import { buildSearchableText } from "@antia/social-domain/searchText"
+import { computePageBadge } from "@antsia/social-domain/badges"
+import { derivePageHandle, PAGE_SIGNATORIES_MAX, type PageRole } from "@antsia/social-domain/pages"
+import { buildSearchableText } from "@antsia/social-domain/searchText"
 
 import type { Doc, Id } from "../../_generated/dataModel"
 import type { QueryCtx } from "../../_generated/server"

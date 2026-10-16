@@ -14,7 +14,7 @@
  *  4. le retrait ANNONCE qu'il ne rappelle rien (`albumWithdrawNotice`) — une
  *     interface qui laisse croire à une révocation ment.
  */
-import type { EngineRoutes } from "@antia/api/network"
+import type { EngineRoutes } from "@antsia/api/network"
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { getFunctionName } from "convex/server"
 import type { ButtonHTMLAttributes, ReactNode } from "react"
@@ -50,7 +50,7 @@ function ok(data: unknown): QueryMock {
   }
 }
 
-vi.mock("@antia/api/hooks", () => ({
+vi.mock("@antsia/api/hooks", () => ({
   useAuthenticatedConvexQuery: (query: unknown, args: unknown) => {
     mocks.query(query, args)
     return mocks.result ?? ok(undefined)
@@ -60,7 +60,7 @@ vi.mock("convex/react", () => ({ useMutation: () => mocks.withdraw }))
 vi.mock("sonner", () => ({
   toast: { success: mocks.toastSuccess, error: mocks.toastError },
 }))
-vi.mock("@antia/ui", () => ({
+vi.mock("@antsia/ui", () => ({
   Alert: ({ title, children }: { title: string; children: ReactNode }) => (
     <div role="alert">
       <strong>{title}</strong>
@@ -179,7 +179,7 @@ describe("AlbumPage — la galerie", () => {
     mocks.result = ok(DETAIL)
     const router = memoryRouter()
     // L'adresse du profil est celle que SERT l'application (`useRoutes().profile`),
-    // qui échappe le handle — comme la table de routes d'antia.ga.
+    // qui échappe le handle — comme la table de routes d'antsia.ga.
     const routes: EngineRoutes = { ...TEST_ROUTES, profile: (handle) => `/profil/${encodeURIComponent(handle)}` }
     render(<AlbumPage handle="a wa" albumId="al-1" />, {
       wrapper: ({ children }) => (

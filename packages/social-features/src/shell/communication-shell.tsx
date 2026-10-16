@@ -14,7 +14,7 @@
  * rail de la page qui l'accueille (et se détache en carte flottante vers `body`).
  * L'hôte du direct (`DirectSessionHost`) rejoint cette couche avec le lot `live`.
  */
-import { useNetwork } from "@antia/api/network"
+import { useNetwork } from "@antsia/api/network"
 
 import { configureDockStorage } from "../features/messagerie/dock-store"
 import { configureCallStoreStorage } from "../stores"

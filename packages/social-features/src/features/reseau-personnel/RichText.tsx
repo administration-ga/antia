@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/RichText.tsx @ ad2e7fdc2 — adaptations : découpage lu dans le domaine du moteur (`splitBodyRich` de `@antia/social-domain/richText`) ; sans gestionnaire, une mention ou un mot-dièse n'est plus un simple mot mais un LIEN vers l'adresse INJECTÉE (`useRoutes()` : le profil par `personHref`, le fil filtré par `reseauAgentTagHref` sur la page réseau) — les gestionnaires `onTag` / `onMention` gardent la priorité ; aucune autre différence de rendu.
+// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/RichText.tsx @ ad2e7fdc2 — adaptations : découpage lu dans le domaine du moteur (`splitBodyRich` de `@antsia/social-domain/richText`) ; sans gestionnaire, une mention ou un mot-dièse n'est plus un simple mot mais un LIEN vers l'adresse INJECTÉE (`useRoutes()` : le profil par `personHref`, le fil filtré par `reseauAgentTagHref` sur la page réseau) — les gestionnaires `onTag` / `onMention` gardent la priorité ; aucune autre différence de rendu.
 "use client"
 
 /**
@@ -20,9 +20,9 @@
  * mot-dièse. Aucune adresse n'est écrite ici.
  */
 
-import { Link } from "@antia/api/routing"
-import { useRoutes } from "@antia/api/network"
-import { splitBodyRich } from "@antia/social-domain/richText"
+import { Link } from "@antsia/api/routing"
+import { useRoutes } from "@antsia/api/network"
+import { splitBodyRich } from "@antsia/social-domain/richText"
 import { Fragment } from "react"
 
 import { personHref } from "./author-link"

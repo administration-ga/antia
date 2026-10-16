@@ -1,11 +1,11 @@
 // Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/DirectsPanel.tsx @ ad2e7fdc2 — adaptations : première tranche réécrite sur les trois listes paginées du moteur, réseau et routes injectés, libellés i18n ; création page et métadonnées de conservation sur les vignettes (F3c).
 "use client"
 
-import { api, type Id } from "@antia/api/engine"
-import { useAuthenticatedConvexQuery } from "@antia/api/hooks"
-import { useNetwork, useRoutes } from "@antia/api/network"
-import { Link } from "@antia/api/routing"
-import { Button } from "@antia/ui"
+import { api, type Id } from "@antsia/api/engine"
+import { useAuthenticatedConvexQuery } from "@antsia/api/hooks"
+import { useNetwork, useRoutes } from "@antsia/api/network"
+import { Link } from "@antsia/api/routing"
+import { Button } from "@antsia/ui"
 import type { FunctionArgs } from "convex/server"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"

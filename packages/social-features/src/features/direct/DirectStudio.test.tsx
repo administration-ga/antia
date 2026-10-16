@@ -1,8 +1,8 @@
 // @vitest-environment jsdom
-// Dupliqué de socle/packages/agent-features/src/features/direct/DirectScene.test.tsx @ ad2e7fdc2 — adaptations : scénarios de contenu et de pin sur personId ANTIA, salle persistante simulée et commandes d’intention sans nouvelle connexion.
+// Dupliqué de socle/packages/agent-features/src/features/direct/DirectScene.test.tsx @ ad2e7fdc2 — adaptations : scénarios de contenu et de pin sur personId ANTSIA, salle persistante simulée et commandes d’intention sans nouvelle connexion.
 import { cleanup, fireEvent, render, screen } from "@testing-library/react"
-import type { Id } from "@antia/api/engine"
-import { noDirectPermissions } from "@antia/social-domain/live/permissions"
+import type { Id } from "@antsia/api/engine"
+import { noDirectPermissions } from "@antsia/social-domain/live/permissions"
 import { I18nextProvider } from "react-i18next"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { createAppI18n } from "../../i18n"

@@ -4,7 +4,7 @@
  * revendication. Le patron d'audit des décisions de modération est repris
  * (`moderation.report_decide` → `page.claim_decide`).
  */
-import { engineErrorCode, engineErrorRule } from "@antia/social-contracts/errors"
+import { engineErrorCode, engineErrorRule } from "@antsia/social-contracts/errors"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 import { api, internal } from "../../_generated/api"

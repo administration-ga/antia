@@ -18,7 +18,7 @@
  * ce que le nombre EST, plutôt que ce qu'on aimerait qu'il soit.
  */
 
-import { Button } from "@antia/ui"
+import { Button } from "@antsia/ui"
 import { useTranslation } from "react-i18next"
 import { Avatar } from "../reseau-personnel/Avatar"
 import { storyAuthorName } from "./stories-tray"

@@ -1,6 +1,6 @@
 // Dupliqué de socle/packages/agent-features/src/stores/direct-session-store.test.ts @ ad2e7fdc2 — adaptations : identifiants du moteur, cas du socle conservés.
 import { beforeEach, describe, expect, it } from "vitest"
-import type { Id } from "@antia/api/engine"
+import type { Id } from "@antsia/api/engine"
 import {
 	DIRECT_TOKEN_TTL_MS,
 	directSessionStore,

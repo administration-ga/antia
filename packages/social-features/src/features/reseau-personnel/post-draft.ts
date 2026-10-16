@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/post-draft.ts @ ad2e7fdc2 — adaptations : audiences relues du stockage confrontées aux listes du DOMAINE du moteur (`PERSONAL_REACH_AUDIENCES` de `@antia/social-domain/content`, `PAGE_POST_AUDIENCES` de `/pages`) au lieu de listes recopiées — l'audience de page « organisation » devient `followers` (note aux abonnés) ; la cible « page » vise une page du moteur ; commentaires rapportés à la garde des fichiers du moteur.
+// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/post-draft.ts @ ad2e7fdc2 — adaptations : audiences relues du stockage confrontées aux listes du DOMAINE du moteur (`PERSONAL_REACH_AUDIENCES` de `@antsia/social-domain/content`, `PAGE_POST_AUDIENCES` de `/pages`) au lieu de listes recopiées — l'audience de page « organisation » devient `followers` (note aux abonnés) ; la cible « page » vise une page du moteur ; commentaires rapportés à la garde des fichiers du moteur.
 /**
  * post-draft — le BROUILLON de publication, hors de tout composant.
  *
@@ -36,8 +36,8 @@
  * Aucun import React ni Convex : ce module ne connaît que des données.
  */
 
-import { PERSONAL_REACH_AUDIENCES } from "@antia/social-domain/content"
-import { PAGE_POST_AUDIENCES } from "@antia/social-domain/pages"
+import { PERSONAL_REACH_AUDIENCES } from "@antsia/social-domain/content"
+import { PAGE_POST_AUDIENCES } from "@antsia/social-domain/pages"
 
 import {
   DEFAULT_AUDIENCE,

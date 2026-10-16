@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/chat/src/use-chat-attachments.ts @ ad2e7fdc2 — adaptations : plafond et liste blanche LUS dans le contrat du moteur (`ATTACHMENT_MAX_BYTES`, `CHAT_ATTACHMENT_MIME_TYPES`, `isChatMimeAllowed` de `@antia/social-contracts/attachments`) au lieu d'être recopiés ; messages de refus traduits (clés `iappel:useChatAttachments.*`, lues par `useTranslation` dans le hook, signature du hook inchangée) ; `formatFileSize` met en forme par `Intl.NumberFormat` dans la langue reçue (paramètre `locale` ajouté en dernier) au lieu d'unités françaises en dur ; le paquet `chat` du socle devient le dossier `lib/chat` du paquet des surfaces.
+// Dupliqué de socle/packages/chat/src/use-chat-attachments.ts @ ad2e7fdc2 — adaptations : plafond et liste blanche LUS dans le contrat du moteur (`ATTACHMENT_MAX_BYTES`, `CHAT_ATTACHMENT_MIME_TYPES`, `isChatMimeAllowed` de `@antsia/social-contracts/attachments`) au lieu d'être recopiés ; messages de refus traduits (clés `iappel:useChatAttachments.*`, lues par `useTranslation` dans le hook, signature du hook inchangée) ; `formatFileSize` met en forme par `Intl.NumberFormat` dans la langue reçue (paramètre `locale` ajouté en dernier) au lieu d'unités françaises en dur ; le paquet `chat` du socle devient le dossier `lib/chat` du paquet des surfaces.
 import { useCallback, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -6,7 +6,7 @@ import {
 	ATTACHMENT_MAX_BYTES,
 	CHAT_ATTACHMENT_MIME_TYPES,
 	isChatMimeAllowed,
-} from "@antia/social-contracts/attachments";
+} from "@antsia/social-contracts/attachments";
 
 /**
  * Taille max par fichier côté client — celle du serveur (ADR-0160), LUE dans

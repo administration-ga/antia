@@ -9,13 +9,13 @@ import { createAppI18n } from "../../i18n"
 import { DirectsPanel } from "./DirectsPanel"
 
 const mocks = vi.hoisted(() => ({ networkId: "network-a", fail: false, emptyFirst: false }))
-vi.mock("@antia/api/network", () => ({
+vi.mock("@antsia/api/network", () => ({
   useNetwork: () => ({ networkId: mocks.networkId }),
   useRoutes: () => ({ conference: (id: string) => `/conference/${id}` }),
 }))
-vi.mock("@antia/api/routing", () => ({ Link: ({ children, href }: { children: ReactNode; href: string }) => <a href={href}>{children}</a> }))
+vi.mock("@antsia/api/routing", () => ({ Link: ({ children, href }: { children: ReactNode; href: string }) => <a href={href}>{children}</a> }))
 vi.mock("./CreateDirectDialog", () => ({ CreateDirectDialog: () => null }))
-vi.mock("@antia/api/hooks", () => ({
+vi.mock("@antsia/api/hooks", () => ({
   useAuthenticatedConvexQuery: (ref: Parameters<typeof getFunctionName>[0], args: "skip" | { networkId: string; cursor?: { sessionId: string } }) => {
     const first = args !== "skip" && !args.cursor
     const title = args !== "skip" ? `${args.networkId}-conférence` : ""

@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/useMediaDraft.ts @ ad2e7fdc2 — adaptations : bornes et types lus dans le domaine du moteur (`@antia/social-domain/content`) ; refus et erreurs par l'i18n — `rejectionFor(file, existing, limits, t)` reçoit `t` en DERNIER paramètre (clés qualifiées `reseau:useMediaDraft.*`, `limits` devient un paramètre explicite, éventuellement `undefined`), le poids maximal se dit depuis la borne du domaine, les erreurs levées par `upload` sont traduites par la langue de l'écran ; identifiant de stockage TYPÉ (`UploadedMedia.storageId: Id<"_storage">`) au lieu d'une chaîne ; API du hook inchangée.
+// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/useMediaDraft.ts @ ad2e7fdc2 — adaptations : bornes et types lus dans le domaine du moteur (`@antsia/social-domain/content`) ; refus et erreurs par l'i18n — `rejectionFor(file, existing, limits, t)` reçoit `t` en DERNIER paramètre (clés qualifiées `reseau:useMediaDraft.*`, `limits` devient un paramètre explicite, éventuellement `undefined`), le poids maximal se dit depuis la borne du domaine, les erreurs levées par `upload` sont traduites par la langue de l'écran ; identifiant de stockage TYPÉ (`UploadedMedia.storageId: Id<"_storage">`) au lieu d'une chaîne ; API du hook inchangée.
 "use client"
 
 /**
@@ -37,14 +37,14 @@
  *    `unrecoverable` le nomme, l'écran demande de le resélectionner.
  */
 
-import type { Id } from "@antia/api/engine"
+import type { Id } from "@antsia/api/engine"
 import {
   POST_IMAGE_MAX_BYTES,
   POST_IMAGE_MIME_TYPES,
   POST_MEDIA_MAX_COUNT,
   POST_VIDEO_MAX_BYTES,
   POST_VIDEO_MIME_TYPES,
-} from "@antia/social-domain/content"
+} from "@antsia/social-domain/content"
 import type { TFunction } from "i18next"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"

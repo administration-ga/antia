@@ -28,16 +28,16 @@
  * mobile/bureau AU-DESSUS de ce hook, jamais à l'intérieur.
  */
 
-import { api } from "@antia/api/engine"
-import type { Id } from "@antia/api/engine"
-import { useAuthenticatedConvexQuery } from "@antia/api/hooks"
-import { useNetwork, useRoutes } from "@antia/api/network"
+import { api } from "@antsia/api/engine"
+import type { Id } from "@antsia/api/engine"
+import { useAuthenticatedConvexQuery } from "@antsia/api/hooks"
+import { useNetwork, useRoutes } from "@antsia/api/network"
 import {
   usePathname,
   useRouter,
   useSearchParams,
   useTabQueryState,
-} from "@antia/api/routing"
+} from "@antsia/api/routing"
 import { type SetStateAction, useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { openNotificationCenter } from "../notifications/notification-center-store"

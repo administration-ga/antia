@@ -7,7 +7,7 @@ import {
 	parseStoredAudioRoute,
 	type CallSlot,
 } from "./call-store"
-import type { Id } from "@antia/api/engine"
+import type { Id } from "@antsia/api/engine"
 
 /**
  * Ce que ces cas gardent : l'intention média (micro coupé, caméra allumée)
@@ -374,9 +374,9 @@ describe("la sortie audio s'enregistre sous le préfixe du RÉSEAU (un état par
 
 	it("le choix s'écrit sous le préfixe du réseau, et s'efface de même", () => {
 		const store = stubStorage()
-		configureCallStoreStorage("antia:test:")
+		configureCallStoreStorage("antsia:test:")
 		callStore.setAudioRoute({ kind: "speaker" })
-		expect(store.get(`antia:test:${AUDIO_ROUTE_STORAGE_KEY}`)).toBe('{"kind":"speaker"}')
+		expect(store.get(`antsia:test:${AUDIO_ROUTE_STORAGE_KEY}`)).toBe('{"kind":"speaker"}')
 		expect(store.has(AUDIO_ROUTE_STORAGE_KEY)).toBe(false)
 		callStore.setAudioRoute(null)
 		expect(store.size).toBe(0)
@@ -384,10 +384,10 @@ describe("la sortie audio s'enregistre sous le préfixe du RÉSEAU (un état par
 
 	it("le choix enregistré pour CE réseau est relu au premier accès — jamais celui d'un autre", () => {
 		stubStorage({
-			[`antia:test:${AUDIO_ROUTE_STORAGE_KEY}`]: '{"kind":"device","deviceId":"d1","label":"Casque"}',
-			[`antia:autre:${AUDIO_ROUTE_STORAGE_KEY}`]: '{"kind":"earpiece"}',
+			[`antsia:test:${AUDIO_ROUTE_STORAGE_KEY}`]: '{"kind":"device","deviceId":"d1","label":"Casque"}',
+			[`antsia:autre:${AUDIO_ROUTE_STORAGE_KEY}`]: '{"kind":"earpiece"}',
 		})
-		configureCallStoreStorage("antia:test:")
+		configureCallStoreStorage("antsia:test:")
 		expect(callStore.getAudioRoute()).toEqual({ kind: "device", deviceId: "d1", label: "Casque" })
 	})
 })

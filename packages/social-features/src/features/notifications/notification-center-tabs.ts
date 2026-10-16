@@ -17,8 +17,8 @@
  * le `t` reçu en dernier paramètre.
  */
 
-import { engineErrorCode } from "@antia/social-contracts/errors"
-import { NOTIFICATION_UNREAD_CAP } from "@antia/social-domain/notifications"
+import { engineErrorCode } from "@antsia/social-contracts/errors"
+import { NOTIFICATION_UNREAD_CAP } from "@antsia/social-domain/notifications"
 import type { TFunction } from "i18next"
 
 /** Le décompte tel que le moteur le rend (`notifications.bell.unreadCount`). */

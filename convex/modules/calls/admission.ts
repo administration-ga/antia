@@ -29,7 +29,7 @@
  *
  * Module PUR : aucun `ctx`. Le serveur rassemble les faits, ce module tranche.
  */
-import type { CallAdmissionReason } from "@antia/social-domain/callJournal"
+import type { CallAdmissionReason } from "@antsia/social-domain/callJournal"
 
 /** Les réglages d'appel du DESTINATAIRE, tels que la table les porte. */
 export interface AdmissionPreferences {

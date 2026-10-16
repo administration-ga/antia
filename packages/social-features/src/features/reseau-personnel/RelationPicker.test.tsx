@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/RelationPicker.test.tsx @ ad2e7fdc2 — adaptations : montage dans l'enveloppe du moteur (`renderWithEngine` : i18n français, réseau de test) ; vraies primitives de `@antia/ui` (plus de doublures) ; vivier au DTO du moteur (`personId`) et résultats de recherche au DTO du graphe (`otherPersonId`, titre de profil au lieu de la fonction) ; accès indexés gardés ; cas neuf : le verbe d'envoi par défaut est traduit, celui de l'appelant passe tel quel ; les neuf cas du socle gardés.
+// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/RelationPicker.test.tsx @ ad2e7fdc2 — adaptations : montage dans l'enveloppe du moteur (`renderWithEngine` : i18n français, réseau de test) ; vraies primitives de `@antsia/ui` (plus de doublures) ; vivier au DTO du moteur (`personId`) et résultats de recherche au DTO du graphe (`otherPersonId`, titre de profil au lieu de la fonction) ; accès indexés gardés ; cas neuf : le verbe d'envoi par défaut est traduit, celui de l'appelant passe tel quel ; les neuf cas du socle gardés.
 // @vitest-environment jsdom
 
 /**

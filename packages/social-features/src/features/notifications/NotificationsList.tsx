@@ -19,15 +19,15 @@
  * lecture dérobé.
  */
 
-import { api } from "@antia/api/engine"
-import type { Id } from "@antia/api/engine"
+import { api } from "@antsia/api/engine"
+import type { Id } from "@antsia/api/engine"
 import {
 	useAuthenticatedConvexQuery,
 	useAuthenticatedPaginatedQuery,
-} from "@antia/api/hooks"
-import { useNetwork } from "@antia/api/network"
-import { Link } from "@antia/api/routing"
-import { Badge, Button } from "@antia/ui"
+} from "@antsia/api/hooks"
+import { useNetwork } from "@antsia/api/network"
+import { Link } from "@antsia/api/routing"
+import { Badge, Button } from "@antsia/ui"
 import { useMutation } from "convex/react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"

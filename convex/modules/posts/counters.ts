@@ -10,7 +10,7 @@
  *
  * Aucune fonction Convex ici.
  */
-import type { PersonalReactionKind } from "@antia/social-domain/content"
+import type { PersonalReactionKind } from "@antsia/social-domain/content"
 import { DirectAggregate } from "@convex-dev/aggregate"
 
 import { components } from "../../_generated/api"

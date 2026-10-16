@@ -1,12 +1,12 @@
 // Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/CommentsSurface.tsx @ ad2e7fdc2 — adaptations : commentaires du moteur avec le réseau courant (`useNetwork().networkId`) — `engagement.engagement.paginateComments` (racines PAGINÉES, « Voir plus de commentaires », aperçu des réponses et leur nombre) au lieu de `listComments` (100 racines, 10 réponses, sans curseur), la suite des réponses par `paginateReplies`, `comment`, `removeComment`, et `editComment` (« Modifier » sur ses propres commentaires) ; une requête paginée LÈVE ses erreurs : l'état d'échec (« Réessayer ») est rendu par une frontière d'erreur dans le cadre du dialogue ; le nombre de conversations ne s'affiche qu'une fois la liste complète (jamais un plancher présenté comme un total) ; nom neutre traduit pour un profil non publié ; identifiants `Id<"posts">` et `Id<"postComments">` ; portail porté par la charte du réseau (`useNetwork().charte`) ; libellés et toasts par l'i18n (clés `reseau:commentsSurface.*`, accords au nombre) ; refus du moteur dit par son code (`postEngineErrorText`) ; voile et ombres par les jetons (`--ui2-scrim`, `--shadow-xl`) au lieu de couleurs littérales ; feuille de style sortie du JSX dans une constante de module (`COMMENTS_SURFACE_CSS`) — un littéral enfant de `<style>` passerait pour une chaîne d'interface — règles inchangées.
 "use client"
 
-import { api } from "@antia/api/engine"
-import type { Id } from "@antia/api/engine"
-import { useAuthenticatedPaginatedQuery } from "@antia/api/hooks"
-import { useNetwork } from "@antia/api/network"
-import { Button, TextArea, useModalA11y } from "@antia/ui"
-import { useBodyScrollLock, useVisualViewport } from "@antia/ui/overlay"
+import { api } from "@antsia/api/engine"
+import type { Id } from "@antsia/api/engine"
+import { useAuthenticatedPaginatedQuery } from "@antsia/api/hooks"
+import { useNetwork } from "@antsia/api/network"
+import { Button, TextArea, useModalA11y } from "@antsia/ui"
+import { useBodyScrollLock, useVisualViewport } from "@antsia/ui/overlay"
 import { useMutation } from "convex/react"
 import { X } from "lucide-react"
 import { Component, useEffect, useId, useRef, useState, type ReactNode } from "react"

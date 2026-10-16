@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/messagerie/use-messagerie-router-nav.ts @ ad2e7fdc2 — adaptations : routeur par `@antia/api/routing` ; base de la messagerie INJECTÉE (`useRoutes().messages()` de `@antia/api/network`) et passée aux fabriques d'adresses de `messagerie-routes` (plus de `MESSAGES_URL`).
+// Dupliqué de socle/packages/agent-features/src/features/messagerie/use-messagerie-router-nav.ts @ ad2e7fdc2 — adaptations : routeur par `@antsia/api/routing` ; base de la messagerie INJECTÉE (`useRoutes().messages()` de `@antsia/api/network`) et passée aux fabriques d'adresses de `messagerie-routes` (plus de `MESSAGES_URL`).
 "use client"
 
 /**
@@ -19,8 +19,8 @@
  * parcouru pour arriver là.
  */
 
-import { useRoutes } from "@antia/api/network"
-import { useRouter } from "@antia/api/routing"
+import { useRoutes } from "@antsia/api/network"
+import { useRouter } from "@antsia/api/routing"
 import { useMemo } from "react"
 import type { ConversationKey } from "./messagerie-dock"
 import {

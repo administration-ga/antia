@@ -1,11 +1,11 @@
 // Dupliqué de socle/packages/agent-features/src/features/direct/DirectInviteesPanel.tsx @ ad2e7fdc2 — adaptations : API moteur, réseau, sélection nominative par personne, canManage relu et fail-closed, rôle proposé distinct de l’antenne réelle et i18n.
 "use client"
 
-import { api } from "@antia/api/engine"
-import { useAuthenticatedConvexQuery } from "@antia/api/hooks"
-import { useNetwork } from "@antia/api/network"
-import { DIRECT_MAX_INVITEES, DIRECT_MAX_SPEAKER_INVITEES } from "@antia/social-domain/live/domain"
-import { Button } from "@antia/ui"
+import { api } from "@antsia/api/engine"
+import { useAuthenticatedConvexQuery } from "@antsia/api/hooks"
+import { useNetwork } from "@antsia/api/network"
+import { DIRECT_MAX_INVITEES, DIRECT_MAX_SPEAKER_INVITEES } from "@antsia/social-domain/live/domain"
+import { Button } from "@antsia/ui"
 import { useMutation } from "convex/react"
 import { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"

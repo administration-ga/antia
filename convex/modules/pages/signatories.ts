@@ -14,7 +14,7 @@
  *    (`page.signatory_grant`, `page.signatory_revoke`, qualité `page_admin`) —
  *    se retirer soi-même ou décliner une invitation n'en sont pas.
  */
-import { assertNotLastAdmin, assertPageHasRoomForSignatory } from "@antia/social-domain/pages"
+import { assertNotLastAdmin, assertPageHasRoomForSignatory } from "@antsia/social-domain/pages"
 import { v } from "convex/values"
 
 import { internal } from "../../_generated/api"

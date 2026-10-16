@@ -1,5 +1,5 @@
 {
-  "name": "@antia/social-features",
+  "name": "@antsia/social-features",
   "version": "0.0.0",
   "private": true,
   "license": "AGPL-3.0-or-later",
@@ -25,10 +25,10 @@
     "lint": "eslint ."
   },
   "dependencies": {
-    "@antia/api": "workspace:*",
-    "@antia/social-contracts": "workspace:*",
-    "@antia/social-domain": "workspace:*",
-    "@antia/ui": "workspace:*",
+    "@antsia/api": "workspace:*",
+    "@antsia/social-contracts": "workspace:*",
+    "@antsia/social-domain": "workspace:*",
+    "@antsia/ui": "workspace:*",
     "@livekit/components-react": "catalog:",
     "@livekit/components-styles": "catalog:",
     "convex": "catalog:",
@@ -49,8 +49,8 @@
     "react-dom": "catalog:"
   },
   "devDependencies": {
-    "@antia/eslint-config": "workspace:*",
-    "@antia/tsconfig": "workspace:*",
+    "@antsia/eslint-config": "workspace:*",
+    "@antsia/tsconfig": "workspace:*",
     "@testing-library/dom": "catalog:",
     "@testing-library/jest-dom": "catalog:",
     "@testing-library/react": "catalog:",

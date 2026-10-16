@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/iappel/ConferenceHintCard.tsx @ ad2e7fdc2 — adaptations : ton « poste » retiré (aucun espace de poste dans le moteur) ; nom accessible de la croix traduit (i18n `iappel`) ; pile Échap lue dans la coque (`shell/floating-surface`) ; `useModalA11y` de @antia/ui.
+// Dupliqué de socle/packages/agent-features/src/features/iappel/ConferenceHintCard.tsx @ ad2e7fdc2 — adaptations : ton « poste » retiré (aucun espace de poste dans le moteur) ; nom accessible de la croix traduit (i18n `iappel`) ; pile Échap lue dans la coque (`shell/floating-surface`) ; `useModalA11y` de @antsia/ui.
 "use client"
 
 /**
@@ -9,7 +9,7 @@
  * composant ne fait que les rendre. Il ne connaît ni fil, ni plafond, ni
  * appel : il reçoit `copy` et des gestes. C'est ce qui permet la même carte
  * dans la messagerie du réseau et sur la scène sombre de l'appel — seul le
- * TON change, par `data-tone`, dans la feuille d'appel de @antia/ui (bloc
+ * TON change, par `data-tone`, dans la feuille d'appel de @antsia/ui (bloc
  * « CARTE CONFÉRENCE »).
  *
  * Trois formes, une par moment où le plafond se rencontre :
@@ -31,7 +31,7 @@
  */
 
 import { X } from "lucide-react"
-import { useModalA11y } from "@antia/ui"
+import { useModalA11y } from "@antsia/ui"
 import { useId, useRef, type KeyboardEvent, type RefObject } from "react"
 import { useTranslation } from "react-i18next"
 import { ESCAPE_PRIORITY } from "../../shell/floating-surface/escape-stack"

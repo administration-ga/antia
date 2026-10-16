@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/messagerie/messagerie-composer.ts @ ad2e7fdc2 — adaptations : bornes lues au contrat du moteur (`@antia/social-contracts/attachments`, dérivé de la politique de dépôt `chat_attachment`) ; poids dit dans la langue courante (`formatBytes(bytes, locale, t)` : nombre par `Intl.NumberFormat`, unité par clé i18n) au lieu de la virgule et des unités françaises en dur ; refus par clés i18n qualifiées (`messagerie:messagerieComposer.*`), `locale` puis `t` en derniers paramètres de `attachmentRejection`.
+// Dupliqué de socle/packages/agent-features/src/features/messagerie/messagerie-composer.ts @ ad2e7fdc2 — adaptations : bornes lues au contrat du moteur (`@antsia/social-contracts/attachments`, dérivé de la politique de dépôt `chat_attachment`) ; poids dit dans la langue courante (`formatBytes(bytes, locale, t)` : nombre par `Intl.NumberFormat`, unité par clé i18n) au lieu de la virgule et des unités françaises en dur ; refus par clés i18n qualifiées (`messagerie:messagerieComposer.*`), `locale` puis `t` en derniers paramètres de `attachmentRejection`.
 /**
  * messagerie-composer — ce que le COMPOSEUR décide.
  *
@@ -34,7 +34,7 @@ import {
 	ATTACHMENTS_MAX_PER_MESSAGE,
 	ATTACHMENT_MAX_BYTES,
 	isVoiceAttachment,
-} from "@antia/social-contracts/attachments"
+} from "@antsia/social-contracts/attachments"
 
 /**
  * Les bornes du SERVEUR, ré-exportées pour que l'écran n'en connaisse pas

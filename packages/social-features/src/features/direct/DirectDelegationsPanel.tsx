@@ -1,11 +1,11 @@
 // Dupliqué de socle/packages/agent-features/src/features/direct/DirectAntennaPanel.tsx @ ad2e7fdc2 — adaptations : délégations dans un volet réservé au droit delegate, candidats liés à l’hôte, capacités sensibles explicites, édition sans confondre média et gestion, i18n.
 "use client"
 
-import { api, type Id } from "@antia/api/engine"
-import { useAuthenticatedConvexQuery } from "@antia/api/hooks"
-import { useNetwork } from "@antia/api/network"
-import { defaultDelegationFlags, DIRECT_MAX_DELEGATIONS } from "@antia/social-domain/live/permissions"
-import { Button } from "@antia/ui"
+import { api, type Id } from "@antsia/api/engine"
+import { useAuthenticatedConvexQuery } from "@antsia/api/hooks"
+import { useNetwork } from "@antsia/api/network"
+import { defaultDelegationFlags, DIRECT_MAX_DELEGATIONS } from "@antsia/social-domain/live/permissions"
+import { Button } from "@antsia/ui"
 import { useMutation } from "convex/react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"

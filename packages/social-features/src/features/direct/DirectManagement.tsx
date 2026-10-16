@@ -1,8 +1,8 @@
 // Dupliqué de socle/packages/agent-features/src/features/direct/DirectSidePanel.tsx @ ad2e7fdc2 — adaptations : volets opt-in par droits serveur, aucune query de gestion chez un spectateur, montage réinitialisé au changement de réseau et session, disposition responsive et i18n.
 "use client"
 
-import { useNetwork } from "@antia/api/network"
-import { Button } from "@antia/ui"
+import { useNetwork } from "@antsia/api/network"
+import { Button } from "@antsia/ui"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { DirectAntennaPanel, DirectMyAntenna } from "./DirectAntennaPanel"

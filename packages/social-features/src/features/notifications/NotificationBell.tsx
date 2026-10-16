@@ -25,9 +25,9 @@
  * affiche alors « 99+ », et son nom accessible « plus de 99 ».
  */
 
-import { api } from "@antia/api/engine"
-import { useAuthenticatedConvexQuery } from "@antia/api/hooks"
-import { useNetwork } from "@antia/api/network"
+import { api } from "@antsia/api/engine"
+import { useAuthenticatedConvexQuery } from "@antsia/api/hooks"
+import { useNetwork } from "@antsia/api/network"
 import { Bell } from "lucide-react"
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react"
 import { useTranslation } from "react-i18next"

@@ -1,5 +1,5 @@
 ---
-title: "ANTIA — Annexe A2 du document 02 : inventaire contradictoire, backend — groupes, groupes thématiques, évènements, stories, suggestions, messagerie personnelle"
+title: "ANTSIA — Annexe A2 du document 02 : inventaire contradictoire, backend — groupes, groupes thématiques, évènements, stories, suggestions, messagerie personnelle"
 date: "2026-10-14"
 source: "socle administration.ga, origin/main = ad2e7fdc2, copie propre (git worktree add), lecture seule"
 statut: "Rapport d'inventaire brut, produit en lecture seule ; la synthèse décisionnelle est docs/02_OWNER_MAP_DUPLICATION.md"
@@ -9,7 +9,7 @@ statut: "Rapport d'inventaire brut, produit en lecture seule ; la synthèse déc
 > propre du socle sur `origin/main` (`ad2e7fdc2`). Les numéros de ligne valent pour ce commit. Quand une
 > décision du document 02 diffère d'une proposition de ce rapport, c'est le document 02 qui fait foi.
 
-# Inventaire contradictoire de la tranche sociale de l'espace agent (socle `ad2e7fdc2`), en vue du moteur social ANTIA
+# Inventaire contradictoire de la tranche sociale de l'espace agent (socle `ad2e7fdc2`), en vue du moteur social ANTSIA
 
 Lecture seule, rien n'a été modifié. Tous les chemins sont relatifs à `$S` (`<copie propre du socle>`).
 

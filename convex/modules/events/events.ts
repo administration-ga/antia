@@ -11,8 +11,8 @@
  * d'autre — refus INDISTINCT. Un évènement ANNULÉ reste visible de ses
  * participants : disparaître en silence laisserait chacun s'y présenter.
  */
-import type { CounterpartLabel } from "@antia/social-contracts/counterpart"
-import { assertPersonalPostBody, assertPostReach, PERSONAL_REACH_AUDIENCES } from "@antia/social-domain/content"
+import type { CounterpartLabel } from "@antsia/social-contracts/counterpart"
+import { assertPersonalPostBody, assertPostReach, PERSONAL_REACH_AUDIENCES } from "@antsia/social-domain/content"
 import {
   assertPersonalEventDescription,
   assertPersonalEventLocation,
@@ -23,8 +23,8 @@ import {
   type PersonalEventParticipationStatus,
   type PersonalEventResponse,
   type PersonalEventStatus,
-} from "@antia/social-domain/events"
-import { effectiveVisibility } from "@antia/social-domain/network"
+} from "@antsia/social-domain/events"
+import { effectiveVisibility } from "@antsia/social-domain/network"
 import { paginationOptsValidator, type PaginationResult } from "convex/server"
 import { v } from "convex/values"
 

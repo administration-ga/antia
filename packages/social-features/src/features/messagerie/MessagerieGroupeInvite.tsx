@@ -1,12 +1,12 @@
 // Dupliqué de socle/packages/agent-features/src/features/messagerie/MessagerieGroupeInvite.tsx @ ad2e7fdc2 — adaptations : aperçu et entrée par `groups.invites.previewGroupInvite` et `joinGroupViaInviteLink` du moteur (réseau courant : un jeton d'un autre réseau se lit comme un jeton inconnu) ; refus traduit (`messageErreurLisible(err, t)`) ; textes traduits (i18n `messagerie`, clés `messagerieGroupeInvite.…`) ; « identité iRéseau » devient « identité sur le réseau » ; feuille de style sortie du JSX dans une constante de module (`MSG_GROUPE_INVITE_CSS`) — un littéral enfant de `<style>` passerait pour une chaîne d'interface — règles inchangées.
 "use client"
 
-import { api } from "@antia/api/engine"
+import { api } from "@antsia/api/engine"
 import {
 	useAuthenticatedConvexQuery,
 	useConvexMutationQuery,
-} from "@antia/api/hooks"
-import { useNetwork } from "@antia/api/network"
+} from "@antsia/api/hooks"
+import { useNetwork } from "@antsia/api/network"
 import { ArrowRight, Link2, Users, X } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"

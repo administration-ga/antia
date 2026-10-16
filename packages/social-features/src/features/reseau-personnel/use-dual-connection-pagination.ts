@@ -1,9 +1,9 @@
 // Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/use-dual-connection-pagination.ts @ ad2e7fdc2 — adaptations : UN seul graphe par réseau — `reseauPersonnel.connections.*` et `reseau.connections.*` deviennent `graph.connections.paginateMine` (deux côtés `low`/`high`) et `graph.connections.paginatePendingForMe` (un seul index, présenté comme une paire au côté haut épuisé) ; `networkId` lu par `useNetwork()` ; DTO `ConnectionPersonDto` du moteur (type `PersonalConnection` exporté) ; hook interne paramétré par une SOURCE typée (requête, arguments, lecture de la réponse) au lieu de références forcées par transtypage ; `useCoreConnections` et `useCorePendingConnections` retirés (annuaire administratif) ; horodatage `at` hors du rendu.
 "use client"
 
-import { api, type Id } from "@antia/api/engine"
-import { useAuthenticatedConvexQuery } from "@antia/api/hooks"
-import { useNetwork } from "@antia/api/network"
+import { api, type Id } from "@antsia/api/engine"
+import { useAuthenticatedConvexQuery } from "@antsia/api/hooks"
+import { useNetwork } from "@antsia/api/network"
 import type { FunctionReference, FunctionReturnType } from "convex/server"
 import { useCallback, useEffect, useMemo, useState } from "react"
 

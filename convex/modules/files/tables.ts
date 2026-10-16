@@ -7,7 +7,7 @@
  * surface. Table DÉDIÉE, jamais de champs sur les publications ou les messages :
  * la machine d'états d'un scan leur est étrangère.
  */
-import { FILE_SCAN_SOURCES, FILE_SCAN_STATUSES, FINDING_SEVERITIES } from "@antia/social-domain/filePolicy"
+import { FILE_SCAN_SOURCES, FILE_SCAN_STATUSES, FINDING_SEVERITIES } from "@antsia/social-domain/filePolicy"
 import { defineTable } from "convex/server"
 import { v } from "convex/values"
 

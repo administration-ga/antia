@@ -8,9 +8,9 @@ import { createAppI18n } from "../../i18n"
 import { DirectsLiveRail } from "./DirectsLiveRail"
 
 const mocks = vi.hoisted(() => ({ networkId: "network-a", empty: true, fail: false, done: false }))
-vi.mock("@antia/api/network", () => ({ useNetwork: () => ({ networkId: mocks.networkId }), useRoutes: () => ({ conference: (id: string) => `/room/${id}`, profile: (handle: string) => `/person/${handle}` }) }))
-vi.mock("@antia/api/routing", () => ({ Link: ({ children, ...props }: { children: ReactNode; href: string }) => <a {...props}>{children}</a> }))
-vi.mock("@antia/api/hooks", () => ({ useAuthenticatedConvexQuery: (_ref: unknown, args: { cursor?: unknown }) => ({
+vi.mock("@antsia/api/network", () => ({ useNetwork: () => ({ networkId: mocks.networkId }), useRoutes: () => ({ conference: (id: string) => `/room/${id}`, profile: (handle: string) => `/person/${handle}` }) }))
+vi.mock("@antsia/api/routing", () => ({ Link: ({ children, ...props }: { children: ReactNode; href: string }) => <a {...props}>{children}</a> }))
+vi.mock("@antsia/api/hooks", () => ({ useAuthenticatedConvexQuery: (_ref: unknown, args: { cursor?: unknown }) => ({
   data: { items: mocks.empty && !args.cursor ? [] : [{ sessionId: mocks.networkId, title: "Recette", startedAt: 1, host: { displayName: "Awa", handle: "awa", avatarUrl: null } }], nextCursor: !args.cursor && !mocks.done ? { startedAt: 1, sessionId: "next" } : null },
   isError: mocks.fail, isFetching: false, refetch: vi.fn(),
 }) }))

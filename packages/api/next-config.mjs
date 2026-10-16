@@ -32,13 +32,13 @@ export function readEnvFile(file) {
 }
 
 /**
- * Configuration Next.js commune aux applications du moteur (antia_ga,
- * admin_antia_ga, et les applications externes comme diasporale_com).
+ * Configuration Next.js commune aux applications du moteur (antsia_ga,
+ * admin_antsia_ga, et les applications externes comme diasporale_com).
  *
  * - Racine de résolution et de traçage = ECOSYSTEMES : toutes les applications
  *   se construisent dans ce contexte (Dockerfile en contexte ECOSYSTEMES).
  * - En développement, le déploiement Convex courant est lu dans le
- *   `.env.local` QUE `bun run dev:convex` ÉCRIT LUI-MÊME à la racine d'ANTIA
+ *   `.env.local` QUE `bun run dev:convex` ÉCRIT LUI-MÊME à la racine d'ANTSIA
  *   (`CONVEX_URL`, `CONVEX_SITE_URL`) : une seule source, aucun fichier
  *   d'environnement à recopier par application.
  * - En production, les valeurs arrivent par les ARG du Dockerfile (catalogue).
@@ -49,7 +49,7 @@ export function readEnvFile(file) {
 export function createEngineNextConfig(options) {
   const isDev = process.env.NODE_ENV !== "production"
   const ecosystemsRoot = path.resolve(options.appDir, "../../..")
-  const engineRoot = options.engineRoot ?? path.join(ecosystemsRoot, "ANTIA")
+  const engineRoot = options.engineRoot ?? path.join(ecosystemsRoot, "ANTSIA")
   const local = isDev ? readEnvFile(path.join(engineRoot, ".env.local")) : {}
   const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL ?? local.CONVEX_URL ?? ""
   const convexSiteUrl = process.env.CONVEX_SITE_URL ?? local.CONVEX_SITE_URL ?? ""
@@ -65,11 +65,11 @@ export function createEngineNextConfig(options) {
     reactCompiler: false,
     poweredByHeader: false,
     transpilePackages: [
-      "@antia/api",
-      "@antia/social-contracts",
-      "@antia/social-domain",
-      "@antia/social-features",
-      "@antia/ui",
+      "@antsia/api",
+      "@antsia/social-contracts",
+      "@antsia/social-domain",
+      "@antsia/social-features",
+      "@antsia/ui",
       ...(options.transpilePackages ?? []),
     ],
     typescript: {

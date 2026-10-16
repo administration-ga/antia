@@ -1,11 +1,11 @@
 // @vitest-environment edge-runtime
 /**
  * Tranche `diaspora` (DIASPORALE PD1) : réseau gouverné, entrée par les règles du
- * domaine, adhésion ANTIA dérivée, parrainage (A3), départ, facette et annuaire,
+ * domaine, adhésion ANTSIA dérivée, parrainage (A3), départ, facette et annuaire,
  * hubs aux compteurs matérialisés, graine idempotente, étanchéité entre réseaux.
  */
-import { engineErrorAppRule, engineErrorCode } from "@antia/social-contracts/errors"
-import { validateFacetSchema } from "@antia/social-domain/facets"
+import { engineErrorAppRule, engineErrorCode } from "@antsia/social-contracts/errors"
+import { validateFacetSchema } from "@antsia/social-domain/facets"
 import { ATTESTATION_PATH, canonicalAttestationString, DAY_MS, DEFAULT_FACET_VISIBILITY, MEMBER_COUNTER_DISPLAY_THRESHOLD, SPONSORSHIPS_PER_WINDOW } from "@diasporale/domain"
 import { afterEach, describe, expect, it, vi } from "vitest"
 
@@ -114,7 +114,7 @@ afterEach(() => {
 })
 
 describe("graine et manifeste de la tranche", () => {
-  it("sème diasporale : fermé, enfant d'ANTIA, gouverné par la tranche, facette valide, France ouverte", async () => {
+  it("sème diasporale : fermé, enfant d'ANTSIA, gouverné par la tranche, facette valide, France ouverte", async () => {
     const t = testConvex()
     const { root, diasporale } = await seedAll(t)
     const network = await t.run(async (ctx) => ctx.db.get(diasporale))
@@ -170,7 +170,7 @@ describe("réseau gouverné : les chemins génériques refusent", () => {
 })
 
 describe("entrer dans DIASPORALE (R1, R3)", () => {
-  it("un compte léger entre « en attente », ne publie pas, et l'adhésion ANTIA dérivée existe", async () => {
+  it("un compte léger entre « en attente », ne publie pas, et l'adhésion ANTSIA dérivée existe", async () => {
     const t = testConvex()
     const { root, diasporale } = await seedAll(t)
     const light = await person(t, "auth-light", "compte.leger")
@@ -433,7 +433,7 @@ describe("facette et confidentialité", () => {
 })
 
 describe("myMembership — projection allowlistée de soi", () => {
-  it("rend le statut effectif, les badges calculés, l'ANTIA dérivée — et rien de consulaire", async () => {
+  it("rend le statut effectif, les badges calculés, l'ANTSIA dérivée — et rien de consulaire", async () => {
     const t = testConvex()
     const { diasporale } = await seedAll(t)
     const ada = await person(t, "auth-ada", "ada")
@@ -454,7 +454,7 @@ describe("myMembership — projection allowlistée de soi", () => {
     expect(await t.withIdentity({ subject: "auth-sans-personne" }).query(api.modules.diaspora.membership.myMembership, { networkId: diasporale })).toBeNull()
   })
 
-  it("une suspension ANTIA vaut dans DIASPORALE", async () => {
+  it("une suspension ANTSIA vaut dans DIASPORALE", async () => {
     const t = testConvex()
     const { root, diasporale } = await seedAll(t)
     const ada = await person(t, "auth-ada", "ada")
@@ -471,21 +471,21 @@ describe("myMembership — projection allowlistée de soi", () => {
 })
 
 describe("étanchéité entre réseaux", () => {
-  it("un membre d'ANTIA seul ne lit ni le fil ni les hubs de diasporale ; la tranche refuse un autre réseau", async () => {
+  it("un membre d'ANTSIA seul ne lit ni le fil ni les hubs de diasporale ; la tranche refuse un autre réseau", async () => {
     const t = testConvex()
     const { root, diasporale } = await seedAll(t)
     const author = await verifiedSponsor(t, diasporale, "auth-auteur", "auteur")
     await author.as.mutation(api.modules.posts.posts.publish, { networkId: diasporale, body: "Réservé au réseau" })
-    const antiaOnly = await person(t, "auth-antia", "antia.seule")
-    await antiaOnly.as.mutation(api.modules.people.memberships.joinNetwork, { networkId: root })
-    const feed = antiaOnly.as.query(api.modules.posts.posts.feed, { networkId: diasporale, paginationOpts: { numItems: 10, cursor: null } })
+    const antsiaOnly = await person(t, "auth-antsia", "antsia.seule")
+    await antsiaOnly.as.mutation(api.modules.people.memberships.joinNetwork, { networkId: root })
+    const feed = antsiaOnly.as.query(api.modules.posts.posts.feed, { networkId: diasporale, paginationOpts: { numItems: 10, cursor: null } })
     expect((await refusal(feed)).code).toBe("notFound")
-    expect((await refusal(antiaOnly.as.query(api.modules.diaspora.hubs.getCountryHub, { networkId: diasporale, country: "FR" }))).code).toBe("notFound")
+    expect((await refusal(antsiaOnly.as.query(api.modules.diaspora.hubs.getCountryHub, { networkId: diasporale, country: "FR" }))).code).toBe("notFound")
     // Membre de la racine, mais la racine n'est pas gouvernée par la tranche : refus indistinct.
-    expect((await refusal(antiaOnly.as.query(api.modules.diaspora.hubs.getCountryHub, { networkId: root, country: "FR" }))).code).toBe("notFound")
-    expect((await refusal(antiaOnly.as.query(api.modules.diaspora.membership.sponsorDashboard, { networkId: root }))).code).toBe("notFound")
+    expect((await refusal(antsiaOnly.as.query(api.modules.diaspora.hubs.getCountryHub, { networkId: root, country: "FR" }))).code).toBe("notFound")
+    expect((await refusal(antsiaOnly.as.query(api.modules.diaspora.membership.sponsorDashboard, { networkId: root }))).code).toBe("notFound")
     // La vitrine publique d'un réseau non gouverné est vide : rien n'y est annoncé.
-    expect(await antiaOnly.as.query(api.modules.diaspora.hubs.listOpenCountries, { networkId: root })).toEqual([])
+    expect(await antsiaOnly.as.query(api.modules.diaspora.hubs.listOpenCountries, { networkId: root })).toEqual([])
   })
 })
 

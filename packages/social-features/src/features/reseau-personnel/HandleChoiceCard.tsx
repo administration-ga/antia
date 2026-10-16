@@ -22,9 +22,9 @@
  * entre l'affichage et le clic.
  */
 
-import { api } from "@antia/api/engine"
-import { useAuthenticatedConvexQuery } from "@antia/api/hooks"
-import { useDebouncedValue } from "@antia/ui"
+import { api } from "@antsia/api/engine"
+import { useAuthenticatedConvexQuery } from "@antsia/api/hooks"
+import { useDebouncedValue } from "@antsia/ui"
 import { useTranslation } from "react-i18next"
 import { validateHandle } from "./shared"
 

@@ -21,14 +21,14 @@ const mocks = vi.hoisted(() => {
   }
 })
 
-vi.mock("@antia/ui/overlay", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("@antia/ui/overlay")>()),
+vi.mock("@antsia/ui/overlay", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@antsia/ui/overlay")>()),
   useIsReseauMobile: () => mocks.mobile,
 }))
 
-vi.mock("@antia/api/engine", () => ({ api: mocks.anyPath() }))
+vi.mock("@antsia/api/engine", () => ({ api: mocks.anyPath() }))
 
-vi.mock("@antia/api/hooks", () => ({
+vi.mock("@antsia/api/hooks", () => ({
   useAuthenticatedConvexQuery: () => ({ data: undefined, isLoading: false, isError: false }),
   useAuthenticatedPaginatedQuery: () => ({ results: [], status: "Exhausted", loadMore: vi.fn(), isLoading: false }),
 }))

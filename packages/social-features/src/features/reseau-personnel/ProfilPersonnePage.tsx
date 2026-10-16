@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/ProfilPersonnePage.tsx @ ad2e7fdc2 — adaptations : fiche lue DANS le réseau courant (`people.profile.getPublicProfile({ networkId, handle })`, « c'est moi » rendu par le moteur `isMe`, photo et couverture servies par la garde des fichiers, une image retenue retombe sur le repli) ; mur par `posts.posts.personPosts` (réseau, curseur `Id<"posts">`, clé `_id`) et publication ÉPINGLÉE rendue en tête du mur (le moteur la sort de la liste ; « Désépingler » par `posts.posts.unpinMyWall` sur ma fiche) ; relation par `graph.connections.connectionWith` (personne), demande par `requestConnection` et réponse à une invitation reçue sur la fiche même (`respondToConnection`) ; suivi par `graph.follows.{isFollowing, follow, unfollow}` (personne) ; une relation se joint d'ici — « Écrire » ouvre le brouillon iCom (`dockStore.openDraft`, et l'adresse de la messagerie de l'application au téléphone) et « Appeler » passe par `useRingRelation` de la brique d'appel (`calls.direct.callMember`, puis le magasin d'appel : fenêtre sortante, ou écran de refus) ; section professionnelle RETIRÉE (résumé iProfil, « Mon dossier iProfil », `iProfiles.getMyIProfil`) ; « Modifier mon profil » ouvre la gestion de MON profil sur ma fiche (`ProfilReseauSection`, ouverte d'emblée par `?gerer=1`) au lieu des paramètres de l'espace, et un profil que j'ai retiré m'y ramène au lieu du refus ; adresses composées par `useRoutes()` (profil, page réseau, messagerie) — aucune route en dur ; aperçu « vu par les membres du réseau » avec retour sur ma fiche ; textes par l'i18n (`reseau:profilPersonnePage.*`, modules purs appelés avec `t`) ; kit d'espace (onglets, styles) par `@antia/ui/espace-kit` ; albums par le barrel de leur tranche (`features/reseau-albums`).
+// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/ProfilPersonnePage.tsx @ ad2e7fdc2 — adaptations : fiche lue DANS le réseau courant (`people.profile.getPublicProfile({ networkId, handle })`, « c'est moi » rendu par le moteur `isMe`, photo et couverture servies par la garde des fichiers, une image retenue retombe sur le repli) ; mur par `posts.posts.personPosts` (réseau, curseur `Id<"posts">`, clé `_id`) et publication ÉPINGLÉE rendue en tête du mur (le moteur la sort de la liste ; « Désépingler » par `posts.posts.unpinMyWall` sur ma fiche) ; relation par `graph.connections.connectionWith` (personne), demande par `requestConnection` et réponse à une invitation reçue sur la fiche même (`respondToConnection`) ; suivi par `graph.follows.{isFollowing, follow, unfollow}` (personne) ; une relation se joint d'ici — « Écrire » ouvre le brouillon iCom (`dockStore.openDraft`, et l'adresse de la messagerie de l'application au téléphone) et « Appeler » passe par `useRingRelation` de la brique d'appel (`calls.direct.callMember`, puis le magasin d'appel : fenêtre sortante, ou écran de refus) ; section professionnelle RETIRÉE (résumé iProfil, « Mon dossier iProfil », `iProfiles.getMyIProfil`) ; « Modifier mon profil » ouvre la gestion de MON profil sur ma fiche (`ProfilReseauSection`, ouverte d'emblée par `?gerer=1`) au lieu des paramètres de l'espace, et un profil que j'ai retiré m'y ramène au lieu du refus ; adresses composées par `useRoutes()` (profil, page réseau, messagerie) — aucune route en dur ; aperçu « vu par les membres du réseau » avec retour sur ma fiche ; textes par l'i18n (`reseau:profilPersonnePage.*`, modules purs appelés avec `t`) ; kit d'espace (onglets, styles) par `@antsia/ui/espace-kit` ; albums par le barrel de leur tranche (`features/reseau-albums`).
 "use client"
 
 /**
@@ -65,11 +65,11 @@
  * j'ai retiré mon profil, me ramène à sa gestion pour le republier.
  */
 
-import { api } from "@antia/api/engine"
-import type { Id } from "@antia/api/engine"
-import { useAuthenticatedConvexQuery } from "@antia/api/hooks"
-import { useNetwork, useRoutes } from "@antia/api/network"
-import { useRouter, useSearchParams } from "@antia/api/routing"
+import { api } from "@antsia/api/engine"
+import type { Id } from "@antsia/api/engine"
+import { useAuthenticatedConvexQuery } from "@antsia/api/hooks"
+import { useNetwork, useRoutes } from "@antsia/api/network"
+import { useRouter, useSearchParams } from "@antsia/api/routing"
 import {
   Alert,
   Badge,
@@ -77,9 +77,9 @@ import {
   Card,
   Icon,
   SkeletonCard,
-} from "@antia/ui"
-import { EspaceDossierTabs, EspaceKitStyles } from "@antia/ui/espace-kit"
-import { useIsReseauMobile } from "@antia/ui/overlay"
+} from "@antsia/ui"
+import { EspaceDossierTabs, EspaceKitStyles } from "@antsia/ui/espace-kit"
+import { useIsReseauMobile } from "@antsia/ui/overlay"
 import { useMutation } from "convex/react"
 import type { FunctionReturnType } from "convex/server"
 import type { TFunction } from "i18next"

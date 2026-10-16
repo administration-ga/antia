@@ -11,7 +11,7 @@
  *  5. aucun identifiant de stockage dans un DTO, aucune photo retenue montrée à
  *     un autre que son propriétaire, aucun orphelin après une suppression.
  */
-import { engineErrorCode, engineErrorRule } from "@antia/social-contracts/errors"
+import { engineErrorCode, engineErrorRule } from "@antsia/social-contracts/errors"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 import { api, internal } from "../../_generated/api"

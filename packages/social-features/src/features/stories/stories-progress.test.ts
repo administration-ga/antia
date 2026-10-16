@@ -1,7 +1,7 @@
 // Dupliqué de socle/packages/agent-features/src/features/stories/stories-progress.test.ts @ ad2e7fdc2 — adaptations : plafond absolu ramené à la borne unique du moteur (cinq minutes au lieu de dix, vérifié contre `STORY_VIDEO_MAX_DURATION_MS` du domaine ; la vidéo légitime sous le plafond passe de neuf à quatre minutes) ; aucun cas retiré.
 import { describe, expect, it } from "vitest"
 
-import { STORY_VIDEO_MAX_DURATION_MS } from "@antia/social-domain/stories"
+import { STORY_VIDEO_MAX_DURATION_MS } from "@antsia/social-domain/stories"
 
 import {
 	initialStoryIndex,

@@ -66,7 +66,7 @@ describe("no-cross-product-imports — étanchéité du moteur (règle 4 de dupl
       'import { api as ok } from "@convex/_generated/api"',
       'import { x } from "../../../../convex/_generated/server"',
     ].join("\n")
-    const findings = detectCrossProductImports("apps/antia_ga/src/app/page.tsx", source)
+    const findings = detectCrossProductImports("apps/antsia_ga/src/app/page.tsx", source)
     const lines = findings.map((finding) => finding.line)
     expect(lines).toContain(1)
     expect(lines).toContain(2)

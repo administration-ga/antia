@@ -25,7 +25,7 @@
  * le drapeau correspondant. Ce que la garde ne cède JAMAIS : personne ne touche
  * à l'HÔTE, et personne ne se sanctionne soi-même.
  */
-import type { DomainRule } from "@antia/social-domain/violation"
+import type { DomainRule } from "@antsia/social-domain/violation"
 import { paginationOptsValidator, type PaginationResult } from "convex/server"
 import { v } from "convex/values"
 

@@ -14,8 +14,8 @@
  * l'analyse, délivrance par `resolveFileDelivery` ; l'image remplacée ou retirée
  * est PURGÉE (elle n'appartient qu'à cette page).
  */
-import { assertCountryCode } from "@antia/social-domain/content"
-import { assertPageName, normalizePageDescription, normalizePageShortName } from "@antia/social-domain/pages"
+import { assertCountryCode } from "@antsia/social-domain/content"
+import { assertPageName, normalizePageDescription, normalizePageShortName } from "@antsia/social-domain/pages"
 import { v } from "convex/values"
 
 import type { Doc, Id } from "../../_generated/dataModel"

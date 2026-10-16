@@ -4,7 +4,7 @@
  * découvrables dans leur réseau, ouverts à l'adhésion. Ni une messagerie (les
  * conversations de groupe), ni un canal d'organisation.
  */
-import { THEMATIC_GROUP_ROLES } from "@antia/social-domain/thematicGroups"
+import { THEMATIC_GROUP_ROLES } from "@antsia/social-domain/thematicGroups"
 import { defineTable } from "convex/server"
 import { v } from "convex/values"
 

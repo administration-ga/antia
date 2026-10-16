@@ -1,9 +1,9 @@
-// Dupliqué de socle/packages/agent-features/src/features/direct/DirectFloatingCard.tsx @ ad2e7fdc2 — adaptations : registre/salle ANTIA sans montage audio, identité personId, rôles et permissions serveur, charte et routes injectées ; déplacement existant de la coque et pose mobile/reduite.
+// Dupliqué de socle/packages/agent-features/src/features/direct/DirectFloatingCard.tsx @ ad2e7fdc2 — adaptations : registre/salle ANTSIA sans montage audio, identité personId, rôles et permissions serveur, charte et routes injectées ; déplacement existant de la coque et pose mobile/reduite.
 "use client"
-import { useNetwork, useRoutes } from "@antia/api/network"
-import { Link } from "@antia/api/routing"
-import { Button } from "@antia/ui"
-import { useIsReseauMobile } from "@antia/ui/overlay"
+import { useNetwork, useRoutes } from "@antsia/api/network"
+import { Link } from "@antsia/api/routing"
+import { Button } from "@antsia/ui"
+import { useIsReseauMobile } from "@antsia/ui/overlay"
 import { ParticipantTile, RoomContext, useSpeakingParticipants, useTracks } from "@livekit/components-react"
 import { Track } from "livekit-client"
 import { useState } from "react"
@@ -20,13 +20,13 @@ import { directCardPose, type DirectCardPose } from "./direct-floating"
 import { directParticipantPersonId, directRosterTracks } from "./direct-studio-model"
 
 const FLOATING_CSS = `
- .antia-direct-float { --ui2-button-min-h:44px; --ui2-button-sm-min-h:44px; position:fixed; left:16px; bottom:24px; z-index:45; box-sizing:border-box; width:min(360px,calc(100vw - 32px)); max-height:calc(100dvh - 32px); display:flex; flex-direction:column; gap:10px; padding:12px; border:1px solid var(--border); border-radius:16px; background:var(--background); color:var(--foreground); box-shadow:var(--shadow-lg); overflow:auto; }
- .antia-direct-float[data-pose=pill] { width:min(320px,calc(100vw - 32px)); }
- .antia-direct-float[data-pose=mobile] { left:12px; right:12px; bottom:calc(76px + env(safe-area-inset-bottom)); width:auto; max-height:40dvh; }
- .antia-direct-float .lk-participant-metadata { display:none; }
- .antia-direct-float video { object-fit:contain; }
- .antia-direct-float[data-dragging=true] { user-select:none; }
- @media(prefers-reduced-motion:reduce) { .antia-direct-float * { transition:none !important; } }
+ .antsia-direct-float { --ui2-button-min-h:44px; --ui2-button-sm-min-h:44px; position:fixed; left:16px; bottom:24px; z-index:45; box-sizing:border-box; width:min(360px,calc(100vw - 32px)); max-height:calc(100dvh - 32px); display:flex; flex-direction:column; gap:10px; padding:12px; border:1px solid var(--border); border-radius:16px; background:var(--background); color:var(--foreground); box-shadow:var(--shadow-lg); overflow:auto; }
+ .antsia-direct-float[data-pose=pill] { width:min(320px,calc(100vw - 32px)); }
+ .antsia-direct-float[data-pose=mobile] { left:12px; right:12px; bottom:calc(76px + env(safe-area-inset-bottom)); width:auto; max-height:40dvh; }
+ .antsia-direct-float .lk-participant-metadata { display:none; }
+ .antsia-direct-float video { object-fit:contain; }
+ .antsia-direct-float[data-dragging=true] { user-select:none; }
+ @media(prefers-reduced-motion:reduce) { .antsia-direct-float * { transition:none !important; } }
 `
 
 export function DirectFloatingCard({ session, onLeave }: { session: DirectSession | undefined; onLeave: () => void }) {
@@ -47,14 +47,14 @@ function FloatingFrame({ pose, session, onLeave }: { pose: DirectCardPose; sessi
   const [exit, setExit] = useState(false)
   const draggable = pose !== "mobile"
   const { ref: surfaceRef, style: surfaceStyle, handleProps, dragging } = useSurfaceDrag({ storageKey: `${storagePrefix}direct-floating-${pose}:v1`, enabled: draggable, label: t("floating.move"), storage: "session", placementMode: "free" })
-  useEscapeLayer({ id: "antia-direct-floating", priority: ESCAPE_PRIORITY.WINDOW, enabled: pose === "card" && !exit, onEscape: () => directSessionStore.setCardMinimized(true) })
+  useEscapeLayer({ id: "antsia-direct-floating", priority: ESCAPE_PRIORITY.WINDOW, enabled: pose === "card" && !exit, onEscape: () => directSessionStore.setCardMinimized(true) })
   const publisher = session?.viewerRole !== "viewer" && !!session && state.credentials?.role === "speaker" && state.phase === "connected"
   if (!state.sessionId) return null
   const title = session?.title ?? t("ongoing")
   const leave = () => { if (session && session.viewerRole !== "viewer" && session.status === "live" && state.phase === "connected") setExit(true); else onLeave() }
   return <>
-    <style href="antia-direct-floating" precedence="default">{FLOATING_CSS}</style>
-    <aside ref={surfaceRef} data-charte={charte} data-pose={pose} data-dragging={dragging || undefined} aria-label={t("floating.label", { title })} className="antia-direct-float" style={draggable ? surfaceStyle : { left: "12px", top: "auto" }}>
+    <style href="antsia-direct-floating" precedence="default">{FLOATING_CSS}</style>
+    <aside ref={surfaceRef} data-charte={charte} data-pose={pose} data-dragging={dragging || undefined} aria-label={t("floating.label", { title })} className="antsia-direct-float" style={draggable ? surfaceStyle : { left: "12px", top: "auto" }}>
       <header className="flex min-w-0 flex-wrap items-center justify-between gap-2">
         {draggable ? <div {...handleProps} className="flex min-h-11 min-w-0 flex-1 items-center"><span className="truncate text-sm font-semibold">{title}</span></div> : <span className="min-w-0 truncate text-sm font-semibold">{title}</span>}
         {pose !== "mobile" ? <Button size="sm" variant="ghost" onClick={() => directSessionStore.setCardMinimized(pose !== "pill")}>{t(pose === "pill" ? "floating.expand" : "floating.minimize")}</Button> : null}
@@ -80,7 +80,7 @@ function MiniScene({ session }: { session: DirectSession }) {
   const active = speaking.map(directParticipantPersonId).find((personId) => roster.some((person) => person.key === personId))
   const focus = roster.find((person) => person.key === session.spotlight?.personId && person.track) ?? roster.find((person) => person.key === active && person.track) ?? roster.find((person) => person.role === "host") ?? roster[0]
   const track = screen ?? focus?.track
-  return <div aria-label={t("floating.preview")} data-lk-theme="antia" className="relative aspect-[16/10] overflow-hidden rounded-lg border border-border bg-muted" style={{ "--lk-bg": "var(--background)", "--lk-fg": "var(--foreground)" } as React.CSSProperties}>
+  return <div aria-label={t("floating.preview")} data-lk-theme="antsia" className="relative aspect-[16/10] overflow-hidden rounded-lg border border-border bg-muted" style={{ "--lk-bg": "var(--background)", "--lk-fg": "var(--foreground)" } as React.CSSProperties}>
     {track ? <ParticipantTile trackRef={track} className="h-full w-full" /> : <p className="p-4 text-sm">{t("studio.notConnected")}</p>}
     <span className="absolute bottom-1 left-1 rounded bg-background px-2 py-1 text-xs">{screen ? t("studio.presentation") : focus?.displayName ?? t("person")}</span>
   </div>

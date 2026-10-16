@@ -1,13 +1,13 @@
 // Dupliqué de socle/packages/agent-features/src/shell/direct-session-host.tsx @ ad2e7fdc2 — adaptations : première tranche réécrite sur le moteur, baux et rôle dans la coque persistante, réseau courant ; carte flottante consommant le registre hors route injectée (F3c).
 "use client"
 
-import { api, type Id } from "@antia/api/engine"
-import { useAuthenticatedConvexQuery } from "@antia/api/hooks"
-import { useNetwork, useRoutes } from "@antia/api/network"
-import { usePathname } from "@antia/api/routing"
+import { api, type Id } from "@antsia/api/engine"
+import { useAuthenticatedConvexQuery } from "@antsia/api/hooks"
+import { useNetwork, useRoutes } from "@antsia/api/network"
+import { usePathname } from "@antsia/api/routing"
 import { useMutation } from "convex/react"
 import { useEffect } from "react"
-import { DIRECT_HOST_HEARTBEAT_MS, DIRECT_PRESENCE_HEARTBEAT_MS } from "@antia/social-domain/live/domain"
+import { DIRECT_HOST_HEARTBEAT_MS, DIRECT_PRESENCE_HEARTBEAT_MS } from "@antsia/social-domain/live/domain"
 
 import { DirectCallCoexistence } from "../../components/direct/DirectCallCoexistence"
 import { DirectRoomMount } from "../../components/direct/DirectRoomMount"

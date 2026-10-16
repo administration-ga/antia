@@ -5,8 +5,8 @@
  * dont le patron d'audit `reseauPlatformActsAudit` est repris : chaque décision
  * écrit sa ligne, un geste sans effet n'écrit rien).
  */
-import { engineErrorCode, engineErrorRule } from "@antia/social-contracts/errors"
-import { PAGE_SIGNATORIES_MAX } from "@antia/social-domain/pages"
+import { engineErrorCode, engineErrorRule } from "@antsia/social-contracts/errors"
+import { PAGE_SIGNATORIES_MAX } from "@antsia/social-domain/pages"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 import { api, internal } from "../../_generated/api"

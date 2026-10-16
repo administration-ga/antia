@@ -30,7 +30,7 @@
  * averti de ses commentaires, la masquer, la signaler.
  */
 
-import { engineErrorCode, engineErrorRule } from "@antia/social-contracts/errors"
+import { engineErrorCode, engineErrorRule } from "@antsia/social-contracts/errors"
 import type { TFunction } from "i18next"
 
 import { authorIsMutable, type AuthorKind } from "./author-link"

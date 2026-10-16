@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/SuggestionsPanel.tsx @ ad2e7fdc2 — adaptations : catalogue du moteur (`suggestions.suggestions.paginate` et `dismiss`, réseau courant par `useNetwork()`), demande par `graph.connections.requestConnection({ handle })` ; adresses par la table de routes injectée (`useRoutes()` : profil, page réseau pour « Voir tout ») ; refus de POLITIQUE du moteur (`policyRefused` : réseau gouverné qui sert ses propres suggestions) : le rail s'efface au lieu d'afficher une panne ; textes par l'i18n (espace `reseau`, clés `suggestionsPanel.*`) et refus du moteur dits par leur code ; « Agents à découvrir » devient « Personnes à découvrir », opposition personne / administration de la doc retirée (une page n'est plus une administration) ; règles du module sorties du JSX dans une constante (`DISCOVERY_CONTROLS_CSS`), inchangées ; primitives de `@antia/ui`, surfaces de la coque.
+// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/SuggestionsPanel.tsx @ ad2e7fdc2 — adaptations : catalogue du moteur (`suggestions.suggestions.paginate` et `dismiss`, réseau courant par `useNetwork()`), demande par `graph.connections.requestConnection({ handle })` ; adresses par la table de routes injectée (`useRoutes()` : profil, page réseau pour « Voir tout ») ; refus de POLITIQUE du moteur (`policyRefused` : réseau gouverné qui sert ses propres suggestions) : le rail s'efface au lieu d'afficher une panne ; textes par l'i18n (espace `reseau`, clés `suggestionsPanel.*`) et refus du moteur dits par leur code ; « Agents à découvrir » devient « Personnes à découvrir », opposition personne / administration de la doc retirée (une page n'est plus une administration) ; règles du module sorties du JSX dans une constante (`DISCOVERY_CONTROLS_CSS`), inchangées ; primitives de `@antsia/ui`, surfaces de la coque.
 "use client"
 
 /**
@@ -26,12 +26,12 @@
  * mutation.
  */
 
-import { api } from "@antia/api/engine"
-import { useAuthenticatedConvexQuery } from "@antia/api/hooks"
-import { useNetwork, useRoutes } from "@antia/api/network"
-import { Link } from "@antia/api/routing"
-import { engineErrorCode } from "@antia/social-contracts/errors"
-import { Button, Card, Icon, SkeletonCard } from "@antia/ui"
+import { api } from "@antsia/api/engine"
+import { useAuthenticatedConvexQuery } from "@antsia/api/hooks"
+import { useNetwork, useRoutes } from "@antsia/api/network"
+import { Link } from "@antsia/api/routing"
+import { engineErrorCode } from "@antsia/social-contracts/errors"
+import { Button, Card, Icon, SkeletonCard } from "@antsia/ui"
 import { useMutation } from "convex/react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"

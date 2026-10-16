@@ -14,10 +14,10 @@
  *  · `startAdHoc` — des personnes choisies une à une, joignables dans le réseau ;
  *  · `addInvitee` — l'ajout en cours d'appel, qui PROMEUT un tête-à-tête.
  */
-import { GROUP_CALL_INVITES_SCAN, GROUP_CALL_MAX_PARTICIPANTS, GROUP_CALL_MIN_OTHERS, countReservedSeats, normalizeGroupInvitees, summarizeGroupCall } from "@antia/social-contracts/callGroup"
-import type { CounterpartLabel } from "@antia/social-contracts/counterpart"
-import type { CallAdmissionReason, CallMediaType, GroupCallInviteStatus } from "@antia/social-domain/callJournal"
-import { isTerminalCallStatus } from "@antia/social-domain/callJournal"
+import { GROUP_CALL_INVITES_SCAN, GROUP_CALL_MAX_PARTICIPANTS, GROUP_CALL_MIN_OTHERS, countReservedSeats, normalizeGroupInvitees, summarizeGroupCall } from "@antsia/social-contracts/callGroup"
+import type { CounterpartLabel } from "@antsia/social-contracts/counterpart"
+import type { CallAdmissionReason, CallMediaType, GroupCallInviteStatus } from "@antsia/social-domain/callJournal"
+import { isTerminalCallStatus } from "@antsia/social-domain/callJournal"
 import { v } from "convex/values"
 
 import type { Doc, Id } from "../../_generated/dataModel"

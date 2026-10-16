@@ -7,8 +7,8 @@
  * devient pas une voie de lecture dérobée — le modérateur ouvre le contenu par
  * les lectures ordinaires, avec leur garde.
  */
-import { assertDecisionReason, type AuditCapacity } from "@antia/social-domain/audit"
-import { canDecideReport, CONTENT_REPORT_DECISIONS, CONTENT_REPORT_NOTE_MAX, type ContentReportDecision } from "@antia/social-domain/moderation"
+import { assertDecisionReason, type AuditCapacity } from "@antsia/social-domain/audit"
+import { canDecideReport, CONTENT_REPORT_DECISIONS, CONTENT_REPORT_NOTE_MAX, type ContentReportDecision } from "@antsia/social-domain/moderation"
 import { paginationOptsValidator, type PaginationResult } from "convex/server"
 import { v } from "convex/values"
 

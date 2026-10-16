@@ -17,13 +17,13 @@
  * dont une seule serait branchée.
  */
 
-import { api } from "@antia/api/engine"
-import type { Id } from "@antia/api/engine"
+import { api } from "@antsia/api/engine"
+import type { Id } from "@antsia/api/engine"
 import {
 	useConvexActionQuery,
 	useConvexMutationQuery,
-} from "@antia/api/hooks"
-import { useNetwork } from "@antia/api/network"
+} from "@antsia/api/hooks"
+import { useNetwork } from "@antsia/api/network"
 import { useEffect, useRef } from "react"
 import { useTranslation } from "react-i18next"
 

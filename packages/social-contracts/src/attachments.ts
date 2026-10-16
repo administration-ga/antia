@@ -12,8 +12,8 @@
  * ⚠️ Un message vocal n'est PAS un genre de message : il se dit par le MIME de
  * sa pièce jointe.
  */
-import { DomainViolation, megabytes } from "@antia/social-domain/violation"
-import { normalizeMimeType, UPLOAD_USAGES } from "@antia/social-domain/uploadPolicy"
+import { DomainViolation, megabytes } from "@antsia/social-domain/violation"
+import { normalizeMimeType, UPLOAD_USAGES } from "@antsia/social-domain/uploadPolicy"
 
 /** Cinq pièces par message : au-delà, c'est un dossier, pas une conversation. */
 export const ATTACHMENTS_MAX_PER_MESSAGE = 5

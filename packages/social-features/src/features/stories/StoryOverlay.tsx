@@ -17,8 +17,8 @@
  * profil.
  */
 
-import { useRoutes } from "@antia/api/network"
-import { Link } from "@antia/api/routing"
+import { useRoutes } from "@antsia/api/network"
+import { Link } from "@antsia/api/routing"
 import type { PointerEvent, ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 import { Avatar } from "../reseau-personnel/Avatar"

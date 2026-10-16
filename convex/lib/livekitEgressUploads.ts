@@ -1,4 +1,4 @@
-// Dupliqué de socle/convex/lib/egressUploads.ts @ ad2e7fdc2 — adaptations : politique de dépôt du MOTEUR — usage `live_recording` du registre du domaine (`@antia/social-domain/uploadPolicy`) au lieu d'`enregistrement_egress` ; temps 2 PAR LA GARDE DES FICHIERS (le moteur ne sert aucun fichier qu'elle ne connaît pas) : un fichier NEUF seulement (`assertFreshUpload` — un fichier déjà connu n'est ni rattaché ni supprimé), confronté puis inscrit à l'analyse (`admitStoredUpload`, réseau et hôte de la conférence) tant qu'il tient dans la borne d'inspection de la garde, au-delà confronté (`assertStoredUpload`) puis inscrit comme produit par la plateforme (`registerGeneratedBlob`) — l'analyse sauterait le fichier après l'avoir chargé ENTIER en mémoire ; sans déclaration (complétion interne d'avant le rapatriement en flux), inscrit comme produit par la plateforme, comme les enregistrements d'appel du socle ; le refus se lit dans le code de la garde (`ConvexError`) et devient une VALEUR, jamais une exception qui annulerait la suppression ; fichier écarté : blob ET ligne d'analyse (`purgeStoredFile`, D10) ; `tryStoredUpload` (retiré du moteur) et la phrase `EGRESS_UPLOAD_REFUSED_REASON` partent — le motif est le code `upload_refused` (`replayComposition`).
+// Dupliqué de socle/convex/lib/egressUploads.ts @ ad2e7fdc2 — adaptations : politique de dépôt du MOTEUR — usage `live_recording` du registre du domaine (`@antsia/social-domain/uploadPolicy`) au lieu d'`enregistrement_egress` ; temps 2 PAR LA GARDE DES FICHIERS (le moteur ne sert aucun fichier qu'elle ne connaît pas) : un fichier NEUF seulement (`assertFreshUpload` — un fichier déjà connu n'est ni rattaché ni supprimé), confronté puis inscrit à l'analyse (`admitStoredUpload`, réseau et hôte de la conférence) tant qu'il tient dans la borne d'inspection de la garde, au-delà confronté (`assertStoredUpload`) puis inscrit comme produit par la plateforme (`registerGeneratedBlob`) — l'analyse sauterait le fichier après l'avoir chargé ENTIER en mémoire ; sans déclaration (complétion interne d'avant le rapatriement en flux), inscrit comme produit par la plateforme, comme les enregistrements d'appel du socle ; le refus se lit dans le code de la garde (`ConvexError`) et devient une VALEUR, jamais une exception qui annulerait la suppression ; fichier écarté : blob ET ligne d'analyse (`purgeStoredFile`, D10) ; `tryStoredUpload` (retiré du moteur) et la phrase `EGRESS_UPLOAD_REFUSED_REASON` partent — le motif est le code `upload_refused` (`replayComposition`).
 /**
  * La politique de dépôt (`lib/uploadPolicy.ts`) appliquée aux fichiers
  * d'Egress LiveKit rapatriés par le SERVEUR — correctif du 2026-09-17.
@@ -24,8 +24,8 @@
  * Sans enregistrement de fonction ni import de `_generated/api` : importé par
  * les actions Node ET par la mutation de complétion.
  */
-import { FILE_GUARD_MAX_INSPECT_BYTES } from "@antia/social-domain/filePolicy"
-import { UPLOAD_USAGES } from "@antia/social-domain/uploadPolicy"
+import { FILE_GUARD_MAX_INSPECT_BYTES } from "@antsia/social-domain/filePolicy"
+import { UPLOAD_USAGES } from "@antsia/social-domain/uploadPolicy"
 import { ConvexError, v } from "convex/values"
 
 import type { Id } from "../_generated/dataModel"

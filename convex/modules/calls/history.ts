@@ -8,8 +8,8 @@
  * DÉCROCHAGE — la compter depuis le début ajouterait la sonnerie d'un appel que
  * personne n'a pris.
  */
-import type { CounterpartLabel } from "@antia/social-contracts/counterpart"
-import { type CallAdmissionReason, type CallCategory, categorizeCall } from "@antia/social-domain/callJournal"
+import type { CounterpartLabel } from "@antsia/social-contracts/counterpart"
+import { type CallAdmissionReason, type CallCategory, categorizeCall } from "@antsia/social-domain/callJournal"
 
 import type { Doc, Id } from "../../_generated/dataModel"
 import { networkQuery } from "../../lib/functions"

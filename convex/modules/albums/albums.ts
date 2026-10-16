@@ -29,7 +29,7 @@ import {
   assertAlbumWithdrawable,
   nextPosition,
   reorderPositions,
-} from "@antia/social-domain/albums"
+} from "@antsia/social-domain/albums"
 import { paginationOptsValidator, type PaginationResult } from "convex/server"
 import { v } from "convex/values"
 

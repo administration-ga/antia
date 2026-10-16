@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/messagerie/use-infos-panneau.ts @ ad2e7fdc2 — adaptations : import du routage par `@antia/api/routing` ; en-tête de provenance.
+// Dupliqué de socle/packages/agent-features/src/features/messagerie/use-infos-panneau.ts @ ad2e7fdc2 — adaptations : import du routage par `@antsia/api/routing` ; en-tête de provenance.
 "use client"
 
 /**
@@ -23,7 +23,7 @@
  * chemins sont justes.
  */
 
-import { usePathname, useRouter, useSearchParams } from "@antia/api/routing"
+import { usePathname, useRouter, useSearchParams } from "@antsia/api/routing"
 import { useCallback, useRef } from "react"
 import { hrefAvecInfos, infosOuvertes } from "./messagerie-routes"
 

@@ -28,7 +28,7 @@
  * appelé que par un geste explicite (« Quitter », « Terminer », rétrogradation).
  */
 
-import type { Id } from "@antia/api/engine"
+import type { Id } from "@antsia/api/engine"
 import { useSyncExternalStore } from "react"
 import {
 	credentialTransition,

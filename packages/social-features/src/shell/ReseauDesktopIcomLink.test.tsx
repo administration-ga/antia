@@ -15,7 +15,7 @@ const mocks = vi.hoisted(() => ({
   detach: vi.fn(),
 }))
 
-vi.mock("@antia/api/engine", () => ({
+vi.mock("@antsia/api/engine", () => ({
   api: {
     modules: {
       messaging: { inbox: { totalUnread: "totalUnread" } },
@@ -24,7 +24,7 @@ vi.mock("@antia/api/engine", () => ({
   },
 }))
 
-vi.mock("@antia/api/hooks", () => ({
+vi.mock("@antsia/api/hooks", () => ({
   useAuthenticatedConvexQuery: (reference: string) =>
     reference === "totalUnread"
       ? {
@@ -45,7 +45,7 @@ vi.mock("../features/messagerie/dock-store", () => ({
   dockStore: { detach: mocks.detach },
 }))
 
-vi.mock("@antia/ui", () => ({
+vi.mock("@antsia/ui", () => ({
   Icon: () => <span aria-hidden="true" />,
 }))
 

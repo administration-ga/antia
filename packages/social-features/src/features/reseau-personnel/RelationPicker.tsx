@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/RelationPicker.tsx @ ad2e7fdc2 — adaptations : primitives de `@antia/ui` ; textes par l'i18n (espace `reseau`, clés `relationPicker.*`) — le verbe d'envoi par défaut est traduit, `label`, `emptyText` et `submitVerb` restent des textes déjà traduits par l'appelant ; la ligne sous le nom porte le titre de profil (plus de poste) ; recherche serveur dans le réseau courant (`useRelationSearch` de la coque du moteur) ; props et export inchangés.
+// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/RelationPicker.tsx @ ad2e7fdc2 — adaptations : primitives de `@antsia/ui` ; textes par l'i18n (espace `reseau`, clés `relationPicker.*`) — le verbe d'envoi par défaut est traduit, `label`, `emptyText` et `submitVerb` restent des textes déjà traduits par l'appelant ; la ligne sous le nom porte le titre de profil (plus de poste) ; recherche serveur dans le réseau courant (`useRelationSearch` de la coque du moteur) ; props et export inchangés.
 "use client"
 
 /**
@@ -22,7 +22,7 @@
  * `var(--…)` uniquement. Cibles tactiles 44 px.
  */
 
-import { Button, TextInput } from "@antia/ui"
+import { Button, TextInput } from "@antsia/ui"
 import { useEffect, useMemo, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
 

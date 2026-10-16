@@ -76,7 +76,7 @@ describe("peopleViewHref — le VOLET d'abord, la sous-vue ensuite", () => {
   })
 
   it("compose sur la base de l'application, même quand elle porte déjà une query ou une ancre", () => {
-    expect(peopleViewHref("suggestions", "/r/antia?lang=fr")).toBe("/r/antia?lang=fr&tab=relations&vue=suggestions")
+    expect(peopleViewHref("suggestions", "/r/antsia?lang=fr")).toBe("/r/antsia?lang=fr&tab=relations&vue=suggestions")
     expect(peopleViewHref("invitations", "/accueil#haut")).toBe("/accueil?tab=relations&vue=invitations#haut")
   })
 

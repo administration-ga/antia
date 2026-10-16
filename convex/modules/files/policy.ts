@@ -1,9 +1,9 @@
-// Dupliqué de socle/convex/modules/fileGuard/policy.ts @ ad2e7fdc2 — adaptations : règles pures déplacées dans `@antia/social-domain/filePolicy` (réexportées ici) ; restent les interrupteurs d'exploitation lus dans l'environnement ; triage IA retiré (V2).
+// Dupliqué de socle/convex/modules/fileGuard/policy.ts @ ad2e7fdc2 — adaptations : règles pures déplacées dans `@antsia/social-domain/filePolicy` (réexportées ici) ; restent les interrupteurs d'exploitation lus dans l'environnement ; triage IA retiré (V2).
 /**
  * Garde des fichiers — interrupteurs d'exploitation (environnement du
  * déploiement), et réexport des règles pures pour les modules du backend.
  */
-import { FILE_GUARD_QUARANTINE_RETENTION_DAYS_DEFAULT } from "@antia/social-domain/filePolicy"
+import { FILE_GUARD_QUARANTINE_RETENTION_DAYS_DEFAULT } from "@antsia/social-domain/filePolicy"
 
 export {
   FILE_GUARD_MAX_ATTEMPTS,
@@ -21,7 +21,7 @@ export {
   isServableStatus,
   serviceStateOf,
   type ServiceState,
-} from "@antia/social-domain/filePolicy"
+} from "@antsia/social-domain/filePolicy"
 
 type Env = Record<string, string | undefined>
 

@@ -1,5 +1,5 @@
 // Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/feed-scopes.test.ts @ ad2e7fdc2 — adaptations : deux portées (celles du domaine du moteur), la portée « mon_administration » retirée — ses cas deviennent « une ancienne adresse retombe sur la portée par défaut » ; libellés lus par un `t` français (les chips portent des clés) ; cas ajoutés : la liste vient du domaine, une graphie héritée (`toString`) ne trouve rien.
-import { FEED_SCOPES } from "@antia/social-domain/content"
+import { FEED_SCOPES } from "@antsia/social-domain/content"
 import { describe, expect, it } from "vitest"
 
 import { createAppI18n } from "../../i18n"

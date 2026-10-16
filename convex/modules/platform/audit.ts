@@ -18,8 +18,8 @@ import {
   auditDetailsProblems,
   type AuditSubject,
   isSystemCapacity,
-} from "@antia/social-domain/audit"
-import type { MembershipRole } from "@antia/social-domain/membership"
+} from "@antsia/social-domain/audit"
+import type { MembershipRole } from "@antsia/social-domain/membership"
 import { paginationOptsValidator, type PaginationResult } from "convex/server"
 import { v } from "convex/values"
 

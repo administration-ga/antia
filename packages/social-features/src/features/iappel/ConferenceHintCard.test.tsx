@@ -21,8 +21,8 @@ import { conferenceHintCopy } from "./conference-hint"
 
 // Le VRAI hook d'a11y (focus initial, restitution) ; le reste d'ui-v2 écarté,
 // pour ne pas charger trente composants dans un test de carte.
-vi.mock("@antia/ui", async () => {
-	const real = await import("@antia/ui")
+vi.mock("@antsia/ui", async () => {
+	const real = await import("@antsia/ui")
 	return { useModalA11y: real.useModalA11y }
 })
 

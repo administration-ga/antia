@@ -10,7 +10,7 @@
  *
  * Aucune fonction Convex ici : c'est une garde, pas une API.
  */
-import { isVisibleTo } from "@antia/social-domain/visibility"
+import { isVisibleTo } from "@antsia/social-domain/visibility"
 
 import type { Doc, Id } from "../../_generated/dataModel"
 import type { QueryCtx } from "../../_generated/server"

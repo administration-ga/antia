@@ -17,7 +17,7 @@
  * Module PUR : le serveur rassemble les faits, ce module tranche — et l'écran
  * l'importe pour compter les places exactement comme le serveur.
  */
-import type { CallAdmissionReason, GroupCallInviteStatus } from "@antia/social-domain/callJournal"
+import type { CallAdmissionReason, GroupCallInviteStatus } from "@antsia/social-domain/callJournal"
 
 import { GROUP_CALL_DEFAULT_MAX_PARTICIPANTS, GROUP_CALL_MIN_PARTICIPANTS } from "./groupCapacity"
 

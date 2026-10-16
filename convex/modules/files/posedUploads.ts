@@ -9,7 +9,7 @@
  * fichier NEUF (`assertFreshUpload`), politique de son usage, inscription au
  * registre au nom du déposant.
  */
-import type { UploadUsage } from "@antia/social-domain/uploadPolicy"
+import type { UploadUsage } from "@antsia/social-domain/uploadPolicy"
 
 import type { Id } from "../../_generated/dataModel"
 import type { MutationCtx } from "../../_generated/server"

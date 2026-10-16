@@ -18,7 +18,7 @@
  */
 
 import { GripVertical, Mic, MicOff, PhoneOff, Play } from "lucide-react"
-import { useNetwork } from "@antia/api/network"
+import { useNetwork } from "@antsia/api/network"
 import { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 

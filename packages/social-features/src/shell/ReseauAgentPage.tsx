@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/ReseauAgentPage.tsx @ ad2e7fdc2 — adaptations : RÉÉCRIT pour la page réseau du moteur, déplacée dans la coque (`shell/`) — l'accueil de l'application (`useRoutes().home()`, volets par `reseau-agent-nav`), sans l'espace agent : orchestration des volets, bascule téléphone/bureau, carte d'identité épinglée, onglets « chemise », outils du fil, stories, composeurs et rails GARDÉS ; volet « Conférences » et dialogue branchés au moteur `live` (F3a), rail avancé différé ; volet Pages et rail « Pages à suivre » par les composants RÉÉCRITS sur les pages du moteur ; rail droit ouvert par la carte iCom (`MessagerieDock`) ; grille sans le rail de l'hôte — le menu vertical (`ReseauMenuRail`) est la navigation dès 812 px de conteneur et les trois colonnes tiennent dès 1 108 px (paliers du socle « rail rétracté », plus aucune lecture de `[data-espace-rail]`), la porte iCom compacte s'efface au seul palier où la carte est visible ; feuille sortie du JSX dans une constante de module (`RESEAU_DESKTOP_CSS`) — un littéral enfant de `<style>` passerait pour une chaîne d'interface — avec la cadence des blocs en valeur (`--sp-4`, jeton absent du moteur, retiré) ; onglets « chemise » et feuille du kit d'espace par `@antia/ui/espace-kit` ; identifiants de la tablist `reseau-panel` / `reseau-tab-` (plus d'iProfil) ; volet Évènements monté sans `onCreateEvent` — l'intention de composition d'iAgenda (absent du moteur) n'existe plus et le catalogue de création mène l'évènement au volet lui-même : un bouton qui y renverrait tournerait en rond ; lecteur des statuts sur `useRoutes().stories()` (paramètre `auteur`), surfaces `reseau` du plateau retirées ; ma fiche lue sur la personne du moteur (identifiant seulement PUBLIÉ, portrait servi par la garde) ; résultats de recherche clés sur `_id` ; textes par l'i18n (`reseau:reseauAgentPage.*`, volets et portées par leurs clés, `t` passé aux modules purs) ; « iRéseau » devient « réseau » ; commentaires rapportés au moteur.
+// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/ReseauAgentPage.tsx @ ad2e7fdc2 — adaptations : RÉÉCRIT pour la page réseau du moteur, déplacée dans la coque (`shell/`) — l'accueil de l'application (`useRoutes().home()`, volets par `reseau-agent-nav`), sans l'espace agent : orchestration des volets, bascule téléphone/bureau, carte d'identité épinglée, onglets « chemise », outils du fil, stories, composeurs et rails GARDÉS ; volet « Conférences » et dialogue branchés au moteur `live` (F3a), rail avancé différé ; volet Pages et rail « Pages à suivre » par les composants RÉÉCRITS sur les pages du moteur ; rail droit ouvert par la carte iCom (`MessagerieDock`) ; grille sans le rail de l'hôte — le menu vertical (`ReseauMenuRail`) est la navigation dès 812 px de conteneur et les trois colonnes tiennent dès 1 108 px (paliers du socle « rail rétracté », plus aucune lecture de `[data-espace-rail]`), la porte iCom compacte s'efface au seul palier où la carte est visible ; feuille sortie du JSX dans une constante de module (`RESEAU_DESKTOP_CSS`) — un littéral enfant de `<style>` passerait pour une chaîne d'interface — avec la cadence des blocs en valeur (`--sp-4`, jeton absent du moteur, retiré) ; onglets « chemise » et feuille du kit d'espace par `@antsia/ui/espace-kit` ; identifiants de la tablist `reseau-panel` / `reseau-tab-` (plus d'iProfil) ; volet Évènements monté sans `onCreateEvent` — l'intention de composition d'iAgenda (absent du moteur) n'existe plus et le catalogue de création mène l'évènement au volet lui-même : un bouton qui y renverrait tournerait en rond ; lecteur des statuts sur `useRoutes().stories()` (paramètre `auteur`), surfaces `reseau` du plateau retirées ; ma fiche lue sur la personne du moteur (identifiant seulement PUBLIÉ, portrait servi par la garde) ; résultats de recherche clés sur `_id` ; textes par l'i18n (`reseau:reseauAgentPage.*`, volets et portées par leurs clés, `t` passé aux modules purs) ; « iRéseau » devient « réseau » ; commentaires rapportés au moteur.
 "use client"
 
 /**
@@ -46,7 +46,7 @@
  *
  * ── Le 2026-08-19 — en-tête compacte et onglets « chemise » ───────────────
  * Les volets sont rendus par `EspaceDossierTabs` (le kit d'espace,
- * `@antia/ui/espace-kit`) dans cette colonne — coins hauts arrondis, l'onglet actif
+ * `@antsia/ui/espace-kit`) dans cette colonne — coins hauts arrondis, l'onglet actif
  * fusionne avec le panneau qui suit par un débord d'un pixel.
  * `ProfileMiniCard` ne porte que l'identité, et sa bannière disparaît
  * (`cover={showCover(...)}`, `reseau-header.ts`). Sous les onglets, une carte
@@ -54,10 +54,10 @@
  * porte la recherche et la portée.
  */
 
-import { useNetwork, useRoutes } from "@antia/api/network"
-import { Alert, Button, Select, SkeletonCard, TextInput } from "@antia/ui"
-import { EspaceDossierTabs, EspaceKitStyles } from "@antia/ui/espace-kit"
-import { useIsReseauMobile } from "@antia/ui/overlay"
+import { useNetwork, useRoutes } from "@antsia/api/network"
+import { Alert, Button, Select, SkeletonCard, TextInput } from "@antsia/ui"
+import { EspaceDossierTabs, EspaceKitStyles } from "@antsia/ui/espace-kit"
+import { useIsReseauMobile } from "@antsia/ui/overlay"
 import { Search } from "lucide-react"
 import { Suspense } from "react"
 import { useTranslation } from "react-i18next"

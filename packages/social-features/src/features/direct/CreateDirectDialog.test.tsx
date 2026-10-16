@@ -9,16 +9,16 @@ import { createAppI18n } from "../../i18n"
 import { CreateDirectDialog } from "./CreateDirectDialog"
 
 const mocks = vi.hoisted(() => ({ create: vi.fn(), push: vi.fn(), close: vi.fn(), networkId: "network-test", pages: [] as unknown[], candidates: [] as unknown[], eligible: ["person-test"] as string[] }))
-vi.mock("@antia/api/network", () => ({
-  useNetwork: () => ({ networkId: mocks.networkId, charte: "antia" }),
+vi.mock("@antsia/api/network", () => ({
+  useNetwork: () => ({ networkId: mocks.networkId, charte: "antsia" }),
   useRoutes: () => ({ conference: (id: string) => `/conference/${id}` }),
 }))
-vi.mock("@antia/api/hooks", () => ({ useAuthenticatedConvexQuery: (ref: Parameters<typeof getFunctionName>[0], args: "skip" | { personIds?: string[] }) => ({
+vi.mock("@antsia/api/hooks", () => ({ useAuthenticatedConvexQuery: (ref: Parameters<typeof getFunctionName>[0], args: "skip" | { personIds?: string[] }) => ({
   data: args === "skip" ? undefined : getFunctionName(ref).endsWith(":myPages") ? mocks.pages : getFunctionName(ref).endsWith(":searchCandidates") ? { candidates: mocks.candidates } : { eligible: (args.personIds ?? []).filter((id) => mocks.eligible.includes(id)).map((personId) => ({ personId, displayName: personId === "person-test" ? "Awa" : "Autre", handle: personId, avatarUrl: null })) }, isError: false,
 }) }))
-vi.mock("@antia/api/routing", () => ({ useRouter: () => ({ push: mocks.push }) }))
+vi.mock("@antsia/api/routing", () => ({ useRouter: () => ({ push: mocks.push }) }))
 vi.mock("convex/react", () => ({ useMutation: () => mocks.create }))
-vi.mock("@antia/ui/espace-kit", () => ({ EspaceDialog: ({ children }: { children: ReactNode }) => <div role="dialog">{children}</div> }))
+vi.mock("@antsia/ui/espace-kit", () => ({ EspaceDialog: ({ children }: { children: ReactNode }) => <div role="dialog">{children}</div> }))
 const i18n = createAppI18n({ locale: "fr", appResources: { fr: {}, en: {} }, defaultNS: "direct" })
 beforeEach(() => { vi.clearAllMocks(); mocks.networkId = "network-test"; mocks.pages = []; mocks.candidates = []; mocks.eligible = ["person-test"]; mocks.create.mockResolvedValue({ sessionId: "session-test", created: true }) })
 afterEach(cleanup)

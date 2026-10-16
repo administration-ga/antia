@@ -1,11 +1,11 @@
 // Dupliqué de socle/packages/agent-features/src/features/direct/DirectAntennaPanel.tsx @ ad2e7fdc2 — adaptations : API typée et réseau courant, droits du DTO, invitations consenties sans ouverture automatique du matériel, horloge effective et i18n ; recherche privée réservée à l’hôte.
 "use client"
 
-import { api } from "@antia/api/engine"
-import { useAuthenticatedConvexQuery } from "@antia/api/hooks"
-import { useNetwork } from "@antia/api/network"
-import { DIRECT_MAX_SPEAKERS } from "@antia/social-domain/live/domain"
-import { Button } from "@antia/ui"
+import { api } from "@antsia/api/engine"
+import { useAuthenticatedConvexQuery } from "@antsia/api/hooks"
+import { useNetwork } from "@antsia/api/network"
+import { DIRECT_MAX_SPEAKERS } from "@antsia/social-domain/live/domain"
+import { Button } from "@antsia/ui"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useMutation } from "convex/react"
 import { useEffect, useState } from "react"

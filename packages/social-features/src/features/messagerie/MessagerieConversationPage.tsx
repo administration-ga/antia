@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/messagerie/MessagerieConversationPage.tsx @ ad2e7fdc2 — adaptations : adresses INJECTÉES par l'application (`useRoutes()` de `@antia/api/network` : le profil par `routes.profile(handle)`, la liste par `routes.messages()`) au lieu du chemin de profil de l'espace agent écrit en dur et de `MESSAGES_URL` (l'application encode le handle) ; routeur par `@antia/api/routing` ; le chrome est celui de la coque légère du moteur.
+// Dupliqué de socle/packages/agent-features/src/features/messagerie/MessagerieConversationPage.tsx @ ad2e7fdc2 — adaptations : adresses INJECTÉES par l'application (`useRoutes()` de `@antsia/api/network` : le profil par `routes.profile(handle)`, la liste par `routes.messages()`) au lieu du chemin de profil de l'espace agent écrit en dur et de `MESSAGES_URL` (l'application encode le handle) ; routeur par `@antsia/api/routing` ; le chrome est celui de la coque légère du moteur.
 "use client"
 
 /**
@@ -27,8 +27,8 @@
  * des routes de l'application (`useRoutes()`).
  */
 
-import { useRoutes } from "@antia/api/network"
-import { useRouter } from "@antia/api/routing"
+import { useRoutes } from "@antsia/api/network"
+import { useRouter } from "@antsia/api/routing"
 import { useDockState } from "./dock-store"
 import { MessagerieConversationView } from "./MessagerieConversationView"
 import { draftTextFor, type ConversationKey } from "./messagerie-dock"

@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/messagerie/ForwardMessageSheet.tsx @ ad2e7fdc2 — adaptations : tiroir du paquet `@antia/ui/sheet` (croix nommée par `closeLabel` traduit) ; libellés traduits (espace de noms `messagerie`, clés `forwardMessageSheet.*`, `buildForwardTargets`/`forwardTargetHint` reçoivent `t`) ; fils et groupes du réseau courant (« espace » → « réseau » dans la doctrine).
+// Dupliqué de socle/packages/agent-features/src/features/messagerie/ForwardMessageSheet.tsx @ ad2e7fdc2 — adaptations : tiroir du paquet `@antsia/ui/sheet` (croix nommée par `closeLabel` traduit) ; libellés traduits (espace de noms `messagerie`, clés `forwardMessageSheet.*`, `buildForwardTargets`/`forwardTargetHint` reçoivent `t`) ; fils et groupes du réseau courant (« espace » → « réseau » dans la doctrine).
 "use client"
 
 /**
@@ -29,7 +29,7 @@ import {
 	SheetDescription,
 	SheetHeader,
 	SheetTitle,
-} from "@antia/ui/sheet"
+} from "@antsia/ui/sheet"
 import { Loader2, Users } from "lucide-react"
 import { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"

@@ -8,7 +8,7 @@
  * (`ctx.auth`). Tout refus d'accès à un réseau dont on n'est pas membre est
  * INDISTINCT (`notFound`) ; une suspension à la racine vaut partout.
  */
-import { type ActiveMembershipStatus, effectiveAccessStatus, isActiveStatus, satisfiesMinimum } from "@antia/social-domain/membership"
+import { type ActiveMembershipStatus, effectiveAccessStatus, isActiveStatus, satisfiesMinimum } from "@antsia/social-domain/membership"
 
 import type { Doc, Id } from "../_generated/dataModel"
 import type { QueryCtx } from "../_generated/server"

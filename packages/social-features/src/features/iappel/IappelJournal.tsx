@@ -17,9 +17,9 @@
  * journal (une frappe au clavier ailleurs dans la page, par exemple).
  */
 
-import { api } from "@antia/api/engine"
-import { useAuthenticatedConvexQuery } from "@antia/api/hooks"
-import { useNetwork } from "@antia/api/network"
+import { api } from "@antsia/api/engine"
+import { useAuthenticatedConvexQuery } from "@antsia/api/hooks"
+import { useNetwork } from "@antsia/api/network"
 import { useMutation } from "convex/react"
 import type { TFunction } from "i18next"
 import type { LucideIcon } from "lucide-react"

@@ -25,13 +25,13 @@
  * (`configureCallStoreStorage`).
  */
 
-import { api } from "@antia/api/engine"
-import type { Id } from "@antia/api/engine"
-import { useAuthenticatedConvexQuery, useConvexMutationQuery } from "@antia/api/hooks"
-import { useNetwork, useRoutes } from "@antia/api/network"
-import { useRouter } from "@antia/api/routing"
-import { callCapacityOf } from "@antia/social-contracts/groupCapacity"
-import { useIsReseauMobile } from "@antia/ui/overlay"
+import { api } from "@antsia/api/engine"
+import type { Id } from "@antsia/api/engine"
+import { useAuthenticatedConvexQuery, useConvexMutationQuery } from "@antsia/api/hooks"
+import { useNetwork, useRoutes } from "@antsia/api/network"
+import { useRouter } from "@antsia/api/routing"
+import { callCapacityOf } from "@antsia/social-contracts/groupCapacity"
+import { useIsReseauMobile } from "@antsia/ui/overlay"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { createPortal } from "react-dom"
 import { useTranslation } from "react-i18next"

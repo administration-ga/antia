@@ -1,9 +1,9 @@
 // Dupliqué de socle/packages/agent-features/src/features/direct/DirectExitDialog.tsx @ ad2e7fdc2 — adaptations : droits moteur, réseau, dialogue partagé avec focus/Échap, sorties explicites et i18n.
 "use client"
-import { api } from "@antia/api/engine"
-import { useNetwork } from "@antia/api/network"
-import { Button } from "@antia/ui"
-import { EspaceDialog } from "@antia/ui/espace-kit"
+import { api } from "@antsia/api/engine"
+import { useNetwork } from "@antsia/api/network"
+import { Button } from "@antsia/ui"
+import { EspaceDialog } from "@antsia/ui/espace-kit"
 import { useMutation } from "convex/react"
 import { useTranslation } from "react-i18next"
 import type { DirectSession } from "./DirectPage"

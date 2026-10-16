@@ -49,7 +49,7 @@ vi.mock("convex/react", async () => {
 vi.mock("sonner", () => ({
   toast: { success: mocks.toastSuccess, error: mocks.toastError },
 }))
-vi.mock("@antia/ui", () => ({
+vi.mock("@antsia/ui", () => ({
   Alert: ({ title, children }: { title: string; children: ReactNode }) => (
     <div role="alert">
       <strong>{title}</strong>

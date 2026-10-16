@@ -1,29 +1,32 @@
 ---
-title: "ANTIA — Prompt de lancement de la session de construction"
+title: "ANTSIA — Prompt de lancement de la session de construction"
 version: "1.0"
 date: "2026-10-14"
 statut: "Prompt de démarrage (session Claude Code, Opus 5.5, effort maximal)"
-projet: "ANTIA"
+projet: "ANTSIA"
 ---
 
-# ANTIA — Prompt de lancement de la session de construction
+# ANTSIA — Prompt de lancement de la session de construction
 
 > Ce texte est le premier message de la session qui construit le moteur social national et le
-> réseau public ANTIA. Il est conservé ici pour la traçabilité. Une session jumelle construit
+> réseau public ANTSIA. Il est conservé ici pour la traçabilité. Une session jumelle construit
 > DIASPORALE en parallèle (`../DIASPORALE/docs/02_LANCEMENT_SESSION_2026-10-14.md`).
+> La marque et les chemins locaux ont été corrigés en ANTSIA le 16/10/2026. La référence
+> GitHub `administration-ga/antia` ci-dessous reste historique : aucun renommage externe
+> n’est attesté par cette correction.
 
 ```text
-Tu construis ANTIA : le moteur social national (backend Convex + paquets) et le réseau social public
-gabonais. Tu travailles dans « Digital GABON/DIGITAL_GOUV/NTSAGUI_DIGITAL/ECOSYSTEMES/ANTIA » (dépôt GitHub
+Tu construis ANTSIA : le moteur social national (backend Convex + paquets) et le réseau social public
+gabonais. Tu travailles dans « Digital GABON/DIGITAL_GOUV/NTSAGUI_DIGITAL/ECOSYSTEMES/ANTSIA » (dépôt GitHub
 PUBLIC administration-ga/antia : aucun secret, aucune donnée réelle, aucun identifiant interne de
 déploiement n'y entre jamais). Au départ il n'y a aucun code : seulement les documents.
 
 LIS D'ABORD, EN ENTIER, DANS CET ORDRE
 1. CLAUDE.md et README.md du dossier.
-2. docs/00_CAHIER_DES_CHARGES_ANTIA.md (le moteur en partie A, le réseau public en partie B : invariants,
+2. docs/00_CAHIER_DES_CHARGES_ANTSIA.md (le moteur en partie A, le réseau public en partie B : invariants,
    tables, autorisation, lots A0–A6, parcours R1–R10, arbitrages).
-3. docs/01_PLAN_IMPLEMENTATION_PROMPTS_ANTIA.md (les prompts PA0 → PA10 et le préambule commun §2).
-4. ../../../Documentation/RESEAUX_SOCIAUX/00_PLAN_RESEAUX_DANS_LE_RESEAU_DIASPORALE_ANTIA_2026-10-14.md et ses
+3. docs/01_PLAN_IMPLEMENTATION_PROMPTS_ANTSIA.md (les prompts PA0 → PA10 et le préambule commun §2).
+4. ../../../Documentation/RESEAUX_SOCIAUX/00_PLAN_RESEAUX_DANS_LE_RESEAU_DIASPORALE_ANTSIA_2026-10-14.md et ses
    annexes A (backend du socle), B (front du socle), D (conventions, ADR, gabarit, identite.ga).
 5. ../DIASPORALE/docs/00_CAHIER_DES_CHARGES_DIASPORALE.md (le premier réseau servi : sa tranche backend
    `convex/modules/diaspora/` vit chez toi).
@@ -37,7 +40,7 @@ quand un préalable externe manque (compte, projet Convex, secret, décision jur
 qui n'en dépend pas et tu dis exactement ce qui manque.
 
 PRIORITÉ : UNE APPLICATION WEB TESTABLE AU PLUS TÔT. Dès PA0 (scaffold) et PA2 (fondations multi-réseaux),
-livre une tranche verticale minimale dans apps/antia_ga sur le réseau `antia` : entrer (compte léger OTP en dev,
+livre une tranche verticale minimale dans apps/antsia_ga sur le réseau `antsia` : entrer (compte léger OTP en dev,
 IDN si le client sandbox existe), choisir un handle, publier un texte, lire le fil, réagir. Le propriétaire doit
 pouvoir ouvrir http://localhost:3030 et tester. Puis poursuis PA3 (duplication complète du backend), PA4 à PA7,
 en gardant l'application testable à chaque étape. Après PA7, attends que la session DIASPORALE ait livré son lot
@@ -49,14 +52,14 @@ ce qui manque.
 
 SESSION JUMELLE : une session nommée « diasporale » construit ../DIASPORALE en parallèle et doit écrire chez toi la
 tranche `convex/modules/diaspora/`, le thème `packages/ui/src/themes/diasporale.css` et ses locales. Règles de
-l'arbre partagé dans ANTIA :
-- tu es propriétaire de tout le dépôt ANTIA sauf ces chemins-là ;
+l'arbre partagé dans ANTSIA :
+- tu es propriétaire de tout le dépôt ANTSIA sauf ces chemins-là ;
 - aucun `git add -A` : toujours `git add -- <chemins>` puis `git commit -- <chemins>` ; aucun changement de
-  branche dans ANTIA tant que les deux sessions y écrivent (on reste sur main pendant le bootstrap PA0 → PA3 ;
+  branche dans ANTSIA tant que les deux sessions y écrivent (on reste sur main pendant le bootstrap PA0 → PA3 ;
   à partir de PA4, branches dédiées + PR si une seule session écrit encore) ;
 - les fichiers partagés (package.json, bun.lock, convex/schema.ts, convex/convex.config.ts, catalogue de
   déploiement) ne sont modifiés que par toi : la session diasporale te demande par message (SendMessage vers
-  « diasporale », elle t'écrit vers « antia ») et tu appliques ;
+  « diasporale », elle t'écrit vers « antsia ») et tu appliques ;
 - annonce-lui par message la clôture de PA2 (fondations : networks, persons, memberships, cliquet), de PA3
   (backend complet) et de PA7 (console) : ce sont ses jalons de dépendance.
 

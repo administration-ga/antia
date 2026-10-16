@@ -1,11 +1,11 @@
-// Dupliqué de socle/packages/agent-features/src/features/stories/stories-styles.tsx @ ad2e7fdc2 — adaptations : règles et sélecteurs inchangés (jetons de rôle seulement, aucune couleur littérale) ; feuille sortie du JSX dans une constante de module (`STORIES_CSS`) — un littéral enfant de `<style>` passerait pour une chaîne d'interface ; commentaires rapportés au cliquet `no-hardcoded-colors` et à la couche de communication de `@antia/ui` (`communication.css` : classes `.esp-story-*`, `.esp-live-pill`, et le jeton de scène `--esp-immersive-on-ink` lu ici).
+// Dupliqué de socle/packages/agent-features/src/features/stories/stories-styles.tsx @ ad2e7fdc2 — adaptations : règles et sélecteurs inchangés (jetons de rôle seulement, aucune couleur littérale) ; feuille sortie du JSX dans une constante de module (`STORIES_CSS`) — un littéral enfant de `<style>` passerait pour une chaîne d'interface ; commentaires rapportés au cliquet `no-hardcoded-colors` et à la couche de communication de `@antsia/ui` (`communication.css` : classes `.esp-story-*`, `.esp-live-pill`, et le jeton de scène `--esp-immersive-on-ink` lu ici).
 "use client"
 
 /**
  * stories-styles — la feuille des stories : la barre du fil et le lecteur
  * plein écran.
  *
- * ⚠️ Les primitives de `@antia/ui` n'ont AUCUNE mise en page responsive : le
+ * ⚠️ Les primitives de `@antsia/ui` n'ont AUCUNE mise en page responsive : le
  * patron est un `<style href precedence>` scopé par écran, que React 19 hisse
  * dans `<head>` et DÉDOUBLONNE si l'écran se remonte. Même mécanique que la
  * feuille de la coquille mobile (`mobile-styles`).
@@ -13,7 +13,7 @@
  * ⚠️ AUCUNE couleur littérale ici — que des `var()` de rôle. Le cliquet
  * `no-hardcoded-colors` refuse toute couleur littérale dans les `.tsx`,
  * commentaires compris ; toute valeur COMPOSÉE (dégradé, `color-mix`) passe
- * par une classe `.esp-*` de la couche de communication de `@antia/ui`
+ * par une classe `.esp-*` de la couche de communication de `@antsia/ui`
  * (`communication.css`) — ici, les cinq familles `.esp-story-*` et
  * `.esp-live-pill`.
  *

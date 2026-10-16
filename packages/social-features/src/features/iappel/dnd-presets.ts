@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/iappel/dnd-presets.ts @ ad2e7fdc2 — adaptations : portée du silence retirée (`DndScope`, `DND_SCOPE_OPTIONS` — option « Appels poste seulement » et type tiré d'un validateur Convex) : le « ne pas déranger » du moteur n'a pas de portée (`calls.preferences.setDnd({ until })`), tous les appels étant personnels ; borne de durée lue dans le contrat du moteur (`MAX_DND_DURATION_MS` de `@antia/social-contracts/calls`) ; libellés des pastilles en CLÉS i18n (`labelKey`, clés `iappel:dndPresets.…`, traduites par l'écran).
+// Dupliqué de socle/packages/agent-features/src/features/iappel/dnd-presets.ts @ ad2e7fdc2 — adaptations : portée du silence retirée (`DndScope`, `DND_SCOPE_OPTIONS` — option « Appels poste seulement » et type tiré d'un validateur Convex) : le « ne pas déranger » du moteur n'a pas de portée (`calls.preferences.setDnd({ until })`), tous les appels étant personnels ; borne de durée lue dans le contrat du moteur (`MAX_DND_DURATION_MS` de `@antsia/social-contracts/calls`) ; libellés des pastilles en CLÉS i18n (`labelKey`, clés `iappel:dndPresets.…`, traduites par l'écran).
 /**
  * Les PRESETS du « Ne pas déranger » — un seul vocabulaire pour toutes les
  * surfaces (réglages des appels, menu avatar).
@@ -13,7 +13,7 @@
  * traduit (`t(pill.labelKey)`).
  */
 
-import { MAX_DND_DURATION_MS } from "@antia/social-contracts/calls"
+import { MAX_DND_DURATION_MS } from "@antsia/social-contracts/calls"
 
 /** Demain 08:00, en heure locale de l'appareil. */
 export function tomorrowAt8(now: number): number {

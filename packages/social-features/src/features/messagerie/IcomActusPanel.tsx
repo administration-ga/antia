@@ -23,10 +23,10 @@
  * et dédoublonne la feuille par `href`.
  */
 
-import { api } from "@antia/api/engine"
-import { useAuthenticatedConvexQuery } from "@antia/api/hooks"
-import { useRoutes } from "@antia/api/network"
-import { useRouter } from "@antia/api/routing"
+import { api } from "@antsia/api/engine"
+import { useAuthenticatedConvexQuery } from "@antsia/api/hooks"
+import { useRoutes } from "@antsia/api/network"
+import { useRouter } from "@antsia/api/routing"
 import { Camera } from "lucide-react"
 import { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"

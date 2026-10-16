@@ -1,7 +1,7 @@
-// Dupliqué de socle/packages/agent-features/src/features/direct/DirectScene.tsx @ ad2e7fdc2 — adaptations : studio réécrit sur la salle persistante ANTIA, personId au lieu des noms, géométrie pure du socle, commandes d’intention conservées dans le store et partage explicite ; i18n et jetons.
+// Dupliqué de socle/packages/agent-features/src/features/direct/DirectScene.tsx @ ad2e7fdc2 — adaptations : studio réécrit sur la salle persistante ANTSIA, personId au lieu des noms, géométrie pure du socle, commandes d’intention conservées dans le store et partage explicite ; i18n et jetons.
 "use client"
 
-import { Button } from "@antia/ui"
+import { Button } from "@antsia/ui"
 import { ParticipantTile, useLocalParticipant, useSpeakingParticipants, useTracks } from "@livekit/components-react"
 import { Track } from "livekit-client"
 import { useEffect, useRef, useState, type CSSProperties } from "react"
@@ -70,7 +70,7 @@ export function DirectStudio({ session, onLeave, onEnd }: { session: DirectSessi
   </div>
   const presentation = screen ? <div className="relative h-full min-h-0 min-w-0 overflow-hidden rounded-lg border border-border bg-muted" aria-label={t("studio.presentation")}><ParticipantTile trackRef={screen} className="h-full w-full [&_video]:object-contain [&_.lk-participant-metadata]:hidden" /><span className="absolute top-1 left-1 rounded bg-background px-2 py-1 text-sm">{t("studio.presentation")}</span></div> : null
 
-  return <div ref={frame} data-lk-theme="antia" className="flex min-w-0 flex-col gap-3 rounded-xl border border-border bg-card p-3" style={{ ...studioTokens, ...(fullscreen ? { height: "100%", overflow: "hidden" } : {}) }}>
+  return <div ref={frame} data-lk-theme="antsia" className="flex min-w-0 flex-col gap-3 rounded-xl border border-border bg-card p-3" style={{ ...studioTokens, ...(fullscreen ? { height: "100%", overflow: "hidden" } : {}) }}>
     <div className="flex shrink-0 flex-wrap items-center justify-between gap-2">
       <label className="flex min-h-11 items-center gap-2 text-sm">{t("studio.view")}<select value={view} onChange={(event) => setView(event.target.value as DirectSceneView)} className="min-h-11 rounded-lg border border-input bg-background px-2">{DIRECT_SCENE_VIEWS.map((value) => <option key={value} value={value}>{t(`studio.views.${value}`)}</option>)}</select></label>
       {typeof document !== "undefined" && document.fullscreenEnabled ? <Button variant="ghost" disabled={command.pending} onClick={() => void command.run(() => fullscreen ? document.exitFullscreen() : frame.current!.requestFullscreen())}>{t(fullscreen ? "studio.exitFullscreen" : "studio.fullscreen")}</Button> : null}

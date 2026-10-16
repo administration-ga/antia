@@ -1,10 +1,10 @@
-// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/mobile/mobile-styles.tsx @ ad2e7fdc2 — adaptations : feuille sortie du JSX dans une constante de module exportée (`RESEAU_MOBILE_CSS`) — un littéral enfant de `<style>` passerait pour une chaîne d'interface ; AUCUNE couleur littérale — le masque du débordement des sous-menus lit un jeton opaque de la charte (`--foreground`) au lieu d'un mot-clé de couleur, la valeur hexadécimale citée en commentaire est retirée ; commentaires rapportés à la coque légère du moteur (scroller de l'hôte, cliquets `no-hardcoded-colors` et `theme-contract`, classes `.esp-*` fournies par `@antia/ui`) ; règles, sélecteurs et paliers inchangés ; déplacé dans la coque (`shell/mobile/`).
+// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/mobile/mobile-styles.tsx @ ad2e7fdc2 — adaptations : feuille sortie du JSX dans une constante de module exportée (`RESEAU_MOBILE_CSS`) — un littéral enfant de `<style>` passerait pour une chaîne d'interface ; AUCUNE couleur littérale — le masque du débordement des sous-menus lit un jeton opaque de la charte (`--foreground`) au lieu d'un mot-clé de couleur, la valeur hexadécimale citée en commentaire est retirée ; commentaires rapportés à la coque légère du moteur (scroller de l'hôte, cliquets `no-hardcoded-colors` et `theme-contract`, classes `.esp-*` fournies par `@antsia/ui`) ; règles, sélecteurs et paliers inchangés ; déplacé dans la coque (`shell/mobile/`).
 "use client"
 
 /**
  * mobile-styles — la feuille de la coquille mobile du réseau.
  *
- * ⚠️ `@antia/ui` n'a AUCUNE primitive de mise en page responsive : le patron
+ * ⚠️ `@antsia/ui` n'a AUCUNE primitive de mise en page responsive : le patron
  * est un `<style href precedence>` scopé par écran, que React 19 hisse dans
  * `<head>` et DÉDOUBLONNE si l'écran se remonte. Même mécanique que `rp-grid`
  * (page de bureau) et `rp-composer` (composeur).
@@ -12,7 +12,7 @@
  * ⚠️ AUCUNE couleur littérale ici — que des `var()` de rôle, tous déclarés par
  * la charte (cliquets `no-hardcoded-colors` et `theme-contract`). Une valeur
  * composée (dégradé, `color-mix`) passe par une classe `.esp-*` de la feuille
- * de `@antia/ui`, jamais par ce fichier.
+ * de `@antsia/ui`, jamais par ce fichier.
  *
  * ⚠️ Le préfixe est `.rm-` et non `.rp-` : les deux coquilles peuvent être
  * montées l'une après l'autre dans la même page (rotation d'écran), et deux

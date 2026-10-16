@@ -11,10 +11,10 @@
  * Le BLOCAGE est unilatéral, muet, et vaut pour toute la paire, dans tous les
  * réseaux : seul son auteur le lève.
  */
-import type { Badge } from "@antia/social-domain/badges"
-import { assertConnectionMessage, normalizeHandle } from "@antia/social-domain/content"
-import { canonicalPair, type ConnectionView, viewConnection } from "@antia/social-domain/connectionState"
-import { foldDiacritics } from "@antia/social-domain/searchText"
+import type { Badge } from "@antsia/social-domain/badges"
+import { assertConnectionMessage, normalizeHandle } from "@antsia/social-domain/content"
+import { canonicalPair, type ConnectionView, viewConnection } from "@antsia/social-domain/connectionState"
+import { foldDiacritics } from "@antsia/social-domain/searchText"
 import { paginationOptsValidator, type PaginationResult } from "convex/server"
 import { v } from "convex/values"
 

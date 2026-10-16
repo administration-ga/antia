@@ -23,7 +23,7 @@
  * fonction de traduction REÇUE (`t`, clés qualifiées `iappel:groupStage.…`).
  */
 
-import { groupCallTitleParts } from "@antia/social-contracts/callGroup"
+import { groupCallTitleParts } from "@antsia/social-contracts/callGroup"
 import type { TFunction } from "i18next"
 
 import type { CallParticipantState, CallParticipantView } from "./call-types"

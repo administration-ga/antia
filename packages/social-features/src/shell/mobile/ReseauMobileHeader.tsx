@@ -25,9 +25,9 @@
  * geste principal de l'en-tête.
  */
 
-import { useRoutes } from "@antia/api/network"
-import { Link } from "@antia/api/routing"
-import { Icon, TextInput } from "@antia/ui"
+import { useRoutes } from "@antsia/api/network"
+import { Link } from "@antsia/api/routing"
+import { Icon, TextInput } from "@antsia/ui"
 import { type FormEvent, type KeyboardEvent, useEffect, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
 

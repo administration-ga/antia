@@ -2,7 +2,7 @@
  * Facettes — les attributs d'une personne propres à un réseau (EXF-AN-04),
  * validés contre le schéma BORNÉ du réseau, chaque champ avec sa visibilité.
  */
-import { projectFacets } from "@antia/social-domain/facets"
+import { projectFacets } from "@antsia/social-domain/facets"
 import { v } from "convex/values"
 
 import { fail } from "../../lib/errors"

@@ -21,8 +21,8 @@
  * comme sur la scène sombre d'un appel, sans variante à maintenir.
  */
 
-import type { Badge } from "@antia/social-domain/badges"
-import { cn } from "@antia/ui"
+import type { Badge } from "@antsia/social-domain/badges"
+import { cn } from "@antsia/ui"
 import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 

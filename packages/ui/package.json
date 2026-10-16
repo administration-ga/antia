@@ -1,10 +1,10 @@
 {
-  "name": "@antia/ui",
+  "name": "@antsia/ui",
   "version": "0.0.0",
   "private": true,
   "license": "AGPL-3.0-or-later",
   "type": "module",
-  "description": "Jetons, charte de base (dupliquée de la charte Personnel du socle), thèmes d'application et primitives du moteur ANTIA.",
+  "description": "Jetons, charte de base (dupliquée de la charte Personnel du socle), thèmes d'application et primitives du moteur ANTSIA.",
   "exports": {
     ".": "./src/index.ts",
     "./overlay": "./src/overlay/index.ts",
@@ -33,8 +33,8 @@
     "react-dom": "catalog:"
   },
   "devDependencies": {
-    "@antia/eslint-config": "workspace:*",
-    "@antia/tsconfig": "workspace:*",
+    "@antsia/eslint-config": "workspace:*",
+    "@antsia/tsconfig": "workspace:*",
     "@testing-library/dom": "catalog:",
     "@testing-library/jest-dom": "catalog:",
     "@testing-library/react": "catalog:",

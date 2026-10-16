@@ -44,8 +44,8 @@
  * recompte), sans document partagé. Les nombres SERVIS à l'écran vivent dans
  * `liveSessionCounters`, recomposés par le seul `reap`.
  */
-import { DIRECT_MAX_VIEWERS_CAP, DIRECT_PRESENCE_TTL_MS, effectiveReplayVisibility, isReplayPublished, isViewerPresent } from "@antia/social-domain/live/domain"
-import { directPermissionsFor, type DirectPermissionKey, type DirectPermissions } from "@antia/social-domain/live/permissions"
+import { DIRECT_MAX_VIEWERS_CAP, DIRECT_PRESENCE_TTL_MS, effectiveReplayVisibility, isReplayPublished, isViewerPresent } from "@antsia/social-domain/live/domain"
+import { directPermissionsFor, type DirectPermissionKey, type DirectPermissions } from "@antsia/social-domain/live/permissions"
 import { v } from "convex/values"
 
 import type { Doc, Id } from "../../_generated/dataModel"

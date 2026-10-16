@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/iappel/group-call-capacity.ts @ ad2e7fdc2 — adaptations : plafonds lus dans les contrats du moteur (`@antia/social-contracts/groupCapacity`, `@antia/social-contracts/callGroup`) ; plafond CONSTANT (`threadCallCapacity`, `myCallCapacity` et le lanceur de poste retirés — aucun compte « illimité » dans le moteur, donc plus de compteur sans dénominateur) ; compteur traduit par i18n (`t` ajouté en dernier paramètre de `correspondentsCounter`, clés `iappel:groupCallCapacity.…`).
+// Dupliqué de socle/packages/agent-features/src/features/iappel/group-call-capacity.ts @ ad2e7fdc2 — adaptations : plafonds lus dans les contrats du moteur (`@antsia/social-contracts/groupCapacity`, `@antsia/social-contracts/callGroup`) ; plafond CONSTANT (`threadCallCapacity`, `myCallCapacity` et le lanceur de poste retirés — aucun compte « illimité » dans le moteur, donc plus de compteur sans dénominateur) ; compteur traduit par i18n (`t` ajouté en dernier paramètre de `correspondentsCounter`, clés `iappel:groupCallCapacity.…`).
 /**
  * group-call-capacity — COMBIEN de correspondants, et comment on le DIT.
  *
@@ -18,8 +18,8 @@
  * Module PUR : aucun React, testé en `node`.
  */
 
-import { GROUP_CALL_MIN_OTHERS } from "@antia/social-contracts/callGroup"
-import { GROUP_CALL_DEFAULT_MAX_PARTICIPANTS } from "@antia/social-contracts/groupCapacity"
+import { GROUP_CALL_MIN_OTHERS } from "@antsia/social-contracts/callGroup"
+import { GROUP_CALL_DEFAULT_MAX_PARTICIPANTS } from "@antsia/social-contracts/groupCapacity"
 import type { TFunction } from "i18next"
 
 /**

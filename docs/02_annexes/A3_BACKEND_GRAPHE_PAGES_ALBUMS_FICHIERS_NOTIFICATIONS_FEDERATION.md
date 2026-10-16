@@ -1,5 +1,5 @@
 ---
-title: "ANTIA — Annexe A3 du document 02 : inventaire contradictoire, backend — graphe des connexions, pages, albums, garde des fichiers, notifications et push, fédération, effacement, limitation de débit"
+title: "ANTSIA — Annexe A3 du document 02 : inventaire contradictoire, backend — graphe des connexions, pages, albums, garde des fichiers, notifications et push, fédération, effacement, limitation de débit"
 date: "2026-10-14"
 source: "socle administration.ga, origin/main = ad2e7fdc2, copie propre (git worktree add), lecture seule"
 statut: "Rapport d'inventaire brut, produit en lecture seule ; la synthèse décisionnelle est docs/02_OWNER_MAP_DUPLICATION.md"

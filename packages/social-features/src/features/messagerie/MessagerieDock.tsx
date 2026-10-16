@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/messagerie/MessagerieDock.tsx @ ad2e7fdc2 — adaptations : portail détaché re-scopé par la charte DU RÉSEAU (`data-charte` = `useNetwork().charte`) ; stockage par réseau — position flottante sous `icomFloatPlacementStorageKey(storagePrefix)` et `configureDockStorage(storagePrefix)` rappelé au montage (idempotent, la coque l'appelle d'abord) ; réconciliation des brouillons sur les fenêtres de la source personnelle (`SOURCE_AGENT.useThreads` / `useGroupThreads` → `messaging.inbox.paginateMyThreads`, `groups.threads.paginateMyGroupThreads`) au lieu de `listMyThreads` / `listMyGroupThreads`, identifiants `threadId` du moteur ; seuil mobile par `@antia/ui/overlay` ; libellés des briques lus par leurs clés (`ICOM_DOCK_TABS`) ; toutes les chaînes d'interface traduites (clés `messagerieDock.*`, annonce des non-lus pluralisée) ; hôte d'appel `ICOM_AGENT_CALL_HOST_ID` inchangé (nom et valeur) ; doc : adresses de l'espace agent remplacées par la base injectée de l'application.
+// Dupliqué de socle/packages/agent-features/src/features/messagerie/MessagerieDock.tsx @ ad2e7fdc2 — adaptations : portail détaché re-scopé par la charte DU RÉSEAU (`data-charte` = `useNetwork().charte`) ; stockage par réseau — position flottante sous `icomFloatPlacementStorageKey(storagePrefix)` et `configureDockStorage(storagePrefix)` rappelé au montage (idempotent, la coque l'appelle d'abord) ; réconciliation des brouillons sur les fenêtres de la source personnelle (`SOURCE_AGENT.useThreads` / `useGroupThreads` → `messaging.inbox.paginateMyThreads`, `groups.threads.paginateMyGroupThreads`) au lieu de `listMyThreads` / `listMyGroupThreads`, identifiants `threadId` du moteur ; seuil mobile par `@antsia/ui/overlay` ; libellés des briques lus par leurs clés (`ICOM_DOCK_TABS`) ; toutes les chaînes d'interface traduites (clés `messagerieDock.*`, annonce des non-lus pluralisée) ; hôte d'appel `ICOM_AGENT_CALL_HOST_ID` inchangé (nom et valeur) ; doc : adresses de l'espace agent remplacées par la base injectée de l'application.
 "use client"
 
 /**
@@ -45,8 +45,8 @@
  * inutilisable. UNE SEULE région `aria-live` pour toute la carte.
  */
 
-import { useNetwork } from "@antia/api/network"
-import { usePathname, useRouter, useSearchParams } from "@antia/api/routing"
+import { useNetwork } from "@antsia/api/network"
+import { usePathname, useRouter, useSearchParams } from "@antsia/api/routing"
 import {
 	Camera,
 	ChevronDown,
@@ -74,7 +74,7 @@ import {
 	useCallHostMode,
 } from "../iappel/call-host-store"
 import type { CallScope } from "../iappel/call-types"
-import { useIsReseauMobile } from "@antia/ui/overlay"
+import { useIsReseauMobile } from "@antsia/ui/overlay"
 import {
 	configureDockStorage,
 	dockStore,

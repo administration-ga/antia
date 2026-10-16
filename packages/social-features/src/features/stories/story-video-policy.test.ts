@@ -1,7 +1,7 @@
-// Dupliqué de socle/packages/agent-features/src/features/stories/story-video-policy.test.ts @ ad2e7fdc2 — adaptations : borne unique du moteur (`STORY_VIDEO_LIMITS` de `@antia/social-domain/stories`, cinq minutes et cinquante mégaoctets) au lieu des bornes par destination — cas « neuf minutes sur iRéseau », « au-delà de dix minutes », « huit minutes sans conversion » ramenés à cette borne, cas « sans destination connue » retiré (aucune destination à choisir) ; refus lus par l'i18n du moteur (`t` français, mêmes fragments attendus) ; cas ajouté : refus en anglais.
+// Dupliqué de socle/packages/agent-features/src/features/stories/story-video-policy.test.ts @ ad2e7fdc2 — adaptations : borne unique du moteur (`STORY_VIDEO_LIMITS` de `@antsia/social-domain/stories`, cinq minutes et cinquante mégaoctets) au lieu des bornes par destination — cas « neuf minutes sur iRéseau », « au-delà de dix minutes », « huit minutes sans conversion » ramenés à cette borne, cas « sans destination connue » retiré (aucune destination à choisir) ; refus lus par l'i18n du moteur (`t` français, mêmes fragments attendus) ; cas ajouté : refus en anglais.
 import { describe, expect, it } from "vitest"
 
-import { STORY_VIDEO_LIMITS } from "@antia/social-domain/stories"
+import { STORY_VIDEO_LIMITS } from "@antsia/social-domain/stories"
 
 import { createAppI18n } from "../../i18n"
 import {

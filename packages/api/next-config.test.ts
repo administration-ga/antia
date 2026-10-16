@@ -19,6 +19,6 @@ describe("readEnvFile", () => {
   })
 
   it("rend un objet vide quand le fichier n'existe pas", () => {
-    expect(readEnvFile(join(tmpdir(), "absent-antia", ".env.local"))).toEqual({})
+    expect(readEnvFile(join(tmpdir(), "absent-antsia", ".env.local"))).toEqual({})
   })
 })

@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/GroupsPanel.test.tsx @ ad2e7fdc2 — adaptations : fonctions du moteur moquées (`thematicGroups.thematicGroups.*`, recherche `graph.connections.searchMine`), réponses au DTO du moteur (`myGroups` → `{ items, truncated }`, vivier `{ items, truncated }` aux lignes `personId`, mur `{ items, nextCursor }`), invitations PAGINÉES (une panne lève, la frontière la dit) ; rendu dans l'enveloppe du moteur (`renderWithEngine` : i18n français, réseau de test) ; primitives de `@antia/ui` et kit d'espace (`@antia/ui/espace-kit`) moqués ; les treize cas du socle portés ; cas ajoutés : le refus `notFound` dit « plus accessible », les gestes portent le réseau courant, la lacune de « Mes groupes » se dit, l'invitation envoie une demande par personne cochée.
+// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/GroupsPanel.test.tsx @ ad2e7fdc2 — adaptations : fonctions du moteur moquées (`thematicGroups.thematicGroups.*`, recherche `graph.connections.searchMine`), réponses au DTO du moteur (`myGroups` → `{ items, truncated }`, vivier `{ items, truncated }` aux lignes `personId`, mur `{ items, nextCursor }`), invitations PAGINÉES (une panne lève, la frontière la dit) ; rendu dans l'enveloppe du moteur (`renderWithEngine` : i18n français, réseau de test) ; primitives de `@antsia/ui` et kit d'espace (`@antsia/ui/espace-kit`) moqués ; les treize cas du socle portés ; cas ajoutés : le refus `notFound` dit « plus accessible », les gestes portent le réseau courant, la lacune de « Mes groupes » se dit, l'invitation envoie une demande par personne cochée.
 // @vitest-environment jsdom
 
 /**
@@ -88,7 +88,7 @@ function mutation(reference: string) {
   return mocks.mutations[reference]
 }
 
-vi.mock("@antia/api/engine", () => ({
+vi.mock("@antsia/api/engine", () => ({
   api: {
     modules: {
       thematicGroups: {
@@ -117,7 +117,7 @@ vi.mock("@antia/api/engine", () => ({
   },
 }))
 
-vi.mock("@antia/api/hooks", () => ({
+vi.mock("@antsia/api/hooks", () => ({
   useAuthenticatedConvexQuery: (query: string, args: unknown) => {
     mocks.queryCalls.push([query, args])
     return mocks.queries[query] ?? emptyAnswer(query)
@@ -137,7 +137,7 @@ vi.mock("./PostCard", () => ({
 }))
 vi.mock("./PostComposer", () => ({ PostComposer: () => <div data-testid="composeur" /> }))
 
-vi.mock("@antia/ui", () => ({
+vi.mock("@antsia/ui", () => ({
   Alert: ({ title, children }: { title: string; children: ReactNode }) => (
     <div role="alert">
       <strong>{title}</strong>
@@ -165,7 +165,7 @@ vi.mock("@antia/ui", () => ({
 }))
 
 // Le kit d'espace (son propre point d'entrée) : l'état vide rend son texte, la pagination se tait.
-vi.mock("@antia/ui/espace-kit", () => ({
+vi.mock("@antsia/ui/espace-kit", () => ({
   EspaceEmptyState: ({ text, action }: { text: string; action?: ReactNode }) => (
     <div>
       <p>{text}</p>

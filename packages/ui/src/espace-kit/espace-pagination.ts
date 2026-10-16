@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/components/espace-kit/espace-pagination.ts @ ad2e7fdc2 — adaptations : le paquet d'interface n'a pas d'i18n — les phrases (« Aucun élément », « 1 élément », « Page X sur Y — a à b sur T », « Page N sur M », « page actuelle ») viennent de l'appelant par `EspacePaginationLabels` (nouveau type exporté, avec `PaginationRange`), passé en DERNIER paramètre de `paginationSummary` et de `pageAriaLabel` ; le module garde la décision (quelle phrase, quels nombres) ; calculs de pages inchangés ; commentaires rapportés au paquet `@antia/ui`.
+// Dupliqué de socle/packages/agent-features/src/components/espace-kit/espace-pagination.ts @ ad2e7fdc2 — adaptations : le paquet d'interface n'a pas d'i18n — les phrases (« Aucun élément », « 1 élément », « Page X sur Y — a à b sur T », « Page N sur M », « page actuelle ») viennent de l'appelant par `EspacePaginationLabels` (nouveau type exporté, avec `PaginationRange`), passé en DERNIER paramètre de `paginationSummary` et de `pageAriaLabel` ; le module garde la décision (quelle phrase, quels nombres) ; calculs de pages inchangés ; commentaires rapportés au paquet `@antsia/ui`.
 /**
  * espace-pagination — la pagination du kit d'espace, décidée hors composant.
  *
@@ -7,8 +7,8 @@
  * vit dans ce module pur, où c'est vérifiable sans navigateur.
  * `EspacePagination.tsx` ne fait que rendre ce que ces fonctions calculent.
  *
- * ⚠️ Le paquet `@antia/ui` n'a PAS d'i18n : il est monté par des applications
- * différentes (le réseau ANTIA, DIASPORALE), chacune avec ses langues. Les
+ * ⚠️ Le paquet `@antsia/ui` n'a PAS d'i18n : il est monté par des applications
+ * différentes (le réseau ANTSIA, DIASPORALE), chacune avec ses langues. Les
  * PHRASES arrivent donc traduites de l'appelant (`EspacePaginationLabels`),
  * comme le `closeLabel` du tiroir et d'`Alert` ; ce module choisit laquelle
  * dire et la remplit — il n'en écrit aucune.

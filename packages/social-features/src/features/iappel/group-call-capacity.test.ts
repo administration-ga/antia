@@ -1,8 +1,8 @@
 // Dupliqué de socle/packages/agent-features/src/features/iappel/group-call-capacity.test.ts @ ad2e7fdc2 — adaptations : plafonds lus dans les contrats du moteur ; compteur lu dans les locales françaises du moteur (`t` réel) — attendus inchangés ; cas retirés : exemption d'un compte d'administration (plafond de mille, compteur sans dénominateur) — aucun compte « illimité » dans le moteur ; cas ajouté : le compteur en anglais.
 import { describe, expect, it } from "vitest"
 
-import { GROUP_CALL_MIN_OTHERS } from "@antia/social-contracts/callGroup"
-import { GROUP_CALL_DEFAULT_MAX_PARTICIPANTS } from "@antia/social-contracts/groupCapacity"
+import { GROUP_CALL_MIN_OTHERS } from "@antsia/social-contracts/callGroup"
+import { GROUP_CALL_DEFAULT_MAX_PARTICIPANTS } from "@antsia/social-contracts/groupCapacity"
 
 import { createAppI18n } from "../../i18n"
 import {

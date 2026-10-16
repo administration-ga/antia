@@ -7,7 +7,7 @@
  * connectés », UNE de « je le suis » — deux divergeraient au premier oubli, et
  * c'est sur cette différence que repose l'audience `connections`.
  */
-import { canonicalPair } from "@antia/social-domain/connectionState"
+import { canonicalPair } from "@antsia/social-domain/connectionState"
 
 import type { Doc, Id } from "../../_generated/dataModel"
 import type { QueryCtx } from "../../_generated/server"

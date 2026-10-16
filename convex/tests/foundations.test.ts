@@ -58,13 +58,13 @@ describe("graine des fondations", () => {
   it("pose la racine ouverte et un réseau fermé enfant, sans rien doubler au second passage", async () => {
     const t = testConvex()
     const first = await seed(t)
-    expect(first.created).toEqual(["antia", "test-closed"])
+    expect(first.created).toEqual(["antsia", "test-closed"])
     const second = await seed(t)
     expect(second.created).toEqual([])
     expect(second.root).toEqual(first.root)
     const networks = await t.run(async (ctx) => ctx.db.query("networks").take(10))
     expect(networks.map((n) => [n.slug, n.kind, n.membershipPolicy])).toEqual([
-      ["antia", "root", "open"],
+      ["antsia", "root", "open"],
       ["test-closed", "closed", "declared_or_verified"],
     ])
   })
@@ -75,7 +75,7 @@ describe("graine des fondations", () => {
     expect(seedsAllowed({})).toBe(false)
     expect(seedsAllowed({ CONVEX_CLOUD_URL: "https://exemple.convex.cloud" })).toBe(false)
     expect(seedsAllowed({ CONVEX_CLOUD_URL: "http://127.0.0.1:3210" })).toBe(true)
-    expect(seedsAllowed({ ANTIA_SEEDS_ALLOWED: "true" })).toBe(true)
+    expect(seedsAllowed({ ANTSIA_SEEDS_ALLOWED: "true" })).toBe(true)
   })
 })
 
@@ -137,7 +137,7 @@ describe("adhésion dérivée vers la racine (invariant 3, R3)", () => {
     expect(rootMembership).toMatchObject({ status: "declaree", derivedFrom: testClosed })
     const memberships = await as.query(api.modules.people.memberships.myMemberships, {})
     expect(memberships.map((m) => [m.slug, m.status]).sort()).toEqual([
-      ["antia", "declaree"],
+      ["antsia", "declaree"],
       ["test-closed", "en_attente"],
     ])
   })
@@ -212,13 +212,13 @@ describe("étanchéité et refus indistinct (invariants 1 et 8, R10)", () => {
       membershipPolicy: "declared_or_verified",
       defaultVisibility: "network",
       reachValues: [],
-      theme: "antia",
+      theme: "antsia",
     })
     const { as } = await onboardedPerson(t, "auth-7", "membre.diaspo")
     await as.mutation(api.modules.people.memberships.joinNetwork, { networkId: testClosed, facet: { values: { countryOfResidence: "FR" }, visibilities: {} } })
 
     await t.run(async (ctx) => {
-      await expect(requireMembershipAs(ctx, "auth-7", root)).resolves.toMatchObject({ network: { slug: "antia" } })
+      await expect(requireMembershipAs(ctx, "auth-7", root)).resolves.toMatchObject({ network: { slug: "antsia" } })
       await expect(requireMembershipAs(ctx, "auth-7", testClosed)).resolves.toMatchObject({ network: { slug: "test-closed" } })
       // Hors réseau et réseau supprimé : la MÊME réponse.
       await expect(requireMembershipAs(ctx, "auth-7", other)).rejects.toMatchObject({ data: { code: "notFound" } })
@@ -248,7 +248,7 @@ describe("console du moteur : les réseaux se créent et s'archivent sans déplo
     const t = testConvex()
     const { root } = await seed(t)
     const { as: visitor } = await onboardedPerson(t, "auth-9", "visiteur")
-    const args = { name: "Réseau", membershipPolicy: "open" as const, defaultVisibility: "network" as const, reachValues: [], theme: "antia" }
+    const args = { name: "Réseau", membershipPolicy: "open" as const, defaultVisibility: "network" as const, reachValues: [], theme: "antsia" }
     expect(await errorCode(visitor.mutation(api.modules.networks.networks.create, { slug: "nouveau", kind: "closed", ...args }))).toBe("operatorRequired")
 
     const operator = await onboardedPerson(t, "auth-op3", "operateur.trois")

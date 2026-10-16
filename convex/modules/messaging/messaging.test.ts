@@ -1,7 +1,7 @@
 // @vitest-environment edge-runtime
 // Dupliqué de socle/convex/modules/reseauPersonnel/messagerie.test.ts (avec socle/convex/modules/messagerieScope/{threads,transfert}.test.ts et socle/convex/tests/{chatsMessagerie,chatsP2P,chatsPinning,chatsAttachmentsAdoption}.test.ts) @ ad2e7fdc2 — adaptations : personnes et réseaux (graine des fondations) ; codes et règles au lieu des libellés ; fils de poste, Standard, iAsted, ressortissants, coffre et appels (→ module des appels) retirés ; le cloisonnement poste / personnel réécrit ENTRE RÉSEAUX ; un poids déclaré qui ment est refusé (le socle l'écrasait) ; tests neufs : le blocage déplace la pastille à l'écriture (D38), contenu retiré absent (D37), saisie lue à l'instant fourni (D16), nom tu après une demande d'effacement, une paire a un fil par réseau.
-import { MESSAGE_EDIT_WINDOW_MS } from "@antia/social-contracts/messaging"
-import { engineErrorCode, engineErrorRule } from "@antia/social-contracts/errors"
+import { MESSAGE_EDIT_WINDOW_MS } from "@antsia/social-contracts/messaging"
+import { engineErrorCode, engineErrorRule } from "@antsia/social-contracts/errors"
 import type { PaginationResult } from "convex/server"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 

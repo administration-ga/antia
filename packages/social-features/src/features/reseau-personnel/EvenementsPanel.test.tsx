@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/EvenementsPanel.test.tsx @ ad2e7fdc2 — adaptations : fonctions du moteur moquées (`events.events.*`, recherche `graph.connections.searchMine`), agenda au DTO du moteur (`{ items, truncated }`, organisateur `counterpartLabel`) ; rendu dans l'enveloppe du moteur (`renderWithEngine` : i18n français, réseau de test, routeur en mémoire) ; primitives de `@antia/ui` et kit d'espace (`@antia/ui/espace-kit`) moqués ; les gestes portent le réseau courant ; les onze premiers cas du socle portés, le douzième retourné — sans hôte, le volet compose LUI-MÊME (iAgenda n'existe pas dans le moteur) : le bouton ouvre la carte de composition ; cas ajoutés : la composition (réseau, fuseau du navigateur, clé tirée à l'ouverture), la fin avant le début, l'intention portée par l'adresse (consommée une fois, URL nettoyée, retour rendu), l'invitation des relations, la liste des invités, la lacune de l'agenda.
+// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/EvenementsPanel.test.tsx @ ad2e7fdc2 — adaptations : fonctions du moteur moquées (`events.events.*`, recherche `graph.connections.searchMine`), agenda au DTO du moteur (`{ items, truncated }`, organisateur `counterpartLabel`) ; rendu dans l'enveloppe du moteur (`renderWithEngine` : i18n français, réseau de test, routeur en mémoire) ; primitives de `@antsia/ui` et kit d'espace (`@antsia/ui/espace-kit`) moqués ; les gestes portent le réseau courant ; les onze premiers cas du socle portés, le douzième retourné — sans hôte, le volet compose LUI-MÊME (iAgenda n'existe pas dans le moteur) : le bouton ouvre la carte de composition ; cas ajoutés : la composition (réseau, fuseau du navigateur, clé tirée à l'ouverture), la fin avant le début, l'intention portée par l'adresse (consommée une fois, URL nettoyée, retour rendu), l'invitation des relations, la liste des invités, la lacune de l'agenda.
 // @vitest-environment jsdom
 
 /**
@@ -20,7 +20,7 @@ import { fireEvent, screen, waitFor } from "@testing-library/react"
 import type { ButtonHTMLAttributes, InputHTMLAttributes, ReactNode, SelectHTMLAttributes, TextareaHTMLAttributes } from "react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
-import type { Id } from "@antia/api/engine"
+import type { Id } from "@antsia/api/engine"
 
 import { createAppI18n } from "../../i18n"
 import { memoryRouter, renderWithEngine, TEST_NETWORK_ID, TEST_ROUTES } from "../../tests/engine-wrapper"
@@ -52,7 +52,7 @@ const mocks = vi.hoisted(() => ({
   invite: vi.fn(),
 }))
 
-vi.mock("@antia/api/engine", () => ({
+vi.mock("@antsia/api/engine", () => ({
   api: {
     modules: {
       events: {
@@ -71,7 +71,7 @@ vi.mock("@antia/api/engine", () => ({
   },
 }))
 
-vi.mock("@antia/api/hooks", () => ({
+vi.mock("@antsia/api/hooks", () => ({
   useAuthenticatedConvexQuery: (query: string, args: unknown) => {
     if (query === "myAgenda") {
       mocks.agendaArgs.push(args)
@@ -100,7 +100,7 @@ vi.mock("convex/react", () => ({
 }))
 vi.mock("sonner", () => ({ toast: { error: vi.fn(), success: vi.fn() } }))
 
-vi.mock("@antia/ui", async () => {
+vi.mock("@antsia/ui", async () => {
   const React = await vi.importActual<typeof import("react")>("react")
   return {
     Alert: ({ title, children }: { title: string; children: ReactNode }) => (
@@ -147,7 +147,7 @@ vi.mock("@antia/ui", async () => {
 })
 
 // Le kit d'espace (son propre point d'entrée) : l'état vide rend son texte, la pagination se tait.
-vi.mock("@antia/ui/espace-kit", () => ({
+vi.mock("@antsia/ui/espace-kit", () => ({
   EspaceEmptyState: ({ text }: { text: string }) => <p>{text}</p>,
   EspacePagination: () => null,
   clampPage: (page: number) => Math.max(1, page),

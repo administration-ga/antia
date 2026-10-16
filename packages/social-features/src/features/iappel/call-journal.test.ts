@@ -1,7 +1,7 @@
-// Dupliqué de socle/packages/agent-features/src/features/iappel/call-journal.test.ts @ ad2e7fdc2 — adaptations : lignes = DTO du moteur (`listCallHistory`) ; le classement est fait par le serveur (testé dans `@antia/social-domain/callJournal` et `convex/modules/calls/calls.test.ts`), l'écran en garde la lecture : sens de l'appel, refus automatiques du moteur, « hors ligne » jamais refus, correspondant à rappeler (appelant d'un appel de groupe compris) ; cas retirés : renvoi au secrétariat (3), appel passé du back-office vers son espace d'agent (3), appel prioritaire (1), repli de l'horodatage sur la création (le moteur rend toujours `startedAt`).
+// Dupliqué de socle/packages/agent-features/src/features/iappel/call-journal.test.ts @ ad2e7fdc2 — adaptations : lignes = DTO du moteur (`listCallHistory`) ; le classement est fait par le serveur (testé dans `@antsia/social-domain/callJournal` et `convex/modules/calls/calls.test.ts`), l'écran en garde la lecture : sens de l'appel, refus automatiques du moteur, « hors ligne » jamais refus, correspondant à rappeler (appelant d'un appel de groupe compris) ; cas retirés : renvoi au secrétariat (3), appel passé du back-office vers son espace d'agent (3), appel prioritaire (1), repli de l'horodatage sur la création (le moteur rend toujours `startedAt`).
 import { describe, expect, it } from "vitest"
 
-import type { CounterpartLabel } from "@antia/social-contracts/counterpart"
+import type { CounterpartLabel } from "@antsia/social-contracts/counterpart"
 
 import {
 	categorizeCallRow,

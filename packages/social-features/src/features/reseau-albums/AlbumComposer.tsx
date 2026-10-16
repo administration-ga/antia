@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/reseau-albums/AlbumComposer.tsx @ ad2e7fdc2 — adaptations : fonctions TYPÉES du moteur (`albums.albums.*`, dépôt par `media.media.generateUploadUrl` sous l'usage `album_image`) appelées avec le réseau courant (`useNetwork().networkId`) ; identifiants d'album et de photo typés ; phrases par l'i18n (espace de noms `albums`, clés `albumComposer.*`, et `album-model` avec `t`) ; pourcentage dit dans la langue courante (`Intl.NumberFormat`) ; refus du moteur traduits par leur règle ou leur code (`albumEngineErrorText`), jamais le texte brut ; `ReencodeImage` reçoit `t` en second paramètre ; ajout des photos par lots de `ALBUM_ADD_BATCH_MAX` (le moteur refuse un lot plus grand, quand le composeur en propose jusqu'à soixante) ; barre de progression rendue sur place (`Progress` n'existe pas dans `@antia/ui`) ; bornes lues au domaine du moteur.
+// Dupliqué de socle/packages/agent-features/src/features/reseau-albums/AlbumComposer.tsx @ ad2e7fdc2 — adaptations : fonctions TYPÉES du moteur (`albums.albums.*`, dépôt par `media.media.generateUploadUrl` sous l'usage `album_image`) appelées avec le réseau courant (`useNetwork().networkId`) ; identifiants d'album et de photo typés ; phrases par l'i18n (espace de noms `albums`, clés `albumComposer.*`, et `album-model` avec `t`) ; pourcentage dit dans la langue courante (`Intl.NumberFormat`) ; refus du moteur traduits par leur règle ou leur code (`albumEngineErrorText`), jamais le texte brut ; `ReencodeImage` reçoit `t` en second paramètre ; ajout des photos par lots de `ALBUM_ADD_BATCH_MAX` (le moteur refuse un lot plus grand, quand le composeur en propose jusqu'à soixante) ; barre de progression rendue sur place (`Progress` n'existe pas dans `@antsia/ui`) ; bornes lues au domaine du moteur.
 "use client"
 
 /**
@@ -25,9 +25,9 @@
  * vérifiable sans navigateur.
  */
 
-import { useNetwork } from "@antia/api/network"
-import { ALBUM_ITEMS_MAX } from "@antia/social-domain/albums"
-import { Alert, Badge, Button, Card, Icon, TextArea, TextInput } from "@antia/ui"
+import { useNetwork } from "@antsia/api/network"
+import { ALBUM_ITEMS_MAX } from "@antsia/social-domain/albums"
+import { Alert, Badge, Button, Card, Icon, TextArea, TextInput } from "@antsia/ui"
 import { useMutation } from "convex/react"
 import type { TFunction } from "i18next"
 import { useCallback, useMemo, useRef, useState } from "react"
@@ -118,7 +118,7 @@ const reencodeOnCanvas: ReencodeImage = async (file, t) => {
 /**
  * La barre d'avancement de l'envoi — décorative : la phrase `aria-live` qui la
  * suit porte l'information. Mêmes jetons que la barre de progression de
- * l'ancien ui-v2 (`@antia/ui` n'en porte pas encore).
+ * l'ancien ui-v2 (`@antsia/ui` n'en porte pas encore).
  */
 function UploadProgressBar({
   value,

@@ -15,8 +15,8 @@
  *  · établi (`connected`, `on_hold`) sans personne dans la salle → terminé ;
  *    au-delà de quatre heures → terminé EN ERREUR (un fantôme se repère).
  */
-import { CALL_CONNECTED_MAX_DURATION_MS, CALL_INITIATING_TIMEOUT_MS, CALL_RING_WINDOW_MS } from "@antia/social-contracts/calls"
-import { isLiveCallStatus } from "@antia/social-domain/callJournal"
+import { CALL_CONNECTED_MAX_DURATION_MS, CALL_INITIATING_TIMEOUT_MS, CALL_RING_WINDOW_MS } from "@antsia/social-contracts/calls"
+import { isLiveCallStatus } from "@antsia/social-domain/callJournal"
 import { v } from "convex/values"
 
 import { internal } from "../../_generated/api"

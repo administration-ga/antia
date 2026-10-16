@@ -5,9 +5,9 @@
  *
  * Fichier de TEST (dossier `tests/`) : jamais importé par une source.
  */
-import { NetworkProvider, type EngineRoutes } from "@antia/api/network"
-import type { Id } from "@antia/api/engine"
-import { RouterProvider, type RouterApi, type RouterImplementation } from "@antia/api/routing"
+import { NetworkProvider, type EngineRoutes } from "@antsia/api/network"
+import type { Id } from "@antsia/api/engine"
+import { RouterProvider, type RouterApi, type RouterImplementation } from "@antsia/api/routing"
 import { render, type RenderOptions } from "@testing-library/react"
 import type { ReactElement, ReactNode } from "react"
 import { I18nextProvider } from "react-i18next"
@@ -65,7 +65,7 @@ export function EngineTestWrapper(props: {
           networkId={TEST_NETWORK_ID}
           slug="test"
           personId={props.personId ?? TEST_PERSON_ID}
-          charte="antia"
+          charte="antsia"
           routes={props.routes ?? TEST_ROUTES}
           liveAvailable
         >

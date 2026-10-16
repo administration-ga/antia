@@ -26,8 +26,8 @@ describe("passerelle des anciennes adresses Messages vers iCom", () => {
 
 	it("arrive sur l'accueil de L'APPLICATION, quel qu'il soit", () => {
 		expect(
-			icomDesktopEntryHref({ home: "/r/antia", conversationKey: null }),
-		).toBe("/r/antia?icom=ouvrir")
+			icomDesktopEntryHref({ home: "/r/antsia", conversationKey: null }),
+		).toBe("/r/antsia?icom=ouvrir")
 	})
 
 	it("transmet une conversation ou l'un des deux composeurs", () => {

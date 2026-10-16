@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/PeoplePanel.test.tsx @ ad2e7fdc2 — adaptations : montage dans l'enveloppe du moteur (`renderWithEngine` : i18n français, réseau et routes de test, routeur en mémoire — la sous-vue est lue dans la VRAIE adresse `?vue=` au lieu d'un `useTabQueryState` simulé) ; fonctions du moteur simulées (`people.directory.searchPeople`, `graph.connections.*`, `graph.follows.*` paginé, `suggestions.suggestions.*` paginé, `calls.direct.callMember` + magasin d'appel au lieu de `useRingRelation`) ; DTO du moteur (`otherPersonId`, `personId`, `targetPersonId`, pages natives) ; vraies primitives de `@antia/ui` et vrai kit d'espace (`@antia/ui/espace-kit`), plus aucune doublure d'interface ; adresses de test (`/messages/a/…`, `/fil?tab=relations&vue=…`) ; « Agents à découvrir » devient « Personnes à découvrir » ; cas RETIRÉ avec sa branche : « le poste avant la bio » (le moteur ne connaît ni poste ni administration) ; cas neufs : relation sans nom (libellé neutre), appel refusé (écran de fin), « Voir plus » des suivis par curseur natif, filtre des masquées qui repart de zéro.
+// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/PeoplePanel.test.tsx @ ad2e7fdc2 — adaptations : montage dans l'enveloppe du moteur (`renderWithEngine` : i18n français, réseau et routes de test, routeur en mémoire — la sous-vue est lue dans la VRAIE adresse `?vue=` au lieu d'un `useTabQueryState` simulé) ; fonctions du moteur simulées (`people.directory.searchPeople`, `graph.connections.*`, `graph.follows.*` paginé, `suggestions.suggestions.*` paginé, `calls.direct.callMember` + magasin d'appel au lieu de `useRingRelation`) ; DTO du moteur (`otherPersonId`, `personId`, `targetPersonId`, pages natives) ; vraies primitives de `@antsia/ui` et vrai kit d'espace (`@antsia/ui/espace-kit`), plus aucune doublure d'interface ; adresses de test (`/messages/a/…`, `/fil?tab=relations&vue=…`) ; « Agents à découvrir » devient « Personnes à découvrir » ; cas RETIRÉ avec sa branche : « le poste avant la bio » (le moteur ne connaît ni poste ni administration) ; cas neufs : relation sans nom (libellé neutre), appel refusé (écran de fin), « Voir plus » des suivis par curseur natif, filtre des masquées qui repart de zéro.
 // @vitest-environment jsdom
 
 /**
@@ -73,7 +73,7 @@ function err(data: unknown = undefined): QueryMock {
   return { ...ok(data), isError: true }
 }
 
-vi.mock("@antia/api/engine", () => ({
+vi.mock("@antsia/api/engine", () => ({
   api: {
     modules: {
       people: { directory: { searchPeople: "searchPeople" } },
@@ -110,7 +110,7 @@ function emptyFor(query: string): unknown {
   return PAGE_VIDE
 }
 
-vi.mock("@antia/api/hooks", () => ({
+vi.mock("@antsia/api/hooks", () => ({
   useAuthenticatedConvexQuery: (query: string, args: unknown) => {
     if (query === "searchPeople") mocks.searchArgs.push(args)
     ;(mocks.queryArgs[query] ??= []).push(args)

@@ -19,12 +19,12 @@
  * (le DTO ne porte que le genre, l'acteur et une référence).
  */
 
-import { api } from "@antia/api/engine"
-import type { Id } from "@antia/api/engine"
-import { useNetwork, useRoutes } from "@antia/api/network"
-import { Link } from "@antia/api/routing"
-import { engineErrorCode } from "@antia/social-contracts/errors"
-import { Badge, Button } from "@antia/ui"
+import { api } from "@antsia/api/engine"
+import type { Id } from "@antsia/api/engine"
+import { useNetwork, useRoutes } from "@antsia/api/network"
+import { Link } from "@antsia/api/routing"
+import { engineErrorCode } from "@antsia/social-contracts/errors"
+import { Badge, Button } from "@antsia/ui"
 import { useConvex, useMutation } from "convex/react"
 import type { FunctionReturnType } from "convex/server"
 import { useState } from "react"

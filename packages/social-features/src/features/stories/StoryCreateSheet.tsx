@@ -33,11 +33,11 @@
  * `useMediaDraft`).
  */
 
-import { api, type Id } from "@antia/api/engine"
-import { useNetwork } from "@antia/api/network"
-import { STORY_CAPTION_MAX_LENGTH } from "@antia/social-domain/stories"
-import { Alert, Button, Field, Select, TextArea } from "@antia/ui"
-import { ImmersiveOverlay, useIsReseauMobile } from "@antia/ui/overlay"
+import { api, type Id } from "@antsia/api/engine"
+import { useNetwork } from "@antsia/api/network"
+import { STORY_CAPTION_MAX_LENGTH } from "@antsia/social-domain/stories"
+import { Alert, Button, Field, Select, TextArea } from "@antsia/ui"
+import { ImmersiveOverlay, useIsReseauMobile } from "@antsia/ui/overlay"
 import { useMutation } from "convex/react"
 import { useEffect, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"

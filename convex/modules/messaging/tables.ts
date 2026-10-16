@@ -2,7 +2,7 @@
 /**
  * Messagerie PERSONNELLE d'un réseau — fils 1:1 entre deux personnes.
  */
-import { MESSAGE_REACTION_KINDS } from "@antia/social-contracts/messageReactions"
+import { MESSAGE_REACTION_KINDS } from "@antsia/social-contracts/messageReactions"
 import { defineTable } from "convex/server"
 import { v } from "convex/values"
 

@@ -1,6 +1,6 @@
 // Dupliqué de socle/packages/agent-features/src/features/direct/direct-playback.ts @ ad2e7fdc2 — adaptations : décisions pures conservées, audience followers, libellés délégués à i18n et refus de sous-titres par le domaine du moteur.
-import type { DirectAudience } from "@antia/social-domain/live/domain"
-import { DIRECT_REPLAY_CAPTIONS_MAX_BYTES, isDirectReplayCaptionsMime } from "@antia/social-domain/live/replayComposition"
+import type { DirectAudience } from "@antsia/social-domain/live/domain"
+import { DIRECT_REPLAY_CAPTIONS_MAX_BYTES, isDirectReplayCaptionsMime } from "@antsia/social-domain/live/replayComposition"
 
 export function replayVisibilityOptions(audience: DirectAudience): DirectAudience[] {
   return audience === "public" ? ["public", "connections"] : [audience]

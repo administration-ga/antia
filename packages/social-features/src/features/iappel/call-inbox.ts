@@ -25,7 +25,7 @@
  * Aucun import React : module pur, testable en environnement `node`.
  */
 
-import { CALL_RING_WINDOW_MS } from "@antia/social-contracts/calls"
+import { CALL_RING_WINDOW_MS } from "@antsia/social-contracts/calls"
 
 import type { RingtoneVariant } from "../../lib/livekit/use-ringtone"
 import type { CallScope, RingingCall } from "./call-types"

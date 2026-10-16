@@ -17,9 +17,9 @@
  * transaction qui vient d'inscrire l'appel refusé au journal.
  */
 
-import { api } from "@antia/api/engine"
-import type { Id } from "@antia/api/engine"
-import { useNetwork } from "@antia/api/network"
+import { api } from "@antsia/api/engine"
+import type { Id } from "@antsia/api/engine"
+import { useNetwork } from "@antsia/api/network"
 import { useMutation } from "convex/react"
 import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"

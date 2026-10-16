@@ -15,7 +15,7 @@ const mocks = vi.hoisted(() => ({
   mediaType: "audio" as "audio" | "video",
 }))
 
-vi.mock("@antia/api/engine", () => ({
+vi.mock("@antsia/api/engine", () => ({
   api: {
     modules: {
       calls: {
@@ -29,7 +29,7 @@ vi.mock("@antia/api/engine", () => ({
 vi.mock("convex/react", () => ({
   useMutation: (name: string) => name === "call" ? mocks.call : mocks.markJournalSeen,
 }))
-vi.mock("@antia/api/hooks", () => ({
+vi.mock("@antsia/api/hooks", () => ({
   useAuthenticatedConvexQuery: () => ({
     isLoading: false,
     isError: false,

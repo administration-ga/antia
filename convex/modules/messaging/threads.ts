@@ -8,8 +8,8 @@
  * réconciliation : `isUnreadFor` (ce message est-il non lu pour ce lecteur ?)
  * et l'état du fil (actif, correspondant non bloqué).
  */
-import { messagePreviewFor, type AttachmentInput } from "@antia/social-contracts/attachments"
-import { assertMessageContent } from "@antia/social-contracts/messaging"
+import { messagePreviewFor, type AttachmentInput } from "@antsia/social-contracts/attachments"
+import { assertMessageContent } from "@antsia/social-contracts/messaging"
 
 import type { Doc, Id } from "../../_generated/dataModel"
 import type { MutationCtx, QueryCtx } from "../../_generated/server"

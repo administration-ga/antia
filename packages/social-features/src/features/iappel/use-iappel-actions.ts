@@ -14,10 +14,10 @@
  * avait ses propres mutations, n'existe pas ici.
  */
 
-import { api } from "@antia/api/engine"
-import type { Id } from "@antia/api/engine"
-import { useConvexMutationQuery } from "@antia/api/hooks"
-import { useNetwork } from "@antia/api/network"
+import { api } from "@antsia/api/engine"
+import type { Id } from "@antsia/api/engine"
+import { useConvexMutationQuery } from "@antsia/api/hooks"
+import { useNetwork } from "@antsia/api/network"
 import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"

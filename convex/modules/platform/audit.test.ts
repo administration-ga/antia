@@ -1,6 +1,6 @@
 // @vitest-environment edge-runtime
 // Dupliqué de socle/convex/tests/reseauPlatformActsAudit.test.ts @ ad2e7fdc2 — adaptations : PATRON repris (une décision écrit sa ligne d'audit, une décision refusée n'en écrit pas) ; décisions de console du moteur (réseaux, suspensions) au lieu des actes de plateforme du réseau institutionnel ; qualité de l'acteur au lieu du contexte d'organisation ; lectures (console, réseau) et refus indistinct neufs ; cohérence d'une ligne (acteur et qualité, détail borné) neuve.
-import { engineErrorCode, engineErrorRule } from "@antia/social-contracts/errors"
+import { engineErrorCode, engineErrorRule } from "@antsia/social-contracts/errors"
 import { afterEach, describe, expect, it, vi } from "vitest"
 
 import { api, internal } from "../../_generated/api"
@@ -18,7 +18,7 @@ afterEach(() => {
 })
 
 const PAGE = { numItems: 50, cursor: null }
-const NETWORK_SETTINGS = { name: "Ville test", membershipPolicy: "open" as const, defaultVisibility: "network" as const, reachValues: [], theme: "antia" }
+const NETWORK_SETTINGS = { name: "Ville test", membershipPolicy: "open" as const, defaultVisibility: "network" as const, reachValues: [], theme: "antsia" }
 
 async function seed(t: T) {
   return await t.mutation(internal.seeds.foundations.run, { confirmNonProduction: SEED_CONFIRMATION })

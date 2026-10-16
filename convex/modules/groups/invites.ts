@@ -6,9 +6,9 @@
  * Une appartenance naît à l'ACCEPTATION, jamais à l'invitation : ajouter
  * quelqu'un d'office le ferait sonner pour un groupe qu'il n'a pas rejoint.
  */
-import type { CounterpartLabel } from "@antia/social-contracts/counterpart"
-import { assertGroupHasRoom } from "@antia/social-contracts/groupCapacity"
-import { canInviteToGroupThread } from "@antia/social-domain/groupThreads"
+import type { CounterpartLabel } from "@antsia/social-contracts/counterpart"
+import { assertGroupHasRoom } from "@antsia/social-contracts/groupCapacity"
+import { canInviteToGroupThread } from "@antsia/social-domain/groupThreads"
 import { paginationOptsValidator, type PaginationResult } from "convex/server"
 import { v } from "convex/values"
 

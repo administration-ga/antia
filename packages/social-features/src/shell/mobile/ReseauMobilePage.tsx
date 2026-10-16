@@ -22,8 +22,8 @@
  * (`ReseauMobileCreateButton`, R-02).
  */
 
-import { useRoutes } from "@antia/api/network"
-import { usePathname, useRouter, useSearchParams } from "@antia/api/routing"
+import { useRoutes } from "@antsia/api/network"
+import { usePathname, useRouter, useSearchParams } from "@antsia/api/routing"
 import { useTranslation } from "react-i18next"
 
 import { SOURCE_AGENT } from "../../features/messagerie/messagerie-source"

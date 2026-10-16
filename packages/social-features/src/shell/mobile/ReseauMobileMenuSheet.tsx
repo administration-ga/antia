@@ -13,17 +13,17 @@
  * droite du bouton « Menu » qui ouvre cette feuille. La feuille porte ce que
  * la barre ne porte pas — les statuts, mon profil, les réglages.
  *
- * ⚠️ `Sheet` de `@antia/ui/sheet`, `side="bottom"`, `max-h-[82dvh]`, coins
+ * ⚠️ `Sheet` de `@antsia/ui/sheet`, `side="bottom"`, `max-h-[82dvh]`, coins
  * hauts arrondis, encoche ajoutée au rembourrage bas et bouton de fermeture
  * porté à 44 px : la feuille s'ouvre depuis la place du pouce.
  */
 
-import { api } from "@antia/api/engine"
-import { useAuthenticatedConvexQuery } from "@antia/api/hooks"
-import { useRoutes } from "@antia/api/network"
-import { Link } from "@antia/api/routing"
-import { Icon } from "@antia/ui"
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@antia/ui/sheet"
+import { api } from "@antsia/api/engine"
+import { useAuthenticatedConvexQuery } from "@antsia/api/hooks"
+import { useRoutes } from "@antsia/api/network"
+import { Link } from "@antsia/api/routing"
+import { Icon } from "@antsia/ui"
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@antsia/ui/sheet"
 import { useTranslation } from "react-i18next"
 
 import { markStoriesOpenedFromApp } from "../../features/stories/stories-entry"

@@ -7,8 +7,8 @@
  * puis exécute la conséquence d'un refus : inscrire l'appel DÉJÀ TERMINÉ et
  * prévenir l'appelé. Aucune fonction Convex ici : des aides des mutations.
  */
-import { PRESENCE_FRESHNESS_MS } from "@antia/social-contracts/calls"
-import { type CallAdmissionReason, type CallMediaType, isLiveCallStatus } from "@antia/social-domain/callJournal"
+import { PRESENCE_FRESHNESS_MS } from "@antsia/social-contracts/calls"
+import { type CallAdmissionReason, type CallMediaType, isLiveCallStatus } from "@antsia/social-domain/callJournal"
 
 import type { Id } from "../../_generated/dataModel"
 import type { MutationCtx, QueryCtx } from "../../_generated/server"

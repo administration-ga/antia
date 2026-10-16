@@ -1,5 +1,5 @@
 ---
-title: "ANTIA — Annexe A1 du document 02 : inventaire contradictoire, backend — noyau du réseau personnel (profils, publications, fil, engagement, graphe, marques, notifications, modération, médias, domaine pur)"
+title: "ANTSIA — Annexe A1 du document 02 : inventaire contradictoire, backend — noyau du réseau personnel (profils, publications, fil, engagement, graphe, marques, notifications, modération, médias, domaine pur)"
 date: "2026-10-14"
 source: "socle administration.ga, origin/main = ad2e7fdc2, copie propre (git worktree add), lecture seule"
 statut: "Rapport d'inventaire brut, produit en lecture seule ; la synthèse décisionnelle est docs/02_OWNER_MAP_DUPLICATION.md"

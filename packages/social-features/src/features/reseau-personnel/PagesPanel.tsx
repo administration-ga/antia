@@ -1,4 +1,4 @@
-// Réécrit d'après socle/packages/agent-features/src/features/reseau-personnel/PagesPanel.tsx @ ad2e7fdc2 — ce qui change : pages du moteur à identité propre, dans le réseau courant (`useNetwork`) : pages suivies par la première page de `pages.pages.paginateMyPageFollows` (catalogue chargé une fois, 50 au plus, troncature DITE), découverte PAGINÉE par `paginateDiscover` (recherche serveur ET filtre par pays, codes ISO nommés dans la langue courante) ; badge CALCULÉ par le serveur au lieu d'un « Page officielle » posé sur toute page, nature et pays sur chaque ligne ; kit d'espace lu à son point d'entrée (`@antia/ui/espace-kit` : `EspaceEmptyState`, `EspacePagination` — phrases traduites par `useEspacePaginationLabels` —, `clampPage`, `pageSlice`, et sa feuille `EspaceKitStyles` montée par le volet lui-même, présent aussi sur téléphone) ; adresses par la table des routes injectée (`pageHref(handle, routes.page)`) ; textes traduits (clés `pagesPanel.…`) ; ajouts sur la vue par défaut : invitations à signer (`pages.signatories.myPageInvitations`, `respondToPageInvitation`), « Mes pages » (`myPages`, avec le rôle), et création d'une page (`createPage`, brouillon jugé par les règles du domaine, puis ouverture de la page créée) ; props inchangés (aucun).
+// Réécrit d'après socle/packages/agent-features/src/features/reseau-personnel/PagesPanel.tsx @ ad2e7fdc2 — ce qui change : pages du moteur à identité propre, dans le réseau courant (`useNetwork`) : pages suivies par la première page de `pages.pages.paginateMyPageFollows` (catalogue chargé une fois, 50 au plus, troncature DITE), découverte PAGINÉE par `paginateDiscover` (recherche serveur ET filtre par pays, codes ISO nommés dans la langue courante) ; badge CALCULÉ par le serveur au lieu d'un « Page officielle » posé sur toute page, nature et pays sur chaque ligne ; kit d'espace lu à son point d'entrée (`@antsia/ui/espace-kit` : `EspaceEmptyState`, `EspacePagination` — phrases traduites par `useEspacePaginationLabels` —, `clampPage`, `pageSlice`, et sa feuille `EspaceKitStyles` montée par le volet lui-même, présent aussi sur téléphone) ; adresses par la table des routes injectée (`pageHref(handle, routes.page)`) ; textes traduits (clés `pagesPanel.…`) ; ajouts sur la vue par défaut : invitations à signer (`pages.signatories.myPageInvitations`, `respondToPageInvitation`), « Mes pages » (`myPages`, avec le rôle), et création d'une page (`createPage`, brouillon jugé par les règles du domaine, puis ouverture de la page créée) ; props inchangés (aucun).
 "use client"
 
 /**
@@ -29,19 +29,19 @@
  * Charte : aucune couleur littérale — jetons `var(--…)` uniquement.
  */
 
-import { api } from "@antia/api/engine"
-import { useAuthenticatedConvexQuery, useAuthenticatedPaginatedQuery } from "@antia/api/hooks"
-import { useNetwork, useRoutes } from "@antia/api/network"
-import { Link, useRouter } from "@antia/api/routing"
-import type { Badge as TrustBadge } from "@antia/social-domain/badges"
+import { api } from "@antsia/api/engine"
+import { useAuthenticatedConvexQuery, useAuthenticatedPaginatedQuery } from "@antsia/api/hooks"
+import { useNetwork, useRoutes } from "@antsia/api/network"
+import { Link, useRouter } from "@antsia/api/routing"
+import type { Badge as TrustBadge } from "@antsia/social-domain/badges"
 import {
   PAGE_DESCRIPTION_MAX_LENGTH,
   PAGE_HANDLE_MAX_LENGTH,
   PAGE_NAME_MAX_LENGTH,
   PAGE_SHORT_NAME_MAX_LENGTH,
-} from "@antia/social-domain/pages"
-import { Alert, Badge, Button, Card, Field, Select, SkeletonCard, TextArea, TextInput, useDebouncedValue } from "@antia/ui"
-import { clampPage, EspaceEmptyState, EspaceKitStyles, EspacePagination, pageSlice } from "@antia/ui/espace-kit"
+} from "@antsia/social-domain/pages"
+import { Alert, Badge, Button, Card, Field, Select, SkeletonCard, TextArea, TextInput, useDebouncedValue } from "@antsia/ui"
+import { clampPage, EspaceEmptyState, EspaceKitStyles, EspacePagination, pageSlice } from "@antsia/ui/espace-kit"
 import { useMutation } from "convex/react"
 import type { FunctionReturnType } from "convex/server"
 import { useId, useState, type FormEvent } from "react"

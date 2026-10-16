@@ -20,7 +20,7 @@
  *  8. **Gérer la liste** = hôte, ou `changeAudienceOrReplay` (jamais délégué).
  *  9. **Le sélecteur** est borné et ne propose ni non-membres ni bloqués.
  */
-import { engineErrorRule } from "@antia/social-contracts/errors"
+import { engineErrorRule } from "@antsia/social-contracts/errors"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 import { api, internal } from "../../_generated/api"

@@ -6,7 +6,7 @@
  * d'apprendre qu'il existe : appel inconnu, d'un autre réseau, dont je n'ai pas
  * de ligne, ou d'un fil que j'ai quitté — la même réponse.
  */
-import { GROUP_CALL_INVITES_SCAN, type GroupParticipantView, participantStateOf } from "@antia/social-contracts/callGroup"
+import { GROUP_CALL_INVITES_SCAN, type GroupParticipantView, participantStateOf } from "@antsia/social-contracts/callGroup"
 
 import type { Doc, Id } from "../../_generated/dataModel"
 import type { QueryCtx } from "../../_generated/server"

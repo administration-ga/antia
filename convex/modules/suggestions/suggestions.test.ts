@@ -1,6 +1,6 @@
 // @vitest-environment edge-runtime
 // Dupliqué de socle/convex/modules/reseauPersonnel/suggestions.test.ts @ ad2e7fdc2 — adaptations : personnes et réseaux (graine des fondations) ; codes au lieu des libellés ; poste et organisation remplacés par le titre ; listes paginées ; tests neufs : réseau gouverné refusé, masquage propre au réseau.
-import { engineErrorCode } from "@antia/social-contracts/errors"
+import { engineErrorCode } from "@antsia/social-contracts/errors"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 import { api, internal } from "../../_generated/api"

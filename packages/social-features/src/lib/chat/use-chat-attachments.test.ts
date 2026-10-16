@@ -7,7 +7,7 @@
 import { act, renderHook } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 
-import { ATTACHMENT_MAX_BYTES } from "@antia/social-contracts/attachments"
+import { ATTACHMENT_MAX_BYTES } from "@antsia/social-contracts/attachments"
 
 import { EngineTestWrapper } from "../../tests/engine-wrapper"
 import { formatFileSize, MAX_ATTACHMENT_SIZE_BYTES, useChatAttachments } from "./use-chat-attachments"

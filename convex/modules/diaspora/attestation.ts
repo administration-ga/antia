@@ -17,7 +17,7 @@
  * Ces variables se posent sur un déploiement par le propriétaire, après la
  * validation juridique (arbitrage A4).
  */
-import { CONSENT_TEXT_VERSIONS, isConsentInForce } from "@antia/social-domain/consent"
+import { CONSENT_TEXT_VERSIONS, isConsentInForce } from "@antsia/social-domain/consent"
 import {
   applyAttestationToFacet,
   ATTESTATION_HEADERS,

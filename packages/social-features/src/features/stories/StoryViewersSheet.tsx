@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/stories/StoryViewersSheet.tsx @ ad2e7fdc2 — adaptations : branché sur `stories.stories.viewers` du moteur (réseau courant de `useNetwork()`, pagination NATIVE de Convex au lieu de la chaîne de curseurs `seenAt` — plus d'ex æquo perdu à une frontière de page) ; spectateur au contrat `counterpartLabel` (`personId`, nom nullable dit par le libellé neutre) ; tiroir `@antia/ui/sheet` avec le nom traduit de sa croix ; libellés traduits (clés `stories:storyViewersSheet.*`).
+// Dupliqué de socle/packages/agent-features/src/features/stories/StoryViewersSheet.tsx @ ad2e7fdc2 — adaptations : branché sur `stories.stories.viewers` du moteur (réseau courant de `useNetwork()`, pagination NATIVE de Convex au lieu de la chaîne de curseurs `seenAt` — plus d'ex æquo perdu à une frontière de page) ; spectateur au contrat `counterpartLabel` (`personId`, nom nullable dit par le libellé neutre) ; tiroir `@antsia/ui/sheet` avec le nom traduit de sa croix ; libellés traduits (clés `stories:storyViewersSheet.*`).
 "use client"
 
 /**
@@ -10,7 +10,7 @@
  * quoi que ce soit, mais pour ne pas afficher un bouton qui ne peut mener
  * qu'à une erreur.
  *
- * ⚠️ `Sheet` de `@antia/ui/sheet`, `side="bottom"`, même gabarit que le Menu
+ * ⚠️ `Sheet` de `@antsia/ui/sheet`, `side="bottom"`, même gabarit que le Menu
  * du réseau : les deux s'ouvrent depuis le bas au pouce, et leur donner deux
  * formes ferait croire à deux mécanismes.
  *
@@ -19,16 +19,16 @@
  * repousse son pied rend ce pied inatteignable.
  */
 
-import { api, type Id } from "@antia/api/engine"
-import { useAuthenticatedPaginatedQuery } from "@antia/api/hooks"
-import { useNetwork } from "@antia/api/network"
-import { Button, SkeletonCard } from "@antia/ui"
+import { api, type Id } from "@antsia/api/engine"
+import { useAuthenticatedPaginatedQuery } from "@antsia/api/hooks"
+import { useNetwork } from "@antsia/api/network"
+import { Button, SkeletonCard } from "@antsia/ui"
 import {
 	Sheet,
 	SheetContent,
 	SheetHeader,
 	SheetTitle,
-} from "@antia/ui/sheet"
+} from "@antsia/ui/sheet"
 import { useTranslation } from "react-i18next"
 import { Avatar } from "../reseau-personnel/Avatar"
 import { formatRelativeDate } from "../reseau-personnel/shared"

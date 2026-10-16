@@ -44,12 +44,12 @@
  * le lecteur s'ouvre sans attendre.
  */
 
-import { api } from "@antia/api/engine"
-import { useAuthenticatedConvexQuery } from "@antia/api/hooks"
-import { useNetwork, useRoutes } from "@antia/api/network"
-import { usePathname, useRouter, useSearchParams } from "@antia/api/routing"
-import { Button } from "@antia/ui"
-import { ImmersiveOverlay, useIsReseauMobile } from "@antia/ui/overlay"
+import { api } from "@antsia/api/engine"
+import { useAuthenticatedConvexQuery } from "@antsia/api/hooks"
+import { useNetwork, useRoutes } from "@antsia/api/network"
+import { usePathname, useRouter, useSearchParams } from "@antsia/api/routing"
+import { Button } from "@antsia/ui"
+import { ImmersiveOverlay, useIsReseauMobile } from "@antsia/ui/overlay"
 import { Suspense, useCallback, useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { VerticalPager } from "../../shell/mobile/VerticalPager"

@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/mobile/ReseauMobileTabBar.tsx @ ad2e7fdc2 — adaptations : sans la coque de l'espace agent (`espace-mobile-volets`, `espace-mobile-volets-row`, `personal-nav` retirés) — le bouton fixe « Menu » OUVRE le menu principal du réseau (`ReseauMobileMenuSheet`, feuille du bas) au lieu de remplacer les sous-menus par les volets de l'espace ; seuil mobile par `MOBILE_ONLY_CLASS` (`@antia/ui/overlay`) ; adresses des volets composées sur la base injectée (`reseauTabHref(id, useRoutes().home())`) ; volets SERVIS seuls (`isServedReseauTab` : « Conférences » attend le module `live`) ; libellés par l'i18n (`reseau:reseauMobileTabBar.*`, libellé court du volet par sa clé) ; « iRéseau » devient « réseau » ; mêmes props (`active`, `badges`), mêmes repères (`data-mobile-nav`, `data-reseau-mobile-nav`) et mêmes classes de géométrie (`.esp-reseau-tabbar`, `.rm-*`).
+// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/mobile/ReseauMobileTabBar.tsx @ ad2e7fdc2 — adaptations : sans la coque de l'espace agent (`espace-mobile-volets`, `espace-mobile-volets-row`, `personal-nav` retirés) — le bouton fixe « Menu » OUVRE le menu principal du réseau (`ReseauMobileMenuSheet`, feuille du bas) au lieu de remplacer les sous-menus par les volets de l'espace ; seuil mobile par `MOBILE_ONLY_CLASS` (`@antsia/ui/overlay`) ; adresses des volets composées sur la base injectée (`reseauTabHref(id, useRoutes().home())`) ; volets SERVIS seuls (`isServedReseauTab` : « Conférences » attend le module `live`) ; libellés par l'i18n (`reseau:reseauMobileTabBar.*`, libellé court du volet par sa clé) ; « iRéseau » devient « réseau » ; mêmes props (`active`, `badges`), mêmes repères (`data-mobile-nav`, `data-reseau-mobile-nav`) et mêmes classes de géométrie (`.esp-reseau-tabbar`, `.rm-*`).
 "use client"
 
 /**
@@ -33,10 +33,10 @@
  * porte fond, filet, relief et rayon, et ne déclare aucune couleur ici.
  */
 
-import { useRoutes } from "@antia/api/network"
-import { Link, usePathname } from "@antia/api/routing"
-import { Icon, type IconName } from "@antia/ui"
-import { MOBILE_ONLY_CLASS } from "@antia/ui/overlay"
+import { useRoutes } from "@antsia/api/network"
+import { Link, usePathname } from "@antsia/api/routing"
+import { Icon, type IconName } from "@antsia/ui"
+import { MOBILE_ONLY_CLASS } from "@antsia/ui/overlay"
 import { useEffect, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
 

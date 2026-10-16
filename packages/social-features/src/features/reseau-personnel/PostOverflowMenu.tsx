@@ -14,9 +14,9 @@
  * `node` : ce qui reste dans un composant n'est vérifiable qu'à l'œil.
  */
 
-import { api } from "@antia/api/engine"
-import type { Id } from "@antia/api/engine"
-import { useNetwork } from "@antia/api/network"
+import { api } from "@antsia/api/engine"
+import type { Id } from "@antsia/api/engine"
+import { useNetwork } from "@antsia/api/network"
 import { useMutation } from "convex/react"
 import { useEffect, useLayoutEffect, useRef, useState } from "react"
 import { createPortal } from "react-dom"

@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/ContactsRail.tsx @ ad2e7fdc2 — adaptations : primitives de `@antia/ui`, surfaces et état d'échec de la coque (`shell/`) ; connexions du graphe du réseau courant (`usePersonalConnections`, DTO `otherPersonId`, nom nullable rendu par le libellé neutre) ; tri dans la langue de l'écran ; textes par l'i18n (espace `reseau`, clés `contactsRail.*`) ; « iRéseau » devient « le réseau ». Composant orphelin au socle comme ici : aucun point de montage inventé.
+// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/ContactsRail.tsx @ ad2e7fdc2 — adaptations : primitives de `@antsia/ui`, surfaces et état d'échec de la coque (`shell/`) ; connexions du graphe du réseau courant (`usePersonalConnections`, DTO `otherPersonId`, nom nullable rendu par le libellé neutre) ; tri dans la langue de l'écran ; textes par l'i18n (espace `reseau`, clés `contactsRail.*`) ; « iRéseau » devient « le réseau ». Composant orphelin au socle comme ici : aucun point de montage inventé.
 "use client"
 
 /**
@@ -17,7 +17,7 @@
  * socle). Le monter est une décision de la coque, pas de ce composant.
  */
 
-import { Button, Card, TextInput } from "@antia/ui"
+import { Button, Card, TextInput } from "@antsia/ui"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 

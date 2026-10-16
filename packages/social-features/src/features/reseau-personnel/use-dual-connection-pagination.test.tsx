@@ -20,7 +20,7 @@ const mocks = vi.hoisted(() => ({
   seenPending: [] as PendingArgs[],
 }))
 
-vi.mock("@antia/api/engine", () => ({
+vi.mock("@antsia/api/engine", () => ({
   api: {
     modules: {
       graph: {
@@ -33,7 +33,7 @@ vi.mock("@antia/api/engine", () => ({
   },
 }))
 
-vi.mock("@antia/api/hooks", () => ({
+vi.mock("@antsia/api/hooks", () => ({
   useAuthenticatedConvexQuery: (reference: string, args: MineArgs | PendingArgs | "skip") => {
     if (args === "skip") {
       return {

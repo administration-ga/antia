@@ -40,10 +40,10 @@
  * expirée pendant qu'on la regarde reste lisible jusqu'au bout, comme au socle.
  */
 
-import { api } from "@antia/api/engine"
-import { useAuthenticatedConvexQuery } from "@antia/api/hooks"
-import { useNetwork } from "@antia/api/network"
-import { Button } from "@antia/ui"
+import { api } from "@antsia/api/engine"
+import { useAuthenticatedConvexQuery } from "@antsia/api/hooks"
+import { useNetwork } from "@antsia/api/network"
+import { Button } from "@antsia/ui"
 import { useMutation } from "convex/react"
 import { useEffect, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"

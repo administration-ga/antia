@@ -29,12 +29,12 @@
  * place et restent RÉINVITABLES.
  */
 
-import { api } from "@antia/api/engine"
-import type { Id } from "@antia/api/engine"
-import { useConvexMutationQuery } from "@antia/api/hooks"
-import { useNetwork } from "@antia/api/network"
-import { engineErrorRule } from "@antia/social-contracts/errors"
-import { useModalA11y } from "@antia/ui"
+import { api } from "@antsia/api/engine"
+import type { Id } from "@antsia/api/engine"
+import { useConvexMutationQuery } from "@antsia/api/hooks"
+import { useNetwork } from "@antsia/api/network"
+import { engineErrorRule } from "@antsia/social-contracts/errors"
+import { useModalA11y } from "@antsia/ui"
 import { Loader2, RotateCcw, UserPlus, X } from "lucide-react"
 import {
 	useEffect,

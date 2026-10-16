@@ -6,7 +6,7 @@
  *  2. le décompte accorde correctement, 0 compris ;
  *  3. l'en-tête d'un aperçu dit QUI parle — la page, l'auteur, ou un nom neutre.
  */
-import type { Id } from "@antia/api/engine"
+import type { Id } from "@antsia/api/engine"
 import { ConvexError } from "convex/values"
 import { describe, expect, it } from "vitest"
 

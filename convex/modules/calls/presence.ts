@@ -12,7 +12,7 @@
  * pas » — jamais « hors ligne ». « Hors ligne » est un CONSTAT servi à part
  * (`offlineHints`), preuves en main : une ligne existe, et elle s'est tue.
  */
-import { PRESENCE_FRESHNESS_MS, type RelationPresenceStatus } from "@antia/social-contracts/calls"
+import { PRESENCE_FRESHNESS_MS, type RelationPresenceStatus } from "@antsia/social-contracts/calls"
 import { v } from "convex/values"
 
 import { internal } from "../../_generated/api"

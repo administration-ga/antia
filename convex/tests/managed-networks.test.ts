@@ -37,7 +37,7 @@ async function seedWithManagedNetwork(t: T) {
       },
       reachValues: ["local", "diaspora"],
       openCountries: ["FR"],
-      theme: "antia",
+      theme: "antsia",
       status: "active",
       createdAt: now,
       updatedAt: now,
@@ -100,7 +100,7 @@ describe("réseau gouverné par une tranche : les chemins génériques ne le con
     const t = testConvex()
     await seedWithManagedNetwork(t)
     expect(await t.query(api.modules.networks.networks.getBySlug, { slug: "gouverne-test" })).toMatchObject({ managedBy: "diaspora" })
-    expect(await t.query(api.modules.networks.networks.getBySlug, { slug: "antia" })).not.toHaveProperty("managedBy")
+    expect(await t.query(api.modules.networks.networks.getBySlug, { slug: "antsia" })).not.toHaveProperty("managedBy")
   })
 
   it("entrer par le chemin générique est refusé, sans rien poser (même pas la racine)", async () => {
@@ -233,11 +233,11 @@ describe("console : la tranche se pose à la naissance du réseau, jamais sur la
     await t.run(async (ctx) => {
       await ctx.db.insert("operators", { personId: operator.personId, role: "platform_operator", grantedAt: Date.now() })
     })
-    const settings = { name: "Réseau", membershipPolicy: "open" as const, defaultVisibility: "network" as const, reachValues: [], theme: "antia" }
+    const settings = { name: "Réseau", membershipPolicy: "open" as const, defaultVisibility: "network" as const, reachValues: [], theme: "antsia" }
     expect(
       await errorCode(operator.as.mutation(api.modules.networks.networks.create, { slug: "racine-gouvernee", kind: "root", managedBy: "diaspora", ...settings })),
     ).toBe("invalidArgument")
-    await operator.as.mutation(api.modules.networks.networks.create, { slug: "antia", kind: "root", ...settings })
+    await operator.as.mutation(api.modules.networks.networks.create, { slug: "antsia", kind: "root", ...settings })
     await operator.as.mutation(api.modules.networks.networks.create, {
       slug: "gouverne-console",
       kind: "closed",

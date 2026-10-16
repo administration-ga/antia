@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/notifications/NotificationBell.test.tsx @ ad2e7fdc2 — adaptations : RÉÉCRIT sur la cloche du moteur — montée dans l'enveloppe du moteur (`renderWithEngine` : i18n française, réseau et adresses de test, routeur en mémoire), fonctions `notifications.bell.*` et `graph.connections.*` simulées par référence, VRAIE carte flottante (`ImmersiveOverlay` et `useModalA11y` d'`@antia/ui`, plus de simulacre du verrou de défilement ni du viewport) ; une seule source : les cas « somme des deux sources », « une source à zéro » et « l'autre décompte charge encore » deviennent le décompte, son accord et le réseau passé au serveur ; le plafond se teste avec la LACUNE du moteur (`capped`) et 99 exact sans elle ; « deux onglets » devient « plus d'onglets, la liste du réseau » ; « charte de l'hôte relue » devient « charte de `<html>`, jamais celle d'un nœud hôte » ; mode personnel et charte de poste retirés ; les autres cas portés (focus, « Tout voir », Échap, une seule carte pour deux cloches, demande antérieure au montage).
+// Dupliqué de socle/packages/agent-features/src/features/notifications/NotificationBell.test.tsx @ ad2e7fdc2 — adaptations : RÉÉCRIT sur la cloche du moteur — montée dans l'enveloppe du moteur (`renderWithEngine` : i18n française, réseau et adresses de test, routeur en mémoire), fonctions `notifications.bell.*` et `graph.connections.*` simulées par référence, VRAIE carte flottante (`ImmersiveOverlay` et `useModalA11y` d'`@antsia/ui`, plus de simulacre du verrou de défilement ni du viewport) ; une seule source : les cas « somme des deux sources », « une source à zéro » et « l'autre décompte charge encore » deviennent le décompte, son accord et le réseau passé au serveur ; le plafond se teste avec la LACUNE du moteur (`capped`) et 99 exact sans elle ; « deux onglets » devient « plus d'onglets, la liste du réseau » ; « charte de l'hôte relue » devient « charte de `<html>`, jamais celle d'un nœud hôte » ; mode personnel et charte de poste retirés ; les autres cas portés (focus, « Tout voir », Échap, une seule carte pour deux cloches, demande antérieure au montage).
 // @vitest-environment jsdom
 
 import { fireEvent, screen, within } from "@testing-library/react"
@@ -13,7 +13,7 @@ const mocks = vi.hoisted(() => ({
 	queries: [] as { reference: string; args: unknown }[],
 }))
 
-vi.mock("@antia/api/engine", () => ({
+vi.mock("@antsia/api/engine", () => ({
 	api: {
 		modules: {
 			notifications: {
@@ -34,7 +34,7 @@ vi.mock("@antia/api/engine", () => ({
 	},
 }))
 
-vi.mock("@antia/api/hooks", () => ({
+vi.mock("@antsia/api/hooks", () => ({
 	useAuthenticatedConvexQuery: (reference: string, args: unknown) => {
 		mocks.queries.push({ reference, args })
 		return { data: mocks.unread, isLoading: false, isError: false }
@@ -211,7 +211,7 @@ describe("NotificationBell — la cloche ouvre une carte, elle ne navigue pas", 
 	it("la carte porte la charte de l'application (<html>), jamais celle d'un nœud hôte", () => {
 		// La carte sort du nœud de l'hôte (portail) : elle redéclare la charte
 		// du RÉSEAU, lue sur `<html>`, et ne relit plus le déclencheur.
-		document.documentElement.setAttribute("data-charte", "antia")
+		document.documentElement.setAttribute("data-charte", "antsia")
 		renderWithEngine(
 			<div data-charte="autre-charte">
 				<NotificationBell />
@@ -223,7 +223,7 @@ describe("NotificationBell — la cloche ouvre une carte, elle ne navigue pas", 
 			screen
 				.getByRole("dialog", { name: "Notifications" })
 				.getAttribute("data-charte"),
-		).toBe("antia")
+		).toBe("antsia")
 	})
 
 	it("n'ouvre QU'UNE carte quand deux cloches sont montées", () => {

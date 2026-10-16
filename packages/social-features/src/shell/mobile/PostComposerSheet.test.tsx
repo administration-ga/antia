@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/mobile/PostComposerSheet.test.tsx @ ad2e7fdc2 — adaptations : feuille montée dans l'enveloppe du moteur (`renderWithEngine` : i18n française) ; les deux simulations de `@antia/ui/overlay` réunies en une (la seconde écrasait la première : `ImmersiveOverlay` n'était plus simulé) ; texte de brouillon sans « note de service » ; les six cas du socle portés.
+// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/mobile/PostComposerSheet.test.tsx @ ad2e7fdc2 — adaptations : feuille montée dans l'enveloppe du moteur (`renderWithEngine` : i18n française) ; les deux simulations de `@antsia/ui/overlay` réunies en une (la seconde écrasait la première : `ImmersiveOverlay` n'était plus simulé) ; texte de brouillon sans « note de service » ; les six cas du socle portés.
 // @vitest-environment jsdom
 
 /**
@@ -23,7 +23,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 import { renderWithEngine } from "../../tests/engine-wrapper"
 
-vi.mock("@antia/ui", () => ({
+vi.mock("@antsia/ui", () => ({
   Button: ({
     children,
     variant: _variant,
@@ -37,7 +37,7 @@ vi.mock("@antia/ui", () => ({
   }) => <button {...props}>{children}</button>,
 }))
 
-vi.mock("@antia/ui/overlay", () => ({
+vi.mock("@antsia/ui/overlay", () => ({
   ImmersiveOverlay: ({
     open,
     children,

@@ -24,7 +24,7 @@ export default defineConfig({
     server: { deps: { inline: ["convex-test", "@convex-dev/rate-limiter"] } },
     env: {
       // Les graines s'exécutent dans la suite (déploiement simulé, jamais la production).
-      ANTIA_SEEDS_ALLOWED: "true",
+      ANTSIA_SEEDS_ALLOWED: "true",
     },
   },
 })

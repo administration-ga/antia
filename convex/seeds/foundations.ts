@@ -1,12 +1,12 @@
 /**
  * Graine des FONDATIONS — hors production seulement (cahier PA2 §4).
  *
- * Pose le réseau racine `antia` (ouvert) et, pour les tests de bout en bout,
+ * Pose le réseau racine `antsia` (ouvert) et, pour les tests de bout en bout,
  * un réseau fermé `test-closed` enfant de la racine. Idempotente (« chercher
  * puis créer », piège payé par PRO.GA : une graine rejouée ne double rien).
  *
  * DOUBLE garde : l'argument `confirmNonProduction` ET un déploiement local
- * (backend Convex sur la machine) ou la variable `ANTIA_SEEDS_ALLOWED=true`
+ * (backend Convex sur la machine) ou la variable `ANTSIA_SEEDS_ALLOWED=true`
  * posée par le propriétaire sur un déploiement de développement. En production,
  * les réseaux se créent par la console (opérateur, trace).
  *
@@ -15,24 +15,26 @@
  * `assertSeedsAllowed` (double garde) et `ensureNetwork` (idempotence) ; la
  * racine se lit par `getRootNetwork` après cette graine-ci.
  */
-import { BRAND_NAME } from "@antia/social-contracts/brand"
-import { ROOT_NETWORK_SLUG } from "@antia/social-domain/network"
+import { BRAND_NAME } from "@antsia/social-contracts/brand"
+import { LEGACY_ROOT_NETWORK_SLUG, ROOT_NETWORK_SLUG } from "@antsia/social-domain/network"
 import { v } from "convex/values"
 
 import type { Id } from "../_generated/dataModel"
 import { internalMutation, type MutationCtx } from "../_generated/server"
 import { isLocalDeployment } from "../lib/devTools"
+import { getRootNetwork } from "../lib/access"
 
-export const SEED_CONFIRMATION = "ANTIA_SEEDS_HORS_PRODUCTION"
+export const SEED_CONFIRMATION = "ANTSIA_SEEDS_HORS_PRODUCTION"
 
 export function seedsAllowed(env: Record<string, string | undefined> = process.env): boolean {
-  return isLocalDeployment(env) || env.ANTIA_SEEDS_ALLOWED === "true"
+  // Compatibilité des variables déjà posées ; la nouvelle valeur prime, sans éditer l’environnement.
+  return isLocalDeployment(env) || (env.ANTSIA_SEEDS_ALLOWED ?? env.ANTIA_SEEDS_ALLOWED) === "true"
 }
 
 /** La double garde de toute graine : argument de confirmation ET déploiement autorisé. */
 export function assertSeedsAllowed(confirmNonProduction: string): void {
-  if (confirmNonProduction !== SEED_CONFIRMATION || !seedsAllowed()) {
-    throw new Error("Graine refusée : hors production seulement (argument de confirmation et déploiement local ou ANTIA_SEEDS_ALLOWED).")
+  if ((confirmNonProduction !== SEED_CONFIRMATION && confirmNonProduction !== "ANTIA_SEEDS_HORS_PRODUCTION") || !seedsAllowed()) {
+    throw new Error("Graine refusée : hors production seulement (argument de confirmation et déploiement local ou ANTSIA_SEEDS_ALLOWED).")
   }
 }
 
@@ -57,14 +59,23 @@ export const run = internalMutation({
     assertSeedsAllowed(confirmNonProduction)
     const now = Date.now()
     const created: string[] = []
-    const root = await ensureNetwork(ctx, ROOT_NETWORK_SLUG, () => ({
+    const existingRoot = await getRootNetwork(ctx)
+    if (existingRoot) {
+      if (existingRoot.slug !== ROOT_NETWORK_SLUG && existingRoot.slug !== LEGACY_ROOT_NETWORK_SLUG) throw new Error("Graine refusée : une autre racine existe déjà.")
+      const collision = await ctx.db.query("networks").withIndex("by_slug", (q) => q.eq("slug", ROOT_NETWORK_SLUG)).unique()
+      if (collision && collision._id !== existingRoot._id) throw new Error("Graine refusée : le nouvel identifiant de la racine est déjà utilisé.")
+      if (existingRoot.slug !== ROOT_NETWORK_SLUG || existingRoot.name !== BRAND_NAME || existingRoot.theme === LEGACY_ROOT_NETWORK_SLUG) {
+        await ctx.db.patch(existingRoot._id, { slug: ROOT_NETWORK_SLUG, name: BRAND_NAME, ...(existingRoot.theme === LEGACY_ROOT_NETWORK_SLUG ? { theme: ROOT_NETWORK_SLUG } : {}), updatedAt: now })
+      }
+    }
+    const root = existingRoot ? { id: existingRoot._id, created: false } : await ensureNetwork(ctx, ROOT_NETWORK_SLUG, () => ({
       slug: ROOT_NETWORK_SLUG,
       kind: "root",
       name: BRAND_NAME,
       membershipPolicy: "open",
       defaultVisibility: "network",
       reachValues: [],
-      theme: "antia",
+      theme: "antsia",
       status: "active",
       createdAt: now,
       updatedAt: now,
@@ -82,7 +93,7 @@ export const run = internalMutation({
       },
       reachValues: ["local", "diaspora"],
       openCountries: ["FR"],
-      theme: "antia",
+      theme: "antsia",
       status: "active",
       createdAt: now,
       updatedAt: now,

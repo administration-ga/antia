@@ -1,6 +1,6 @@
 // @vitest-environment edge-runtime
 // Dupliqué de socle/convex/modules/reseauPersonnel/marks.test.ts @ ad2e7fdc2 — adaptations : personnes et réseaux (marques et sourdines PAR RÉSEAU) ; listes paginées seules (`paginateBookmarks`, `paginateHiddenPosts`, `paginateMyMutes`) ; départ d'un groupe posé sur la ligne d'appartenance (le module des groupes arrive au lot 9) ; publications de série insérées directement (débit réel de `publish`) ; test neuf : une marque vaut dans le réseau où elle est posée.
-import { engineErrorCode } from "@antia/social-contracts/errors"
+import { engineErrorCode } from "@antsia/social-contracts/errors"
 import { afterEach, describe, expect, it, vi } from "vitest"
 
 import { api, internal } from "../../_generated/api"
@@ -220,7 +220,7 @@ describe("enregistrer et suivre", () => {
         await ctx.db.insert("networkMemberships", { networkId: testClosed, personId: person.personId, status: "declaree", role: "member", joinedAt: 1, statusChangedAt: 1 })
       }
     })
-    const { postId } = await alice.as.mutation(api.modules.posts.posts.publish, { networkId: testClosed, body: "Aussi sur ANTIA", alsoOnRoot: true })
+    const { postId } = await alice.as.mutation(api.modules.posts.posts.publish, { networkId: testClosed, body: "Aussi sur ANTSIA", alsoOnRoot: true })
     await bob.as.mutation(api.modules.marks.marks.hidePost, { networkId: root, postId })
     expect(await recents(bob, root)).toEqual([])
     expect(await recents(bob, testClosed)).toEqual([postId])

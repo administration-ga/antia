@@ -68,7 +68,7 @@ describe("deploy-catalog — chaque application servie est au catalogue (câblag
   })
 
   it("test du test : une application externe lit aussi les paquets de son dépôt", () => {
-    expect(packageDirectoriesOf("apps/antia_ga")).toEqual(["packages"])
+    expect(packageDirectoriesOf("apps/antsia_ga")).toEqual(["packages"])
     expect(packageDirectoriesOf("../DIASPORALE/apps/diasporale_com")).toEqual(["packages", "../DIASPORALE/packages"])
   })
 })

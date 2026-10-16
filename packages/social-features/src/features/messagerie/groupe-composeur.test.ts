@@ -3,7 +3,7 @@ import {
 	GROUP_MEMBERS_MAX,
 	GROUP_MIN_OTHERS,
 	GROUP_TITLE_MAX_LENGTH,
-} from "@antia/social-contracts/groupCapacity"
+} from "@antsia/social-contracts/groupCapacity"
 import { describe, expect, it } from "vitest"
 import { createAppI18n } from "../../i18n"
 import {

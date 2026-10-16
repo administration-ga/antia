@@ -11,7 +11,7 @@
  * dans un réseau pour le retrouver dans un autre ne protégerait de rien. Il est
  * écrit sur chaque ligne de la paire, et lu sur toute la paire (`by_pair`).
  */
-import { CONNECTION_STATUSES } from "@antia/social-domain/connectionState"
+import { CONNECTION_STATUSES } from "@antsia/social-domain/connectionState"
 import { defineTable } from "convex/server"
 import { v } from "convex/values"
 

@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/messagerie/groupe-appel-selection.ts @ ad2e7fdc2 — adaptations : plafond d'appel CONSTANT du moteur (`GROUP_CALL_MAX_PARTICIPANTS` de `@antia/social-contracts/callGroup`, onze appelant compris) — la lecture `threadCallCapacity` du socle est retirée, le paramètre `capacity` reste (défaut : le plafond constant) ; comptes exemptés retirés (`exempt` ôté de `needsInviteeSelection` : aucun compte « illimité » dans le moteur) ; phrases traduites (`t` en DERNIER paramètre de `selectionHint` et `selectionBlockReason`, clés qualifiées `messagerie:groupeAppelSelection.…`) ; doc recadrée (plus de lanceur de poste).
+// Dupliqué de socle/packages/agent-features/src/features/messagerie/groupe-appel-selection.ts @ ad2e7fdc2 — adaptations : plafond d'appel CONSTANT du moteur (`GROUP_CALL_MAX_PARTICIPANTS` de `@antsia/social-contracts/callGroup`, onze appelant compris) — la lecture `threadCallCapacity` du socle est retirée, le paramètre `capacity` reste (défaut : le plafond constant) ; comptes exemptés retirés (`exempt` ôté de `needsInviteeSelection` : aucun compte « illimité » dans le moteur) ; phrases traduites (`t` en DERNIER paramètre de `selectionHint` et `selectionBlockReason`, clés qualifiées `messagerie:groupeAppelSelection.…`) ; doc recadrée (plus de lanceur de poste).
 /**
  * groupe-appel-selection — CHOISIR QUI APPELER dans un fil de groupe (IC-08).
  *
@@ -23,7 +23,7 @@
  * Aucun import React.
  */
 
-import { GROUP_CALL_MIN_OTHERS } from "@antia/social-contracts/callGroup"
+import { GROUP_CALL_MIN_OTHERS } from "@antsia/social-contracts/callGroup"
 import type { TFunction } from "i18next"
 import {
 	correspondentsCounter,

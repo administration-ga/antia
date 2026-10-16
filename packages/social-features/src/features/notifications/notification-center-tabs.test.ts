@@ -1,5 +1,5 @@
 // Dupliqué de socle/packages/agent-features/src/features/notifications/notification-center-tabs.test.ts @ ad2e7fdc2 — adaptations : RÉÉCRIT pour une seule source — retirés avec l'onglet « Administration » : `CENTER_TABS` (1 cas), `defaultCenterTab` (5), `combineUnread` (2), `combinedUnreadLabel` (4) et l'accord « administrative » de `tabBadgeLabel` (1) ; portés : les trois cas de `tabBadge`, et trois cas de `tabBadgeLabel` réécrits sur `unreadLabel` (nombre et accord, silence, plafond), libellés lus dans l'i18n du moteur ; ajoutés : la LACUNE du décompte (`capped`) sur la pastille et sur son nom, le plafond lu dans le domaine, l'anglais, et le texte d'un marquage refusé (code du moteur, sinon phrase générique).
-import { NOTIFICATION_UNREAD_CAP } from "@antia/social-domain/notifications"
+import { NOTIFICATION_UNREAD_CAP } from "@antsia/social-domain/notifications"
 import { describe, expect, it } from "vitest"
 
 import { createAppI18n } from "../../i18n"

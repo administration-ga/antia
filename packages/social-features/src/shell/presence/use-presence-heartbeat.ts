@@ -1,9 +1,9 @@
 // Réécrit d'après socle/packages/agent-features/src/hooks/use-agent-presence.ts @ ad2e7fdc2 — présence par (réseau, personne) au lieu d'un battement par organisation (le hook du socle sortait sans rien faire quand la personne n'avait aucune organisation) ; plus d'appel en cours transmis : le serveur le lit sur les lignes de participation ; « hors ligne » à la fermeture de l'onglet et au démontage, DIFFÉRÉ et annulé par un remontage, et aucun battement redoublé à moins de vingt secondes (le seau `presence.heartbeat` du moteur est de huit par minute).
 "use client"
 
-import { api, type Id } from "@antia/api/engine"
-import { useNetwork } from "@antia/api/network"
-import { PRESENCE_HEARTBEAT_INTERVAL_MS } from "@antia/social-contracts/calls"
+import { api, type Id } from "@antsia/api/engine"
+import { useNetwork } from "@antsia/api/network"
+import { PRESENCE_HEARTBEAT_INTERVAL_MS } from "@antsia/social-contracts/calls"
 import { useMutation } from "convex/react"
 import { useEffect, useRef } from "react"
 

@@ -19,10 +19,10 @@
  *
  * Ce module ne connaît ni React ni Convex : il n'importe que des TYPES
  * (`CSSProperties`, `TFunction`, effacés à la compilation) et les lecteurs
- * d'erreur PURS du contrat du moteur (`@antia/social-contracts/errors`).
+ * d'erreur PURS du contrat du moteur (`@antsia/social-contracts/errors`).
  */
 
-import { engineErrorCode, engineErrorRule } from "@antia/social-contracts/errors"
+import { engineErrorCode, engineErrorRule } from "@antsia/social-contracts/errors"
 import type { TFunction } from "i18next"
 import type { CSSProperties } from "react"
 

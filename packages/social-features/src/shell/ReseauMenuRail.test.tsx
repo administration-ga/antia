@@ -14,7 +14,7 @@ const mocks = vi.hoisted(() => ({
   groups: [] as { groupId: string; name: string }[],
 }))
 
-vi.mock("@antia/api/engine", () => ({
+vi.mock("@antsia/api/engine", () => ({
   api: {
     modules: {
       people: { persons: { getMyPerson: "getMyPerson" } },
@@ -24,7 +24,7 @@ vi.mock("@antia/api/engine", () => ({
   },
 }))
 
-vi.mock("@antia/api/hooks", () => ({
+vi.mock("@antsia/api/hooks", () => ({
   useAuthenticatedConvexQuery: (reference: string) =>
     reference === "getMyPerson" ? { data: mocks.person, isLoading: false, isError: false } : { data: { items: mocks.groups, truncated: false }, isLoading: false, isError: false },
   useAuthenticatedPaginatedQuery: () => ({ results: mocks.pages, status: "Exhausted", loadMore: vi.fn(), isLoading: false }),

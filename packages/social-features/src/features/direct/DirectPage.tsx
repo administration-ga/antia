@@ -1,11 +1,11 @@
 // Dupliqué de socle/packages/agent-features/src/features/direct/DirectPage.tsx @ ad2e7fdc2 — adaptations : DTO moteur, préflight avant démarrage, studio consommant la salle persistante et gestion d’antenne par permissions serveur, i18n et routes injectées.
 "use client"
 
-import { api, type Id } from "@antia/api/engine"
-import { useAuthenticatedConvexQuery } from "@antia/api/hooks"
-import { useNetwork, useRoutes } from "@antia/api/network"
-import { Link } from "@antia/api/routing"
-import { Button } from "@antia/ui"
+import { api, type Id } from "@antsia/api/engine"
+import { useAuthenticatedConvexQuery } from "@antsia/api/hooks"
+import { useNetwork, useRoutes } from "@antsia/api/network"
+import { Link } from "@antsia/api/routing"
+import { Button } from "@antsia/ui"
 import { RoomContext } from "@livekit/components-react"
 import { useAction, useMutation } from "convex/react"
 import type { FunctionReturnType } from "convex/server"

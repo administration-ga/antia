@@ -22,11 +22,11 @@ import {
   canSetThematicGroupRole,
   isThematicGroupModerator,
   type ThematicGroupRole,
-} from "@antia/social-domain/thematicGroups"
-import { assertCountryCode, groupViewingReasonFor } from "@antia/social-domain/content"
-import type { PersonalFeedCursor } from "@antia/social-domain/feedScale"
-import { cursorForFeedPost } from "@antia/social-domain/feedScale"
-import { buildSearchableText, foldSearchQuery } from "@antia/social-domain/searchText"
+} from "@antsia/social-domain/thematicGroups"
+import { assertCountryCode, groupViewingReasonFor } from "@antsia/social-domain/content"
+import type { PersonalFeedCursor } from "@antsia/social-domain/feedScale"
+import { cursorForFeedPost } from "@antsia/social-domain/feedScale"
+import { buildSearchableText, foldSearchQuery } from "@antsia/social-domain/searchText"
 import { paginationOptsValidator, type PaginationResult } from "convex/server"
 import { type Infer, v } from "convex/values"
 

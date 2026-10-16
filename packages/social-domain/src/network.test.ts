@@ -3,11 +3,11 @@ import { describe, expect, it } from "vitest"
 import { effectiveVisibility, isValidNetworkSlug, ROOT_NETWORK_SLUG, validateNetworkShape } from "./network"
 
 describe("isValidNetworkSlug", () => {
-  it.each(["antia", "diasporale", "test-closed", "a1b"])("accepte %s", (slug) => {
+  it.each(["antsia", "diasporale", "test-closed", "a1b"])("accepte %s", (slug) => {
     expect(isValidNetworkSlug(slug)).toBe(true)
   })
 
-  it.each(["", "ab", "Antia", "1abc", "abc-", "a--b", "a_b", "a".repeat(33)])("refuse « %s »", (slug) => {
+  it.each(["", "ab", "Antsia", "1abc", "abc-", "a--b", "a_b", "a".repeat(33)])("refuse « %s »", (slug) => {
     expect(isValidNetworkSlug(slug)).toBe(false)
   })
 

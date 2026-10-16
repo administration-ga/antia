@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/notifications/notification-targets.ts @ ad2e7fdc2 — adaptations : plus aucune adresse écrite — la cible se compose sur les adresses INJECTÉES de l'application (`NotificationRoutes`, tirées de `useRoutes()` : page réseau `home()` et ses paramètres de vue de `reseau-agent-nav`, messagerie `messages()` par `conversationHref`, journal iAppel par `icomMobileTabHref`, profil `profile(handle)` et albums d'un profil composés dessus, conférence `conference(sessionId)`) ; `reseauBaseHref` retiré (la page réseau du moteur est toujours l'accueil, la publication n'est plus masquée) ; sujet du moteur en forme générique `{ kind, id }` au lieu des colonnes `subject…Id`, aiguillé par un `switch` exhaustif sur les natures du domaine ; cible « direct » (démarrage, invitations, rediffusion publiée) composée sur l'adresse INJECTÉE de la conférence (`conference(sessionId)`) pour le sujet `liveSession` du moteur au lieu de `subjectDirectSessionId` et d'une adresse de l'espace, avec son rappel `onOpenDirect` ; cibles ajoutées pour les sujets du moteur (album d'un profil, appel et message vocal vers le journal iAppel ; analyse de fichier sans cible) et profil du parrain pour `sponsorship_received` ; état d'invitation du domaine (`@antia/social-domain/connectionState`) ; libellés et phrases traduits (`t` en DERNIER paramètre de `notificationTarget`, `notificationRowAction`, `connectionInviteOutcome` ; clés qualifiées `notifications:notificationTargets.…`) ; ajouts : `notificationRowSentence` (phrase de TOUS les genres du moteur — ceux de `shared.notificationSentence` et, ici, page suivie, album, fichier retenu, appel manqué, message vocal, parrainages et attestations de DIASPORALE ; nom neutre quand le profil n'est pas publié), `notificationRowNote` (résultat d'une invitation, statut vivant d'un fichier retenu) et `targetCallback`.
+// Dupliqué de socle/packages/agent-features/src/features/notifications/notification-targets.ts @ ad2e7fdc2 — adaptations : plus aucune adresse écrite — la cible se compose sur les adresses INJECTÉES de l'application (`NotificationRoutes`, tirées de `useRoutes()` : page réseau `home()` et ses paramètres de vue de `reseau-agent-nav`, messagerie `messages()` par `conversationHref`, journal iAppel par `icomMobileTabHref`, profil `profile(handle)` et albums d'un profil composés dessus, conférence `conference(sessionId)`) ; `reseauBaseHref` retiré (la page réseau du moteur est toujours l'accueil, la publication n'est plus masquée) ; sujet du moteur en forme générique `{ kind, id }` au lieu des colonnes `subject…Id`, aiguillé par un `switch` exhaustif sur les natures du domaine ; cible « direct » (démarrage, invitations, rediffusion publiée) composée sur l'adresse INJECTÉE de la conférence (`conference(sessionId)`) pour le sujet `liveSession` du moteur au lieu de `subjectDirectSessionId` et d'une adresse de l'espace, avec son rappel `onOpenDirect` ; cibles ajoutées pour les sujets du moteur (album d'un profil, appel et message vocal vers le journal iAppel ; analyse de fichier sans cible) et profil du parrain pour `sponsorship_received` ; état d'invitation du domaine (`@antsia/social-domain/connectionState`) ; libellés et phrases traduits (`t` en DERNIER paramètre de `notificationTarget`, `notificationRowAction`, `connectionInviteOutcome` ; clés qualifiées `notifications:notificationTargets.…`) ; ajouts : `notificationRowSentence` (phrase de TOUS les genres du moteur — ceux de `shared.notificationSentence` et, ici, page suivie, album, fichier retenu, appel manqué, message vocal, parrainages et attestations de DIASPORALE ; nom neutre quand le profil n'est pas publié), `notificationRowNote` (résultat d'une invitation, statut vivant d'un fichier retenu) et `targetCallback`.
 /**
  * notification-targets — CE QU'OUVRE une ligne de notification, par où, et ce
  * qu'elle DIT.
@@ -20,10 +20,10 @@
  * ne fabrique que des adresses et des phrases de GENRE.
  */
 
-import type { ConnectionInviteState } from "@antia/social-domain/connectionState"
-import type { FileScanStatus } from "@antia/social-domain/filePolicy"
-import { isServableStatus } from "@antia/social-domain/filePolicy"
-import type { NotificationKind, NotificationSubject, NotificationSubjectKind } from "@antia/social-domain/notifications"
+import type { ConnectionInviteState } from "@antsia/social-domain/connectionState"
+import type { FileScanStatus } from "@antsia/social-domain/filePolicy"
+import { isServableStatus } from "@antsia/social-domain/filePolicy"
+import type { NotificationKind, NotificationSubject, NotificationSubjectKind } from "@antsia/social-domain/notifications"
 import type { TFunction } from "i18next"
 
 import { RESEAU_AGENT_POST_PARAM, reseauAgentGroupeHref, reseauAgentHref } from "../../shell/reseau-agent-nav"
@@ -32,7 +32,7 @@ import { groupeKey } from "../messagerie/messagerie-dock"
 import { conversationHref } from "../messagerie/messagerie-routes"
 import { NOTIFICATION_SENTENCE_KINDS, notificationSentence, type NotificationSentenceKind, resolutionSentence } from "../reseau-personnel/shared"
 
-export type { ConnectionInviteState } from "@antia/social-domain/connectionState"
+export type { ConnectionInviteState } from "@antsia/social-domain/connectionState"
 
 /** Les natures de cible qu'une notification peut désigner. */
 export type NotificationTargetKind =

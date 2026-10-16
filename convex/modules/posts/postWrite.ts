@@ -12,10 +12,10 @@
  * et la cloche des citations — avec la règle de visibilité (on ne sonne jamais
  * vers un lien qui refuse).
  */
-import { assertGroupAudienceShape, assertPageAudienceShape, type PersonalPostAudience } from "@antia/social-domain/content"
-import type { ContentVisibility } from "@antia/social-domain/network"
-import { extractHashtags } from "@antia/social-domain/richText"
-import { buildSearchableText } from "@antia/social-domain/searchText"
+import { assertGroupAudienceShape, assertPageAudienceShape, type PersonalPostAudience } from "@antsia/social-domain/content"
+import type { ContentVisibility } from "@antsia/social-domain/network"
+import { extractHashtags } from "@antsia/social-domain/richText"
+import { buildSearchableText } from "@antsia/social-domain/searchText"
 
 import type { Doc, Id } from "../../_generated/dataModel"
 import type { MutationCtx } from "../../_generated/server"

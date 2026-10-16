@@ -29,10 +29,10 @@
  *    La fraîcheur perçue (≤ ~75 s) est déjà celle du seuil serveur (90 s).
  */
 
-import { api } from "@antia/api/engine"
-import { useAuthenticatedConvexQuery } from "@antia/api/hooks"
-import { useNetwork } from "@antia/api/network"
-import type { RelationPresenceStatus } from "@antia/social-contracts/calls"
+import { api } from "@antsia/api/engine"
+import { useAuthenticatedConvexQuery } from "@antsia/api/hooks"
+import { useNetwork } from "@antsia/api/network"
+import type { RelationPresenceStatus } from "@antsia/social-contracts/calls"
 import { useConvex } from "convex/react"
 import type { TFunction } from "i18next"
 import { useCallback, useEffect, useState } from "react"

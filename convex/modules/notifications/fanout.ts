@@ -8,8 +8,8 @@
  * porte unique, puis se replanifie tant que la source n'est pas épuisée. Le job
  * ne touche JAMAIS le document du sujet : zéro conflit avec ses écritures.
  */
-import type { DirectAudience } from "@antia/social-domain/live/domain"
-import type { NotificationKind } from "@antia/social-domain/notifications"
+import type { DirectAudience } from "@antsia/social-domain/live/domain"
+import type { NotificationKind } from "@antsia/social-domain/notifications"
 import { type Infer, v } from "convex/values"
 
 import { internal } from "../../_generated/api"

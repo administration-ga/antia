@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/messagerie/MessageAttachment.tsx @ ad2e7fdc2 — adaptations : iDocument retiré (bouton « Enregistrer dans iDocument », `onSave`, `sourceDocumentId`) ; la retenue d'un fichier se lit dans le DTO du moteur (`withheld` : `fileScanPending` / `fileQuarantined`, garde fail-closed) et se ramène à l'état de service de la politique de fichiers (`ServiceState` de `@antia/social-domain/filePolicy`) au lieu du statut d'analyse et de `scanBadgeLabel` ; libellés traduits (espace de noms `messagerie`, clés `messageAttachment.*`) ; poids dit dans la langue courante (`formatBytes(bytes, locale, t)`).
+// Dupliqué de socle/packages/agent-features/src/features/messagerie/MessageAttachment.tsx @ ad2e7fdc2 — adaptations : iDocument retiré (bouton « Enregistrer dans iDocument », `onSave`, `sourceDocumentId`) ; la retenue d'un fichier se lit dans le DTO du moteur (`withheld` : `fileScanPending` / `fileQuarantined`, garde fail-closed) et se ramène à l'état de service de la politique de fichiers (`ServiceState` de `@antsia/social-domain/filePolicy`) au lieu du statut d'analyse et de `scanBadgeLabel` ; libellés traduits (espace de noms `messagerie`, clés `messageAttachment.*`) ; poids dit dans la langue courante (`formatBytes(bytes, locale, t)`).
 "use client"
 
 /**
@@ -27,8 +27,8 @@
  * `messagerie-styles.tsx`) et ses jetons de rôle.
  */
 
-import type { MediaWithheld } from "@antia/social-contracts/media"
-import type { ServiceState } from "@antia/social-domain/filePolicy"
+import type { MediaWithheld } from "@antsia/social-contracts/media"
+import type { ServiceState } from "@antsia/social-domain/filePolicy"
 import { Download, FileText, Loader2, Music, ShieldAlert } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { attachmentKind, formatBytes } from "./messagerie-composer"

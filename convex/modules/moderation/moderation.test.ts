@@ -1,6 +1,6 @@
 // @vitest-environment edge-runtime
 // Dupliqué de socle/convex/modules/reseauPersonnel/moderation.test.ts @ ad2e7fdc2 — adaptations : rôles `AdminSystem`/`SuperAdmin` → modérateur ou administrateur DU RÉSEAU du contenu, opérateur en dernier ressort ; décrément vérifié dans les agrégats (partages, commentaires) au lieu de `shareCount`/`commentCount` ; la décision écrit sa ligne dans le journal du moteur (patron `reseauPlatformActsAudit`) ; le signalement masque pour le déclarant.
-import { engineErrorCode } from "@antia/social-contracts/errors"
+import { engineErrorCode } from "@antsia/social-contracts/errors"
 import { afterEach, describe, expect, it, vi } from "vitest"
 
 import { api, internal } from "../../_generated/api"

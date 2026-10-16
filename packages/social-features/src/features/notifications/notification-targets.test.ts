@@ -3,8 +3,8 @@ import type {
 	NotificationKind,
 	NotificationSubject,
 	NotificationSubjectKind,
-} from "@antia/social-domain/notifications"
-import { NOTIFICATION_KINDS } from "@antia/social-domain/notifications"
+} from "@antsia/social-domain/notifications"
+import { NOTIFICATION_KINDS } from "@antsia/social-domain/notifications"
 import { describe, expect, it, vi } from "vitest"
 
 import { createAppI18n } from "../../i18n"
@@ -63,8 +63,8 @@ describe("notificationTarget — une adresse par nature de sujet", () => {
 	})
 
 	it("ajoute la vue après la query de la base et avant son ancre", () => {
-		const routes: NotificationRoutes = { ...ROUTES, home: () => `${HOME}?reseau=antia#haut` }
-		expect(notificationTarget(item({ subject: subject("post", "post-1") }), routes, t)?.href).toBe(`${HOME}?reseau=antia&post=post-1#haut`)
+		const routes: NotificationRoutes = { ...ROUTES, home: () => `${HOME}?reseau=antsia#haut` }
+		expect(notificationTarget(item({ subject: subject("post", "post-1") }), routes, t)?.href).toBe(`${HOME}?reseau=antsia&post=post-1#haut`)
 	})
 
 	it("adresse la conversation de groupe, le groupe et l'évènement", () => {

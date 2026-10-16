@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/messagerie/MessagesRoute.tsx @ ad2e7fdc2 — adaptations : seuil mobile par `@antia/ui/overlay` (`useIsReseauMobile`) ; annonce de chargement traduite (clé `messagesRoute.loading`) ; doc : routes décrites depuis la base injectée de l'application (aucune adresse de l'espace agent), renvoi au chrome de l'espace agent (`personal-chrome.ts`) retiré ; aiguillage inchangé.
+// Dupliqué de socle/packages/agent-features/src/features/messagerie/MessagesRoute.tsx @ ad2e7fdc2 — adaptations : seuil mobile par `@antsia/ui/overlay` (`useIsReseauMobile`) ; annonce de chargement traduite (clé `messagesRoute.loading`) ; doc : routes décrites depuis la base injectée de l'application (aucune adresse de l'espace agent), renvoi au chrome de l'espace agent (`personal-chrome.ts`) retiré ; aiguillage inchangé.
 "use client"
 
 /**
@@ -26,7 +26,7 @@
  * remplir ce qu'on lui laisse.
  */
 
-import { useIsReseauMobile } from "@antia/ui/overlay"
+import { useIsReseauMobile } from "@antsia/ui/overlay"
 import { useTranslation } from "react-i18next"
 import { MessagerieComposePage } from "./MessagerieComposePage"
 import { MessagerieConversationPage } from "./MessagerieConversationPage"

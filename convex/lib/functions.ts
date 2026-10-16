@@ -21,7 +21,7 @@
  * toute fonction publique qui n'emprunte pas un constructeur borné ou ne
  * porte pas sa justification.
  */
-import type { ActiveMembershipStatus } from "@antia/social-domain/membership"
+import type { ActiveMembershipStatus } from "@antsia/social-domain/membership"
 import { customAction, customMutation, customQuery } from "convex-helpers/server/customFunctions"
 import { makeFunctionReference } from "convex/server"
 import { v } from "convex/values"

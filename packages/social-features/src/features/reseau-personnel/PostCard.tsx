@@ -15,12 +15,12 @@
  * page rendent la même — un seul gabarit à tenir.
  */
 
-import { api } from "@antia/api/engine"
-import type { Id } from "@antia/api/engine"
-import { useNetwork, useRoutes } from "@antia/api/network"
-import { Link } from "@antia/api/routing"
-import type { Badge } from "@antia/social-domain/badges"
-import { Button, Card, TextArea } from "@antia/ui"
+import { api } from "@antsia/api/engine"
+import type { Id } from "@antsia/api/engine"
+import { useNetwork, useRoutes } from "@antsia/api/network"
+import { Link } from "@antsia/api/routing"
+import type { Badge } from "@antsia/social-domain/badges"
+import { Button, Card, TextArea } from "@antsia/ui"
 import { useMutation } from "convex/react"
 import type { FunctionReturnType } from "convex/server"
 import { MessageCircle, Share2 } from "lucide-react"

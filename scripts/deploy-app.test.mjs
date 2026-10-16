@@ -11,14 +11,14 @@ describe("catalogue réel du moteur", () => {
   })
 
   test("le plan n'invente aucune valeur : les absentes restent des marqueurs", () => {
-    const plan = buildPlan(readCatalog(), "antia_ga", {})
+    const plan = buildPlan(readCatalog(), "antsia_ga", {})
     expect(plan.build).toContain("--substitutions")
     expect(plan.build.join(" ")).toContain("_NEXT_PUBLIC_CONVEX_URL=<NEXT_PUBLIC_CONVEX_URL>")
-    expect(plan.image).toContain("<ANTIA_GCP_PROJECT>")
+    expect(plan.image).toContain("<ANTSIA_GCP_PROJECT>")
   })
 
   test("le plan passe toutes les clés de Cloud Build : celles d'une autre application, vides", () => {
-    const plan = buildPlan(readCatalog(), "antia_ga", { NEXT_PUBLIC_CONVEX_URL: "u" })
+    const plan = buildPlan(readCatalog(), "antsia_ga", { NEXT_PUBLIC_CONVEX_URL: "u" })
     const substitutions = plan.build[plan.build.indexOf("--substitutions") + 1]
     expect(substitutions).toContain("_NEXT_PUBLIC_CONVEX_URL=u")
     expect(substitutions).toContain("_NEXT_PUBLIC_DIASPORALE_DATA_SOURCE=,")
@@ -43,7 +43,7 @@ describe("catalogue réel du moteur", () => {
 describe("contrôle d'un catalogue", () => {
   test("détecte un ARG manquant, un port faux et une liste blanche absente", () => {
     const ecosystems = mkdtempSync(join(tmpdir(), "catalogue-"))
-    const root = join(ecosystems, "ANTIA")
+    const root = join(ecosystems, "ANTSIA")
     mkdirSync(join(root, "apps/demo"), { recursive: true })
     writeFileSync(join(root, "apps/demo/package.json"), JSON.stringify({ name: "demo", scripts: { dev: "next dev --port 3999" } }))
     writeFileSync(join(root, "apps/demo/Dockerfile"), "FROM scratch\nARG NEXT_PUBLIC_CONVEX_URL\n")
@@ -53,7 +53,7 @@ describe("contrôle d'un catalogue", () => {
           package: "demo",
           path: "apps/demo",
           service: "demo",
-          dockerfile: "ANTIA/apps/demo/Dockerfile",
+          dockerfile: "ANTSIA/apps/demo/Dockerfile",
           site_url: "https://demo.example",
           dev_port: 3030,
           build_args: ["NEXT_PUBLIC_CONVEX_URL", "NEXT_PUBLIC_SITE_URL"],
@@ -69,7 +69,7 @@ describe("contrôle d'un catalogue", () => {
 
   test("détecte une variable que Cloud Build ne passe pas, et un espace externe que l'image ne copie pas", () => {
     const ecosystems = mkdtempSync(join(tmpdir(), "catalogue-"))
-    const root = join(ecosystems, "ANTIA")
+    const root = join(ecosystems, "ANTSIA")
     mkdirSync(join(root, "apps/demo"), { recursive: true })
     mkdirSync(join(root, "deploy"), { recursive: true })
     mkdirSync(join(ecosystems, "EXTERNE/packages/regles"), { recursive: true })
@@ -79,8 +79,8 @@ describe("contrôle d'un catalogue", () => {
     )
     writeFileSync(join(ecosystems, "EXTERNE/packages/regles/package.json"), JSON.stringify({ name: "@externe/regles" }))
     writeFileSync(join(root, "apps/demo/package.json"), JSON.stringify({ name: "demo", scripts: { dev: "next dev --port 3999" } }))
-    writeFileSync(join(root, "apps/demo/Dockerfile"), "FROM scratch\nARG NEXT_PUBLIC_CONVEX_URL\nCOPY ANTIA ./ANTIA\n")
-    writeFileSync(join(root, "apps/demo/Dockerfile.dockerignore"), "*\n!ANTIA\n")
+    writeFileSync(join(root, "apps/demo/Dockerfile"), "FROM scratch\nARG NEXT_PUBLIC_CONVEX_URL\nCOPY ANTSIA ./ANTSIA\n")
+    writeFileSync(join(root, "apps/demo/Dockerfile.dockerignore"), "*\n!ANTSIA\n")
     writeFileSync(join(root, "deploy/cloudbuild.yaml"), "steps: []\n")
     const catalog = {
       applications: {
@@ -88,7 +88,7 @@ describe("contrôle d'un catalogue", () => {
           package: "demo",
           path: "apps/demo",
           service: "demo",
-          dockerfile: "ANTIA/apps/demo/Dockerfile",
+          dockerfile: "ANTSIA/apps/demo/Dockerfile",
           site_url: "https://demo.example",
           dev_port: 3999,
           build_args: ["NEXT_PUBLIC_CONVEX_URL"],
@@ -97,10 +97,10 @@ describe("contrôle d'un catalogue", () => {
     }
     expect(checkCatalog(catalog, root)).toEqual([
       "demo : deploy/cloudbuild.yaml ne passe pas NEXT_PUBLIC_CONVEX_URL",
-      "demo : le Dockerfile ne copie pas EXTERNE/packages/regles (dépendance de la racine d'ANTIA)",
+      "demo : le Dockerfile ne copie pas EXTERNE/packages/regles (dépendance de la racine d'ANTSIA)",
     ])
     writeFileSync(join(root, "deploy/cloudbuild.yaml"), "args: [NEXT_PUBLIC_CONVEX_URL=${_NEXT_PUBLIC_CONVEX_URL}]\n")
-    writeFileSync(join(root, "apps/demo/Dockerfile"), "FROM scratch\nARG NEXT_PUBLIC_CONVEX_URL\nCOPY ANTIA ./ANTIA\nCOPY EXTERNE/packages ./EXTERNE/packages\n")
+    writeFileSync(join(root, "apps/demo/Dockerfile"), "FROM scratch\nARG NEXT_PUBLIC_CONVEX_URL\nCOPY ANTSIA ./ANTSIA\nCOPY EXTERNE/packages ./EXTERNE/packages\n")
     expect(checkCatalog(catalog, root)).toEqual([])
   })
 })

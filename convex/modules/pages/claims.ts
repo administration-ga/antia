@@ -17,8 +17,8 @@
  *    du décideur). Validée, elle fait du demandeur un administrateur et de la
  *    page `community` une page `verified`.
  */
-import { assertDecisionReason } from "@antia/social-domain/audit"
-import { pageTrustRank, assertPageClaimable, assertPageClaimEvidenceCount, isPageClaimOpen, normalizePageClaimNote } from "@antia/social-domain/pages"
+import { assertDecisionReason } from "@antsia/social-domain/audit"
+import { pageTrustRank, assertPageClaimable, assertPageClaimEvidenceCount, isPageClaimOpen, normalizePageClaimNote } from "@antsia/social-domain/pages"
 import { paginationOptsValidator, type PaginationResult } from "convex/server"
 import { type Infer, v } from "convex/values"
 

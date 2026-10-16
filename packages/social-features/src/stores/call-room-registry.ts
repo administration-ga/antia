@@ -17,7 +17,7 @@
 
 import type { Room } from "livekit-client";
 import { useSyncExternalStore } from "react";
-import type { Id } from "@antia/api/engine";
+import type { Id } from "@antsia/api/engine";
 
 const rooms = new Map<string, Room>();
 const listeners = new Set<() => void>();

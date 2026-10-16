@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 
-import { DOMAIN_RULES } from "@antia/social-domain/violation"
+import { DOMAIN_RULES } from "@antsia/social-domain/violation"
 
 import { ENGINE_ERROR_CODES, engineErrorAppRule, engineErrorCode, engineErrorRule, isAppRule } from "./errors"
 import en from "./i18n/locales/en/errors.json"

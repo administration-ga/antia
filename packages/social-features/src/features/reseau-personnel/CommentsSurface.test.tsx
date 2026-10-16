@@ -40,7 +40,7 @@ const mocks = vi.hoisted(() => ({
   edit: vi.fn(),
 }))
 
-vi.mock("@antia/api/engine", () => ({
+vi.mock("@antsia/api/engine", () => ({
   api: {
     modules: {
       engagement: {
@@ -56,7 +56,7 @@ vi.mock("@antia/api/engine", () => ({
   },
 }))
 
-vi.mock("@antia/api/hooks", () => ({
+vi.mock("@antsia/api/hooks", () => ({
   useAuthenticatedPaginatedQuery: (reference: string, args: unknown) => {
     mocks.paginatedArgs.push({ reference, args })
     if (reference === "paginateReplies") return mocks.replies
@@ -70,7 +70,7 @@ vi.mock("convex/react", () => ({
     reference === "comment" ? mocks.comment : reference === "editComment" ? mocks.edit : mocks.remove,
 }))
 
-vi.mock("@antia/ui", () => ({
+vi.mock("@antsia/ui", () => ({
   Alert: ({ children, title }: { children: ReactNode; title?: string }) => (
     <div role="alert">
       {title}
@@ -102,7 +102,7 @@ vi.mock("./RichText", () => ({
   RichText: ({ body }: { body: string }) => <p>{body}</p>,
 }))
 
-vi.mock("@antia/ui/overlay", () => ({
+vi.mock("@antsia/ui/overlay", () => ({
   useBodyScrollLock: () => undefined,
   useVisualViewport: () => undefined,
 }))

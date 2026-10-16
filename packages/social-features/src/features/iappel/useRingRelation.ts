@@ -19,8 +19,8 @@
  * appel de crochet rendrait le cliquet aveugle.
  */
 
-import { api, type Id } from "@antia/api/engine"
-import { useNetwork } from "@antia/api/network"
+import { api, type Id } from "@antsia/api/engine"
+import { useNetwork } from "@antsia/api/network"
 import { useMutation } from "convex/react"
 import { useCallback, useState } from "react"
 import { useTranslation } from "react-i18next"

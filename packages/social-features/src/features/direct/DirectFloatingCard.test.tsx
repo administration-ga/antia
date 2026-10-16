@@ -4,18 +4,18 @@ import { act, cleanup, fireEvent, render, screen } from "@testing-library/react"
 import type { ReactNode } from "react"
 import { I18nextProvider } from "react-i18next"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
-import { noDirectPermissions } from "@antia/social-domain/live/permissions"
+import { noDirectPermissions } from "@antsia/social-domain/live/permissions"
 import { createAppI18n } from "../../i18n"
 import { directSessionStore } from "../../stores/direct-session-store"
 import type { DirectSession } from "./DirectPage"
 import { DirectFloatingCard } from "./DirectFloatingCard"
 
 const mocks = vi.hoisted(() => ({ mobile: false as boolean | null, room: null as unknown, leave: vi.fn(), mutation: vi.fn() }))
-vi.mock("@antia/api/network", () => ({ useNetwork: () => ({ networkId: "network-a", charte: "antia", storagePrefix: "antia:a:" }), useRoutes: () => ({ conference: (id: string) => `/room/${id}` }) }))
-vi.mock("@antia/api/routing", () => ({ Link: ({ children, href }: { children: ReactNode; href: string }) => <a href={href}>{children}</a> }))
-vi.mock("@antia/ui/overlay", () => ({ useIsReseauMobile: () => mocks.mobile }))
+vi.mock("@antsia/api/network", () => ({ useNetwork: () => ({ networkId: "network-a", charte: "antsia", storagePrefix: "antsia:a:" }), useRoutes: () => ({ conference: (id: string) => `/room/${id}` }) }))
+vi.mock("@antsia/api/routing", () => ({ Link: ({ children, href }: { children: ReactNode; href: string }) => <a href={href}>{children}</a> }))
+vi.mock("@antsia/ui/overlay", () => ({ useIsReseauMobile: () => mocks.mobile }))
 vi.mock("../../stores/direct-room-registry", () => ({ useDirectRoom: () => mocks.room }))
-vi.mock("@antia/ui/espace-kit", () => ({ EspaceDialog: ({ children, title }: { children: ReactNode; title: string }) => <div role="dialog" aria-label={title}>{children}</div> }))
+vi.mock("@antsia/ui/espace-kit", () => ({ EspaceDialog: ({ children, title }: { children: ReactNode; title: string }) => <div role="dialog" aria-label={title}>{children}</div> }))
 vi.mock("convex/react", () => ({ useMutation: () => mocks.mutation }))
 const i18n = createAppI18n({ locale: "fr", appResources: { fr: {}, en: {} }, defaultNS: "direct" })
 const session = { sessionId: "session-a", title: "Recette", status: "live", viewerRole: "host", permissions: noDirectPermissions(), speakers: [], spotlight: null } as unknown as DirectSession

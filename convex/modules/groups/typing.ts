@@ -3,8 +3,8 @@
  * « En train d'écrire » dans un groupe — une ligne éphémère par (fil,
  * personne), qui expire six secondes après le dernier signal ; un cron purge.
  */
-import type { CounterpartLabel } from "@antia/social-contracts/counterpart"
-import { GROUP_MEMBERS_MAX } from "@antia/social-contracts/groupCapacity"
+import type { CounterpartLabel } from "@antsia/social-contracts/counterpart"
+import { GROUP_MEMBERS_MAX } from "@antsia/social-contracts/groupCapacity"
 import { v } from "convex/values"
 
 import type { Id } from "../../_generated/dataModel"

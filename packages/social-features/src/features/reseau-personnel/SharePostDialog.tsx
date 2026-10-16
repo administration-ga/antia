@@ -29,10 +29,10 @@
  * dialogue soit un enfant de `<body>`.
  */
 
-import { api } from "@antia/api/engine"
-import type { Id } from "@antia/api/engine"
-import { useNetwork } from "@antia/api/network"
-import { Button, Card, Field, Select, TextArea, useModalA11y } from "@antia/ui"
+import { api } from "@antsia/api/engine"
+import type { Id } from "@antsia/api/engine"
+import { useNetwork } from "@antsia/api/network"
+import { Button, Card, Field, Select, TextArea, useModalA11y } from "@antsia/ui"
 import { useMutation } from "convex/react"
 import { useEffect, useRef, useState } from "react"
 import { createPortal } from "react-dom"

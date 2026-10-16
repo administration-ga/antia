@@ -32,7 +32,7 @@
  */
 
 import type { TFunction } from "i18next"
-import type { DirectAudience } from "@antia/social-domain/live/domain"
+import type { DirectAudience } from "@antsia/social-domain/live/domain"
 
 import { storyAuthorName, type StoryTrayGroup } from "./stories-tray"
 

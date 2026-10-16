@@ -1,9 +1,9 @@
-// Dupliqué de socle/convex/modules/reseauPages/validators.ts @ ad2e7fdc2 — adaptations : littéraux DÉRIVÉS des listes du domaine pur (`@antia/social-domain/pages`, une seule source) ; rôles de signataire, statuts et décisions de revendication, audiences d'une publication de page et carte allowlistée d'une page ajoutés.
+// Dupliqué de socle/convex/modules/reseauPages/validators.ts @ ad2e7fdc2 — adaptations : littéraux DÉRIVÉS des listes du domaine pur (`@antsia/social-domain/pages`, une seule source) ; rôles de signataire, statuts et décisions de revendication, audiences d'une publication de page et carte allowlistée d'une page ajoutés.
 /**
  * Validateurs des PAGES. Module sans fonction Convex enregistrée : un import
  * client l'atteint sans embarquer le backend.
  */
-import { PAGE_CLAIM_DECISIONS, PAGE_CLAIM_STATUSES, PAGE_POST_AUDIENCES, PAGE_ROLES, PAGE_STATUSES } from "@antia/social-domain/pages"
+import { PAGE_CLAIM_DECISIONS, PAGE_CLAIM_STATUSES, PAGE_POST_AUDIENCES, PAGE_ROLES, PAGE_STATUSES } from "@antsia/social-domain/pages"
 import { type Infer, v } from "convex/values"
 
 import { badgeValidator, literals, pageOwnerKindValidator } from "../../lib/validators"

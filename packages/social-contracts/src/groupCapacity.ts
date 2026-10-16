@@ -11,7 +11,7 @@
  * acceptera — un écran qui laisse composer ce qu'il refusera fait perdre le
  * geste entier.
  */
-import { DomainViolation } from "@antia/social-domain/violation"
+import { DomainViolation } from "@antsia/social-domain/violation"
 
 /**
  * Le plafond de STRUCTURE d'un fil de groupe, créateur compris. Il borne aussi

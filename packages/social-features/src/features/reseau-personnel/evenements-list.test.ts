@@ -11,8 +11,8 @@
  *     les trois formes attendues (même jour, jours différents, sans fin) ;
  *  5. le récapitulatif d'une ANNONCE (R-16) sépare les invités des lecteurs.
  */
-import type { Id } from "@antia/api/engine"
-import { PERSONAL_EVENT_TITLE_MAX_LENGTH, PERSONAL_EVENT_TITLE_MIN_LENGTH } from "@antia/social-domain/events"
+import type { Id } from "@antsia/api/engine"
+import { PERSONAL_EVENT_TITLE_MAX_LENGTH, PERSONAL_EVENT_TITLE_MIN_LENGTH } from "@antsia/social-domain/events"
 import { ConvexError } from "convex/values"
 import { describe, expect, it } from "vitest"
 

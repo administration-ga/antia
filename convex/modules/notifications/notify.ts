@@ -16,7 +16,7 @@ import {
   type NotificationResolution,
   notificationResolutionPrefix,
   type NotificationSubject,
-} from "@antia/social-domain/notifications"
+} from "@antsia/social-domain/notifications"
 import type { Infer } from "convex/values"
 
 import type { Doc, Id } from "../../_generated/dataModel"

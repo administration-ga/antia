@@ -32,7 +32,7 @@ export const STORY_IMAGE_MS = 5_000
 
 /**
  * Le plafond ABSOLU d'une vidéo, RECOPIÉ du domaine du moteur
- * (`STORY_VIDEO_MAX_DURATION_MS`, `@antia/social-domain/stories`) — cinq
+ * (`STORY_VIDEO_MAX_DURATION_MS`, `@antsia/social-domain/stories`) — cinq
  * minutes. Le socle bornait par surface et prenait ici la plus permissive
  * (dix minutes sur le fil) ; le moteur n'a qu'une surface et une seule borne.
  *

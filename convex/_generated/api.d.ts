@@ -24,6 +24,7 @@ import type * as lib_livekitEgressUploads from "../lib/livekitEgressUploads.js";
 import type * as lib_livekitEgressWebhook from "../lib/livekitEgressWebhook.js";
 import type * as lib_livekitIdentity from "../lib/livekitIdentity.js";
 import type * as lib_livekitWake from "../lib/livekitWake.js";
+import type * as lib_networkSlug from "../lib/networkSlug.js";
 import type * as lib_rateLimit from "../lib/rateLimit.js";
 import type * as lib_uploadPolicy from "../lib/uploadPolicy.js";
 import type * as lib_validators from "../lib/validators.js";
@@ -204,6 +205,7 @@ declare const fullApi: ApiFromModules<{
   "lib/livekitEgressWebhook": typeof lib_livekitEgressWebhook;
   "lib/livekitIdentity": typeof lib_livekitIdentity;
   "lib/livekitWake": typeof lib_livekitWake;
+  "lib/networkSlug": typeof lib_networkSlug;
   "lib/rateLimit": typeof lib_rateLimit;
   "lib/uploadPolicy": typeof lib_uploadPolicy;
   "lib/validators": typeof lib_validators;

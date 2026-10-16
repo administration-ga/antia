@@ -54,7 +54,7 @@
  * locaux (téléversement, pièce à resélectionner), déjà traduits.
  */
 
-import { engineErrorCode, engineErrorRule } from "@antia/social-contracts/errors"
+import { engineErrorCode, engineErrorRule } from "@antsia/social-contracts/errors"
 import type { TFunction } from "i18next"
 import type { PendingAttachment } from "../../lib/chat/use-chat-attachments"
 import { Check, Paperclip, Send, X } from "lucide-react"

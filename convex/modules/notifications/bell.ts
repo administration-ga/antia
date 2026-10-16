@@ -6,9 +6,9 @@
  * garde. L'acteur vient du profil PUBLIÉ. Une ligne d'autrui ou inventée rend
  * le même refus : décliner apprendrait qu'un événement a eu lieu entre deux tiers.
  */
-import { type ConnectionInviteState, pendingStateOf } from "@antia/social-domain/connectionState"
-import type { FileScanStatus } from "@antia/social-domain/filePolicy"
-import { NOTIFICATION_UNREAD_CAP, type NotificationKind, type NotificationResolution, type NotificationSubject } from "@antia/social-domain/notifications"
+import { type ConnectionInviteState, pendingStateOf } from "@antsia/social-domain/connectionState"
+import type { FileScanStatus } from "@antsia/social-domain/filePolicy"
+import { NOTIFICATION_UNREAD_CAP, type NotificationKind, type NotificationResolution, type NotificationSubject } from "@antsia/social-domain/notifications"
 import { paginationOptsValidator, type PaginationResult } from "convex/server"
 import { v } from "convex/values"
 

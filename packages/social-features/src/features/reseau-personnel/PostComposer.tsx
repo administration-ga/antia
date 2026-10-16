@@ -27,10 +27,10 @@
  * présente pas un nom de fichier comme une pièce sauvegardée.
  */
 
-import { api } from "@antia/api/engine"
-import type { Id } from "@antia/api/engine"
-import { useNetwork } from "@antia/api/network"
-import { POST_MEDIA_ALT_MAX_LENGTH } from "@antia/social-domain/content"
+import { api } from "@antsia/api/engine"
+import type { Id } from "@antsia/api/engine"
+import { useNetwork } from "@antsia/api/network"
+import { POST_MEDIA_ALT_MAX_LENGTH } from "@antsia/social-domain/content"
 import {
   Alert,
   Button,
@@ -39,7 +39,7 @@ import {
   Select,
   TextArea,
   TextInput,
-} from "@antia/ui"
+} from "@antsia/ui"
 import { useMutation } from "convex/react"
 import { useEffect, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"

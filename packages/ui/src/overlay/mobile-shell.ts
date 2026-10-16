@@ -19,7 +19,7 @@ import { MOBILE_MAX_PX, MOBILE_QUERY } from "./breakpoint"
  *
  *  · `MOBILE_ONLY_CLASS` (`./breakpoint`) rend `min-[960px]:hidden` : la
  *    barre basse existe jusqu'à 959 px inclus, le rail prend le relais à 960 ;
- *  · `DOCK_MIN_VIEWPORT_PX = 960` (messagerie de `@antia/social-features`)
+ *  · `DOCK_MIN_VIEWPORT_PX = 960` (messagerie de `@antsia/social-features`)
  *    est le seuil sous lequel la carte de messagerie ne se rend pas.
  *
  * Un seuil à 960 ici — ou à 768, le `md` des shells institutionnels — ouvrirait

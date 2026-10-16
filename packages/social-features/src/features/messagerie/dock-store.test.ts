@@ -202,9 +202,9 @@ describe("dock-store — un état PAR RÉSEAU (configureDockStorage)", () => {
 	})
 
 	it("les clés portent le préfixe du réseau, jamais celui de l'espace du socle", () => {
-		expect(dockStorageKey("antia:antia:")).toBe("antia:antia:messagerie-dock:v6")
-		expect(icomFloatPlacementStorageKey("antia:antia:")).toBe(
-			"antia:antia:icom-floating-placement:v1",
+		expect(dockStorageKey("antsia:antsia:")).toBe("antsia:antsia:messagerie-dock:v6")
+		expect(icomFloatPlacementStorageKey("antsia:antsia:")).toBe(
+			"antsia:antsia:icom-floating-placement:v1",
 		)
 		expect(STORAGE_KEY.startsWith(PREFIXE)).toBe(true)
 	})

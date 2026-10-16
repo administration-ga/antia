@@ -1,4 +1,4 @@
-import { NETWORK_SLICES } from "@antia/social-domain/network"
+import { NETWORK_SLICES } from "@antsia/social-domain/network"
 import { describe, expect, it } from "vitest"
 
 import { detectUnscopedFunctions } from "./lib/detectors"

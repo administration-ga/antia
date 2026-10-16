@@ -1,4 +1,4 @@
-// Dupliqué de socle/convex/lib/egressWebhook.ts (avec `timingSafeEqual`, socle/convex/lib/httpSecurity.ts l. 19-31) @ ad2e7fdc2 — adaptations : propriétaires et routes RÉDUITS AU DIRECT (`EGRESS_ROUTES = ["direct"]` : enregistrements d'appel, messagerie vocale et pistes iRéunion n'existent pas dans le moteur) — `isEgressKnownBy` et `completeEgressForOwners` n'ont plus qu'une branche (`modules/live/replay`), le plan ne garde qu'UN motif (celui du direct : `EGRESS_FAILED`, `ABORTED`, `LIMIT_REACHED`), ni début de capture ni taille (fusion iRéunion) ; motifs à CODE (`directEgressFailureReason`, et le motif d'un rapatriement raté, déjà un code) ; statut lu dans le module pur du domaine (`@antia/social-domain/live/replayComposition`) ; comparaison à temps constant recopiée ici pour le secret historique du webhook (le moteur n'a pas de `lib/httpSecurity`).
+// Dupliqué de socle/convex/lib/egressWebhook.ts (avec `timingSafeEqual`, socle/convex/lib/httpSecurity.ts l. 19-31) @ ad2e7fdc2 — adaptations : propriétaires et routes RÉDUITS AU DIRECT (`EGRESS_ROUTES = ["direct"]` : enregistrements d'appel, messagerie vocale et pistes iRéunion n'existent pas dans le moteur) — `isEgressKnownBy` et `completeEgressForOwners` n'ont plus qu'une branche (`modules/live/replay`), le plan ne garde qu'UN motif (celui du direct : `EGRESS_FAILED`, `ABORTED`, `LIMIT_REACHED`), ni début de capture ni taille (fusion iRéunion) ; motifs à CODE (`directEgressFailureReason`, et le motif d'un rapatriement raté, déjà un code) ; statut lu dans le module pur du domaine (`@antsia/social-domain/live/replayComposition`) ; comparaison à temps constant recopiée ici pour le secret historique du webhook (le moteur n'a pas de `lib/httpSecurity`).
 /**
  * Le webhook Egress LiveKit — ce qu'un événement veut dire, et à QUI il
  * parle. Sans enregistrement de fonction : importé par le webhook
@@ -23,7 +23,7 @@
  * journal. Le traitement garde la connaissance de SA table (une requête
  * interne, `replay.isEgressKnown`).
  */
-import { type DirectReplayFailureReason, directEgressFailureReason } from "@antia/social-domain/live/replayComposition"
+import { type DirectReplayFailureReason, directEgressFailureReason } from "@antsia/social-domain/live/replayComposition"
 
 import { internal } from "../_generated/api"
 import type { Id } from "../_generated/dataModel"

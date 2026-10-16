@@ -15,8 +15,8 @@
  *  · sinon → « En ligne » (je suis là, puisque ce menu est ouvert).
  */
 
-import { api } from "@antia/api/engine"
-import { useAuthenticatedConvexQuery } from "@antia/api/hooks"
+import { api } from "@antsia/api/engine"
+import { useAuthenticatedConvexQuery } from "@antsia/api/hooks"
 import { useMutation } from "convex/react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"

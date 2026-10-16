@@ -4,10 +4,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 const calls: { name: "heartbeat" | "setOffline"; args: unknown }[] = []
 
-vi.mock("@antia/api/engine", () => ({
+vi.mock("@antsia/api/engine", () => ({
   api: { modules: { calls: { presence: { heartbeat: "heartbeat", setOffline: "setOffline" } } } },
 }))
-vi.mock("@antia/api/network", () => ({ useNetwork: () => ({ networkId: "networks_test" }) }))
+vi.mock("@antsia/api/network", () => ({ useNetwork: () => ({ networkId: "networks_test" }) }))
 vi.mock("convex/react", () => ({
   useMutation: (ref: "heartbeat" | "setOffline") => (args: unknown) => {
     calls.push({ name: ref, args })

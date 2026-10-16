@@ -1,11 +1,11 @@
-// Dupliqué de socle/packages/agent-features/src/features/stories/story-create.test.ts @ ad2e7fdc2 — adaptations : bornes lues dans `@antia/social-domain/stories` ; destinations (ADR-0079 du socle) retirées avec le moteur — cas des cases, de l'origine, de l'invite croisée, des refus et indices par surface supprimés, cas du plafond vidéo ramenés à la borne unique du moteur (cinquante mégaoctets) ; phrases lues par l'i18n du moteur (`t` français, mêmes fragments attendus) ; cas ajoutés : unités traduites, refus en anglais, texte des refus du moteur par leur code.
+// Dupliqué de socle/packages/agent-features/src/features/stories/story-create.test.ts @ ad2e7fdc2 — adaptations : bornes lues dans `@antsia/social-domain/stories` ; destinations (ADR-0079 du socle) retirées avec le moteur — cas des cases, de l'origine, de l'invite croisée, des refus et indices par surface supprimés, cas du plafond vidéo ramenés à la borne unique du moteur (cinquante mégaoctets) ; phrases lues par l'i18n du moteur (`t` français, mêmes fragments attendus) ; cas ajoutés : unités traduites, refus en anglais, texte des refus du moteur par leur code.
 import { describe, expect, it } from "vitest"
 
 import {
 	STORY_CAPTION_MAX_LENGTH,
 	STORY_IMAGE_MAX_BYTES,
 	STORY_VIDEO_LIMITS,
-} from "@antia/social-domain/stories"
+} from "@antsia/social-domain/stories"
 
 import { createAppI18n } from "../../i18n"
 import {

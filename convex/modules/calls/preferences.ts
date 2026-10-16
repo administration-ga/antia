@@ -7,7 +7,7 @@
  * réglages que personne n'a choisis. Chaque mise à jour ne touche que les champs
  * fournis — plusieurs cartes indépendantes à l'écran ne s'écrasent pas.
  */
-import { MAX_DND_DURATION_MS, normalizeQuickReplies } from "@antia/social-contracts/calls"
+import { MAX_DND_DURATION_MS, normalizeQuickReplies } from "@antsia/social-contracts/calls"
 import { v } from "convex/values"
 
 import { failRule } from "../../lib/errors"

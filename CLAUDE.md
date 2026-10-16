@@ -1,19 +1,19 @@
-# ANTIA — Consignes pour les agents (Claude Code, Codex)
+# ANTSIA — Consignes pour les agents (Claude Code, Codex)
 
-> Moteur social national (backend Convex + paquets `@antia/*`) et réseau public ANTIA.
+> Moteur social national (backend Convex + paquets `@antsia/*`) et réseau public ANTSIA.
 > Avant tout travail, lire dans l'ordre :
-> 1. `docs/00_CAHIER_DES_CHARGES_ANTIA.md` (le moteur et le réseau public : invariants, tables, lots) ;
-> 2. `docs/01_PLAN_IMPLEMENTATION_PROMPTS_ANTIA.md` (le prompt à exécuter, un à la fois, avec son
+> 1. `docs/00_CAHIER_DES_CHARGES_ANTSIA.md` (le moteur et le réseau public : invariants, tables, lots) ;
+> 2. `docs/01_PLAN_IMPLEMENTATION_PROMPTS_ANTSIA.md` (le prompt à exécuter, un à la fois, avec son
 >    préambule commun ; l'encart « État » dit où l'on en est) ;
-> 3. `../../../Documentation/RESEAUX_SOCIAUX/00_PLAN_RESEAUX_DANS_LE_RESEAU_DIASPORALE_ANTIA_2026-10-14.md`
+> 3. `../../../Documentation/RESEAUX_SOCIAUX/00_PLAN_RESEAUX_DANS_LE_RESEAU_DIASPORALE_ANTSIA_2026-10-14.md`
 >    et ses annexes A (backend du socle) et B (front du socle), qui sont la carte de duplication ;
 > 4. `../DIASPORALE/docs/00_CAHIER_DES_CHARGES_DIASPORALE.md` (le premier réseau servi) ;
 > 5. `docs/adr/` (décisions du moteur).
 
 ## Ce qu'est ce dépôt
 
-- **Le moteur social national** (backend Convex `antia` + paquets) et **le réseau public
-  ANTIA** (`apps/antia_ga`, port 3030) et sa **console** (`apps/admin_antia_ga`, port 3032).
+- **Le moteur social national** (backend Convex `antsia` + paquets) et **le réseau public
+  ANTSIA** (`apps/antsia_ga`, port 3030) et sa **console** (`apps/admin_antsia_ga`, port 3032).
   DIASPORALE (`../DIASPORALE`) est une application externe de ce moteur ; sa tranche backend
   `convex/modules/diaspora/` vit ici.
 - Le code vient du **socle administration.ga sur `origin/main`** (jamais de l'arbre de
@@ -65,21 +65,21 @@
 
 ## Arbre partagé avec la session DIASPORALE
 
-- La session ANTIA est propriétaire de tout le dépôt, SAUF `convex/modules/diaspora/`,
+- La session ANTSIA est propriétaire de tout le dépôt, SAUF `convex/modules/diaspora/`,
   `packages/ui/src/themes/diasporale.css` et `packages/social-contracts/src/i18n/locales/*/diaspora.json`
   (écrits par la session DIASPORALE).
 - Fichiers partagés (`package.json`, `bun.lock`, `convex/schema.ts`, `convex/convex.config.ts`,
-  `deploy/catalog.json`) : modifiés par la session ANTIA seule, sur demande par message.
+  `deploy/catalog.json`) : modifiés par la session ANTSIA seule, sur demande par message.
 - Jamais `git add -A` : `git add -- <chemins>` puis `git commit -- <chemins>`. Aucun changement de
-  branche dans ANTIA tant que les deux sessions y écrivent (`main` pendant PA0 → PA3 ; à partir
+  branche dans ANTSIA tant que les deux sessions y écrivent (`main` pendant PA0 → PA3 ; à partir
   de PA4, branches dédiées + PR si une seule session écrit encore).
 
 ## Commandes
 
 ```bash
 bun install                # une seule installation, ici
-bun run dev:convex         # déploiement Convex de développement (local anonyme tant que le projet `antia` n'existe pas)
-bun run dev:antia          # http://localhost:3030
+bun run dev:convex         # déploiement Convex de développement (local anonyme tant que le projet `antsia` n'existe pas)
+bun run dev:antsia          # http://localhost:3030
 bun run dev:admin          # http://localhost:3032
 bun run verify             # obligatoire avant tout commit
 ```
@@ -106,7 +106,7 @@ Cliquets en place (`tests/ratchets/`) : `no-cross-product-imports`, `no-any-vali
   (zéro module, harnais muet). Forme tableau avec exclusions `"!…"` ; le test du harnais vérifie
   que le glob n'est jamais vide.
 - **`@next/env` garde un cache partagé avec Next** : `loadEnvConfig` sur un second dossier rend
-  l'environnement du premier. La config Next commune lit `ANTIA/.env.local` par un lecteur
+  l'environnement du premier. La config Next commune lit `ANTSIA/.env.local` par un lecteur
   minimal (`readEnvFile`), testé.
 - Une modification de `packages/api/next-config.mjs` ne redémarre PAS `next dev` (seul
   `next.config.ts` est surveillé) : relancer le serveur.
@@ -133,22 +133,22 @@ Cliquets en place (`tests/ratchets/`) : `no-cross-product-imports`, `no-any-vali
   ferme le commentaire : la feuille entière casse.
 - **Frontière serveur/client de Next** : une page serveur n'appelle aucune fonction exportée d'un module
   `"use client"` (« Attempted to call … from the server ») ; un analyseur d'adresse vit dans un module pur
-  (`apps/antia_ga/src/lib/messages-route.ts`).
-- **Coque des pages de membre** : montée UNE fois dans le gabarit `(membre)` d'antia.ga ; remontée à chaque
+  (`apps/antsia_ga/src/lib/messages-route.ts`).
+- **Coque des pages de membre** : montée UNE fois dans le gabarit `(membre)` d'antsia.ga ; remontée à chaque
   page, elle coupait un appel en cours et faisait déborder le seau de présence (8 par minute).
 - **Tests du moteur** : toujours avec `--config convex/vitest.config.ts` (depuis la racine :
-  `bunx vitest run --config convex/vitest.config.ts modules/<module>`) — sans elle, `ANTIA_SEEDS_ALLOWED` manque et
+  `bunx vitest run --config convex/vitest.config.ts modules/<module>`) — sans elle, `ANTSIA_SEEDS_ALLOWED` manque et
   tout test qui pose la graine des fondations échoue (« Graine refusée »).
 - **Récolte des directs** (`live/reap.ts`) : par tranches de CINQ sessions chaînées par curseur — le pire cas d'une
   session lit ≈ 2,3 Mo ; une tranche plus large dépasserait la limite de lecture d'une mutation (16 Mio).
-- **Kit d'espace sans i18n** (`@antia/ui/espace-kit`) : `EspacePagination` exige ses phrases (`labels`) et
+- **Kit d'espace sans i18n** (`@antsia/ui/espace-kit`) : `EspacePagination` exige ses phrases (`labels`) et
   `EspaceDialog` son `closeLabel` — dans le moteur, `useEspacePaginationLabels()` (`shell/`) les traduit une fois.
 - **Page réseau de bureau** (`ReseauAgentPage`) : ses colonnes défilent chacune, elle exige un conteneur de
   hauteur DÉFINIE ; au téléphone (≤ 959 px), sa coquille laisse défiler le document — pas de hauteur figée.
 - **Pages en développement local** : créer une page exige une adhésion `verifiee` ; le compte de
   développement n'a qu'une adhésion déclarée (refus traduit attendu).
 - **Personnes de démonstration** (développement local) : `node scripts/convex-dev.mjs run
-  seeds/devSocial:demoPerson '{"confirmNonProduction":"ANTIA_SEEDS_HORS_PRODUCTION","networkSlug":"antia",
+  seeds/devSocial:demoPerson '{"confirmNonProduction":"ANTSIA_SEEDS_HORS_PRODUCTION","networkSlug":"antsia",
   "handle":"awa.demo","displayName":"Awa","connectToHandle":"<votre identifiant>"}'` — personne publiée,
   membre, reliée, sans session : de quoi éprouver iCom sans second compte.
 - **Garde des fichiers** : tout `ctx.storage.getUrl` passe par `convex/modules/files/storageGuard.ts`
@@ -157,5 +157,5 @@ Cliquets en place (`tests/ratchets/`) : `no-cross-product-imports`, `no-any-vali
 
 ## Mémoire
 
-Vault Obsidian : `10-PROJETS/antia/` (fiche, contexte actif, décisions) ; ADR du dépôt dans
+Vault Obsidian : `10-PROJETS/antsia/` (fiche, contexte actif, décisions) ; ADR du dépôt dans
 `docs/adr/`. Mettre à jour en fin de travail (`/memoire-maj`).

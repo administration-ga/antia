@@ -12,11 +12,11 @@ const mocks = vi.hoisted(() => ({
   markStoriesOpenedFromApp: vi.fn(),
 }))
 
-vi.mock("@antia/api/engine", () => ({
+vi.mock("@antsia/api/engine", () => ({
   api: { modules: { people: { persons: { getMyPerson: "getMyPerson" } } } },
 }))
 
-vi.mock("@antia/api/hooks", () => ({
+vi.mock("@antsia/api/hooks", () => ({
   useAuthenticatedConvexQuery: () => ({ data: mocks.person, isLoading: false, isError: false }),
 }))
 

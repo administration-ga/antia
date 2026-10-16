@@ -3,8 +3,8 @@ import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-libra
 import { getFunctionName } from "convex/server"
 import { I18nextProvider } from "react-i18next"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
-import type { Id } from "@antia/api/engine"
-import { noDirectPermissions } from "@antia/social-domain/live/permissions"
+import type { Id } from "@antsia/api/engine"
+import { noDirectPermissions } from "@antsia/social-domain/live/permissions"
 import type { LocalTrack } from "livekit-client"
 
 import { createAppI18n } from "../../i18n"
@@ -17,13 +17,13 @@ const mocks = vi.hoisted(() => ({
   path: "/conference/session-a", networkId: "network-a", mounted: vi.fn(), unmounted: vi.fn(),
   session: null as unknown,
 }))
-vi.mock("@antia/ui/overlay", () => ({ useIsReseauMobile: () => false }))
-vi.mock("@antia/api/network", () => ({
-  useNetwork: () => ({ networkId: mocks.networkId, personId: "person-a", charte: "antia" }),
+vi.mock("@antsia/ui/overlay", () => ({ useIsReseauMobile: () => false }))
+vi.mock("@antsia/api/network", () => ({
+  useNetwork: () => ({ networkId: mocks.networkId, personId: "person-a", charte: "antsia" }),
   useRoutes: () => ({ home: () => "/fil", conference: (id: string) => `/conference/${id}` }),
 }))
-vi.mock("@antia/api/hooks", () => ({ useAuthenticatedConvexQuery: () => ({ data: mocks.session, isError: false }) }))
-vi.mock("@antia/api/routing", () => ({
+vi.mock("@antsia/api/hooks", () => ({ useAuthenticatedConvexQuery: () => ({ data: mocks.session, isError: false }) }))
+vi.mock("@antsia/api/routing", () => ({
   usePathname: () => mocks.path,
   useRouter: () => ({ push: vi.fn() }),
   Link: ({ children, href }: { children: React.ReactNode; href: string }) => <a href={href}>{children}</a>,

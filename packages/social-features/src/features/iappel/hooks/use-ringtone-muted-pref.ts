@@ -26,12 +26,12 @@
  * (`storagePrefix`) : un état par réseau, comme tout stockage local du moteur.
  */
 
-import { api } from "@antia/api/engine";
+import { api } from "@antsia/api/engine";
 import {
 	useAuthenticatedConvexQuery,
 	useConvexMutationQuery,
-} from "@antia/api/hooks";
-import { useNetwork } from "@antia/api/network";
+} from "@antsia/api/hooks";
+import { useNetwork } from "@antsia/api/network";
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import {
 	resolveRingtonePrefs,

@@ -1,8 +1,8 @@
 // @vitest-environment jsdom
-// Dupliqué de socle/packages/agent-features/src/features/direct/ParticipantsPanel.test.tsx @ ad2e7fdc2 — adaptations : matrice serveur et API réseau ANTIA, volets opt-in, consentement et curseurs ; scénarios regroupés sur la surface branchée.
+// Dupliqué de socle/packages/agent-features/src/features/direct/ParticipantsPanel.test.tsx @ ad2e7fdc2 — adaptations : matrice serveur et API réseau ANTSIA, volets opt-in, consentement et curseurs ; scénarios regroupés sur la surface branchée.
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react"
-import type { Id } from "@antia/api/engine"
-import { directPermissionsFor, noDirectPermissions } from "@antia/social-domain/live/permissions"
+import type { Id } from "@antsia/api/engine"
+import { directPermissionsFor, noDirectPermissions } from "@antsia/social-domain/live/permissions"
 import { getFunctionName } from "convex/server"
 import { I18nextProvider } from "react-i18next"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
@@ -11,14 +11,14 @@ import { DirectManagement } from "./DirectManagement"
 import type { DirectSession } from "./DirectPage"
 
 const mocks = vi.hoisted(() => ({ network: "network-a", query: vi.fn(), mutation: vi.fn(), data: {} as Record<string, unknown>, errors: new Set<string>(), refetch: vi.fn() }))
-vi.mock("@antia/api/network", () => ({ useNetwork: () => ({ networkId: mocks.network, personId: "person-self", charte: "antia" }) }))
-vi.mock("@antia/api/hooks", () => ({ useAuthenticatedConvexQuery: (ref: Parameters<typeof getFunctionName>[0], args: unknown) => {
+vi.mock("@antsia/api/network", () => ({ useNetwork: () => ({ networkId: mocks.network, personId: "person-self", charte: "antsia" }) }))
+vi.mock("@antsia/api/hooks", () => ({ useAuthenticatedConvexQuery: (ref: Parameters<typeof getFunctionName>[0], args: unknown) => {
   const name = getFunctionName(ref)
   mocks.query(name, args)
   return { data: args === "skip" ? undefined : mocks.data[name], isError: mocks.errors.has(name), isFetching: false, refetch: mocks.refetch }
 } }))
 vi.mock("convex/react", () => ({ useMutation: (ref: Parameters<typeof getFunctionName>[0]) => (...args: unknown[]) => mocks.mutation(getFunctionName(ref), ...args) }))
-vi.mock("@antia/ui/espace-kit", () => ({ EspaceDialog: ({ title, description, children }: { title: string; description: string; children: React.ReactNode }) => <div role="dialog" aria-label={title}><p>{description}</p>{children}</div> }))
+vi.mock("@antsia/ui/espace-kit", () => ({ EspaceDialog: ({ title, description, children }: { title: string; description: string; children: React.ReactNode }) => <div role="dialog" aria-label={title}><p>{description}</p>{children}</div> }))
 
 const i18n = createAppI18n({ locale: "fr", appResources: { fr: {}, en: {} }, defaultNS: "direct" })
 function session(patch: Partial<DirectSession> = {}): DirectSession {

@@ -5,9 +5,10 @@
  * `networkSettingsHistory` (les réglages figés) et dans le journal des
  * décisions du moteur (`engineAudit` : qui, à quel titre, pourquoi).
  */
-import { assertDecisionReason } from "@antia/social-domain/audit"
-import { validateFacetSchema } from "@antia/social-domain/facets"
-import { isValidNetworkSlug, validateNetworkShape } from "@antia/social-domain/network"
+import { assertDecisionReason } from "@antsia/social-domain/audit"
+import { BRAND_NAME } from "@antsia/social-contracts/brand"
+import { validateFacetSchema } from "@antsia/social-domain/facets"
+import { isValidNetworkSlug, validateNetworkShape, LEGACY_ROOT_NETWORK_SLUG, ROOT_NETWORK_SLUG } from "@antsia/social-domain/network"
 import { v } from "convex/values"
 
 import type { Doc, Id } from "../../_generated/dataModel"
@@ -15,6 +16,7 @@ import { type MutationCtx, query } from "../../_generated/server"
 import { checked, fail } from "../../lib/errors"
 import { operatorMutation, operatorQuery } from "../../lib/functions"
 import { enforceRateLimit } from "../../lib/rateLimit"
+import { findNetworkBySlug } from "../../lib/networkSlug"
 import {
   contentVisibilityValidator,
   facetSchemaValidator,
@@ -43,10 +45,11 @@ const publicNetworkValidator = v.object({
 })
 
 function toPublicNetwork(network: Doc<"networks">) {
+  const legacyRoot = network.kind === "root" && network.slug === LEGACY_ROOT_NETWORK_SLUG
   return {
     _id: network._id,
-    slug: network.slug,
-    name: network.name,
+    slug: legacyRoot ? ROOT_NETWORK_SLUG : network.slug,
+    name: legacyRoot ? BRAND_NAME : network.name,
     kind: network.kind,
     ...(network.parentId ? { parentId: network.parentId } : {}),
     ...(network.managedBy ? { managedBy: network.managedBy } : {}),
@@ -55,7 +58,7 @@ function toPublicNetwork(network: Doc<"networks">) {
     ...(network.facetSchema ? { facetSchema: network.facetSchema } : {}),
     reachValues: network.reachValues,
     ...(network.openCountries ? { openCountries: network.openCountries } : {}),
-    theme: network.theme,
+    theme: network.theme === LEGACY_ROOT_NETWORK_SLUG ? ROOT_NETWORK_SLUG : network.theme,
   }
 }
 
@@ -68,10 +71,7 @@ export const getBySlug = query({
   args: { slug: v.string() },
   returns: v.union(publicNetworkValidator, v.null()),
   handler: async (ctx, { slug }) => {
-    const network = await ctx.db
-      .query("networks")
-      .withIndex("by_slug", (q) => q.eq("slug", slug))
-      .unique()
+    const network = await findNetworkBySlug(ctx, slug)
     if (!network || network.status !== "active") return null
     return toPublicNetwork(network)
   },

@@ -21,13 +21,13 @@
  * automatiquement le groupe.
  */
 
-import { api } from "@antia/api/engine"
-import type { Id } from "@antia/api/engine"
+import { api } from "@antsia/api/engine"
+import type { Id } from "@antsia/api/engine"
 import {
 	useAuthenticatedConvexQuery,
 	useConvexMutationQuery,
-} from "@antia/api/hooks"
-import { useNetwork } from "@antia/api/network"
+} from "@antsia/api/hooks"
+import { useNetwork } from "@antsia/api/network"
 import { useIdempotencyKey } from "../../lib/chat/use-idempotency-key"
 import {
 	ArrowLeft,

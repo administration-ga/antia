@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/messagerie/messagerie-floating-contract.test.ts @ ad2e7fdc2 — adaptations : format téléphone UNIQUE du moteur, 440 × 956, au lieu du gabarit 390 × 844 — largeur plafonnée à 440 px qui suit la hauteur disponible au rapport du téléphone, hauteur DÉDUITE de la largeur au même rapport ; feuille lue sur la constante exportée `MESSAGERIE_STYLES_CSS`, commentaires retirés, au lieu du texte source ; composants relus commentaires ôtés ; libellés de la barre iCom et de l'en-tête de brique lus par leurs clés i18n (`messagerieDock.*`, `icomBrickHeader.*`) et vérifiés dans la locale française (« iCom », « Rétracter iCom », « Déployer iCom », « Détacher iCom en fenêtre », « Rétracter/Déployer <brique> ») ; clé de la position flottante dérivée du préfixe de stockage du réseau (`icomFloatPlacementStorageKey(prefix)`), distincte de celle de l'état du dock, au lieu de la constante `espace:` ; surface flottante dans la coque (`shell/floating-surface/`) et relais d'iAppel vers `../../shell/floating-surface/` ; vérification de la fenêtre du poste (`icom-poste/IcomPosteWindow.tsx`) retirée — le moteur n'a qu'un espace, aucun poste ; cas ajouté : l'iCom détaché et la fenêtre d'appel flottante (`.iappel-float`, `communication.css` de `@antia/ui`) ont une seule et même règle de format.
+// Dupliqué de socle/packages/agent-features/src/features/messagerie/messagerie-floating-contract.test.ts @ ad2e7fdc2 — adaptations : format téléphone UNIQUE du moteur, 440 × 956, au lieu du gabarit 390 × 844 — largeur plafonnée à 440 px qui suit la hauteur disponible au rapport du téléphone, hauteur DÉDUITE de la largeur au même rapport ; feuille lue sur la constante exportée `MESSAGERIE_STYLES_CSS`, commentaires retirés, au lieu du texte source ; composants relus commentaires ôtés ; libellés de la barre iCom et de l'en-tête de brique lus par leurs clés i18n (`messagerieDock.*`, `icomBrickHeader.*`) et vérifiés dans la locale française (« iCom », « Rétracter iCom », « Déployer iCom », « Détacher iCom en fenêtre », « Rétracter/Déployer <brique> ») ; clé de la position flottante dérivée du préfixe de stockage du réseau (`icomFloatPlacementStorageKey(prefix)`), distincte de celle de l'état du dock, au lieu de la constante `espace:` ; surface flottante dans la coque (`shell/floating-surface/`) et relais d'iAppel vers `../../shell/floating-surface/` ; vérification de la fenêtre du poste (`icom-poste/IcomPosteWindow.tsx`) retirée — le moteur n'a qu'un espace, aucun poste ; cas ajouté : l'iCom détaché et la fenêtre d'appel flottante (`.iappel-float`, `communication.css` de `@antsia/ui`) ont une seule et même règle de format.
 import { readFileSync } from "node:fs"
 import { createRequire } from "node:module"
 import { pathToFileURL } from "node:url"
@@ -23,7 +23,7 @@ const t = createAppI18n({
 const PHONE = { width: 440, height: 956 } as const
 
 /** Un préfixe de stockage de réseau, tel que `useNetwork()` le compose. */
-const PREFIXE_RESEAU = "antia:antia:"
+const PREFIXE_RESEAU = "antsia:antsia:"
 
 /** Le CODE d'un fichier (chemin relatif à ce test), commentaires ôtés : on vérifie du code, pas de la prose. */
 function code(relativePath: string): string {
@@ -178,9 +178,9 @@ describe("iCom ancré ou flottant — contrat de pose", () => {
 	it("le téléphone iCom et la fenêtre d'appel flottante n'ont qu'UN format", () => {
 		// Ce qui se détache au bureau est UN téléphone : l'iCom flottant, et
 		// l'appel quand aucune carte ne l'héberge (`.iappel-float`, couche de
-		// communication de `@antia/ui`). Deux règles qui divergeraient d'un
+		// communication de `@antsia/ui`). Deux règles qui divergeraient d'un
 		// pixel poseraient deux téléphones différents côte à côte.
-		const entree = createRequire(import.meta.url).resolve("@antia/ui/styles.css")
+		const entree = createRequire(import.meta.url).resolve("@antsia/ui/styles.css")
 		const appel = cssOf(
 			readFileSync(
 				new URL("./styles/communication.css", pathToFileURL(entree)),

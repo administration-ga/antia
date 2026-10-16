@@ -42,10 +42,10 @@
  * d'onglets.
  */
 
-import { api } from "@antia/api/engine"
-import { useAuthenticatedConvexQuery } from "@antia/api/hooks"
-import { useNetwork, useRoutes } from "@antia/api/network"
-import { usePathname, useRouter, useSearchParams } from "@antia/api/routing"
+import { api } from "@antsia/api/engine"
+import { useAuthenticatedConvexQuery } from "@antsia/api/hooks"
+import { useNetwork, useRoutes } from "@antsia/api/network"
+import { usePathname, useRouter, useSearchParams } from "@antsia/api/routing"
 import { Suspense, useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { ReseauMobileStyles } from "../../shell/mobile/mobile-styles"

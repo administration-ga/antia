@@ -5,7 +5,7 @@
  * RÉFÉRENCE, relue avec sa garde à l'ouverture. Dédoublonnage par `dedupKey`
  * (`genre|sujet|acteur`). Écrite par la porte unique `notify.ts` seulement.
  */
-import { NOTIFICATION_KINDS, NOTIFICATION_RESOLUTIONS } from "@antia/social-domain/notifications"
+import { NOTIFICATION_KINDS, NOTIFICATION_RESOLUTIONS } from "@antsia/social-domain/notifications"
 import { defineTable } from "convex/server"
 import { v } from "convex/values"
 

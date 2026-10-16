@@ -8,7 +8,7 @@ import { beforeAll, describe, expect, it, vi } from "vitest"
 import { EngineTestWrapper, memoryRouter, TEST_ROUTES } from "../../tests/engine-wrapper"
 import { reseauAgentHref } from "../reseau-agent-nav"
 
-vi.mock("@antia/ui", () => ({
+vi.mock("@antsia/ui", () => ({
   Icon: ({ name }: { name: string }) => <span aria-hidden="true">{name}</span>,
 }))
 

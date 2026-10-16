@@ -4,7 +4,7 @@
  * publication à date d'expiration : une story n'entre dans aucune fenêtre du
  * fil, n'est pas cherchable, et son blob EST purgé (avec sa ligne d'analyse).
  */
-import { PERSONAL_REACH_AUDIENCES } from "@antia/social-domain/content"
+import { PERSONAL_REACH_AUDIENCES } from "@antsia/social-domain/content"
 import { defineTable } from "convex/server"
 import { v } from "convex/values"
 

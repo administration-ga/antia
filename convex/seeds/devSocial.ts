@@ -1,7 +1,7 @@
 /**
  * Graine SOCIALE de développement — hors production seulement (même double garde
  * que les fondations : argument de confirmation ET déploiement local ou
- * `ANTIA_SEEDS_ALLOWED=true`).
+ * `ANTSIA_SEEDS_ALLOWED=true`).
  *
  * Pose une personne de DÉMONSTRATION (profil publié, membre déclarée d'un
  * réseau) et, sur demande, sa relation ACCEPTÉE avec une personne existante
@@ -16,6 +16,7 @@ import { v } from "convex/values"
 
 import type { Id } from "../_generated/dataModel"
 import { internalMutation } from "../_generated/server"
+import { findNetworkBySlug } from "../lib/networkSlug"
 import { assertSeedsAllowed } from "./foundations"
 
 /** Préfixe du sujet d'authentification d'une personne de démonstration (aucune session ne le porte). */
@@ -33,10 +34,7 @@ export const demoPerson = internalMutation({
   handler: async (ctx, args) => {
     assertSeedsAllowed(args.confirmNonProduction)
     const now = Date.now()
-    const network = await ctx.db
-      .query("networks")
-      .withIndex("by_slug", (q) => q.eq("slug", args.networkSlug))
-      .unique()
+    const network = await findNetworkBySlug(ctx, args.networkSlug)
     if (!network) throw new Error(`Graine refusée : réseau « ${args.networkSlug} » introuvable (jouer d'abord seeds/foundations:run).`)
 
     const existing = await ctx.db

@@ -6,9 +6,9 @@
  * un refus ne termine pas un appel de groupe, un départ non plus, et chaque
  * invité décroche quand il veut.
  */
-import { MAX_DECLINE_NOTE_LENGTH } from "@antia/social-contracts/calls"
-import { countReservedSeats } from "@antia/social-contracts/callGroup"
-import { isLiveCallStatus, isRingingCallStatus, isTerminalCallStatus } from "@antia/social-domain/callJournal"
+import { MAX_DECLINE_NOTE_LENGTH } from "@antsia/social-contracts/calls"
+import { countReservedSeats } from "@antsia/social-contracts/callGroup"
+import { isLiveCallStatus, isRingingCallStatus, isTerminalCallStatus } from "@antsia/social-domain/callJournal"
 import { v } from "convex/values"
 
 import type { Doc, Id } from "../../_generated/dataModel"

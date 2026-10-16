@@ -4,7 +4,7 @@
  * du réseau du contenu les reçoit. La modération à l'échelle (équipes, sanctions,
  * recours, relecture) arrive en PA5 sur cette table.
  */
-import { CONTENT_REPORT_REASONS, CONTENT_REPORT_STATUSES } from "@antia/social-domain/moderation"
+import { CONTENT_REPORT_REASONS, CONTENT_REPORT_STATUSES } from "@antsia/social-domain/moderation"
 import { defineTable } from "convex/server"
 import { v } from "convex/values"
 

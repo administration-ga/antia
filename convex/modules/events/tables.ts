@@ -3,7 +3,7 @@
  * Évènements PERSONNELS d'un réseau — l'agenda d'une personne, jamais d'une
  * organisation. L'invitation et la réponse sont LA MÊME ligne de participation.
  */
-import { PERSONAL_EVENT_PARTICIPATION_STATUSES, PERSONAL_EVENT_STATUSES } from "@antia/social-domain/events"
+import { PERSONAL_EVENT_PARTICIPATION_STATUSES, PERSONAL_EVENT_STATUSES } from "@antsia/social-domain/events"
 import { defineTable } from "convex/server"
 import { v } from "convex/values"
 

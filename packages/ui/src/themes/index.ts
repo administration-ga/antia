@@ -4,5 +4,5 @@
  * `[data-charte="<nom>"]`. `diasporale` appartient à la session DIASPORALE
  * (fichier `diasporale.css`, écrit par elle).
  */
-export const APPLICATION_THEMES = ["antia", "admin-antia", "diasporale"] as const
+export const APPLICATION_THEMES = ["antsia", "admin-antsia", "diasporale"] as const
 export type ApplicationTheme = (typeof APPLICATION_THEMES)[number]

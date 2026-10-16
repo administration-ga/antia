@@ -1,5 +1,5 @@
 // Dupliqué de socle/convex/lib/groupCapacity.test.ts @ ad2e7fdc2 — adaptations : cas d'appel de groupe non administratifs seulement (exemption du back-office et réglage d'organisation retirés) ; cas neufs pour les bornes du titre, de la description et de la composition d'un fil.
-import { DomainViolation } from "@antia/social-domain/violation"
+import { DomainViolation } from "@antsia/social-domain/violation"
 import { describe, expect, it } from "vitest"
 
 import {

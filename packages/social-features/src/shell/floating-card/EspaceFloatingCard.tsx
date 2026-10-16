@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/espace-personnel/EspaceFloatingCard.tsx @ ad2e7fdc2 — adaptations : déplacé dans la coque (`shell/floating-card/`) ; textes « Fermer » et progression d'assistant lus dans l'espace de noms `shell` (`espaceFloatingCard.close`, `espaceFloatingCard.stepProgress`) au lieu des clés communes du socle ; charte par défaut = celle de l'application (`<html data-charte>`, résolue par `ImmersiveOverlay` de `@antia/ui/overlay`) au lieu de « espace-personnel », règle d'arrondi de la charte de poste (`espace-structure`) retirée ; feuille sortie du JSX dans une constante de module (`ESPACE_FLOATING_CARD_CSS`) — un littéral enfant de `<style>` passerait pour une chaîne d'interface —, règles inchangées ; primitives `@antia/ui`.
+// Dupliqué de socle/packages/agent-features/src/features/espace-personnel/EspaceFloatingCard.tsx @ ad2e7fdc2 — adaptations : déplacé dans la coque (`shell/floating-card/`) ; textes « Fermer » et progression d'assistant lus dans l'espace de noms `shell` (`espaceFloatingCard.close`, `espaceFloatingCard.stepProgress`) au lieu des clés communes du socle ; charte par défaut = celle de l'application (`<html data-charte>`, résolue par `ImmersiveOverlay` de `@antsia/ui/overlay`) au lieu de « espace-personnel », règle d'arrondi de la charte de poste (`espace-structure`) retirée ; feuille sortie du JSX dans une constante de module (`ESPACE_FLOATING_CARD_CSS`) — un littéral enfant de `<style>` passerait pour une chaîne d'interface —, règles inchangées ; primitives `@antsia/ui`.
 "use client"
 
 /**
@@ -34,8 +34,8 @@
  * plus.
  */
 
-import { Button } from "@antia/ui"
-import { ImmersiveOverlay, useIsReseauMobile } from "@antia/ui/overlay"
+import { Button } from "@antsia/ui"
+import { ImmersiveOverlay, useIsReseauMobile } from "@antsia/ui/overlay"
 import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 import { type FloatingCardKind, floatingCardPose } from "./floating-card"

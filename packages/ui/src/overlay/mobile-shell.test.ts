@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/mobile/mobile-shell.test.ts @ ad2e7fdc2 — adaptations : l'accord avec le seuil du dock de messagerie se vérifie dans `@antia/social-features` (un paquet d'interface n'importe pas les surfaces) ; la barre basse se lit sur `MOBILE_ONLY_CLASS` au lieu de `personal-nav` (coque de l'espace agent, non reprise).
+// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/mobile/mobile-shell.test.ts @ ad2e7fdc2 — adaptations : l'accord avec le seuil du dock de messagerie se vérifie dans `@antsia/social-features` (un paquet d'interface n'importe pas les surfaces) ; la barre basse se lit sur `MOBILE_ONLY_CLASS` au lieu de `personal-nav` (coque de l'espace agent, non reprise).
 import { describe, expect, it } from "vitest"
 import { MOBILE_ONLY_CLASS } from "./breakpoint"
 import {

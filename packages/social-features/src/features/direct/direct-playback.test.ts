@@ -1,6 +1,6 @@
 // Dupliqué de socle/packages/agent-features/src/features/direct/direct-playback.test.ts @ ad2e7fdc2 — adaptations : règles du moteur, codes i18n et frontière VTT partagée.
 import { describe, expect, it } from "vitest"
-import { DIRECT_REPLAY_CAPTIONS_MAX_BYTES } from "@antia/social-domain/live/replayComposition"
+import { DIRECT_REPLAY_CAPTIONS_MAX_BYTES } from "@antsia/social-domain/live/replayComposition"
 import { replayCanDecide, replayCanRetry, replayCaptionsFileRefusal, replayDurationParts, replayRetentionIsNear, replayVisibilityOptions } from "./direct-playback"
 import { directCardPose, directPresentationPlace } from "./direct-floating"
 

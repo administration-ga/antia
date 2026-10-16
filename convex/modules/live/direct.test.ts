@@ -24,8 +24,8 @@
  *  7. **Le replay ne peut que RESTREINDRE**, et la branche `directs/` du
  *     webhook aboutit ici.
  */
-import { GENERATED_BLOB_SKIP_REASON } from "@antia/social-domain/filePolicy"
-import { DIRECT_HOST_GRACE_MS, DIRECT_HOST_LEASE_MS, DIRECT_LIVE_MAX_DURATION_MS, DIRECT_PRESENCE_TTL_MS } from "@antia/social-domain/live/domain"
+import { GENERATED_BLOB_SKIP_REASON } from "@antsia/social-domain/filePolicy"
+import { DIRECT_HOST_GRACE_MS, DIRECT_HOST_LEASE_MS, DIRECT_LIVE_MAX_DURATION_MS, DIRECT_PRESENCE_TTL_MS } from "@antsia/social-domain/live/domain"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 import { api, internal } from "../../_generated/api"

@@ -30,7 +30,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { renderWithEngine, TEST_NETWORK_ID, TEST_PERSON_ID } from "../../tests/engine-wrapper"
 
 /** Le préfixe de stockage du réseau de test (`NetworkProvider`, slug `test`). */
-const PREFIXE = "antia:test:"
+const PREFIXE = "antsia:test:"
 
 const mocks = vi.hoisted(() => ({
   publish: vi.fn(),
@@ -39,7 +39,7 @@ const mocks = vi.hoisted(() => ({
   toast: { success: vi.fn(), error: vi.fn() },
 }))
 
-vi.mock("@antia/api/engine", () => ({
+vi.mock("@antsia/api/engine", () => ({
   api: {
     modules: {
       posts: { posts: { publish: "publish" } },
@@ -59,7 +59,7 @@ vi.mock("convex/react", () => ({
 
 vi.mock("sonner", () => ({ toast: mocks.toast }))
 
-vi.mock("@antia/ui", () => ({
+vi.mock("@antsia/ui", () => ({
   Alert: ({ children }: { children: ReactNode }) => (
     <div role="alert">{children}</div>
   ),

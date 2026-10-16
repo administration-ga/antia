@@ -18,7 +18,7 @@ describe("no-hardcoded-strings — toute chaîne d'interface passe par l'i18n", 
     const source = [
       "export function A() {",
       "  return (",
-      '    <div data-charte="antia" aria-label="Fermer">',
+      '    <div data-charte="antsia" aria-label="Fermer">',
       "      Bonjour",
       '      {"Publier"}',
       '      <img alt={"Photo"} src={url} />',

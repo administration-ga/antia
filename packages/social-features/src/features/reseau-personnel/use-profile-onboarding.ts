@@ -22,8 +22,8 @@
  * porte aucune correction.
  */
 
-import { api } from "@antia/api/engine"
-import { useAuthenticatedConvexQuery } from "@antia/api/hooks"
+import { api } from "@antsia/api/engine"
+import { useAuthenticatedConvexQuery } from "@antsia/api/hooks"
 import { useMutation } from "convex/react"
 import { useEffect, useState } from "react"
 import {

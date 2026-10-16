@@ -1,6 +1,6 @@
 // @vitest-environment edge-runtime
 // Dupliqué de socle/convex/modules/reseauPersonnel/notifications.test.ts (avec socle/convex/tests/notifications.test.ts) @ ad2e7fdc2 — adaptations : la cloche sociale du moteur, par réseau ; porte unique (soi-même, blocage, non-membre) ; pagination native seule (le curseur temporel qui levait est retiré, D18) ; non-lus bornés avec lacune (D19) ; résolution par le serveur ; diffusion par lots chaînés (patron icom/notifyFanout, D07) ; avis de verdict de la garde des fichiers ; titres, corps et liens administratifs retirés.
-import { engineErrorCode } from "@antia/social-contracts/errors"
+import { engineErrorCode } from "@antsia/social-contracts/errors"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 import { api, internal } from "../../_generated/api"

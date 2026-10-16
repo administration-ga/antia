@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/stories/story-create.ts @ ad2e7fdc2 — adaptations : destinations `reseau`/`icom` (ADR-0079 du socle) retirées avec le moteur, qui n'a qu'une surface et une seule borne vidéo (la plus stricte du socle) — cases et libellés « iRéseau » / « iCom (Statuts) », invite croisée, origine du composeur, refus et indices par surface supprimés ; bornes lues dans `@antia/social-domain/stories` et `/content` ; phrases de refus et unités (Mo, minutes, secondes) traduites par i18n (`t` en dernier paramètre, clés `stories:storyCreate.*`) au lieu des libellés du domaine du socle ; texte des refus du moteur par leur code (`storyEngineErrorText` : espaces `rules` et `errors`).
+// Dupliqué de socle/packages/agent-features/src/features/stories/story-create.ts @ ad2e7fdc2 — adaptations : destinations `reseau`/`icom` (ADR-0079 du socle) retirées avec le moteur, qui n'a qu'une surface et une seule borne vidéo (la plus stricte du socle) — cases et libellés « iRéseau » / « iCom (Statuts) », invite croisée, origine du composeur, refus et indices par surface supprimés ; bornes lues dans `@antsia/social-domain/stories` et `/content` ; phrases de refus et unités (Mo, minutes, secondes) traduites par i18n (`t` en dernier paramètre, clés `stories:storyCreate.*`) au lieu des libellés du domaine du socle ; texte des refus du moteur par leur code (`storyEngineErrorText` : espaces `rules` et `errors`).
 /**
  * story-create — ce qu'on ACCEPTE de publier en story, et quand le bouton
  * « Publier » s'allume.
@@ -34,13 +34,13 @@
 
 import type { TFunction } from "i18next"
 
-import { engineErrorCode, engineErrorRule } from "@antia/social-contracts/errors"
-import { POST_IMAGE_MIME_TYPES } from "@antia/social-domain/content"
+import { engineErrorCode, engineErrorRule } from "@antsia/social-contracts/errors"
+import { POST_IMAGE_MIME_TYPES } from "@antsia/social-domain/content"
 import {
 	STORY_CAPTION_MAX_LENGTH,
 	STORY_IMAGE_MAX_BYTES,
 	STORY_VIDEO_LIMITS,
-} from "@antia/social-domain/stories"
+} from "@antsia/social-domain/stories"
 
 /**
  * Ce que le sélecteur de fichiers ACCEPTE.

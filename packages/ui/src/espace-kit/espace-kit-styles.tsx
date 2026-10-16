@@ -2,7 +2,7 @@
 "use client"
 
 /**
- * Feuille de style partagée du kit de primitives d'espace (`@antia/ui/espace-kit`).
+ * Feuille de style partagée du kit de primitives d'espace (`@antsia/ui/espace-kit`).
  *
  * Un seul `<style href="espace-kit" precedence="default">` pour tout le
  * kit : React 19 le hisse et le dédoublonne dans le `<head>`, donc plusieurs

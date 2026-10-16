@@ -1,4 +1,4 @@
-// Dupliqué de socle/convex/modules/direct/validators.ts @ ad2e7fdc2 — adaptations : validateurs PRÉCIS dérivés des listes du domaine (`@antia/social-domain/live/domain` et `/live/antenna`, une seule source pour les littéraux) ; ceux dont le vocabulaire est un TYPE d'un module pur porté tel quel (format de scène et état de capture de `replayComposition`, genre de délégation de `permissions`, rôle de connexion de `grants`) vérifiés contre lui À LA COMPILATION, dans les deux sens (`exactly`) ; audience « organisation » retirée, remplacée par `followers` — les abonnés et signataires vivants de la page qui signe la conférence (V36) ; invité désigné par une PERSONNE (`personId`) ; réactions et visibilité de rediffusion sur les validateurs communs du moteur (`reactionKindValidator`, `reachAudienceValidator`) ; ajouts : réponse de l'hôte à une main levée (le validateur local d'`antenna.ts`), décision de l'hôte sur l'enregistrement, rôle de CONNEXION rendu par `authorizeToken`.
+// Dupliqué de socle/convex/modules/direct/validators.ts @ ad2e7fdc2 — adaptations : validateurs PRÉCIS dérivés des listes du domaine (`@antsia/social-domain/live/domain` et `/live/antenna`, une seule source pour les littéraux) ; ceux dont le vocabulaire est un TYPE d'un module pur porté tel quel (format de scène et état de capture de `replayComposition`, genre de délégation de `permissions`, rôle de connexion de `grants`) vérifiés contre lui À LA COMPILATION, dans les deux sens (`exactly`) ; audience « organisation » retirée, remplacée par `followers` — les abonnés et signataires vivants de la page qui signe la conférence (V36) ; invité désigné par une PERSONNE (`personId`) ; réactions et visibilité de rediffusion sur les validateurs communs du moteur (`reactionKindValidator`, `reachAudienceValidator`) ; ajouts : réponse de l'hôte à une main levée (le validateur local d'`antenna.ts`), décision de l'hôte sur l'enregistrement, rôle de CONNEXION rendu par `authorizeToken`.
 /**
  * Validateurs du DIRECT (module `convex/modules/live`).
  *
@@ -12,7 +12,7 @@
  * nominative) — arrivent chacune AVEC sa garde (`access.ts`) et ses refus de
  * forme ; c'est l'audience sans garde qui est interdite, pas l'audience de plus.
  */
-import { DIRECT_ANTENNA_INVITE_STATES, DIRECT_ANTENNA_REQUEST_STATUSES, DIRECT_ANTENNA_RESPONSES } from "@antia/social-domain/live/antenna"
+import { DIRECT_ANTENNA_INVITE_STATES, DIRECT_ANTENNA_REQUEST_STATUSES, DIRECT_ANTENNA_RESPONSES } from "@antsia/social-domain/live/antenna"
 import {
   DIRECT_ANTENNA_INVITATION_STATUSES,
   DIRECT_AUDIENCES,
@@ -29,10 +29,10 @@ import {
   DIRECT_SPEAKER_ROLES,
   DIRECT_STAGE_LAYOUTS,
   DIRECT_STATUSES,
-} from "@antia/social-domain/live/domain"
-import type { DirectDelegationKind } from "@antia/social-domain/live/permissions"
-import { DIRECT_REPLAY_CAPTIONS_LANGS, DIRECT_REPLAY_FAILURE_REASONS } from "@antia/social-domain/live/replayComposition"
-import type { DirectReplayEgressState, DirectStageFormat } from "@antia/social-domain/live/replayComposition"
+} from "@antsia/social-domain/live/domain"
+import type { DirectDelegationKind } from "@antsia/social-domain/live/permissions"
+import { DIRECT_REPLAY_CAPTIONS_LANGS, DIRECT_REPLAY_FAILURE_REASONS } from "@antsia/social-domain/live/replayComposition"
+import type { DirectReplayEgressState, DirectStageFormat } from "@antsia/social-domain/live/replayComposition"
 import { v } from "convex/values"
 
 import { literals, reachAudienceValidator, reactionKindValidator } from "../../lib/validators"

@@ -14,7 +14,7 @@ const mocks = vi.hoisted(() => ({
   openRefusedCall: vi.fn(),
 }))
 
-vi.mock("@antia/api/engine", () => ({
+vi.mock("@antsia/api/engine", () => ({
   api: { modules: { calls: { direct: { callMember: "callMember" } } } },
 }))
 vi.mock("convex/react", () => ({ useMutation: () => mocks.call }))

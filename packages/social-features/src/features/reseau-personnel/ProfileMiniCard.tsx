@@ -43,11 +43,11 @@
  * de la même couverture ne peuvent pas diverger.
  */
 
-import { api } from "@antia/api/engine"
-import { useAuthenticatedConvexQuery } from "@antia/api/hooks"
-import { useRoutes } from "@antia/api/network"
-import { Link, useRouter } from "@antia/api/routing"
-import { Alert, Button, Card } from "@antia/ui"
+import { api } from "@antsia/api/engine"
+import { useAuthenticatedConvexQuery } from "@antsia/api/hooks"
+import { useRoutes } from "@antsia/api/network"
+import { Link, useRouter } from "@antsia/api/routing"
+import { Alert, Button, Card } from "@antsia/ui"
 import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 import { Avatar } from "./Avatar"

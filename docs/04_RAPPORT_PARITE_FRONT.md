@@ -1,11 +1,11 @@
 ---
-title: "ANTIA — Rapport de parité du front (PA6)"
+title: "ANTSIA — Rapport de parité du front (PA6)"
 date: "2026-10-15"
 source: "socle administration.ga, origin/main = ad2e7fdc2 (copie propre, lecture seule)"
 statut: "Tenu à jour à chaque lot du front ; la carte de duplication est docs/02_OWNER_MAP_DUPLICATION.md §4.3 et §7, le détail fichier par fichier ses annexes A5 et A6"
 ---
 
-# Rapport de parité du front — `@antia/social-features` et sa coque
+# Rapport de parité du front — `@antsia/social-features` et sa coque
 
 Le front de l'espace agent du socle est dupliqué dans le moteur par LOTS, dans l'ordre de l'owner map
 (§4.3). Chaque lot suit les règles de duplication (`CLAUDE.md`) : copie d'abord, en-tête de
@@ -14,8 +14,8 @@ vérification sur le serveur qui tourne.
 
 | Lot | Contenu | Clos le | Commit(s) |
 |---|---|---|---|
-| F0 — fondations | `@antia/ui` (primitives d'ui-v2, tiroir, surfaces plein écran), `@antia/api` (routage, réseau courant, références typées du moteur), dépendances | 2026-10-15 | `8ddece5` |
-| F1 — iCom | messagerie (iChat, groupes), iAppel (appels 1:1 et de groupe, journal, présence, messagerie vocale), stories (Statuts), primitives du réseau personnel, coque légère, branchement d'antia.ga | 2026-10-15 | `517bf13` |
+| F0 — fondations | `@antsia/ui` (primitives d'ui-v2, tiroir, surfaces plein écran), `@antsia/api` (routage, réseau courant, références typées du moteur), dépendances | 2026-10-15 | `8ddece5` |
+| F1 — iCom | messagerie (iChat, groupes), iAppel (appels 1:1 et de groupe, journal, présence, messagerie vocale), stories (Statuts), primitives du réseau personnel, coque légère, branchement d'antsia.ga | 2026-10-15 | `517bf13` |
 | F2 — réseau personnel | fil et publication, relations, groupes thématiques, évènements, signets, vie privée, profil, pages, cloche, albums, coque de bureau et coquille mobile (A5, A6 §4.3) | 2026-10-15 | ce commit |
 | F3 — direct | conférences en direct (A6 §4.1), après le lot 16 `live` du moteur | — | — |
 
@@ -30,7 +30,7 @@ vérification sur le serveur qui tourne.
    coupée aux fichiers retirés (poste, organisation, iAsted, iDocument, centre d'appels, iRéunion) et aux
    fichiers réécrits (`IcomMobileTabBar`, barrels) : **180 sources (≈ 43 000 l.) et leurs tests voisins**,
    275 fichiers. En-tête de provenance posé, chemins cibles de l'owner map, imports relatifs recalculés,
-   imports de paquets réécrits (`@workspace/*` → `@antia/*`, `@convex/*` → `@antia/api/engine` et
+   imports de paquets réécrits (`@workspace/*` → `@antsia/*`, `@convex/*` → `@antsia/api/engine` et
    contrats).
 2. **Adaptation par huit lots parallèles** (agents Opus, consigne du 25/09), chacun sur ses fichiers et ses
    fichiers de traduction, avec un brief commun (fonctions du moteur, i18n, couleurs, tests, contrôles).
@@ -50,7 +50,7 @@ vérification sur le serveur qui tourne.
 | W7 primitives du réseau personnel, coque basse | 39 | 292 | 102 |
 | W8 magasins d'appel, LiveKit client, utilitaires de discussion | 16 | 56 | 2 |
 
-`@antia/social-features` : **100 fichiers de test, 1 757 cas verts** ; tous les cas retirés le sont avec
+`@antsia/social-features` : **100 fichiers de test, 1 757 cas verts** ; tous les cas retirés le sont avec
 leur branche (poste, secrétariat, priorité, file, exemption, surfaces de stories), listés dans le rapport
 de chaque lot (en-têtes des fichiers de test).
 
@@ -83,7 +83,7 @@ de chaque lot (en-têtes des fichiers de test).
 - **Conférence** : le geste « Lancer une conférence » reste câblé mais N'EST PAS proposé
   (`CONFERENCE_LAUNCH_AVAILABLE = false`) tant que le lot `live` n'a pas d'hôte de conférence ; la liste
   des directs en cours des stories est vide jusqu'à ce lot.
-- **Coque persistante** : antia.ga monte la coque une fois, dans le gabarit `(membre)` (fil, messagerie,
+- **Coque persistante** : antsia.ga monte la coque une fois, dans le gabarit `(membre)` (fil, messagerie,
   statuts) : un appel en cours, la présence et le dock ne se démontent plus à chaque navigation.
 - **Présence sans organisation** (`use-presence-heartbeat`, réécrit) : par (réseau, personne), sans
   battement redoublé à moins de 20 s, « hors ligne » différé et annulé par un remontage — le seau du
@@ -95,7 +95,7 @@ de chaque lot (en-têtes des fichiers de test).
   croissance du fil de conversation ; badge de page calculé par le serveur au lieu de « Page officielle »
   pour toute page ; échec de copie du lien d'invitation dit pour ce qu'il est.
 
-### Branchement d'antia.ga
+### Branchement d'antsia.ga
 
 - Gabarit `(membre)` : porte d'adhésion, `NextRouterAdapter`, `NetworkProvider`, couche de communication.
 - `/fil` : rangée des statuts en tête, carte iCom dans la colonne de droite au bureau (≥ 960 px), lien
@@ -106,7 +106,7 @@ de chaque lot (en-têtes des fichiers de test).
 - Feuille LiveKit importée par l'application ; CSP : origine du serveur média (`LIVEKIT_WS_URL`, variable
   sans valeur par défaut) et stockage du déploiement en `media-src` (messages vocaux).
 - **Tailwind** : `@source "…/packages/*/src"` ne balayait AUCUN fichier des paquets (mesuré) ; chemins
-  explicites dans antia.ga et la console.
+  explicites dans antsia.ga et la console.
 
 ### Vérification
 
@@ -151,10 +151,10 @@ réconciliées, contrats communs posés au fil des rapports, application branch�
 | P4 profil social (fiche, publication du profil, identifiant, mini-carte) | 15 | 114 | 140 |
 | P5 coque de bureau (page réseau, menu) et coquille mobile | 24 | 71 | 56 |
 | P6 cloche et carte flottante | 16 | 91 | 45 |
-| P7 albums et kit d'espace (`@antia/ui/espace-kit`) | 24 | 125 | 89 |
+| P7 albums et kit d'espace (`@antsia/ui/espace-kit`) | 24 | 125 | 89 |
 | P8 pages, RÉÉCRITES sur le module `pages` du moteur | 11 | 135 | 158 |
 
-`@antia/social-features` : **160 fichiers de test, 2 704 cas verts** (1 757 à la fin de F1). Cas du socle
+`@antsia/social-features` : **160 fichiers de test, 2 704 cas verts** (1 757 à la fin de F1). Cas du socle
 portés sauf branches retirées (poste, administration, iProfil, conférences, iAgenda), chaque retrait
 nommé dans l'en-tête du fichier de test.
 
@@ -165,7 +165,7 @@ nommé dans l'en-tête du fichier de test.
   reseau-header, reseau-menu, design-styles, floating-card}`, `SF/shell/mobile/*` (coquille mobile).
 - `UI/espace-kit` : le kit d'espace (cartes, onglets « chemise », état vide, pagination, dialogue), SANS
   i18n — les phrases viennent de l'appelant (`EspacePagination.labels`, `EspaceDialog.closeLabel`).
-- Exports du paquet : `@antia/social-features/reseau-personnel`, `/albums`, `/notifications`.
+- Exports du paquet : `@antsia/social-features/reseau-personnel`, `/albums`, `/notifications`.
 
 ### Décisions et écarts
 
@@ -188,7 +188,7 @@ nommé dans l'en-tête du fichier de test.
 - **Direct absent** (lot `live`) : volet Conférences, rail des directs et format « Conférence » retirés ;
   une adresse `?tab=conferences` retombe sur le fil.
 
-### Branchement d'antia.ga
+### Branchement d'antsia.ga
 
 - `/fil` : la page réseau du moteur, qui choisit son arbre (≤ 959 px : coquille mobile, le document défile ;
   au-delà : trois colonnes qui défilent chacune, dans un conteneur de hauteur définie) ; barre du haut au
@@ -200,7 +200,7 @@ nommé dans l'en-tête du fichier de test.
 
 ### Vérification
 
-- `bun run verify` : vert (Convex 656 cas, cliquets 53, `@antia/social-features` 2 704, `@antia/ui` 86,
+- `bun run verify` : vert (Convex 656 cas, cliquets 53, `@antsia/social-features` 2 704, `@antsia/ui` 86,
   typage des 10 paquets, lint).
 - Navigateur (http://localhost:3030, compte de développement) : page réseau au bureau (menu, fil, identité,
   rail iCom, suggestions, pages à suivre, évènements) et au téléphone (en-tête, barre basse, aucun
@@ -233,7 +233,7 @@ Le backend `live` permet la première tranche de PA6/F3. **F3 reste en cours** :
 n'affirme pas la parité du studio et de la console d'antenne du socle.
 
 Source : `ad2e7fdc2` ; le diff du périmètre direct, stores, hôtes et points de branchement contre
-l'`origin/main` local du socle (`25398f565`) est vide. Copies dans les fichiers réels d'ANTIA.
+l'`origin/main` local du socle (`25398f565`) est vide. Copies dans les fichiers réels d'ANTSIA.
 
 ### Surfaces branchées
 
@@ -258,7 +258,7 @@ l'`origin/main` local du socle (`25398f565`) est vide. Copies dans les fichiers 
   publication ou conservation privée. L'enregistrement est **décoché par défaut dans ce
   formulaire**, demandé explicitement et annoncé dans la salle ; le défaut du backend reste
   inchangé. Aucune suppression de rediffusion exposée par cette tranche.
-- Activation explicite par `NetworkProvider.liveAvailable` : ANTIA la pose avec sa route servie ;
+- Activation explicite par `NetworkProvider.liveAvailable` : ANTSIA la pose avec sa route servie ;
   DIASPORALE garde sa route réservée sans activer la création iCom, le lecteur des directs ni
   l’hôte. Test de l’absence de capacité par défaut.
 - Textes français et anglais ; jetons existants, aucun changement de primitive ui.
@@ -292,7 +292,7 @@ compact du fil. Une publication `root` ne devient pas un direct hors réseau.
 
 ## F3b — Studio et gestion avancée d'antenne (16/10/2026)
 
-Tranche branchée dans `DirectPage` sur la route existante d'ANTIA. La salle reste
+Tranche branchée dans `DirectPage` sur la route existante d'ANTSIA. La salle reste
 possédée par la coque du membre ; aucune connexion ni piste audio supplémentaire.
 Sources relues sur `origin/main` du socle, sans différence pour les fichiers portés
 depuis `ad2e7fdc2`. Décision : [ADR-0005](adr/0005-studio-persistant-et-droits-d-antenne.md).
@@ -351,7 +351,7 @@ propriétaire. Les tests de scène/contrôles avec une salle simulée ne la prou
   présenté comme un succès. Les reprises couvrent les mêmes étapes sur les sources finales.
 - Cliquets statiques : un worker, délai de 60 s réservé à leurs analyses AST du dépôt
   (un scan valide prenait 36 s sous swap). Assertions et délais des suites fonctionnelles
-  inchangés. Aucun cache ni donnée supprimé par la session ANTIA ; son serveur Next
+  inchangés. Aucun cache ni donnée supprimé par la session ANTSIA ; son serveur Next
   a été redémarré après un verrou de compaction provoqué par le disque plein.
 - 77 cas front nouveaux : géométrie du socle, identités exactes/homonymes, écran et
   caméra distincts, JWT tardif après rétrogradation, retour d'audio seul vers caméra,
@@ -366,7 +366,8 @@ propriétaire. Les tests de scène/contrôles avec une salle simulée ne la prou
 - Gestion vérifiée à 320, 375 et 1 280 px sans débordement horizontal ; viewport remis
   à sa valeur initiale. Préflight : refus traduit du média absent, démarrage désactivé,
   conférence restant à venir. Captures de recette dans le dossier de visualisations
-  Codex du 16/10, `antia-f3b-delegations.png` et `antia-f3b-mobile.png`.
+  Codex du 16/10, `antia-f3b-delegations.png` et `antia-f3b-mobile.png` (noms historiques,
+  conservés pour retrouver les captures antérieures au renommage ANTSIA).
 - Reste : média réel, scène de plusieurs appareils, écran partagé réel, plein écran
   réel avec SFU, Egress, passe sombre exhaustive et audit AA complet.
 
@@ -437,14 +438,15 @@ identique à `ad2e7fdc2`. Décision : [ADR-0006](adr/0006-creation-et-rediffusio
   2 891 cas social-features (177 fichiers), tous les autres paquets/apps testés et
   lint neuf espaces sans erreur. Avertissements hérités inchangés : 69 social-features,
   six ui. Délais et assertions fonctionnels inchangés.
-- Log final : `/tmp/antia-f3c-verify-delivery.log`. Les essais antérieurs et leur
+- Log final : `/tmp/antia-f3c-verify-delivery.log` (nom historique du journal). Les essais antérieurs et leur
   correction de fixture ne sont pas présentés comme le verdict final.
 - Chrome réel, serveur 3030 et compte fictif déjà présent : formulaire bureau/mobile,
   identité/nom de l'invité, rôle proposé, brouillon conservé à la bascule ; création
   nominative locale `v571tsd1pcq12x9wchkxke8g9x8gc00t`, sans annonce ni enregistrement.
   Son volet Invités confirme un intervenant proposé hors antenne. Aucun débordement
   documentaire à 320, 375 et 1280 px. Captures `antia-f3c-form-mobile.png` et
-  `antia-f3c-invites*.png` dans le dossier de visualisation Codex de cette session.
+  `antia-f3c-invites*.png` dans le dossier de visualisation Codex de cette session
+  (noms historiques des captures, conservés pour retrouver les fichiers réels).
 
 ### Limites de preuve et suite
 

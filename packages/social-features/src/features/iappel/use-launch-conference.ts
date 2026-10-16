@@ -37,7 +37,7 @@
  * formulaire à l'improviste.
  */
 
-import { useOptionalNetwork } from "@antia/api/network"
+import { useOptionalNetwork } from "@antsia/api/network"
 import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"

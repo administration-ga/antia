@@ -1,6 +1,6 @@
 // @vitest-environment edge-runtime
 // Dupliqué de socle/convex/modules/reseauPersonnel/media.adoption.test.ts @ ad2e7fdc2 — adaptations : la vérification des médias déclarés et leur délivrance, testées pour elles-mêmes (les cas qui passent par `stories.publish` et les groupes thématiques reviennent avec ces modules) ; politique d'usage appliquée (D36) ; délivrance fail-closed avec retenue nommée ; URL de dépôt sous adhésion et usage déclaré.
-import { engineErrorCode, engineErrorRule } from "@antia/social-contracts/errors"
+import { engineErrorCode, engineErrorRule } from "@antsia/social-contracts/errors"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 import { api, internal } from "../../_generated/api"

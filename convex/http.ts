@@ -9,7 +9,7 @@
  * Le webhook Egress LiveKit (`/webhooks/livekit-egress`) ramène les
  * rediffusions des directs (module `live`).
  */
-import { directEgressOutcomeFromStatus } from "@antia/social-domain/live/replayComposition"
+import { directEgressOutcomeFromStatus } from "@antsia/social-domain/live/replayComposition"
 import { httpRouter } from "convex/server"
 
 import { internal } from "./_generated/api"

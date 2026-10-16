@@ -1,0 +1,11 @@
+@import "tailwindcss";
+@import "@antsia/ui/styles.css";
+@import "@antsia/ui/themes/antsia.css";
+
+/* Les classes utilisées par les paquets du moteur doivent être générées pour
+   cette application : Tailwind ne parcourt que le dossier de l'application.
+   ⚠️ Des chemins EXPLICITES : avec Tailwind 4.3, un glob sur un dossier
+   (une étoile à la place du nom du paquet) ne fait balayer aucun fichier — mesuré (aucune classe des
+   paquets dans la feuille), alors que ces chemins-ci le font. */
+@source "../../../../packages/ui/src";
+@source "../../../../packages/social-features/src";

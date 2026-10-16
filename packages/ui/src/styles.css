@@ -1,10 +1,10 @@
 /*
- * Point d'entrée CSS du moteur ANTIA — à importer par chaque application,
+ * Point d'entrée CSS du moteur ANTSIA — à importer par chaque application,
  * APRÈS `@import "tailwindcss"` :
  *
  *   @import "tailwindcss";
- *   @import "@antia/ui/styles.css";
- *   @import "@antia/ui/themes/antia.css";   ← le thème de l'application
+ *   @import "@antsia/ui/styles.css";
+ *   @import "@antsia/ui/themes/antsia.css";   ← le thème de l'application
  *
  * L'ordre compte : la charte de base déclare tous les jetons sur
  * `[data-charte]`, le thème les surcharge sur `[data-charte="<thème>"]`

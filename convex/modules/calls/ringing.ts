@@ -15,8 +15,8 @@
  * avant le décrochage. Un appel de groupe ne se met pas en attente : parquer la
  * ligne gèlerait la conversation de tous les autres.
  */
-import type { CounterpartLabel } from "@antia/social-contracts/counterpart"
-import { isRingingCallStatus, isTerminalCallStatus } from "@antia/social-domain/callJournal"
+import type { CounterpartLabel } from "@antsia/social-contracts/counterpart"
+import { isRingingCallStatus, isTerminalCallStatus } from "@antsia/social-domain/callJournal"
 import { v } from "convex/values"
 
 import type { Doc, Id } from "../../_generated/dataModel"

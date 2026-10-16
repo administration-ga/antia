@@ -9,7 +9,7 @@
 import { RINGTONE_PROFILES, type RingtoneVariant } from "../../lib/livekit/use-ringtone"
 
 /** Fenêtre de sonnerie d'un appel — la MÊME que le serveur (contrat du moteur). */
-export { CALL_RING_WINDOW_MS } from "@antia/social-contracts/calls"
+export { CALL_RING_WINDOW_MS } from "@antsia/social-contracts/calls"
 
 /**
  * Motif `[vibre, pause, vibre, …]` en millisecondes, dont la durée totale

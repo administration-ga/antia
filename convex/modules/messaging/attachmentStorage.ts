@@ -9,8 +9,8 @@
  * pièce RECOPIÉE par le serveur (transfert, sans acteur) n'est pas un dépôt :
  * son identifiant vient du message d'origine, jamais d'un argument client.
  */
-import { ATTACHMENTS_MAX_PER_MESSAGE, type AttachmentInput, assertAttachmentBatch } from "@antia/social-contracts/attachments"
-import type { FileScanSource } from "@antia/social-domain/filePolicy"
+import { ATTACHMENTS_MAX_PER_MESSAGE, type AttachmentInput, assertAttachmentBatch } from "@antsia/social-contracts/attachments"
+import type { FileScanSource } from "@antsia/social-domain/filePolicy"
 import { type Infer, v } from "convex/values"
 
 import type { Id } from "../../_generated/dataModel"

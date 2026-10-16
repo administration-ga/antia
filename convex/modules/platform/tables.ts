@@ -5,7 +5,7 @@
  * (IDN `loa ≥ 2` obligatoire, double validation des actes irréversibles)
  * arrive au prompt PA7 ; son journal est la lecture de `engineAudit`.
  */
-import { AUDIT_ACTIONS, AUDIT_CAPACITIES, AUDIT_SUBJECT_TABLES } from "@antia/social-domain/audit"
+import { AUDIT_ACTIONS, AUDIT_CAPACITIES, AUDIT_SUBJECT_TABLES } from "@antsia/social-domain/audit"
 import { defineTable } from "convex/server"
 import { v } from "convex/values"
 

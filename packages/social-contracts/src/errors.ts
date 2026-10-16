@@ -1,4 +1,4 @@
-import { DOMAIN_RULES, type DomainRule, type DomainRuleParams } from "@antia/social-domain/violation"
+import { DOMAIN_RULES, type DomainRule, type DomainRuleParams } from "@antsia/social-domain/violation"
 
 /**
  * Codes d'erreur du moteur, partagés par le serveur (qui les lève dans une

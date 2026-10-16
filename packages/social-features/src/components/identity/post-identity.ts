@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/components/identity/post-identity.ts @ ad2e7fdc2 — adaptations : identité SANS fonction ni administration (portée « poste », `positionTitle`, `orgName` et le type `CommunicationScope` retirés) ; le sur-titre dit les badges CALCULÉS par le serveur (`Badge` de `@antia/social-domain/badges`), « Communauté » seul n'en fait pas un ; badges répétés dédoublonnés ; libellés par l'i18n (`t` en dernier paramètre de `postEyebrow` et `postIdentityAnnouncement`, clés qualifiées `social:badges.*` et `reseau:postIdentity.*`) ; ajout de `signalBadges` et `badgeLabelKey`.
+// Dupliqué de socle/packages/agent-features/src/components/identity/post-identity.ts @ ad2e7fdc2 — adaptations : identité SANS fonction ni administration (portée « poste », `positionTitle`, `orgName` et le type `CommunicationScope` retirés) ; le sur-titre dit les badges CALCULÉS par le serveur (`Badge` de `@antsia/social-domain/badges`), « Communauté » seul n'en fait pas un ; badges répétés dédoublonnés ; libellés par l'i18n (`t` en dernier paramètre de `postEyebrow` et `postIdentityAnnouncement`, clés qualifiées `social:badges.*` et `reseau:postIdentity.*`) ; ajout de `signalBadges` et `badgeLabelKey`.
 /**
  * post-identity — comment se compose le SUR-TITRE de l'identité d'une personne.
  *
@@ -23,7 +23,7 @@
  * disparaît plutôt que d'afficher une phrase de remplissage.
  */
 
-import type { Badge } from "@antia/social-domain/badges"
+import type { Badge } from "@antsia/social-domain/badges"
 import type { TFunction } from "i18next"
 
 export interface PostIdentityInput {

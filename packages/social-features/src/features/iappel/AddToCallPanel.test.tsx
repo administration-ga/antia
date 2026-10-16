@@ -41,17 +41,17 @@ const mocks = vi.hoisted(() => ({
 	},
 }))
 
-vi.mock("@antia/api/engine", () => ({
+vi.mock("@antsia/api/engine", () => ({
 	api: { modules: { calls: { groupCalls: { addInvitee: "addInvitee" } } } },
 }))
-vi.mock("@antia/api/hooks", () => ({
+vi.mock("@antsia/api/hooks", () => ({
 	useConvexMutationQuery: () => ({ mutateAsync: vi.fn(async () => ({})) }),
 }))
 // Le VRAI hook d'a11y : c'est lui qu'on met à l'épreuve (`trapFocus: false`).
 // Seul le reste du paquet ui-v2 est écarté, pour ne pas charger trente
 // composants dans un test de focus.
-vi.mock("@antia/ui", async () => {
-	const real = await import("@antia/ui")
+vi.mock("@antsia/ui", async () => {
+	const real = await import("@antsia/ui")
 	return { useModalA11y: real.useModalA11y }
 })
 vi.mock("sonner", () => ({

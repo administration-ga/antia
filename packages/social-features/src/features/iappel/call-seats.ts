@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/iappel/call-seats.ts @ ad2e7fdc2 — adaptations : règle des places importée du contrat du moteur (`reservesSeat` de `@antia/social-contracts/callGroup`) ; phrase de l'en-tête traduite par i18n avec ses pluriels (`t` ajouté en dernier paramètre de `describeCallSeats`, clés `iappel:callSeats.…`).
+// Dupliqué de socle/packages/agent-features/src/features/iappel/call-seats.ts @ ad2e7fdc2 — adaptations : règle des places importée du contrat du moteur (`reservesSeat` de `@antsia/social-contracts/callGroup`) ; phrase de l'en-tête traduite par i18n avec ses pluriels (`t` ajouté en dernier paramètre de `describeCallSeats`, clés `iappel:callSeats.…`).
 /**
  * call-seats — LES PLACES D'UN APPEL, EN UNE SEULE PROJECTION (IC-03 / IC-04,
  * Lot 01 du plan espace agent, 2026-09-06).
@@ -20,7 +20,7 @@
  * ═══════════════════════════════════════════════════════════════════════════
  *
  *  · réservent : `host`, `connected`, `ringing` (`reservesSeat`, contrat
- *    `@antia/social-contracts/callGroup` — importé, jamais recopié) ;
+ *    `@antsia/social-contracts/callGroup` — importé, jamais recopié) ;
  *  · un optimisme local ne compte que tant que le serveur ne dit pas AUTRE
  *    CHOSE que ce qu'il disait au moment du clic — absent ⇒ présent, ou
  *    « declined » ⇒ « ringing » pour une réinvitation. Quel que soit l'état
@@ -36,7 +36,7 @@
  * Module PUR : aucun React, testé en `node`.
  */
 
-import { reservesSeat } from "@antia/social-contracts/callGroup"
+import { reservesSeat } from "@antsia/social-contracts/callGroup"
 import type { TFunction } from "i18next"
 
 import type { CallParticipantState, CallParticipantView } from "./call-types"

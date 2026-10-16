@@ -20,7 +20,7 @@
  *  5. **Le DTO est une VIGNETTE** : ni `roomName`, ni `storageId`, ni URL de
  *     replay. Une liste ne distribue pas d'octets.
  */
-import { GENERATED_BLOB_SKIP_REASON } from "@antia/social-domain/filePolicy"
+import { GENERATED_BLOB_SKIP_REASON } from "@antsia/social-domain/filePolicy"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 import { api, internal } from "../../_generated/api"

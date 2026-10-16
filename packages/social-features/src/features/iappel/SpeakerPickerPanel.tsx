@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/iappel/SpeakerPickerPanel.tsx @ ad2e7fdc2 — adaptations : titre traduit (i18n `iappel`) ; pile Échap lue dans la coque (`shell/floating-surface`) ; `useModalA11y` de @antia/ui.
+// Dupliqué de socle/packages/agent-features/src/features/iappel/SpeakerPickerPanel.tsx @ ad2e7fdc2 — adaptations : titre traduit (i18n `iappel`) ; pile Échap lue dans la coque (`shell/floating-surface`) ; `useModalA11y` de @antsia/ui.
 "use client"
 
 /**
@@ -30,7 +30,7 @@
 import { Check, Volume2 } from "lucide-react"
 import { useEffect, useRef } from "react"
 import { useTranslation } from "react-i18next"
-import { useModalA11y } from "@antia/ui"
+import { useModalA11y } from "@antsia/ui"
 import { ESCAPE_PRIORITY } from "../../shell/floating-surface/escape-stack"
 import { useEscapeLayer } from "../../shell/floating-surface/use-escape-layer"
 import type { SpeakerPickerOption } from "./audio-route"

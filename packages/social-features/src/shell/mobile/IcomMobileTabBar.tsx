@@ -1,4 +1,4 @@
-// Réécrit d'après socle/packages/agent-features/src/features/messagerie/IcomMobileTabBar.tsx @ ad2e7fdc2 — barre déplacée dans la coque (`shell/mobile/`) ; sans le menu principal de l'espace agent (`EspaceMobileVoletsRow`, volets iProfil · iRéseau · iBoîte · iCom) ni `personal-nav` : le premier emplacement est un LIEN vers l'accueil du réseau (`useRoutes().home()`), là où vivent sa barre et son menu, au lieu de basculer la barre ; seuil mobile `MOBILE_ONLY_CLASS` de `@antia/ui/overlay` ; adresses des briques composées depuis la base injectée (`useRoutes().messages()`) ; libellés et pastilles traduits (`icomMobileTabText`, `icomMobileBadge`, clés `icomMobileTabBar.*`) ; mêmes props (`active`, `badges`), mêmes repères (`data-mobile-nav`, `data-icom-mobile-nav`) et mêmes classes de géométrie (`.esp-reseau-tabbar`, `.rm-*`).
+// Réécrit d'après socle/packages/agent-features/src/features/messagerie/IcomMobileTabBar.tsx @ ad2e7fdc2 — barre déplacée dans la coque (`shell/mobile/`) ; sans le menu principal de l'espace agent (`EspaceMobileVoletsRow`, volets iProfil · iRéseau · iBoîte · iCom) ni `personal-nav` : le premier emplacement est un LIEN vers l'accueil du réseau (`useRoutes().home()`), là où vivent sa barre et son menu, au lieu de basculer la barre ; seuil mobile `MOBILE_ONLY_CLASS` de `@antsia/ui/overlay` ; adresses des briques composées depuis la base injectée (`useRoutes().messages()`) ; libellés et pastilles traduits (`icomMobileTabText`, `icomMobileBadge`, clés `icomMobileTabBar.*`) ; mêmes props (`active`, `badges`), mêmes repères (`data-mobile-nav`, `data-icom-mobile-nav`) et mêmes classes de géométrie (`.esp-reseau-tabbar`, `.rm-*`).
 "use client"
 
 /**
@@ -28,10 +28,10 @@
  * barre se rendrait en cinq liens empilés, sans icônes ni pastilles.
  */
 
-import { useRoutes } from "@antia/api/network"
-import { Link } from "@antia/api/routing"
-import { Icon } from "@antia/ui"
-import { MOBILE_ONLY_CLASS } from "@antia/ui/overlay"
+import { useRoutes } from "@antsia/api/network"
+import { Link } from "@antsia/api/routing"
+import { Icon } from "@antsia/ui"
+import { MOBILE_ONLY_CLASS } from "@antsia/ui/overlay"
 import { useEffect, useRef } from "react"
 import { useTranslation } from "react-i18next"
 import {

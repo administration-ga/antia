@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/messagerie/groupe-gestion.ts @ ad2e7fdc2 — adaptations : prédicats d'autorité lus dans le domaine du moteur (`@antia/social-domain/groupThreads`) ; dates dans le fuseau du NAVIGATEUR et la langue courante (`dateDuGroupe` reçoit `locale`, plus de fuseau gabonais ni de `fr-FR` écrits en dur) ; tri et recherche sans langue écrite en dur (`ordonnerMembres` et `vueDeGestion` reçoivent `locale`, casse rabattue par `toLowerCase`) ; libellés de rôle, phrases de confirmation et lignes système traduits (`t` en DERNIER paramètre de `libelleDeRole`, `vueDeGestion`, `phraseDeSuppression`, `phraseDeDepart`, `phraseDEffacement`, `phraseDeRetrait`, `ligneSystemeDeGroupe` ; clés qualifiées `messagerie:groupeGestion.…`) ; places restantes comptées sur l'EFFECTIF du serveur (`effectif`, la fiche ne porte plus la liste complète des membres) ; projections `membreDuGroupe` et `convieDuGroupe` des DTO à libellé du moteur (`counterpartLabel` : nom nul = libellé neutre traduit).
+// Dupliqué de socle/packages/agent-features/src/features/messagerie/groupe-gestion.ts @ ad2e7fdc2 — adaptations : prédicats d'autorité lus dans le domaine du moteur (`@antsia/social-domain/groupThreads`) ; dates dans le fuseau du NAVIGATEUR et la langue courante (`dateDuGroupe` reçoit `locale`, plus de fuseau gabonais ni de `fr-FR` écrits en dur) ; tri et recherche sans langue écrite en dur (`ordonnerMembres` et `vueDeGestion` reçoivent `locale`, casse rabattue par `toLowerCase`) ; libellés de rôle, phrases de confirmation et lignes système traduits (`t` en DERNIER paramètre de `libelleDeRole`, `vueDeGestion`, `phraseDeSuppression`, `phraseDeDepart`, `phraseDEffacement`, `phraseDeRetrait`, `ligneSystemeDeGroupe` ; clés qualifiées `messagerie:groupeGestion.…`) ; places restantes comptées sur l'EFFECTIF du serveur (`effectif`, la fiche ne porte plus la liste complète des membres) ; projections `membreDuGroupe` et `convieDuGroupe` des DTO à libellé du moteur (`counterpartLabel` : nom nul = libellé neutre traduit).
 /**
  * groupe-gestion — ce qu'un membre peut FAIRE dans un groupe, et ce que le
  * panneau doit lui montrer.
@@ -8,7 +8,7 @@
  * ═══════════════════════════════════════════════════════════════════════════
  *
  * Les prédicats d'autorité vivent dans le domaine pur du moteur
- * (`@antia/social-domain/groupThreads`), écrit pour être atteint depuis le
+ * (`@antsia/social-domain/groupThreads`), écrit pour être atteint depuis le
  * client. Ce sont EXACTEMENT ceux que les mutations appliquent. Les recopier
  * ici donnerait deux définitions de « qui peut retirer qui » — et le jour où
  * elles divergent, l'écran propose un bouton que le serveur refuse, ou cache
@@ -30,7 +30,7 @@ import {
 	canRenameGroupThread,
 	canSetGroupThreadRole,
 	type GroupThreadRole,
-} from "@antia/social-domain/groupThreads"
+} from "@antsia/social-domain/groupThreads"
 import type { TFunction } from "i18next"
 import { GROUPE_MAX_MEMBRES } from "./groupe-composeur"
 

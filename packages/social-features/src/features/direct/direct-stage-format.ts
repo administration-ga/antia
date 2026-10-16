@@ -19,7 +19,7 @@
  * `antennaCapacityLabel`) et la grille fixe qu'il a explicitement demandée.
  */
 
-import { DIRECT_MAX_SPEAKERS } from "@antia/social-domain/live/domain"
+import { DIRECT_MAX_SPEAKERS } from "@antsia/social-domain/live/domain"
 
 export const DIRECT_STAGE_CAPACITY = DIRECT_MAX_SPEAKERS
 

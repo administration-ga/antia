@@ -9,10 +9,10 @@
  * pas un oracle du graphe. Les autres sont INVITÉS, jamais ajoutés d'office :
  * une appartenance naît à l'acceptation.
  */
-import type { CounterpartLabel } from "@antia/social-contracts/counterpart"
-import { assertGroupComposition, assertGroupTitle, normalizeGroupDescription } from "@antia/social-contracts/groupCapacity"
-import { canRemoveGroupThreadMember, canRenameGroupThread, canSetGroupThreadRole, type GroupThreadRole, nextGroupThreadOwner } from "@antia/social-domain/groupThreads"
-import { NOTIFICATION_UNREAD_CAP } from "@antia/social-domain/notifications"
+import type { CounterpartLabel } from "@antsia/social-contracts/counterpart"
+import { assertGroupComposition, assertGroupTitle, normalizeGroupDescription } from "@antsia/social-contracts/groupCapacity"
+import { canRemoveGroupThreadMember, canRenameGroupThread, canSetGroupThreadRole, type GroupThreadRole, nextGroupThreadOwner } from "@antsia/social-domain/groupThreads"
+import { NOTIFICATION_UNREAD_CAP } from "@antsia/social-domain/notifications"
 import { paginationOptsValidator, type PaginationResult } from "convex/server"
 import { v } from "convex/values"
 

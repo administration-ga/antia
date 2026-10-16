@@ -4,9 +4,9 @@
  * affiché, son accroche. Rien n'est publié d'office (invariant 7) : c'est la
  * personne qui choisit et publie.
  */
-import type { MediaWithheld } from "@antia/social-contracts/media"
-import { assertDisplayName, assertHandle, assertHeadline, normalizeHandle } from "@antia/social-domain/content"
-import { handleLadder } from "@antia/social-domain/handleSuggestion"
+import type { MediaWithheld } from "@antsia/social-contracts/media"
+import { assertDisplayName, assertHandle, assertHeadline, normalizeHandle } from "@antsia/social-domain/content"
+import { handleLadder } from "@antsia/social-domain/handleSuggestion"
 import { v } from "convex/values"
 
 import type { Doc, Id } from "../../_generated/dataModel"

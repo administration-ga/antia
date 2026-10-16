@@ -1,5 +1,5 @@
-import { type AppRuleParams, type EngineErrorCode, type EngineErrorData, isAppRule } from "@antia/social-contracts/errors"
-import { type DomainRule, type DomainRuleParams, isDomainViolation } from "@antia/social-domain/violation"
+import { type AppRuleParams, type EngineErrorCode, type EngineErrorData, isAppRule } from "@antsia/social-contracts/errors"
+import { type DomainRule, type DomainRuleParams, isDomainViolation } from "@antsia/social-domain/violation"
 import { ConvexError } from "convex/values"
 
 /**

@@ -20,7 +20,7 @@
  * 3. **Le statut décide, l'horloge récolte.** `end` est le geste de l'hôte ;
  *    la récolte (`reap.reapStaleDirects`) ferme ce que l'hôte n'a pas fermé.
  */
-import { assertPersonalPostBody } from "@antia/social-domain/content"
+import { assertPersonalPostBody } from "@antsia/social-domain/content"
 import { v } from "convex/values"
 
 import { api, internal } from "../../_generated/api"

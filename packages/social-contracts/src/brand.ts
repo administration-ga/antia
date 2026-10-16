@@ -1,7 +1,6 @@
 /**
- * Jeton de marque UNIQUE du réseau racine (cahier §0 : « Nom à confirmer —
- * dans le code, le nom est un jeton de marque unique »). Changer de nom
- * (ANTIA / ANTSA, arbitrage A1) se fait ici, en un commit. Les textes
+ * Jeton de marque UNIQUE du réseau racine : ANTSIA, confirmé par le propriétaire
+ * le 16/10/2026. Les textes
  * d'interface l'insèrent par interpolation i18n (`{{brand}}`), jamais en dur.
  */
-export const BRAND_NAME = "ANTIA" as const
+export const BRAND_NAME = "ANTSIA" as const

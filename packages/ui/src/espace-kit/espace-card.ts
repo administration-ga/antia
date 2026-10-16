@@ -1,11 +1,11 @@
-// Dupliqué de socle/packages/agent-features/src/components/espace-kit/espace-card.ts @ ad2e7fdc2 — adaptations : aucune sur le code (valeurs et jetons inchangés) ; commentaire rapporté au jumeau du moteur (`shell/design-styles` de `@antia/social-features`) et au cliquet `no-hardcoded-colors`.
+// Dupliqué de socle/packages/agent-features/src/components/espace-kit/espace-card.ts @ ad2e7fdc2 — adaptations : aucune sur le code (valeurs et jetons inchangés) ; commentaire rapporté au jumeau du moteur (`shell/design-styles` de `@antsia/social-features`) et au cliquet `no-hardcoded-colors`.
 import type { CSSProperties } from "react"
 
 /**
  * Constantes de surface du kit d'espace.
  *
  * Mêmes valeurs que `RESEAU_SURFACE_STYLE` / `RESEAU_CARD_STYLE` /
- * `RESEAU_INNER_CARD_STYLE` de `shell/design-styles` (`@antia/social-features`,
+ * `RESEAU_INNER_CARD_STYLE` de `shell/design-styles` (`@antsia/social-features`,
  * la source pour le réseau). Les deux DOIVENT rester d'accord : un écart entre
  * eux ferait cohabiter deux cartes visuellement différentes dans le même
  * réseau, sans qu'aucun test ne puisse l'attraper (ce sont des styles en

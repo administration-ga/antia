@@ -1,4 +1,4 @@
-// Réécrit d'après socle/packages/agent-features/src/features/reseau-personnel/PagesSuggestionsRail.tsx @ ad2e7fdc2 — ce qui change : test NEUF (le socle ne montait pas ce rail) : monté dans l'enveloppe du moteur (`renderWithEngine`), annuaire borné simulé (`pages.pages.discover`, réseau courant), vrais composants de `@antia/ui` (seul le squelette est marqué) ; vérifie le plafond du rail et du carrousel, le masquage sans écriture serveur, le retrait d'une page suivie à l'instant, la panne avec Réessayer, la carte vide et le badge calculé.
+// Réécrit d'après socle/packages/agent-features/src/features/reseau-personnel/PagesSuggestionsRail.tsx @ ad2e7fdc2 — ce qui change : test NEUF (le socle ne montait pas ce rail) : monté dans l'enveloppe du moteur (`renderWithEngine`), annuaire borné simulé (`pages.pages.discover`, réseau courant), vrais composants de `@antsia/ui` (seul le squelette est marqué) ; vérifie le plafond du rail et du carrousel, le masquage sans écriture serveur, le retrait d'une page suivie à l'instant, la panne avec Réessayer, la carte vide et le badge calculé.
 // @vitest-environment jsdom
 
 /**
@@ -11,7 +11,7 @@
  *  5. le badge posé est celui que le serveur a calculé.
  */
 import { act, fireEvent, screen, within } from "@testing-library/react"
-import type * as AntiaUi from "@antia/ui"
+import type * as AntsiaUi from "@antsia/ui"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
 import { renderWithEngine, TEST_NETWORK_ID, TEST_ROUTES } from "../../tests/engine-wrapper"
@@ -29,11 +29,11 @@ const mocks = vi.hoisted(() => ({
   unfollow: vi.fn(),
 }))
 
-vi.mock("@antia/api/engine", () => ({
+vi.mock("@antsia/api/engine", () => ({
   api: { modules: { pages: { pages: { discover: "discover", follow: "follow", unfollow: "unfollow" } } } },
 }))
 
-vi.mock("@antia/api/hooks", () => ({
+vi.mock("@antsia/api/hooks", () => ({
   useAuthenticatedConvexQuery: (name: string, args: unknown) => {
     mocks.queried(name, args)
     return mocks.discover
@@ -46,8 +46,8 @@ vi.mock("convex/react", () => ({
 
 vi.mock("sonner", () => ({ toast: { error: vi.fn(), success: vi.fn() } }))
 
-vi.mock("@antia/ui", async (importOriginal) => ({
-  ...(await importOriginal<typeof AntiaUi>()),
+vi.mock("@antsia/ui", async (importOriginal) => ({
+  ...(await importOriginal<typeof AntsiaUi>()),
   SkeletonCard: () => <div data-testid="skeleton" />,
 }))
 

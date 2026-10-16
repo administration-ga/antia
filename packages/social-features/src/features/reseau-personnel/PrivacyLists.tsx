@@ -1,10 +1,10 @@
 // Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/PrivacyLists.tsx @ ad2e7fdc2 — adaptations : mes listes dans le réseau courant (`marks.marks.paginateBookmarks`, `paginateHiddenPosts`, `unhidePost`, `unmuteAuthor` du moteur, `networkId` par `useNetwork()`) ; les sourdines PAGINÉES (`paginateMyMutes` au lieu de `myMutes`, « Voir plus ») — une panne de lecture lève et la frontière d'erreur la dit, la branche d'erreur de la query non paginée disparaît ; personnes désignées par `personId` (`targetPersonId`), nom neutre quand le profil n'est pas publié, publication d'une page nommée par sa page ; refus du moteur lus par code (`markActionErrorText`) ; toutes les chaînes par l'i18n (espace `reseau`, clés `privacyLists.*`).
 "use client"
 
-import { api, type Id } from "@antia/api/engine"
-import { useAuthenticatedPaginatedQuery } from "@antia/api/hooks"
-import { useNetwork } from "@antia/api/network"
-import { Button, Card } from "@antia/ui"
+import { api, type Id } from "@antsia/api/engine"
+import { useAuthenticatedPaginatedQuery } from "@antsia/api/hooks"
+import { useNetwork } from "@antsia/api/network"
+import { Button, Card } from "@antsia/ui"
 import { useMutation } from "convex/react"
 import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"

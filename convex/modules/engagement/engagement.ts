@@ -7,7 +7,7 @@
  * passage unique ; une connexion rompue, un départ de groupe ou un blocage
  * referme aussitôt le fil de commentaires qu'ils ouvraient.
  */
-import { addedMentionedIds, assertPersonalCommentBody } from "@antia/social-domain/content"
+import { addedMentionedIds, assertPersonalCommentBody } from "@antsia/social-domain/content"
 import { paginationOptsValidator, type PaginationResult } from "convex/server"
 import { v } from "convex/values"
 

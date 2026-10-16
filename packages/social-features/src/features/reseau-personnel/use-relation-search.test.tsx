@@ -18,7 +18,7 @@ const mocks = vi.hoisted(() => ({
   refetch: vi.fn(),
 }))
 
-vi.mock("@antia/api/engine", () => ({
+vi.mock("@antsia/api/engine", () => ({
   api: {
     modules: {
       graph: { connections: { searchMine: "searchMine" } },
@@ -26,7 +26,7 @@ vi.mock("@antia/api/engine", () => ({
   },
 }))
 
-vi.mock("@antia/api/hooks", () => ({
+vi.mock("@antsia/api/hooks", () => ({
   useAuthenticatedConvexQuery: (_reference: string, args: SearchArgs) => {
     mocks.calls.push(args)
     // Une requête DÉSACTIVÉE reste `pending` en TanStack v5 (fetchStatus

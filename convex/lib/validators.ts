@@ -1,14 +1,14 @@
 /**
  * Validateurs PRÉCIS des notions du moteur, dérivés des constantes du domaine
- * pur (`@antia/social-domain`) : une seule source pour les littéraux, jamais
+ * pur (`@antsia/social-domain`) : une seule source pour les littéraux, jamais
  * le validateur permissif (cliquet `no-any-validators`).
  */
-import { BADGES, IDENTITY_PROVIDERS, PAGE_OWNER_KINDS, PAGE_TRUST_LEVELS } from "@antia/social-domain/badges"
-import { CONSENT_ORIGINS, CONSENT_PURPOSES } from "@antia/social-domain/consent"
-import { PERSONAL_POST_AUDIENCES, PERSONAL_POST_STATUSES, PERSONAL_REACH_AUDIENCES, PERSONAL_REACTION_KINDS } from "@antia/social-domain/content"
-import { FACET_FIELD_KINDS, FACET_VISIBILITIES } from "@antia/social-domain/facets"
-import { ACTIVE_MEMBERSHIP_STATUSES, MEMBERSHIP_ROLES, MEMBERSHIP_STATUSES, VERIFICATION_SOURCES } from "@antia/social-domain/membership"
-import { CONTENT_VISIBILITIES, MEMBERSHIP_POLICIES, NETWORK_KINDS, NETWORK_SLICES, NETWORK_STATUSES } from "@antia/social-domain/network"
+import { BADGES, IDENTITY_PROVIDERS, PAGE_OWNER_KINDS, PAGE_TRUST_LEVELS } from "@antsia/social-domain/badges"
+import { CONSENT_ORIGINS, CONSENT_PURPOSES } from "@antsia/social-domain/consent"
+import { PERSONAL_POST_AUDIENCES, PERSONAL_POST_STATUSES, PERSONAL_REACH_AUDIENCES, PERSONAL_REACTION_KINDS } from "@antsia/social-domain/content"
+import { FACET_FIELD_KINDS, FACET_VISIBILITIES } from "@antsia/social-domain/facets"
+import { ACTIVE_MEMBERSHIP_STATUSES, MEMBERSHIP_ROLES, MEMBERSHIP_STATUSES, VERIFICATION_SOURCES } from "@antsia/social-domain/membership"
+import { CONTENT_VISIBILITIES, MEMBERSHIP_POLICIES, NETWORK_KINDS, NETWORK_SLICES, NETWORK_STATUSES } from "@antsia/social-domain/network"
 import { type Validator, v, type VLiteral, type VUnion } from "convex/values"
 
 /** `v.union(v.literal(a), v.literal(b), …)` à partir d'une liste `as const` (un littéral au moins). */

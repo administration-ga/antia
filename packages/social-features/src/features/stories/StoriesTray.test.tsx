@@ -21,11 +21,11 @@ const mocks = vi.hoisted(() => ({
 	byInstant: new Map<number, { groups: unknown[]; truncated: boolean }>(),
 }))
 
-vi.mock("@antia/api/engine", () => ({
+vi.mock("@antsia/api/engine", () => ({
 	api: { modules: { stories: { stories: { tray: "tray" } } } },
 }))
 
-vi.mock("@antia/api/hooks", () => ({
+vi.mock("@antsia/api/hooks", () => ({
 	useAuthenticatedConvexQuery: (_reference: string, args: TrayArgs) => {
 		mocks.calls.push(args)
 		return {

@@ -27,14 +27,14 @@
  * inconditionnellement par la vue.
  */
 
-import { api } from "@antia/api/engine"
-import type { Id } from "@antia/api/engine"
+import { api } from "@antsia/api/engine"
+import type { Id } from "@antsia/api/engine"
 import {
 	useAuthenticatedConvexQuery,
 	useConvexMutationQuery,
-} from "@antia/api/hooks"
-import { useNetwork } from "@antia/api/network"
-import type { CallAdmissionReason } from "@antia/social-domain/callJournal"
+} from "@antsia/api/hooks"
+import { useNetwork } from "@antsia/api/network"
+import type { CallAdmissionReason } from "@antsia/social-domain/callJournal"
 import type { FunctionReturnType } from "convex/server"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { etatDeQuery, type EtatListe } from "../../shell/query-state"

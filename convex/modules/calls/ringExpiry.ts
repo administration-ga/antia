@@ -11,8 +11,8 @@
  * Module à part : un fichier qui se replanifie lui-même dégrade le typage de
  * toute l'API générée.
  */
-import { CALL_RING_WINDOW_MS } from "@antia/social-contracts/calls"
-import { isRingingCallStatus } from "@antia/social-domain/callJournal"
+import { CALL_RING_WINDOW_MS } from "@antsia/social-contracts/calls"
+import { isRingingCallStatus } from "@antsia/social-domain/callJournal"
 import { v } from "convex/values"
 
 import { internal } from "../../_generated/api"

@@ -45,9 +45,9 @@ describe("conversationHref / parseConversationRoute — l'aller-retour", () => {
 
 describe("la base est celle de l'application — jamais écrite ici", () => {
 	it("compose sous une base IMBRIQUÉE et en relit la clé", () => {
-		const imbriquee = "/r/antia/messages"
+		const imbriquee = "/r/antsia/messages"
 		const href = conversationHref(groupeKey("g9"), imbriquee)
-		expect(href).toBe("/r/antia/messages/groupe/g9")
+		expect(href).toBe("/r/antsia/messages/groupe/g9")
 		expect(isConversationRoute(href, imbriquee)).toBe(true)
 		expect(conversationKeyFromPath(href, imbriquee)).toBe(groupeKey("g9"))
 		// Sous une AUTRE base, la même adresse n'est pas une conversation.

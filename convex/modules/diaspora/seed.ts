@@ -10,9 +10,9 @@
  * fondations d'abord). En production, la console crée le réseau avec
  * `managedBy: "diaspora"`.
  */
-import { normalizeHandle } from "@antia/social-domain/content"
-import { validateFacetSchema } from "@antia/social-domain/facets"
-import { isValidNetworkSlug, validateNetworkShape } from "@antia/social-domain/network"
+import { normalizeHandle } from "@antsia/social-domain/content"
+import { validateFacetSchema } from "@antsia/social-domain/facets"
+import { isValidNetworkSlug, validateNetworkShape } from "@antsia/social-domain/network"
 import { DAY_MS, DIASPORALE_NETWORK_SEED, DIASPORALE_SLICE, type EngineFacetField } from "@diasporale/domain"
 import { v } from "convex/values"
 

@@ -1,8 +1,8 @@
 // @vitest-environment edge-runtime
 // Dupliqué de socle/convex/modules/reseauPersonnel/groupes.test.ts (avec socle/convex/modules/reseauPersonnel/groupes.cascadeBlobs.test.ts et les cas de transfert de groupe de socle/convex/modules/messagerieScope/transfert.test.ts) @ ad2e7fdc2 — adaptations : personnes et réseaux (graine des fondations) ; codes et règles au lieu des libellés ; appels de groupe (→ lot 15), espaces poste / personnel, comptes publics et coffre retirés ; membres et conviés lus par pages ; la pastille est un compteur TENU (diffusion par lots exécutée par le harnais) ; tests neufs : la diffusion rejouée ne recompte rien, le blocage recompte les fils partagés (D23), masquage par table (D22), fil et jeton d'un autre réseau introuvables, transfert refusé entre réseaux, purge qui épargne le blob d'une copie vivante.
-import { GROUP_MEMBERS_MAX } from "@antia/social-contracts/groupCapacity"
-import { engineErrorCode, engineErrorRule } from "@antia/social-contracts/errors"
-import { MESSAGE_EDIT_WINDOW_MS } from "@antia/social-contracts/messaging"
+import { GROUP_MEMBERS_MAX } from "@antsia/social-contracts/groupCapacity"
+import { engineErrorCode, engineErrorRule } from "@antsia/social-contracts/errors"
+import { MESSAGE_EDIT_WINDOW_MS } from "@antsia/social-contracts/messaging"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 import { api, internal } from "../../_generated/api"

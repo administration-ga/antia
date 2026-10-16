@@ -4,7 +4,7 @@
  * Fichier à deux points dans son nom : ignoré par le bundler de Convex et par
  * le glob du harnais (comme `convex/test.setup.ts`) — il n'est jamais déployé.
  */
-import { engineErrorCode, engineErrorRule } from "@antia/social-contracts/errors"
+import { engineErrorCode, engineErrorRule } from "@antsia/social-contracts/errors"
 import { vi } from "vitest"
 
 import { api, internal } from "../../_generated/api"

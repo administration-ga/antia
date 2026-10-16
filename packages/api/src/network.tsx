@@ -16,9 +16,10 @@
  * §7.5) est porté tel quel, en constantes : `personalMode = true`,
  * `personalSpaceIsElsewhere = false`, `activeOrgId = null`.
  */
-import { createContext, useContext, type ReactNode } from "react"
+import { createContext, useContext, useEffect, useState, type ReactNode } from "react"
 
 import type { Id } from "./engine"
+import { migrateNetworkStorage } from "./network-storage-migration"
 
 /** Les adresses de l'application, injectées : aucune surface n'écrit une URL. */
 export interface EngineRoutes {
@@ -40,7 +41,7 @@ export interface EngineRoutes {
 
 export interface NetworkContextValue {
   networkId: Id<"networks">
-  /** Identifiant lisible du réseau (`antia`, `diaspora`…). */
+  /** Identifiant lisible du réseau (`antsia`, `diaspora`…). */
   slug: string
   /** La personne de la session : chaque surface sait de quel côté elle se tient. */
   personId: Id<"persons">
@@ -68,12 +69,33 @@ export function NetworkProvider(props: {
   liveAvailable?: boolean
   children: ReactNode
 }) {
+  const [initializedSlug, setInitializedSlug] = useState<string | null>(null)
+
+  useEffect(() => {
+    // La reprise précède le montage des enfants : les stores du dock, des
+    // brouillons et des appels ne doivent pas hydrater le nouveau préfixe vide.
+    // Chaque stockage est indépendant, y compris si son accès lui-même échoue.
+    try {
+      migrateNetworkStorage(window.localStorage, props.slug)
+    } catch {
+      // Le navigateur peut refuser l'accès à localStorage (mode privé/politique).
+    }
+    try {
+      migrateNetworkStorage(window.sessionStorage, props.slug)
+    } catch {
+      // L'absence de persistance n'empêche jamais l'accès au réseau.
+    }
+    setInitializedSlug(props.slug)
+  }, [props.slug])
+
+  if (initializedSlug !== props.slug) return null
+
   const value: NetworkContextValue = {
     networkId: props.networkId,
     slug: props.slug,
     personId: props.personId,
     charte: props.charte,
-    storagePrefix: `antia:${props.slug}:`,
+    storagePrefix: `antsia:${props.slug}:`,
     liveAvailable: props.liveAvailable === true,
     personalMode: true,
     personalSpaceIsElsewhere: false,
@@ -89,7 +111,7 @@ export function NetworkProvider(props: {
 /** Le réseau courant ; lève hors d'un `NetworkProvider` (une surface sociale n'existe que dans un réseau). */
 export function useNetwork(): NetworkContextValue {
   const value = useContext(NetworkContext)
-  if (!value) throw new Error("@antia/api/network : aucun NetworkProvider au-dessus de cette surface.")
+  if (!value) throw new Error("@antsia/api/network : aucun NetworkProvider au-dessus de cette surface.")
   return value
 }
 
@@ -101,6 +123,6 @@ export function useOptionalNetwork(): NetworkContextValue | null {
 /** Les adresses de l'application ; lève hors d'un `NetworkProvider`. */
 export function useRoutes(): EngineRoutes {
   const value = useContext(RoutesContext)
-  if (!value) throw new Error("@antia/api/network : aucune table de routes injectée (NetworkProvider).")
+  if (!value) throw new Error("@antsia/api/network : aucune table de routes injectée (NetworkProvider).")
   return value
 }

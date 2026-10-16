@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/groupes-thematiques.ts @ ad2e7fdc2 — adaptations : bornes et rôles tirés du domaine du moteur (`@antia/social-domain/thematicGroups`) au lieu d'un miroir recopié ; libellés par l'i18n — les constantes de texte deviennent des CLÉS qualifiées (`GROUPS_RETURN_LABEL_KEY`, `EMPTY_DISCOVER_TEXT_KEY`, `EMPTY_MY_GROUPS_TEXT_KEY`, `GROUPS_ERROR_TEXT_KEYS`, `GROUP_INVITE_OPEN_LABEL_KEY`, `GROUP_INVITE_PICKER_LABEL_KEY`, `GROUP_INVITE_EMPTY_TEXT_KEY`), les fonctions reçoivent `t` en DERNIER paramètre (clés `reseau:groupesThematiques.*`, pluriels par `count`) ; nom neutre d'une personne sans profil publié (`groupPersonName`) ; refus du moteur lus par leur code ou leur règle (`groupActionErrorText`) ; réponse d'`invite` du moteur (`alreadyInvited` toujours rendu, la lecture tolérante est gardée).
+// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/groupes-thematiques.ts @ ad2e7fdc2 — adaptations : bornes et rôles tirés du domaine du moteur (`@antsia/social-domain/thematicGroups`) au lieu d'un miroir recopié ; libellés par l'i18n — les constantes de texte deviennent des CLÉS qualifiées (`GROUPS_RETURN_LABEL_KEY`, `EMPTY_DISCOVER_TEXT_KEY`, `EMPTY_MY_GROUPS_TEXT_KEY`, `GROUPS_ERROR_TEXT_KEYS`, `GROUP_INVITE_OPEN_LABEL_KEY`, `GROUP_INVITE_PICKER_LABEL_KEY`, `GROUP_INVITE_EMPTY_TEXT_KEY`), les fonctions reçoivent `t` en DERNIER paramètre (clés `reseau:groupesThematiques.*`, pluriels par `count`) ; nom neutre d'une personne sans profil publié (`groupPersonName`) ; refus du moteur lus par leur code ou leur règle (`groupActionErrorText`) ; réponse d'`invite` du moteur (`alreadyInvited` toujours rendu, la lecture tolérante est gardée).
 /**
  * groupes-thematiques — ce que le volet Groupes DÉCIDE, hors de tout composant.
  *
@@ -7,7 +7,7 @@
  * vérifiable, et non dans le corps de `GroupsPanel`.
  *
  * Les bornes et la matrice d'autorité sont celles du DOMAINE du moteur
- * (`@antia/social-domain/thematicGroups`), importées et non recopiées : les
+ * (`@antsia/social-domain/thematicGroups`), importées et non recopiées : les
  * prédicats ci-dessous ne MONTRENT ou cachent que des boutons — la garde reste
  * au serveur, seul endroit où elle protège quelque chose.
  *
@@ -16,7 +16,7 @@
  * paramètre. Aucun import React : ce module ne connaît que des données.
  */
 
-import { engineErrorCode, engineErrorRule } from "@antia/social-contracts/errors"
+import { engineErrorCode, engineErrorRule } from "@antsia/social-contracts/errors"
 import {
   canLeaveThematicGroup,
   isThematicGroupModerator,
@@ -24,7 +24,7 @@ import {
   THEMATIC_GROUP_NAME_MAX_LENGTH,
   THEMATIC_GROUP_NAME_MIN_LENGTH,
   type ThematicGroupRole as DomainThematicGroupRole,
-} from "@antia/social-domain/thematicGroups"
+} from "@antsia/social-domain/thematicGroups"
 import type { TFunction } from "i18next"
 
 /** Les bornes du domaine — le client borne pour éviter un aller-retour perdu, le serveur reste seul juge. */

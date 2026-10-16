@@ -6,7 +6,7 @@
  * Au socle, ces références étaient typées À LA MAIN (`makeFunctionReference`)
  * faute de génération : le NOM était le contrat, et un renommage côté serveur
  * cassait l'appel sans que le typage ne bronche. Ici, elles viennent de
- * l'API générée du moteur (`@antia/api/engine`) : arguments, cibles et
+ * l'API générée du moteur (`@antsia/api/engine`) : arguments, cibles et
  * résultat sont ceux de `convex/modules/messaging/forward.ts`, vérifiés à la
  * compilation.
  *
@@ -15,7 +15,7 @@
  * mêmes : un fil 1:1 (`personal`), un groupe (`group`), ou une personne du
  * réseau par son identifiant public (`handle`), dont le fil s'ouvre au besoin.
  */
-import { api, type Id } from "@antia/api/engine"
+import { api, type Id } from "@antsia/api/engine"
 import type { FunctionArgs } from "convex/server"
 
 import type { ForwardTargetArg } from "./forward-targets"

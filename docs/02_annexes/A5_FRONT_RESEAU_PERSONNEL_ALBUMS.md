@@ -1,5 +1,5 @@
 ---
-title: "ANTIA — Annexe A5 du document 02 : inventaire contradictoire, front — tranches reseau-personnel et reseau-albums"
+title: "ANTSIA — Annexe A5 du document 02 : inventaire contradictoire, front — tranches reseau-personnel et reseau-albums"
 date: "2026-10-14"
 source: "socle administration.ga, origin/main = ad2e7fdc2, copie propre (git worktree add), lecture seule"
 statut: "Rapport d'inventaire brut, produit en lecture seule ; la synthèse décisionnelle est docs/02_OWNER_MAP_DUPLICATION.md"
@@ -23,7 +23,7 @@ Tous les chemins sont relatifs à `S` :
 **Méthode, en lecture seule.**
 - Commandes : `ls -R`, `wc -l`, `grep -n`, `awk` et `perl -ne` (lecture seule), lecture des en-têtes et des passages cités.
 - Git, en lecture seule sur la copie : `git log`, `git diff --stat`, `git ls-tree`, `git show`. Aucun fetch, aucune écriture.
-- Lus pour comparaison : l'annexe B (`DIGITAL_GOUV/Documentation/RESEAUX_SOCIAUX/annexes/B_AUDIT_FRONTEND_…_2026-10-14.md`), le cahier ANTIA §3.1, le prompt PA6, et les cliquets d'ANTIA (`tests/ratchets/lib/detectors.ts`).
+- Lus pour comparaison : l'annexe B (`DIGITAL_GOUV/Documentation/RESEAUX_SOCIAUX/annexes/B_AUDIT_FRONTEND_…_2026-10-14.md`), le cahier ANTSIA §3.1, le prompt PA6, et les cliquets d'ANTSIA (`tests/ratchets/lib/detectors.ts`).
 
 ## Légende des tableaux
 
@@ -39,7 +39,7 @@ Tous les chemins sont relatifs à `S` :
 - **api.\*** : préfixes abrégés. `rP.` = `api.modules.reseauPersonnel.`, `Pages.` = `api.modules.reseauPages.pages.` ; q = `useAuthenticatedConvexQuery`, pq = `useAuthenticatedPaginatedQuery`, m = `useMutation`.
 - **Accroches** : lignes de code ; « comm. » signale un commentaire.
 - **≈lit** : nombre de lignes de code qui portent un texte d'interface littéral. C'est une heuristique awk : CSS et commentaires exclus. Elle sous-estime les libellés d'un seul mot.
-- **Coul.** : les lignes que le cliquet ANTIA `no-hardcoded-colors` attraperait (j'ai rejoué ses regex à l'identique). Il n'y a aucune classe de palette Tailwind. Les classes présentes sont sémantiques (`bg-primary`, `text-muted-foreground`…, dans ReseauMobileCreateButton L92-133 et ReseauMobileMenuSheet L68-100).
+- **Coul.** : les lignes que le cliquet ANTSIA `no-hardcoded-colors` attraperait (j'ai rejoué ses regex à l'identique). Il n'y a aucune classe de palette Tailwind. Les classes présentes sont sémantiques (`bg-primary`, `text-muted-foreground`…, dans ReseauMobileCreateButton L92-133 et ReseauMobileMenuSheet L68-100).
 - **Cible** : par défaut, le même chemin relatif sous `packages/social-features/src/features/reseau-personnel/` (ou `…/reseau-albums/`). `shell/…` = `packages/social-features/src/shell/…`. « — » = non dupliqué.
 
 ---
@@ -77,7 +77,7 @@ L'annexe B donnait 34 % tel quel, 56 % à adapter et 10 % à retirer. L'écart e
   - 68 `useMutation`.
 - « /espace » apparaît sur 104 lignes : 39 de code, 65 de commentaires.
 - Environ 1 000 lignes de texte d'interface littéral.
-- 12 lignes de couleur seraient refusées par le cliquet ANTIA.
+- 12 lignes de couleur seraient refusées par le cliquet ANTSIA.
 
 **Points saillants nouveaux.**
 - **Trois composants orphelins**, montés nulle part dans le socle : NotificationsPanel, ContactsRail, MonReseauCard.
@@ -184,7 +184,7 @@ L'annexe B donnait 34 % tel quel, 56 % à adapter et 10 % à retirer. L'écart e
 | bookmarks-panel.ts | 47 | Décisions du volet Enregistrements | S | — | — | 3 | **À adapter** (i18n) | id. |
 | contacts-rail.ts | 96 | Décisions du rail Contacts | S | int : shared | « Trouvez des collègues » L89 | 3 | **À adapter** | id. |
 | creation-controller.ts | 223 | Ce qu'on peut créer et par quelle surface | S | int : reseau-agent-nav · F reseau-albums/album-model:30, iagenda/agenda-create-intent:31 · WS ui2 (type) | événement via iAgenda L80-81 ; `/espace/profil` L89 | 10 | **À adapter** | id. |
-| design-styles.ts | 77 | Styles de surfaces (jetons `--esp-*`, `--rp-*`) | K | — | jetons de la charte espace-personnel | 0 | **À adapter** (jetons ANTIA) | `shell/` |
+| design-styles.ts | 77 | Styles de surfaces (jetons `--esp-*`, `--rp-*`) | K | — | jetons de la charte espace-personnel | 0 | **À adapter** (jetons ANTSIA) | `shell/` |
 | directs-panel.ts | 313 | Décisions du volet Conférences | S | K shell/espace-origin:22 | `/espace/conference/` L312 ; comm. « espace_administration_ga » L301 | 16 | **À adapter** | id. |
 | dual-pagination-pages.ts | 255 | Chaîne de pages à double curseur | S | — | — | 0 | **Tel quel** | id. |
 | empty-states.ts | 268 | États vides et seul geste proposé | S | int : evenements-list, groupes-thematiques, people-panel, reseau-agent-nav | liens L146, 202, 213 ; « agent » L239 | 17 | **À adapter** | id. |
@@ -421,7 +421,7 @@ Détail des 15 retraits (5 078 l.) :
 
 ---
 
-## 8. Modules `@convex/*` importés par les deux features (à sortir vers `@antia/social-contracts`)
+## 8. Modules `@convex/*` importés par les deux features (à sortir vers `@antsia/social-contracts`)
 
 **`@convex/modules/reseauPersonnel/domain`.** Module pur : aucun import, 1 633 l.
 - `RichText.tsx:17` importe `splitBodyRich` (fonction L967, type `PostBodySegment` L939).
@@ -437,7 +437,7 @@ Détail des 15 retraits (5 078 l.) :
 - `album-model.ts:14-17` importe `ALBUM_ITEMS_MAX` et `ALBUM_TITLE_MAX` (L59).
 - Ce module importe lui-même `../reseauPersonnel/domain` (`POST_IMAGE_MAX_BYTES`, `POST_IMAGE_MIME_TYPES`, `POST_MEDIA_ALT_MAX_LENGTH`, `type PersonalReachAudience`). Les deux modules sortent donc ensemble.
 
-**`@convex/_generated/api`**, à remplacer par `@antia/api`.
+**`@convex/_generated/api`**, à remplacer par `@antsia/api`.
 - 33 fichiers de RP : AnnounceEventDialog, BookmarksPanel, CommentsSurface, DirectsLiveRail, DirectsPanel, EvenementsPanel, EvenementsRail, FeedPages, GroupsPanel, HandleChoiceCard, MonProfilPage, MonReseauCard, PageFollowButton, PagesPanel, PagesSuggestionsRail, PeoplePanel, PostCard, PostComposer, PostOverflowMenu, PrivacyLists, ProfilPagePage, ProfilPersonnePage, ProfilProfessionnelSection, ProfilReseauSection, ProfileMiniCard, ProfilePublicationCard, ReseauMenuRail, SharePostDialog, SuggestionsPanel, use-dual-connection-pagination, use-profile-onboarding, use-relation-search, useReseauFeedState.
 - Aucun fichier de RA : il passe par `makeFunctionReference`.
 
@@ -565,7 +565,7 @@ Les features suivantes réimportent des modules de RP :
 
 ### 10.4 Ordre proposé
 
-0. **Contrats** : les trois modules du §8, le type PostMediaDto, les DTO d'albums, et l'API typée `@antia/api` (Id, références).
+0. **Contrats** : les trois modules du §8, le type PostMediaDto, les DTO d'albums, et l'API typée `@antsia/api` (Id, références).
 1. **Coque et primitives** (`shell/`) :
    - `useRoutes` et `useNetwork` ;
    - `design-styles`, `query-state`, `ReseauQueryError`, `ReseauPaginatedErrorBoundary` ;
@@ -621,7 +621,7 @@ Les features suivantes réimportent des modules de RP :
 9. **Précisions de lignes.**
    - La ligne « fonction » de l'annexe (PeoplePanel 1155, 1239) se décide en réalité dans `people-panel.ts:104-115`. `relation-picker.ts:63, 110` porte aussi `positionTitle` (affiché `RelationPicker.tsx:249`).
    - `page.orgId` est en `PostCard.tsx:95-101`, avec orgId en L96.
-10. **Couleurs.** Les en-têtes de composants affirment « aucun hexadécimal », mais le cliquet ANTIA (qui lit aussi les commentaires) relèverait 12 lignes :
+10. **Couleurs.** Les en-têtes de composants affirment « aucun hexadécimal », mais le cliquet ANTSIA (qui lit aussi les commentaires) relèverait 12 lignes :
     - 1 hexadécimal en commentaire : `mobile-styles.tsx:321` ;
     - 2 `hsl(` en repli : ReseauMobileCreateButton:121, 125 ;
     - 9 `rgb()` ou `rgba()` d'ombres ou de voiles.
@@ -631,7 +631,7 @@ Les features suivantes réimportent des modules de RP :
 ## 12. Points d'attention
 
 - **Pages.** Le cahier §3.1 et M-A5 prévoient des Pages génériques (institution, association, entreprise, média, « Officiel » fédéré). Retirer les 6 fichiers de Pages de la copie PA6 suppose qu'un lot ultérieur les réécrive. Ces fichiers retiennent aussi des branches dans PostCard, PostComposer, post-draft, post-composer-target, shared, author-link, ReseauMenuRail, reseau-menu, reseau-agent-nav, reseau-layout et ReseauMobilePage.
-- **Cliquets ANTIA génériques, trop étroits pour PA6.**
+- **Cliquets ANTSIA génériques, trop étroits pour PA6.**
   - `no-hardcoded-urls` ne verrait que 6 des 39 lignes de code qui contiennent `/espace` : MonProfilPage:1136, 1639 ; reseau-mobile-tabs:249-251 ; ReseauMobileFeed:198.
   - `no-hardcoded-strings` ne voit que le JSX : les constantes de texte des modules `.ts` (shared, groupes-thematiques, empty-states…) lui échappent.
   - Il faut donc un cliquet « /espace » dédié et une revue des `.ts`.

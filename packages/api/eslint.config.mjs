@@ -1,1 +1,1 @@
-export { default } from "@antia/eslint-config/react"
+export { default } from "@antsia/eslint-config/react"

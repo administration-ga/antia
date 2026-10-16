@@ -17,7 +17,7 @@
  * serveur re-borne quoi qu'il envoie, et le seau `live.reaction` borne la
  * cadence des rafales.
  */
-import type { PersonalReactionKind } from "@antia/social-domain/content"
+import type { PersonalReactionKind } from "@antsia/social-domain/content"
 import { v } from "convex/values"
 
 import { failRule } from "../../lib/errors"

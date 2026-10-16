@@ -11,7 +11,7 @@
  * réseau tenu à jour (`syncPersonDirectory`) — une tranche qui passe par elles
  * n'a rien à y penser.
  */
-import { validateFacetValues } from "@antia/social-domain/facets"
+import { validateFacetValues } from "@antsia/social-domain/facets"
 import {
   type ActiveMembershipStatus,
   derivedRootMembership,
@@ -20,7 +20,7 @@ import {
   type MembershipStatus,
   nextMembershipStatus,
   type VerificationSource,
-} from "@antia/social-domain/membership"
+} from "@antsia/social-domain/membership"
 
 import { internal } from "../../_generated/api"
 import type { Doc, Id } from "../../_generated/dataModel"

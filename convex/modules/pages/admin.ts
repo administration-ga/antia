@@ -7,8 +7,8 @@
  * « Officiel ». Retirer une page ne supprime rien : ses publications cessent
  * d'être servies, ses abonnements demeurent, une réactivation rend tout.
  */
-import { assertDecisionReason } from "@antia/social-domain/audit"
-import { assertCountryCode } from "@antia/social-domain/content"
+import { assertDecisionReason } from "@antsia/social-domain/audit"
+import { assertCountryCode } from "@antsia/social-domain/content"
 import {
   assertPageHandle,
   assertPageName,
@@ -16,7 +16,7 @@ import {
   normalizePageDescription,
   normalizePageShortName,
   pageTrustRank,
-} from "@antia/social-domain/pages"
+} from "@antsia/social-domain/pages"
 import { paginationOptsValidator, type PaginationResult } from "convex/server"
 import { v } from "convex/values"
 

@@ -13,7 +13,7 @@
  * d'analyse ; tout échec après `_markRunning` finit dans `_record`. Le balayeur
  * `retryStale` rattrape le crash pur du runtime.
  */
-import { type AuditCapacity, assertDecisionReason } from "@antia/social-domain/audit"
+import { type AuditCapacity, assertDecisionReason } from "@antsia/social-domain/audit"
 import { v } from "convex/values"
 
 import { internal } from "../../_generated/api"

@@ -2,7 +2,7 @@
 /**
  * Ce qu'un message de conversation est, des deux côtés de l'API.
  */
-import { DomainViolation } from "@antia/social-domain/violation"
+import { DomainViolation } from "@antsia/social-domain/violation"
 
 /**
  * Fenêtre pendant laquelle l'AUTEUR peut encore modifier ou retirer son

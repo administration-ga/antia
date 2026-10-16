@@ -1,5 +1,5 @@
 // Dupliqué de socle/convex/lib/livekitWake.test.ts @ ad2e7fdc2 — adaptations : le refus se lit par son CODE du moteur (`mediaServerUnavailable`, `mediaServerNoCapacity`) au lieu des chaînes `LIVEKIT_*` ; les dix cas conservés.
-import { engineErrorCode } from "@antia/social-contracts/errors"
+import { engineErrorCode } from "@antsia/social-contracts/errors"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 import { ensureLiveKitAwake } from "./livekitWake"

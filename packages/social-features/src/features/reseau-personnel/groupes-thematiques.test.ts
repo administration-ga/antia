@@ -8,7 +8,7 @@
  *     rôle que le serveur refuse est un échec assuré ;
  *  3. les libellés disent l'état, jamais l'inverse.
  */
-import { THEMATIC_GROUP_NAME_MAX_LENGTH, THEMATIC_GROUP_NAME_MIN_LENGTH } from "@antia/social-domain/thematicGroups"
+import { THEMATIC_GROUP_NAME_MAX_LENGTH, THEMATIC_GROUP_NAME_MIN_LENGTH } from "@antsia/social-domain/thematicGroups"
 import { ConvexError } from "convex/values"
 import { describe, expect, it } from "vitest"
 

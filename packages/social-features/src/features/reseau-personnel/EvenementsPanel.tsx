@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/EvenementsPanel.tsx @ ad2e7fdc2 — adaptations : mon agenda dans le réseau courant (`events.events.myAgenda` → `{ items, truncated }`, `respond`, `cancel` avec `networkId` par `useNetwork()`), la lacune de l'agenda borné se dit ; jour civil et dates dans le fuseau du NAVIGATEUR et la langue courante (plus de fuseau ni de langue imposés) ; organisateur nommé par le contrat `counterpartLabel` (nom neutre quand le profil n'est pas publié) ; refus du moteur lus par code (`eventActionErrorText`) ; état vide par `reseauEmptyState("agenda", home, t)` ; toutes les chaînes par l'i18n (espace `reseau`, clés `evenementsPanel.*` et `evenementsList.*`) ; COMPOSITION AJOUTÉE (iAgenda, qui la portait au socle, n'existe pas dans le moteur) : carte de création sur place (`events.events.create`, fuseau du navigateur fixé à la création, clé d'idempotence tirée à l'ouverture), ouverte par le bouton « Créer un évènement » quand aucun hôte ne fournit `onCreateEvent`, ou par l'INTENTION portée par l'adresse (`?nouveau=evenement&retour=…`, `agenda-create-intent`, consommée une fois puis retirée de l'URL, retour rendu après la création) ; l'organisateur invite ses relations depuis la carte (`events.events.invite` par le sélecteur de relations, récapitulatif sans mensonge poli) ; la liste des invités et de leurs réponses se déplie (`events.events.paginateEventParticipants`, paginée) ; primitives de `@antia/ui`, kit d'espace de `@antia/ui/espace-kit` (phrases de la pagination par `useEspacePaginationLabels`).
+// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/EvenementsPanel.tsx @ ad2e7fdc2 — adaptations : mon agenda dans le réseau courant (`events.events.myAgenda` → `{ items, truncated }`, `respond`, `cancel` avec `networkId` par `useNetwork()`), la lacune de l'agenda borné se dit ; jour civil et dates dans le fuseau du NAVIGATEUR et la langue courante (plus de fuseau ni de langue imposés) ; organisateur nommé par le contrat `counterpartLabel` (nom neutre quand le profil n'est pas publié) ; refus du moteur lus par code (`eventActionErrorText`) ; état vide par `reseauEmptyState("agenda", home, t)` ; toutes les chaînes par l'i18n (espace `reseau`, clés `evenementsPanel.*` et `evenementsList.*`) ; COMPOSITION AJOUTÉE (iAgenda, qui la portait au socle, n'existe pas dans le moteur) : carte de création sur place (`events.events.create`, fuseau du navigateur fixé à la création, clé d'idempotence tirée à l'ouverture), ouverte par le bouton « Créer un évènement » quand aucun hôte ne fournit `onCreateEvent`, ou par l'INTENTION portée par l'adresse (`?nouveau=evenement&retour=…`, `agenda-create-intent`, consommée une fois puis retirée de l'URL, retour rendu après la création) ; l'organisateur invite ses relations depuis la carte (`events.events.invite` par le sélecteur de relations, récapitulatif sans mensonge poli) ; la liste des invités et de leurs réponses se déplie (`events.events.paginateEventParticipants`, paginée) ; primitives de `@antsia/ui`, kit d'espace de `@antsia/ui/espace-kit` (phrases de la pagination par `useEspacePaginationLabels`).
 "use client"
 
 /**
@@ -29,12 +29,12 @@
  * n'apparaît qu'en vraie attente (`query-state`).
  */
 
-import { api, type Id } from "@antia/api/engine"
-import { useAuthenticatedConvexQuery, useAuthenticatedPaginatedQuery } from "@antia/api/hooks"
-import { useNetwork, useRoutes } from "@antia/api/network"
-import { usePathname, useRouter, useSearchParams } from "@antia/api/routing"
-import { Badge, Button, Card, Field, SkeletonCard, TextArea, TextInput } from "@antia/ui"
-import { clampPage, EspaceEmptyState, EspacePagination, pageSlice } from "@antia/ui/espace-kit"
+import { api, type Id } from "@antsia/api/engine"
+import { useAuthenticatedConvexQuery, useAuthenticatedPaginatedQuery } from "@antsia/api/hooks"
+import { useNetwork, useRoutes } from "@antsia/api/network"
+import { usePathname, useRouter, useSearchParams } from "@antsia/api/routing"
+import { Badge, Button, Card, Field, SkeletonCard, TextArea, TextInput } from "@antsia/ui"
+import { clampPage, EspaceEmptyState, EspacePagination, pageSlice } from "@antsia/ui/espace-kit"
 import { useMutation } from "convex/react"
 import { useEffect, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"

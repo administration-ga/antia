@@ -14,8 +14,8 @@
  * aucune coordonnée — le contact passe par la messagerie. Une page bornée, sans
  * curseur : on affine la recherche, on ne parcourt pas l'annuaire.
  */
-import { normalizeHandle } from "@antia/social-domain/content"
-import { foldSearchQuery } from "@antia/social-domain/searchText"
+import { normalizeHandle } from "@antsia/social-domain/content"
+import { foldSearchQuery } from "@antsia/social-domain/searchText"
 import {
   type DiasporaFacet,
   DIRECTORY_PAGE_SIZE_MAX,

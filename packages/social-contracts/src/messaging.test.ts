@@ -1,4 +1,4 @@
-import { DomainViolation } from "@antia/social-domain/violation"
+import { DomainViolation } from "@antsia/social-domain/violation"
 import { describe, expect, it } from "vitest"
 
 import { assertMessageContent, isWithinEditWindow, MESSAGE_EDIT_WINDOW_MS, MESSAGE_MAX_LENGTH } from "./messaging"

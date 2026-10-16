@@ -1,10 +1,10 @@
-// Dupliqué de socle/packages/agent-features/src/features/reseau-albums/index.ts @ ad2e7fdc2 — adaptations : exports alignés sur le modèle traduit (les tables de libellés `ALBUM_STEP_LABELS`, `ALBUM_AUDIENCE_LABELS`, `ALBUM_AUDIENCE_HINTS`, `ALBUM_STATUS_LABELS` et la constante `ALBUM_WITHDRAW_NOTICE` deviennent les fonctions `albumStepLabel`, `albumAudienceLabel`, `albumAudienceHint`, `albumStatusLabel` et `albumWithdrawNotice`, qui prennent `t`) ; ajouts : `albumAddBatches`, `albumEngineErrorText`, `ALBUM_UPLOAD_USAGE` et les types tirés de l'API du moteur (`AlbumCover`, `AlbumId`, `AlbumItemId`, `AlbumListPage`) ; note d'import rapportée au paquet `@antia/social-features`.
+// Dupliqué de socle/packages/agent-features/src/features/reseau-albums/index.ts @ ad2e7fdc2 — adaptations : exports alignés sur le modèle traduit (les tables de libellés `ALBUM_STEP_LABELS`, `ALBUM_AUDIENCE_LABELS`, `ALBUM_AUDIENCE_HINTS`, `ALBUM_STATUS_LABELS` et la constante `ALBUM_WITHDRAW_NOTICE` deviennent les fonctions `albumStepLabel`, `albumAudienceLabel`, `albumAudienceHint`, `albumStatusLabel` et `albumWithdrawNotice`, qui prennent `t`) ; ajouts : `albumAddBatches`, `albumEngineErrorText`, `ALBUM_UPLOAD_USAGE` et les types tirés de l'API du moteur (`AlbumCover`, `AlbumId`, `AlbumItemId`, `AlbumListPage`) ; note d'import rapportée au paquet `@antsia/social-features`.
 /**
  * Tranche ALBUMS (R-09, ADR-0145) — albums de photos d'une personne, dans un
  * réseau.
  *
  * ⚠️ Le barrel est ce que les applications importent. Le champ `exports` de
- * `@antia/social-features` publie `./*` vers `./src/*.ts` : un import PROFOND
+ * `@antsia/social-features` publie `./*` vers `./src/*.ts` : un import PROFOND
  * d'un composant (`…/reseau-albums/AlbumPage`, fichier `.tsx`) ne résout PAS,
  * et le seul symptôme est une erreur de résolution au build de l'application
  * hôte. Passer par ce barrel (`…/features/reseau-albums/index`, ou l'entrée

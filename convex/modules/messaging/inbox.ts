@@ -6,7 +6,7 @@
  * qui l'on est en relation (ou avec qui un fil existe déjà) ; le BLOCAGE ferme
  * la messagerie dans les deux sens, à l'ouverture comme à la lecture.
  */
-import type { CounterpartLabel } from "@antia/social-contracts/counterpart"
+import type { CounterpartLabel } from "@antsia/social-contracts/counterpart"
 import { v } from "convex/values"
 
 import type { Doc, Id } from "../../_generated/dataModel"

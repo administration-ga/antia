@@ -1,5 +1,5 @@
 ---
-title: "ANTIA — Annexe A4 du document 02 : inventaire contradictoire, backend — appels personnels (iappel, meetings, présence), LiveKit et Egress, direct"
+title: "ANTSIA — Annexe A4 du document 02 : inventaire contradictoire, backend — appels personnels (iappel, meetings, présence), LiveKit et Egress, direct"
 date: "2026-10-14"
 source: "socle administration.ga, origin/main = ad2e7fdc2, copie propre (git worktree add), lecture seule"
 statut: "Rapport d'inventaire brut, produit en lecture seule ; la synthèse décisionnelle est docs/02_OWNER_MAP_DUPLICATION.md"
@@ -23,7 +23,7 @@ Racine : `$S=<copie propre du socle>`. Tous les chemins sont relatifs à `$S`, e
 **Substitutions mécaniques, valables pour tout fichier gardé (non répétées ensuite)**
 - `v.id("users")` devient `v.id("persons")`.
 - `ctx.user._id` devient la personne courante.
-- `authQuery`/`authMutation` (`cx/lib/customFunctions`) sont remplacés par les constructeurs ANTIA avec `requireMembership(ctx, networkId, minStatus)`.
+- `authQuery`/`authMutation` (`cx/lib/customFunctions`) sont remplacés par les constructeurs ANTSIA avec `requireMembership(ctx, networkId, minStatus)`.
 - `networkId` est ajouté à chaque table et chaque ligne.
 - Les noms viennent du profil `persons` au lieu de `reseauPersonnel/people.publishedMiniProfile` et de l'état civil `users.firstName/lastName`.
 - Les identités LiveKit gardent le sujet d'auth en préfixe.
@@ -70,7 +70,7 @@ Bilan : 16 fichiers gardés (6 071 l.) et 10 exclus (3 352 l.).
 **`_deps.ts` (13)**
 - Ré-exports : `authMutation`/`authQuery` (`lib/customFunctions`, L9), `getMembership` (`lib/auth`, L10), `loadLiveMemberships` (`appAccess/resolve`, L11), `getPositionContext` (`lib/positionContext`, L12), `error`/`ErrorCode` (L13).
 - Accroches : L10-12 (rattachements et postes).
-- Il faut y exposer `requireMembership` et les constructeurs ANTIA.
+- Il faut y exposer `requireMembership` et les constructeurs ANTSIA.
 
 **`admission.ts` (404)**
 - Imports : `./hours`, `./scope`.
@@ -150,7 +150,7 @@ Bilan : 16 fichiers gardés (6 071 l.) et 10 exclus (3 352 l.).
 - Dette : `invitesOf` lit jusqu'à 1 000 lignes (L129) ; tickets lus par 1 000 (L1318, L1369).
 - Dette : réécriture du tableau `meetings.participants` à chaque ajout (L973-978, L1039-1045), document chaud.
 - Dette : aucun limiteur de débit sur `startAdHoc`, `addInvitee`, `startFromThread` ; un push par invité (L425-430, L1071-1077).
-- **Trou** : aucun contrôle `isBlockedBetween` sur les invités ad hoc (L694-713) ni sur le chemin d'org d'`addInvitee` (L838-850). À ajouter dans ANTIA.
+- **Trou** : aucun contrôle `isBlockedBetween` sur les invités ad hoc (L694-713) ni sur le chemin d'org d'`addInvitee` (L838-850). À ajouter dans ANTSIA.
 
 **`hours.ts` (372)** — exclu
 - Fuseau UTC+1 fixe (`lib/eauHoraires` `LIBREVILLE_UTC_OFFSET_MS`) : L7-16, L27-32, L113-141.
@@ -302,7 +302,7 @@ La cible est `calls/presence.ts`, avec la présence par personne.
   - `isAvailable` L328 ;
   - `backfillMultiCallFields` L351 (iM).
 - Dette : le nettoyage ne balaie que 500 lignes de toute la table (L220-222) ; au-delà, des lignes ne sont jamais nettoyées. Fuite d'information par les deux queries sans garde. Écriture toutes les 30 s (voulu).
-- À garder dans ANTIA : `heartbeat`, `setOffline`, `cleanup` (indexé par `lastHeartbeat`). Le reste est exclu (centre d'appels, pointage).
+- À garder dans ANTSIA : `heartbeat`, `setOffline`, `cleanup` (indexé par `lastHeartbeat`). Le reste est exclu (centre d'appels, pointage).
 
 ---
 
@@ -416,7 +416,7 @@ Détail de `requestToken` (L127-297) :
 | `tables.ts` | 563 | 12 tables (l'en-tête n'en liste que 8) | — | `pageId` vers `reseauPages_pages` L75-88 | à adapter |
 | `validators.ts` | 344 | Validators | — | `organisation` L42-53 | à adapter |
 
-**Entrants vers le direct, à recréer dans ANTIA**
+**Entrants vers le direct, à recréer dans ANTSIA**
 - `cx/lib/membershipLifecycle.ts:139`, `:146`.
 - `cx/modules/reseau/connections.ts:38`, `:47`.
 - `cx/modules/reseauPages/admin.ts:218`.
@@ -720,11 +720,11 @@ Il y a 46 champs et 10 index.
 - **Audiences** : `public`, `connections`, `invitees`.
 - **Limiteurs** : `directComment`, `directReaction`, `directAntennaRequest`, `directAntennaInvite`.
 - **Les 12 tables, sur le fond.**
-- **Ce qui change :** l'audience `organisation` devient la page ; `isPublicUser` devient l'adhésion ; `communication.publish` devient un rôle de page ; ajout de `networkId` (index de découverte `by_status_and_startedAt` et `by_status_replayStatus_endedAt` à préfixer par le réseau) ; `notifyPersonal` et `writePersonalPost` pointent vers leurs équivalents ANTIA.
+- **Ce qui change :** l'audience `organisation` devient la page ; `isPublicUser` devient l'adhésion ; `communication.publish` devient un rôle de page ; ajout de `networkId` (index de découverte `by_status_and_startedAt` et `by_status_replayStatus_endedAt` à préfixer par le réseau) ; `notifyPersonal` et `writePersonalPost` pointent vers leurs équivalents ANTSIA.
 
 ### (4) Ordre de duplication proposé
 
-0. **Prérequis ANTIA** : `persons`, `networks`, `requireMembership`, graphe (`isConnectedTo`, `isBlockedBetween`), fils de groupe, notifications, push VAPID, `rateLimiter`, `uploadPolicy`/`fileGuard`.
+0. **Prérequis ANTSIA** : `persons`, `networks`, `requireMembership`, graphe (`isConnectedTo`, `isBlockedBetween`), fils de groupe, notifications, push VAPID, `rateLimiter`, `uploadPolicy`/`fileGuard`.
 1. **Transport** : `lib/livekit`, `lib/livekitWake`, `lib/livekitIdentity` (simplifié), avec leurs tests.
 2. **Modules purs des appels** : `group` (tel quel), `scope` réduit à `journal`, `admission`, `capacity`, `validators`, avec leurs tests node.
 3. **Tables** : `calls`, `callInvites`, `callPreferences`, `voicemails`, `personPresence`.
@@ -775,7 +775,7 @@ Il y a 46 champs et 10 index.
 | `tests/` périphériques | 7 | 2 354 | 74 | — | tous |
 | Hors `tests/` | 7 | 7 705 | 190 | Partiellement liés | — |
 
-**Points d'attention majeurs pour ANTIA**
+**Points d'attention majeurs pour ANTSIA**
 - **`endStaleCalls` non borné** (`meetings.ts` L163-184), appelé à chaque appel émis.
 - **Aucun limiteur de débit** sur tout le chemin d'appel.
 - **Contrôle de blocage absent** sur les invités ad hoc (`groupCalls.ts` L694-713).

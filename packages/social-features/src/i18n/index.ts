@@ -2,15 +2,15 @@
  * i18n du moteur — i18next, comme le socle et consulat.ga.
  *
  * Un espace de noms par paquet : `social` (ces surfaces), `errors` (codes
- * renvoyés par le serveur, `@antia/social-contracts`), et ceux des
- * applications (`antia`, `admin`, et `diasporale` chez DIASPORALE). Aucune
+ * renvoyés par le serveur, `@antsia/social-contracts`), et ceux des
+ * applications (`antsia`, `admin`, et `diasporale` chez DIASPORALE). Aucune
  * chaîne d'interface hors des fichiers de locale (cliquet
  * `no-hardcoded-strings`) ; les deux langues portent les mêmes clés (cliquet
  * `i18n-locales`).
  */
 import { createInstance, type i18n as I18nInstance, type Resource } from "i18next"
 
-import { serverCodeResources } from "@antia/social-contracts/i18n"
+import { serverCodeResources } from "@antsia/social-contracts/i18n"
 
 import enDirect from "./locales/en/direct.json"
 import frDirect from "./locales/fr/direct.json"

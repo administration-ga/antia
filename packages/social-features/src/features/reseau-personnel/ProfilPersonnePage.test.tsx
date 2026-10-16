@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/ProfilPersonnePage.test.tsx @ ad2e7fdc2 — adaptations : rendu dans l'enveloppe du moteur (`renderWithEngine` : i18n française, réseau et adresses de test, routeur en mémoire dont on relit l'adresse et les navigations) ; fonctions du moteur moquées (`people.profile.getPublicProfile` au DTO du moteur — `personId`, `avatar`/`cover` servis par la garde, `isMe` —, `posts.posts.personPosts` clé `_id`, `graph.connections.*`, `graph.follows.*`, `calls.direct.callMember`) ; « c'est moi » lu dans `isMe` au lieu de `getMyProfile` ; résumé iProfil retiré (cas « Mon iProfil professionnel » sans objet) ; aperçu « vu par les membres du réseau » qui ramène à MA fiche (adresse des routes de test) ; kit d'espace simulé à part (`@antia/ui/espace-kit`, témoin ARIA fidèle du tablist) ; albums simulés par le barrel de leur tranche (constantes d'adresse réelles du modèle pur) ; cas neufs : invitation reçue acceptée sur la fiche, demande et suivi par personne et réseau, refus du moteur dit par son code, « Écrire » (brouillon iCom, adresse de messagerie au téléphone) et « Appeler » (fenêtre sortante, écran de refus) réservés aux relations, publication épinglée en tête du mur et « Désépingler » sur ma fiche, gestion de mon profil ouverte par « Modifier mon profil » ou `?gerer=1` (jamais en aperçu), mon profil retiré qui ramène à sa gestion au lieu du refus.
+// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/ProfilPersonnePage.test.tsx @ ad2e7fdc2 — adaptations : rendu dans l'enveloppe du moteur (`renderWithEngine` : i18n française, réseau et adresses de test, routeur en mémoire dont on relit l'adresse et les navigations) ; fonctions du moteur moquées (`people.profile.getPublicProfile` au DTO du moteur — `personId`, `avatar`/`cover` servis par la garde, `isMe` —, `posts.posts.personPosts` clé `_id`, `graph.connections.*`, `graph.follows.*`, `calls.direct.callMember`) ; « c'est moi » lu dans `isMe` au lieu de `getMyProfile` ; résumé iProfil retiré (cas « Mon iProfil professionnel » sans objet) ; aperçu « vu par les membres du réseau » qui ramène à MA fiche (adresse des routes de test) ; kit d'espace simulé à part (`@antsia/ui/espace-kit`, témoin ARIA fidèle du tablist) ; albums simulés par le barrel de leur tranche (constantes d'adresse réelles du modèle pur) ; cas neufs : invitation reçue acceptée sur la fiche, demande et suivi par personne et réseau, refus du moteur dit par son code, « Écrire » (brouillon iCom, adresse de messagerie au téléphone) et « Appeler » (fenêtre sortante, écran de refus) réservés aux relations, publication épinglée en tête du mur et « Désépingler » sur ma fiche, gestion de mon profil ouverte par « Modifier mon profil » ou `?gerer=1` (jamais en aperçu), mon profil retiré qui ramène à sa gestion au lieu du refus.
 // @vitest-environment jsdom
 
 /**
@@ -76,7 +76,7 @@ function err(data: unknown = undefined): QueryMock {
   return { ...ok(data), isError: true }
 }
 
-vi.mock("@antia/api/engine", () => ({
+vi.mock("@antsia/api/engine", () => ({
   api: {
     modules: {
       people: {
@@ -111,7 +111,7 @@ function cleDeQuery(query: string, args: unknown): string {
     : `${query}@${cursor.publishedAt}:${cursor.postId}`
 }
 
-vi.mock("@antia/api/hooks", () => ({
+vi.mock("@antsia/api/hooks", () => ({
   useAuthenticatedConvexQuery: (query: string, args: unknown) => {
     mocks.args.push(args)
     if (args === "skip") return { ...ok(undefined), isPending: true }
@@ -127,7 +127,7 @@ vi.mock("convex/react", () => ({
 vi.mock("sonner", () => ({
   toast: { error: mocks.toastError, success: mocks.toastSuccess },
 }))
-vi.mock("@antia/ui/overlay", () => ({
+vi.mock("@antsia/ui/overlay", () => ({
   useIsReseauMobile: () => mocks.mobile,
 }))
 vi.mock("../messagerie/dock-store", () => ({
@@ -197,7 +197,7 @@ vi.mock("./ProfilReseauSection", () => ({
   ProfilReseauSection: () => <div data-testid="gestion-profil" />,
 }))
 
-vi.mock("@antia/ui", () => ({
+vi.mock("@antsia/ui", () => ({
   Alert: ({ title, children }: { title: string; children: ReactNode }) => (
     <div role="alert">
       <strong>{title}</strong>
@@ -228,11 +228,11 @@ vi.mock("@antia/ui", () => ({
 }))
 
 /**
- * Le kit d'espace a son propre point d'entrée (`@antia/ui/espace-kit`) : il se
+ * Le kit d'espace a son propre point d'entrée (`@antsia/ui/espace-kit`) : il se
  * simule À PART. Le témoin du tablist tient le MÊME contrat ARIA (rôles,
  * sélection, liaison au panneau) — c'est ce que ce fichier vérifie de lui.
  */
-vi.mock("@antia/ui/espace-kit", () => ({
+vi.mock("@antsia/ui/espace-kit", () => ({
   EspaceKitStyles: () => null,
   EspaceDossierTabs: ({
     tabs,

@@ -39,10 +39,10 @@
  * l'image, pas du thème.
  */
 
-import { api } from "@antia/api/engine"
-import { useAuthenticatedConvexQuery } from "@antia/api/hooks"
-import { useNetwork } from "@antia/api/network"
-import { Icon } from "@antia/ui"
+import { api } from "@antsia/api/engine"
+import { useAuthenticatedConvexQuery } from "@antsia/api/hooks"
+import { useNetwork } from "@antsia/api/network"
+import { Icon } from "@antsia/ui"
 import type { FunctionReturnType } from "convex/server"
 import { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"

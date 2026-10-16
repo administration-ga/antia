@@ -1,7 +1,7 @@
 // Dupliqué de socle/packages/agent-features/src/features/messagerie/IcomPublicReminders.test.tsx @ ad2e7fdc2 — adaptations : rendu dans l'enveloppe du moteur (i18n français, routeur en mémoire, table des routes injectée) au lieu d'un `Link` moqué ; « iRéseau » devient « le réseau » ; le badge est celui que le serveur a CALCULÉ (« Officiel » pour une page officielle) ; la page mène à la fiche que sert l'application (`routes.page`, table injectée), jamais au profil homonyme, « Tout voir » mène à l'accueil du réseau ; cas neuf : une page de communauté n'est pas dite officielle.
 // @vitest-environment jsdom
 
-import type { EngineRoutes } from "@antia/api/network"
+import type { EngineRoutes } from "@antsia/api/network"
 import { fireEvent, render, screen } from "@testing-library/react"
 import type { ReactNode } from "react"
 import { describe, expect, it, vi } from "vitest"

@@ -3,7 +3,7 @@
  * CONVERSATIONS DE GROUPE d'un réseau — distinctes du 1:1 (`messaging`) : la
  * paire ordonnée ne se généralise pas à N personnes.
  *
- * Plafond : `GROUP_MEMBERS_MAX` (`@antia/social-contracts/groupCapacity`),
+ * Plafond : `GROUP_MEMBERS_MAX` (`@antsia/social-contracts/groupCapacity`),
  * créateur compris — ne pas recopier le chiffre ici.
  */
 import { defineTable } from "convex/server"

@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/messagerie/MessagerieComposeView.test.tsx @ ad2e7fdc2 — adaptations : couche Convex simulée sur les références du MOTEUR (`graph.connections.paginateMine` / `searchMine`, arguments portant `networkId`) ; relations au DTO du moteur (`otherPersonId`, badges ; ni fonction ni administration) ; montage dans l'enveloppe du moteur (`renderWithEngine` : i18n fr, réseau, routes) au lieu de simuler `@antia/ui` (vrais `Alert`/`Button`, vrai `useDebouncedValue`) ; un cas ajouté — relation sans nom publié ; les cinq cas du socle tels quels.
+// Dupliqué de socle/packages/agent-features/src/features/messagerie/MessagerieComposeView.test.tsx @ ad2e7fdc2 — adaptations : couche Convex simulée sur les références du MOTEUR (`graph.connections.paginateMine` / `searchMine`, arguments portant `networkId`) ; relations au DTO du moteur (`otherPersonId`, badges ; ni fonction ni administration) ; montage dans l'enveloppe du moteur (`renderWithEngine` : i18n fr, réseau, routes) au lieu de simuler `@antsia/ui` (vrais `Alert`/`Button`, vrai `useDebouncedValue`) ; un cas ajouté — relation sans nom publié ; les cinq cas du socle tels quels.
 // @vitest-environment jsdom
 
 /**
@@ -47,7 +47,7 @@ const mocks = vi.hoisted(() => ({
   openDraft: vi.fn(),
 }))
 
-vi.mock("@antia/api/engine", () => ({
+vi.mock("@antsia/api/engine", () => ({
   api: {
     modules: {
       graph: {
@@ -61,7 +61,7 @@ vi.mock("@antia/api/engine", () => ({
   },
 }))
 
-vi.mock("@antia/api/hooks", () => ({
+vi.mock("@antsia/api/hooks", () => ({
   useAuthenticatedConvexQuery: (
     reference: string,
     args: DualArgs | SearchArgs | "skip",

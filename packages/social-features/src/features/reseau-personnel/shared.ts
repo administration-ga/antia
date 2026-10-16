@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/shared.ts @ ad2e7fdc2 — adaptations : miroirs du serveur remplacés par la source de vérité du moteur (`@antia/social-domain/content` : bornes, audiences, raisons du fil, réactions, photo de profil ; `/pages` : audiences d'une page ; `/notifications` : genres de la cloche) ; aucune trace d'organisation ni de poste (audience « organisation », raison « collegue » et voix « Mon administration » retirées ; la note aux abonnés d'une page devient l'audience `followers`) ; genres de la cloche aux noms du moteur (`live_*`, `event_invite`) ; libellés par l'i18n — les constantes portent des CLÉS (`labelKey`, `hintKey`), les fonctions reçoivent `t` en DERNIER paramètre (clés qualifiées `reseau:shared.*`) ; dates absolues dans la langue courante (formateur `datetime` d'i18next, plus de « fr-FR » en dur) ; pluriels par `count`.
+// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/shared.ts @ ad2e7fdc2 — adaptations : miroirs du serveur remplacés par la source de vérité du moteur (`@antsia/social-domain/content` : bornes, audiences, raisons du fil, réactions, photo de profil ; `/pages` : audiences d'une page ; `/notifications` : genres de la cloche) ; aucune trace d'organisation ni de poste (audience « organisation », raison « collegue » et voix « Mon administration » retirées ; la note aux abonnés d'une page devient l'audience `followers`) ; genres de la cloche aux noms du moteur (`live_*`, `event_invite`) ; libellés par l'i18n — les constantes portent des CLÉS (`labelKey`, `hintKey`), les fonctions reçoivent `t` en DERNIER paramètre (clés qualifiées `reseau:shared.*`) ; dates absolues dans la langue courante (formateur `datetime` d'i18next, plus de « fr-FR » en dur) ; pluriels par `count`.
 /**
  * Logique DÉCIDABLE du réseau — libellés, dates, bornes, états vides.
  *
@@ -24,12 +24,12 @@ import {
   type PersonalPostAudience,
   type PersonalReachAudience,
   type PersonalReactionKind,
-} from "@antia/social-domain/content"
-import type { NotificationKind } from "@antia/social-domain/notifications"
-import type { PagePostAudience } from "@antia/social-domain/pages"
+} from "@antsia/social-domain/content"
+import type { NotificationKind } from "@antsia/social-domain/notifications"
+import type { PagePostAudience } from "@antsia/social-domain/pages"
 import type { TFunction } from "i18next"
 
-/** Les bornes du domaine (`@antia/social-domain/content`), lues et non recopiées.
+/** Les bornes du domaine (`@antsia/social-domain/content`), lues et non recopiées.
  *  Le client borne pour ÉVITER un aller-retour perdu ; le serveur reste seul
  *  juge — un compteur d'écran n'est pas une garde. */
 export const POST_MAX_LENGTH = PERSONAL_POST_MAX_LENGTH
@@ -271,7 +271,7 @@ export function unreadBadgeLabel(count: number | undefined, t: TFunction): strin
 
 /**
  * Les genres de la cloche qui ont une phrase ici — aux noms du moteur
- * (`@antia/social-domain/notifications`) : un nom qui n'y existe pas ne
+ * (`@antsia/social-domain/notifications`) : un nom qui n'y existe pas ne
  * compile pas. Les genres propres au moteur (page suivie, album, garde des
  * fichiers, appels manqués, messages vocaux, tranches d'application) sont
  * phrasés par la surface des notifications.

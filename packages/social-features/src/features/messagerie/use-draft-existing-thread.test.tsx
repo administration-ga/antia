@@ -13,10 +13,10 @@ const mocks = vi.hoisted(() => ({
   args: [] as unknown[],
 }))
 
-vi.mock("@antia/api/engine", () => ({
+vi.mock("@antsia/api/engine", () => ({
   api: { modules: { messaging: { inbox: { findThreadWithHandle: "findThreadWithHandle" } } } },
 }))
-vi.mock("@antia/api/hooks", () => ({
+vi.mock("@antsia/api/hooks", () => ({
   useAuthenticatedConvexQuery: (_reference: string, args: unknown) => {
     mocks.args.push(args)
     return { data: args === "skip" ? undefined : mocks.found, isLoading: false, isError: false, isFetching: false, refetch: vi.fn() }

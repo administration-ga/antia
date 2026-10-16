@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/stories/StoryRing.tsx @ ad2e7fdc2 — adaptations : aucune dans le code (aucun libellé ; un nom vide rend la silhouette, ce que l'appelant passe pour un auteur que le moteur ne nomme pas) ; classes d'anneau `.esp-story-ring*` lues dans la couche de communication de `@antia/ui` (`communication.css`).
+// Dupliqué de socle/packages/agent-features/src/features/stories/StoryRing.tsx @ ad2e7fdc2 — adaptations : aucune dans le code (aucun libellé ; un nom vide rend la silhouette, ce que l'appelant passe pour un auteur que le moteur ne nomme pas) ; classes d'anneau `.esp-story-ring*` lues dans la couche de communication de `@antsia/ui` (`communication.css`).
 "use client"
 
 /**
@@ -7,7 +7,7 @@
  * Trois états, décidés par `ringStateFor` (`stories-tray.ts`) et jamais ici :
  * `self` (ma série), `unseen` (il reste à voir), `seen` (tout est vu). La
  * COULEUR des trois vient des classes `.esp-story-ring*` de la couche de
- * communication de `@antia/ui` (`communication.css`) — un dégradé conique est
+ * communication de `@antsia/ui` (`communication.css`) — un dégradé conique est
  * une valeur composée, elle ne se dit ni en classe Tailwind ni en style en
  * ligne.
  *
@@ -17,7 +17,7 @@
  * l'annonce — un lecteur d'écran dirait deux fois le même nom.
  */
 
-import { Icon } from "@antia/ui"
+import { Icon } from "@antsia/ui"
 import { initialsOf } from "../reseau-personnel/Avatar"
 import type { StoryRingState } from "./stories-tray"
 

@@ -19,7 +19,7 @@
  *  4. refus à code : `notFound` indistinct, `liveRoleRequired`, `LIVE_EXCLUDED`,
  *     `LIVE_FULL`, débit `live.token`.
  */
-import { DIRECT_PRESENCE_TTL_MS } from "@antia/social-domain/live/domain"
+import { DIRECT_PRESENCE_TTL_MS } from "@antsia/social-domain/live/domain"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 import { internal } from "../../_generated/api"

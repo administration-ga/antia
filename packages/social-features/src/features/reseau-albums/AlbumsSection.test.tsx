@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/reseau-albums/AlbumsSection.test.tsx @ ad2e7fdc2 — adaptations : rendu dans l'enveloppe du moteur (i18n français, réseau de test, routeur en mémoire au lieu d'un `useRouter` simulé) ; liste du moteur (`paginatePersonAlbums`) lue avec le réseau courant ; DTO du moteur (couverture `{ url, withheld, altText }`, champs absents en `null`) ; adresse de l'album composée sous le profil que sert l'application (table de routes qui échappe le handle, comme celle d'antia.ga) ; adresses d'images neutres ; les 11 cas sont gardés ; cas ajouté : une couverture retenue par la garde (propriétaire seul) se rend comme une couverture absente.
+// Dupliqué de socle/packages/agent-features/src/features/reseau-albums/AlbumsSection.test.tsx @ ad2e7fdc2 — adaptations : rendu dans l'enveloppe du moteur (i18n français, réseau de test, routeur en mémoire au lieu d'un `useRouter` simulé) ; liste du moteur (`paginatePersonAlbums`) lue avec le réseau courant ; DTO du moteur (couverture `{ url, withheld, altText }`, champs absents en `null`) ; adresse de l'album composée sous le profil que sert l'application (table de routes qui échappe le handle, comme celle d'antsia.ga) ; adresses d'images neutres ; les 11 cas sont gardés ; cas ajouté : une couverture retenue par la garde (propriétaire seul) se rend comme une couverture absente.
 // @vitest-environment jsdom
 
 /**
@@ -13,7 +13,7 @@
  *  4. le statut « Brouillon » ne s'affiche qu'à son propriétaire — l'afficher
  *     à un tiers dirait qu'il existe quelque chose qu'il ne peut pas voir.
  */
-import type { EngineRoutes } from "@antia/api/network"
+import type { EngineRoutes } from "@antsia/api/network"
 import { cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { getFunctionName } from "convex/server"
 import type { ButtonHTMLAttributes, ReactNode } from "react"
@@ -46,13 +46,13 @@ function ok(data: unknown): QueryMock {
   }
 }
 
-vi.mock("@antia/api/hooks", () => ({
+vi.mock("@antsia/api/hooks", () => ({
   useAuthenticatedConvexQuery: (query: unknown, args: unknown) => {
     mocks.query(query, args)
     return mocks.result ?? ok(null)
   },
 }))
-vi.mock("@antia/ui", () => ({
+vi.mock("@antsia/ui", () => ({
   Alert: ({ title, children }: { title: string; children: ReactNode }) => (
     <div role="alert">
       <strong>{title}</strong>
@@ -121,7 +121,7 @@ describe("AlbumsSection — la liste publiée", () => {
     mocks.result = ok({ page: [ALBUM], isDone: true, continueCursor: "" })
     const router = memoryRouter()
     // L'adresse du profil est celle que SERT l'application (`useRoutes().profile`),
-    // qui échappe le handle — comme la table de routes d'antia.ga.
+    // qui échappe le handle — comme la table de routes d'antsia.ga.
     const routes: EngineRoutes = { ...TEST_ROUTES, profile: (handle) => `/profil/${encodeURIComponent(handle)}` }
     render(<AlbumsSection handle="a wa" isSelf={false} />, {
       wrapper: ({ children }) => (

@@ -21,10 +21,10 @@
  * une interface qui laisse croire à une révocation ment (plan §2.1).
  */
 
-import { useAuthenticatedConvexQuery } from "@antia/api/hooks"
-import { useNetwork, useRoutes } from "@antia/api/network"
-import { useRouter } from "@antia/api/routing"
-import { Alert, Badge, Button, Card, Icon, SkeletonCard } from "@antia/ui"
+import { useAuthenticatedConvexQuery } from "@antsia/api/hooks"
+import { useNetwork, useRoutes } from "@antsia/api/network"
+import { useRouter } from "@antsia/api/routing"
+import { Alert, Badge, Button, Card, Icon, SkeletonCard } from "@antsia/ui"
 import { useMutation } from "convex/react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"

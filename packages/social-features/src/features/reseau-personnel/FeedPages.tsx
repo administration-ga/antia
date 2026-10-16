@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/FeedPages.tsx @ ad2e7fdc2 — adaptations : fil `posts.posts.myFeed` du moteur avec le réseau courant (`useNetwork().networkId`), portées du domaine (sans « mon_administration ») ; cartes rendues avec la projection du moteur (clé `_id`) ; le rail des pages à suivre est celui que le lot des pages réécrit sur le moteur (`./PagesSuggestionsRail`, mêmes nom et props qu'au socle) ; état vide du kit d'espace de `@antia/ui/espace-kit` ; commentaires rapportés à la page réseau (« personnes » au lieu d'« agents »).
+// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/FeedPages.tsx @ ad2e7fdc2 — adaptations : fil `posts.posts.myFeed` du moteur avec le réseau courant (`useNetwork().networkId`), portées du domaine (sans « mon_administration ») ; cartes rendues avec la projection du moteur (clé `_id`) ; le rail des pages à suivre est celui que le lot des pages réécrit sur le moteur (`./PagesSuggestionsRail`, mêmes nom et props qu'au socle) ; état vide du kit d'espace de `@antsia/ui/espace-kit` ; commentaires rapportés à la page réseau (« personnes » au lieu d'« agents »).
 "use client"
 
 /**
@@ -14,11 +14,11 @@
  * ni l'entrelacement des suggestions.
  */
 
-import { api } from "@antia/api/engine"
-import { useAuthenticatedConvexQuery } from "@antia/api/hooks"
-import { useNetwork } from "@antia/api/network"
-import { SkeletonCard } from "@antia/ui"
-import { EspaceEmptyState } from "@antia/ui/espace-kit"
+import { api } from "@antsia/api/engine"
+import { useAuthenticatedConvexQuery } from "@antsia/api/hooks"
+import { useNetwork } from "@antsia/api/network"
+import { SkeletonCard } from "@antsia/ui"
+import { EspaceEmptyState } from "@antsia/ui/espace-kit"
 import { Fragment, useEffect, type ReactNode } from "react"
 import { PostCard } from "./PostCard"
 import { PagesSuggestionsRail } from "./PagesSuggestionsRail"

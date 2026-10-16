@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs"
 import { fileURLToPath } from "node:url"
 import { describe, expect, it } from "vitest"
 
-import type { Id } from "@antia/api/engine"
+import type { Id } from "@antsia/api/engine"
 import {
 	combinerNonLus,
 	curseursEgaux,

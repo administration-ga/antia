@@ -34,10 +34,10 @@
  * façon.
  */
 
-import { api } from "@antia/api/engine"
-import type { Id } from "@antia/api/engine"
-import { useConvexMutationQuery } from "@antia/api/hooks"
-import { useNetwork } from "@antia/api/network"
+import { api } from "@antsia/api/engine"
+import type { Id } from "@antsia/api/engine"
+import { useConvexMutationQuery } from "@antsia/api/hooks"
+import { useNetwork } from "@antsia/api/network"
 import { useEffect, useRef } from "react"
 import { useCallStore } from "../../stores/call-store"
 import {

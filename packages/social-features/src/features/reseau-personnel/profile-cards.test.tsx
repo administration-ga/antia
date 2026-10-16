@@ -17,7 +17,7 @@ const mocks = vi.hoisted(() => {
   }
 })
 
-vi.mock("@antia/api/engine", () => ({
+vi.mock("@antsia/api/engine", () => ({
   api: {
     modules: {
       people: {
@@ -36,7 +36,7 @@ vi.mock("@antia/api/engine", () => ({
     },
   },
 }))
-vi.mock("@antia/api/hooks", () => ({
+vi.mock("@antsia/api/hooks", () => ({
   useAuthenticatedConvexQuery: (query: string, args: unknown) => {
     mocks.args.push([query, args])
     if (args === "skip") return { data: undefined, isLoading: false, isError: false, isFetching: false, refetch: vi.fn() }
@@ -45,7 +45,7 @@ vi.mock("@antia/api/hooks", () => ({
 }))
 vi.mock("convex/react", () => ({ useMutation: (reference: string) => mocks.mutation(reference) }))
 vi.mock("sonner", () => ({ toast: { error: mocks.toastError, success: mocks.toastSuccess } }))
-vi.mock("@antia/ui", async (importOriginal) => {
+vi.mock("@antsia/ui", async (importOriginal) => {
   const actual = await importOriginal<Record<string, unknown>>()
   // Pause de frappe neutralisée : la valeur passe tout de suite.
   return { ...actual, useDebouncedValue: <T,>(value: T) => value }

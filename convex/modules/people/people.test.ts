@@ -4,7 +4,7 @@
  * Le profil social d'une personne dans le moteur : publier, retirer, mode
  * privé, annuaire du réseau, images de profil, fiche publique, mentions.
  */
-import { engineErrorCode, engineErrorRule } from "@antia/social-contracts/errors"
+import { engineErrorCode, engineErrorRule } from "@antsia/social-contracts/errors"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 import { api, internal } from "../../_generated/api"

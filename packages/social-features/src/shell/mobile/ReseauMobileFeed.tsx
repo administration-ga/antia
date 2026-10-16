@@ -29,8 +29,8 @@
  * trouvable, ni connectable — c'est un prérequis, pas une préférence.
  */
 
-import { useRoutes } from "@antia/api/network"
-import { Alert, Button, SkeletonCard } from "@antia/ui"
+import { useRoutes } from "@antsia/api/network"
+import { Alert, Button, SkeletonCard } from "@antsia/ui"
 import { useTranslation } from "react-i18next"
 
 import { Avatar } from "../../features/reseau-personnel/Avatar"

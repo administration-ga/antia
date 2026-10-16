@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/messagerie/groupe-composeur.ts @ ad2e7fdc2 — adaptations : bornes lues dans le contrat du moteur (`@antia/social-contracts/groupCapacity` : plafond de structure 256, minimum d'autres membres et longueur du titre, au lieu de deux copies locales) ; raison de refus traduite (`validerSelection` reçoit `t` en dernier paramètre, clés qualifiées `messagerie:groupeComposeur.…`) ; refus d'une PHOTO DE GROUPE (`refusPhotoDeGroupe`, types et poids du domaine `@antia/social-domain/content`) qui remplace la réécriture, par remplacement de texte, du refus de photo de profil ; `GROUPE_PHOTO_ACCEPT` et `GROUPE_PHOTO_MAX_MO` pour le sélecteur de fichier et son aide.
+// Dupliqué de socle/packages/agent-features/src/features/messagerie/groupe-composeur.ts @ ad2e7fdc2 — adaptations : bornes lues dans le contrat du moteur (`@antsia/social-contracts/groupCapacity` : plafond de structure 256, minimum d'autres membres et longueur du titre, au lieu de deux copies locales) ; raison de refus traduite (`validerSelection` reçoit `t` en dernier paramètre, clés qualifiées `messagerie:groupeComposeur.…`) ; refus d'une PHOTO DE GROUPE (`refusPhotoDeGroupe`, types et poids du domaine `@antsia/social-domain/content`) qui remplace la réécriture, par remplacement de texte, du refus de photo de profil ; `GROUPE_PHOTO_ACCEPT` et `GROUPE_PHOTO_MAX_MO` pour le sélecteur de fichier et son aide.
 /**
  * groupe-composeur — ce que le composeur de GROUPE décide.
  *
@@ -21,9 +21,9 @@ import {
 	GROUP_MEMBERS_MAX,
 	GROUP_MIN_OTHERS,
 	GROUP_TITLE_MAX_LENGTH,
-} from "@antia/social-contracts/groupCapacity"
-import { AVATAR_MAX_BYTES, AVATAR_MIME_TYPES } from "@antia/social-domain/content"
-import { megabytes } from "@antia/social-domain/violation"
+} from "@antsia/social-contracts/groupCapacity"
+import { AVATAR_MAX_BYTES, AVATAR_MIME_TYPES } from "@antsia/social-domain/content"
+import { megabytes } from "@antsia/social-domain/violation"
 import type { TFunction } from "i18next"
 
 /** Plafond d'un groupe, CRÉATEUR COMPRIS — la SOURCE, plus un miroir. */

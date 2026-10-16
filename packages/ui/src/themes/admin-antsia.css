@@ -1,0 +1,9 @@
+/*
+ * Thème de la console du moteur (`apps/admin_antsia_ga`, `data-charte="admin-antsia"`).
+ *
+ * VIDE À DESSEIN jusqu'à la passe de direction artistique de la console
+ * (prompt PA7 ; candidates du programme : `papier-encre` ou `marianne`) :
+ * la console hérite de la charte de base. Mêmes règles que `antsia.css`.
+ */
+[data-charte="admin-antsia"] {
+}

@@ -1,5 +1,5 @@
-// Dupliqué de socle/packages/agent-features/src/features/messagerie/message-actions.test.ts @ ad2e7fdc2 — adaptations : fenêtre d'édition lue au contrat du moteur (`@antia/social-contracts/messaging`) ; `actionsFor` reçoit la traduction française du moteur (`t` en dernier paramètre) — libellés attendus : texte exact du socle ; un cas ajouté : les libellés suivent la langue.
-import { MESSAGE_EDIT_WINDOW_MS } from "@antia/social-contracts/messaging"
+// Dupliqué de socle/packages/agent-features/src/features/messagerie/message-actions.test.ts @ ad2e7fdc2 — adaptations : fenêtre d'édition lue au contrat du moteur (`@antsia/social-contracts/messaging`) ; `actionsFor` reçoit la traduction française du moteur (`t` en dernier paramètre) — libellés attendus : texte exact du socle ; un cas ajouté : les libellés suivent la langue.
+import { MESSAGE_EDIT_WINDOW_MS } from "@antsia/social-contracts/messaging"
 import { describe, expect, it } from "vitest"
 import { createAppI18n } from "../../i18n"
 import {

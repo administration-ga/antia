@@ -26,7 +26,7 @@ const mocks = vi.hoisted(() => ({
 	convexQuery: vi.fn(),
 }))
 
-vi.mock("@antia/api/engine", () => ({
+vi.mock("@antsia/api/engine", () => ({
 	api: {
 		modules: {
 			notifications: {
@@ -47,7 +47,7 @@ vi.mock("@antia/api/engine", () => ({
 	},
 }))
 
-vi.mock("@antia/api/hooks", () => ({
+vi.mock("@antsia/api/hooks", () => ({
 	useAuthenticatedConvexQuery: (reference: string, args: unknown) => {
 		mocks.queries.push({ reference, args })
 		return { data: mocks.unread, isLoading: false, isError: false }

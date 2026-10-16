@@ -9,8 +9,8 @@
  * - Les niveaux fins de la facette et le niveau d'annuaire vivent dans
  *   `memberPrivacy` ; les valeurs de la facette, dans `personFacets` du moteur.
  */
-import { type ConsentPurpose, isConsentInForce } from "@antia/social-domain/consent"
-import { effectiveAccessStatus, isActiveStatus, type MembershipStatus } from "@antia/social-domain/membership"
+import { type ConsentPurpose, isConsentInForce } from "@antsia/social-domain/consent"
+import { effectiveAccessStatus, isActiveStatus, type MembershipStatus } from "@antsia/social-domain/membership"
 import {
   DEFAULT_DIRECTORY_VISIBILITY,
   DEFAULT_FACET_VISIBILITY,

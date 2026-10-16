@@ -21,7 +21,7 @@
  * Un fichier que la plateforme PRODUIT elle-même n'est pas admis : il est
  * INSCRIT (`registerGeneratedBlob`), né `skipped/server_generated`.
  */
-import { type DeclaredUpload, normalizeSha256, type StoredUpload } from "@antia/social-domain/uploadPolicy"
+import { type DeclaredUpload, normalizeSha256, type StoredUpload } from "@antsia/social-domain/uploadPolicy"
 
 import { internal } from "../../_generated/api"
 import type { Doc, Id } from "../../_generated/dataModel"

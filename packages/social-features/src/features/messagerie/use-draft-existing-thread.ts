@@ -11,10 +11,10 @@
  * un identifiant inconnu, un blocage, soi-même ou un fil sorti de la boîte : le
  * brouillon reste alors un brouillon, comme avant.
  */
-import { api } from "@antia/api/engine"
-import { useAuthenticatedConvexQuery } from "@antia/api/hooks"
-import { useNetwork, useRoutes } from "@antia/api/network"
-import { useRouter } from "@antia/api/routing"
+import { api } from "@antsia/api/engine"
+import { useAuthenticatedConvexQuery } from "@antsia/api/hooks"
+import { useNetwork, useRoutes } from "@antsia/api/network"
+import { useRouter } from "@antsia/api/routing"
 import { useEffect } from "react"
 
 import { dockStore } from "./dock-store"

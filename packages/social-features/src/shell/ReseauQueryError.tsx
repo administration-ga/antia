@@ -1,7 +1,7 @@
-// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/ReseauQueryError.tsx @ ad2e7fdc2 — adaptations : primitives de `@antia/ui` ; libellé « Réessayer » par l'i18n (`reseau:reseauQueryError.retry`) ; déplacé dans la coque (`shell/`) ; contrat des props inchangé (titre et message déjà traduits par l'appelant).
+// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/ReseauQueryError.tsx @ ad2e7fdc2 — adaptations : primitives de `@antsia/ui` ; libellé « Réessayer » par l'i18n (`reseau:reseauQueryError.retry`) ; déplacé dans la coque (`shell/`) ; contrat des props inchangé (titre et message déjà traduits par l'appelant).
 "use client"
 
-import { Alert, Button } from "@antia/ui"
+import { Alert, Button } from "@antsia/ui"
 import { useTranslation } from "react-i18next"
 
 /** État d'échec partagé : une panne ne se présente jamais comme une liste vide. */

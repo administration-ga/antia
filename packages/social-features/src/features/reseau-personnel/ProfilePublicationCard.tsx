@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/ProfilePublicationCard.tsx @ ad2e7fdc2 — adaptations : branchée sur la personne du moteur (`people.persons.getMyPerson`, sur soi) et ses gestes (`people.profile.{publishMyProfile, withdrawMyProfile, setMyProfilePrivacy, setMyAvatar, setMyCover}`) ; photo et couverture déposées par `people.profile.generateProfileUploadUrl({ usage })` puis posées avec leur type déclaré (garde des fichiers : une image neuve peut être RETENUE le temps de son analyse, ce que la carte et le toast disent) ; retrait de la couverture ajouté (la copie de visibilité promet que chaque image se retire comme elle s'ajoute) ; rien n'est publié d'office (invariant 7) — plus d'étape « adresse posée d'office » : l'identifiant se choisit DANS l'éditeur (`HandleChoiceCard` contrôlé, propositions à partir du nom saisi), et un profil retiré se republie sous son identifiant gardé ; « Reprendre la photo de mon compte » retiré avec la prop `accountAvatarUrl` (rien n'est repris du compte) ; refus du moteur par leurs codes (`profileErrorText` : règle, puis code, puis phrase) ; « votre poste reste joignable dans l'annuaire » retiré ; textes par l'i18n (`reseau:profilePublicationCard.*`) ; bornes des champs lues dans le domaine (`@antia/social-domain/content`).
+// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/ProfilePublicationCard.tsx @ ad2e7fdc2 — adaptations : branchée sur la personne du moteur (`people.persons.getMyPerson`, sur soi) et ses gestes (`people.profile.{publishMyProfile, withdrawMyProfile, setMyProfilePrivacy, setMyAvatar, setMyCover}`) ; photo et couverture déposées par `people.profile.generateProfileUploadUrl({ usage })` puis posées avec leur type déclaré (garde des fichiers : une image neuve peut être RETENUE le temps de son analyse, ce que la carte et le toast disent) ; retrait de la couverture ajouté (la copie de visibilité promet que chaque image se retire comme elle s'ajoute) ; rien n'est publié d'office (invariant 7) — plus d'étape « adresse posée d'office » : l'identifiant se choisit DANS l'éditeur (`HandleChoiceCard` contrôlé, propositions à partir du nom saisi), et un profil retiré se republie sous son identifiant gardé ; « Reprendre la photo de mon compte » retiré avec la prop `accountAvatarUrl` (rien n'est repris du compte) ; refus du moteur par leurs codes (`profileErrorText` : règle, puis code, puis phrase) ; « votre poste reste joignable dans l'annuaire » retiré ; textes par l'i18n (`reseau:profilePublicationCard.*`) ; bornes des champs lues dans le domaine (`@antsia/social-domain/content`).
 "use client"
 
 /**
@@ -22,15 +22,15 @@
  *     effacer — l'identifiant reste réservé, republier rétablit.
  */
 
-import { api } from "@antia/api/engine"
-import type { Id } from "@antia/api/engine"
-import { useAuthenticatedConvexQuery } from "@antia/api/hooks"
-import type { MediaWithheld } from "@antia/social-contracts/media"
+import { api } from "@antsia/api/engine"
+import type { Id } from "@antsia/api/engine"
+import { useAuthenticatedConvexQuery } from "@antsia/api/hooks"
+import type { MediaWithheld } from "@antsia/social-contracts/media"
 import {
   DISPLAY_NAME_MAX_LENGTH,
   HEADLINE_MAX_LENGTH,
-} from "@antia/social-domain/content"
-import { Alert, Button, Card, Field, TextInput } from "@antia/ui"
+} from "@antsia/social-domain/content"
+import { Alert, Button, Card, Field, TextInput } from "@antsia/ui"
 import { useMutation } from "convex/react"
 import { useRef, useState } from "react"
 import { useTranslation } from "react-i18next"

@@ -15,15 +15,15 @@
  * se comptent sur l'EFFECTIF rendu par le serveur, exact dès le premier rendu.
  */
 
-import { api } from "@antia/api/engine"
-import type { Id } from "@antia/api/engine"
+import { api } from "@antsia/api/engine"
+import type { Id } from "@antsia/api/engine"
 import {
 	useAuthenticatedConvexQuery,
 	useAuthenticatedPaginatedQuery,
 	useConvexMutationQuery,
-} from "@antia/api/hooks"
-import { useNetwork, useRoutes } from "@antia/api/network"
-import { GROUP_DESCRIPTION_MAX_LENGTH } from "@antia/social-contracts/groupCapacity"
+} from "@antsia/api/hooks"
+import { useNetwork, useRoutes } from "@antsia/api/network"
+import { GROUP_DESCRIPTION_MAX_LENGTH } from "@antsia/social-contracts/groupCapacity"
 import {
 	ArrowLeft,
 	Camera,

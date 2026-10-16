@@ -49,7 +49,7 @@ const mocks = vi.hoisted(() => ({
   },
 }))
 
-vi.mock("@antia/api/engine", () => ({
+vi.mock("@antsia/api/engine", () => ({
   api: {
     modules: {
       calls: {
@@ -61,7 +61,7 @@ vi.mock("@antia/api/engine", () => ({
   },
 }))
 
-vi.mock("@antia/api/hooks", () => ({
+vi.mock("@antsia/api/hooks", () => ({
   useAuthenticatedConvexQuery: (query: string, args: unknown) => {
     mocks.query(query, args)
     return query === "groups" ? mocks.groups : mocks.presence

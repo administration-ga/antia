@@ -8,7 +8,7 @@
  *
  * Aucune fonction Convex ici : c'est une garde, pas une API.
  */
-import { isAlbumVisibleTo } from "@antia/social-domain/albums"
+import { isAlbumVisibleTo } from "@antsia/social-domain/albums"
 
 import type { Doc, Id } from "../../_generated/dataModel"
 import type { QueryCtx } from "../../_generated/server"

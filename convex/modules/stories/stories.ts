@@ -15,11 +15,11 @@
  * gestes qui désignent UNE story (`markSeen`, `viewers`, `remove`) l'acceptent
  * de son auteur jusqu'à la purge.
  */
-import type { CounterpartLabel } from "@antia/social-contracts/counterpart"
-import type { MediaWithheld } from "@antia/social-contracts/media"
-import { PERSONAL_REACH_AUDIENCES } from "@antia/social-domain/content"
-import { boundedFeedSourceIds } from "@antia/social-domain/feedScale"
-import { assertStoryCaption, assertStoryMedia, isStoryExpired, isStoryVisibleTo, STORY_ACTIVE_PER_AUTHOR_MAX, STORY_TTL_MS, storyExpiresAt } from "@antia/social-domain/stories"
+import type { CounterpartLabel } from "@antsia/social-contracts/counterpart"
+import type { MediaWithheld } from "@antsia/social-contracts/media"
+import { PERSONAL_REACH_AUDIENCES } from "@antsia/social-domain/content"
+import { boundedFeedSourceIds } from "@antsia/social-domain/feedScale"
+import { assertStoryCaption, assertStoryMedia, isStoryExpired, isStoryVisibleTo, STORY_ACTIVE_PER_AUTHOR_MAX, STORY_TTL_MS, storyExpiresAt } from "@antsia/social-domain/stories"
 import { paginationOptsValidator, type PaginationResult } from "convex/server"
 import { v } from "convex/values"
 

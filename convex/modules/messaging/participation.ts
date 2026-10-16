@@ -5,10 +5,10 @@
  * Être partie au fil, dans CE réseau, sans blocage entre les deux : sinon le
  * même refus que pour un fil inventé — un fil n'est pas un oracle.
  */
-import type { MediaWithheld } from "@antia/social-contracts/media"
-import { replyExcerpt } from "@antia/social-contracts/attachments"
-import { type CounterpartLabel, counterpartLabel } from "@antia/social-contracts/counterpart"
-import { emptyMessageReactionCounts, type MessageReactionCounts, type MessageReactionKind } from "@antia/social-contracts/messageReactions"
+import type { MediaWithheld } from "@antsia/social-contracts/media"
+import { replyExcerpt } from "@antsia/social-contracts/attachments"
+import { type CounterpartLabel, counterpartLabel } from "@antsia/social-contracts/counterpart"
+import { emptyMessageReactionCounts, type MessageReactionCounts, type MessageReactionKind } from "@antsia/social-contracts/messageReactions"
 
 import type { Doc, Id } from "../../_generated/dataModel"
 import type { QueryCtx } from "../../_generated/server"

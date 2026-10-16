@@ -1,5 +1,5 @@
 ---
-title: "ANTIA — Annexe A6 du document 02 : inventaire contradictoire, front — messagerie, iappel, direct, stories, notifications, primitives, coque et paquets"
+title: "ANTSIA — Annexe A6 du document 02 : inventaire contradictoire, front — messagerie, iappel, direct, stories, notifications, primitives, coque et paquets"
 date: "2026-10-14"
 source: "socle administration.ga, origin/main = ad2e7fdc2, copie propre (git worktree add), lecture seule"
 statut: "Rapport d'inventaire brut, produit en lecture seule ; la synthèse décisionnelle est docs/02_OWNER_MAP_DUPLICATION.md"

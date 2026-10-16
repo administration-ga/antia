@@ -1,7 +1,7 @@
 // @vitest-environment edge-runtime
 // Dupliqué de socle/convex/modules/reseauPersonnel/stories.test.ts @ ad2e7fdc2 — adaptations : personnes et réseaux (graine des fondations) ; codes et règles au lieu des libellés ; surfaces `reseau`/`icom` retirées avec leurs cas (une seule borne vidéo, la plus stricte) ; une déclaration qui ment est refusée (le socle l'écrasait) ; la garde des fichiers décide de ce qui est servable (une story non servable est omise pour les autres, montrée retenue à son auteur) ; spectateurs lus dans l'agrégat ; « vu par » à curseur natif (la « limite connue » du socle devient un cas qui passe) ; tests neufs : purge de la ligne d'analyse et des décomptes, story d'un autre réseau introuvable, clé rejouée ailleurs refusée.
-import { engineErrorCode, engineErrorRule } from "@antia/social-contracts/errors"
-import { STORY_ACTIVE_PER_AUTHOR_MAX, STORY_TTL_MS } from "@antia/social-domain/stories"
+import { engineErrorCode, engineErrorRule } from "@antsia/social-contracts/errors"
+import { STORY_ACTIVE_PER_AUTHOR_MAX, STORY_TTL_MS } from "@antsia/social-domain/stories"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 import { api, internal } from "../../_generated/api"

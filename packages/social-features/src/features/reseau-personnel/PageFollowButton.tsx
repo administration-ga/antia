@@ -15,9 +15,9 @@
  * vraie raison d'un refus (débit, adhésion, page devenue illisible).
  */
 
-import { api, type Id } from "@antia/api/engine"
-import { useNetwork } from "@antia/api/network"
-import { Button } from "@antia/ui"
+import { api, type Id } from "@antsia/api/engine"
+import { useNetwork } from "@antsia/api/network"
+import { Button } from "@antsia/ui"
 import { useMutation } from "convex/react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"

@@ -14,8 +14,8 @@
  * Aucun import React ni runtime Convex : ce module ne connaît que des données.
  */
 
-import type { api } from "@antia/api/engine"
-import { engineErrorCode, engineErrorRule } from "@antia/social-contracts/errors"
+import type { api } from "@antsia/api/engine"
+import { engineErrorCode, engineErrorRule } from "@antsia/social-contracts/errors"
 import type { FunctionReturnType } from "convex/server"
 import type { TFunction } from "i18next"
 

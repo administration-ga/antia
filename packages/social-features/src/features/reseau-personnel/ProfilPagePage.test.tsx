@@ -13,7 +13,7 @@
  *     invitation, revendiquer, gérer l'identité et les signataires.
  */
 import { act, fireEvent, screen, within } from "@testing-library/react"
-import type * as AntiaUi from "@antia/ui"
+import type * as AntsiaUi from "@antsia/ui"
 import type { ReactNode } from "react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
@@ -43,7 +43,7 @@ const mocks = vi.hoisted(() => {
   }
 })
 
-vi.mock("@antia/api/engine", () => ({
+vi.mock("@antsia/api/engine", () => ({
   api: {
     modules: {
       pages: {
@@ -71,7 +71,7 @@ vi.mock("@antia/api/engine", () => ({
   },
 }))
 
-vi.mock("@antia/api/hooks", () => ({
+vi.mock("@antsia/api/hooks", () => ({
   useAuthenticatedConvexQuery: (name: string, args: { cursor?: { postId: string } }) => {
     if (name === "getPage") return mocks.getPage
     if (name === "myPageInvitations") return mocks.invitations
@@ -98,8 +98,8 @@ vi.mock("convex/react", () => ({
 
 vi.mock("sonner", () => ({ toast: Object.assign(vi.fn(), { success: vi.fn(), error: vi.fn() }) }))
 
-vi.mock("@antia/ui", async (importOriginal) => ({
-  ...(await importOriginal<typeof AntiaUi>()),
+vi.mock("@antsia/ui", async (importOriginal) => ({
+  ...(await importOriginal<typeof AntsiaUi>()),
   SkeletonCard: () => <div data-testid="skeleton" />,
 }))
 

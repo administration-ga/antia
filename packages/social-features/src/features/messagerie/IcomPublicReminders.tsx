@@ -9,12 +9,12 @@
  * frontière reste ainsi lisible : privé ici, public là-bas.
  */
 
-import { api } from "@antia/api/engine"
-import { useAuthenticatedConvexQuery } from "@antia/api/hooks"
-import { useNetwork, useRoutes } from "@antia/api/network"
-import { Link } from "@antia/api/routing"
-import type { Badge as PageBadge } from "@antia/social-domain/badges"
-import { Badge, Button, Icon, type IconName, type Tone } from "@antia/ui"
+import { api } from "@antsia/api/engine"
+import { useAuthenticatedConvexQuery } from "@antsia/api/hooks"
+import { useNetwork, useRoutes } from "@antsia/api/network"
+import { Link } from "@antsia/api/routing"
+import type { Badge as PageBadge } from "@antsia/social-domain/badges"
+import { Badge, Button, Icon, type IconName, type Tone } from "@antsia/ui"
 import { useId, type ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 import { Avatar } from "../reseau-personnel/Avatar"

@@ -109,10 +109,10 @@ describe("icomMobileTabHref", () => {
 	})
 
 	it("suit les bases de L'APPLICATION, quelles qu'elles soient", () => {
-		const imbriquees = { home: "/r/antia", messages: "/r/antia/messages" }
-		expect(icomMobileTabHref("ichat", imbriquees)).toBe("/r/antia/messages")
-		expect(icomMobileTabHref("iappel", imbriquees)).toBe("/r/antia/messages?brique=iappel")
-		expect(icomMobileTabHref("menu_principal", imbriquees)).toBe("/r/antia")
+		const imbriquees = { home: "/r/antsia", messages: "/r/antsia/messages" }
+		expect(icomMobileTabHref("ichat", imbriquees)).toBe("/r/antsia/messages")
+		expect(icomMobileTabHref("iappel", imbriquees)).toBe("/r/antsia/messages?brique=iappel")
+		expect(icomMobileTabHref("menu_principal", imbriquees)).toBe("/r/antsia")
 	})
 })
 

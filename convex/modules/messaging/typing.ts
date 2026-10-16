@@ -3,7 +3,7 @@
  * « En train d'écrire » — une ligne éphémère par (fil, personne), qui expire
  * six secondes après le dernier signal ; un cron purge les lignes expirées.
  */
-import type { CounterpartLabel } from "@antia/social-contracts/counterpart"
+import type { CounterpartLabel } from "@antsia/social-contracts/counterpart"
 import { v } from "convex/values"
 
 import type { Id } from "../../_generated/dataModel"

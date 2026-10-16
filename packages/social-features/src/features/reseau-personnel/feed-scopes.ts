@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/feed-scopes.ts @ ad2e7fdc2 — adaptations : portées LUES dans le domaine du moteur (`FEED_SCOPES`, `FEED_SCOPE_DEFAULT`, type `FeedScope` de `@antia/social-domain/content`) au lieu d'un miroir ; portée « mon_administration » et ses alias (`mon-administration`, `administration`, `collegues`) retirés — une ancienne adresse retombe sur la portée par défaut ; chips décrites par des CLÉS i18n (`labelKey`, `descriptionKey`, clés qualifiées `reseau:feedScopes.chips.*`) au lieu de libellés ; « agents » → « personnes » ; références au manifeste de navigation d'iAsted retirées des commentaires ; `parseFeedScope` ne lit plus une propriété héritée de l'objet des alias.
+// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/feed-scopes.ts @ ad2e7fdc2 — adaptations : portées LUES dans le domaine du moteur (`FEED_SCOPES`, `FEED_SCOPE_DEFAULT`, type `FeedScope` de `@antsia/social-domain/content`) au lieu d'un miroir ; portée « mon_administration » et ses alias (`mon-administration`, `administration`, `collegues`) retirés — une ancienne adresse retombe sur la portée par défaut ; chips décrites par des CLÉS i18n (`labelKey`, `descriptionKey`, clés qualifiées `reseau:feedScopes.chips.*`) au lieu de libellés ; « agents » → « personnes » ; références au manifeste de navigation d'iAsted retirées des commentaires ; `parseFeedScope` ne lit plus une propriété héritée de l'objet des alias.
 /**
  * feed-scopes — les « chips » de portée du fil, côté client.
  *
@@ -7,7 +7,7 @@
  * sens — vit dans ce module, où c'est vérifiable en environnement `node`, sans
  * monter de composant.
  *
- * Les portées elles-mêmes sont celles du DOMAINE (`@antia/social-domain/content`) :
+ * Les portées elles-mêmes sont celles du DOMAINE (`@antsia/social-domain/content`) :
  * ce module n'en recopie aucune. Il ne porte que des CLÉS de libellés et de la
  * navigation : la règle d'admission reste au serveur, seul endroit où elle
  * protège quelque chose.
@@ -21,7 +21,7 @@
  * Aucun import React : ce module ne connaît que des données de navigation.
  */
 
-import { FEED_SCOPE_DEFAULT as DOMAIN_FEED_SCOPE_DEFAULT, FEED_SCOPES, type FeedScope as DomainFeedScope } from "@antia/social-domain/content"
+import { FEED_SCOPE_DEFAULT as DOMAIN_FEED_SCOPE_DEFAULT, FEED_SCOPES, type FeedScope as DomainFeedScope } from "@antsia/social-domain/content"
 
 import type { FeedView } from "../../shell/reseau-layout"
 import type { ReseauAgentTabId } from "../../shell/reseau-agent-nav"

@@ -3,8 +3,8 @@
  * LE message épinglé d'un fil — un seul : épingler remplace. Les deux
  * participants peuvent épingler ; l'épingle vit sur le fil, visible des deux.
  */
-import { replyExcerpt } from "@antia/social-contracts/attachments"
-import type { CounterpartLabel } from "@antia/social-contracts/counterpart"
+import { replyExcerpt } from "@antsia/social-contracts/attachments"
+import type { CounterpartLabel } from "@antsia/social-contracts/counterpart"
 import { v } from "convex/values"
 
 import type { Id } from "../../_generated/dataModel"

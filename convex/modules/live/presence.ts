@@ -69,7 +69,7 @@
  * d'être connecté, donc de battre, et sa place revient au TTL. Il ne peut de
  * toute façon plus obtenir de jeton.
  */
-import { engineErrorCode } from "@antia/social-contracts/errors"
+import { engineErrorCode } from "@antsia/social-contracts/errors"
 import { v } from "convex/values"
 
 import type { Id } from "../../_generated/dataModel"

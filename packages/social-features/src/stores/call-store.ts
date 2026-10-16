@@ -1,5 +1,5 @@
 // Dupliqué de socle/packages/agent-features/src/stores/call-store.ts @ ad2e7fdc2 — adaptations : identifiants du moteur (`Id<"calls">` pour les slots, `Id<"persons">` pour l'appelé ; noms de champs `meetingId` et `participantUserId` et noms des méthodes gardés, signatures stables pour les consommateurs) ; file du centre d'appels retirée (plus de slot `queue` supprimé au lieu d'être parqué) ; renvoi au secrétariat d'un poste (`routedFor`) retiré du slot et de la fenêtre sortante ; présence vocale d'iAsted retirée (`setVoiceCallSource` et son prédicat `isCallStoreLive`) ; clé de stockage de la sortie audio rangée sous le préfixe du réseau, posé par la coque (`configureCallStoreStorage`) — sans préfixe, rien n'est lu ni écrit ; commentaires recadrés sur la coque du moteur (AppShell, iRéunion, iAsted, poste et centre d'appels retirés).
-import type { Id } from "@antia/api/engine";
+import type { Id } from "@antsia/api/engine";
 import { useSyncExternalStore } from "react";
 import type {
   AudioRouteIntent,

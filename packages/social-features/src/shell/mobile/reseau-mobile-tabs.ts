@@ -31,8 +31,8 @@
  * navigation (les types importés sont effacés à la compilation).
  */
 
-import type { EngineRoutes } from "@antia/api/network"
-import type { IconName } from "@antia/ui"
+import type { EngineRoutes } from "@antsia/api/network"
+import type { IconName } from "@antsia/ui"
 
 import {
   parseReseauAgentTab,
@@ -55,7 +55,7 @@ export interface ReseauMobileTab {
   labelKey: string
   /** Clé i18n qualifiée du libellé rendu sous l'icône (~70 px par emplacement). */
   shortLabelKey: string
-  /** Nom d'icône `@antia/ui` — une seule famille dans toute la barre. */
+  /** Nom d'icône `@antsia/ui` — une seule famille dans toute la barre. */
   icon: IconName
 }
 
@@ -226,7 +226,7 @@ export interface ReseauMenuItem {
   /** Clé i18n qualifiée du libellé. */
   labelKey: string
   url: string
-  /** Nom d'icône `@antia/ui`, comme la barre. */
+  /** Nom d'icône `@antsia/ui`, comme la barre. */
   icon: IconName
 }
 

@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/BookmarksPanel.tsx @ ad2e7fdc2 — adaptations : mes signets dans le réseau courant (`marks.marks.paginateBookmarks` et `toggleMark` du moteur, `networkId` par `useNetwork()`) ; en-tête d'un aperçu décidé par `bookmarkIdentity` (la PAGE quand la publication parle en son nom, sinon l'auteur, sinon un nom neutre) ; dates relatives dans la langue courante (`formatRelativeDate(…, t)`) ; refus du moteur lus par code (`markActionErrorText`) ; état vide par `reseauEmptyState("signets", home, t)` (lien vers le fil composé sur la base injectée) ; toutes les chaînes par l'i18n (espace `reseau`, clés `bookmarksPanel.*`) ; état vide du kit d'espace (`@antia/ui/espace-kit`).
+// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/BookmarksPanel.tsx @ ad2e7fdc2 — adaptations : mes signets dans le réseau courant (`marks.marks.paginateBookmarks` et `toggleMark` du moteur, `networkId` par `useNetwork()`) ; en-tête d'un aperçu décidé par `bookmarkIdentity` (la PAGE quand la publication parle en son nom, sinon l'auteur, sinon un nom neutre) ; dates relatives dans la langue courante (`formatRelativeDate(…, t)`) ; refus du moteur lus par code (`markActionErrorText`) ; état vide par `reseauEmptyState("signets", home, t)` (lien vers le fil composé sur la base injectée) ; toutes les chaînes par l'i18n (espace `reseau`, clés `bookmarksPanel.*`) ; état vide du kit d'espace (`@antsia/ui/espace-kit`).
 "use client"
 
 /**
@@ -17,12 +17,12 @@
  * `bookmarks-panel.ts`, testé.
  */
 
-import { api, type Id } from "@antia/api/engine"
-import { useAuthenticatedPaginatedQuery } from "@antia/api/hooks"
-import { useNetwork, useRoutes } from "@antia/api/network"
-import { Link } from "@antia/api/routing"
-import { Button, Card, SkeletonCard } from "@antia/ui"
-import { EspaceEmptyState } from "@antia/ui/espace-kit"
+import { api, type Id } from "@antsia/api/engine"
+import { useAuthenticatedPaginatedQuery } from "@antsia/api/hooks"
+import { useNetwork, useRoutes } from "@antsia/api/network"
+import { Link } from "@antsia/api/routing"
+import { Button, Card, SkeletonCard } from "@antsia/ui"
+import { EspaceEmptyState } from "@antsia/ui/espace-kit"
 import { useMutation } from "convex/react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"

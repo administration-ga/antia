@@ -11,7 +11,7 @@ import {
 	selectionHint,
 	toggleInvitee,
 } from "./groupe-appel-selection"
-import { GROUP_CALL_MAX_PARTICIPANTS } from "@antia/social-contracts/callGroup"
+import { GROUP_CALL_MAX_PARTICIPANTS } from "@antsia/social-contracts/callGroup"
 import { correspondentsCounter } from "../iappel/group-call-capacity"
 
 const t = createAppI18n({ locale: "fr", appResources: { fr: {}, en: {} }, defaultNS: "messagerie" }).t

@@ -8,7 +8,7 @@
  * participant, sans fenêtre, sans effet ailleurs. Les confondre donnerait à
  * n'importe qui le droit d'effacer le message d'un tiers.
  */
-import { assertMessageContent, isWithinEditWindow, MESSAGE_EDIT_WINDOW_MS } from "@antia/social-contracts/messaging"
+import { assertMessageContent, isWithinEditWindow, MESSAGE_EDIT_WINDOW_MS } from "@antsia/social-contracts/messaging"
 import { paginationOptsValidator, type PaginationResult } from "convex/server"
 import { v } from "convex/values"
 

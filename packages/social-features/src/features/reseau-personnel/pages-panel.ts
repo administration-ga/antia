@@ -23,8 +23,8 @@
  * QUALIFIÉES (`reseau:pagesPanel.…`) : n'importe quelle instance les résout.
  */
 
-import { engineErrorCode, engineErrorRule } from "@antia/social-contracts/errors"
-import type { Badge, PageOwnerKind } from "@antia/social-domain/badges"
+import { engineErrorCode, engineErrorRule } from "@antsia/social-contracts/errors"
+import type { Badge, PageOwnerKind } from "@antsia/social-domain/badges"
 import {
   assertPageHandle,
   assertPageName,
@@ -33,9 +33,9 @@ import {
   normalizePageDescription,
   normalizePageShortName,
   type PageRole,
-} from "@antia/social-domain/pages"
-import { isDomainViolation } from "@antia/social-domain/violation"
-import type { IconName, Tone } from "@antia/ui"
+} from "@antsia/social-domain/pages"
+import { isDomainViolation } from "@antsia/social-domain/violation"
+import type { IconName, Tone } from "@antsia/ui"
 import type { TFunction } from "i18next"
 
 import { badgeLabelKey } from "../../components/identity/post-identity"
@@ -504,7 +504,7 @@ export function pageHandlePreview(draft: Pick<PageDraft, "name" | "handle">): st
 
 /**
  * Juge le brouillon AVANT l'envoi, avec les règles mêmes du serveur
- * (`@antia/social-domain/pages`) : un refus se dit sous son champ, dans la
+ * (`@antsia/social-domain/pages`) : un refus se dit sous son champ, dans la
  * langue de l'écran, sans aller-retour. Le serveur rejuge tout de toute façon
  * (adresse prise, statut d'adhésion, débit).
  *

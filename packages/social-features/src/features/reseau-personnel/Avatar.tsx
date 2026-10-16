@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/Avatar.tsx @ ad2e7fdc2 — adaptations : primitives de `@antia/ui` ; commentaires du contour carré (une PAGE du moteur, plus une administration) et du repli d'initiales (nom publié de `persons`) ; code inchangé.
+// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/Avatar.tsx @ ad2e7fdc2 — adaptations : primitives de `@antsia/ui` ; commentaires du contour carré (une PAGE du moteur, plus une administration) et du repli d'initiales (nom publié de `persons`) ; code inchangé.
 "use client"
 
 /**
@@ -9,7 +9,7 @@
  * porte sur ce que le serveur a bien voulu rendre, et il ne rend que le publié.
  */
 
-import { Icon } from "@antia/ui"
+import { Icon } from "@antsia/ui"
 import { useState } from "react"
 
 interface AvatarProps {

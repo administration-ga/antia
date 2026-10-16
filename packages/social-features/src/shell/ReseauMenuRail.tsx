@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/ReseauMenuRail.tsx @ ad2e7fdc2 — adaptations : déplacé dans la coque (`shell/`) ; branché sur le moteur — ma fiche par `people.persons.getMyPerson` (sans réseau ; identité montrée seulement si le profil est publié, portrait servi par la garde des fichiers), mes groupes par `thematicGroups.thematicGroups.myGroups`, mes pages suivies par la première page de `pages.pages.paginateMyPageFollows` (pages GÉNÉRIQUES du moteur, au lieu des pages d'organisation), réseau courant par `useNetwork()` ; adresses par la table des routes INJECTÉE (`useRoutes()` : volets sur `home()`, mon profil sur `profile(handle)`, fiche d'une page sur `page(handle)`, réglages sur `settings?.()`) — `personal-nav` et ses URL de l'espace retirés, une destination absente RETIRE son entrée (et « Voir plus » disparaît quand il n'a plus rien à déplier) ; volets SERVIS seuls (`menuItemsFor(counts, home)`) ; libellés par l'i18n (`reseau:reseauMenuRail.*`, libellé du volet par sa clé, pastille par `menuBadgeLabel(item, t)`) ; « iRéseau » devient « réseau » ; liens par `Link` de `@antia/api/routing`, d'UNE seule pièce (un lien à la facture du bouton fantôme au lieu d'un bouton DANS un lien : deux arrêts de tabulation pour un geste) ; rendu, ordre et styles inchangés.
+// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/ReseauMenuRail.tsx @ ad2e7fdc2 — adaptations : déplacé dans la coque (`shell/`) ; branché sur le moteur — ma fiche par `people.persons.getMyPerson` (sans réseau ; identité montrée seulement si le profil est publié, portrait servi par la garde des fichiers), mes groupes par `thematicGroups.thematicGroups.myGroups`, mes pages suivies par la première page de `pages.pages.paginateMyPageFollows` (pages GÉNÉRIQUES du moteur, au lieu des pages d'organisation), réseau courant par `useNetwork()` ; adresses par la table des routes INJECTÉE (`useRoutes()` : volets sur `home()`, mon profil sur `profile(handle)`, fiche d'une page sur `page(handle)`, réglages sur `settings?.()`) — `personal-nav` et ses URL de l'espace retirés, une destination absente RETIRE son entrée (et « Voir plus » disparaît quand il n'a plus rien à déplier) ; volets SERVIS seuls (`menuItemsFor(counts, home)`) ; libellés par l'i18n (`reseau:reseauMenuRail.*`, libellé du volet par sa clé, pastille par `menuBadgeLabel(item, t)`) ; « iRéseau » devient « réseau » ; liens par `Link` de `@antsia/api/routing`, d'UNE seule pièce (un lien à la facture du bouton fantôme au lieu d'un bouton DANS un lien : deux arrêts de tabulation pour un geste) ; rendu, ordre et styles inchangés.
 "use client"
 
 /**
@@ -19,11 +19,11 @@
  * les pastilles des entrées.
  */
 
-import { api } from "@antia/api/engine"
-import { useAuthenticatedConvexQuery, useAuthenticatedPaginatedQuery } from "@antia/api/hooks"
-import { useNetwork, useRoutes } from "@antia/api/network"
-import { Link } from "@antia/api/routing"
-import { Badge, Button, Card, Icon } from "@antia/ui"
+import { api } from "@antsia/api/engine"
+import { useAuthenticatedConvexQuery, useAuthenticatedPaginatedQuery } from "@antsia/api/hooks"
+import { useNetwork, useRoutes } from "@antsia/api/network"
+import { Link } from "@antsia/api/routing"
+import { Badge, Button, Card, Icon } from "@antsia/ui"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 

@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/evenements-list.ts @ ad2e7fdc2 — adaptations : `EvenementListItem` tiré de l'API du moteur (`events.events.myAgenda`, organisateur nommé par le contrat `counterpartLabel`) au lieu d'un miroir recopié ; statuts et bornes tirés du domaine (`@antia/social-domain/events`) ; jour civil et dates dans le FUSEAU DU LECTEUR (paramètre `timeZone`, `viewerTimeZone()` = celui du navigateur) et la LANGUE courante (paramètre `locale` de `formatEventRange`) au lieu du fuseau de Libreville et du français imposés à tous ; libellés par l'i18n — `EVENT_SECTION_TITLES` → `EVENT_SECTION_TITLE_KEYS`, `t` en DERNIER paramètre de `myResponseLabel`, `emptyAgendaText`, `announceAudienceLabel`, `announceSummary` (clés `reseau:evenementsList.*`, pluriels par `count`) ; ajoutés pour la composition d'un évènement sur la page réseau (la composition vivait dans iAgenda, absent du moteur) : bornes et calculs du formulaire repris de `iagenda/personal-event-form.ts` (`isEndAfterStart`, `tomorrowLocalDate`, `localDateTimeMs`, `validateEventTitle`), récapitulatif des invitations (`eventInviteReportLabel`), réponse d'un invité (`participantStatusLabel`), nom neutre (`eventPersonName`) et lecture des refus du moteur (`eventActionErrorText`).
+// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/evenements-list.ts @ ad2e7fdc2 — adaptations : `EvenementListItem` tiré de l'API du moteur (`events.events.myAgenda`, organisateur nommé par le contrat `counterpartLabel`) au lieu d'un miroir recopié ; statuts et bornes tirés du domaine (`@antsia/social-domain/events`) ; jour civil et dates dans le FUSEAU DU LECTEUR (paramètre `timeZone`, `viewerTimeZone()` = celui du navigateur) et la LANGUE courante (paramètre `locale` de `formatEventRange`) au lieu du fuseau de Libreville et du français imposés à tous ; libellés par l'i18n — `EVENT_SECTION_TITLES` → `EVENT_SECTION_TITLE_KEYS`, `t` en DERNIER paramètre de `myResponseLabel`, `emptyAgendaText`, `announceAudienceLabel`, `announceSummary` (clés `reseau:evenementsList.*`, pluriels par `count`) ; ajoutés pour la composition d'un évènement sur la page réseau (la composition vivait dans iAgenda, absent du moteur) : bornes et calculs du formulaire repris de `iagenda/personal-event-form.ts` (`isEndAfterStart`, `tomorrowLocalDate`, `localDateTimeMs`, `validateEventTitle`), récapitulatif des invitations (`eventInviteReportLabel`), réponse d'un invité (`participantStatusLabel`), nom neutre (`eventPersonName`) et lecture des refus du moteur (`eventActionErrorText`).
 /**
  * evenements-list — ce que le volet ÉVÈNEMENTS décide, hors de tout composant.
  *
@@ -19,9 +19,9 @@
  * Aucun import React ni runtime Convex : ce module ne connaît que des données.
  */
 
-import type { api } from "@antia/api/engine"
-import { engineErrorCode, engineErrorRule } from "@antia/social-contracts/errors"
-import type { PersonalReachAudience } from "@antia/social-domain/content"
+import type { api } from "@antsia/api/engine"
+import { engineErrorCode, engineErrorRule } from "@antsia/social-contracts/errors"
+import type { PersonalReachAudience } from "@antsia/social-domain/content"
 import {
   PERSONAL_EVENT_DESCRIPTION_MAX_LENGTH,
   PERSONAL_EVENT_LOCATION_MAX_LENGTH,
@@ -29,7 +29,7 @@ import {
   PERSONAL_EVENT_TITLE_MIN_LENGTH,
   type PersonalEventParticipationStatus as DomainParticipationStatus,
   type PersonalEventStatus as DomainEventStatus,
-} from "@antia/social-domain/events"
+} from "@antsia/social-domain/events"
 import type { FunctionReturnType } from "convex/server"
 import type { TFunction } from "i18next"
 
@@ -103,7 +103,7 @@ export function isPastEvent(event: Pick<EvenementListItem, "endAt">, now: number
 
 /**
  * MONTRER les boutons de réponse ? Le serveur (`canRespondToPersonalEvent`,
- * `@antia/social-domain/events`) n'exige qu'un évènement `scheduled` et une
+ * `@antsia/social-domain/events`) n'exige qu'un évènement `scheduled` et une
  * ligne de participation à soi — il permettrait donc techniquement de répondre
  * à un évènement déjà passé (« consigner a posteriori » est un usage d'agenda
  * légitime côté serveur). Ce module est VOLONTAIREMENT plus strict à l'écran :

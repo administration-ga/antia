@@ -1,11 +1,11 @@
-// Dupliqué de socle/convex/tests/uploadPolicy.test.ts @ ad2e7fdc2 — adaptations : la lecture de `_storage` et les deux portes (temps 1 et 2) seulement, les règles pures sont testées dans `@antia/social-domain` ; refus à code du moteur.
+// Dupliqué de socle/convex/tests/uploadPolicy.test.ts @ ad2e7fdc2 — adaptations : la lecture de `_storage` et les deux portes (temps 1 et 2) seulement, les règles pures sont testées dans `@antsia/social-domain` ; refus à code du moteur.
 /**
  * Le contexte est stubbé plutôt que monté sous convex-test : `assertStoredUpload`
  * ne lit QUE `ctx.db.system.get("_storage", …)`. Un stub rend visible, à la
  * lecture, ce que la fonction consulte réellement.
  */
-import { engineErrorCode, engineErrorRule } from "@antia/social-contracts/errors"
-import type { UploadUsage } from "@antia/social-domain/uploadPolicy"
+import { engineErrorCode, engineErrorRule } from "@antsia/social-contracts/errors"
+import type { UploadUsage } from "@antsia/social-domain/uploadPolicy"
 import { describe, expect, it } from "vitest"
 
 import type { Id } from "../_generated/dataModel"

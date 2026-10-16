@@ -10,7 +10,7 @@
  * reste visible quel que soit le volet ouvert.
  */
 
-import { Icon } from "@antia/ui"
+import { Icon } from "@antsia/ui"
 import type { TFunction } from "i18next"
 import { useTranslation } from "react-i18next"
 

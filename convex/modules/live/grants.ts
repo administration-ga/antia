@@ -1,4 +1,4 @@
-// Dupliqué de socle/convex/modules/direct/grants.ts @ ad2e7fdc2 — adaptations : les trois plafonds de la salle (`DIRECT_MAX_SPEAKERS`, `DIRECT_DEFAULT_MAX_VIEWERS`, `DIRECT_MAX_VIEWERS_CAP`) sont posés dans le domaine (`@antia/social-domain/live/domain`, qui en a besoin et n'importe rien du backend) et RÉEXPORTÉS ici sous les mêmes noms et avec les mêmes valeurs ; rien d'autre.
+// Dupliqué de socle/convex/modules/direct/grants.ts @ ad2e7fdc2 — adaptations : les trois plafonds de la salle (`DIRECT_MAX_SPEAKERS`, `DIRECT_DEFAULT_MAX_VIEWERS`, `DIRECT_MAX_VIEWERS_CAP`) sont posés dans le domaine (`@antsia/social-domain/live/domain`, qui en a besoin et n'importe rien du backend) et RÉEXPORTÉS ici sous les mêmes noms et avec les mêmes valeurs ; rien d'autre.
 /**
  * Grants et identités LiveKit du DIRECT — module PUR.
  *
@@ -55,7 +55,7 @@ export {
   DIRECT_DEFAULT_MAX_VIEWERS,
   DIRECT_MAX_SPEAKERS,
   DIRECT_MAX_VIEWERS_CAP,
-} from "@antia/social-domain/live/domain"
+} from "@antsia/social-domain/live/domain"
 
 /**
  * TTL des jetons (secondes). Une heure pour TOUS les rôles : côté spectateur

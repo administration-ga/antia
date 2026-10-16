@@ -7,7 +7,7 @@
  * `isConnected || isFollowing` quelque part : l'abonné devient alors un proche.
  * La garde d'audience reste la connexion, évaluée ailleurs.
  */
-import type { Badge } from "@antia/social-domain/badges"
+import type { Badge } from "@antsia/social-domain/badges"
 import { TableAggregate } from "@convex-dev/aggregate"
 import { paginationOptsValidator, type PaginationResult } from "convex/server"
 import { v } from "convex/values"

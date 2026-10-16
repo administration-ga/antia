@@ -13,7 +13,7 @@
  * `networkId` (`useNetwork().networkId`) en plus de ses arguments, et ne voit
  * que les albums de ce réseau.
  */
-import { api } from "@antia/api/engine"
+import { api } from "@antsia/api/engine"
 import type { FunctionArgs, FunctionReturnType } from "convex/server"
 
 const albums = api.modules.albums.albums

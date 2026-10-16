@@ -7,10 +7,10 @@
  * serait un déversement de l'annuaire. L'identifiant est une ADRESSE : il se
  * cherche aussi EXACTEMENT, en plus de la ressemblance du nom.
  */
-import type { Badge } from "@antia/social-domain/badges"
-import { normalizeHandle } from "@antia/social-domain/content"
-import { isActiveStatus } from "@antia/social-domain/membership"
-import { buildSearchableText, foldSearchQuery } from "@antia/social-domain/searchText"
+import type { Badge } from "@antsia/social-domain/badges"
+import { normalizeHandle } from "@antsia/social-domain/content"
+import { isActiveStatus } from "@antsia/social-domain/membership"
+import { buildSearchableText, foldSearchQuery } from "@antsia/social-domain/searchText"
 import { v } from "convex/values"
 
 import { internal } from "../../_generated/api"

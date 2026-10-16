@@ -3,11 +3,11 @@
 
 /** Aperçu compact des prochains évènements dans le rail de découverte. */
 
-import { api } from "@antia/api/engine"
-import { useAuthenticatedConvexQuery } from "@antia/api/hooks"
-import { useNetwork, useRoutes } from "@antia/api/network"
-import { Link } from "@antia/api/routing"
-import { Badge, Button, Card, SkeletonCard } from "@antia/ui"
+import { api } from "@antsia/api/engine"
+import { useAuthenticatedConvexQuery } from "@antsia/api/hooks"
+import { useNetwork, useRoutes } from "@antsia/api/network"
+import { Link } from "@antsia/api/routing"
+import { Badge, Button, Card, SkeletonCard } from "@antsia/ui"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 

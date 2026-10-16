@@ -12,7 +12,7 @@
  * DERNIER paramètre, avec des clés QUALIFIÉES (`reseau:profilPage.…`).
  */
 
-import type { Badge } from "@antia/social-domain/badges"
+import type { Badge } from "@antsia/social-domain/badges"
 import {
   assertPageClaimEvidenceCount,
   assertPageName,
@@ -21,9 +21,9 @@ import {
   normalizePageShortName,
   type PageClaimStatus,
   type PageRole,
-} from "@antia/social-domain/pages"
-import { isMimeAllowedForUsage, UPLOAD_USAGES } from "@antia/social-domain/uploadPolicy"
-import { isDomainViolation, megabytes } from "@antia/social-domain/violation"
+} from "@antsia/social-domain/pages"
+import { isMimeAllowedForUsage, UPLOAD_USAGES } from "@antsia/social-domain/uploadPolicy"
+import { isDomainViolation, megabytes } from "@antsia/social-domain/violation"
 import type { TFunction } from "i18next"
 
 import { followLabel, formatFollowerCount, PAGE_ACTION_ERROR_FALLBACK_KEY } from "./pages-panel"

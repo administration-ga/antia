@@ -1,8 +1,8 @@
-// Dupliqué de socle/packages/agent-features/src/features/messagerie/MessagerieDesktopPage.tsx @ ad2e7fdc2 — adaptations : routeur par `@antia/api/routing` ; page d'arrivée INJECTÉE (`useRoutes().home()`, passée à `icomDesktopEntryHref`) ; annonce « Ouverture d'iCom… » traduite (clé `messagerieDesktopPage.opening`).
+// Dupliqué de socle/packages/agent-features/src/features/messagerie/MessagerieDesktopPage.tsx @ ad2e7fdc2 — adaptations : routeur par `@antsia/api/routing` ; page d'arrivée INJECTÉE (`useRoutes().home()`, passée à `icomDesktopEntryHref`) ; annonce « Ouverture d'iCom… » traduite (clé `messagerieDesktopPage.opening`).
 "use client"
 
-import { useRoutes } from "@antia/api/network"
-import { useRouter, useSearchParams } from "@antia/api/routing"
+import { useRoutes } from "@antsia/api/network"
+import { useRouter, useSearchParams } from "@antsia/api/routing"
 import { Suspense, useEffect } from "react"
 import { useTranslation } from "react-i18next"
 import { icomDesktopEntryHref } from "./icom-desktop-entry"

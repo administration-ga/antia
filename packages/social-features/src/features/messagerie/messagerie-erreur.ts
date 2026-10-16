@@ -23,7 +23,7 @@
  * erreur construite par l'autre copie (les lecteurs du contrat lisent `data`).
  */
 
-import { engineErrorCode, engineErrorRule } from "@antia/social-contracts/errors"
+import { engineErrorCode, engineErrorRule } from "@antsia/social-contracts/errors"
 import type { TFunction } from "i18next"
 
 /** La phrase neutre, quand le refus ne porte aucun code reconnu. */

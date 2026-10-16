@@ -1,7 +1,7 @@
 /**
  * Réseaux du moteur — règles PURES (cahier §5, §7, ADR-0001).
  *
- * Un réseau est une ligne de `networks` : la racine (`antia`, publique) ou un
+ * Un réseau est une ligne de `networks` : la racine (`antsia`, publique) ou un
  * réseau fermé, enfant de la racine (`diasporale`, `administration` en miroir).
  * Créer un réseau ne déploie aucun backend : une ligne, une politique, une
  * équipe de modération, un thème.
@@ -11,7 +11,7 @@ export const NETWORK_KINDS = ["root", "closed"] as const
 export type NetworkKind = (typeof NETWORK_KINDS)[number]
 
 /**
- * Politique d'adhésion : `open` (ANTIA : `declaree` d'emblée),
+ * Politique d'adhésion : `open` (ANTSIA : `declaree` d'emblée),
  * `declared_or_verified` (DIASPORALE : déclaration, vérification ou
  * parrainage), `mirror` (administration : par reflet signé seulement, jamais
  * par une adhésion directe).
@@ -40,8 +40,10 @@ export type NetworkStatus = (typeof NETWORK_STATUSES)[number]
 export const NETWORK_SLICES = ["diaspora"] as const
 export type NetworkSlice = (typeof NETWORK_SLICES)[number]
 
-/** Le réseau racine du moteur (arbitrage A1 : nom à confirmer — jeton unique). */
-export const ROOT_NETWORK_SLUG = "antia" as const
+/** Nom confirmé par le propriétaire le 16/10/2026. */
+export const ROOT_NETWORK_SLUG = "antsia" as const
+/** Ancien identifiant : uniquement pour reprendre les données et préférences existantes. */
+export const LEGACY_ROOT_NETWORK_SLUG = "antia" as const
 
 /** Identifiant public d'un réseau : minuscules, chiffres, tirets ; 3 à 32 caractères. */
 export const NETWORK_SLUG_PATTERN = /^[a-z][a-z0-9-]{1,30}[a-z0-9]$/
@@ -88,7 +90,7 @@ export function validateNetworkShape(shape: NetworkShape): NetworkShapeError[] {
  * Visibilité effective d'un contenu publié dans un réseau (invariant 4) :
  * - dans la racine, tout est `network` (c'est déjà la racine) ;
  * - ailleurs, `root` exige une audience PUBLIQUE, puis soit le geste explicite
- *   de l'auteur (« publier aussi sur ANTIA »), soit une règle (règle de page,
+ *   de l'auteur (« publier aussi sur ANTSIA »), soit une règle (règle de page,
  *   visibilité par défaut du réseau) ; sinon le contenu reste dans son réseau.
  */
 export function effectiveVisibility(input: {

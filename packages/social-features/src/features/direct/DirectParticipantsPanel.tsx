@@ -1,11 +1,11 @@
 // Dupliqué de socle/packages/agent-features/src/features/direct/ParticipantsPanel.tsx @ ad2e7fdc2 — adaptations : admissions historiques et non présence, curseur de page sans cache conservé, commandes d’après les permissions serveur, personne courante et hôte protégés, exclusion confirmée et i18n.
 "use client"
 
-import { api, type Id } from "@antia/api/engine"
-import { useAuthenticatedConvexQuery } from "@antia/api/hooks"
-import { useNetwork } from "@antia/api/network"
-import { Button } from "@antia/ui"
-import { EspaceDialog } from "@antia/ui/espace-kit"
+import { api, type Id } from "@antsia/api/engine"
+import { useAuthenticatedConvexQuery } from "@antsia/api/hooks"
+import { useNetwork } from "@antsia/api/network"
+import { Button } from "@antsia/ui"
+import { EspaceDialog } from "@antsia/ui/espace-kit"
 import { useMutation } from "convex/react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"

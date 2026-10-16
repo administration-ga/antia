@@ -4,8 +4,8 @@
  * (invariant 7). Les badges ne sont pas stockés : ils sont calculés ici, à
  * chaque lecture, à partir des liens d'identité (invariant 5).
  */
-import { computePersonBadges, hasStrongIdentity } from "@antia/social-domain/badges"
-import { isConsentInForce } from "@antia/social-domain/consent"
+import { computePersonBadges, hasStrongIdentity } from "@antsia/social-domain/badges"
+import { isConsentInForce } from "@antsia/social-domain/consent"
 import { v } from "convex/values"
 
 import type { Doc, Id } from "../../_generated/dataModel"

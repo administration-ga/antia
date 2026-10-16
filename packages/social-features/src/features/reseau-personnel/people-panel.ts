@@ -17,7 +17,7 @@
  *  4. ce qu'un refus du moteur dit à l'écran.
  */
 
-import { engineErrorCode, engineErrorRule } from "@antia/social-contracts/errors"
+import { engineErrorCode, engineErrorRule } from "@antsia/social-contracts/errors"
 import type { TFunction } from "i18next"
 
 import { RESEAU_AGENT_VUE_PARAM, reseauAgentHref } from "../../shell/reseau-agent-nav"

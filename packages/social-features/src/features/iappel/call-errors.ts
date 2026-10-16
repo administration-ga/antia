@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/lib/call-errors.ts @ ad2e7fdc2 — adaptations : codes du MOTEUR (`engineErrorCode`, `engineErrorRule` de `@antia/social-contracts/errors`) au lieu des codes `LIVEKIT_*` et `NOT_*` du socle — serveur des appels non configuré, injoignable ou saturé (`mediaServer*`), session expirée, appel introuvable ; règles du domaine (`CALL_*`, `GROUP_CALL_*`, `VOICEMAIL_*`) traduites avec leurs bornes ; refus de rendez-vous, de créneau et d'EAU retirés ; plus de phrase française portée par le serveur ni de code cherché dans le message (le moteur lève des `ConvexError` à code, dont `data` traverse partout) ; phrases traduites par i18n (`t` ajouté en dernier paramètre de `callErrorMessage` et `livekitRoomErrorMessage`, clés `iappel:callErrors.…`).
+// Dupliqué de socle/packages/agent-features/src/lib/call-errors.ts @ ad2e7fdc2 — adaptations : codes du MOTEUR (`engineErrorCode`, `engineErrorRule` de `@antsia/social-contracts/errors`) au lieu des codes `LIVEKIT_*` et `NOT_*` du socle — serveur des appels non configuré, injoignable ou saturé (`mediaServer*`), session expirée, appel introuvable ; règles du domaine (`CALL_*`, `GROUP_CALL_*`, `VOICEMAIL_*`) traduites avec leurs bornes ; refus de rendez-vous, de créneau et d'EAU retirés ; plus de phrase française portée par le serveur ni de code cherché dans le message (le moteur lève des `ConvexError` à code, dont `data` traverse partout) ; phrases traduites par i18n (`t` ajouté en dernier paramètre de `callErrorMessage` et `livekitRoomErrorMessage`, clés `iappel:callErrors.…`).
 /**
  * Traduction des échecs de connexion d'appel en message affichable.
  *
@@ -16,7 +16,7 @@
  * Module pur (aucun import React/Convex) : testable et utilisable partout.
  */
 
-import { engineErrorCode, engineErrorRule, type EngineErrorCode } from "@antia/social-contracts/errors"
+import { engineErrorCode, engineErrorRule, type EngineErrorCode } from "@antsia/social-contracts/errors"
 import type { TFunction } from "i18next"
 
 /**

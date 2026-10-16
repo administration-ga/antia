@@ -1,4 +1,4 @@
-// Réécrit d'après socle/packages/agent-features/src/features/reseau-personnel/PagesPanel.test.tsx @ ad2e7fdc2 — ce qui change : monté dans l'enveloppe du moteur (`renderWithEngine` : i18n fr, réseau et routes de test, routeur en mémoire) ; références simulées du moteur (`pages.pages.*`, `pages.signatories.*`, réseau courant dans chaque argument) ; vrais composants de `@antia/ui` (seul le squelette est marqué) ; pages au DTO du moteur ; les huit cas du socle portés tels quels (recherche serveur, « Afficher plus », état vide après épuisement, pannes de la découverte et des suivies, squelette, état vide véritable) ; cas ajoutés : filtre par pays, badge calculé et ligne de méta, suivi par l'adresse, mes pages et invitations à signer, création d'une page, troncature et pagination (kit d'espace, `@antia/ui/espace-kit` non simulé) des pages suivies.
+// Réécrit d'après socle/packages/agent-features/src/features/reseau-personnel/PagesPanel.test.tsx @ ad2e7fdc2 — ce qui change : monté dans l'enveloppe du moteur (`renderWithEngine` : i18n fr, réseau et routes de test, routeur en mémoire) ; références simulées du moteur (`pages.pages.*`, `pages.signatories.*`, réseau courant dans chaque argument) ; vrais composants de `@antsia/ui` (seul le squelette est marqué) ; pages au DTO du moteur ; les huit cas du socle portés tels quels (recherche serveur, « Afficher plus », état vide après épuisement, pannes de la découverte et des suivies, squelette, état vide véritable) ; cas ajoutés : filtre par pays, badge calculé et ligne de méta, suivi par l'adresse, mes pages et invitations à signer, création d'une page, troncature et pagination (kit d'espace, `@antsia/ui/espace-kit` non simulé) des pages suivies.
 // @vitest-environment jsdom
 
 /**
@@ -16,7 +16,7 @@
  *     invitation, créer une page (puis l'ouvrir).
  */
 import { act, fireEvent, screen, within } from "@testing-library/react"
-import type * as AntiaUi from "@antia/ui"
+import type * as AntsiaUi from "@antsia/ui"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 import { memoryRouter, renderWithEngine, TEST_NETWORK_ID, TEST_ROUTES } from "../../tests/engine-wrapper"
@@ -48,7 +48,7 @@ const mocks = vi.hoisted(() => ({
   createPage: vi.fn(),
 }))
 
-vi.mock("@antia/api/engine", () => ({
+vi.mock("@antsia/api/engine", () => ({
   api: {
     modules: {
       pages: {
@@ -69,7 +69,7 @@ vi.mock("@antia/api/engine", () => ({
   },
 }))
 
-vi.mock("@antia/api/hooks", () => ({
+vi.mock("@antsia/api/hooks", () => ({
   useAuthenticatedConvexQuery: (query: string, args: unknown) => {
     mocks.queried(query, args)
     if (query === "paginateMyPageFollows") return mocks.followed
@@ -101,8 +101,8 @@ vi.mock("convex/react", () => ({
 
 vi.mock("sonner", () => ({ toast: { error: vi.fn(), success: vi.fn() } }))
 
-vi.mock("@antia/ui", async (importOriginal) => ({
-  ...(await importOriginal<typeof AntiaUi>()),
+vi.mock("@antsia/ui", async (importOriginal) => ({
+  ...(await importOriginal<typeof AntsiaUi>()),
   SkeletonCard: () => <div data-testid="skeleton" />,
 }))
 

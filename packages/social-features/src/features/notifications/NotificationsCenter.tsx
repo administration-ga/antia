@@ -11,10 +11,10 @@
  * elle-même le « Tout marquer lu », proposé seulement quand il y a du neuf.
  */
 
-import { api } from "@antia/api/engine"
-import { useAuthenticatedConvexQuery } from "@antia/api/hooks"
-import { useNetwork } from "@antia/api/network"
-import { Button } from "@antia/ui"
+import { api } from "@antsia/api/engine"
+import { useAuthenticatedConvexQuery } from "@antsia/api/hooks"
+import { useNetwork } from "@antsia/api/network"
+import { Button } from "@antsia/ui"
 import { useMutation } from "convex/react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"

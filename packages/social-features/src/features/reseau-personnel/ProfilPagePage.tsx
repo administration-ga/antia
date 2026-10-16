@@ -33,10 +33,10 @@
  * qui défile ; la variante carrée de la pastille est celle d'une page.
  */
 
-import { api, type Id } from "@antia/api/engine"
-import { useAuthenticatedConvexQuery } from "@antia/api/hooks"
-import { useNetwork, useRoutes } from "@antia/api/network"
-import { useRouter } from "@antia/api/routing"
+import { api, type Id } from "@antsia/api/engine"
+import { useAuthenticatedConvexQuery } from "@antsia/api/hooks"
+import { useNetwork, useRoutes } from "@antsia/api/network"
+import { useRouter } from "@antsia/api/routing"
 import {
   PAGE_CLAIM_EVIDENCE_MAX,
   PAGE_CLAIM_NOTE_MAX_LENGTH,
@@ -45,8 +45,8 @@ import {
   PAGE_ROLES,
   PAGE_SHORT_NAME_MAX_LENGTH,
   type PageRole,
-} from "@antia/social-domain/pages"
-import { Alert, Badge, Button, Card, Field, Select, SkeletonCard, TextArea, TextInput } from "@antia/ui"
+} from "@antsia/social-domain/pages"
+import { Alert, Badge, Button, Card, Field, Select, SkeletonCard, TextArea, TextInput } from "@antsia/ui"
 import { useMutation } from "convex/react"
 import type { FunctionReturnType } from "convex/server"
 import { useCallback, useEffect, useId, useState, type ChangeEvent, type CSSProperties, type FormEvent, type ReactNode } from "react"

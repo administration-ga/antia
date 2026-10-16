@@ -59,7 +59,7 @@ afterAll(() => {
 const FEED = postDraftKey({ kind: "feed" })
 
 /** Le préfixe d'un réseau de test (`useNetwork().storagePrefix`). */
-const PREFIXE = "antia:test:"
+const PREFIXE = "antsia:test:"
 
 /** La clé de l'auteur dans le réseau de test. */
 const cle = (auteur: string) => postDraftStorageKey(PREFIXE, auteur)
@@ -271,12 +271,12 @@ describe("un état PAR RÉSEAU (configurePostDraftStorage)", () => {
   it("deux réseaux = deux brouillons, jamais mêlés", () => {
     postDraftStore.setScope("awa")
     postDraftStore.setBody(FEED, "Pour le réseau A")
-    configurePostDraftStorage("antia:autre:")
+    configurePostDraftStorage("antsia:autre:")
     // L'état repart de celui de l'autre réseau, vide : le texte n'a pas suivi.
-    expect(postDraftStore.storagePrefix()).toBe("antia:autre:")
+    expect(postDraftStore.storagePrefix()).toBe("antsia:autre:")
     postDraftStore.setBody(FEED, "Pour le réseau B")
     expect(parseDrafts(values.get(cle("awa"))).drafts[FEED]?.body).toBe("Pour le réseau A")
-    expect(parseDrafts(values.get(postDraftStorageKey("antia:autre:", "awa"))).drafts[FEED]?.body).toBe("Pour le réseau B")
+    expect(parseDrafts(values.get(postDraftStorageKey("antsia:autre:", "awa"))).drafts[FEED]?.body).toBe("Pour le réseau B")
     // Le retour relit le brouillon du premier réseau.
     configurePostDraftStorage(PREFIXE)
     postDraftStore.setComposerOpen(true)

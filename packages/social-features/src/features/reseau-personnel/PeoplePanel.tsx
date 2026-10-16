@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/PeoplePanel.tsx @ ad2e7fdc2 — adaptations : fonctions du moteur, réseau courant par `useNetwork()` — recherche dans l'annuaire du réseau (`people.directory.searchPeople`), demandes par identifiant (`graph.connections.requestConnection({ handle, message? })`), réponses (`graph.connections.respondToConnection`), suivis (`graph.follows.{follow, unfollow, paginateMyFollows, myFollowerCount}`), catalogue de suggestions (`suggestions.suggestions.{paginate, dismiss, restore, paginateDismissed, paginateSentInvitations}`) ; listes paginées nativement par une chaîne de pages à curseur (invitations envoyées, suivis — la pagination numérotée des suivis devient « Voir plus » —, catalogue), décomptes PLANCHERS marqués « + » quand une page reste ; ligne « fonction » réduite au titre publié (poste et administration retirés) ; personnes au DTO du moteur (`otherPersonId`, nom nullable rendu par le libellé neutre) ; appel d'une relation par `useRingRelation` de la brique d'appel (`features/iappel`, `calls.direct.callMember({ target: { personId } })`) ; adresses par la table de routes injectée (`useRoutes()` : profil, messagerie, page réseau) ; textes par l'i18n (espace `reseau`, clés `peoplePanel.*`) et refus du moteur dits par leur code ; « Agents à découvrir » devient « Personnes à découvrir » ; feuille du volet sortie du JSX dans une constante de module (`PEOPLE_PANEL_CSS`) — un littéral enfant de `<style>` passerait pour une chaîne d'interface —, règles inchangées ; primitives de `@antia/ui` et kit d'espace de `@antia/ui/espace-kit` (onglets « chemise », état vide ; la pagination numérotée n'est plus employée), surfaces de la coque.
+// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/PeoplePanel.tsx @ ad2e7fdc2 — adaptations : fonctions du moteur, réseau courant par `useNetwork()` — recherche dans l'annuaire du réseau (`people.directory.searchPeople`), demandes par identifiant (`graph.connections.requestConnection({ handle, message? })`), réponses (`graph.connections.respondToConnection`), suivis (`graph.follows.{follow, unfollow, paginateMyFollows, myFollowerCount}`), catalogue de suggestions (`suggestions.suggestions.{paginate, dismiss, restore, paginateDismissed, paginateSentInvitations}`) ; listes paginées nativement par une chaîne de pages à curseur (invitations envoyées, suivis — la pagination numérotée des suivis devient « Voir plus » —, catalogue), décomptes PLANCHERS marqués « + » quand une page reste ; ligne « fonction » réduite au titre publié (poste et administration retirés) ; personnes au DTO du moteur (`otherPersonId`, nom nullable rendu par le libellé neutre) ; appel d'une relation par `useRingRelation` de la brique d'appel (`features/iappel`, `calls.direct.callMember({ target: { personId } })`) ; adresses par la table de routes injectée (`useRoutes()` : profil, messagerie, page réseau) ; textes par l'i18n (espace `reseau`, clés `peoplePanel.*`) et refus du moteur dits par leur code ; « Agents à découvrir » devient « Personnes à découvrir » ; feuille du volet sortie du JSX dans une constante de module (`PEOPLE_PANEL_CSS`) — un littéral enfant de `<style>` passerait pour une chaîne d'interface —, règles inchangées ; primitives de `@antsia/ui` et kit d'espace de `@antsia/ui/espace-kit` (onglets « chemise », état vide ; la pagination numérotée n'est plus employée), surfaces de la coque.
 "use client"
 
 /**
@@ -11,12 +11,12 @@
  * d'une absence.
  */
 
-import { api, type Id } from "@antia/api/engine"
-import { useAuthenticatedConvexQuery } from "@antia/api/hooks"
-import { useNetwork, useRoutes } from "@antia/api/network"
-import { Link, useTabQueryState } from "@antia/api/routing"
-import { Badge, Button, Card, Field, TextInput } from "@antia/ui"
-import { EspaceDossierTabs, EspaceEmptyState, EspaceKitStyles } from "@antia/ui/espace-kit"
+import { api, type Id } from "@antsia/api/engine"
+import { useAuthenticatedConvexQuery } from "@antsia/api/hooks"
+import { useNetwork, useRoutes } from "@antsia/api/network"
+import { Link, useTabQueryState } from "@antsia/api/routing"
+import { Badge, Button, Card, Field, TextInput } from "@antsia/ui"
+import { EspaceDossierTabs, EspaceEmptyState, EspaceKitStyles } from "@antsia/ui/espace-kit"
 import { useMutation } from "convex/react"
 import type { FunctionReference, FunctionReturnType } from "convex/server"
 import { useCallback, useEffect, useId, useMemo, useState, type ReactNode } from "react"

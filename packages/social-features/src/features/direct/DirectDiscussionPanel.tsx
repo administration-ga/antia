@@ -1,11 +1,11 @@
 // Dupliqué de socle/packages/agent-features/src/features/direct/DirectCommentsPanel.tsx @ ad2e7fdc2 — adaptations : commentaires et réactions abonnés seulement dans le volet ouvert, API moteur et réseau, formulaire RHF/Zod, modération par permission serveur et i18n.
 "use client"
 
-import { api } from "@antia/api/engine"
-import { useAuthenticatedConvexQuery } from "@antia/api/hooks"
-import { useNetwork } from "@antia/api/network"
-import { DIRECT_COMMENT_MAX_LENGTH } from "@antia/social-domain/live/domain"
-import { Button } from "@antia/ui"
+import { api } from "@antsia/api/engine"
+import { useAuthenticatedConvexQuery } from "@antsia/api/hooks"
+import { useNetwork } from "@antsia/api/network"
+import { DIRECT_COMMENT_MAX_LENGTH } from "@antsia/social-domain/live/domain"
+import { Button } from "@antsia/ui"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useMutation } from "convex/react"
 import { useForm } from "react-hook-form"

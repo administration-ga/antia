@@ -1,4 +1,4 @@
-// Dupliqué de socle/convex/modules/direct/permissions.ts @ ad2e7fdc2 — adaptations : module PUR déplacé dans le domaine (`@antia/social-domain/live/permissions`, importable par le front sans `convex/`), réexporté par `convex/modules/live/permissions.ts` ; `directDelegationKindLabel` rend un CODE de libellé (`delegationKind.cohost` | `delegationKind.moderator`, traduit par l'écran) au lieu d'une phrase française ; rien d'autre dans le code.
+// Dupliqué de socle/convex/modules/direct/permissions.ts @ ad2e7fdc2 — adaptations : module PUR déplacé dans le domaine (`@antsia/social-domain/live/permissions`, importable par le front sans `convex/`), réexporté par `convex/modules/live/permissions.ts` ; `directDelegationKindLabel` rend un CODE de libellé (`delegationKind.cohost` | `delegationKind.moderator`, traduit par l'écran) au lieu d'une phrase française ; rien d'autre dans le code.
 /**
  * Les RÔLES DE GESTION d'un direct, séparés du rôle PUBLIANT (D-11, ADR-0144).
  *

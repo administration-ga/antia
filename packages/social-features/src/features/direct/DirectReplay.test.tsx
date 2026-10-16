@@ -4,13 +4,13 @@ import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-libra
 import { getFunctionName } from "convex/server"
 import { I18nextProvider } from "react-i18next"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
-import { noDirectPermissions } from "@antia/social-domain/live/permissions"
+import { noDirectPermissions } from "@antsia/social-domain/live/permissions"
 import { createAppI18n } from "../../i18n"
 import type { DirectSession } from "./DirectPage"
 import { DirectReplay } from "./DirectReplay"
 
 const calls = vi.hoisted(() => ({ mutation: vi.fn(), captions: vi.fn() }))
-vi.mock("@antia/api/network", () => ({ useNetwork: () => ({ networkId: "network-a" }) }))
+vi.mock("@antsia/api/network", () => ({ useNetwork: () => ({ networkId: "network-a" }) }))
 vi.mock("convex/react", () => ({
   useMutation: (ref: Parameters<typeof getFunctionName>[0]) => (args: unknown) => calls.mutation(getFunctionName(ref), args),
   useAction: () => calls.captions,

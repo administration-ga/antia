@@ -11,7 +11,7 @@
  *    une croix pour annuler la citation.
  *
  * ⚠️ L'extrait n'est JAMAIS recopié à l'écriture. Le serveur le RELIT à la
- * lecture (`replyExcerpt` du contrat `@antia/social-contracts/attachments`), avec la garde du
+ * lecture (`replyExcerpt` du contrat `@antsia/social-contracts/attachments`), avec la garde du
  * fil : un message supprimé depuis cesse ainsi d'apparaître dans les citations
  * qui le désignent — sans cela, la citation serait le seul endroit où le
  * message supprimé survivrait. Ce composant ne reçoit donc que ce que le
