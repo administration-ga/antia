@@ -136,6 +136,11 @@ Cliquets en place (`tests/ratchets/`) : `no-cross-product-imports`, `no-any-vali
   (`apps/antia_ga/src/lib/messages-route.ts`).
 - **Coque des pages de membre** : montée UNE fois dans le gabarit `(membre)` d'antia.ga ; remontée à chaque
   page, elle coupait un appel en cours et faisait déborder le seau de présence (8 par minute).
+- **Tests du moteur** : toujours avec `--config convex/vitest.config.ts` (depuis la racine :
+  `bunx vitest run --config convex/vitest.config.ts modules/<module>`) — sans elle, `ANTIA_SEEDS_ALLOWED` manque et
+  tout test qui pose la graine des fondations échoue (« Graine refusée »).
+- **Récolte des directs** (`live/reap.ts`) : par tranches de CINQ sessions chaînées par curseur — le pire cas d'une
+  session lit ≈ 2,3 Mo ; une tranche plus large dépasserait la limite de lecture d'une mutation (16 Mio).
 - **Kit d'espace sans i18n** (`@antia/ui/espace-kit`) : `EspacePagination` exige ses phrases (`labels`) et
   `EspaceDialog` son `closeLabel` — dans le moteur, `useEspacePaginationLabels()` (`shell/`) les traduit une fois.
 - **Page réseau de bureau** (`ReseauAgentPage`) : ses colonnes défilent chacune, elle exige un conteneur de

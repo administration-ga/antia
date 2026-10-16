@@ -1,4 +1,4 @@
-// Dupliqué de socle/convex/modules/fileGuard/mutations.ts @ ad2e7fdc2 — adaptations : table `fileScans` ; quarantaine iDocument et triage IA retirés (le statut bloquant EST la retenue ; l'avis part par la cloche sociale, `notify.ts`) ; libération par un MODÉRATEUR du réseau du fichier ou un opérateur (au lieu de `settings.manage` d'une administration), relance par un opérateur (au lieu du superadmin) ; `logAudit` (journal de l'archive iDocument) remplacé par le journal du moteur (`appendAudit` : libération, relance, purge, avec la qualité de l'acteur) ; débit sur les gestes humains ; coupe-circuit respecté par l'analyse et le balayeur (fail-closed) ; purge indexée sur `blobPurgedAt` (D31 : une ligne purgée ne bloque plus la file) ; `_ageScanForTests` non recopiée (les tests vieillissent la ligne eux-mêmes) ; refus à code du moteur.
+// Dupliqué de socle/convex/modules/fileGuard/mutations.ts @ ad2e7fdc2 — adaptations : table `fileScans` ; quarantaine iDocument et triage IA retirés (le statut bloquant EST la retenue ; l'avis part par la cloche sociale, `notify.ts`) ; libération par un MODÉRATEUR du réseau du fichier ou un opérateur (au lieu de `settings.manage` d'une administration), relance par un opérateur (au lieu du superadmin) ; `logAudit` (journal de l'archive iDocument) remplacé par le journal du moteur (`appendAudit` : libération, relance, purge, avec la qualité de l'acteur) ; débit sur les gestes humains ; coupe-circuit respecté par l'analyse et le balayeur (fail-closed) ; purge indexée sur `blobPurgedAt` (D31 : une ligne purgée ne bloque plus la file) ; `_ageScanForTests` non recopiée (les tests vieillissent la ligne eux-mêmes) ; refus à code du moteur. ; `_markRunning` rend la taille STOCKÉE (`sizeBytes`, table `_storage`) pour que l'analyse écarte un fichier trop gros AVANT de le télécharger (lot 16).
 /**
  * Garde des fichiers — MUTATIONS.
  *
@@ -46,6 +46,8 @@ export const scanFactsValidator = v.object({
   filename: v.union(v.string(), v.null()),
   declaredMimeType: v.union(v.string(), v.null()),
   attempts: v.number(),
+  /** La taille STOCKÉE (table `_storage`), lue avant tout téléchargement ; `null` : inconnue. */
+  sizeBytes: v.union(v.number(), v.null()),
 })
 
 /**
@@ -63,12 +65,14 @@ export const _markRunning = internalMutation({
     const now = Date.now()
     const attempts = scan.attempts + 1
     await ctx.db.patch(scan._id, { status: "running", attempts, startedAt: now, updatedAt: now })
+    const stored = await ctx.db.system.get(scan.storageId)
     return {
       scanId: scan._id,
       storageId: scan.storageId,
       filename: scan.filename ?? null,
       declaredMimeType: scan.declaredMimeType ?? null,
       attempts,
+      sizeBytes: stored?.size ?? null,
     }
   },
 })

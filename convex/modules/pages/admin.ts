@@ -1,4 +1,4 @@
-// Dupliqué de socle/convex/modules/reseauPages/admin.ts @ ad2e7fdc2 — adaptations : réécrit (owner map §6.15) — la console du moteur (`operatorMutation`, opérateur de plateforme vivant) au lieu du superadmin ; plus d'ACTIVATION pour une organisation : la console CRÉE une page d'institution « Officiel » (décision tracée, idempotente par référence d'import), pose la confiance (`isTrustAllowedForOwner` : « Officiel » n'appartient qu'à une institution), retire ou rétablit une page, change son adresse (l'ancienne dans l'historique d'identité) et habilite un premier administrateur (invitation à accepter, identité forte exigée pour une page officielle) ; motif de décision borné ; chaque geste qui ÉCRIT laisse sa ligne au journal du moteur (`appendAudit`, au lieu d'`appendContextAudit`), un geste qui ne change rien n'écrit rien ; avertissement « module Actualités » et fermeture des directs retirés (plus d'organisation ; le direct d'une page viendra avec le module `live`) ; liste paginée au lieu de 100 lignes.
+// Dupliqué de socle/convex/modules/reseauPages/admin.ts @ ad2e7fdc2 — adaptations : réécrit (owner map §6.15) — la console du moteur (`operatorMutation`, opérateur de plateforme vivant) au lieu du superadmin ; plus d'ACTIVATION pour une organisation : la console CRÉE une page d'institution « Officiel » (décision tracée, idempotente par référence d'import), pose la confiance (`isTrustAllowedForOwner` : « Officiel » n'appartient qu'à une institution), retire ou rétablit une page, change son adresse (l'ancienne dans l'historique d'identité) et habilite un premier administrateur (invitation à accepter, identité forte exigée pour une page officielle) ; motif de décision borné ; chaque geste qui ÉCRIT laisse sa ligne au journal du moteur (`appendAudit`, au lieu d'`appendContextAudit`), un geste qui ne change rien n'écrit rien ; avertissement « module Actualités » retiré ; fermeture des directs de la page RÉTABLIE avec le module `live` (lot 16 : le retrait planifie `live/revocation.closePageDirects`, comme `deactivate` au socle) ; liste paginée au lieu de 100 lignes.
 /**
  * La CONSOLE des pages — les décisions qui ne se prennent pas depuis une page.
  *
@@ -20,6 +20,7 @@ import {
 import { paginationOptsValidator, type PaginationResult } from "convex/server"
 import { v } from "convex/values"
 
+import { internal } from "../../_generated/api"
 import type { Doc } from "../../_generated/dataModel"
 import { checked, failRule, notFound } from "../../lib/errors"
 import { operatorMutation, operatorQuery } from "../../lib/functions"
@@ -163,6 +164,7 @@ export const setPageStatus = operatorMutation({
     if (page.status === args.status) return { changed: false }
     const now = Date.now()
     await ctx.db.patch(page._id, { status: args.status, deactivatedAt: args.status === "inactive" ? now : undefined, updatedAt: now })
+    if (args.status === "inactive") await ctx.scheduler.runAfter(0, internal.modules.live.revocation.closePageDirects, { pageId: page._id, cursor: null, revokedAt: now })
     await appendAudit(ctx, {
       action: "page.status_set",
       capacity: operatorCapacity(ctx.operator),

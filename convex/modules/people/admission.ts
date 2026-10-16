@@ -16,11 +16,13 @@ import {
   type ActiveMembershipStatus,
   derivedRootMembership,
   type EntryEvidence,
+  isActiveStatus,
   type MembershipStatus,
   nextMembershipStatus,
   type VerificationSource,
 } from "@antia/social-domain/membership"
 
+import { internal } from "../../_generated/api"
 import type { Doc, Id } from "../../_generated/dataModel"
 import type { MutationCtx } from "../../_generated/server"
 import { getMembership } from "../../lib/access"
@@ -32,7 +34,10 @@ export type FacetInput = {
   visibilities: Doc<"personFacets">["visibilities"]
 }
 
-/** Change le statut d'une adhésion en datant le changement ; l'annuaire suit. */
+/**
+ * Change le statut d'une adhésion en datant le changement ; l'annuaire suit, et
+ * une SORTIE (départ, suspension) coupe la personne des directs du réseau.
+ */
 export async function setMembershipStatus(
   ctx: MutationCtx,
   membership: Doc<"networkMemberships">,
@@ -41,6 +46,7 @@ export async function setMembershipStatus(
 ): Promise<void> {
   await ctx.db.patch(membership._id, { status, statusChangedAt: Date.now(), ...extra })
   await syncPersonDirectory(ctx, membership.personId)
+  if (isActiveStatus(membership.status) && !isActiveStatus(status)) await ctx.scheduler.runAfter(0, internal.modules.live.revocation.kickUserFromNetworkDirects, { personId: membership.personId, networkId: membership.networkId, cursor: null })
 }
 
 /**

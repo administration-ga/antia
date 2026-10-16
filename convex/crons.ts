@@ -36,4 +36,19 @@ crons.interval("stories-purge-expired", { minutes: 10 }, internal.modules.storie
 crons.interval("calls-cleanup-stale", { seconds: 30 }, internal.modules.calls.cleanup.cleanupStaleCalls, {})
 crons.interval("calls-presence-cleanup-stale", { seconds: 60 }, internal.modules.calls.presence.cleanupStalePresence, {})
 
+// Direct (`live`, socle `crons.ts` l. 264-296) : la RÉCOLTE ferme les sessions
+// programmées jamais démarrées (24 h) et les directs fantômes (4 h, hôte parti
+// sans terminer), arrête leur Egress et recompose les compteurs de salle —
+// l'écrivain unique (D28), le chemin chaud n'écrit jamais la session.
+crons.interval("live-reap-stale", { seconds: 60 }, internal.modules.live.reap.reapStaleDirects, {})
+// Filet de la conservation des rediffusions : l'échéance exacte est planifiée à
+// la livraison Egress, ce passage horaire récupère les jobs manqués et
+// matérialise l'échéance des rediffusions qui n'en ont pas, par lots de 50.
+crons.interval("live-purge-expired-replays", { hours: 1 }, internal.modules.live.replay.purgeExpiredReplays, {})
+// Le filet des webhooks : une terminaison reçue AVANT la corrélation est
+// absorbée et rien ne la rejoue — ce passage reprend les sessions terminées dont
+// la rediffusion n'a pas abouti, demande son sort à LiveKit et conclut
+// (fichier rapatrié, échec nommé, ou abandon motivé après 24 h).
+crons.interval("live-reconcile-replays", { minutes: 15 }, internal.modules.live.replay.reconcileStalePending, {})
+
 export default crons

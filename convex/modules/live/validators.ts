@@ -31,6 +31,7 @@ import {
   DIRECT_STATUSES,
 } from "@antia/social-domain/live/domain"
 import type { DirectDelegationKind } from "@antia/social-domain/live/permissions"
+import { DIRECT_REPLAY_CAPTIONS_LANGS, DIRECT_REPLAY_FAILURE_REASONS } from "@antia/social-domain/live/replayComposition"
 import type { DirectReplayEgressState, DirectStageFormat } from "@antia/social-domain/live/replayComposition"
 import { v } from "convex/values"
 
@@ -200,3 +201,9 @@ export const directReplayCompositionValidator = v.object({
  * durable : `speaker` publie (hôte et intervenants), `viewer` regarde.
  */
 export const directConnectionRoleValidator = literals(exactly<DirectConnectionRole>()(["viewer", "speaker"]))
+
+/** POURQUOI aucune rediffusion ne sera produite — un code du vocabulaire fermé, jamais une phrase. */
+export const directReplayFailureReasonValidator = literals(DIRECT_REPLAY_FAILURE_REASONS)
+
+/** La langue DÉCLARÉE d'une piste de sous-titres — un code du vocabulaire fermé. */
+export const directReplayCaptionsLangValidator = literals(DIRECT_REPLAY_CAPTIONS_LANGS)

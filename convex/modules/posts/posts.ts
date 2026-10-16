@@ -1,4 +1,4 @@
-// Dupliqué de socle/convex/modules/reseauPersonnel/posts.ts @ ad2e7fdc2 — adaptations : PAR RÉSEAU — tout se lit DEPUIS le réseau de la fonction appelée (une publication `network` d'un réseau fermé n'est rendue par aucune lecture de la racine, R4 ; la racine lit ses natifs et les `root` de tous les réseaux par l'index `onRoot`), adhésion par le constructeur au lieu d'`assertNotSuspended` ; fenêtres par auteur, fusion k-voies, curseur composite et deux phases GARDÉS, lecteurs de fenêtre factorisés (réseau, racine, auteur) ; portée « mon_administration », collègues, organisations et notes de service retirés (l. 1059-1061, 1079-1081, 1221-1224, 1253) ; PAGES rebranchées sur les pages du moteur (lot 13 : fenêtre par page suivie dans « Pour vous », admission propre `pageFeedAdmissionFor` — ni la connexion au signataire, ni la sourdine, ni le blocage entre personnes ne s'y appliquent —, carte de la page dans le DTO avec `author` pour signataire, aucune publication de page sur un mur personnel ni dans « mes publications », autorité ACTUELLE du signataire pour retirer ou éditer) ; direct et évènement (l. 550-598) au lot de leurs modules ; BLOCAGE exclu du fil, de la recherche et du mur (il l'emporte sur toute audience) ; lacune des ensembles bornés RENDUE (`lacunar`, D19, D24) ; une seule garde dans la recherche (D25) ; partages comptés par agrégat ; cloche du partage et des citations par la porte unique ; portée et pays ; épingle par réseau (sur l'adhésion) rendue avec le mur ; `myPosts` paginé (`paginateMyPosts`) ; le fil « Récents » natif `feed` de la tranche verticale GARDÉ (compatibilité des écrans), DTO étendu ; débit sur publier, éditer, retirer ; fil par VOIES (portée, pays facultatif) que compose une application servie (le hub d'un pays, « toute la diaspora »), fusionnées par date ; fenêtres bornées fusionnées sous FRONTIÈRE (une fenêtre pleine n'ouvre plus de trou dans « Pour vous »).
+// Dupliqué de socle/convex/modules/reseauPersonnel/posts.ts @ ad2e7fdc2 — adaptations : PAR RÉSEAU — tout se lit DEPUIS le réseau de la fonction appelée (une publication `network` d'un réseau fermé n'est rendue par aucune lecture de la racine, R4 ; la racine lit ses natifs et les `root` de tous les réseaux par l'index `onRoot`), adhésion par le constructeur au lieu d'`assertNotSuspended` ; fenêtres par auteur, fusion k-voies, curseur composite et deux phases GARDÉS, lecteurs de fenêtre factorisés (réseau, racine, auteur) ; portée « mon_administration », collègues, organisations et notes de service retirés (l. 1059-1061, 1079-1081, 1221-1224, 1253) ; PAGES rebranchées sur les pages du moteur (lot 13 : fenêtre par page suivie dans « Pour vous », admission propre `pageFeedAdmissionFor` — ni la connexion au signataire, ni la sourdine, ni le blocage entre personnes ne s'y appliquent —, carte de la page dans le DTO avec `author` pour signataire, aucune publication de page sur un mur personnel ni dans « mes publications », autorité ACTUELLE du signataire pour retirer ou éditer) ; évènement (l. 564-598) au lot de son module ; DIRECT annoncé (l. 545-562, `resolveDirectProjection`) rebranché au lot 16 : la carte porte `live` (session relue à chaque lecture : identifiant, statut, titre), FACULTATIVE dans le DTO (absente quand la publication n'annonce rien ou que la session n'existe plus) ; BLOCAGE exclu du fil, de la recherche et du mur (il l'emporte sur toute audience) ; lacune des ensembles bornés RENDUE (`lacunar`, D19, D24) ; une seule garde dans la recherche (D25) ; partages comptés par agrégat ; cloche du partage et des citations par la porte unique ; portée et pays ; épingle par réseau (sur l'adhésion) rendue avec le mur ; `myPosts` paginé (`paginateMyPosts`) ; le fil « Récents » natif `feed` de la tranche verticale GARDÉ (compatibilité des écrans), DTO étendu ; débit sur publier, éditer, retirer ; fil par VOIES (portée, pays facultatif) que compose une application servie (le hub d'un pays, « toute la diaspora »), fusionnées par date ; fenêtres bornées fusionnées sous FRONTIÈRE (une fenêtre pleine n'ouvre plus de trou dans « Pour vous »).
 /**
  * Publications d'un réseau — publier, partager, éditer, retirer, épingler ;
  * lire le fil, le mur d'une personne, une publication ; chercher.
@@ -41,6 +41,7 @@ import {
   PERSONAL_FEED_AUTHORS_MAX,
   type PersonalFeedCursor,
 } from "@antia/social-domain/feedScale"
+import { DIRECT_STATUSES } from "@antia/social-domain/live/domain"
 import { effectiveVisibility } from "@antia/social-domain/network"
 import { pageFeedAdmissionFor, PAGES_FEED_MAX } from "@antia/social-domain/pages"
 import { extractHashtags } from "@antia/social-domain/richText"
@@ -134,6 +135,9 @@ const sharedPostValidator = v.union(
 /** Le réseau d'ORIGINE d'une publication lue ailleurs (pastille « Diaspora » du fil de la racine). */
 const originValidator = v.union(v.object({ networkId: v.id("networks"), slug: v.string(), name: v.string() }), v.null())
 
+/** Le DIRECT annoncé, tel qu'il est MAINTENANT — une référence, son statut et son titre, rien d'autre. */
+const liveAnnounceValidator = v.object({ sessionId: v.id("liveSessions"), status: literals(DIRECT_STATUSES), title: v.string() })
+
 export const feedItemValidator = v.object({
   _id: v.id("posts"),
   body: v.string(),
@@ -154,6 +158,15 @@ export const feedItemValidator = v.object({
   groupId: v.union(v.id("thematicGroups"), v.null()),
   /** L'évènement ANNONCÉ par la publication, relu à chaque lecture (statut, MA réponse). */
   event: v.union(eventCardValidator, v.null()),
+  /**
+   * Le DIRECT annoncé par la publication — statut RELU à chaque lecture, jamais
+   * figé : la carte dit « en direct » ou « terminé » selon l'instant, pas selon
+   * l'annonce. L'audience de la session est EXACTEMENT celle de la publication,
+   * dans le même réseau (invariant d'écriture) : voir l'annonce, c'est avoir le
+   * droit de savoir que le direct existe. Absent : la publication n'annonce
+   * rien, ou la session n'existe plus — la carte redevient ordinaire.
+   */
+  live: v.optional(liveAnnounceValidator),
   /**
    * La PAGE au nom de laquelle la publication parle — l'en-tête à afficher ;
    * `author` est alors son SIGNATAIRE (« signé par »), et `isMine` reste faux :
@@ -220,9 +233,21 @@ async function resolveShareProjection(ctx: QueryCtx, post: Doc<"posts">, reader:
   }
 }
 
+/**
+ * Le DIRECT annoncé, tel qu'il est MAINTENANT. Statut relu à chaque lecture —
+ * une annonce n'est pas un état, c'est un pointeur. Session disparue : rien, la
+ * carte redevient une publication ordinaire.
+ */
+async function resolveDirectProjection(ctx: ReadCtx, post: Doc<"posts">): Promise<Infer<typeof liveAnnounceValidator> | null> {
+  if (post.liveSessionId === undefined) return null
+  const session = await ctx.db.get(post.liveSessionId)
+  if (session === null) return null
+  return { sessionId: session._id, status: session.status, title: session.title }
+}
+
 /** LA projection d'une publication — le fil, le mur, la recherche et la lecture unitaire rendent la même carte. */
 export async function toFeedItem(ctx: QueryCtx, post: Doc<"posts">, reader: ReaderContext, reason: FeedReason, enrich: Enrichment): Promise<FeedItem> {
-  const [author, reactions, commentCount, shareCount, media, share, origin, event, page] = await Promise.all([
+  const [author, reactions, commentCount, shareCount, media, share, origin, event, page, live] = await Promise.all([
     enrich.profileOf(post.authorPersonId),
     summarizeReactions(ctx, post._id, reader.personId),
     countComments(ctx, post._id),
@@ -232,6 +257,7 @@ export async function toFeedItem(ctx: QueryCtx, post: Doc<"posts">, reader: Read
     post.networkId === reader.network._id ? Promise.resolve(null) : enrich.originOf(post.networkId),
     eventCardOf(ctx, post.eventId, reader.personId),
     post.pageId === undefined ? Promise.resolve(null) : enrich.pageOf(post.pageId),
+    resolveDirectProjection(ctx, post),
   ])
   // Une publication de page ne retombe JAMAIS sur l'identité de son signataire : page retirée, contenu indisponible.
   if (post.pageId !== undefined && page === null) return notFound()
@@ -259,6 +285,7 @@ export async function toFeedItem(ctx: QueryCtx, post: Doc<"posts">, reader: Read
     tags: post.tags ?? [],
     groupId: post.groupId ?? null,
     event,
+    ...(live === null ? {} : { live }),
     page,
     reach: post.reach ?? null,
     country: post.country ?? null,

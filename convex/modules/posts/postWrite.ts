@@ -1,4 +1,4 @@
-// Dupliqué de socle/convex/modules/reseauPersonnel/postWrite.ts @ ad2e7fdc2 — adaptations : réseau, visibilité et `onRoot` (lisible depuis la racine) dénormalisés à l'écriture ; portée et pays ; citations résolues parmi les profils PUBLIÉS et membres du réseau de la publication (`resolveMentionedPersonIds`) ; cloche des citations par la porte unique (`notifyPerson`) avec la règle « qui peut être sonné » (`mentionCanSeePost`) — au plus 10 citations par publication (`MENTION_MAX_PER_POST`), aucune diffusion différée nécessaire ; partage compté dans l'agrégat ; aucun compteur sur la publication ; extension direct reportée avec son module, l'évènement annoncé porté (lot 12), la PAGE portée (lot 13 : forme `public`/`followers`, publication comptée pour la page, citations d'une note aux abonnés sonnées vers ses seuls abonnés et signataires vivants) ; branche organisation (l. 187-198) retirée.
+// Dupliqué de socle/convex/modules/reseauPersonnel/postWrite.ts @ ad2e7fdc2 — adaptations : réseau, visibilité et `onRoot` (lisible depuis la racine) dénormalisés à l'écriture ; portée et pays ; citations résolues parmi les profils PUBLIÉS et membres du réseau de la publication (`resolveMentionedPersonIds`) ; cloche des citations par la porte unique (`notifyPerson`) avec la règle « qui peut être sonné » (`mentionCanSeePost`) — au plus 10 citations par publication (`MENTION_MAX_PER_POST`), aucune diffusion différée nécessaire ; partage compté dans l'agrégat ; aucun compteur sur la publication ; la session de direct annoncée portée (`directSessionId` → `liveSessionId`, lot 16), l'évènement annoncé porté (lot 12), la PAGE portée (lot 13 : forme `public`/`followers`, publication comptée pour la page, citations d'une note aux abonnés sonnées vers ses seuls abonnés et signataires vivants) ; branche organisation (l. 187-198) retirée.
 /**
  * L'ÉCRITURE d'une publication — le geste commun à tous les écrivains,
  * présents (`posts.publish`) et à venir (annonce d'un direct, d'un évènement,
@@ -48,6 +48,8 @@ export type PostWriteInput = {
   idempotencyKey?: string
   /** L'évènement ANNONCÉ — l'organisateur est DÉJÀ vérifié par l'appelant. */
   eventId?: Id<"events">
+  /** L'annonce d'un DIRECT — la carte du fil portera « Regarder » (`live/sessions.create`). */
+  liveSessionId?: Id<"liveSessions">
   /** La PAGE au nom de laquelle on publie — le rôle VIVANT du signataire est DÉJÀ vérifié par l'appelant. */
   pageId?: Id<"pages">
 }
@@ -135,6 +137,7 @@ export async function writePost(ctx: MutationCtx, input: PostWriteInput): Promis
     searchText: buildSearchableText(input.body, tags.join(" ")),
     ...(input.idempotencyKey ? { idempotencyKey: input.idempotencyKey } : {}),
     ...(input.eventId ? { eventId: input.eventId } : {}),
+    ...(input.liveSessionId ? { liveSessionId: input.liveSessionId } : {}),
     ...(input.pageId ? { pageId: input.pageId } : {}),
     publishedAt: now,
     createdAt: now,

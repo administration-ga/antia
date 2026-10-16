@@ -1,0 +1,70 @@
+// @vitest-environment edge-runtime
+/**
+ * La garde des fichiers juge la TAILLE STOCKÉE avant de télécharger : un fichier
+ * au-delà du plafond d'inspection est écarté (`skipped`, `too_large`) sans que
+ * l'action ne lise ses octets. Le plafond est abaissé à 16 octets pour le test
+ * (le vrai, 512 Mio, ne se fabrique pas dans le harnais).
+ */
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
+
+import { internal } from "../../_generated/api"
+import type { Id } from "../../_generated/dataModel"
+import type { MutationCtx } from "../../_generated/server"
+import { testConvex } from "../../test.setup"
+import { admitStoredUpload } from "./admission"
+
+vi.mock("./policy", async (importOriginal) => ({ ...(await importOriginal<typeof import("./policy")>()), FILE_GUARD_MAX_INSPECT_BYTES: 16 }))
+
+type T = ReturnType<typeof testConvex>
+
+beforeEach(() => {
+  vi.stubEnv("CONVEX_CLOUD_URL", "http://127.0.0.1:3210")
+})
+
+afterEach(() => {
+  vi.restoreAllMocks()
+  vi.unstubAllEnvs()
+})
+
+/** Un fichier déposé puis admis à l'analyse (ligne `pending`), comme le fait une mutation de dépôt. */
+async function admitted(t: T, content: string): Promise<Id<"fileScans">> {
+  return await t.run(async (ctx) => {
+    const storageId = await ctx.storage.store(new Blob([content], { type: "application/pdf" }))
+    const out = await admitStoredUpload(ctx as unknown as MutationCtx, { storageId, usage: "chat_attachment", mimeType: "application/pdf" }, { source: "message" })
+    return out.scanId
+  })
+}
+
+describe("analyse — la taille stockée d'abord", () => {
+  it("`_markRunning` rend la taille STOCKÉE", async () => {
+    const t = testConvex()
+    const scanId = await admitted(t, "%PDF-1.4 petit")
+    const facts = await t.mutation(internal.modules.files.mutations._markRunning, { scanId })
+    expect(facts?.sizeBytes).toBe(14)
+  })
+
+  it("au-delà du plafond, le fichier est écarté SANS que ses octets soient lus", async () => {
+    const t = testConvex()
+    const scanId = await admitted(t, "%PDF-1.4 un fichier qui dépasse le plafond abaissé")
+    const read = vi.spyOn(Blob.prototype, "arrayBuffer")
+
+    await t.action(internal.modules.files.scan.runScan, { scanId })
+
+    expect(read).not.toHaveBeenCalled()
+    const scan = await t.run(async (ctx) => ctx.db.get(scanId))
+    expect(scan).toMatchObject({ status: "skipped", skipReason: "too_large" })
+    expect(scan?.sizeBytes).toBeGreaterThan(16)
+  })
+
+  it("sous le plafond, l'analyse lit le fichier et rend son verdict", async () => {
+    const t = testConvex()
+    const scanId = await admitted(t, "%PDF-1.4 court")
+    const read = vi.spyOn(Blob.prototype, "arrayBuffer")
+
+    await t.action(internal.modules.files.scan.runScan, { scanId })
+
+    expect(read).toHaveBeenCalled()
+    const scan = await t.run(async (ctx) => ctx.db.get(scanId))
+    expect(scan?.status).not.toBe("skipped")
+  })
+})

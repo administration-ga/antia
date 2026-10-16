@@ -1,4 +1,4 @@
-// Dupliqué de socle/convex/modules/reseauPages/pages.ts @ ad2e7fdc2 — adaptations : réécrit (owner map §6.15) — pages GÉNÉRIQUES par réseau, CRÉÉES par un membre vérifié (association, entreprise, média, communauté ; l'institution naît d'une décision tracée, `admin.ts`) au lieu d'être activées pour une organisation ; identité lue sur la page ; lues dans leur réseau, ou depuis la racine si elles y sont ; publier et retirer exigent un SIGNATAIRE VIVANT (au lieu de `communication.publish`) ; audiences `public` (communiqué) et `followers` (note aux abonnés, au lieu de la note de service `organisation`) ; visibilité par la RÈGLE de la page, pays et portée des publications locales tirés de la page (EXF-DG-23) ; abonnés prévenus par la DIFFUSION PAR LOTS, re-gardés au moment de sonner ; abonnés et publications comptés par l'agrégat (D02) ; annuaire par confiance puis récence (au lieu des plus suivies), filtré par pays, cherché sans accents, borné (`discover`) ou paginé (`paginateDiscover`) ; « mes pages suivies » paginées ; mur par fenêtres bornées et curseur composite (le patron du mur d'une personne), chaque ligne re-gardée ; débit sur chaque écriture (D14) ; refus indistinct à code.
+// Dupliqué de socle/convex/modules/reseauPages/pages.ts @ ad2e7fdc2 — adaptations : réécrit (owner map §6.15) — pages GÉNÉRIQUES par réseau, CRÉÉES par un membre vérifié (association, entreprise, média, communauté ; l'institution naît d'une décision tracée, `admin.ts`) au lieu d'être activées pour une organisation ; identité lue sur la page ; lues dans leur réseau, ou depuis la racine si elles y sont ; publier et retirer exigent un SIGNATAIRE VIVANT (au lieu de `communication.publish`) ; audiences `public` (communiqué) et `followers` (note aux abonnés, au lieu de la note de service `organisation`) ; visibilité par la RÈGLE de la page, pays et portée des publications locales tirés de la page (EXF-DG-23) ; abonnés prévenus par la DIFFUSION PAR LOTS, re-gardés au moment de sonner ; abonnés et publications comptés par l'agrégat (D02) ; annuaire par confiance puis récence (au lieu des plus suivies), filtré par pays, cherché sans accents, borné (`discover`) ou paginé (`paginateDiscover`) ; « mes pages suivies » paginées ; mur par fenêtres bornées et curseur composite (le patron du mur d'une personne), chaque ligne re-gardée ; débit sur chaque écriture (D14) ; refus indistinct à code. Désabonnement : coupure des directs réservés aux abonnés de la page (`live.revocation.kickUserFromPageDirects`, lot 16).
 /**
  * Les PAGES d'un réseau — créer, lire, suivre, publier en leur nom, lire leur
  * mur, les découvrir.
@@ -20,6 +20,7 @@ import { foldSearchQuery } from "@antia/social-domain/searchText"
 import { paginationOptsValidator, type PaginationResult } from "convex/server"
 import { type Infer, v } from "convex/values"
 
+import { internal } from "../../_generated/api"
 import type { Doc, Id } from "../../_generated/dataModel"
 import type { QueryCtx } from "../../_generated/server"
 import { checked, fail, failRule, notFound } from "../../lib/errors"
@@ -222,6 +223,10 @@ export const unfollow = networkMutation({
     if (existing) {
       await ctx.db.delete(existing._id)
       await unrecordPageFollower(ctx, existing)
+      // Sortir du cercle d'une page coupe aussi une connexion DÉJÀ ouverte à ses directs
+      // réservés aux abonnés (la lecture et les jetons neufs sont refusés tout de suite ;
+      // sans cette coupure, la salle tiendrait jusqu'à l'expiration du jeton).
+      await ctx.scheduler.runAfter(0, internal.modules.live.revocation.kickUserFromPageDirects, { personId: ctx.person._id, pageId: args.pageId, cursor: null })
     }
     return { following: false as const }
   },

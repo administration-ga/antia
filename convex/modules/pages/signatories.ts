@@ -17,6 +17,7 @@
 import { assertNotLastAdmin, assertPageHasRoomForSignatory } from "@antia/social-domain/pages"
 import { v } from "convex/values"
 
+import { internal } from "../../_generated/api"
 import type { Doc } from "../../_generated/dataModel"
 import { checked, fail, failRule, notFound } from "../../lib/errors"
 import { networkMutation, networkQuery } from "../../lib/functions"
@@ -127,6 +128,9 @@ export const revokePageRole = networkMutation({
       checked(() => assertNotLastAdmin({ role: "admin", nextRole: null, adminCount }))
     }
     await ctx.db.delete(row._id)
+    // Un signataire retiré sort du cercle de la page : sa connexion DÉJÀ ouverte à un direct
+    // réservé aux abonnés est coupée, sauf s'il en reste abonné (la décision d'accès juge).
+    await ctx.scheduler.runAfter(0, internal.modules.live.revocation.kickUserFromPageDirects, { personId: args.personId, pageId: page._id, cursor: null })
     if (!self) {
       await appendAudit(ctx, {
         action: "page.signatory_revoke",

@@ -1,4 +1,4 @@
-// Dupliqué de socle/convex/modules/direct/permissions.ts @ ad2e7fdc2 — adaptations : aucune dans le code ; module PUR déplacé dans le domaine (`@antia/social-domain/live/permissions`, importable par le front sans `convex/`), réexporté par `convex/modules/live/permissions.ts`.
+// Dupliqué de socle/convex/modules/direct/permissions.ts @ ad2e7fdc2 — adaptations : module PUR déplacé dans le domaine (`@antia/social-domain/live/permissions`, importable par le front sans `convex/`), réexporté par `convex/modules/live/permissions.ts` ; `directDelegationKindLabel` rend un CODE de libellé (`delegationKind.cohost` | `delegationKind.moderator`, traduit par l'écran) au lieu d'une phrase française ; rien d'autre dans le code.
 /**
  * Les RÔLES DE GESTION d'un direct, séparés du rôle PUBLIANT (D-11, ADR-0144).
  *
@@ -202,7 +202,11 @@ export function hasAnyDirectManagement(
  */
 export const DIRECT_MAX_DELEGATIONS = 8
 
-/** Le libellé d'un genre de délégation — français, une seule source. */
-export function directDelegationKindLabel(kind: DirectDelegationKind): string {
-  return kind === "cohost" ? "Cohôte" : "Modérateur"
+/**
+ * Le libellé d'un genre de délégation — un CODE, une seule source : la clé que
+ * l'écran traduit dans l'espace de noms de sa tranche du direct (fr « Cohôte »,
+ * « Modérateur »). Le domaine ne parle pas : aucune phrase ici.
+ */
+export function directDelegationKindLabel(kind: DirectDelegationKind): `delegationKind.${DirectDelegationKind}` {
+  return kind === "cohost" ? "delegationKind.cohost" : "delegationKind.moderator"
 }

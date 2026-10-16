@@ -1,4 +1,4 @@
-// Dupliqué de socle/convex/modules/direct/replayComposition.test.ts @ ad2e7fdc2 — adaptations : aucune ; les vingt-sept cas portés tels quels, à côté du module déplacé dans le domaine.
+// Dupliqué de socle/convex/modules/direct/replayComposition.test.ts @ ad2e7fdc2 — adaptations : les vingt-sept cas portés à côté du module déplacé dans le domaine ; les MOTIFS attendus sont des CODES (`DIRECT_REPLAY_FAILURE_REASONS`) et non plus des phrases — les deux cas qui bornaient le détail technique affiché à l'hôte affirment désormais qu'aucun détail ne sort ; libellés de langue et de refus de piste attendus en CLÉS (`captionsLang.<langue>`, `captionsRefusal.<refus>`) ; cas NEUFS : vocabulaire fermé des motifs, motif d'un rapatriement raté dérivé de son code.
 /**
  * Les décisions de composition et d'état d'une rediffusion — module PUR, donc
  * testé en `node`, sans harnais Convex.
@@ -34,7 +34,11 @@ import {
   directReplayCaptionsLangLabel,
   directReplayCaptionsRefusalLabel,
   directReplayEgressView,
+  directReplayFailureReasonLabel,
   directReplayReconcileVerdict,
+  directReplayTransferFailureReason,
+  DIRECT_REPLAY_FAILURE_REASONS,
+  DIRECT_REPLAY_TRANSFER_FAILURES,
   isDirectReplayCaptionsMime,
   normalizeDirectReplayCaptionsLang,
   normalizeDirectStageFormat,
@@ -161,13 +165,9 @@ describe("statuts LiveKit — les deux formes, et les trois échecs", () => {
   })
 
   it("ABORTED et LIMIT_REACHED sont des ÉCHECS NOMMÉS, pas un fichier absent", () => {
-    expect(directEgressFailureReason("EGRESS_FAILED")).toBe(
-      "LiveKit egress failed",
-    )
-    expect(directEgressFailureReason("EGRESS_ABORTED")).toBe(
-      "LiveKit egress aborted",
-    )
-    expect(directEgressFailureReason(6)).toBe("LiveKit egress limit reached")
+    expect(directEgressFailureReason("EGRESS_FAILED")).toBe("egress_failed")
+    expect(directEgressFailureReason("EGRESS_ABORTED")).toBe("egress_aborted")
+    expect(directEgressFailureReason(6)).toBe("egress_limit_reached")
     expect(directEgressFailureReason("EGRESS_COMPLETE")).toBeUndefined()
     expect(directEgressFailureReason(undefined)).toBeUndefined()
   })
@@ -187,7 +187,7 @@ describe("statuts LiveKit — les deux formes, et les trois échecs", () => {
     expect(directEgressOutcomeFromStatus(1)).toEqual({ kind: "active" })
     expect(directEgressOutcomeFromStatus(5)).toEqual({
       kind: "failed",
-      reason: "LiveKit egress aborted",
+      reason: "egress_aborted",
     })
   })
 })
@@ -273,20 +273,14 @@ describe("démarrage de l'Egress — la salle n'existe pas encore, LiveKit dort 
   })
 
   it("le motif d'abandon dit CE QU'ON A ATTENDU — la salle, ou le serveur", () => {
-    expect(directEgressStartGiveUpReason({ roomSeen: false })).toContain(
-      "la salle n'a jamais été ouverte",
-    )
-    expect(
-      directEgressStartGiveUpReason({ roomSeen: true, lastError: "fetch failed" }),
-    ).toBe("Egress refusé au démarrage : fetch failed")
-    expect(directEgressStartGiveUpReason({ roomSeen: true })).toBe(
-      "Egress refusé au démarrage.",
-    )
-    // Un message de 2 000 caractères ne finit pas à l'écran de l'hôte.
-    expect(
-      directEgressStartGiveUpReason({ roomSeen: true, lastError: "x".repeat(2_000) })
-        .length,
-    ).toBeLessThan(260)
+    expect(directEgressStartGiveUpReason({ roomSeen: false })).toBe("room_never_opened")
+    expect(directEgressStartGiveUpReason({ roomSeen: true, lastFailureStage: "egress" })).toBe("start_refused")
+    expect(directEgressStartGiveUpReason({ roomSeen: true })).toBe("start_refused")
+    // Un message technique ne finit plus à l'écran de l'hôte : le motif est un
+    // code du vocabulaire fermé, le détail reste au journal du serveur.
+    for (const roomSeen of [true, false]) {
+      expect(DIRECT_REPLAY_FAILURE_REASONS).toContain(directEgressStartGiveUpReason({ roomSeen }))
+    }
   })
 })
 
@@ -307,9 +301,7 @@ describe("la cause RÉELLE voyage d'une tentative à la suivante (correctif du 2
     }
     // LE défaut : « terminée avant que l'enregistrement démarre » accusait
     // l'hôte d'une panne d'infrastructure.
-    expect(directEgressEndedBeforeStartReason(carried)).toBe(
-      `Le service d'enregistrement n'a pas répondu : ${NO_WORKER}`,
-    )
+    expect(directEgressEndedBeforeStartReason(carried)).toBe("recorder_unresponsive")
   })
 
   it("sans AUCUN échec côté LiveKit, « terminée avant que l'enregistrement démarre » reste la phrase juste", () => {
@@ -319,9 +311,7 @@ describe("la cause RÉELLE voyage d'une tentative à la suivante (correctif du 2
       carried = nextDirectEgressStartFailure({ previous: carried, serverAnswered: true })
     }
     expect(carried).toBeUndefined()
-    expect(directEgressEndedBeforeStartReason(carried)).toBe(
-      "La conférence s'est terminée avant que l'enregistrement démarre.",
-    )
+    expect(directEgressEndedBeforeStartReason(carried)).toBe("ended_before_start")
   })
 
   it("une salle qui se REFERME après un refus ne fait pas oublier le refus", () => {
@@ -361,38 +351,33 @@ describe("la cause RÉELLE voyage d'une tentative à la suivante (correctif du 2
     ).toEqual(reveilRefuse)
   })
 
-  it("le motif nomme l'ÉTAGE en panne et borne son détail technique", () => {
+  it("le motif nomme l'ÉTAGE en panne, et son détail technique ne sort jamais", () => {
     expect(
       directEgressEndedBeforeStartReason({ stage: "server", detail: "fetch failed" }),
-    ).toBe("Le serveur vidéo n'a pas répondu : fetch failed")
+    ).toBe("media_server_unresponsive")
     expect(directEgressEndedBeforeStartReason({ stage: "egress", detail: "  " })).toBe(
-      "Le service d'enregistrement n'a pas répondu.",
+      "recorder_unresponsive",
     )
     expect(
-      directEgressEndedBeforeStartReason({ stage: "egress", detail: "x".repeat(2_000) })
-        .length,
-    ).toBeLessThan(260)
+      directEgressEndedBeforeStartReason({ stage: "egress", detail: "x".repeat(2_000) }),
+    ).toBe("recorder_unresponsive")
   })
 
   it("l'abandon ne dit plus « salle jamais ouverte » quand c'est le SERVEUR qui n'a jamais répondu", () => {
     expect(
       directEgressStartGiveUpReason({
         roomSeen: false,
-        lastError: "LIVEKIT_NO_CAPACITY",
         lastFailureStage: "server",
       }),
-    ).toBe("Le serveur vidéo n'a pas répondu : LIVEKIT_NO_CAPACITY")
-    // Sans cause serveur, la phrase historique tient toujours.
-    expect(directEgressStartGiveUpReason({ roomSeen: false })).toContain(
-      "la salle n'a jamais été ouverte",
-    )
+    ).toBe("media_server_unresponsive")
+    // Sans cause serveur, le motif historique tient toujours.
+    expect(directEgressStartGiveUpReason({ roomSeen: false })).toBe("room_never_opened")
     expect(
       directEgressStartGiveUpReason({
         roomSeen: true,
-        lastError: NO_WORKER,
         lastFailureStage: "egress",
       }),
-    ).toBe(`Egress refusé au démarrage : ${NO_WORKER}`)
+    ).toBe("start_refused")
   })
 })
 
@@ -416,18 +401,36 @@ describe("sous-titres — ce qu'on accepte d'attacher", () => {
     expect(normalizeDirectReplayCaptionsLang("en")).toBe("en")
     expect(normalizeDirectReplayCaptionsLang("kl")).toBe("fr")
     expect(normalizeDirectReplayCaptionsLang(undefined)).toBe("fr")
-    expect(directReplayCaptionsLangLabel("en")).toBe("Anglais")
-    expect(directReplayCaptionsLangLabel("zz")).toBe("Français")
+    // Le domaine ne parle pas : une CLÉ de libellé, que l'écran traduit.
+    expect(directReplayCaptionsLangLabel("en")).toBe("captionsLang.en")
+    expect(directReplayCaptionsLangLabel("zz")).toBe("captionsLang.fr")
   })
 
-  it("chaque refus a SA phrase, et le succès n'en a aucune", () => {
+  it("chaque refus a SA clé de libellé, et le succès n'en a aucune", () => {
     expect(directReplayCaptionsRefusalLabel("ok")).toBeNull()
-    expect(directReplayCaptionsRefusalLabel("too_large")).toContain("2")
-    expect(directReplayCaptionsRefusalLabel("wrong_type")).toContain("WebVTT")
-    expect(directReplayCaptionsRefusalLabel("missing")).toBeTruthy()
+    expect(directReplayCaptionsRefusalLabel("too_large")).toBe("captionsRefusal.too_large")
+    expect(directReplayCaptionsRefusalLabel("wrong_type")).toBe("captionsRefusal.wrong_type")
+    expect(directReplayCaptionsRefusalLabel("missing")).toBe("captionsRefusal.missing")
   })
 
   it("le plafond est de 2 Mo, exprimé en octets", () => {
     expect(DIRECT_REPLAY_CAPTIONS_MAX_BYTES).toBe(2 * 1024 * 1024)
+  })
+})
+
+describe("les motifs — un vocabulaire FERMÉ de codes, jamais une phrase", () => {
+  it("chaque motif est un code sans espace ni accent, et a SA clé de libellé", () => {
+    expect(new Set(DIRECT_REPLAY_FAILURE_REASONS).size).toBe(DIRECT_REPLAY_FAILURE_REASONS.length)
+    for (const reason of DIRECT_REPLAY_FAILURE_REASONS) {
+      expect(reason).toMatch(/^[a-z]+(_[a-z]+)*$/)
+      expect(directReplayFailureReasonLabel(reason)).toBe(`replayFailure.${reason}`)
+    }
+  })
+
+  it("chaque échec nommé du rapatriement a son motif dans le vocabulaire", () => {
+    for (const code of DIRECT_REPLAY_TRANSFER_FAILURES) {
+      expect(DIRECT_REPLAY_FAILURE_REASONS).toContain(directReplayTransferFailureReason(code))
+    }
+    expect(directReplayTransferFailureReason("too_large")).toBe("transfer_too_large")
   })
 })

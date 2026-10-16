@@ -1,4 +1,4 @@
-// Dupliqué de socle/convex/modules/reseauPersonnel/tables.ts (l. 137-300) @ ad2e7fdc2 — adaptations : `networkId` et visibilité `network`/`root` sur chaque publication, index préfixés par le réseau ; `onRoot` dénormalisé (lisible depuis la racine) et index de la racine ; portée (`reach`) et pays (`country`) des réseaux à portées ; auteurs et réacteurs en personnes ; AUCUN compteur sur la publication (D01) : réactions par fragments (`postReactionShards`), partages par l'agrégat `engineCounters` ; index jamais lus non recopiés (`by_directSessionId`, `by_eventId`, `by_sharedPostId`, D35) ; mur de groupe préfixé par le réseau ; index des directs ajoutés avec leur module ; la PAGE de la publication (lot 13 : `pageId`, mur et fenêtres de fil d'une page, dans son réseau et depuis la racine) ; l'évènement annoncé porté par la publication (lot 12, sans index : rien ne le relit par là) ; recherche `search_body_v2` filtrée par réseau, statut et racine.
+// Dupliqué de socle/convex/modules/reseauPersonnel/tables.ts (l. 137-300) @ ad2e7fdc2 — adaptations : `networkId` et visibilité `network`/`root` sur chaque publication, index préfixés par le réseau ; `onRoot` dénormalisé (lisible depuis la racine) et index de la racine ; portée (`reach`) et pays (`country`) des réseaux à portées ; auteurs et réacteurs en personnes ; AUCUN compteur sur la publication (D01) : réactions par fragments (`postReactionShards`), partages par l'agrégat `engineCounters` ; index jamais lus non recopiés (`by_directSessionId`, `by_eventId`, `by_sharedPostId`, D35) ; mur de groupe préfixé par le réseau ; la PAGE de la publication (lot 13 : `pageId`, mur et fenêtres de fil d'une page, dans son réseau et depuis la racine) ; l'évènement annoncé porté par la publication (lot 12, sans index : rien ne le relit par là) ; la session de DIRECT annoncée (`directSessionId` du socle → `liveSessionId`, lot 16, sans index pour la même raison) ; recherche `search_body_v2` filtrée par réseau, statut et racine.
 import { defineTable } from "convex/server"
 import { v } from "convex/values"
 
@@ -39,6 +39,13 @@ export const postsTables = {
     groupId: v.optional(v.id("thematicGroups")),
     /** L'ÉVÈNEMENT annoncé par cette publication (son organisateur seul l'annonce, une fois). */
     eventId: v.optional(v.id("events")),
+    /**
+     * L'ANNONCE d'une conférence en DIRECT (`liveSessions`) : la carte du fil
+     * relit la session à chaque lecture (statut, titre). Invariant tenu à
+     * l'écriture (`live/sessions.create`) : l'annonce garde l'audience EXACTE
+     * de la session, dans son réseau — et ni l'une ni l'autre n'est modifiable.
+     */
+    liveSessionId: v.optional(v.id("liveSessions")),
     /**
      * La PAGE au nom de laquelle la publication parle (`authorPersonId` est
      * alors son SIGNATAIRE, pour l'audit et l'idempotence). Audience `public`

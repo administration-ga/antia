@@ -1,4 +1,4 @@
-// Dupliqué de socle/convex/modules/reseau/connections.ts (avec la façade socle/convex/modules/reseauPersonnel/connections.ts) @ ad2e7fdc2 — adaptations : RÉÉCRIT sur personnes et réseaux, une seule façade (plus de délégation par `runMutation`) ; garde d'adhésion par le constructeur, débit, message borné par le domaine ; adressage par identifiant OU par personne, avec la MÊME exigence de découvrabilité (manque du socle sur l'API brute, EXF-AN-15) ; FUITE DU BLOCAGE CORRIGÉE (D12 : le bloqué reçoit la réponse d'une demande envoyée, sans rien écrire) ; blocage posé et lu sur toute la paire, tous réseaux ; demandes reçues listées par un index (`recipientPersonId`) au lieu d'un `.filter()` ; listes historiques plafonnées (`listMine`, `listPendingForMe`, qui levaient au-delà de 200) non recopiées, la pagination native les remplace (D04) ; fonction et administration (`resolvePostIdentities`) retirées ; poser ou lever le blocage d'une paire déplace la pastille de messagerie à l'écriture (D38) et recompte les conversations de groupe partagées (D23).
+// Dupliqué de socle/convex/modules/reseau/connections.ts (avec la façade socle/convex/modules/reseauPersonnel/connections.ts) @ ad2e7fdc2 — adaptations : RÉÉCRIT sur personnes et réseaux, une seule façade (plus de délégation par `runMutation`) ; garde d'adhésion par le constructeur, débit, message borné par le domaine ; adressage par identifiant OU par personne, avec la MÊME exigence de découvrabilité (manque du socle sur l'API brute, EXF-AN-15) ; FUITE DU BLOCAGE CORRIGÉE (D12 : le bloqué reçoit la réponse d'une demande envoyée, sans rien écrire) ; blocage posé et lu sur toute la paire, tous réseaux ; demandes reçues listées par un index (`recipientPersonId`) au lieu d'un `.filter()` ; listes historiques plafonnées (`listMine`, `listPendingForMe`, qui levaient au-delà de 200) non recopiées, la pagination native les remplace (D04) ; fonction et administration (`resolvePostIdentities`) retirées ; poser ou lever le blocage d'une paire déplace la pastille de messagerie à l'écriture (D38) et recompte les conversations de groupe partagées (D23) ; la paire qui se FERME planifie la coupure de ses directs (`live/revocation.revokeConnectionDirects`, les deux expulsions symétriques du helper `revokeConnectionDirects` du socle, une fois au lieu de chaque `block`).
 /**
  * Connexions personne ↔ personne dans un réseau : demander, répondre, bloquer.
  *
@@ -18,7 +18,7 @@ import { foldDiacritics } from "@antia/social-domain/searchText"
 import { paginationOptsValidator, type PaginationResult } from "convex/server"
 import { v } from "convex/values"
 
-import { api } from "../../_generated/api"
+import { api, internal } from "../../_generated/api"
 import type { Doc, Id } from "../../_generated/dataModel"
 import type { MutationCtx } from "../../_generated/server"
 import { isActiveMember } from "../../lib/access"
@@ -192,6 +192,7 @@ export const blockPerson = networkMutation({
     if (!wasBlocked) {
       await onPairBlockChanged(ctx, ctx.person._id, targetPersonId, true)
       await onPairBlockChangedInGroups(ctx, ctx.person._id, targetPersonId)
+      await ctx.scheduler.runAfter(0, internal.modules.live.revocation.revokeConnectionDirects, { firstPersonId: ctx.person._id, secondPersonId: targetPersonId })
     }
     return null
   },

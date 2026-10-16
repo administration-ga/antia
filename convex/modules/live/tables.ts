@@ -54,7 +54,9 @@ import {
   directInviteeStageRoleValidator,
   directReactionKindValidator,
   directReplayCompositionValidator,
+  directReplayCaptionsLangValidator,
   directReplayEgressStateValidator,
+  directReplayFailureReasonValidator,
   directReplayPublicationValidator,
   directReplayStatusValidator,
   directReplayVisibilityValidator,
@@ -137,7 +139,7 @@ export const liveTables = {
      */
     replayEgressState: v.optional(directReplayEgressStateValidator),
     /** POURQUOI aucun fichier ne sera produit, quand LiveKit l'a dit. */
-    replayFailureReason: v.optional(v.string()),
+    replayFailureReason: v.optional(directReplayFailureReasonValidator),
     /** La composition demandée à l'Egress — décision photographiée. */
     replayComposition: v.optional(directReplayCompositionValidator),
     /**
@@ -153,7 +155,7 @@ export const liveTables = {
     /** Piste WebVTT éventuelle, soumise à la MÊME échéance que la vidéo. */
     replayCaptionsStorageId: v.optional(v.id("_storage")),
     /** La LANGUE de cette piste, déclarée par l'hôte à l'importation. */
-    replayCaptionsLang: v.optional(v.string()),
+    replayCaptionsLang: v.optional(directReplayCaptionsLangValidator),
     replayDurationMs: v.optional(v.number()),
     /** Échéance matérialisée au succès Egress ; absente = lecture refusée. */
     replayRetentionUntil: v.optional(v.number()),

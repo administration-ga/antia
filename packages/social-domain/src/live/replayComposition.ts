@@ -1,4 +1,4 @@
-// Dupliqué de socle/convex/modules/direct/replayComposition.ts @ ad2e7fdc2 — adaptations : aucune dans le code ; module PUR déplacé dans le domaine (`@antia/social-domain/live/replayComposition`, importable par le front sans `convex/`), réexporté par `convex/modules/live/replayComposition.ts`.
+// Dupliqué de socle/convex/modules/direct/replayComposition.ts @ ad2e7fdc2 — adaptations : module PUR déplacé dans le domaine (`@antia/social-domain/live/replayComposition`, importable par le front sans `convex/`), réexporté par `convex/modules/live/replayComposition.ts` ; MOTIFS de rediffusion → CODES d'un vocabulaire fermé (`DIRECT_REPLAY_FAILURE_REASONS`, stockés dans `replayFailureReason` et traduits par l'écran) : `directEgressStartGiveUpReason`, `directEgressEndedBeforeStartReason` et `directEgressFailureReason` rendent un code au lieu d'une phrase (le détail technique d'un échec ne quitte plus le journal du serveur : `lastError` et la borne `DIRECT_EGRESS_FAILURE_DETAIL_MAX` partent), motif d'un rapatriement raté dérivé de son code (`directReplayTransferFailureReason`) ; langues de piste → codes (`DIRECT_REPLAY_CAPTIONS_LANGS = ["fr", "en"]`), libellés de langue et de refus de piste → CLÉS de libellé (`captionsLang.<langue>`, `captionsRefusal.<refus>`, comme `directDelegationKindLabel`), listes `as const` des refus de piste et des motifs pour les validateurs du backend.
 /**
  * La COMPOSITION d'une rediffusion, et ce que son état a le droit de DIRE.
  *
@@ -194,6 +194,86 @@ export function directReplayEgressView(input: {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
+// LES MOTIFS — des CODES, jamais des phrases
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * POURQUOI aucune rediffusion ne sera produite — le vocabulaire FERMÉ de
+ * `liveSessions.replayFailureReason`, servi à l'hôte seul et traduit par
+ * l'écran (`replayFailure.<motif>`). Le domaine ne parle pas : le détail
+ * technique d'un échec (message du SDK, statut HTTP) reste au journal du
+ * serveur, il ne devient jamais un texte d'écran.
+ *
+ *  · démarrage de la capture —
+ *    `recording_unavailable` (aucune configuration LiveKit sur ce déploiement),
+ *    `ended_before_start` (terminée avant toute capture, sans échec côté LiveKit),
+ *    `media_server_unresponsive` (le serveur vidéo — réveil, salles — n'a pas répondu),
+ *    `recorder_unresponsive` (le service d'enregistrement n'a pas répondu),
+ *    `room_never_opened` (la salle n'a jamais été ouverte auprès du serveur vidéo),
+ *    `start_refused` (salle ouverte, démarrage de la capture refusé jusqu'à la borne) ;
+ *  · fin de capture déclarée par LiveKit — `egress_failed`, `egress_aborted`,
+ *    `egress_limit_reached`, et `no_file_delivered` (terminée sans fichier) ;
+ *  · réconciliation — `never_started` (aucune capture corrélée), `never_delivered`
+ *    (corrélée, jamais livrée en 24 h), `egress_not_found` (introuvable chez
+ *    LiveKit), `file_not_retrieved` (terminée sans emplacement de fichier) ;
+ *  · rapatriement — `transfer_<code>` (`DIRECT_REPLAY_TRANSFER_FAILURES`) ;
+ *  · politique de dépôt — `upload_refused` (le fichier rapatrié n'est pas un
+ *    enregistrement exploitable : type ou taille refusés, il a été supprimé).
+ */
+export const DIRECT_REPLAY_FAILURE_REASONS = [
+  "recording_unavailable",
+  "ended_before_start",
+  "media_server_unresponsive",
+  "recorder_unresponsive",
+  "room_never_opened",
+  "start_refused",
+  "egress_failed",
+  "egress_aborted",
+  "egress_limit_reached",
+  "no_file_delivered",
+  "never_started",
+  "never_delivered",
+  "egress_not_found",
+  "file_not_retrieved",
+  "transfer_invalid_location",
+  "transfer_download_failed",
+  "transfer_empty",
+  "transfer_too_large",
+  "transfer_length_mismatch",
+  "transfer_timeout",
+  "transfer_upload_failed",
+  "upload_refused",
+] as const
+export type DirectReplayFailureReason = (typeof DIRECT_REPLAY_FAILURE_REASONS)[number]
+
+/**
+ * Les échecs NOMMÉS du rapatriement en flux (`convex/lib/livekitEgressFileTransfer.ts`,
+ * qui garde ses phrases pour le journal) : adresse invalide, téléchargement
+ * refusé, fichier vide, trop volumineux, arrivé incomplet, délai dépassé,
+ * dépôt refusé par le stockage.
+ */
+export const DIRECT_REPLAY_TRANSFER_FAILURES = [
+  "invalid_location",
+  "download_failed",
+  "empty",
+  "too_large",
+  "length_mismatch",
+  "timeout",
+  "upload_failed",
+] as const
+export type DirectReplayTransferFailure = (typeof DIRECT_REPLAY_TRANSFER_FAILURES)[number]
+
+/** Le motif d'un rapatriement raté — dérivé de son code, une seule définition. */
+export function directReplayTransferFailureReason(code: DirectReplayTransferFailure): DirectReplayFailureReason {
+  return `transfer_${code}`
+}
+
+/** La clé de libellé d'un motif — celle que l'écran traduit (`replayFailure.<motif>`). */
+export function directReplayFailureReasonLabel(reason: DirectReplayFailureReason): `replayFailure.${DirectReplayFailureReason}` {
+  return `replayFailure.${reason}`
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
 // DÉMARRAGE DE L'EGRESS — la salle n'existe pas encore, LiveKit dort
 // ═══════════════════════════════════════════════════════════════════════════
 
@@ -247,22 +327,13 @@ export function directEgressStartVerdict(attempt: number): DirectEgressStartVerd
  */
 export function directEgressStartGiveUpReason(input: {
   roomSeen: boolean
-  lastError?: string
   lastFailureStage?: DirectEgressStartFailureStage
-}): string {
+}): DirectReplayFailureReason {
   if (!input.roomSeen && input.lastFailureStage === "server") {
-    return directEgressEndedBeforeStartReason({
-      stage: "server",
-      detail: input.lastError ?? "",
-    })
+    return directEgressEndedBeforeStartReason({ stage: "server", detail: "" })
   }
-  if (!input.roomSeen) {
-    return "Aucun enregistrement : la salle n'a jamais été ouverte auprès du serveur vidéo."
-  }
-  const detail = input.lastError?.trim()
-  return detail !== undefined && detail.length > 0
-    ? `Egress refusé au démarrage : ${detail.slice(0, 200)}`
-    : "Egress refusé au démarrage."
+  if (!input.roomSeen) return "room_never_opened"
+  return "start_refused"
 }
 
 /**
@@ -284,13 +355,14 @@ export function directEgressStartGiveUpReason(input: {
  */
 export type DirectEgressStartFailureStage = "server" | "egress"
 
+/**
+ * `detail` est le message TECHNIQUE de la tentative (SDK, réseau) : il voyage
+ * d'une tentative à la suivante pour le journal du serveur, jamais vers l'écran.
+ */
 export type DirectEgressStartFailure = {
   stage: DirectEgressStartFailureStage
   detail: string
 }
-
-/** Borne d'un détail technique affiché à l'hôte — la même que le motif d'abandon. */
-const DIRECT_EGRESS_FAILURE_DETAIL_MAX = 200
 
 /**
  * La cause qui PART avec la tentative suivante.
@@ -322,16 +394,9 @@ export function nextDirectEgressStartFailure(input: {
  */
 export function directEgressEndedBeforeStartReason(
   lastFailure?: DirectEgressStartFailure,
-): string {
-  if (lastFailure === undefined) {
-    return "La conférence s'est terminée avant que l'enregistrement démarre."
-  }
-  const phrase =
-    lastFailure.stage === "egress"
-      ? "Le service d'enregistrement n'a pas répondu"
-      : "Le serveur vidéo n'a pas répondu"
-  const detail = lastFailure.detail.trim().slice(0, DIRECT_EGRESS_FAILURE_DETAIL_MAX)
-  return detail.length > 0 ? `${phrase} : ${detail}` : `${phrase}.`
+): DirectReplayFailureReason {
+  if (lastFailure === undefined) return "ended_before_start"
+  return lastFailure.stage === "egress" ? "recorder_unresponsive" : "media_server_unresponsive"
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -387,7 +452,7 @@ export function directReplayReconcileVerdict(input: {
  */
 export type DirectEgressOutcome =
   | { kind: "complete" }
-  | { kind: "failed"; reason: string }
+  | { kind: "failed"; reason: DirectReplayFailureReason }
   | { kind: "active" }
   | { kind: "wait" }
 
@@ -411,22 +476,22 @@ export function directEgressStatusName(
 }
 
 /**
- * Le MOTIF d'échec, en clair, ou `undefined` si ce statut n'est pas un échec.
+ * Le MOTIF d'échec (un code), ou `undefined` si ce statut n'est pas un échec.
  *
- * ⚠️ `EGRESS_FAILED` gardait déjà sa phrase (`convex/http.ts`) ; `ABORTED` et
- * `LIMIT_REACHED` tombaient en revanche dans « fichier absent », un message
+ * ⚠️ `EGRESS_FAILED` gardait déjà son motif (`convex/http.ts`) ; `ABORTED` et
+ * `LIMIT_REACHED` tombaient en revanche dans « fichier absent », un motif
  * qui ne dit pas à l'hôte que sa conférence a dépassé une limite de service.
  */
 export function directEgressFailureReason(
   status: string | number | undefined,
-): string | undefined {
+): DirectReplayFailureReason | undefined {
   switch (directEgressStatusName(status)) {
     case "EGRESS_FAILED":
-      return "LiveKit egress failed"
+      return "egress_failed"
     case "EGRESS_ABORTED":
-      return "LiveKit egress aborted"
+      return "egress_aborted"
     case "EGRESS_LIMIT_REACHED":
-      return "LiveKit egress limit reached"
+      return "egress_limit_reached"
     default:
       return undefined
   }
@@ -489,29 +554,22 @@ export function isDirectReplayCaptionsMime(mime: string | undefined | null): boo
  * Vocabulaire FERMÉ des langues de piste. `<track srcLang>` recevait `"fr"` en
  * dur : une piste anglaise s'annonçait française. Une chaîne LIBRE venue du
  * client aurait fait l'inverse — un attribut d'accessibilité rempli par
- * n'importe quoi.
+ * n'importe quoi. Des CODES : le libellé (« Français », « Anglais ») est
+ * l'affaire de l'écran.
  */
-export const DIRECT_REPLAY_CAPTIONS_LANGS: readonly {
-  value: string
-  label: string
-}[] = [
-  { value: "fr", label: "Français" },
-  { value: "en", label: "Anglais" },
-]
+export const DIRECT_REPLAY_CAPTIONS_LANGS = ["fr", "en"] as const
+export type DirectReplayCaptionsLang = (typeof DIRECT_REPLAY_CAPTIONS_LANGS)[number]
 
-export function normalizeDirectReplayCaptionsLang(value: unknown): string {
-  return DIRECT_REPLAY_CAPTIONS_LANGS.some((lang) => lang.value === value)
-    ? (value as string)
-    : "fr"
+export function normalizeDirectReplayCaptionsLang(value: unknown): DirectReplayCaptionsLang {
+  return DIRECT_REPLAY_CAPTIONS_LANGS.find((lang) => lang === value) ?? "fr"
 }
 
-/** Le libellé d'une langue de piste — celui que porte `<track label>`. */
-export function directReplayCaptionsLangLabel(value: unknown): string {
-  const normalized = normalizeDirectReplayCaptionsLang(value)
-  return (
-    DIRECT_REPLAY_CAPTIONS_LANGS.find((lang) => lang.value === normalized)
-      ?.label ?? "Français"
-  )
+/**
+ * La clé de libellé d'une langue de piste — celle que l'écran traduit pour
+ * `<track label>` (`captionsLang.fr` | `captionsLang.en`). Le domaine ne parle pas.
+ */
+export function directReplayCaptionsLangLabel(value: unknown): `captionsLang.${DirectReplayCaptionsLang}` {
+  return `captionsLang.${normalizeDirectReplayCaptionsLang(value)}`
 }
 
 /**
@@ -524,24 +582,16 @@ export function directReplayCaptionsLangLabel(value: unknown): string {
  * monde. Refuser en rendant une valeur laisse la suppression COMMITTÉE et dit
  * quand même non.
  */
-export type DirectReplayCaptionsRefusal =
-  | "ok"
-  | "missing"
-  | "too_large"
-  | "wrong_type"
+export const DIRECT_REPLAY_CAPTIONS_REFUSALS = ["ok", "missing", "too_large", "wrong_type"] as const
+export type DirectReplayCaptionsRefusal = (typeof DIRECT_REPLAY_CAPTIONS_REFUSALS)[number]
 
-/** Le refus, en français — une seule phrase, serveur et écran la partagent. */
+/**
+ * Le refus, en CLÉ de libellé — une seule source, serveur et écran la
+ * partagent (`captionsRefusal.<refus>`, traduite par l'écran) ; le succès n'en
+ * a aucune.
+ */
 export function directReplayCaptionsRefusalLabel(
   reason: DirectReplayCaptionsRefusal,
-): string | null {
-  switch (reason) {
-    case "ok":
-      return null
-    case "missing":
-      return "Ce fichier n'a pas été déposé."
-    case "too_large":
-      return "Un fichier de sous-titres ne dépasse pas 2 Mo."
-    case "wrong_type":
-      return "Seul un fichier de sous-titres WebVTT (.vtt) est accepté."
-  }
+): `captionsRefusal.${Exclude<DirectReplayCaptionsRefusal, "ok">}` | null {
+  return reason === "ok" ? null : `captionsRefusal.${reason}`
 }

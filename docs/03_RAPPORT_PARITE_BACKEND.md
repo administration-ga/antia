@@ -31,6 +31,7 @@ l'owner map), les tests portés et neufs, les écarts assumés. Un module n'entr
 | 13 | `pages` (réécrit : identité propre, signataires vivants, revendications, console) | `06e31fa` | 2 fichiers convex + 1 fichier domaine | D02, D05, D14, D19 |
 | 14 | `albums` (photos par réseau sous la garde des fichiers, purge sans orphelin) | `daf3750` | 1 fichier convex (26 cas) + 1 fichier domaine (32 cas) | D05, D09, D14 |
 | 15 | `calls` (appels 1:1 et de groupe, sonnerie, attente, journal, présence, réglages, messagerie vocale, jeton LiveKit) | voir journal git (`feat(calls)`) | 4 fichiers convex (114 cas) + 2 purs du module (22 cas) + 3 bibliothèques LiveKit (21 cas) + 1 fichier domaine (14 cas) + 2 fichiers contrats (29 cas) | D02, D05, D11, D13, D14, D16, D19, D21, D26, D27 |
+| 16 | `live` (le direct : sessions, découverte, audience, antenne, orateurs, délégations, modération, présences, récolte, commentaires, réactions, rediffusion Egress, jeton, route du webhook, crons) | `78e2dca` (fondation), lot 16b | 25 fichiers convex du module (≈ 430 cas) + 4 bibliothèques Egress (≈ 50 cas) + 4 purs du domaine (≈ 60 cas) | D05, D10, D11, D14, D16, D19, D28, D35 |
 
 Ordre suivi (owner map §4.2), avec un écart : le lot 1 (modules purs) est porté avec chaque module qui le
 consomme ; l'avis de verdict des fichiers (`files/notify`) est arrivé avec le module `notifications` (lot 5), dont il
@@ -1191,3 +1192,79 @@ dépend.
   si la CLI tourne sous un Node non supporté — réglé le même jour : `codegen` passe lui aussi par `scripts/convex-dev.mjs`
   (piège mis à jour dans `CLAUDE.md`).
 - **Écrans** (iAppel, journal, réglages, grille, surface d'appel) : PA6.
+
+## Lot 16 — `live` (le direct : conférences en direct d'un réseau)
+
+Méthode : une FONDATION (lot 16a, `78e2dca` : tables, validateurs, gardes, purs, débits, codes, sujet de la cloche),
+puis cinq lots parallèles (agents Opus, brief commun et fiche des contrats de la fondation) : sessions et découverte,
+audience, scène, vie de la salle, médias ; intégration et `verify` par la session.
+
+### Parité, fichier par fichier
+
+| Source (`socle/convex/…`) | Cible | Sort | État |
+|---|---|---|---|
+| `modules/direct/{domain,permissions,replayComposition}.ts`, constantes d'`antenna.ts` | `packages/social-domain/src/live/*` (réexportés par `convex/modules/live/`) | à adapter / tel quel | ✅ (audience « organisation » → `followers` ; motifs de rediffusion et libellés → CODES) |
+| `modules/direct/{validators,tables}.ts` | `convex/modules/live/{validators,tables}.ts` | à adapter | ✅ (13 tables `live*`, `networkId` partout, compteurs dans `liveSessionCounters`) |
+| `modules/direct/{access,grants,retention}.ts` | `convex/modules/live/` | à adapter / tel quel | ✅ (adhésion d'abord, `authorizeToken` du moteur) |
+| `modules/direct/sessions.ts` | `convex/modules/live/sessions.ts` | à adapter | ✅ (page au lieu de l'organisation, cloche par la diffusion, découverte préfixée par le réseau, annonce au fil) |
+| `modules/direct/{invitees,invitationSettle,revocation}.ts` | `convex/modules/live/` | à adapter / tel quel | ✅ (révocations par page, relation, adhésion) |
+| `modules/direct/{antenna,speakers,delegations,moderation}.ts` | `convex/modules/live/` | tel quel | ✅ (cible déclarée exigée) |
+| `modules/direct/{presence,hostPresence,reap,comments,reactions}.ts` | `convex/modules/live/` | tel quel | ✅ (récolte par tranches chaînées, écrivain unique des compteurs) |
+| `modules/direct/replay.ts`, `actions/livekitDirect.ts` | `convex/modules/live/{replay,livekitActions,egressActions}.ts` | tel quel | ✅ (`networkAction` pour le jeton et les sous-titres) |
+| `lib/egress{FileTransfer,Routing,Uploads,Webhook}.ts` | `convex/lib/livekitEgress*.ts` | tel quel / à simplifier | ✅ (branche `directs/` seule ; dépôt sous la garde des fichiers) |
+| `http.ts` (route `POST /webhooks/livekit-egress`) | `convex/http.ts` | à simplifier | ✅ (propriété limitée au direct) |
+| crons `reap-stale-directs`, `purge-expired-direct-replays`, `reconcile-direct-replays` | `live-reap-stale` (60 s), `live-purge-expired-replays` (1 h), `live-reconcile-replays` (15 min) | patron | ✅ |
+| `modules/direct/manifest.ts` | — | exclu | — |
+
+### Adaptations (liste fermée)
+
+- **Par réseau** : toute session, ligne d'antenne, invitation, présence, commentaire et réaction porte `networkId` ; une
+  session d'un autre réseau est introuvable ; la découverte et ses curseurs sont préfixés par le réseau (V37).
+- **Adhésion d'abord** (V35) : la décision d'accès exige un membre ACTIF du réseau ; un invité ne franchit son invitation
+  que s'il reste membre et non effacé ; perdre l'adhésion (départ, suspension — point unique `people/admission.setMembershipStatus`)
+  coupe les salles où la personne était admise.
+- **Organisation → page** (V36, V38-V40) : l'audience « organisation » devient **`followers`** — les abonnés et les
+  signataires vivants d'une page ; parler au nom d'une page exige d'en être signataire ; une invitation ne franchit jamais
+  ce cercle ; se désabonner, perdre sa signature, retirer la page coupent les connexions ouvertes.
+- **Compteurs hors de la session** (D28) : `liveSessionCounters`, écrite par la seule récolte et seulement sur changement ;
+  l'admission n'écrit plus la session ; capacité jugée sur les présents recomptés.
+- **Récolte par tranches chaînées** : cinq sessions par transaction (pire cas mesuré ≈ 2,3 Mo par session face à la
+  limite de 16 Mio), suite planifiée par curseur — au socle, les directs au-delà du 50e n'étaient jamais récoltés.
+- **Cibles déclarées** : l'antenne, la délégation et la promotion exigent une adhésion `declaree` (un membre en attente ne
+  peut ni obtenir de jeton ni agir).
+- **Débit** (D14) : `live.create`, `live.inviteesAdd`, `live.presence`, `live.hostPresence` (refus attrapé : un battement
+  ne lève jamais), `live.token`, et les quatre seaux du socle (commentaire, réaction, main levée, invitation à l'antenne).
+- **Codes** : 46 règles `LIVE_*` et `liveRoleRequired` ; motifs d'échec de rediffusion (22 codes), langues de sous-titres et
+  libellés de délégation en CODES (le front traduit).
+- **Fichiers** : la rediffusion rapatriée entre à la GARDE (analyse jusqu'à 60 Mo, inscription au-delà) ; la piste de
+  sous-titres est analysée ; chaque purge emporte sa ligne d'analyse (D10) ; délivrance par `servableUrl` (D05).
+- **Cloche** : sujet `liveSession` ; `live_started` diffusé par lots (`liveSessionAudience`), décision d'accès rejugée par
+  destinataire ; un exclu n'est plus sonné, une conférence terminée ne sonne plus « a démarré ».
+- **Annonce au fil** : publication portant `liveSessionId` (visibilité `network`), carte `live` facultative du fil.
+
+### Corrections de dette
+
+- **D28**, **D11** (aucun `.collect()`), **D14**, **D16** (instant fourni par l'écran aux lectures d'antenne et du bail de
+  l'hôte), **D19** (ensembles préchargés tronqués relus à la source), **D05**, **D10**, **D35** (aucun index de
+  publication par direct).
+- **Garde des fichiers** (hors lot, trouvée par le lot) : l'analyse lisait le fichier ENTIER avant de juger sa taille — un
+  fichier de plus de 512 Mio faisait tomber l'action ; la taille stockée est désormais jugée avant tout téléchargement.
+
+### Tests
+
+- Portés : les 21 fichiers du direct (340 cas) — `organisationAccess` et `revocation` RÉÉCRITS (page, adhésion) —, les
+  tests des bibliothèques Egress et de la route du webhook (cas d'enregistrement d'appel, de messagerie vocale et
+  d'iRéunion retirés avec leur branche).
+- Neufs : refus indistinct d'un autre réseau, débit, adhésion en attente, audience `followers`, compteurs écrits par la seule
+  récolte, récolte au-delà de 50 directs, jeton (identité, attributs, configuration absente), portes du cercle d'une page,
+  analyse jugée sur la taille stockée.
+- Suite du module et des bibliothèques : 31 fichiers, 467 cas verts.
+
+### Écarts assumés
+
+- **Audience `followers`** au lieu d'un simple retrait de l'audience « organisation » (décision à valider) ; l'annonce au fil
+  d'une conférence `followers` reste refusée (parité du socle).
+- **Gestes sans seau** (passer en direct, terminer, régler, déléguer, modérer, promouvoir, rediffusion, quitter, retirer un
+  commentaire) : parité du socle ; à déclarer en exceptions du cliquet `rate-limited-writes` (PA5).
+- **Effacement** des tables `live*` : PA5 (aucun index par personne).
+- **Écrans** (salle, antenne, console de l'hôte, rediffusion, carte du direct dans le fil) : PA6, lot F3.

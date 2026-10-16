@@ -1,4 +1,4 @@
-// Dupliqué de socle/convex/modules/direct/permissions.test.ts @ ad2e7fdc2 — adaptations : aucune ; les seize cas portés tels quels, à côté du module déplacé dans le domaine.
+// Dupliqué de socle/convex/modules/direct/permissions.test.ts @ ad2e7fdc2 — adaptations : les seize cas portés, à côté du module déplacé dans le domaine ; le cas du libellé de genre tient le CODE de libellé (`delegationKind.<genre>`) au lieu des phrases françaises ; les quinze autres tels quels.
 /**
  * La MATRICE de gestion du direct (D-11, ADR-0144), ligne par ligne.
  *
@@ -192,9 +192,13 @@ describe("les outils autour de la matrice", () => {
     }
   })
 
-  it("chaque genre a un libellé français distinct", () => {
-    expect(directDelegationKindLabel("cohost")).toBe("Cohôte")
-    expect(directDelegationKindLabel("moderator")).toBe("Modérateur")
+  it("chaque genre a un CODE de libellé distinct — jamais une phrase", () => {
+    expect(directDelegationKindLabel("cohost")).toBe("delegationKind.cohost")
+    expect(directDelegationKindLabel("moderator")).toBe("delegationKind.moderator")
+    // Un code se traduit, il ne s'affiche pas : ni espace, ni accent, ni majuscule initiale.
+    for (const kind of ["cohost", "moderator"] as const) {
+      expect(directDelegationKindLabel(kind)).toMatch(/^[a-z][A-Za-z]*\.[a-z]+$/)
+    }
   })
 
   it("aucune clé de la liste de référence n'est oubliée par la matrice", () => {

@@ -1,4 +1,4 @@
-// Dupliqué de socle/convex/modules/fileGuard/scan.ts @ ad2e7fdc2 — adaptations : références internes du module `files` du moteur ; le reste tel quel (runtime Node, `jszip`, règles pures, fournisseur, une seule écriture de vérité).
+// Dupliqué de socle/convex/modules/fileGuard/scan.ts @ ad2e7fdc2 — adaptations : références internes du module `files` du moteur ; le reste tel quel (runtime Node, `jszip`, règles pures, fournisseur, une seule écriture de vérité) ; taille STOCKÉE jugée avant le téléchargement (un fichier au-delà du plafond n'est jamais chargé en mémoire, lot 16).
 "use node"
 /**
  * Garde des fichiers — l'ACTION D'ANALYSE.
@@ -89,6 +89,13 @@ export const runScan = internalAction({
     }
 
     try {
+      // La taille STOCKÉE d'abord : `storage.get` charge le fichier ENTIER en mémoire, et
+      // un fichier de plus de 512 Mio ferait tomber l'action avant tout verdict (trois
+      // tentatives, puis `error` bloqué). Au-delà du plafond, rien n'est téléchargé.
+      if (facts.sizeBytes !== null && facts.sizeBytes > FILE_GUARD_MAX_INSPECT_BYTES) {
+        await record({ kind: "skipped", reason: "too_large", sizeBytes: facts.sizeBytes })
+        return null
+      }
       const blob = await ctx.storage.get(facts.storageId)
       if (!blob) {
         await record({ kind: "error", reason: "BLOB_MISSING" })
