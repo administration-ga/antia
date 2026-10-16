@@ -82,7 +82,13 @@
     "consentRequired": "Votre accord est nécessaire pour rejoindre le réseau.",
     "submit": "Rejoindre {{brand}}",
     "submitting": "Un instant…",
-    "done": "Bienvenue, {{name}} !"
+    "done": "Bienvenue, {{name}} !",
+    "localeLabel": "Langue",
+    "french": "Français",
+    "english": "Anglais",
+    "timeZoneLabel": "Fuseau horaire",
+    "timeZoneHint": "Détecté sur votre appareil, modifiable avant de continuer.",
+    "invalidTimeZone": "Saisissez un fuseau horaire valable."
   },
   "feed": {
     "title": "Le fil"
@@ -113,5 +119,17 @@
   },
   "album": {
     "title": "Album de @{{handle}}"
+  },
+  "identity": {
+    "title": "Votre identité",
+    "lead": "Un compte IDN vérifié renforce la confiance dans votre profil.",
+    "verify": "Vérifier avec IDN",
+    "unavailable": "La vérification avec IDN n’est pas encore disponible.",
+    "pending": "Connexion à IDN…",
+    "applications": "Autres espaces",
+    "handoffFailed": "Le passage n’a pas abouti. Réessayez.",
+    "antsia_ga": "ANTSIA",
+    "diasporale_com": "DIASPORALE",
+    "admin_antsia_ga": "Console ANTSIA"
   }
 }

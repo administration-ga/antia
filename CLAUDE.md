@@ -97,9 +97,13 @@ Cliquets en place (`tests/ratchets/`) : `no-cross-product-imports`, `no-any-vali
 `convex/modules/notifications/notify.ts` écrit dans `notifications`), et pour le journal des décisions
 `operator-audit` (toute `operatorMutation` appelle `appendAudit`), `crons-contract`
 (dix passages PA3 : registre branché, identifiants ASCII uniques, cibles internes,
-cadences et arguments contrôlés ; lot 17). À venir : `rate-limited-writes` (PA5), `sign-out-everywhere` (PA4).
+cadences et arguments contrôlés ; lot 17), `sign-out-everywhere` (PA4 : sorties SDK uniquement par la porte partagée, purge nominale et navigation complète). À venir : `rate-limited-writes` (PA5).
 
 ## Pièges déjà payés
+
+- **PA4 / sessions** : `sessionId` du JWT doit désigner une session Better Auth vivante du même sujet ; aucune exception de développement. Les tests construisent de vraies sessions (`testConvex`/`createTestSession`), les contextes de garde passent par `as.run`.
+- **Better Auth / envoi OTP** : `emailAndPassword.enabled=false` ne ferme pas les routes de réinitialisation des plugins OTP. Les bloquer explicitement. Le SDK masque les erreurs de délivrance e-mail ; le retour middleware est fusionné dans l’endpoint, donc la preuve d’envoi partagée doit être sous `{ context: { context: … } }` pour son hook après. Cas réel de transport défaillant testé.
+- **Déconnexion / SSO** : un transfert ne démarre ni ne termine pendant `signOutEverywhere`. Passer la navigation dans son callback : le registre `Symbol.for` est commun aux copies du bundle et reste verrouillé jusqu’au nouveau document. La garde attend la purge/navigation avant reload ; aucune synchronisation de personne pendant la sortie. Un transfert refusé monte Convex anonyme, sans réadoption du cookie HTTP ; un transfert admis impose bearer explicite et sujet corrélé.
 
 - **Fichiers à plusieurs points sous `convex/`** (`*.test.ts`, `test.setup.ts`,
   `vitest.config.ts`) : ignorés par le bundler de Convex (vérifié dans le CLI 1.45). Un fichier à

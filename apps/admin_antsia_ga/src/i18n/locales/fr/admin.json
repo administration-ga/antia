@@ -7,8 +7,8 @@
   "home": {
     "eyebrow": "Accès réservé",
     "title": "Console du moteur {{brand}}",
-    "lead": "Les opérateurs de la plateforme y créent les réseaux, nomment les équipes de modération, suivent les files d'appel et la fédération, et lisent le journal des actes sensibles.",
-    "access": "La connexion se fait par l'identité numérique IDN, avec un niveau de garantie suffisant. Elle sera ouverte avec la console complète.",
+    "lead": "L’accès à la console est en préparation. Les outils de gestion ne sont pas encore ouverts.",
+    "access": "Une connexion au moteur ne confère aucun droit d’administration.",
     "healthLink": "État du service"
   },
   "health": {
@@ -19,5 +19,20 @@
     "missing": "non configuré",
     "version": "Version",
     "backHome": "Retour à l'accueil"
+  },
+  "session": {
+    "loading": "Vérification de la session…",
+    "failed": "La session ne peut pas être vérifiée.",
+    "retry": "Réessayer",
+    "backendMissing": "Le moteur n’est pas configuré pour cette console.",
+    "connected": "Session du moteur ouverte.",
+    "signedOut": "Vous n’êtes pas connecté au moteur.",
+    "noAuthority": "Cette connexion ne donne pas de droits d’administration. Les outils de la console restent indisponibles.",
+    "signIn": "Me connecter",
+    "signOut": "Me déconnecter partout",
+    "signingOut": "Déconnexion…",
+    "globalSignOutFailed": "La session locale a été fermée, mais la révocation sur les autres appareils n’a pas pu être confirmée.",
+    "localSignOutFailed": "Le nettoyage local n’a pas pu être terminé. Rechargez la page et vérifiez votre session.",
+    "continue": "Recharger l’accueil"
   }
 }

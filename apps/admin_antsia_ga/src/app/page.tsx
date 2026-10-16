@@ -2,6 +2,7 @@ import Link from "next/link"
 
 import { getAppT } from "@/i18n/server"
 import { routes } from "@/lib/routes"
+import { ConsoleSession } from "@/components/console-session"
 
 /**
  * Accueil provisoire de la console du moteur (PA0). La console — réseaux,
@@ -17,7 +18,7 @@ export default function ConsoleHomePage() {
         <h1 className="text-4xl">{t("home.title")}</h1>
         <p className="text-lg text-muted-foreground">{t("home.lead")}</p>
       </header>
-      <p className="rounded-xl bg-card p-4 text-card-foreground">{t("home.access")}</p>
+      <ConsoleSession />
       <footer className="border-t border-border pt-6 text-sm text-muted-foreground">
         <Link href={routes.health()}>{t("home.healthLink")}</Link>
       </footer>

@@ -11,6 +11,8 @@ export const STORIES_NEW_SEGMENT = "nouvelle"
 export const routes = {
   home: () => "/",
   signIn: () => "/entrer",
+  signedOut: (incomplete: boolean) => incomplete ? "/entrer?deconnexion=incomplete" : "/entrer",
+  application: (origin: string) => new URL("/", origin).href,
   welcome: () => "/bienvenue",
   feed: () => "/fil",
   /** iCom en pages (téléphone, liens directs) : la messagerie et ses sous-adresses. */

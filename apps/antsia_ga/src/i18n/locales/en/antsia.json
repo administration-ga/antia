@@ -82,7 +82,13 @@
     "consentRequired": "Your agreement is required to join the network.",
     "submit": "Join {{brand}}",
     "submitting": "One moment…",
-    "done": "Welcome, {{name}}!"
+    "done": "Welcome, {{name}}!",
+    "localeLabel": "Language",
+    "french": "French",
+    "english": "English",
+    "timeZoneLabel": "Time zone",
+    "timeZoneHint": "Detected on your device; you can change it before continuing.",
+    "invalidTimeZone": "Enter a valid time zone."
   },
   "feed": {
     "title": "The feed"
@@ -113,5 +119,17 @@
   },
   "album": {
     "title": "Album by @{{handle}}"
+  },
+  "identity": {
+    "title": "Your identity",
+    "lead": "A verified IDN account strengthens trust in your profile.",
+    "verify": "Verify with IDN",
+    "unavailable": "IDN verification is not yet available.",
+    "pending": "Connecting to IDN…",
+    "applications": "Other spaces",
+    "handoffFailed": "The handoff did not complete. Try again.",
+    "antsia_ga": "ANTSIA",
+    "diasporale_com": "DIASPORALE",
+    "admin_antsia_ga": "Console ANTSIA"
   }
 }

@@ -14,6 +14,8 @@ import { serverCodeResources } from "@antsia/social-contracts/i18n"
 
 import enDirect from "./locales/en/direct.json"
 import frDirect from "./locales/fr/direct.json"
+import enIdentity from "./locales/en/identity.json"
+import frIdentity from "./locales/fr/identity.json"
 
 import enSocial from "./locales/en/social.json"
 import frSocial from "./locales/fr/social.json"
@@ -73,6 +75,7 @@ export const engineResources = {
   fr: {
     social: frSocial,
     direct: frDirect,
+    identity: frIdentity,
     messagerie: { ...frMessagerieConversation, ...frMessagerieDock, ...frMessagerieGroupes },
     iappel: { ...frIappelCore, ...frIappelSurfaces, ...frIappelStores },
     stories: frStories,
@@ -85,6 +88,7 @@ export const engineResources = {
   en: {
     social: enSocial,
     direct: enDirect,
+    identity: enIdentity,
     messagerie: { ...enMessagerieConversation, ...enMessagerieDock, ...enMessagerieGroupes },
     iappel: { ...enIappelCore, ...enIappelSurfaces, ...enIappelStores },
     stories: enStories,

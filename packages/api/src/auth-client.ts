@@ -1,8 +1,8 @@
-// Dupliqué de plateforme/espace/espace_administration_ga/src/lib/auth-client.ts @ ad2e7fdc2 — adaptations : fabrique partagée par les applications du moteur (au lieu d'un fichier par application) ; greffons `convexClient`, `crossDomainClient` et `emailOTPClient` (comptes légers) ; IDN (`genericOAuthClient`) et SMS (`phoneNumberClient`) arrivent avec PA4.
+// Dupliqué de plateforme/espace/espace_administration_ga/src/lib/auth-client.ts @ 25398f565 — adaptations : fabrique partagée par les applications du moteur ; greffons de session Convex, crossDomain, codes e-mail/SMS, IDN et passage entre applications à usage unique (PA4), sans mot de passe.
 "use client"
 
 import { convexClient, crossDomainClient } from "@convex-dev/better-auth/client/plugins"
-import { emailOTPClient } from "better-auth/client/plugins"
+import { emailOTPClient, genericOAuthClient, oneTimeTokenClient, phoneNumberClient } from "better-auth/client/plugins"
 import { createAuthClient } from "better-auth/react"
 
 /**
@@ -13,7 +13,7 @@ import { createAuthClient } from "better-auth/react"
 function buildClient() {
   return createAuthClient({
     baseURL: typeof window !== "undefined" ? window.location.origin : undefined,
-    plugins: [convexClient(), crossDomainClient(), emailOTPClient()],
+    plugins: [convexClient(), crossDomainClient(), emailOTPClient(), genericOAuthClient(), phoneNumberClient(), oneTimeTokenClient()],
   })
 }
 

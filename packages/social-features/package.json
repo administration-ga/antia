@@ -16,6 +16,7 @@
     "./reseau-personnel": "./src/features/reseau-personnel/index.ts",
     "./albums": "./src/features/reseau-albums/index.ts",
     "./notifications": "./src/features/notifications/index.ts",
+    "./identity": "./src/features/identity/index.ts",
     "./*": "./src/*.ts",
     "./direct": "./src/features/direct/index.ts"
   },

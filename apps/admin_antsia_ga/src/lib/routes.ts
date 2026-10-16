@@ -5,6 +5,8 @@
  */
 export const routes = {
   home: () => "/",
+  signIn: () => "/entrer",
+  signedOut: (incomplete = false) => incomplete ? "/entrer?deconnexion=incomplete" : "/entrer",
   health: () => "/sante-fonctionnelle",
   healthApi: () => "/api/sante-fonctionnelle",
 } as const

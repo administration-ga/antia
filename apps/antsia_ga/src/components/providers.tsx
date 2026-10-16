@@ -6,7 +6,8 @@ import { BRAND_NAME } from "@antsia/social-contracts/brand"
 import type { Locale } from "@antsia/social-features/i18n"
 import { I18nProvider } from "@antsia/social-features/i18n/client"
 import { api } from "@convex/_generated/api"
-import type { ReactNode } from "react"
+import { useConvexAuth, useQuery } from "convex/react"
+import { type ReactNode, useEffect } from "react"
 import { useTranslation } from "react-i18next"
 import { Toaster } from "sonner"
 
@@ -14,6 +15,19 @@ import { APP_NAMESPACE, appResources } from "@/i18n/resources"
 import { authClient } from "@/lib/auth-client"
 
 const CONVEX_URL = process.env.NEXT_PUBLIC_CONVEX_URL ?? ""
+
+/** La préférence personnelle s'applique après preuve de session, sans recopier les claims IDN. */
+function PersonalLocale({ children }: { children: ReactNode }) {
+  const { isAuthenticated } = useConvexAuth()
+  const person = useQuery(api.modules.people.persons.getMyPerson, isAuthenticated ? {} : "skip")
+  const { i18n } = useTranslation()
+  useEffect(() => {
+    if (!person?.locale) return
+    document.documentElement.lang = person.locale
+    if (i18n.language !== person.locale) void i18n.changeLanguage(person.locale)
+  }, [person?.locale, i18n])
+  return <>{children}</>
+}
 
 /** Session Better Auth + client Convex ; sans moteur configuré, un avertissement plutôt qu'un écran blanc. */
 function SessionProviders({ children }: { children: ReactNode }) {
@@ -32,9 +46,10 @@ function SessionProviders({ children }: { children: ReactNode }) {
       convexUrl={CONVEX_URL}
       authClient={authClient as unknown as RefreshableCrossDomainAuthClient}
       ensurePerson={api.modules.people.persons.ensureMyPerson}
+      isSessionActive={api.modules.platform.authentication.mySession}
       labels={{ loading: t("session.loading"), failed: t("session.failed"), retry: t("session.retry") }}
     >
-      {children}
+      <PersonalLocale>{children}</PersonalLocale>
     </EngineConvexProvider>
   )
 }

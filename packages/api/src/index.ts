@@ -7,3 +7,7 @@
  * Rempli à partir des prompts PA2 (réseau courant) et PA4 (identité).
  */
 export const API_PACKAGE = "@antsia/api" as const
+
+export { createEngineAuthClient, type EngineAuthClient } from "./auth-client"
+export { signOutEverywhere, type SignOutEverywhereOptions, type SignOutEverywhereResult, type SignOutIssue } from "./sign-out-everywhere"
+export { prepareSsoNavigation, useSsoNavigate, validateSsoTarget, type SsoNavigationResult, type SsoNavigationOptions } from "./use-sso-navigate"

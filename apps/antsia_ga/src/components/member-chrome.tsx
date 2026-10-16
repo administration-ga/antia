@@ -9,8 +9,9 @@ import { type ReactNode, useState } from "react"
 import { useTranslation } from "react-i18next"
 
 import { useMemberSession } from "@/components/network-shell"
+import { IdentityTools } from "@/components/identity-tools"
 import { Button } from "@/components/shared/controls"
-import { authClient } from "@/lib/auth-client"
+import { signOutAndRedirect } from "@/lib/sign-out"
 import { routes } from "@/lib/routes"
 
 const NAV_LINK =
@@ -44,6 +45,7 @@ export function MemberTopBar({ onMobile = "visible" }: { onMobile?: "visible" | 
         </Link>
         <nav aria-label={t("nav.label")} className="flex items-center gap-1">
           <NotificationBell />
+          <IdentityTools />
           <Link href={routes.messages()} className={NAV_LINK} aria-label={t("nav.messages")}>
             <MessageCircle aria-hidden="true" className="size-4" />
             <span className="hidden sm:inline">{t("nav.messages")}</span>
@@ -61,8 +63,7 @@ export function MemberTopBar({ onMobile = "visible" }: { onMobile?: "visible" | 
             className="px-3"
             onClick={async () => {
               setSigningOut(true)
-              await authClient.signOut()
-              window.location.assign(routes.home())
+              await signOutAndRedirect()
             }}
           >
             <LogOut aria-hidden="true" className="size-4" />

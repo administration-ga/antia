@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/api/src/cross-domain-session-bootstrap.ts @ ad2e7fdc2 — adaptations : une seule, une exemption de lint justifiée en ligne (`prefer-const`).
+// Dupliqué de socle/packages/api/src/cross-domain-session-bootstrap.ts @ ad2e7fdc2 — adaptations : exemption de lint justifiée en ligne (`prefer-const`) ; absence de session ou OTT rejeté = purge ; adoption prouvée et renouvellement en Bearer explicite, sans repli sur un cookie résiduel.
 type FetchResult = {
 	data?: unknown;
 	error?: unknown;
@@ -225,7 +225,7 @@ export function clearCrossDomainSessionResidue(
 
 export type OneTimeTokenOutcome =
 	| { kind: "absent" }
-	| { kind: "adopted"; sessionToken: string }
+	| { kind: "adopted"; sessionToken: string; sessionData: Record<string, unknown> }
 	| { kind: "rejected"; reason: "unsupported" | "verify_failed" };
 
 /**
@@ -247,7 +247,7 @@ export type OneTimeTokenOutcome =
 export async function adoptOneTimeTokenSession(
 	authClient: RefreshableCrossDomainAuthClient,
 	token: string | null,
-	options: { signal?: AbortSignal; storage?: CrossDomainStorage } = {},
+	options: { signal?: AbortSignal; storage?: CrossDomainStorage; timeoutMs?: number } = {},
 ): Promise<OneTimeTokenOutcome> {
 	if (!token) return { kind: "absent" };
 
@@ -257,29 +257,36 @@ export async function adoptOneTimeTokenSession(
 		return { kind: "rejected", reason: "unsupported" };
 	}
 
-	const result = await verify({
-		token,
-		fetchOptions: { throw: false, signal: options.signal },
-	}).catch(() => null);
+	try {
+		const adopted = await runWithTimeout(async (signal) => {
+			const result = await verify({ token, fetchOptions: { throw: false, signal } });
+			const sessionToken = errorOf(result) ? null : sessionTokenOf(result);
+			if (!sessionToken || signal.aborted) throw new Error("OTT non vérifié");
 
-	const sessionToken = sessionTokenOf(result);
-	if (!sessionToken) {
+			// Le Bearer affirme la personne du handoff, même si un cookie HTTP
+			// d'une autre personne est encore partagé entre les ports localhost.
+			const sessionResult = await authClient.getSession({
+				fetchOptions: {
+					throw: false,
+					signal,
+					headers: { Authorization: `Bearer ${sessionToken}` },
+				},
+			});
+			const sessionData = errorOf(sessionResult) ? null : sessionOf(sessionResult);
+			if (!sessionData || !validSessionIdentity(sessionData) || !sessionMatchesProof(sessionData, dataOf(result))) {
+				throw new Error("session OTT non prouvée");
+			}
+			return { kind: "adopted" as const, sessionToken, sessionData };
+		}, options.timeoutMs ?? 4_000, options.signal);
+
+		// Le hook du plugin a posé le matériau vérifié. Ne réveiller useSession
+		// qu'après la preuve, jamais après une réponse refusée ou un délai écoulé.
+		authClient.updateSession?.();
+		return adopted;
+	} catch {
 		clearCrossDomainSessionResidue(options.storage, authClient);
 		return { kind: "rejected", reason: "verify_failed" };
 	}
-
-	// Réécrit `better-auth_cookie` + `better-auth_session_data` sur la session
-	// prouvée (hook `onSuccess` du plugin), puis réveille `useSession()`.
-	await authClient.getSession({
-		fetchOptions: {
-			throw: false,
-			signal: options.signal,
-			headers: { Authorization: `Bearer ${sessionToken}` },
-		},
-	});
-	authClient.updateSession?.();
-
-	return { kind: "adopted", sessionToken };
 }
 
 function sessionTokenOf(value: unknown): string | null {
@@ -343,6 +350,30 @@ function sessionIdOf(value: unknown): string | null {
 	return typeof id === "string" ? id : null;
 }
 
+function sessionSubjectOf(value: unknown): string | null {
+	if (!value || typeof value !== "object") return null;
+	const data = value as { user?: unknown; session?: unknown };
+	const userId = data.user && typeof data.user === "object" && "id" in data.user
+		? (data.user as { id?: unknown }).id : null;
+	const sessionUserId = data.session && typeof data.session === "object" && "userId" in data.session
+		? (data.session as { userId?: unknown }).userId : null;
+	if (typeof userId === "string" && typeof sessionUserId === "string" && userId !== sessionUserId) return null;
+	const subject = userId ?? sessionUserId;
+	return typeof subject === "string" && subject.length > 0 ? subject : null;
+}
+
+function validSessionIdentity(value: unknown): boolean {
+	return Boolean(sessionIdOf(value) && sessionSubjectOf(value));
+}
+
+/** Toute identité disponible dans la preuve doit rester identique. */
+function sessionMatchesProof(sessionData: unknown, proof: unknown): boolean {
+	const proofId = sessionIdOf(proof);
+	const proofSubject = sessionSubjectOf(proof);
+	return (!proofId || proofId === sessionIdOf(sessionData)) &&
+		(!proofSubject || proofSubject === sessionSubjectOf(sessionData));
+}
+
 /**
  * Renouvelle explicitement une session cross-domain avant de monter Convex.
  *
@@ -374,12 +405,24 @@ export async function refreshCrossDomainSession(
 	const ott = await adoptOneTimeTokenSession(authClient, options.oneTimeToken ?? null, {
 		signal: options.signal,
 		storage,
+		timeoutMs,
 	});
+	if (ott.kind === "rejected") {
+		// La purge ne peut pas retirer un cookie HTTP d'un autre port. Un OTT
+		// refusé clôt l'amorçage : aucune lecture du résidu ni requête JWT.
+		clearCrossDomainSessionResidue(storage, authClient);
+		return { kind: "signed_out", token: null };
+	}
+	const authorization = ott.kind === "adopted"
+		? { Authorization: `Bearer ${ott.sessionToken}` } : undefined;
 
 	const hasAuthMaterial =
 		ott.kind === "adopted" ||
 		Boolean(authClient.getCookie?.() || authClient.getSessionData?.());
-	if (!hasAuthMaterial) return { kind: "signed_out", token: null };
+	if (!hasAuthMaterial) {
+		clearCrossDomainSessionResidue(storage, authClient);
+		return { kind: "signed_out", token: null };
+	}
 
 	let lastError: unknown = new Error("renouvellement de session impossible");
 	for (let attempt = 1; attempt <= attempts; attempt += 1) {
@@ -387,8 +430,9 @@ export async function refreshCrossDomainSession(
 			const { sessionResult, tokenResult } = await runWithTimeout(
 				async (signal) => {
 					const sessionResult = await authClient.getSession({
-						fetchOptions: { throw: false, signal },
+						fetchOptions: { throw: false, signal, headers: authorization },
 					});
+					const sessionData = errorOf(sessionResult) ? null : sessionOf(sessionResult);
 					// Le JWT Convex n'est demandé QUE si une session existe.
 					// `hasAuthMaterial` se contente d'un résidu (`better-auth_cookie` /
 					// `better-auth_session_data` en localStorage) qui survit à une
@@ -397,9 +441,9 @@ export async function refreshCrossDomainSession(
 					// d'avance — son résultat est ignoré juste en dessous, où l'absence
 					// de session renvoie `signed_out` — et ne faisait que polluer la
 					// console et coûter un aller-retour à chaque chargement déconnecté.
-					const tokenResult = sessionOf(sessionResult)
+					const tokenResult = sessionData && (ott.kind !== "adopted" || sessionMatchesProof(sessionData, ott.sessionData))
 						? await authClient.convex.token({
-								fetchOptions: { throw: false, signal },
+								fetchOptions: { throw: false, signal, headers: authorization },
 							})
 						: null;
 					return { sessionResult, tokenResult };
@@ -407,17 +451,23 @@ export async function refreshCrossDomainSession(
 				timeoutMs,
 				options.signal,
 			);
-			const sessionData = sessionOf(sessionResult);
+			const sessionData = errorOf(sessionResult) ? null : sessionOf(sessionResult);
 			if (!sessionData) {
 				const error = errorOf(sessionResult);
 				const status = statusOf(error);
 				if (dataOf(sessionResult) == null && (status == null || status === 401)) {
+					clearCrossDomainSessionResidue(storage, authClient);
 					return { kind: "signed_out", token: null };
 				}
 				throw error ?? new Error("session Better Auth absente");
 			}
 
-			const token = tokenOf(tokenResult);
+			if (ott.kind === "adopted" && !sessionMatchesProof(sessionData, ott.sessionData)) {
+				clearCrossDomainSessionResidue(storage, authClient);
+				return { kind: "signed_out", token: null };
+			}
+
+			const token = errorOf(tokenResult) ? null : tokenOf(tokenResult);
 			if (!token) {
 				throw errorOf(tokenResult) ?? new Error("JWT Convex absent");
 			}

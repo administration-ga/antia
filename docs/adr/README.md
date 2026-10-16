@@ -13,3 +13,4 @@ réservent contre `origin/main` et les PR ouvertes de ce dépôt.
 | [0005](0005-studio-persistant-et-droits-d-antenne.md) | Studio persistant, identités exactes et droits d'antenne servis par le moteur | Accepté |
 | [0006](0006-creation-et-rediffusion-dans-le-contexte-du-direct.md) | Création, rediffusion et fenêtre dans le contexte du direct | Accepté |
 | [0007](0007-nom-canonique-antsia.md) | Nom canonique ANTSIA et reprise des données et préférences existantes | Accepté |
+| [0008](0008-preuves-serveur-et-revocation-immediate-des-sessions.md) | Preuves serveur, rattachement explicite et révocation immédiate des sessions | Accepté |

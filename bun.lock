@@ -137,6 +137,7 @@
         "@antsia/social-contracts": "workspace:*",
         "@antsia/social-features": "workspace:*",
         "@antsia/ui": "workspace:*",
+        "convex": "catalog:",
         "i18next": "catalog:",
         "next": "catalog:",
         "react": "catalog:",

@@ -16,6 +16,7 @@ import { Button, Card, CenteredStatus, Field, TextInput } from "@/components/sha
 import { useSessionState } from "@/components/use-session-state"
 import { engineErrorMessage } from "@/lib/engine-errors"
 import { routes } from "@/lib/routes"
+import { signOutAndRedirect } from "@/lib/sign-out"
 
 /** La valeur, une fois que la saisie s'est calmée (évite une requête par frappe). */
 function useSettled<T>(value: T, delayMs = 350): T {
@@ -30,10 +31,12 @@ function useSettled<T>(value: T, delayMs = 350): T {
 export function WelcomeScreen() {
   const { t } = useTranslation()
   const router = useRouter()
+  const [signingOut, setSigningOut] = useState(false)
   const session = useSessionState()
   const recordConsent = useMutation(api.modules.people.consents.recordConsent)
   const publishMyProfile = useMutation(api.modules.people.profile.publishMyProfile)
   const joinNetwork = useMutation(api.modules.people.memberships.joinNetwork)
+  const setPreferences = useMutation(api.modules.people.preferences.setMyPreferences)
 
   const schema = z.object({
     displayName: z.string().trim().min(1, t("rules:DISPLAY_NAME_LENGTH", { min: 1, max: DISPLAY_NAME_MAX_LENGTH })).max(DISPLAY_NAME_MAX_LENGTH, t("rules:DISPLAY_NAME_LENGTH", { min: 1, max: DISPLAY_NAME_MAX_LENGTH })),
@@ -45,18 +48,24 @@ export function WelcomeScreen() {
       .max(HANDLE_MAX_LENGTH, t("rules:HANDLE_LENGTH", { min: HANDLE_MIN_LENGTH, max: HANDLE_MAX_LENGTH }))
       .regex(/^[a-z0-9](?:[a-z0-9._-]*[a-z0-9])?$/, t("rules:HANDLE_CHARSET")),
     consent: z.boolean().refine((value) => value, t("antsia:welcome.consentRequired")),
+    locale: z.enum(["fr", "en"]),
+    timeZone: z.string().trim().min(1, t("antsia:welcome.invalidTimeZone")).refine((value) => {
+      try { new Intl.DateTimeFormat("en", { timeZone: value }).format(); return true } catch { return false }
+    }, t("antsia:welcome.invalidTimeZone")),
   })
   type Values = z.infer<typeof schema>
-  const form = useForm<Values>({ resolver: zodResolver(schema), defaultValues: { displayName: "", handle: "", consent: false } })
+  const form = useForm<Values>({ resolver: zodResolver(schema), defaultValues: { displayName: "", handle: "", consent: false, locale: "fr", timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone } })
 
   const person = session.status === "welcome" ? session.person : null
   const consentInForce = person?.consentsInForce.includes("social_profile") ?? false
   useEffect(() => {
     if (person?.displayName && !form.getValues("displayName")) form.setValue("displayName", person.displayName)
     if (person?.handle && !form.getValues("handle")) form.setValue("handle", person.handle)
+    if (person?.locale && !form.getFieldState("locale").isDirty) form.setValue("locale", person.locale)
+    if (person?.timeZone && !form.getFieldState("timeZone").isDirty) form.setValue("timeZone", person.timeZone)
     // Un consentement déjà en vigueur ne se redemande pas : la case n'est pas affichée.
     if (consentInForce) form.setValue("consent", true)
-  }, [person?.displayName, person?.handle, consentInForce, form])
+  }, [person?.displayName, person?.handle, person?.locale, person?.timeZone, consentInForce, form])
 
   useEffect(() => {
     if (session.status === "signedOut") router.replace(routes.signIn())
@@ -77,6 +86,7 @@ export function WelcomeScreen() {
   const onSubmit = form.handleSubmit(async (values) => {
     try {
       if (!consentGiven) await recordConsent({ purpose: "social_profile", origin: "onboarding" })
+      await setPreferences({ locale: values.locale, timeZone: values.timeZone })
       await publishMyProfile({ handle: values.handle, displayName: values.displayName })
       await joinNetwork({ networkId: root._id })
       toast.success(t("antsia:welcome.done", { name: values.displayName.trim() }))
@@ -92,6 +102,7 @@ export function WelcomeScreen() {
       <header className="flex flex-col gap-2">
         <h1 className="text-3xl">{t("antsia:welcome.title")}</h1>
         <p className="text-muted-foreground">{t("antsia:welcome.lead")}</p>
+        <Button variant="ghost" className="self-start" pending={signingOut} onClick={async () => { setSigningOut(true); await signOutAndRedirect() }}>{t("antsia:nav.signOut")}</Button>
       </header>
       <Card>
         <form onSubmit={onSubmit} noValidate className="flex flex-col gap-5">
@@ -145,6 +156,15 @@ export function WelcomeScreen() {
             </div>
           ) : null}
 
+          <Field id="locale" label={t("antsia:welcome.localeLabel")}>
+            <select id="locale" className="min-h-11 rounded-lg border border-input bg-background px-3 text-sm" {...form.register("locale")}>
+              <option value="fr">{t("antsia:welcome.french")}</option>
+              <option value="en">{t("antsia:welcome.english")}</option>
+            </select>
+          </Field>
+          <Field id="timeZone" label={t("antsia:welcome.timeZoneLabel")} hint={t("antsia:welcome.timeZoneHint")} error={errors.timeZone?.message}>
+            <TextInput id="timeZone" aria-invalid={errors.timeZone ? true : undefined} aria-describedby={errors.timeZone ? "timeZone-error" : "timeZone-hint"} {...form.register("timeZone")} />
+          </Field>
           {consentGiven ? null : (
             <div className="flex flex-col gap-1.5">
               <label className="flex items-start gap-3 text-sm">

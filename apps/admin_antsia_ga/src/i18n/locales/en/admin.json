@@ -7,8 +7,8 @@
   "home": {
     "eyebrow": "Restricted access",
     "title": "{{brand}} engine console",
-    "lead": "Platform operators create networks, appoint moderation teams, follow appeal queues and federation, and read the log of sensitive actions.",
-    "access": "Sign-in uses the IDN digital identity, with a sufficient assurance level. It will open with the full console.",
+    "lead": "Console access is being prepared. Management tools are not open yet.",
+    "access": "Signing in to the engine does not grant administration rights.",
     "healthLink": "Service status"
   },
   "health": {
@@ -19,5 +19,20 @@
     "missing": "not configured",
     "version": "Version",
     "backHome": "Back to home"
+  },
+  "session": {
+    "loading": "Checking session…",
+    "failed": "The session cannot be verified.",
+    "retry": "Try again",
+    "backendMissing": "The engine is not configured for this console.",
+    "connected": "Engine session is open.",
+    "signedOut": "You are not signed in to the engine.",
+    "noAuthority": "Signing in does not grant administration rights. Console tools remain unavailable.",
+    "signIn": "Sign in",
+    "signOut": "Sign out everywhere",
+    "signingOut": "Signing out…",
+    "globalSignOutFailed": "The local session was closed, but revocation on other devices could not be confirmed.",
+    "localSignOutFailed": "Local cleanup could not be completed. Reload the page and check your session.",
+    "continue": "Reload home"
   }
 }

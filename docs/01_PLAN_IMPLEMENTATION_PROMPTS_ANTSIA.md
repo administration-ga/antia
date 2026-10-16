@@ -29,7 +29,7 @@ dependances:
 > | ↳ tranche verticale testable (priorité du propriétaire : entrer, identifiant, publier, fil, réagir) | 2026-10-15 | `5021401` |
 > | ↳ câblage de DIASPORALE (sa demande PD0 : espaces de travail, catalogue, port 3031) | 2026-10-15 | `5535a63` |
 > | PA3 — duplication du backend | 2026-10-16 : lots 2 → 17 achevés ; noyau social, appels et direct, crons bornés et chaînés, cliquets du §8 renforcés ; parité et preuves dans `docs/03` ; `verify` complet vert (1 124 backend, 102 cliquets) | commits des lots dans `docs/03` ; lot 17 `feat(maintenance)` |
-> | PA4 — identité | — | — |
+> | PA4 — identité | 2026-10-16 : portes IDN/e-mail/SMS, preuves serveur, liens, préférences, passage et déconnexion partout implémentés ; recette et vérification dans `docs/05`. Critère IDN sandbox **ouvert** : clients non créés/configurés (confirmation du propriétaire). | noyau `8589702`, raccord DIASPORALE `91029ac`, surfaces `feat(identity)` sur `codex/pa4-identite-session` |
 > | PA5 — modération, débit, données, notifications, fédération | — | — |
 > | PA6 — frontend `social-features` | en cours : fondations (`@antsia/ui`, `@antsia/api`), F1 iCom et F2 réseau personnel livrés ; F3a (conférences, listes, préflight, salle persistante et premiers replays) F3b (studio, antenne, modération, délégations et discussion) et F3c (création page/followers et invités initiaux, replays avancés, carte flottante et rail compact) branchés ; recette média réelle et audit AA/sombre restent à faire après configuration LiveKit ; parité et preuves dans `docs/04` | `8ddece5`, `517bf13`, lot F2, `1a5f74f`, `9714d2a`, F3c |
 > | PA7 — console | — | — |
