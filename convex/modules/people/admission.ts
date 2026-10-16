@@ -25,7 +25,7 @@ import {
 import { internal } from "../../_generated/api"
 import type { Doc, Id } from "../../_generated/dataModel"
 import type { MutationCtx } from "../../_generated/server"
-import { getMembership } from "../../lib/access"
+import { getMembership, getRootNetwork } from "../../lib/access"
 import { fail } from "../../lib/errors"
 import { syncPersonDirectory } from "./directory"
 
@@ -47,6 +47,29 @@ export async function setMembershipStatus(
   await ctx.db.patch(membership._id, { status, statusChangedAt: Date.now(), ...extra })
   await syncPersonDirectory(ctx, membership.personId)
   if (isActiveStatus(membership.status) && !isActiveStatus(status)) await ctx.scheduler.runAfter(0, internal.modules.live.revocation.kickUserFromNetworkDirects, { personId: membership.personId, networkId: membership.networkId, cursor: null })
+}
+
+/**
+ * Une vérification arrivée dans un enfant après l'entrée élève la racine
+ * EXISTANTE. Ni départ ni sanction ni origine/rôle ne sont réécrits ; aucune
+ * adhésion n'est créée. La tranche appelle cette aide après sa propre règle.
+ */
+export async function promoteDerivedRootMembership(
+  ctx: MutationCtx,
+  personId: Id<"persons">,
+  sourceNetworkId: Id<"networks">,
+  verifiedBy: VerificationSource,
+): Promise<boolean> {
+  const source = await ctx.db.get(sourceNetworkId)
+  if (!source || source.status !== "active" || source.kind === "root") return false
+  const sourceMembership = await getMembership(ctx, sourceNetworkId, personId)
+  if (sourceMembership?.status !== "verifiee") return false
+  const root = await getRootNetwork(ctx)
+  if (!root || root.membershipPolicy !== "open") return false
+  const membership = await getMembership(ctx, root._id, personId)
+  if (!membership || !isActiveStatus(membership.status) || membership.status === "verifiee") return false
+  await setMembershipStatus(ctx, membership, "verifiee", { verifiedBy })
+  return true
 }
 
 /**

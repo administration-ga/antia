@@ -26,6 +26,9 @@ import {
   verificationSourceValidator,
 } from "../../lib/validators"
 
+export const idnLoaValidator = v.union(v.literal(1), v.literal(2), v.literal(3))
+export const idnProfileTypeValidator = v.union(v.literal("citizen"), v.literal("resident"), v.literal("visitor"), v.literal("developer"))
+
 export const peopleTables = {
   persons: defineTable({
     /** Sujet du jeton Better Auth (`identity.subject`) : le lien session → personne. */
@@ -57,7 +60,7 @@ export const peopleTables = {
     subject: v.string(),
     loa: v.optional(v.number()),
     nationality: v.optional(v.string()),
-    profileType: v.optional(v.union(v.literal("citizen"), v.literal("resident"), v.literal("visitor"), v.literal("developer"))),
+    profileType: v.optional(idnProfileTypeValidator),
     channel: v.optional(v.union(v.literal("email"), v.literal("phone"))),
     orgRef: v.optional(v.string()),
     country: v.optional(v.string()),
@@ -67,6 +70,15 @@ export const peopleTables = {
   })
     .index("by_person_and_provider", ["personId", "provider"])
     .index("by_provider_and_subject", ["provider", "subject"]),
+
+  /** Preuve minimale issue de `/userinfo`, écrite uniquement par le callback OIDC serveur. Aucun profil ni adhésion n'en naît. */
+  idnProofs: defineTable({
+    subject: v.string(),
+    loa: v.optional(idnLoaValidator),
+    nationality: v.optional(v.string()),
+    profileType: v.optional(idnProfileTypeValidator),
+    observedAt: v.number(),
+  }).index("by_subject", ["subject"]),
 
   networkMemberships: defineTable({
     networkId: v.id("networks"),

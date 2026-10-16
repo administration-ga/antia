@@ -13,8 +13,10 @@ import { mutation, query, type QueryCtx } from "../../_generated/server"
 import { getCurrentPerson } from "../../lib/access"
 import { fail } from "../../lib/errors"
 import { enforceRateLimit } from "../../lib/rateLimit"
+import { getActiveIdentity } from "../../lib/session"
 import { badgeValidator, consentPurposeValidator, localeValidator } from "../../lib/validators"
 import { resolveFileDelivery, withheldCodeOf, withheldCodeValidator } from "../files/storageGuard"
+import { syncIdentityForPerson } from "./identity"
 
 /** Liens d'identité VIVANTS d'une personne (bornés : un par fournisseur, quatre fournisseurs). */
 export async function liveIdentityLinks(ctx: Pick<QueryCtx, "db">, personId: Id<"persons">): Promise<Doc<"identityLinks">[]> {
@@ -98,16 +100,23 @@ export const getMyPerson = query({
 export const ensureMyPerson = mutation({
   args: {},
   returns: v.id("persons"),
-  handler: async (ctx) => {
-    const identity = await ctx.auth.getUserIdentity()
+  handler: async (ctx): Promise<Id<"persons">> => {
+    const identity = await getActiveIdentity(ctx)
     if (!identity) return fail("unauthenticated")
     const existing = await ctx.db
       .query("persons")
       .withIndex("by_authUserId", (q) => q.eq("authUserId", identity.subject))
       .unique()
-    if (existing) return existing._id
+    if (existing) {
+      await syncIdentityForPerson(ctx, existing)
+      return existing._id
+    }
     await enforceRateLimit(ctx, "person.ensure", identity.subject)
     const now = Date.now()
-    return await ctx.db.insert("persons", { authUserId: identity.subject, createdAt: now, updatedAt: now })
+    const personId = await ctx.db.insert("persons", { authUserId: identity.subject, createdAt: now, updatedAt: now })
+    const person = await ctx.db.get(personId)
+    if (!person) return fail("unauthenticated")
+    await syncIdentityForPerson(ctx, person)
+    return personId
   },
 })

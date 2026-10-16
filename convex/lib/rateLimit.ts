@@ -17,6 +17,7 @@ const RATE_LIMITS = {
   "auth.otp.send": { kind: "token bucket", rate: 3, period: 5 * MINUTE, capacity: 3 },
   // Fondations (PA2)
   "person.ensure": { kind: "token bucket", rate: 10, period: HOUR, capacity: 5 },
+  "person.identity": { kind: "token bucket", rate: 10, period: HOUR, capacity: 5 },
   "person.profile": { kind: "token bucket", rate: 30, period: HOUR, capacity: 10 },
   "network.join": { kind: "token bucket", rate: 10, period: HOUR, capacity: 5 },
   "network.leave": { kind: "token bucket", rate: 10, period: HOUR, capacity: 5 },

@@ -9,6 +9,8 @@
  */
 
 import type * as betterAuth_auth from "../betterAuth/auth.js";
+import type * as betterAuth_delivery from "../betterAuth/delivery.js";
+import type * as betterAuth_settings from "../betterAuth/settings.js";
 import type * as crons from "../crons.js";
 import type * as health from "../health.js";
 import type * as http from "../http.js";
@@ -26,6 +28,7 @@ import type * as lib_livekitIdentity from "../lib/livekitIdentity.js";
 import type * as lib_livekitWake from "../lib/livekitWake.js";
 import type * as lib_networkSlug from "../lib/networkSlug.js";
 import type * as lib_rateLimit from "../lib/rateLimit.js";
+import type * as lib_session from "../lib/session.js";
 import type * as lib_uploadPolicy from "../lib/uploadPolicy.js";
 import type * as lib_validators from "../lib/validators.js";
 import type * as migrations from "../migrations.js";
@@ -156,13 +159,16 @@ import type * as modules_people_admission from "../modules/people/admission.js";
 import type * as modules_people_consents from "../modules/people/consents.js";
 import type * as modules_people_directory from "../modules/people/directory.js";
 import type * as modules_people_facets from "../modules/people/facets.js";
+import type * as modules_people_identity from "../modules/people/identity.js";
 import type * as modules_people_memberships from "../modules/people/memberships.js";
 import type * as modules_people_miniProfile from "../modules/people/miniProfile.js";
 import type * as modules_people_persons from "../modules/people/persons.js";
+import type * as modules_people_preferences from "../modules/people/preferences.js";
 import type * as modules_people_profile from "../modules/people/profile.js";
 import type * as modules_people_tables from "../modules/people/tables.js";
 import type * as modules_platform_audit from "../modules/platform/audit.js";
 import type * as modules_platform_authRateLimit from "../modules/platform/authRateLimit.js";
+import type * as modules_platform_authentication from "../modules/platform/authentication.js";
 import type * as modules_platform_devTools from "../modules/platform/devTools.js";
 import type * as modules_platform_tables from "../modules/platform/tables.js";
 import type * as modules_posts_access from "../modules/posts/access.js";
@@ -190,6 +196,8 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   "betterAuth/auth": typeof betterAuth_auth;
+  "betterAuth/delivery": typeof betterAuth_delivery;
+  "betterAuth/settings": typeof betterAuth_settings;
   crons: typeof crons;
   health: typeof health;
   http: typeof http;
@@ -207,6 +215,7 @@ declare const fullApi: ApiFromModules<{
   "lib/livekitWake": typeof lib_livekitWake;
   "lib/networkSlug": typeof lib_networkSlug;
   "lib/rateLimit": typeof lib_rateLimit;
+  "lib/session": typeof lib_session;
   "lib/uploadPolicy": typeof lib_uploadPolicy;
   "lib/validators": typeof lib_validators;
   migrations: typeof migrations;
@@ -337,13 +346,16 @@ declare const fullApi: ApiFromModules<{
   "modules/people/consents": typeof modules_people_consents;
   "modules/people/directory": typeof modules_people_directory;
   "modules/people/facets": typeof modules_people_facets;
+  "modules/people/identity": typeof modules_people_identity;
   "modules/people/memberships": typeof modules_people_memberships;
   "modules/people/miniProfile": typeof modules_people_miniProfile;
   "modules/people/persons": typeof modules_people_persons;
+  "modules/people/preferences": typeof modules_people_preferences;
   "modules/people/profile": typeof modules_people_profile;
   "modules/people/tables": typeof modules_people_tables;
   "modules/platform/audit": typeof modules_platform_audit;
   "modules/platform/authRateLimit": typeof modules_platform_authRateLimit;
+  "modules/platform/authentication": typeof modules_platform_authentication;
   "modules/platform/devTools": typeof modules_platform_devTools;
   "modules/platform/tables": typeof modules_platform_tables;
   "modules/posts/access": typeof modules_posts_access;

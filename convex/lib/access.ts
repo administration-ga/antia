@@ -13,10 +13,11 @@ import { type ActiveMembershipStatus, effectiveAccessStatus, isActiveStatus, sat
 import type { Doc, Id } from "../_generated/dataModel"
 import type { QueryCtx } from "../_generated/server"
 import { fail, notFound } from "./errors"
+import { getActiveIdentity } from "./session"
 
 /** La personne liée à la session, ou `null` (pas de session, ou personne pas encore créée). */
 export async function getCurrentPerson(ctx: QueryCtx): Promise<Doc<"persons"> | null> {
-  const identity = await ctx.auth.getUserIdentity()
+  const identity = await getActiveIdentity(ctx)
   if (!identity) return null
   return await ctx.db
     .query("persons")
@@ -26,7 +27,7 @@ export async function getCurrentPerson(ctx: QueryCtx): Promise<Doc<"persons"> | 
 
 /** La personne liée à la session ; `unauthenticated` sinon. */
 export async function requirePerson(ctx: QueryCtx): Promise<Doc<"persons">> {
-  const identity = await ctx.auth.getUserIdentity()
+  const identity = await getActiveIdentity(ctx)
   if (!identity) return fail("unauthenticated")
   const person = await ctx.db
     .query("persons")

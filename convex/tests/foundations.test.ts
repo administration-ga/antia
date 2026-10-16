@@ -181,7 +181,7 @@ describe("suspension à la racine = partout (invariant 3, R7)", () => {
     await operator.as.mutation(api.modules.people.memberships.suspendEverywhere, { personId, reason: "Harcèlement répété (test)" })
 
     // La garde refuse partout, y compris dans le réseau fermé où l'adhésion locale est intacte.
-    await t.run(async (ctx) => {
+    await as.run(async (ctx) => {
       await expect(requireMembershipAs(ctx, "auth-6", testClosed)).rejects.toMatchObject({ data: { code: "membershipSuspended" } })
       await expect(requireMembershipAs(ctx, "auth-6", root)).rejects.toMatchObject({ data: { code: "membershipSuspended" } })
     })
@@ -193,10 +193,10 @@ describe("suspension à la racine = partout (invariant 3, R7)", () => {
   })
 })
 
-/** Rejoue `requireMembership` avec l'identité d'un sujet donné (la garde lit `ctx.auth`). */
+/** Rejoue la garde sous une vraie session du harnais, y compris son claim PA4. */
 async function requireMembershipAs(ctx: Parameters<Parameters<T["run"]>[0]>[0], subject: string, networkId: Id<"networks">) {
-  const scoped = { ...ctx, auth: { getUserIdentity: async () => ({ subject, issuer: "test", tokenIdentifier: `test|${subject}` }) } }
-  return await requireMembership(scoped as never, networkId, "en_attente")
+  expect((await ctx.auth.getUserIdentity())?.subject).toBe(subject)
+  return await requireMembership(ctx, networkId, "en_attente")
 }
 
 describe("étanchéité et refus indistinct (invariants 1 et 8, R10)", () => {
@@ -217,7 +217,7 @@ describe("étanchéité et refus indistinct (invariants 1 et 8, R10)", () => {
     const { as } = await onboardedPerson(t, "auth-7", "membre.diaspo")
     await as.mutation(api.modules.people.memberships.joinNetwork, { networkId: testClosed, facet: { values: { countryOfResidence: "FR" }, visibilities: {} } })
 
-    await t.run(async (ctx) => {
+    await as.run(async (ctx) => {
       await expect(requireMembershipAs(ctx, "auth-7", root)).resolves.toMatchObject({ network: { slug: "antsia" } })
       await expect(requireMembershipAs(ctx, "auth-7", testClosed)).resolves.toMatchObject({ network: { slug: "test-closed" } })
       // Hors réseau et réseau supprimé : la MÊME réponse.
@@ -234,9 +234,8 @@ describe("étanchéité et refus indistinct (invariants 1 et 8, R10)", () => {
     const { testClosed } = await seed(t)
     const { as } = await onboardedPerson(t, "auth-8", "en.attente")
     await as.mutation(api.modules.people.memberships.joinNetwork, { networkId: testClosed, facet: { values: { countryOfResidence: "FR" }, visibilities: {} } })
-    await t.run(async (ctx) => {
-      const scoped = { ...ctx, auth: { getUserIdentity: async () => ({ subject: "auth-8", issuer: "test", tokenIdentifier: "test|auth-8" }) } }
-      await expect(requireMembership(scoped as never, testClosed, "declaree")).rejects.toMatchObject({ data: { code: "statusInsufficient" } })
+    await as.run(async (ctx) => {
+      await expect(requireMembership(ctx, testClosed, "declaree")).rejects.toMatchObject({ data: { code: "statusInsufficient" } })
     })
     // Lecture de sa facette : permise en attente.
     expect(await as.query(api.modules.people.facets.myFacet, { networkId: testClosed })).toMatchObject({ values: { countryOfResidence: "FR" } })
