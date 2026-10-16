@@ -1,11 +1,14 @@
 // @vitest-environment edge-runtime
 /** Recette du mur : locale seulement, cible fictive fermée, aucune admission implicite. */
 import type { MembershipStatus } from "@antsia/social-domain/membership"
+import { canonicalPair } from "@antsia/social-domain/connectionState"
+import { engineErrorCode } from "@antsia/social-contracts/errors"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 import { api, components, internal } from "../../_generated/api"
 import { SEED_CONFIRMATION } from "../../seeds/foundations"
 import { testConvex } from "../../test.setup"
+import { followerCounts } from "../graph/follows"
 
 type T = ReturnType<typeof testConvex>
 const HANDLE = "relations.recette"
@@ -68,6 +71,16 @@ async function posts(t: T) {
 
 async function albums(t: T) {
   return await t.run(async (ctx) => await ctx.db.query("albums").take(100))
+}
+
+async function follows(t: T) {
+  return await t.run(async (ctx) => await ctx.db.query("follows").take(10))
+}
+
+async function storyReaderFixture(t: T, options: Parameters<typeof fixture>[1] = {}) {
+  const author = await fixture(t)
+  const reader = await fixture(t, { handle: "pd4.lecture", email: "pd4.recette@exemple.test", status: "en_attente", rootStatus: "en_attente", ...options })
+  return { author, reader }
 }
 
 describe("diaspora/seed:profilePostsForRecette", () => {
@@ -328,5 +341,133 @@ describe("diaspora/seed:albumDraftsForRecette", () => {
     await expect(t.mutation(internal.modules.diaspora.seed.albumDraftsForRecette, ARGS)).rejects.toThrow(/album existant hors du périmètre/)
     expect(await albums(t)).toEqual(before)
     expect(await posts(t)).toEqual([])
+  })
+})
+
+describe("diaspora/seed:storyReaderForRecette", () => {
+  it("refuse sans confirmation et ne crée aucun abonnement", async () => {
+    const t = testConvex()
+    await expect(t.mutation(internal.modules.diaspora.seed.storyReaderForRecette, { confirmNonProduction: "oui" })).rejects.toThrow(/hors production/)
+    expect(await follows(t)).toEqual([])
+  })
+
+  it("refuse le nuage même si les graines y sont autorisées", async () => {
+    vi.stubEnv("CONVEX_CLOUD_URL", "https://recette.convex.cloud")
+    vi.stubEnv("ANTSIA_SEEDS_ALLOWED", "true")
+    const t = testConvex()
+    await expect(t.mutation(internal.modules.diaspora.seed.storyReaderForRecette, ARGS)).rejects.toThrow(/backend local obligatoire/)
+    expect(await follows(t)).toEqual([])
+  })
+
+  it("ne crée pas le lecteur s'il manque", async () => {
+    const t = testConvex()
+    await fixture(t)
+    const before = await t.run(async (ctx) => await ctx.db.query("persons").take(5))
+    await expect(t.mutation(internal.modules.diaspora.seed.storyReaderForRecette, ARGS)).rejects.toThrow(/profil lecteur fictif préexistant/)
+    expect(await t.run(async (ctx) => await ctx.db.query("persons").take(5))).toEqual(before)
+    expect(await follows(t)).toEqual([])
+  })
+
+  it.each([
+    { name: "autre handle", options: { handle: "autre.lecture" }, error: /profil lecteur fictif préexistant/ },
+    { name: "profil retiré", options: { withdrawn: true }, error: /profil lecteur fictif préexistant/ },
+    { name: "adresse sans le point attendu", options: { email: "pd4recette@exemple.test" }, error: /identité fictive vérifiée du lecteur/ },
+    { name: "identité non vérifiée", options: { verified: false }, error: /identité fictive vérifiée du lecteur/ },
+    { name: "adhésion absente", options: { withMembership: false }, error: /lecteur en attente/ },
+    { name: "lecteur déclaré", options: { status: "declaree" as const }, error: /lecteur en attente/ },
+    { name: "lecteur vérifié", options: { status: "verifiee" as const }, error: /lecteur en attente/ },
+    { name: "lecteur suspendu", options: { status: "suspendue" as const }, error: /lecteur en attente/ },
+    { name: "lecteur parti", options: { status: "partie" as const }, error: /lecteur en attente/ },
+    { name: "racine suspendue", options: { rootStatus: "suspendue" as const }, error: /lecteur en attente/ },
+    { name: "racine quittée", options: { rootStatus: "partie" as const }, error: /lecteur en attente/ },
+  ])("refuse la cible non conforme : $name", async ({ options, error }) => {
+    const t = testConvex()
+    await storyReaderFixture(t, options)
+    await expect(t.mutation(internal.modules.diaspora.seed.storyReaderForRecette, ARGS)).rejects.toThrow(error)
+    expect(await follows(t)).toEqual([])
+  })
+
+  it.each(["en_attente", "declaree"] as const)("crée seulement l'abonnement DIASPORALE et son agrégat, puis rejoue sans rien modifier (racine %s)", async (rootStatus) => {
+    const t = testConvex()
+    const { author, reader } = await storyReaderFixture(t, { rootStatus })
+    const snapshot = async () => await t.run(async (ctx) => ({
+      persons: await ctx.db.query("persons").take(5),
+      memberships: await ctx.db.query("networkMemberships").take(5),
+      identities: await ctx.db.query("identityLinks").take(5),
+      networks: await ctx.db.query("networks").take(5),
+      stories: await ctx.db.query("stories").take(5),
+      albums: await ctx.db.query("albums").take(5),
+      notifications: await ctx.db.query("notifications").take(5),
+    }))
+    const before = await snapshot()
+    expect(await t.mutation(internal.modules.diaspora.seed.storyReaderForRecette, ARGS)).toEqual({ created: true })
+    const first = await follows(t)
+    expect(first).toHaveLength(1)
+    expect(first[0]).toMatchObject({ networkId: author.network, followerPersonId: reader.personId, targetPersonId: author.personId, createdAt: NOW })
+    expect(await t.run(async (ctx) => await followerCounts.count(ctx, { namespace: `${author.network}:${author.personId}` }))).toBe(1)
+    expect(await t.run(async (ctx) => await followerCounts.count(ctx, { namespace: `${author.root}:${author.personId}` }))).toBe(0)
+
+    vi.setSystemTime(NOW + 60_000)
+    expect(await t.mutation(internal.modules.diaspora.seed.storyReaderForRecette, ARGS)).toEqual({ created: false })
+    expect(await follows(t)).toEqual(first)
+    expect(await snapshot()).toEqual(before)
+    expect(await t.run(async (ctx) => await followerCounts.count(ctx, { namespace: `${author.network}:${author.personId}` }))).toBe(1)
+    const readerAccess = t.withIdentity({ subject: reader.authUserId })
+    let refusal: unknown
+    try {
+      await readerAccess.mutation(api.modules.graph.follows.follow, { networkId: author.network, handle: HANDLE })
+    } catch (error) {
+      refusal = error
+    }
+    expect(engineErrorCode(refusal)).toBe("statusInsufficient")
+  })
+
+  it("un abonnement d'un autre réseau ne remplace pas celui de DIASPORALE", async () => {
+    const t = testConvex()
+    const { author, reader } = await storyReaderFixture(t)
+    await t.run(async (ctx) => {
+      const id = await ctx.db.insert("follows", { networkId: author.root, followerPersonId: reader.personId, targetPersonId: author.personId, createdAt: NOW - 1 })
+      const row = await ctx.db.get(id)
+      if (!row) throw new Error("Abonnement de test absent")
+      await followerCounts.insert(ctx, row)
+    })
+    const before = await follows(t)
+
+    expect(await t.mutation(internal.modules.diaspora.seed.storyReaderForRecette, ARGS)).toEqual({ created: true })
+    expect(await follows(t)).toHaveLength(2)
+    expect((await follows(t)).find((follow) => follow.networkId === author.root)).toEqual(before[0])
+    expect(await t.run(async (ctx) => await followerCounts.count(ctx, { namespace: `${author.network}:${author.personId}` }))).toBe(1)
+    expect(await t.run(async (ctx) => await followerCounts.count(ctx, { namespace: `${author.root}:${author.personId}` }))).toBe(1)
+  })
+
+  it("ne réactive pas un réseau archivé", async () => {
+    const t = testConvex()
+    const { author } = await storyReaderFixture(t)
+    await t.run(async (ctx) => await ctx.db.patch(author.network, { status: "archived" }))
+
+    await expect(t.mutation(internal.modules.diaspora.seed.storyReaderForRecette, ARGS)).rejects.toThrow(/réseau diasporale actif/)
+    expect(await follows(t)).toEqual([])
+    expect(await t.run(async (ctx) => await ctx.db.get(author.network))).toMatchObject({ status: "archived" })
+  })
+
+  it("ne crée pas d'abonnement si la paire fictive est bloquée", async () => {
+    const t = testConvex()
+    const { author, reader } = await storyReaderFixture(t)
+    const pair = canonicalPair(author.personId, reader.personId)
+    await t.run(async (ctx) => await ctx.db.insert("connections", {
+      networkId: author.network,
+      personIdLow: pair.low,
+      personIdHigh: pair.high,
+      requestedByPersonId: author.personId,
+      recipientPersonId: reader.personId,
+      status: "blocked",
+      blockedByPersonId: author.personId,
+      requestedAt: NOW,
+      updatedAt: NOW,
+    }))
+
+    await expect(t.mutation(internal.modules.diaspora.seed.storyReaderForRecette, ARGS)).rejects.toThrow(/paire fictive indisponible/)
+    expect(await follows(t)).toEqual([])
+    expect(await t.run(async (ctx) => await followerCounts.count(ctx, { namespace: `${author.network}:${author.personId}` }))).toBe(0)
   })
 })

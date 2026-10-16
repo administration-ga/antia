@@ -12,6 +12,7 @@
  */
 import { normalizeHandle } from "@antsia/social-domain/content"
 import { validateFacetSchema } from "@antsia/social-domain/facets"
+import { isActiveStatus } from "@antsia/social-domain/membership"
 import { isValidNetworkSlug, validateNetworkShape } from "@antsia/social-domain/network"
 import { DAY_MS, DIASPORALE_NETWORK_SEED, DIASPORALE_SLICE, type EngineFacetField } from "@diasporale/domain"
 import { v } from "convex/values"
@@ -22,6 +23,8 @@ import { getMembership, getRootNetwork } from "../../lib/access"
 import { isLocalDeployment } from "../../lib/devTools"
 import { membershipStatusValidator } from "../../lib/validators"
 import { assertSeedsAllowed, ensureNetwork } from "../../seeds/foundations"
+import { followerCounts } from "../graph/follows"
+import { isBlockedBetween, isFollowingPerson } from "../graph/graph"
 import { verifiedEmailHashOf } from "../people/identity"
 import { isPublishedPerson } from "../people/miniProfile"
 import { liveIdentityLinks } from "../people/persons"
@@ -151,6 +154,8 @@ const PROFILE_POSTS_RECETTE_HANDLE = "relations.recette"
 const PROFILE_POSTS_RECETTE_EMAIL = "relations.recette@exemple.test"
 const PROFILE_POSTS_RECETTE_COUNT = 35
 const ALBUM_DRAFTS_RECETTE_COUNT = 13
+const STORY_READER_RECETTE_HANDLE = "pd4.lecture"
+const STORY_READER_RECETTE_EMAIL = "pd4.recette@exemple.test"
 
 /** La cible fermée des recettes locales, relue sans créer ni modifier d'identité. */
 async function requireLocalRecetteAuthor(ctx: MutationCtx): Promise<{ network: Doc<"networks">; person: Doc<"persons"> }> {
@@ -263,5 +268,39 @@ export const albumDraftsForRecette = internalMutation({
       created += 1
     }
     return { handle: PROFILE_POSTS_RECETTE_HANDLE, created, existing } as const
+  },
+})
+
+/** Une source de lecture fictive pour le membre EN ATTENTE, sans changer son admission. */
+export const storyReaderForRecette = internalMutation({
+  args: { confirmNonProduction: v.string() },
+  returns: v.object({ created: v.boolean() }),
+  handler: async (ctx, { confirmNonProduction }) => {
+    assertSeedsAllowed(confirmNonProduction)
+    const { network, person: author } = await requireLocalRecetteAuthor(ctx)
+    const reader = await ctx.db
+      .query("persons")
+      .withIndex("by_handle", (q) => q.eq("handle", STORY_READER_RECETTE_HANDLE))
+      .unique()
+    if (!reader || !isPublishedPerson(reader)) throw new Error("Recette refusée : profil lecteur fictif préexistant requis.")
+    const access = await effectiveStatusIn(ctx, network, reader._id)
+    if (!access.membership || access.status !== "en_attente" || access.rootStatus === null || !isActiveStatus(access.rootStatus)) {
+      throw new Error("Recette refusée : lecteur en attente et adhésion racine active requis.")
+    }
+    if (await verifiedEmailHashOf(ctx, reader._id) !== await sha256Hex(STORY_READER_RECETTE_EMAIL)) {
+      throw new Error("Recette refusée : identité fictive vérifiée du lecteur requise.")
+    }
+    if (await isFollowingPerson(ctx, network._id, reader._id, author._id)) return { created: false }
+    if (await isBlockedBetween(ctx, reader._id, author._id)) throw new Error("Recette refusée : paire fictive indisponible.")
+    const followId = await ctx.db.insert("follows", {
+      networkId: network._id,
+      followerPersonId: reader._id,
+      targetPersonId: author._id,
+      createdAt: Date.now(),
+    })
+    const follow = await ctx.db.get(followId)
+    if (!follow) throw new Error("Recette refusée : abonnement fictif indisponible.")
+    await followerCounts.insert(ctx, follow)
+    return { created: true }
   },
 })
