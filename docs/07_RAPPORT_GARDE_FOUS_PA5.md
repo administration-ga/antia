@@ -117,7 +117,7 @@ Le registre [crons](../convex/crons.ts) et `crons-contract` contrôlent branchem
 
 Trace complète : `/tmp/antsia-pa5-verify-validated.log` ; serveur `/tmp/antsia-pa5-next.log`. Les tentatives antérieures ont exposé puis corrigé les fixtures de quota, sessions de push, projections d’export, contrats d’authentification, typage de pagination et attentes de phrases système ; elles ne remplacent pas le passage final.
 
-Le contrôle commun comprend les compléments DIASPORALE gelés, dont sa graine et son bouton de désabonnement. Ils appartiennent à son chat et restent exclus du commit PA5. Sources PA5 sur `codex/pa4-identite-session` ; aucun changement de branche pendant les écritures concurrentes.
+Le contrôle commun comprend les compléments DIASPORALE gelés, dont sa graine et son bouton de désabonnement. Ils appartiennent à son chat et restent exclus du commit PA5. Sources PA5 enregistrées dans le commit local **`639d987`**, sur `codex/pa4-identite-session` ; aucun changement de branche pendant les écritures concurrentes.
 
 Les tests de transport et d'effacement reposent sur le harnais local et des doubles contrôlés. Ils ne démontrent ni réception push sur un appareil, ni distribution e-mail, ni connexion à un système externe.
 
