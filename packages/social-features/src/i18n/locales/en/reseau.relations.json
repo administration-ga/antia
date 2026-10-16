@@ -56,7 +56,11 @@
       "errorTitle": "Sent invitations unavailable",
       "errorMessage": "Your pending requests could not be loaded.",
       "awaiting": "Awaiting a reply.",
-      "loadMore": "See more sent invitations"
+      "loadMore": "See more sent invitations",
+      "cancel": "Cancel request",
+      "cancelled": "Request cancelled.",
+      "cancelFailed": "The request could not be cancelled.",
+      "cancelLabel": "Cancel the request sent to {{name}}"
     },
     "catalogue": {
       "title": "People to discover",
@@ -93,6 +97,23 @@
       "unfollowed": "You no longer follow this person.",
       "unfollowFailed": "Unfollowing could not be saved.",
       "loadMore": "See more people you follow"
+    },
+    "blocks": {
+      "title": "Blocked people",
+      "globalScope": "These blocks apply across all your ANTSIA networks. Unblocking does not create a new connection. Existing follows are kept.",
+      "neutral": "Blocked person",
+      "blockedAt": "Blocked on {{date}}",
+      "empty": "You have not blocked anyone.",
+      "loadMore": "See more blocks",
+      "errorTitle": "Blocks unavailable",
+      "errorMessage": "Your blocks could not be loaded.",
+      "unblock": "Unblock",
+      "confirmTitle": "Unblock this person?",
+      "confirmBody": "The block you set will be removed across all your ANTSIA networks. No new connection is created. Existing follows are kept.",
+      "cancel": "Cancel",
+      "close": "Close confirmation",
+      "unblocked": "Block removed.",
+      "unblockFailed": "The block could not be removed."
     }
   },
   "suggestionsActions": {

@@ -56,7 +56,11 @@
       "errorTitle": "Invitations envoyées indisponibles",
       "errorMessage": "Vos demandes en attente n'ont pas pu être chargées.",
       "awaiting": "En attente de réponse.",
-      "loadMore": "Voir plus d'invitations envoyées"
+      "loadMore": "Voir plus d'invitations envoyées",
+      "cancel": "Annuler la demande",
+      "cancelled": "Demande annulée.",
+      "cancelFailed": "La demande n’a pas pu être annulée.",
+      "cancelLabel": "Annuler la demande envoyée à {{name}}"
     },
     "catalogue": {
       "title": "Personnes à découvrir",
@@ -93,6 +97,23 @@
       "unfollowed": "Suivi retiré.",
       "unfollowFailed": "Le retrait n'a pas pu être enregistré.",
       "loadMore": "Voir plus de personnes suivies"
+    },
+    "blocks": {
+      "title": "Personnes bloquées",
+      "globalScope": "Ces blocages s’appliquent à tous vos réseaux ANTSIA. Aucune nouvelle relation n’est créée au déblocage. Les abonnements existants sont conservés.",
+      "neutral": "Personne bloquée",
+      "blockedAt": "Bloquée le {{date}}",
+      "empty": "Vous n’avez bloqué aucune personne.",
+      "loadMore": "Voir plus de blocages",
+      "errorTitle": "Blocages indisponibles",
+      "errorMessage": "Vos blocages n’ont pas pu être chargés.",
+      "unblock": "Débloquer",
+      "confirmTitle": "Débloquer cette personne ?",
+      "confirmBody": "Le blocage que vous avez défini sera retiré sur tous vos réseaux ANTSIA. Aucune nouvelle relation n’est créée. Les abonnements existants sont conservés.",
+      "cancel": "Annuler",
+      "close": "Fermer la confirmation",
+      "unblocked": "Blocage retiré.",
+      "unblockFailed": "Le blocage n’a pas pu être retiré."
     }
   },
   "suggestionsActions": {

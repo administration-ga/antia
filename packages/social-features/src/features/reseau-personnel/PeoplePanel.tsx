@@ -34,6 +34,16 @@ import { conversationHref } from "../messagerie/messagerie-routes"
 import { personHref } from "./author-link"
 import { Avatar } from "./Avatar"
 import {
+  appendCursorPage,
+  initialCursorPages,
+  mergedCursorRows,
+  nextCursor,
+  recordCursorPage,
+  removeCursorRows,
+  type CursorPageMount,
+  type CursorPageSnapshot,
+} from "./cursor-pages"
+import {
   appendFollowPage,
   initialFollowsPages,
   mergedFollowRows,
@@ -129,12 +139,6 @@ type SentInvitationRow = FunctionReturnType<typeof api.modules.suggestions.sugge
 /** Une carte du catalogue des suggestions. */
 type SuggestionCatalogRow = FunctionReturnType<typeof api.modules.suggestions.suggestions.paginate>["page"][number]
 
-const SENT_INVITATIONS_SOURCE: PagedSource<typeof api.modules.suggestions.suggestions.paginateSentInvitations, SentInvitationRow> = {
-  query: api.modules.suggestions.suggestions.paginateSentInvitations,
-  page: (data) => data,
-  key: (row) => String(row.connectionId),
-}
-
 const SUGGESTIONS_SOURCE: PagedSource<typeof api.modules.suggestions.suggestions.paginate, SuggestionCatalogRow> = {
   query: api.modules.suggestions.suggestions.paginate,
   page: (data) => data,
@@ -143,9 +147,9 @@ const SUGGESTIONS_SOURCE: PagedSource<typeof api.modules.suggestions.suggestions
 
 /**
  * La chaîne des pages d'une liste paginée — le patron du catalogue (R-05),
- * partagé par les invitations envoyées et le catalogue. Chaque page remplace
- * la sienne par clé, et l'ensemble se dédoublonne par `source.key`. Les suivis
- * ont leur chaîne réactive dédiée dans `follows-pagination.ts`.
+ * utilisé par le catalogue. Chaque page remplace la sienne par clé, et
+ * l'ensemble se dédoublonne par `source.key`. Les suivis et les invitations
+ * envoyées ont des chaînes réactives où toutes les pages restent abonnées.
  *
  * Seule la DERNIÈRE page montée est abonnée : les précédentes sont des
  * instantanés, que les gestes locaux corrigent (`update`) en attendant le
@@ -306,7 +310,7 @@ const PEOPLE_PANEL_CSS = `
  * feuille de style. React 19 hisse et dédoublonne par `href` — les monter
  * deux fois ne coûte rien.
  */
-function PeoplePanelStyles() {
+export function PeoplePanelStyles() {
   return (
     <style href="rp-people-panel" precedence="default">
       {PEOPLE_PANEL_CSS}
@@ -380,7 +384,7 @@ export function PeopleSearchPanel() {
   )
 }
 
-function PanelCard({
+export function PanelCard({
   title,
   count,
   countIsFloor = false,
@@ -717,31 +721,118 @@ function PendingRequestsCard({ pending }: { pending: ReturnType<typeof usePerson
 /**
  * Les invitations que J'AI envoyées, encore sans réponse.
  *
- * Elles n'existaient nulle part (R-04) : une demande partie disparaissait de
- * l'écran, et la personne se reproposait dans les suggestions comme si de rien
- * n'était. Aucun geste ici — annuler une demande n'est pas dans ce lot ; la
- * liste RÉPOND à « qu'ai-je demandé ? », ce que rien ne faisait.
+ * Une annulation vise la VERSION rendue par le serveur : réutiliser la même
+ * ligne après une réémission ne donne jamais le droit d'annuler la suivante.
+ * Toutes les pages restent abonnées aux réponses de leurs destinataires.
  */
-function SentInvitationsCard() {
+export interface SentInvitationsSectionProps {
+  discover?: { href: string; label: string }
+}
+
+export function SentInvitationsSection(props: SentInvitationsSectionProps) {
+  return (
+    <div className="rp-people-panel" data-collection="relations">
+      <PeoplePanelStyles />
+      <EspaceKitStyles />
+      <SentInvitationsCard {...props} />
+    </div>
+  )
+}
+
+function SentInvitationsCard(props: SentInvitationsSectionProps) {
+  const { networkId, personId } = useNetwork()
+  return <SentInvitationsPages key={JSON.stringify([networkId, personId])} {...props} />
+}
+
+type RetrySentPage = () => Promise<unknown>
+
+function SentInvitationsQueryPage(props: {
+  mount: CursorPageMount
+  report: (mount: CursorPageMount, snapshot: CursorPageSnapshot<SentInvitationRow>) => void
+  registerRetry: (id: number, retry: RetrySentPage) => () => void
+}) {
+  const { networkId } = useNetwork()
+  const { mount, report, registerRetry } = props
+  const query = useAuthenticatedConvexQuery(api.modules.suggestions.suggestions.paginateSentInvitations, {
+    networkId,
+    paginationOpts: { numItems: SENT_INVITATIONS_PAGE_SIZE, cursor: mount.cursor },
+  })
+  useEffect(() => {
+    report(mount, { data: query.data ?? undefined, isPending: query.isPending, isError: query.isError })
+  }, [mount, query.data, query.isPending, query.isError, report])
+  useEffect(() => registerRetry(mount.id, query.refetch), [mount.id, query.refetch, registerRetry])
+  return null
+}
+
+function SentInvitationsPages({ discover }: SentInvitationsSectionProps) {
   const { t } = useTranslation("reseau")
   const { networkId } = useNetwork()
-  const sent = usePagedList(SENT_INVITATIONS_SOURCE, (cursor) => ({
-    networkId,
-    paginationOpts: { numItems: SENT_INVITATIONS_PAGE_SIZE, cursor },
-  }))
-  const items = sent.items
+  const routes = useRoutes()
+  const [state, setState] = useState(() => initialCursorPages<SentInvitationRow>())
+  const retries = useRef(new Map<number, RetrySentPage>())
+  const pendingRequests = useRef(new Set<string>())
+  const [busyRequests, setBusyRequests] = useState<ReadonlySet<string>>(new Set())
+  const active = useRef(false)
+  useLayoutEffect(() => {
+    active.current = true
+    return () => { active.current = false }
+  }, [])
+  const report = useCallback((mount: CursorPageMount, snapshot: CursorPageSnapshot<SentInvitationRow>) => {
+    setState((previous) => recordCursorPage(previous, mount, snapshot))
+  }, [])
+  const registerRetry = useCallback((id: number, retry: RetrySentPage) => {
+    retries.current.set(id, retry)
+    return () => {
+      if (retries.current.get(id) === retry) retries.current.delete(id)
+    }
+  }, [])
+  const retry = () => {
+    for (const refetch of retries.current.values()) {
+      void (async () => { try { await refetch() } catch { /* Le hook porte la panne. */ } })()
+    }
+  }
+  const cancelSentRequest = useMutation(api.modules.graph.connections.cancelSentRequest)
+  const items = mergedCursorRows(state, (row) => String(row.connectionId))
+  const last = state.mounts[state.mounts.length - 1]!
+  const current = state.pages[last.id]
+  const hasError = state.mounts.some((mount) => state.pages[mount.id]?.isError)
+  const initialLoading = state.pages[0]?.data === undefined && !hasError
+  const loadingMore = state.mounts.length > 1 && (!current?.data || current.isPending) && !current?.isError
+  const hasMore = nextCursor(state) !== null
+  const empty = !initialLoading && !hasError && items.length === 0 && !hasMore && !loadingMore
+
+  const cancel = async (request: SentInvitationRow) => {
+    if (pendingRequests.current.has(request.connectionId)) return
+    pendingRequests.current.add(request.connectionId)
+    setBusyRequests(new Set(pendingRequests.current))
+    try {
+      await cancelSentRequest({ networkId, connectionId: request.connectionId, expectedRequestedAt: request.at })
+      if (!active.current) return
+      setState((previous) => removeCursorRows(previous, (row) => row.connectionId === request.connectionId && row.at === request.at))
+      toast.success(t("peoplePanel.sent.cancelled"))
+    } catch (error) {
+      if (!active.current) return
+      toast.error(relationErrorText(error, "reseau:peoplePanel.sent.cancelFailed", t))
+    } finally {
+      pendingRequests.current.delete(request.connectionId)
+      if (active.current) setBusyRequests(new Set(pendingRequests.current))
+    }
+  }
 
   return (
-    <PanelCard title={t("peoplePanel.sent.title")} count={items.length} countIsFloor={sent.hasMore}>
-      <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+    <PanelCard title={t("peoplePanel.sent.title")} count={items.length} countIsFloor={hasMore || loadingMore || hasError}>
+      {state.mounts.map((mount) => <SentInvitationsQueryPage key={mount.id} mount={mount} report={report} registerRetry={registerRetry} />)}
+      <div style={{ display: "flex", flexDirection: "column", gap: 12 }} aria-busy={initialLoading || loadingMore}>
         {/* La panne se DIT et ne vide pas la liste tenue (R-08). */}
-        {sent.isError ? <ReseauQueryError title={t("peoplePanel.sent.errorTitle")} message={t("peoplePanel.sent.errorMessage")} onRetry={sent.retry} /> : null}
-        {montreSquelette(sent.etat) ? (
+        {hasError ? <ReseauQueryError title={t("peoplePanel.sent.errorTitle")} message={t("peoplePanel.sent.errorMessage")} onRetry={retry} /> : null}
+        {initialLoading ? (
           <EmptyLine>{t("peoplePanel.loading")}</EmptyLine>
-        ) : montreEtatVide(sent.etat, items.length) ? (
-          <ReseauEmptyCard id="relations-demandes-envoyees" />
-        ) : !montreElements(sent.etat, items.length) ? null : (
-          <>
+        ) : empty ? (
+          discover ? (
+            <EspaceEmptyState compact text={reseauEmptyState("relations-demandes-envoyees", routes.home(), t).text} action={<Link href={discover.href}>{discover.label}</Link>} />
+          ) : <ReseauEmptyCard id="relations-demandes-envoyees" />
+        ) : null}
+        {items.length > 0 ? (
             <ul className="rp-person-tiles" style={{ listStyle: "none", margin: 0, padding: 0 }}>
               {items.map((request) => (
                 <li key={request.connectionId} className="rp-person-tile">
@@ -761,16 +852,28 @@ function SentInvitationsCard() {
                   >
                     {t("peoplePanel.sent.awaiting")}
                   </p>
+                  <div className="rp-person-actions">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      style={RESEAU_PILL_ACTION_STYLE}
+                      disabled={busyRequests.has(request.connectionId)}
+                      aria-busy={busyRequests.has(request.connectionId)}
+                      aria-label={t("peoplePanel.sent.cancelLabel", { name: request.displayName ?? t("peoplePanel.unnamed") })}
+                      onClick={() => void cancel(request)}
+                    >
+                      {t("peoplePanel.sent.cancel")}
+                    </Button>
+                  </div>
                 </li>
               ))}
             </ul>
-            {sent.hasMore ? (
-              <Button variant="secondary" size="sm" onClick={sent.loadMore}>
-                {t("peoplePanel.sent.loadMore")}
-              </Button>
-            ) : null}
-          </>
-        )}
+        ) : null}
+        {hasMore || loadingMore ? (
+          <Button variant="secondary" size="sm" disabled={loadingMore || hasError} onClick={() => setState(appendCursorPage<SentInvitationRow>)}>
+            {t(loadingMore ? "peoplePanel.loading" : "peoplePanel.sent.loadMore")}
+          </Button>
+        ) : null}
       </div>
     </PanelCard>
   )

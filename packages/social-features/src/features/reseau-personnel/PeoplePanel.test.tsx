@@ -17,7 +17,7 @@
  * comme le masquage — du SERVEUR, plus d'un `useState`.
  */
 import type { Id } from "@antsia/api/engine"
-import { cleanup, fireEvent, render, screen } from "@testing-library/react"
+import { act, cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 import { EngineTestWrapper, memoryRouter, renderWithEngine, TEST_NETWORK_ID } from "../../tests/engine-wrapper"
@@ -79,7 +79,7 @@ vi.mock("@antsia/api/engine", () => ({
     modules: {
       people: { directory: { searchPeople: "searchPeople" } },
       graph: {
-        connections: { requestConnection: "requestConnection", respondToConnection: "respondToConnection" },
+        connections: { requestConnection: "requestConnection", respondToConnection: "respondToConnection", cancelSentRequest: "cancelSentRequest" },
         follows: {
           follow: "follow",
           unfollow: "unfollow",
@@ -509,5 +509,28 @@ describe("PeoplePanel — invitations envoyées (R-04)", () => {
         .map((node) => node.textContent ?? "")
         .join(" "),
     ).toContain("Invitations envoyées indisponibles")
+  })
+
+  it("annule depuis la même carte intégrée avec la version exacte de la demande", async () => {
+    mocks.queries.paginateSentInvitations = ok(pageOf([{
+      connectionId: "connections_bea", otherPersonId: "persons_bea", handle: "bea", displayName: "Béa Moussavou", headline: null, avatarUrl: null, at: 42,
+    }]))
+    monter("vue=invitations")
+    await act(async () => { fireEvent.click(screen.getByRole("button", { name: "Annuler la demande envoyée à Béa Moussavou" })) })
+    expect(mocks.mutations.cancelSentRequest).toHaveBeenCalledWith({ networkId: TEST_NETWORK_ID, connectionId: "connections_bea", expectedRequestedAt: 42 })
+    expect(screen.queryByText("Béa Moussavou")).toBeNull()
+  })
+
+  it("réinitialise les demandes envoyées du volet quand le lecteur change", () => {
+    mocks.queries.paginateSentInvitations = ok(pageOf([{
+      connectionId: "connections_bea", otherPersonId: "persons_bea", handle: "bea", displayName: "Béa Moussavou", headline: null, avatarUrl: null, at: 42,
+    }]))
+    const router = memoryRouter({ pathname: "/fil", search: "vue=invitations" })
+    const view = render(<EngineTestWrapper router={router.implementation}><PeoplePanel /></EngineTestWrapper>)
+    expect(screen.getByText("Béa Moussavou")).toBeTruthy()
+    mocks.queries.paginateSentInvitations = { ...ok(undefined), isPending: true, isFetching: true, fetchStatus: "fetching" }
+    view.rerender(<EngineTestWrapper router={router.implementation} personId={"persons_other" as Id<"persons">}><PeoplePanel /></EngineTestWrapper>)
+    expect(screen.queryByText("Béa Moussavou")).toBeNull()
+    expect((mocks.queryArgs.paginateSentInvitations ?? []).at(-1)).toMatchObject({ paginationOpts: { cursor: null } })
   })
 })
