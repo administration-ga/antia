@@ -43,8 +43,12 @@ export const SOCIAL_MODULE_DIRECTORIES: readonly string[] = [
  * Modules du moteur qui ne sont PAS sociaux (aucun contenu, aucune adhésion) :
  * `files` est l'infrastructure de garde des fichiers — ses lectures publiques
  * sont bornées une à une (réseau, déposant, modérateur, opérateur).
+ * `federation` est le transport système : aucune lecture de contenu social,
+ * émetteurs/receipts/DLQ réservés aux opérateurs ; inbox HMAC avec réseau issu
+ * du registre serveur et admission AST contrôlée par rate-limited-writes.
+ * Les futurs handlers de contrats devront garder leur audience propre.
  */
-export const NON_SOCIAL_MODULE_DIRECTORIES: readonly string[] = ["convex/modules/platform", "convex/modules/files"]
+export const NON_SOCIAL_MODULE_DIRECTORIES: readonly string[] = ["convex/modules/platform", "convex/modules/files", "convex/modules/federation"]
 
 describe("network-scoped-functions — toute fonction sociale est bornée par le réseau (R10)", () => {
   it("chaque fonction publique des modules sociaux exige un réseau et une adhésion", () => {

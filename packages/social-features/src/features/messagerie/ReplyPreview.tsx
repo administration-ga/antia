@@ -25,13 +25,15 @@ import { MESSAGE_DELETED_KEY } from "./messagerie-bulles"
 
 export interface ReplyPreviewData {
 	/** L'identifiant du message cité — sert à y revenir. */
-	messageId: string
+	messageId: string | null
 	/** Le nom de son auteur, quand on le connaît. */
 	authorName?: string | null
 	/** L'extrait, tronqué par le serveur. */
 	excerpt: string
 	/** Le message cité a été retiré depuis. */
 	deleted: boolean
+	/** R9 : le serveur a conservé seulement une marque anonyme après effacement. */
+	authorDeleted?: boolean
 }
 
 export function ReplyPreview({
@@ -48,8 +50,8 @@ export function ReplyPreview({
 	onCancel?: () => void
 }) {
 	const { t } = useTranslation("messagerie")
-	const auteur = reply.authorName ?? t("replyPreview.quotedMessage")
-	const texte = reply.deleted ? t(MESSAGE_DELETED_KEY) : reply.excerpt
+	const auteur = reply.authorDeleted ? t("replyPreview.deletedAccount") : reply.authorName ?? t("replyPreview.quotedMessage")
+	const texte = reply.deleted || reply.authorDeleted ? t(MESSAGE_DELETED_KEY) : reply.excerpt
 
 	if (place === "composer") {
 		return (
@@ -76,11 +78,12 @@ export function ReplyPreview({
 		<button
 			type="button"
 			className="msg-quote"
-			data-deleted={reply.deleted ? "true" : "false"}
+			data-deleted={reply.deleted || reply.authorDeleted ? "true" : "false"}
+			disabled={reply.authorDeleted === true || reply.messageId === null}
 			// Le nom accessible dit ce que fait le bouton, pas seulement ce qu'il
 			// montre : « Message cité de X » lu seul ne dit pas qu'on peut y aller.
 			aria-label={t("replyPreview.goTo", { author: auteur })}
-			onClick={() => onOpen?.(reply.messageId)}
+			onClick={() => { if (reply.messageId !== null && !reply.authorDeleted) onOpen?.(reply.messageId) }}
 		>
 			<span className="msg-quote-author">{auteur}</span>
 			<span className="msg-quote-text">{texte}</span>

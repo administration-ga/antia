@@ -17,7 +17,7 @@ import { v } from "convex/values"
 
 import type { Doc } from "../../_generated/dataModel"
 import { query } from "../../_generated/server"
-import { getCurrentPerson, getMembership, getRootNetwork } from "../../lib/access"
+import { effectiveMembershipStatus, getCurrentPerson, getMembership, getRootNetwork } from "../../lib/access"
 import { checked, fail, notFound } from "../../lib/errors"
 import { operatorMutation, personMutation } from "../../lib/functions"
 import { enforceRateLimit } from "../../lib/rateLimit"
@@ -203,7 +203,7 @@ export const myMemberships = query({
         slug: network.slug,
         name: network.name,
         kind: network.kind,
-        status: row.status,
+        status: network.kind === "root" ? (effectiveMembershipStatus(row) ?? row.status) : row.status,
         role: row.role,
         ...(row.derivedFrom ? { derivedFrom: row.derivedFrom } : {}),
       })

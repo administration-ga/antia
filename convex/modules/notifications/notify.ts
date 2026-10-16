@@ -23,6 +23,8 @@ import type { Doc, Id } from "../../_generated/dataModel"
 import type { MutationCtx } from "../../_generated/server"
 import { isActiveMember } from "../../lib/access"
 import { isBlockedBetween } from "../graph/graph"
+import { enqueueNotificationPush } from "./deliveries"
+import { moderationNoticeRecipient } from "./policy"
 import type { notificationSubjectValidator } from "./tables"
 
 export type NotificationSubjectRef = Infer<typeof notificationSubjectValidator>
@@ -39,6 +41,7 @@ export function subjectOf(ref: NotificationSubjectRef | undefined): Notification
   if ("call" in ref) return { kind: "call", id: ref.call }
   if ("voicemail" in ref) return { kind: "voicemail", id: ref.voicemail }
   if ("liveSession" in ref) return { kind: "liveSession", id: ref.liveSession }
+  if ("report" in ref) return { kind: "report", id: ref.report }
   return { kind: "fileScan", id: ref.fileScan }
 }
 
@@ -54,6 +57,7 @@ function subjectColumns(ref: NotificationSubjectRef | undefined): Partial<Doc<"n
   if ("call" in ref) return { subjectCallId: ref.call }
   if ("voicemail" in ref) return { subjectVoicemailId: ref.voicemail }
   if ("liveSession" in ref) return { subjectLiveSessionId: ref.liveSession }
+  if ("report" in ref) return { subjectReportId: ref.report }
   return { subjectFileScanId: ref.fileScan }
 }
 
@@ -69,6 +73,7 @@ export function subjectRefOf(row: Doc<"notifications">): NotificationSubjectRef 
   if (row.subjectCallId) return { call: row.subjectCallId }
   if (row.subjectVoicemailId) return { voicemail: row.subjectVoicemailId }
   if (row.subjectLiveSessionId) return { liveSession: row.subjectLiveSessionId }
+  if (row.subjectReportId) return { report: row.subjectReportId }
   return undefined
 }
 
@@ -85,12 +90,14 @@ export type NotifyInput = {
  * Émet (ou rafraîchit) une notification pour UNE personne. Rend l'identifiant de
  * la ligne écrite, `null` quand rien n'a été écrit (soi-même, blocage, non-membre).
  */
-export async function notifyPerson(ctx: Pick<MutationCtx, "db">, input: NotifyInput): Promise<Id<"notifications"> | null> {
+export async function notifyPerson(ctx: Pick<MutationCtx, "db"> & Partial<Pick<MutationCtx, "runQuery">>, input: NotifyInput): Promise<Id<"notifications"> | null> {
+  const moderationNotice = input.kind === "moderation_decision"
+  if (moderationNotice && (!input.subject || !("report" in input.subject) || input.actorPersonId !== undefined || !(await moderationNoticeRecipient(ctx, input.networkId, input.recipientPersonId, input.subject.report)))) return null
   if (input.actorPersonId !== undefined) {
     if (input.actorPersonId === input.recipientPersonId) return null
     if (await isBlockedBetween(ctx, input.actorPersonId, input.recipientPersonId)) return null
   }
-  if (!(await isActiveMember(ctx, input.networkId, input.recipientPersonId))) return null
+  if (!moderationNotice && !(await isActiveMember(ctx, input.networkId, input.recipientPersonId))) return null
   const dedupKey = notificationDedupKey(input.kind, subjectOf(input.subject), input.actorPersonId ?? null)
   const now = Date.now()
   const existing = await ctx.db
@@ -102,7 +109,7 @@ export async function notifyPerson(ctx: Pick<MutationCtx, "db">, input: NotifyIn
     await ctx.db.patch(existing._id, { createdAt: now, readAt: undefined, resolvedAt: undefined, resolution: undefined })
     return existing._id
   }
-  return await ctx.db.insert("notifications", {
+  const notificationId = await ctx.db.insert("notifications", {
     networkId: input.networkId,
     recipientPersonId: input.recipientPersonId,
     ...(input.actorPersonId !== undefined ? { actorPersonId: input.actorPersonId } : {}),
@@ -111,6 +118,10 @@ export async function notifyPerson(ctx: Pick<MutationCtx, "db">, input: NotifyIn
     dedupKey,
     createdAt: now,
   })
+  // La date de cloche peut être rafraîchie ; seul le PREMIER geste admet un push.
+  // Le cron de vidange reprend cette file durable, même si le scheduler tombe.
+  if (ctx.runQuery) await enqueueNotificationPush({ db: ctx.db, runQuery: ctx.runQuery }, notificationId)
+  return notificationId
 }
 
 /** Lignes relues pour une résolution : deux invitants successifs font deux lignes, rarement plus. */

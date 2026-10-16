@@ -7,6 +7,8 @@ import { useEffect, useId, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 
+import Link from "next/link"
+
 import { useMemberSession } from "./network-shell"
 import { Button } from "./shared/controls"
 import { authClient } from "@/lib/auth-client"
@@ -84,6 +86,7 @@ export function IdentityTools() {
             }}>{linking ? t("identity.pending") : t("identity.verify")}</Button>
             {!configuration?.idn ? <p className="text-xs text-muted-foreground">{t("identity.unavailable")}</p> : null}
           </> : null}
+          <Link href={routes.personalControls()} className="rounded-lg p-2 text-sm font-medium hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring">{t("personal.title")}</Link>
           <p className="text-sm font-medium">{t("identity.applications")}</p>
           {configuration?.applications.filter((app) => app.key !== "antsia_ga").map((app) => (
             <Button key={app.key} variant="ghost" disabled={sso.pending} onClick={async () => {

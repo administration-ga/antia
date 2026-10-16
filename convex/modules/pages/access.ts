@@ -11,6 +11,7 @@ import { computePageBadge } from "@antsia/social-domain/badges"
 import { derivePageHandle, PAGE_SIGNATORIES_MAX, type PageRole } from "@antsia/social-domain/pages"
 import { buildSearchableText } from "@antsia/social-domain/searchText"
 
+import { canReadModeratedContent } from "../moderation/policy"
 import type { Doc, Id } from "../../_generated/dataModel"
 import type { QueryCtx } from "../../_generated/server"
 import { isActiveMember } from "../../lib/access"
@@ -42,9 +43,9 @@ export function isPageInReadingContext(page: Doc<"pages">, network: Doc<"network
  * Page inconnue, retirée, ou d'un autre réseau : le même `null`. Distinguer
  * dirait à qui cherche qu'une organisation a « déjà eu » une page.
  */
-export async function readablePageOrNull(ctx: ReadCtx, network: Doc<"networks">, pageId: Id<"pages">): Promise<Doc<"pages"> | null> {
+export async function readablePageOrNull(ctx: ReadCtx, network: Doc<"networks">, pageId: Id<"pages">, readerPersonId?: Id<"persons">): Promise<Doc<"pages"> | null> {
   const page = await ctx.db.get(pageId)
-  if (!page || page.status !== "active" || !isPageInReadingContext(page, network)) return null
+  if (!page || page.status !== "active" || !isPageInReadingContext(page, network) || !(await canReadModeratedContent(ctx, "page", page._id, readerPersonId))) return null
   return page
 }
 
@@ -62,9 +63,9 @@ export async function findPageByHandle(ctx: ReadCtx, rawHandle: string): Promise
     .unique()
 }
 
-export async function readablePageByHandle(ctx: ReadCtx, network: Doc<"networks">, rawHandle: string): Promise<Doc<"pages"> | null> {
+export async function readablePageByHandle(ctx: ReadCtx, network: Doc<"networks">, rawHandle: string, readerPersonId?: Id<"persons">): Promise<Doc<"pages"> | null> {
   const page = await findPageByHandle(ctx, rawHandle)
-  if (!page || page.status !== "active" || !isPageInReadingContext(page, network)) return null
+  if (!page || page.status !== "active" || !isPageInReadingContext(page, network) || !(await canReadModeratedContent(ctx, "page", page._id, readerPersonId))) return null
   return page
 }
 

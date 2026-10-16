@@ -12,6 +12,7 @@
  */
 import { isVisibleTo } from "@antsia/social-domain/visibility"
 
+import { canReadModeratedContent } from "../moderation/policy"
 import type { Doc, Id } from "../../_generated/dataModel"
 import type { QueryCtx } from "../../_generated/server"
 import { notFound } from "../../lib/errors"
@@ -41,6 +42,7 @@ export function isInReadingContext(post: Doc<"posts">, network: Doc<"networks">)
  */
 export async function canSeePostDoc(ctx: ReadCtx, reader: ReaderContext, post: Doc<"posts">): Promise<boolean> {
   if (!isInReadingContext(post, reader.network)) return false
+  if (!(await canReadModeratedContent(ctx, "post", post._id, reader.personId))) return false
   if (post.pageId !== undefined) return await canSeePagePostDoc(ctx, reader, post, post.pageId)
   const isAuthor = post.authorPersonId === reader.personId
   const isBlockedWithAuthor = isAuthor ? false : await isBlockedBetween(ctx, reader.personId, post.authorPersonId)
@@ -73,7 +75,7 @@ export async function canSeePostDoc(ctx: ReadCtx, reader: ReaderContext, post: D
  */
 async function canSeePagePostDoc(ctx: ReadCtx, reader: ReaderContext, post: Doc<"posts">, pageId: Id<"pages">): Promise<boolean> {
   const page = await ctx.db.get(pageId)
-  if (!page || page.status !== "active") return false
+  if (!page || page.status !== "active" || !(await canReadModeratedContent(ctx, "page", page._id, reader.personId))) return false
   const isPageAudience =
     post.audience === "followers"
       ? (await isFollowingPage(ctx, pageId, reader.personId)) || (await liveSignatoryRole(ctx, page, reader.personId)) !== null

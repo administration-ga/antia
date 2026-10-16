@@ -18,6 +18,7 @@ import { assertCountryCode } from "@antsia/social-domain/content"
 import { assertPageName, normalizePageDescription, normalizePageShortName } from "@antsia/social-domain/pages"
 import { v } from "convex/values"
 
+import { moderateContentWrite } from "../moderation/policy"
 import type { Doc, Id } from "../../_generated/dataModel"
 import type { MutationCtx } from "../../_generated/server"
 import { checked } from "../../lib/errors"
@@ -94,6 +95,7 @@ export const updatePageIdentity = networkMutation({
     const now = Date.now()
     const name = patch.name ?? page.name
     const shortName = "shortName" in patch ? patch.shortName : page.shortName
+    await moderateContentWrite(ctx, { networkId: ctx.networkId, ownerPersonId: ctx.person._id, kind: "page", id: page._id, text: `${patch.name ?? page.name} ${patch.description ?? page.description ?? ""}` })
     await ctx.db.patch(page._id, { ...patch, searchText: pageSearchText({ name, ...(shortName !== undefined ? { shortName } : {}), handle: page.handle }), updatedAt: now })
     await ctx.db.insert("pageIdentityHistory", { networkId: page.networkId, pageId: page._id, actorPersonId: ctx.person._id, previous, at: now })
     return { changed: true }

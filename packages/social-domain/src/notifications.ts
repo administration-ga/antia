@@ -55,6 +55,9 @@ export const NOTIFICATION_KINDS = [
   "attestation_verified",
   /** L'attestation n'a pas confirmé — sans acteur, sans aucune raison consulaire. */
   "attestation_not_confirmed",
+  "membership_changed",
+  "badge_changed",
+  "moderation_decision",
 ] as const
 
 export type NotificationKind = (typeof NOTIFICATION_KINDS)[number]
@@ -74,7 +77,7 @@ export type NotificationResolution = (typeof NOTIFICATION_RESOLUTIONS)[number]
  * `live_invite`, `live_antenna_invite` et `live_replay_published` — relue avec
  * sa garde à l'ouverture (la page de conférence sert le direct ou sa rediffusion).
  */
-export const NOTIFICATION_SUBJECT_KINDS = ["post", "connection", "fileScan", "thematicGroup", "groupThread", "event", "album", "call", "voicemail", "liveSession"] as const
+export const NOTIFICATION_SUBJECT_KINDS = ["post", "connection", "fileScan", "thematicGroup", "groupThread", "event", "album", "call", "voicemail", "liveSession", "report"] as const
 
 export type NotificationSubjectKind = (typeof NOTIFICATION_SUBJECT_KINDS)[number]
 

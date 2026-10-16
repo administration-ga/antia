@@ -40,6 +40,9 @@
     "inviteCancelled": "Invitation cancelled.",
     "unknownActor": "Network member",
     "sentence": {
+      "membershipChanged": "Your network membership has changed.",
+      "badgeChanged": "Your badges have changed.",
+      "moderationDecision": "A moderation decision concerns you. View your decisions and appeals.",
       "pagePost": "A page you follow published a post.",
       "pagePostNamed": "{{page}} posted.",
       "albumPublished": "{{actor}} published an album.",

@@ -32,11 +32,12 @@ export function SignInScreen() {
 
   useEffect(() => {
     if (new URLSearchParams(window.location.search).get("deconnexion") === "incomplete") return
-    if (session.status === "member") router.replace(routes.feed())
+    if (session.status === "restricted") router.replace(routes.personalControls())
+    else if (session.status === "member") router.replace(routes.feed())
     else if (session.status === "welcome") router.replace(routes.welcome())
   }, [session.status, router])
 
-  if (session.status === "loading" || (!signOutIncomplete && (session.status === "member" || session.status === "welcome"))) return <CenteredStatus label={t("session.checking")} />
+  if (session.status === "loading" || (!signOutIncomplete && (session.status === "restricted" || session.status === "member" || session.status === "welcome"))) return <CenteredStatus label={t("session.checking")} />
 
   return (
     <main id="contenu" className="mx-auto flex min-h-dvh w-full max-w-md flex-col justify-center px-5 py-12">

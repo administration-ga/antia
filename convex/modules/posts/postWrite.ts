@@ -17,6 +17,7 @@ import type { ContentVisibility } from "@antsia/social-domain/network"
 import { extractHashtags } from "@antsia/social-domain/richText"
 import { buildSearchableText } from "@antsia/social-domain/searchText"
 
+import { moderateContentWrite } from "../moderation/policy"
 import type { Doc, Id } from "../../_generated/dataModel"
 import type { MutationCtx } from "../../_generated/server"
 import { checked } from "../../lib/errors"
@@ -144,6 +145,8 @@ export async function writePost(ctx: MutationCtx, input: PostWriteInput): Promis
     updatedAt: now,
   }
   const postId = await ctx.db.insert("posts", doc)
+  const admitted = await moderateContentWrite(ctx, { networkId: input.network._id, ownerPersonId: input.authorPersonId, kind: "post", id: postId, text: input.body })
+  if (!admitted) return { postId }
   await recordShare(ctx, { _id: postId, ...(input.sharedPostId ? { sharedPostId: input.sharedPostId } : {}), publishedAt: now })
   await recordPagePost(ctx, { _id: postId, ...(input.pageId ? { pageId: input.pageId } : {}), publishedAt: now })
   await notifyMentions(ctx, { _id: postId, ...doc }, mentionedPersonIds)

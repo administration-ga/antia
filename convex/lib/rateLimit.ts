@@ -5,18 +5,34 @@
  * aux membres `declaree` sans badge fort (comptes légers), en plus du seau
  * ordinaire (PA5 les étend à toutes les mutations ; cliquet `rate-limited-writes`).
  */
+import { computePersonBadges } from "@antsia/social-domain/badges"
+import { effectiveAccessStatus } from "@antsia/social-domain/membership"
 import { DAY, HOUR, MINUTE, type RateLimitConfig, RateLimiter } from "@convex-dev/rate-limiter"
 
 import { components } from "../_generated/api"
+import type { Doc, Id } from "../_generated/dataModel"
 import type { MutationCtx } from "../_generated/server"
+import { effectiveMembershipStatus } from "./access"
 import { fail } from "./errors"
 
 const RATE_LIMITS = {
+  // Portes obligatoires des constructeurs : budgets par PERSONNE, jamais par
+  // réseau. Les limites de métier ci-dessous restent plus fines. La porte
+  // réseau laisse tenir plusieurs présences sans réduire leurs cadences.
+  "social.write": { kind: "token bucket", rate: 1200, period: MINUTE, capacity: 600 },
+  "social.write.reinforced": { kind: "token bucket", rate: 300, period: MINUTE, capacity: 150 },
+  "person.write": { kind: "token bucket", rate: 1200, period: HOUR, capacity: 300 },
+  "operator.write": { kind: "token bucket", rate: 6000, period: HOUR, capacity: 1500 },
+  "action.write": { kind: "token bucket", rate: 120, period: MINUTE, capacity: 30 },
+  // Systèmes fédérés : clé issue du registre serveur émetteur/environnement,
+  // distincte des budgets humains et impossible à recréer par le payload.
+  "federation.receive": { kind: "token bucket", rate: 300, period: MINUTE, capacity: 60 },
   // Authentification (clé : l'adresse ou le numéro normalisé, jamais l'IP seule)
   "auth.login": { kind: "token bucket", rate: 5, period: 15 * MINUTE, capacity: 5 },
   "auth.otp.send": { kind: "token bucket", rate: 3, period: 5 * MINUTE, capacity: 3 },
   // Fondations (PA2)
   "person.ensure": { kind: "token bucket", rate: 10, period: HOUR, capacity: 5 },
+  "person.bootstrap": { kind: "token bucket", rate: 1200, period: HOUR, capacity: 300 },
   "person.identity": { kind: "token bucket", rate: 10, period: HOUR, capacity: 5 },
   "person.profile": { kind: "token bucket", rate: 30, period: HOUR, capacity: 10 },
   "network.join": { kind: "token bucket", rate: 10, period: HOUR, capacity: 5 },
@@ -26,10 +42,22 @@ const RATE_LIMITS = {
   // Contenus (PA3) — valeurs de départ, mesurées puis ajustées en PA10.
   "post.publish": { kind: "token bucket", rate: 30, period: HOUR, capacity: 10 },
   "post.publish.reinforced": { kind: "token bucket", rate: 10, period: DAY, capacity: 3 },
+  "story.publish.reinforced": { kind: "token bucket", rate: 10, period: DAY, capacity: 3 },
+  "album.publish.reinforced": { kind: "token bucket", rate: 10, period: DAY, capacity: 3 },
+  "page.publish.reinforced": { kind: "token bucket", rate: 10, period: DAY, capacity: 3 },
+  "comment.create.reinforced": { kind: "token bucket", rate: 20, period: HOUR, capacity: 5 },
+  "upload.url.reinforced": { kind: "token bucket", rate: 20, period: HOUR, capacity: 6 },
+  "message.send.reinforced": { kind: "token bucket", rate: 15, period: MINUTE, capacity: 8 },
+  "connection.request.reinforced": { kind: "token bucket", rate: 10, period: HOUR, capacity: 3 },
+  "group.invite.reinforced": { kind: "token bucket", rate: 20, period: HOUR, capacity: 6 },
+  "groupThread.invite.reinforced": { kind: "token bucket", rate: 20, period: HOUR, capacity: 6 },
   "reaction.toggle": { kind: "token bucket", rate: 120, period: MINUTE, capacity: 30 },
   "comment.create": { kind: "token bucket", rate: 60, period: HOUR, capacity: 15 },
   "comment.edit": { kind: "token bucket", rate: 60, period: HOUR, capacity: 20 },
   "comment.remove": { kind: "token bucket", rate: 60, period: HOUR, capacity: 20 },
+  "moderation.appeal": { kind: "token bucket", rate: 60, period: HOUR, capacity: 10 },
+  "notification.unsubscribe": { kind: "token bucket", rate: 120, period: HOUR, capacity: 30 },
+  "data.erasure.cancel": { kind: "token bucket", rate: 60, period: HOUR, capacity: 10 },
   "report.create": { kind: "token bucket", rate: 20, period: HOUR, capacity: 5 },
   "group.create": { kind: "token bucket", rate: 10, period: HOUR, capacity: 3 },
   "group.join": { kind: "token bucket", rate: 60, period: HOUR, capacity: 20 },
@@ -50,6 +78,8 @@ const RATE_LIMITS = {
   // Cloche (PA3 lot 5)
   "notification.read": { kind: "token bucket", rate: 300, period: HOUR, capacity: 60 },
   "notification.readAll": { kind: "token bucket", rate: 30, period: HOUR, capacity: 10 },
+  "notification.settings": { kind: "token bucket", rate: 120, period: HOUR, capacity: 30 },
+  "notification.subscribe": { kind: "token bucket", rate: 60, period: HOUR, capacity: 20 },
   // Messagerie (PA3 lot 10). Ouvrir un fil, y compris par un transfert vers un
   // identifiant, consomme « thread.open » : un seul budget, quel que soit le chemin.
   "thread.open": { kind: "token bucket", rate: 30, period: HOUR, capacity: 10 },
@@ -58,6 +88,7 @@ const RATE_LIMITS = {
   "message.edit": { kind: "token bucket", rate: 120, period: HOUR, capacity: 30 },
   "message.react": { kind: "token bucket", rate: 120, period: MINUTE, capacity: 30 },
   "message.typing": { kind: "token bucket", rate: 60, period: MINUTE, capacity: 20 },
+  "message.clearTyping": { kind: "token bucket", rate: 600, period: MINUTE, capacity: 120 },
   "message.forward": { kind: "token bucket", rate: 30, period: HOUR, capacity: 10 },
   // Conversations de groupe (PA3 lot 11) — les messages consomment les seaux « message.* ».
   "groupThread.create": { kind: "token bucket", rate: 10, period: HOUR, capacity: 3 },
@@ -96,6 +127,7 @@ const RATE_LIMITS = {
   "call.respond": { kind: "token bucket", rate: 240, period: HOUR, capacity: 60 },
   "call.leave": { kind: "token bucket", rate: 600, period: HOUR, capacity: 120 },
   "call.settings": { kind: "token bucket", rate: 60, period: HOUR, capacity: 20 },
+  "call.token": { kind: "token bucket", rate: 60, period: HOUR, capacity: 20 },
   "voicemail.leave": { kind: "token bucket", rate: 20, period: HOUR, capacity: 5 },
   "voicemail.read": { kind: "token bucket", rate: 240, period: HOUR, capacity: 60 },
   // Présence : un battement toutes les 30 s par écran ouvert, quelques écrans au plus.
@@ -122,6 +154,17 @@ const RATE_LIMITS = {
   // public). Consommé par `live/access.authorizeToken` APRÈS la visibilité et AVANT le réveil
   // du serveur multimédia : un refus ne coûte rien, une boucle ne rallume pas la machine.
   "live.token": { kind: "token bucket", rate: 60, period: HOUR, capacity: 20 },
+  "live.captions": { kind: "token bucket", rate: 10, period: HOUR, capacity: 3 },
+  "live.manage": { kind: "token bucket", rate: 240, period: HOUR, capacity: 60 },
+  "live.stage": { kind: "token bucket", rate: 240, period: HOUR, capacity: 60 },
+  "live.moderate": { kind: "token bucket", rate: 300, period: HOUR, capacity: 60 },
+  "live.respond": { kind: "token bucket", rate: 240, period: HOUR, capacity: 60 },
+  // Rendre une place / fermer son micro doit rester possible après beaucoup
+  // d'interactions. Ces gestes ont un budget distinct et large.
+  "live.leave": { kind: "token bucket", rate: 600, period: MINUTE, capacity: 120 },
+  "live.end": { kind: "token bucket", rate: 600, period: MINUTE, capacity: 120 },
+  "group.leave": { kind: "token bucket", rate: 600, period: HOUR, capacity: 120 },
+  "post.unpin": { kind: "token bucket", rate: 600, period: HOUR, capacity: 120 },
   // Garde des fichiers : gestes humains (libération par un modérateur, relance par un opérateur).
   "file.moderate": { kind: "token bucket", rate: 60, period: HOUR, capacity: 20 },
   // Console (PA7)
@@ -140,13 +183,79 @@ const RATE_LIMITS = {
 
 export type RateLimitBucket = keyof typeof RATE_LIMITS & string
 
+/** Les actions ne peuvent demander qu'un budget de leur surface, jamais une clé client. */
+export const ACTION_WRITE_BUCKETS = ["call.token", "live.captions"] as const satisfies readonly RateLimitBucket[]
+export type ActionWriteBucket = typeof ACTION_WRITE_BUCKETS[number]
+
+const REINFORCED_BUCKETS = {
+  "social.write": "social.write.reinforced",
+  "post.publish": "post.publish.reinforced",
+  "story.publish": "story.publish.reinforced",
+  "album.publish": "album.publish.reinforced",
+  "page.publish": "page.publish.reinforced",
+  "comment.create": "comment.create.reinforced",
+  "upload.url": "upload.url.reinforced",
+  "message.send": "message.send.reinforced",
+  "connection.request": "connection.request.reinforced",
+  "group.invite": "group.invite.reinforced",
+  "groupThread.invite": "groupThread.invite.reinforced",
+} as const satisfies Partial<Record<RateLimitBucket, RateLimitBucket>>
+
+type NetworkRateContext = {
+  networkId?: Id<"networks">
+  network?: Doc<"networks">
+  membership?: Doc<"networkMemberships">
+  rootNetwork?: Doc<"networks">
+}
+
+/**
+ * Le statut et les badges de LA PERSONNE dont on consomme le budget. Un
+ * cohôte invitant au nom de l'hôte ne prête pas son propre badge au seau.
+ * Les mutations de personne sans réseau utilisent la racine ; elles ne
+ * reçoivent aucune garde d'adhésion (onboarding, consentements, remèdes).
+ */
+async function isReinforcedMember(ctx: MutationCtx & NetworkRateContext, key: string): Promise<boolean> {
+  const personId = ctx.db.normalizeId("persons", key)
+  if (!personId) return false // auth : la clé est un sujet/contact, pas une personne sociale.
+  const root = ctx.rootNetwork ?? await ctx.db.query("networks").withIndex("by_kind_and_status", (q) => q.eq("kind", "root").eq("status", "active")).unique()
+  if (!root) return false
+  const networkId = ctx.networkId ?? ctx.network?._id ?? root._id
+  const membership = ctx.membership?.personId === personId && ctx.membership.networkId === networkId
+    ? ctx.membership
+    : await ctx.db.query("networkMemberships").withIndex("by_network_and_person", (q) => q.eq("networkId", networkId).eq("personId", personId)).unique()
+  const rootMembership = networkId === root._id ? membership : await ctx.db.query("networkMemberships").withIndex("by_network_and_person", (q) => q.eq("networkId", root._id).eq("personId", personId)).unique()
+  // Même statut temporel que l'admission : l'expiration agit immédiatement,
+  // sans attendre que le cron restaure la ligne physique de l'adhésion.
+  const status = effectiveAccessStatus({ networkStatus: effectiveMembershipStatus(membership), rootStatus: effectiveMembershipStatus(rootMembership), isRoot: networkId === root._id })
+  if (status !== "declaree") return false
+  // borné : quatre fournisseurs, un lien par personne/fournisseur ; lecture défensive à seize.
+  const links = await ctx.db.query("identityLinks").withIndex("by_person_and_provider", (q) => q.eq("personId", personId)).take(16)
+  return computePersonBadges(links).every((badge) => badge === "community")
+}
+
 export const rateLimiter = new RateLimiter(components.rateLimiter, RATE_LIMITS)
+
+/** Suppression effective des clés personnelles du composant lors de l'effacement. */
+export async function erasePersonalRateLimits(ctx: MutationCtx, personId: string, authUserId: string, contacts: readonly string[]): Promise<void> {
+  for (const name of Object.keys(RATE_LIMITS) as RateLimitBucket[]) {
+    if (name === "federation.receive") continue
+    const keys = name.startsWith("auth.") ? contacts : name === "person.bootstrap" ? [authUserId] : [personId]
+    for (const key of keys) await rateLimiter.reset(ctx, name, { key })
+  }
+}
 
 /**
  * Consomme un jeton du seau pour la clé donnée (la personne, le plus souvent) ;
  * `rateLimited` (avec le délai) au-delà du seuil.
  */
-export async function enforceRateLimit(ctx: MutationCtx, bucket: RateLimitBucket, key: string): Promise<void> {
+export async function enforceRateLimit(ctx: MutationCtx & NetworkRateContext, bucket: RateLimitBucket, key: string): Promise<void> {
+  const reinforced = Object.prototype.hasOwnProperty.call(REINFORCED_BUCKETS, bucket)
+    ? REINFORCED_BUCKETS[bucket as keyof typeof REINFORCED_BUCKETS]
+    : undefined
+  if (reinforced && await isReinforcedMember(ctx, key)) {
+    const strengthened = await rateLimiter.limit(ctx, reinforced, { key })
+    if (!strengthened.ok) fail("rateLimited", { retryAfterMs: strengthened.retryAfter })
+  }
   const result = await rateLimiter.limit(ctx, bucket, { key })
   if (!result.ok) fail("rateLimited", { retryAfterMs: result.retryAfter })
 }

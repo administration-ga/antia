@@ -68,7 +68,8 @@ export function WelcomeScreen() {
   }, [person?.displayName, person?.handle, person?.locale, person?.timeZone, consentInForce, form])
 
   useEffect(() => {
-    if (session.status === "signedOut") router.replace(routes.signIn())
+    if (session.status === "restricted") router.replace(routes.personalControls())
+    else if (session.status === "signedOut") router.replace(routes.signIn())
     else if (session.status === "member") router.replace(routes.feed())
   }, [session.status, router])
 

@@ -10,6 +10,7 @@ import type { Badge } from "@antsia/social-domain/badges"
 import { isProfileDiscoverable, isProfilePublished, normalizeHandle } from "@antsia/social-domain/content"
 import { extractMentionHandles } from "@antsia/social-domain/richText"
 
+import { canReadModeratedContent } from "../moderation/policy"
 import type { Doc, Id } from "../../_generated/dataModel"
 import type { QueryCtx } from "../../_generated/server"
 import { isActiveMember } from "../../lib/access"
@@ -28,11 +29,12 @@ export type PersonMiniProfile = {
   avatarUrl: string | null
   badges: Badge[]
   hasPublishedProfile: boolean
+  isDeleted?: boolean
 }
 
 /** Le profil est-il publié (choisi, non retiré) et la personne non effacée ? */
 export function isPublishedPerson(person: Doc<"persons">): boolean {
-  return person.publishedAt !== undefined && isProfilePublished(person) && person.deletionRequestedAt === undefined
+  return person.publishedAt !== undefined && isProfilePublished(person) && person.deletionRequestedAt === undefined && person.erasedAt === undefined
 }
 
 /** Publié ET non privé : la condition pour être TROUVÉ (recherche, suggestions, nouveaux liens). */
@@ -43,7 +45,7 @@ export function isDiscoverablePerson(person: Doc<"persons">): boolean {
 /** La personne au profil VIVANT, ou `null` (non publiée, retirée ou effacée = inexistante). */
 export async function livePersonProfile(ctx: Pick<QueryCtx, "db">, personId: Id<"persons">): Promise<Doc<"persons"> | null> {
   const person = await ctx.db.get(personId)
-  return person && isPublishedPerson(person) ? person : null
+  return person && isPublishedPerson(person) && await canReadModeratedContent(ctx, "person", person._id) ? person : null
 }
 
 /**
@@ -74,14 +76,17 @@ export async function findPublishedPersonByHandle(
     .unique()
   if (!person) return null
   if (!(options?.requireDiscoverable ? isDiscoverablePerson(person) : isPublishedPerson(person))) return null
-  if (!(await isActiveMember(ctx, networkId, person._id))) return null
+  if (!(await isActiveMember(ctx, networkId, person._id)) || !(await canReadModeratedContent(ctx, "person", person._id))) return null
   return person
 }
 
 /** Le mini-profil allowlisté d'une personne, lu depuis son profil PUBLIÉ. */
 export async function publishedMiniProfile(ctx: ReadCtx, personId: Id<"persons">): Promise<PersonMiniProfile> {
   const person = await livePersonProfile(ctx, personId)
-  if (!person) return { personId, displayName: null, handle: null, headline: null, avatarUrl: null, badges: [], hasPublishedProfile: false }
+  if (!person) {
+    const tombstone = await ctx.db.get(personId)
+    return { personId, displayName: null, handle: null, headline: null, avatarUrl: null, badges: [], hasPublishedProfile: false, ...(tombstone?.erasedAt !== undefined ? { isDeleted: true } : {}) }
+  }
   return {
     personId,
     displayName: person.displayName ?? null,

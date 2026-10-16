@@ -622,9 +622,10 @@ export function MessagerieConversationView({
 						m.replyTo === null
 							? null
 							: {
-									messageId: String(m.replyTo.messageId),
+									messageId: m.replyTo.messageId === null ? null : String(m.replyTo.messageId),
 									excerpt: m.replyTo.excerpt,
 									deleted: m.replyTo.deleted,
+									authorDeleted: m.replyTo.authorDeleted,
 								},
 					reactions: m.reactions,
 					deleted: m.deleted,
@@ -660,9 +661,10 @@ export function MessagerieConversationView({
 				m.replyTo === null
 					? null
 					: {
-							messageId: String(m.replyTo.messageId),
+							messageId: m.replyTo.messageId === null ? null : String(m.replyTo.messageId),
 							excerpt: m.replyTo.excerpt,
 							deleted: m.replyTo.deleted,
+							authorDeleted: m.replyTo.authorDeleted,
 						},
 			reactions: m.reactions,
 			// L'accusé n'a de sens que pour MES messages : le moteur ne le rend
@@ -815,7 +817,7 @@ export function MessagerieConversationView({
 							...(a.durationMs === undefined ? {} : { durationMs: a.durationMs }),
 						}))
 					: undefined
-			const citation = reply === null ? undefined : reply.messageId
+			const citation = reply?.messageId ?? undefined
 
 			if (groupeId !== null) {
 				dockStore.setDraftText(conversationKey, "")

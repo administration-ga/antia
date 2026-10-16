@@ -138,6 +138,8 @@ export const groupsTables = {
     callId: v.optional(v.id("calls")),
     attachmentFiles: v.optional(v.array(storedAttachmentValidator)),
     replyToMessageId: v.optional(v.id("groupMessages")),
+    /** R9 : marque anonyme de citation, aucun extrait ni identifiant de compte effacé. */
+    replyToDeletedAccount: v.optional(v.boolean()),
     reactionCounts: v.optional(messageReactionCountsValidator),
     /** Retiré POUR TOUT LE MONDE par l'auteur, dans la fenêtre : pierre tombale, la ligne demeure. */
     deletedAt: v.optional(v.number()),

@@ -12,11 +12,12 @@
 import { replyExcerpt } from "@antsia/social-contracts/attachments"
 import type { CounterpartLabel } from "@antsia/social-contracts/counterpart"
 import { applyMessageReactionDelta, emptyMessageReactionCounts, type MessageReactionCounts, type MessageReactionKind, nextMessageReactionKind } from "@antsia/social-contracts/messageReactions"
-import { assertMessageContent, isWithinEditWindow, MESSAGE_EDIT_WINDOW_MS } from "@antsia/social-contracts/messaging"
+import { assertMessageContent, deletedAccountReply, isWithinEditWindow, MESSAGE_EDIT_WINDOW_MS, type MessageReplyQuote } from "@antsia/social-contracts/messaging"
 import { isGroupThreadManager } from "@antsia/social-domain/groupThreads"
 import { paginationOptsValidator, type PaginationResult } from "convex/server"
 import { type Infer, v } from "convex/values"
 
+import { canReadModeratedContent, moderateContentWrite } from "../moderation/policy"
 import type { Doc, Id } from "../../_generated/dataModel"
 import type { MutationCtx, QueryCtx } from "../../_generated/server"
 import { checked, fail, failRule, notFound } from "../../lib/errors"
@@ -52,7 +53,7 @@ const HIDES_SCAN = 400
  * ni masqué pour moi. (Le blocage, lui, garde la ligne et retire le corps.)
  */
 export async function isVisibleToMember(ctx: Pick<QueryCtx, "db">, message: Doc<"groupMessages">, member: Doc<"groupMembers">): Promise<boolean> {
-  if (message.threadId !== member.threadId) return false
+  if (message.threadId !== member.threadId || !(await canReadModeratedContent(ctx, "groupMessage", message._id, member.personId))) return false
   if (message.createdAt < historyFloor(member)) return false
   if (isClearedForMember(message, member)) return false
   return !(await isHiddenForPerson(ctx, message._id, member.personId))
@@ -71,7 +72,7 @@ async function requireVisibleMessage(ctx: MutationCtx & { networkId: Id<"network
 // Projection
 // ═══════════════════════════════════════════════════════════════
 
-export type GroupReplyToDto = { messageId: Id<"groupMessages">; senderPersonId: Id<"persons">; excerpt: string; deleted: boolean }
+export type GroupReplyToDto = MessageReplyQuote<Id<"groupMessages">, Id<"persons">>
 
 export type GroupMessageDto = {
   messageId: Id<"groupMessages">
@@ -137,11 +138,12 @@ export async function projectGroupMessages(ctx: ReadCtx, member: Doc<"groupMembe
   const out: GroupMessageDto[] = []
   for (const row of rows) {
     if (isClearedForMember(row, member) || row.createdAt < historyFloor(member)) continue
-    if (await isHidden(row._id)) continue
+    if (await isHidden(row._id) || !(await canReadModeratedContent(ctx, "groupMessage", row._id, me))) continue
     const masked = row.type === "text" && (await isBlockedWith(row.senderPersonId))
     const deleted = row.deletedAt !== undefined
     let replyTo: GroupReplyToDto | null = null
-    if (row.replyToMessageId !== undefined) {
+    if (row.replyToDeletedAccount === true) replyTo = deletedAccountReply()
+    else if (row.replyToMessageId !== undefined) {
       const cited = await ctx.db.get(row.replyToMessageId)
       if (cited) {
         // L'extrait subit les MÊMES retraits que le message qu'il cite.
@@ -271,6 +273,8 @@ export async function appendGroupMessage(ctx: MutationCtx, thread: Doc<"groupThr
     ...(input.forwardedFrom ? { forwardedFrom: input.forwardedFrom } : {}),
     createdAt: now,
   })
+  const admitted = await moderateContentWrite(ctx, { networkId: thread.networkId, ownerPersonId: sender.personId, kind: "groupMessage", id: messageId, text: input.content })
+  if (!admitted) return messageId
   await ctx.db.patch(thread._id, { ...previewColumns(input.content, input.attachmentFiles ?? []), lastMessageAt: now, lastMessageId: messageId, lastMessageByPersonId: sender.personId })
   const message = await ctx.db.get(messageId)
   if (message === null) return notFound()
@@ -389,10 +393,11 @@ export const editGroupMessage = networkMutation({
     const now = Date.now()
     if (!isWithinEditWindow(message.createdAt, now)) return failRule("MESSAGE_EDIT_WINDOW_EXPIRED", { minutes: MESSAGE_EDIT_WINDOW_MS / 60_000 })
     const content = checked(() => assertMessageContent(args.content, false))
+    const admitted = await moderateContentWrite(ctx, { networkId: thread.networkId, ownerPersonId: ctx.person._id, kind: "groupMessage", id: message._id, text: content })
     // Rouvert puis refermé sans y toucher : rien à marquer « (modifié) ».
     if (content === message.content) return { editedAt: message.editedAt ?? message.createdAt }
     await ctx.db.patch(message._id, { content, editedAt: now })
-    if (thread.lastMessageId === message._id) await ctx.db.patch(thread._id, previewColumns(content, message.attachmentFiles ?? []))
+    if (thread.lastMessageId === message._id) await ctx.db.patch(thread._id, admitted ? previewColumns(content, message.attachmentFiles ?? []) : { lastMessageText: undefined, lastMessageKind: undefined, lastMessageAttachmentCount: undefined })
     return { editedAt: now }
   },
 })

@@ -19,8 +19,10 @@ import { networkMutation, networkQuery, operatorMutation } from "../../lib/funct
 import { enforceRateLimit } from "../../lib/rateLimit"
 import { literals } from "../../lib/validators"
 import { appendAudit, type AuditEntry, networkRoleCapacity, operatorCapacity } from "../platform/audit"
+import { notifyPerson } from "../notifications/notify"
 import { assertVisiblePost, type ReaderContext } from "../posts/access"
 import { markCommentRemoved, markPostRemoved } from "../posts/contentRemoval"
+import { requireReportCapacity } from "./cases"
 import { contentReportReasonValidator, contentReportStatusValidator } from "./tables"
 
 const readerOf = (ctx: { person: Doc<"persons">; network: Doc<"networks"> }): ReaderContext => ({ personId: ctx.person._id, network: ctx.network })
@@ -57,8 +59,15 @@ async function fileReport(
   await hideForReporter(ctx, ctx.networkId, ctx.person._id, target.post._id)
   if (existing) return { reportId: existing._id, created: false, hidden: true as const }
   const now = Date.now()
+  const comment = target.commentId ? await ctx.db.get(target.commentId) : null
+  const polymorphicTarget = target.kind === "post" ? { kind: "post" as const, id: target.post._id } : { kind: "comment" as const, id: target.commentId! }
+  const teams = await ctx.db.query("moderationTeams").withIndex("by_network_active", (q) => q.eq("networkId", target.post.networkId).eq("active", true)).take(101)
+  if (teams.length > 100) return fail("policyRefused")
+  const team = teams.find((row) => row.scope === target.kind) ?? teams.find((row) => row.scope === undefined)
+  const polymorphicId = await ctx.db.insert("reports", { networkId: target.post.networkId, target: polymorphicTarget, targetKind: target.kind, targetId: polymorphicTarget.id, ownerPersonId: comment?.authorPersonId ?? target.post.authorPersonId, reporterPersonId: ctx.person._id, reason, ...(team ? { teamId: team._id } : {}), level: team ? "team" : "network", status: "open", createdAt: now, updatedAt: now })
   const reportId = await ctx.db.insert("contentReports", {
     networkId: target.post.networkId,
+    reportId: polymorphicId,
     targetKind: target.kind,
     postId: target.post._id,
     ...(target.commentId !== undefined ? { commentId: target.commentId } : {}),
@@ -80,6 +89,8 @@ export const reportPost = networkMutation({
   handler: async (ctx, args) => {
     await enforceRateLimit(ctx, "report.create", ctx.person._id)
     const note = boundedNote(args.note)
+    const prior = await ctx.db.query("contentReports").withIndex("by_reporter_target", (q) => q.eq("reporterPersonId", ctx.person._id).eq("targetKind", "post").eq("postId", args.postId).eq("commentId", undefined)).unique()
+    if (prior) return { reportId: prior._id, created: false, hidden: true as const }
     const post = await assertVisiblePost(ctx, readerOf(ctx), args.postId)
     if (post.authorPersonId === ctx.person._id || post.status !== "published") return notFound()
     return await fileReport(ctx, { kind: "post", post }, args.reason, note)
@@ -96,6 +107,8 @@ export const reportComment = networkMutation({
     const note = boundedNote(args.note)
     const comment = await ctx.db.get(args.commentId)
     if (!comment || comment.status !== "published") return notFound()
+    const prior = await ctx.db.query("contentReports").withIndex("by_reporter_target", (q) => q.eq("reporterPersonId", ctx.person._id).eq("targetKind", "comment").eq("postId", comment.postId).eq("commentId", comment._id)).unique()
+    if (prior) return { reportId: prior._id, created: false, hidden: true as const }
     const post = await assertVisiblePost(ctx, readerOf(ctx), comment.postId)
     if (comment.authorPersonId === ctx.person._id) return notFound()
     return await fileReport(ctx, { kind: "comment", post, commentId: comment._id }, args.reason, note)
@@ -128,9 +141,14 @@ export const paginateQueue = networkQuery({
       .query("contentReports")
       .withIndex("by_network_status_createdAt", (q) => q.eq("networkId", ctx.networkId).eq("status", args.status ?? "open"))
       .paginate(args.paginationOpts)
+    const eligible: Doc<"contentReports">[] = []
+    for (const row of result.page) {
+      const linked = row.reportId ? await ctx.db.get(row.reportId) : null
+      if (!linked || await requireReportCapacity(ctx, ctx, linked)) eligible.push(row)
+    }
     return {
       ...result,
-      page: result.page.map((row) => ({
+      page: eligible.map((row) => ({
         reportId: row._id,
         targetKind: row.targetKind,
         postId: row.postId,
@@ -162,6 +180,7 @@ async function decideReport(
   const decisionReason = checked(() => assertDecisionReason(args.decisionReason, 3))
   const now = Date.now()
   await ctx.db.patch(report._id, { status: args.status, decisionReason, reviewedByPersonId: args.actorPersonId, reviewedAt: now, updatedAt: now })
+  if (report.reportId) await ctx.db.patch(report.reportId, { status: args.status, decisionReason, reviewedByPersonId: args.actorPersonId, reviewedAt: now, updatedAt: now, removedTarget: args.status === "actioned" })
   let targetRemoved = false
   if (args.status === "actioned") {
     if (report.targetKind === "post") {
@@ -177,6 +196,10 @@ async function decideReport(
         await markCommentRemoved(ctx, comment, now)
       }
     }
+  }
+  if (report.reportId && args.status === "actioned") {
+    const linked = await ctx.db.get(report.reportId)
+    if (linked?.ownerPersonId) await notifyPerson(ctx, { networkId: linked.networkId, recipientPersonId: linked.ownerPersonId, kind: "moderation_decision", subject: { report: linked._id } })
   }
   return {
     action: "moderation.report_decide",
@@ -206,9 +229,11 @@ export const decide = networkMutation({
   args: decisionArgs,
   returns: v.object({ status: literals(CONTENT_REPORT_DECISIONS) }),
   handler: async (ctx, args) => {
-    const capacity = networkRoleCapacity(ctx.membership.role)
     const report = await ctx.db.get(args.reportId)
-    if (!capacity || !report || report.networkId !== ctx.networkId) return notFound()
+    if (!report || report.networkId !== ctx.networkId) return notFound()
+    const linked = report.reportId ? await ctx.db.get(report.reportId) : null
+    const capacity = linked ? await requireReportCapacity(ctx, ctx, linked) : networkRoleCapacity(ctx.membership.role)
+    if (!capacity) return notFound()
     await enforceRateLimit(ctx, "moderation.decide", ctx.person._id)
     await appendAudit(ctx, await decideReport(ctx, { report, status: args.status, decisionReason: args.decisionReason, actorPersonId: ctx.person._id, capacity }))
     return { status: args.status }

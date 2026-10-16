@@ -42,6 +42,7 @@ export const setGroupTyping = networkMutation({
 
 /** Retirer MON signal (envoi, champ vidé) — le délai s'en charge sinon. */
 export const clearGroupTyping = networkMutation({
+  writeBucket: "message.clearTyping",
   minStatus: "en_attente",
   args: { threadId: v.id("groupThreads") },
   returns: v.null(),

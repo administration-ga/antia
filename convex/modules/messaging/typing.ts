@@ -38,6 +38,7 @@ export const setTyping = networkMutation({
 
 /** Retirer mon signal (message envoyé, champ vidé) — optionnel, le délai s'en charge. */
 export const clearTyping = networkMutation({
+  writeBucket: "message.clearTyping",
   minStatus: "en_attente",
   args: { threadId: v.id("personalThreads") },
   returns: v.null(),

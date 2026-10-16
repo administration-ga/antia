@@ -14,6 +14,7 @@ import type { Doc, Id } from "../_generated/dataModel"
 import type { QueryCtx } from "../_generated/server"
 import { fail, notFound } from "./errors"
 import { getActiveIdentity } from "./session"
+import { hasLiveGlobalSanction } from "../modules/moderation/policy"
 
 /** La personne liée à la session, ou `null` (pas de session, ou personne pas encore créée). */
 export async function getCurrentPerson(ctx: QueryCtx): Promise<Doc<"persons"> | null> {
@@ -56,6 +57,11 @@ export async function getMembership(
     .unique()
 }
 
+export function effectiveMembershipStatus(membership: Doc<"networkMemberships"> | null) {
+  if (membership?.status === "suspendue" && membership.suspendedUntil !== undefined && membership.suspendedUntil <= Date.now()) return membership.statusBeforeSuspension ?? "declaree"
+  return membership?.status ?? null
+}
+
 export type NetworkAccess = {
   person: Doc<"persons">
   network: Doc<"networks">
@@ -77,6 +83,7 @@ export async function requireMembership(
   minStatus: ActiveMembershipStatus,
 ): Promise<NetworkAccess> {
   const person = await requirePerson(ctx)
+  if (await hasLiveGlobalSanction(ctx, person._id)) return fail("membershipSuspended")
   const network = await ctx.db.get(networkId)
   if (!network || network.status !== "active") return notFound()
   const rootNetwork = network.kind === "root" ? network : await getRootNetwork(ctx)
@@ -84,8 +91,8 @@ export async function requireMembership(
   const membership = await getMembership(ctx, network._id, person._id)
   const rootMembership = network.kind === "root" ? membership : await getMembership(ctx, rootNetwork._id, person._id)
   const status = effectiveAccessStatus({
-    networkStatus: membership?.status ?? null,
-    rootStatus: rootMembership?.status ?? null,
+    networkStatus: effectiveMembershipStatus(membership),
+    rootStatus: effectiveMembershipStatus(rootMembership),
     isRoot: network.kind === "root",
   })
   if (!membership || status === null || status === "partie") return notFound()
@@ -117,6 +124,7 @@ export async function memberHasStatus(ctx: Pick<QueryCtx, "db">, networkId: Id<"
 
 /** Le statut d'accès EFFECTIF d'une personne dans un réseau actif (adhésion propre et racine), ou `null`. */
 async function effectiveStatusOf(ctx: Pick<QueryCtx, "db">, networkId: Id<"networks">, personId: Id<"persons">) {
+  if (await hasLiveGlobalSanction(ctx, personId)) return "suspendue"
   const network = await ctx.db.get(networkId)
   if (!network || network.status !== "active") return null
   const membership = await getMembership(ctx, network._id, personId)
@@ -124,8 +132,8 @@ async function effectiveStatusOf(ctx: Pick<QueryCtx, "db">, networkId: Id<"netwo
   const root = network.kind === "root" ? network : await getRootNetwork(ctx)
   const rootMembership = network.kind === "root" || !root ? membership : await getMembership(ctx, root._id, personId)
   return effectiveAccessStatus({
-    networkStatus: membership.status,
-    rootStatus: rootMembership?.status ?? null,
+    networkStatus: effectiveMembershipStatus(membership),
+    rootStatus: effectiveMembershipStatus(rootMembership),
     isRoot: network.kind === "root",
   })
 }

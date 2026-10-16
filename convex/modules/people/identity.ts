@@ -214,6 +214,7 @@ export const linkIdn = mutation({
   returns: v.null(),
   handler: async (ctx) => {
     const { person } = await activePerson(ctx)
+    await enforceRateLimit(ctx, "person.write", person._id)
     const changed = await linkIdnForPerson(ctx, person, true)
     if (changed) await reconcileMemberships(ctx, person._id, null)
     return null
@@ -226,6 +227,7 @@ export const linkLocal = mutation({
   returns: v.null(),
   handler: async (ctx) => {
     const { person, user } = await activePerson(ctx)
+    await enforceRateLimit(ctx, "person.write", person._id)
     await linkLocalForPerson(ctx, person, user, true)
     return null
   },

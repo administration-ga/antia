@@ -144,6 +144,7 @@ export type DirectDelegationDto = {
  * la seule chose que le genre décide (`permissions.ts`).
  */
 export const grant = networkMutation({
+  writeBucket: "live.manage",
   args: {
     sessionId: v.id("liveSessions"),
     targetPersonId: v.id("persons"),
@@ -211,6 +212,7 @@ export const grant = networkMutation({
  * acte, il n'y a rien à expulser du SFU (déléguer n'ouvrait aucun flux).
  */
 export const revoke = networkMutation({
+  writeBucket: "live.manage",
   args: {
     sessionId: v.id("liveSessions"),
     targetPersonId: v.id("persons"),

@@ -451,7 +451,7 @@ describe("connectionInviteOutcome — relire avant d'agir", () => {
 
 describe("notificationRowSentence — ce que dit la ligne, pour TOUS les genres du moteur", () => {
 	const OTHER = "Nouvelle activité dans le réseau."
-	const SYSTEM_KINDS: readonly NotificationKind[] = ["page_post", "file_withheld", "attestation_verified", "attestation_not_confirmed"]
+	const SYSTEM_KINDS: readonly NotificationKind[] = ["membership_changed", "badge_changed", "moderation_decision", "page_post", "file_withheld", "attestation_verified", "attestation_not_confirmed"]
 
 	it("chaque genre du domaine a sa phrase — jamais une clé brute, jamais la phrase générique", () => {
 		for (const kind of NOTIFICATION_KINDS) {

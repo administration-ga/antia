@@ -37,7 +37,8 @@ export function NetworkShell({ children }: { children: ReactNode }) {
   const session = useSessionState()
 
   useEffect(() => {
-    if (session.status === "signedOut") router.replace(routes.signIn())
+    if (session.status === "restricted") router.replace(routes.personalControls())
+    else if (session.status === "signedOut") router.replace(routes.signIn())
     else if (session.status === "welcome") router.replace(routes.welcome())
   }, [session.status, router])
 

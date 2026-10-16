@@ -96,11 +96,24 @@ Cliquets en place (`tests/ratchets/`) : `no-cross-product-imports`, `no-any-vali
 `fresh-upload`, `storage-arg-freshness`, et pour la cloche `notifications-writer` (seule
 `convex/modules/notifications/notify.ts` écrit dans `notifications`), et pour le journal des décisions
 `operator-audit` (toute `operatorMutation` appelle `appendAudit`), `crons-contract`
-(dix passages PA3 : registre branché, identifiants ASCII uniques, cibles internes,
-cadences et arguments contrôlés ; lot 17), `sign-out-everywhere` (PA4 : sorties SDK uniquement par la porte partagée, purge nominale et navigation complète). À venir : `rate-limited-writes` (PA5).
+(dix cadences/arguments PA3 protégés ; registre, identifiants ASCII uniques et cibles
+internes contrôlés également pour les extensions PA5), `sign-out-everywhere` (PA4 : sorties SDK uniquement par la porte partagée, purge
+nominale et navigation complète), `rate-limited-writes` (PA5 : admission de débit des
+écritures publiques vérifiée par AST), `notification-payload-content` (PA5 : aucune copie
+de contenu social ni contact dans les jobs et transports). La couverture de l'inventaire
+d'effacement dérivé du schéma est vérifiée par `convex/modules/people/erasure.test.ts`.
 
 ## Pièges déjà payés
 
+- **PA5 / export et effacement** : une référence personnelle ou une mention ne donne pas
+  la propriété du document. L'export passe par `exportableRecord` et ses projections,
+  jamais par une ligne étrangère brute. Les vérifications Better Auth sont parcourues
+  avant révocation des sessions ; `deleteOne(user)` ne supprime pas ses dépendances.
+  Les copies transférées et aperçus de fils sont expurgés avec leur source ; les citations
+  restantes utilisent le profil anonyme `erasedAt` / `isDeleted`, sans nom stocké.
+- **PA5 / preuves externes** : `sent` est une admission technique, pas une réception sur
+  appareil. L'inbox signée possède un registre métier fermé : un 202 `dead_letter` ne
+  prouve aucun reflet appliqué. Configuration et recette réelles restent distinctes.
 - **PA4 / sessions** : `sessionId` du JWT doit désigner une session Better Auth vivante du même sujet ; aucune exception de développement. Les tests construisent de vraies sessions (`testConvex`/`createTestSession`), les contextes de garde passent par `as.run`.
 - **Better Auth / envoi OTP** : `emailAndPassword.enabled=false` ne ferme pas les routes de réinitialisation des plugins OTP. Les bloquer explicitement. Le SDK masque les erreurs de délivrance e-mail ; le retour middleware est fusionné dans l’endpoint, donc la preuve d’envoi partagée doit être sous `{ context: { context: … } }` pour son hook après. Cas réel de transport défaillant testé.
 - **Déconnexion / SSO** : un transfert ne démarre ni ne termine pendant `signOutEverywhere`. Passer la navigation dans son callback : le registre `Symbol.for` est commun aux copies du bundle et reste verrouillé jusqu’au nouveau document. La garde attend la purge/navigation avant reload ; aucune synchronisation de personne pendant la sortie. Un transfert refusé monte Convex anonyme, sans réadoption du cookie HTTP ; un transfert admis impose bearer explicite et sujet corrélé.

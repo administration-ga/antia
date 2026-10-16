@@ -9,9 +9,11 @@ import { assertDisplayName, assertHandle, assertHeadline, normalizeHandle } from
 import { handleLadder } from "@antsia/social-domain/handleSuggestion"
 import { v } from "convex/values"
 
+import { canReadModeratedContent, moderateContentWrite } from "../moderation/policy"
 import type { Doc, Id } from "../../_generated/dataModel"
 import type { MutationCtx, QueryCtx } from "../../_generated/server"
-import { checked, fail } from "../../lib/errors"
+import { getRootNetwork } from "../../lib/access"
+import { checked, fail, notFound } from "../../lib/errors"
 import { networkQuery, personMutation, personQuery } from "../../lib/functions"
 import { enforceRateLimit } from "../../lib/rateLimit"
 import { guardUploadUrl } from "../../lib/uploadPolicy"
@@ -108,6 +110,9 @@ export const publishMyProfile = personMutation({
       withdrawnAt: undefined,
       updatedAt: now,
     })
+    const root = await getRootNetwork(ctx)
+    if (!root) return notFound()
+    await moderateContentWrite(ctx, { networkId: root._id, ownerPersonId: ctx.person._id, kind: "person", id: ctx.person._id, text: `${displayName} ${headline ?? ""}` })
     await syncPersonDirectory(ctx, ctx.person._id)
     return { handle }
   },
@@ -247,7 +252,7 @@ export const getPublicProfile = networkQuery({
   ),
   handler: async (ctx, { handle }) => {
     const person = await findPublishedPersonByHandle(ctx, ctx.networkId, handle)
-    if (!person || !person.handle || !person.displayName) return null
+    if (!person || !person.handle || !person.displayName || !(await canReadModeratedContent(ctx, "person", person._id, ctx.person._id))) return null
     if (person._id !== ctx.person._id && (await isBlockedBetween(ctx, ctx.person._id, person._id))) return null
     const image = async (storageId: Id<"_storage"> | undefined) => {
       if (!storageId) return { url: null, withheld: null }

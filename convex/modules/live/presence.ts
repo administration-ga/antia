@@ -156,6 +156,7 @@ export const heartbeat = networkMutation({
  * tout membre actif (`en_attente` compris) : rendre sa place ne donne rien.
  */
 export const leave = networkMutation({
+  writeBucket: "live.leave",
   minStatus: "en_attente",
   args: { sessionId: v.id("liveSessions") },
   handler: async (ctx, args): Promise<{ released: boolean }> => {

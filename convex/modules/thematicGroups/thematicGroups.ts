@@ -188,6 +188,7 @@ export const join = networkMutation({
 
 /** Quitter. Idempotent. L'`owner` ne part pas (il ferme, archive ou supprime). */
 export const leave = networkMutation({
+  writeBucket: "group.leave",
   minStatus: "en_attente",
   args: { groupId: v.id("thematicGroups") },
   returns: v.object({ left: v.literal(true) }),

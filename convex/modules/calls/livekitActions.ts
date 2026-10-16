@@ -27,6 +27,7 @@ import { callMediaTypeValidator } from "./validators"
 const TOKEN_TTL = "2h"
 
 export const requestToken = networkAction({
+  writeBucket: "call.token",
   args: { callId: v.id("calls") },
   returns: v.object({ token: v.string(), roomName: v.string(), wsUrl: v.string(), mediaType: callMediaTypeValidator }),
   handler: async (ctx, args): Promise<{ token: string; roomName: string; wsUrl: string; mediaType: "audio" | "video" }> => {

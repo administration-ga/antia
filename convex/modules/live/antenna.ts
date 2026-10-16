@@ -363,6 +363,7 @@ export const raiseHand = networkMutation({
 
 /** Annuler MA main — live seulement, idempotent si elle n'est plus active. */
 export const cancelHand = networkMutation({
+  writeBucket: "live.leave",
   args: { sessionId: v.id("liveSessions") },
   handler: async (ctx, args): Promise<{ cancelled: boolean }> => {
     const session = await assertLiveAudience(ctx, directCaller(ctx), args.sessionId)
@@ -557,6 +558,7 @@ export const hostState = networkQuery({
 
 /** Accepter/refuser une main — permission `admitToStage`, atomique avec le rôle. */
 export const respondToRequest = networkMutation({
+  writeBucket: "live.respond",
   args: {
     requestId: v.id("liveAntennaRequests"),
     response: directAntennaResponseValidator,
@@ -667,6 +669,7 @@ export const inviteByHandle = networkMutation({
  * (CH-094) : une offre retirée ne doit plus proposer « Accepter ».
  */
 export const revokeInvitation = networkMutation({
+  writeBucket: "live.manage",
   args: { invitationId: v.id("liveAntennaInvitations") },
   handler: async (ctx, args): Promise<{ changed: boolean }> => {
     const row = await ctx.db.get(args.invitationId)
@@ -879,6 +882,7 @@ export const inviteStatesForUsers = networkQuery({
 
 /** Répondre à MON invitation — accepter ouvre le rôle, jamais la caméra. */
 export const respondToInvitation = networkMutation({
+  writeBucket: "live.respond",
   args: {
     invitationId: v.id("liveAntennaInvitations"),
     response: directAntennaResponseValidator,
@@ -939,6 +943,7 @@ export const respondToInvitation = networkMutation({
 
 /** Quitter volontairement l'antenne — intervenant seul, jamais l'hôte. */
 export const leaveAntenna = networkMutation({
+  writeBucket: "live.leave",
   args: { sessionId: v.id("liveSessions") },
   handler: async (ctx, args): Promise<{ left: true }> => {
     const session = await assertLiveAudience(ctx, directCaller(ctx), args.sessionId)

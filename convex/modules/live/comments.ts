@@ -78,6 +78,7 @@ export const send = networkMutation({
  * un refus de permission avant qu'on ait regardé s'il en est l'auteur.
  */
 export const remove = networkMutation({
+  writeBucket: "live.moderate",
   args: { commentId: v.id("liveComments") },
   handler: async (ctx, args): Promise<{ removed: true }> => {
     const comment = await ctx.db.get(args.commentId)

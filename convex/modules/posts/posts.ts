@@ -49,6 +49,7 @@ import { buildSearchableText, foldSearchQuery } from "@antsia/social-domain/sear
 import { type IndexRange, paginationOptsValidator } from "convex/server"
 import { type Infer, v } from "convex/values"
 
+import { canReadModeratedContent, moderateContentWrite } from "../moderation/policy"
 import type { Doc, Id } from "../../_generated/dataModel"
 import type { QueryCtx } from "../../_generated/server"
 import { checked, fail, notFound } from "../../lib/errors"
@@ -106,6 +107,7 @@ export const clampLimit = (limit: number | undefined) => Math.min(Math.max(Math.
 // ═══════════════════════════════════════════════════════════════
 
 const authorValidator = v.object({
+  isDeleted: v.optional(v.boolean()),
   personId: v.id("persons"),
   handle: v.union(v.string(), v.null()),
   displayName: v.union(v.string(), v.null()),
@@ -276,6 +278,7 @@ export async function toFeedItem(ctx: QueryCtx, post: Doc<"posts">, reader: Read
       headline: author.headline,
       avatarUrl: author.avatarUrl,
       badges: author.badges,
+      ...(author.isDeleted ? { isDeleted: true } : {}),
     },
     reactions,
     commentCount,
@@ -625,7 +628,7 @@ export const publish = networkMutation({
     })
 
     // L'auteur de l'ORIGINAL apprend le partage — le sujet est SA publication.
-    if (shared) {
+    if (shared && (await canReadModeratedContent(ctx, "post", postId, shared.authorPersonId))) {
       await notifyPerson(ctx, { networkId: ctx.networkId, recipientPersonId: shared.authorPersonId, actorPersonId: ctx.person._id, kind: "post_share", subject: { post: shared._id } })
     }
     return { postId, created: true }
@@ -685,7 +688,8 @@ export const edit = networkMutation({
       editedAt: now,
       updatedAt: now,
     })
-    await notifyMentions(ctx, post, addedMentionedIds(post.mentionedPersonIds, mentioned))
+    const admitted = await moderateContentWrite(ctx, { networkId: post.networkId, ownerPersonId: ctx.person._id, kind: "post", id: post._id, text: body })
+    if (admitted) await notifyMentions(ctx, post, addedMentionedIds(post.mentionedPersonIds, mentioned))
     return { editedAt: now }
   },
 })
@@ -706,6 +710,7 @@ export const pinOnMyWall = networkMutation({
 })
 
 export const unpinMyWall = networkMutation({
+  writeBucket: "post.unpin",
   minStatus: "en_attente",
   args: {},
   returns: v.object({ pinned: v.literal(false) }),
@@ -1079,6 +1084,7 @@ export const personPosts = networkQuery({
         // une publication de PAGE non plus — pas même sur celui de son signataire.
         if (post.audience === "group" || post.pageId !== undefined) continue
         if (pinnedPost && post._id === pinnedPost._id) continue
+        if (!(await canReadModeratedContent(ctx, "post", post._id, reader.personId))) continue
         const admitted = isPersonalPostVisibleTo({ audience: post.audience, status: post.status, isAuthor, isConnected, isGroupMember: false, isBlockedWithAuthor: false, isPageAudience: false })
         if (!admitted) continue
         visible.push(post)

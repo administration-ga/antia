@@ -29,6 +29,7 @@ import { paginationOptsValidator, type PaginationResult } from "convex/server"
 import { v } from "convex/values"
 
 import { internal } from "../../_generated/api"
+import { canReadModeratedContent, contentState, moderateContentWrite } from "../moderation/policy"
 import type { Doc, Id } from "../../_generated/dataModel"
 import { internalMutation, type MutationCtx, type QueryCtx } from "../../_generated/server"
 import { checked, fail, failRule, notFound } from "../../lib/errors"
@@ -97,7 +98,7 @@ export async function requireEventAccess(
   personId: Id<"persons">,
 ): Promise<{ event: Doc<"events">; participation: Doc<"eventParticipants"> | null; isOrganizer: boolean }> {
   const event = await ctx.db.get(eventId)
-  if (!event || event.networkId !== networkId) return notFound()
+  if (!event || event.networkId !== networkId || !(await canReadModeratedContent(ctx, "event", event._id, personId))) return notFound()
   const isOrganizer = event.organizerPersonId === personId
   const participation = isOrganizer ? null : await participationOf(ctx, eventId, personId)
   if (!isOrganizer && !participation) return notFound()
@@ -162,6 +163,7 @@ export const create = networkMutation({
       createdAt: now,
       updatedAt: now,
     })
+    await moderateContentWrite(ctx, { networkId: ctx.networkId, ownerPersonId: ctx.person._id, kind: "event", id: eventId, text: `${title} ${description ?? ""} ${location ?? ""}` })
     return { eventId, created: true }
   },
 })
@@ -180,6 +182,7 @@ export const invite = networkMutation({
   handler: async (ctx, args) => {
     await enforceRateLimit(ctx, "event.invite", ctx.person._id)
     const event = await requireOrganizedEvent(ctx, args.eventId)
+    if ((await contentState(ctx, "event", event._id))?.status === "pending_review") return fail("policyRefused")
     if (event.status === "cancelled") return failRule("EVENT_CANCELLED")
     const found = await findPublishedPersonByHandle(ctx, ctx.networkId, args.handle)
     if (!found || found._id === ctx.person._id) return notFound()
@@ -299,6 +302,7 @@ export const announce = networkMutation({
   returns: v.object({ postId: v.id("posts"), created: v.boolean() }),
   handler: async (ctx, args) => {
     const event = await requireOrganizedEvent(ctx, args.eventId)
+    if ((await contentState(ctx, "event", event._id))?.status === "pending_review") return fail("policyRefused")
     if (event.status === "cancelled") return failRule("EVENT_CANCELLED")
     if (event.announcePostId !== undefined && (await ctx.db.get(event.announcePostId)) !== null) return { postId: event.announcePostId, created: false }
     await enforceRateLimit(ctx, "post.publish", ctx.person._id)
@@ -424,10 +428,10 @@ export const myAgenda = networkQuery({
         : []
     if (participationsPast.length > 0 && participationsPast.length >= AGENDA_SCAN - participations.length) truncated = true
     const items: EventDto[] = []
-    for (const event of [...organizedPast, ...organized]) items.push(await toEventDto(ctx, event, { isOrganizer: true, participation: null, profileOf }))
+    for (const event of [...organizedPast, ...organized]) if (await canReadModeratedContent(ctx, "event", event._id, me)) items.push(await toEventDto(ctx, event, { isOrganizer: true, participation: null, profileOf }))
     for (const participation of [...participationsPast, ...participations]) {
       const event = await ctx.db.get(participation.eventId)
-      if (event) items.push(await toEventDto(ctx, event, { isOrganizer: false, participation, profileOf }))
+      if (event && await canReadModeratedContent(ctx, "event", event._id, me)) items.push(await toEventDto(ctx, event, { isOrganizer: false, participation, profileOf }))
     }
     items.sort((a, b) => a.startAt - b.startAt)
     return { items, truncated }

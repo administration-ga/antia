@@ -109,6 +109,7 @@ function egressClientFor(config: LiveKitConfig): EgressClient {
  * Le démarrage et la délivrance rejouent ensuite leurs gardes.
  */
 export const checkBroadcastConfiguration = networkAction({
+  readOnly: true,
   args: { sessionId: v.id("liveSessions") },
   returns: v.object({ ready: v.literal(true) }),
   handler: async (ctx, args): Promise<{ ready: true }> => {
@@ -701,6 +702,7 @@ export const reconcileDirectEgress = internalAction({
  *     elle l'inscrit à l'analyse de la garde des fichiers.
  */
 export const importReplayCaptions = networkAction({
+  writeBucket: "live.captions",
   args: {
     sessionId: v.id("liveSessions"),
     /** Le contenu WebVTT, en clair. Borné par la politique ci-dessous. */

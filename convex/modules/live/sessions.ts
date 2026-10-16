@@ -24,9 +24,10 @@ import { assertPersonalPostBody } from "@antsia/social-domain/content"
 import { v } from "convex/values"
 
 import { api, internal } from "../../_generated/api"
+import { contentState, moderateContentWrite } from "../moderation/policy"
 import type { Doc, Id } from "../../_generated/dataModel"
 import type { MutationCtx, QueryCtx } from "../../_generated/server"
-import { checked, failRule } from "../../lib/errors"
+import { checked, fail, failRule } from "../../lib/errors"
 import { networkMutation, networkQuery } from "../../lib/functions"
 import { enforceRateLimit } from "../../lib/rateLimit"
 import { servableUrl } from "../files/storageGuard"
@@ -246,6 +247,8 @@ export const create = networkMutation({
       updatedAt: now,
     })
 
+    await moderateContentWrite(ctx, { networkId: ctx.networkId, ownerPersonId: me, kind: "live", id: sessionId, text: title })
+
     // L'hôte est un INTERVENANT dès la naissance — sa ligne durable existe
     // avant tout jeton, et compte dans le plafond de 8.
     await ctx.db.insert("liveSpeakers", {
@@ -298,6 +301,7 @@ export const create = networkMutation({
  * cloche `live_started` — jamais à la création.
  */
 export const goLive = networkMutation({
+  writeBucket: "live.manage",
   args: { sessionId: v.id("liveSessions") },
   handler: async (ctx, args): Promise<{ started: boolean }> => {
     const session = await ctx.db.get(args.sessionId)
@@ -310,6 +314,7 @@ export const goLive = networkMutation({
     if ((await directSessionAccessDecision(ctx, ctx.person._id, session, { readerIsMember: true })) !== "allowed") {
       return directNotFound()
     }
+    if ((await contentState(ctx, "live", session._id))?.status === "pending_review") return fail("policyRefused")
     if (session.status === "live") return { started: false }
     if (session.status === "ended") return failRule("LIVE_ENDED")
 
@@ -402,6 +407,7 @@ async function notifyDirectAudience(ctx: Pick<MutationCtx, "scheduler">, session
  * de lui ouvrir une porte que l'audience a refermée.
  */
 export const end = networkMutation({
+  writeBucket: "live.end",
   args: { sessionId: v.id("liveSessions") },
   handler: async (ctx, args): Promise<{ ended: boolean }> => {
     const session = await ctx.db.get(args.sessionId)
@@ -716,6 +722,7 @@ export const get = networkQuery({
  * (plus personne n'écrit) et réécrirait un état historique. Idempotente.
  */
 export const setChatMode = networkMutation({
+  writeBucket: "live.manage",
   args: {
     sessionId: v.id("liveSessions"),
     chatMode: directChatModeValidator,
@@ -741,6 +748,7 @@ export const setChatMode = networkMutation({
  * spectateur ne désignerait aucune vignette. Idempotente.
  */
 export const setSpotlight = networkMutation({
+  writeBucket: "live.stage",
   args: {
     sessionId: v.id("liveSessions"),
     /** `null` = plus personne en avant — le retrait est le même geste. */
@@ -776,6 +784,7 @@ export const setSpotlight = networkMutation({
  * endroit où l'on lit qui peut quoi.
  */
 export const setReplayVisibility = networkMutation({
+  writeBucket: "live.manage",
   args: {
     sessionId: v.id("liveSessions"),
     visibility: directAudienceValidator,
@@ -822,6 +831,7 @@ export const setReplayVisibility = networkMutation({
  * Idempotente : rejouée, elle rend `{ withdrawn: false }`.
  */
 export const withdrawReplay = networkMutation({
+  writeBucket: "live.manage",
   args: { sessionId: v.id("liveSessions") },
   handler: async (ctx, args): Promise<{ withdrawn: boolean }> => {
     const session = await assertVisibleDirectSession(ctx, directCaller(ctx), args.sessionId)
@@ -869,6 +879,7 @@ async function withdrawReplayRow(ctx: MutationCtx, session: Doc<"liveSessions">)
  * rediffusion. Seule une publication EFFECTIVE sonne.
  */
 export const decideReplayPublication = networkMutation({
+  writeBucket: "live.manage",
   args: {
     sessionId: v.id("liveSessions"),
     decision: directReplayDecisionValidator,
@@ -907,6 +918,7 @@ export const decideReplayPublication = networkMutation({
  * est une information, pas une erreur à masquer.
  */
 export const retryReplay = networkMutation({
+  writeBucket: "live.manage",
   args: { sessionId: v.id("liveSessions") },
   handler: async (ctx, args): Promise<{ scheduled: boolean }> => {
     const session = await assertVisibleDirectSession(ctx, directCaller(ctx), args.sessionId)

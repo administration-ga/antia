@@ -610,6 +610,22 @@ describe("messages — gardes et gestes", () => {
     expect((await history(root, alice, threadId))[0]!.replyTo!.excerpt.length).toBe(140)
   })
 
+  it("R9 : la citation d'un original purgé ne conserve ni identifiant ni extrait de l'auteur effacé", async () => {
+    const t = testConvex(), { root } = await seed(t), alice = await enter(t, root, "alice"), bob = await enter(t, root, "bob")
+    await connect(t, root, alice, bob)
+    const { threadId, messageId: original } = await open(root, alice, bob, "Texte à purger")
+    const { messageId: response } = await bob.as.mutation(M.messages.sendMessage, { networkId: root, threadId, content: "Ma réponse demeure", replyToMessageId: original })
+    // Contrat du purger : marquer la citation survivante, retirer la référence,
+    // puis supprimer PHYSIQUEMENT le message ; aucune pierre tombale de l'auteur.
+    await t.run(async (ctx) => { await ctx.db.patch(response, { replyToMessageId: undefined, replyToDeletedAccount: true }); await ctx.db.delete(original) })
+    const row = (await history(root, bob, threadId)).find((message) => message.messageId === response)!
+    expect(row.content).toBe("Ma réponse demeure")
+    expect(row.replyTo).toEqual({ messageId: null, senderPersonId: null, excerpt: "", deleted: true, authorDeleted: true })
+    expect(await t.run(async (ctx) => await ctx.db.get(original))).toBeNull()
+    expect(JSON.stringify(row.replyTo)).not.toContain(alice.personId)
+    expect(JSON.stringify(row.replyTo)).not.toContain("Texte à purger")
+  })
+
   it("les deux suppressions : « pour moi » retire de MA vue seulement, s'ouvre au destinataire, se rejoue sans empiler ; « pour tous » reste à l'auteur", async () => {
     const t = testConvex()
     const { root } = await seed(t)

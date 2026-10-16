@@ -48,6 +48,7 @@ import { DIRECT_MAX_VIEWERS_CAP, DIRECT_PRESENCE_TTL_MS, effectiveReplayVisibili
 import { directPermissionsFor, type DirectPermissionKey, type DirectPermissions } from "@antsia/social-domain/live/permissions"
 import { v } from "convex/values"
 
+import { canReadModeratedContent } from "../moderation/policy"
 import type { Doc, Id } from "../../_generated/dataModel"
 import { internalMutation, type MutationCtx, type QueryCtx } from "../../_generated/server"
 import { isActiveMember, requireMembership } from "../../lib/access"
@@ -481,6 +482,7 @@ export async function directSessionAccessDecision(
   session: Doc<"liveSessions">,
   facts?: DirectAccessFacts,
 ): Promise<DirectAccessDecision> {
+  if (!(await canReadModeratedContent(ctx, "live", session._id, readerPersonId))) return "outside_audience"
   if (facts?.readerIsMember !== true && !(await isActiveMember(ctx, session.networkId, readerPersonId))) {
     return "outside_audience"
   }

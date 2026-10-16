@@ -154,6 +154,7 @@ export async function demoteSpeakerRow(ctx: SpeakerWriteCtx, session: SpeakerSes
  * mot celle d'avant.
  */
 export const promote = networkMutation({
+  writeBucket: "live.stage",
   args: {
     sessionId: v.id("liveSessions"),
     targetPersonId: v.id("persons"),
@@ -205,6 +206,7 @@ export const promote = networkMutation({
  * reste dans la salle. C'est `moderation.ban` qui ferme la porte.
  */
 export const demote = networkMutation({
+  writeBucket: "live.stage",
   args: {
     sessionId: v.id("liveSessions"),
     targetPersonId: v.id("persons"),
@@ -246,6 +248,7 @@ export const demote = networkMutation({
  * conférence — il le fait lui-même, depuis son appareil.
  */
 export const muteMicrophone = networkMutation({
+  writeBucket: "live.stage",
   args: {
     sessionId: v.id("liveSessions"),
     targetPersonId: v.id("persons"),

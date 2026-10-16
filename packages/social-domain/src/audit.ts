@@ -24,6 +24,11 @@ export const AUDIT_ACTIONS = [
   "membership.lift_suspension",
   // Modération d'un réseau
   "moderation.report_decide",
+  "moderation.team_create", "moderation.team_member_set", "moderation.policy_set", "moderation.term_set",
+  "moderation.appeal_file", "moderation.appeal_decide", "moderation.content_review",
+  "moderation.sanction_expire", "moderation.transparency_compute",
+  "data.erasure_request", "data.erasure_cancel", "data.erasure_complete", "data.export_request",
+  "federation.emitter_set", "federation.replay",
   // Garde des fichiers
   "file.release",
   "file.requeue",
@@ -44,11 +49,11 @@ export const AUDIT_ACTIONS = [
 export type AuditAction = (typeof AUDIT_ACTIONS)[number]
 
 /** À quel titre l'acte a été posé : la qualité qui l'AUTORISAIT au moment de l'acte. */
-export const AUDIT_CAPACITIES = ["platform_admin", "platform_operator", "network_admin", "network_moderator", "page_admin", "system"] as const
+export const AUDIT_CAPACITIES = ["platform_admin", "platform_operator", "network_admin", "network_moderator", "page_admin", "member", "system"] as const
 export type AuditCapacity = (typeof AUDIT_CAPACITIES)[number]
 
 /** Les tables qu'une décision peut viser — une référence, jamais un contenu. */
-export const AUDIT_SUBJECT_TABLES = ["networks", "persons", "fileScans", "contentReports", "pages", "pageClaims"] as const
+export const AUDIT_SUBJECT_TABLES = ["networks", "persons", "fileScans", "contentReports", "pages", "pageClaims", "reports", "moderationTeams", "sanctions", "appeals", "moderationPolicies", "blockedTerms", "moderationContentStates", "moderationTransparency", "dataErasureJobs", "dataExports", "federationEmitters", "federationDeadLetters"] as const
 export type AuditSubjectTable = (typeof AUDIT_SUBJECT_TABLES)[number]
 
 export type AuditSubject = { table: AuditSubjectTable; id: string }

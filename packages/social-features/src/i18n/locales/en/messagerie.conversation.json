@@ -54,6 +54,7 @@
     "unpin": "Unpin the message"
   },
   "replyPreview": {
+    "deletedAccount": "Deleted account",
     "quotedMessage": "Quoted message",
     "replyTo": "Replying to {{author}}",
     "cancel": "Cancel the reply",

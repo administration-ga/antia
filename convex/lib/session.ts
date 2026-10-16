@@ -41,5 +41,10 @@ export async function getActiveIdentity(ctx: QueryCtx | MutationCtx): Promise<Us
   if (!("_id" in session) || session._id !== identity.sessionId) return null
   if (!("userId" in session) || session.userId !== identity.subject) return null
   if (!("expiresAt" in session) || typeof session.expiresAt !== "number" || !Number.isFinite(session.expiresAt) || session.expiresAt <= Date.now()) return null
+  const person = await ctx.db.query("persons").withIndex("by_authUserId", (q) => q.eq("authUserId", identity.subject)).unique()
+  if (person?.deletionRequestedAt !== undefined) {
+    const erasure = await ctx.db.query("dataErasureJobs").withIndex("by_person", (q) => q.eq("personId", person._id)).unique()
+    if (erasure && (erasure.phase !== "waiting" || erasure.dueAt <= Date.now())) return null
+  }
   return identity
 }

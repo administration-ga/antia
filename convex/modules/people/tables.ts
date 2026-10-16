@@ -47,6 +47,8 @@ export const peopleTables = {
     locale: v.optional(localeValidator),
     timeZone: v.optional(v.string()),
     deletionRequestedAt: v.optional(v.number()),
+    /** Marque anonyme commune aux références conservées après effacement. */
+    erasedAt: v.optional(v.number()),
     createdAt: v.number(),
     updatedAt: v.number(),
   })

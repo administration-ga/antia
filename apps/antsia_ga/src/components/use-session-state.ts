@@ -21,6 +21,7 @@ export type SessionState =
   | { status: "signedOut" }
   | { status: "rootMissing" }
   | { status: "welcome"; person: MyPerson | null; root: RootNetwork }
+  | { status: "restricted"; person: MyPerson; root: RootNetwork }
   | { status: "member"; person: MyPerson; root: RootNetwork }
 
 export function useSessionState(): SessionState {
@@ -35,6 +36,7 @@ export function useSessionState(): SessionState {
   if (root === undefined || person === undefined || memberships === undefined) return { status: "loading" }
   if (root === null) return { status: "rootMissing" }
   const rootMembership = memberships.find((membership) => membership.networkId === root._id)
+  if (person && rootMembership?.status === "suspendue") return { status: "restricted", person, root }
   const activeMember = rootMembership !== undefined && rootMembership.status !== "suspendue"
   if (!person || !person.published || !activeMember) return { status: "welcome", person, root }
   return { status: "member", person, root }

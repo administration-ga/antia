@@ -610,6 +610,7 @@ export const add = networkMutation({
  * VIVANTS.
  */
 export const revoke = networkMutation({
+  writeBucket: "live.manage",
   args: {
     sessionId: v.id("liveSessions"),
     personId: v.id("persons"),

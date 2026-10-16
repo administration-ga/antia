@@ -24,6 +24,8 @@ export const routes = {
   profile: (handle: string) => `/profil/${encodeURIComponent(handle)}`,
   page: (handle: string) => `/page/${encodeURIComponent(handle)}`,
   conference: (sessionId: string) => `/conference/${encodeURIComponent(sessionId)}`,
+  personalControls: () => "/mes-donnees",
+  pushWorker: () => "/notifications-worker",
   health: () => "/sante-fonctionnelle",
   healthApi: () => "/api/sante-fonctionnelle",
 } as const

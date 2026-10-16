@@ -33,4 +33,10 @@ describe("cloche — clés de dédoublonnage et de résolution", () => {
     expect(notificationDedupKey("connection_request", { kind: "connection", id: "c1" }, "x").startsWith(prefix)).toBe(true)
     expect(notificationDedupKey("connection_request", { kind: "connection", id: "c10" }, "x").startsWith(prefix)).toBe(false)
   })
+
+  it("les décisions désignent un signalement, jamais un motif ni un contenu", () => {
+    expect(notificationDedupKey("moderation_decision", { kind: "report", id: "r1" }, null)).toBe("moderation_decision|report:r1|-")
+    expect(notificationDedupKey("membership_changed", null, null)).toBe("membership_changed|-|-")
+    expect(notificationDedupKey("badge_changed", null, null)).toBe("badge_changed|-|-")
+  })
 })

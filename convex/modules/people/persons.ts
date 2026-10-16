@@ -103,6 +103,7 @@ export const ensureMyPerson = mutation({
   handler: async (ctx): Promise<Id<"persons">> => {
     const identity = await getActiveIdentity(ctx)
     if (!identity) return fail("unauthenticated")
+    await enforceRateLimit(ctx, "person.bootstrap", identity.subject)
     const existing = await ctx.db
       .query("persons")
       .withIndex("by_authUserId", (q) => q.eq("authUserId", identity.subject))

@@ -5,6 +5,7 @@ import { callsTables } from "./modules/calls/tables"
 import { diasporaTables } from "./modules/diaspora/tables"
 import { engagementTables } from "./modules/engagement/tables"
 import { eventsTables } from "./modules/events/tables"
+import { federationTables } from "./modules/federation/tables"
 import { filesTables } from "./modules/files/tables"
 import { graphTables } from "./modules/graph/tables"
 import { groupsTables } from "./modules/groups/tables"
@@ -15,6 +16,7 @@ import { moderationTables } from "./modules/moderation/tables"
 import { networksTables } from "./modules/networks/tables"
 import { notificationsTables } from "./modules/notifications/tables"
 import { pagesTables } from "./modules/pages/tables"
+import { dataTables } from "./modules/people/dataTables"
 import { peopleTables } from "./modules/people/tables"
 import { platformTables } from "./modules/platform/tables"
 import { postsTables } from "./modules/posts/tables"
@@ -41,10 +43,12 @@ export default defineSchema(
   {
     ...networksTables,
     ...peopleTables,
+    ...dataTables,
     ...platformTables,
     ...postsTables,
     ...engagementTables,
     ...filesTables,
+    ...federationTables,
     ...graphTables,
     ...notificationsTables,
     ...thematicGroupsTables,

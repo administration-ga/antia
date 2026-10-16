@@ -475,6 +475,20 @@ describe("réponse citée, réactions et suppressions", () => {
     expect((await history(root, bob, threadId))[0]!.replyTo).toMatchObject({ excerpt: "", deleted: true })
   })
 
+  it("R9 : citation de groupe anonyme après suppression physique, sans texte ni identifiants", async () => {
+    const t = testConvex(), { root } = await seed(t), { alice, bob, carla } = await trio(t, root)
+    const threadId = await constituted(alice, root, [bob, carla])
+    const original = await send(root, alice, threadId, "Texte à purger")
+    const response = await send(root, bob, threadId, "Ma réponse demeure", { replyToMessageId: original })
+    await t.run(async (ctx) => { await ctx.db.patch(response, { replyToMessageId: undefined, replyToDeletedAccount: true }); await ctx.db.delete(original) })
+    const row = (await history(root, carla, threadId)).find((message) => message.messageId === response)!
+    expect(row.content).toBe("Ma réponse demeure")
+    expect(row.replyTo).toEqual({ messageId: null, senderPersonId: null, excerpt: "", deleted: true, authorDeleted: true })
+    expect(await t.run(async (ctx) => await ctx.db.get(original))).toBeNull()
+    expect(JSON.stringify(row.replyTo)).not.toContain(alice.personId)
+    expect(JSON.stringify(row.replyTo)).not.toContain("Texte à purger")
+  })
+
   it("réagir : pose, remplace, retire ; additionne deux personnes et rend MA réaction ; un non-membre est refusé", async () => {
     const t = testConvex()
     const { root } = await seed(t)

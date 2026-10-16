@@ -166,7 +166,7 @@ describe("publier et lire le fil", () => {
     expect(again.postId).toEqual(first.postId)
   })
 
-  it("la publication est bornée en débit", async () => {
+  it("la publication d'un membre déclaré sans badge fort est bornée au seuil renforcé", async () => {
     const t = testConvex()
     await seed(t)
     const lynda = await enter(t, "auth-lynda", "lynda.onanga")
@@ -174,8 +174,8 @@ describe("publier et lire le fil", () => {
     for (let index = 0; index < 12; index += 1) {
       codes.push(code(await caught(lynda.as.mutation(api.modules.posts.posts.publish, { networkId: lynda.rootId, body: `Billet ${index}` }))))
     }
-    expect(codes.slice(0, 10).every((value) => value === null)).toBe(true)
-    expect(codes).toContain("rateLimited")
+    expect(codes.slice(0, 3)).toEqual([null, null, null])
+    expect(codes.slice(3).every((value) => value === "rateLimited")).toBe(true)
   })
 })
 

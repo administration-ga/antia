@@ -51,4 +51,13 @@ crons.interval("live-purge-expired-replays", { hours: 1 }, internal.modules.live
 // (fichier rapatrié, échec nommé, ou abandon motivé après 24 h).
 crons.interval("live-reconcile-replays", { minutes: 15 }, internal.modules.live.replay.reconcileStalePending, {})
 
+// PA5 — bornes, reprises et absence de contenu dans les notifications.
+crons.interval("moderation-expire-sanctions", { minutes: 5 }, internal.modules.moderation.maintenance.expireSanctions, {})
+crons.daily("moderation-aggregate-transparency", { hourUTC: 4, minuteUTC: 10 }, internal.modules.moderation.maintenance.aggregateTransparency, {})
+crons.interval("notifications-drain-deliveries", { seconds: 30 }, internal.modules.notifications.deliveries.drain, {})
+crons.daily("notifications-reserve-digests", { hourUTC: 7, minuteUTC: 0 }, internal.modules.notifications.deliveries.reserveDigests, {})
+crons.daily("notifications-retention-active", { hourUTC: 3, minuteUTC: 45 }, internal.modules.notifications.retention.run, {})
+crons.interval("data-resume-erasure", { minutes: 15 }, internal.modules.people.erasure.resumeDueErasures, {})
+crons.daily("data-purge-export-receipts", { hourUTC: 4, minuteUTC: 30 }, internal.modules.people.erasure.purgeExpiredExports, {})
+
 export default crons

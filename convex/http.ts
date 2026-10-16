@@ -12,6 +12,7 @@
 import { directEgressOutcomeFromStatus } from "@antsia/social-domain/live/replayComposition"
 import { httpRouter } from "convex/server"
 
+import { inbox as federationInbox } from "./modules/federation/http"
 import { internal } from "./_generated/api"
 import { httpAction } from "./_generated/server"
 import { createAuth, trustedOrigins } from "./betterAuth/auth"
@@ -256,5 +257,7 @@ http.route({
     return livekitEgressJson({ ok: true })
   }),
 })
+
+http.route({ path: "/federation/inbox", method: "POST", handler: federationInbox })
 
 export default http

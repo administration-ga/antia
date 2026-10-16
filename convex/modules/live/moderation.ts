@@ -72,6 +72,7 @@ function assertModeratableTarget(
 
 /** Exclure une personne de CE direct. Permission `exclude`, idempotent. */
 export const ban = networkMutation({
+  writeBucket: "live.moderate",
   args: {
     sessionId: v.id("liveSessions"),
     targetPersonId: v.id("persons"),
@@ -152,6 +153,7 @@ export const ban = networkMutation({
  * rend plus sa ligne (point UNIQUE, `access.ts`).
  */
 export const reinstate = networkMutation({
+  writeBucket: "live.moderate",
   args: {
     sessionId: v.id("liveSessions"),
     targetPersonId: v.id("persons"),
@@ -177,6 +179,7 @@ export const reinstate = networkMutation({
  * la refuse. C'est l'écart entre « ne rien faire » et « exclure ».
  */
 export const muteChat = networkMutation({
+  writeBucket: "live.moderate",
   args: {
     sessionId: v.id("liveSessions"),
     targetPersonId: v.id("persons"),
@@ -211,6 +214,7 @@ export const muteChat = networkMutation({
 
 /** RÉTABLIR le chat d'une personne. Permission `moderateChat`, idempotente. */
 export const unmuteChat = networkMutation({
+  writeBucket: "live.moderate",
   args: {
     sessionId: v.id("liveSessions"),
     targetPersonId: v.id("persons"),

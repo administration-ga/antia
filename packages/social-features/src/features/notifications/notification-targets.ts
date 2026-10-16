@@ -216,6 +216,7 @@ export function notificationTarget(item: NotificationTargetInput, routes: Notifi
 			return { kind: "calls", id, href: icomMobileTabHref("iappel", { home: routes.home(), messages: routes.messages() }), label: t(OPEN_LABEL) }
 		case "connection":
 		case "fileScan":
+		case "report":
 			// Une connexion ne s'ouvre pas hors de son genre (traité plus haut) ;
 			// un fichier retenu n'a pas de page ici (la modération a sa console).
 			return null
@@ -354,6 +355,9 @@ type EngineOnlyKind = Exclude<NotificationKind, NotificationSentenceKind>
  * parrain lui-même, ou par la modération, qui ne se désigne pas.
  */
 const ENGINE_ONLY_SENTENCES: Readonly<Record<EngineOnlyKind, { actor: string | null; system: string | null }>> = Object.freeze({
+		membership_changed: { actor: null, system: "notifications:notificationTargets.sentence.membershipChanged" },
+		badge_changed: { actor: null, system: "notifications:notificationTargets.sentence.badgeChanged" },
+		moderation_decision: { actor: null, system: "notifications:notificationTargets.sentence.moderationDecision" },
 	// C'est la PAGE qui parle : aucun acteur, la publication est le sujet.
 	page_post: { actor: null, system: "notifications:notificationTargets.sentence.pagePost" },
 	album_published: { actor: "notifications:notificationTargets.sentence.albumPublished", system: null },

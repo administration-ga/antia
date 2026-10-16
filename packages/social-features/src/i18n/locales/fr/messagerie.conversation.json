@@ -54,6 +54,7 @@
     "unpin": "Désépingler le message"
   },
   "replyPreview": {
+    "deletedAccount": "Compte supprimé",
     "quotedMessage": "Message cité",
     "replyTo": "Réponse à {{author}}",
     "cancel": "Annuler la réponse",

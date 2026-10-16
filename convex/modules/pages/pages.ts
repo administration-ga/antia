@@ -21,6 +21,7 @@ import { paginationOptsValidator, type PaginationResult } from "convex/server"
 import { type Infer, v } from "convex/values"
 
 import { internal } from "../../_generated/api"
+import { canReadModeratedContent, moderateContentWrite } from "../moderation/policy"
 import type { Doc, Id } from "../../_generated/dataModel"
 import type { QueryCtx } from "../../_generated/server"
 import { checked, fail, failRule, notFound } from "../../lib/errors"
@@ -164,6 +165,7 @@ export const createPage = networkMutation({
       createdAt: now,
       updatedAt: now,
     })
+    await moderateContentWrite(ctx, { networkId: ctx.networkId, ownerPersonId: ctx.person._id, kind: "page", id: pageId, text: `${name} ${description ?? ""}` })
     await ctx.db.insert("pageSignatories", { networkId: ctx.networkId, pageId, personId: ctx.person._id, role: "admin", acceptedAt: now, createdAt: now, updatedAt: now })
     return { pageId, handle }
   },
@@ -178,7 +180,7 @@ export const getPage = networkQuery({
   args: { handle: v.string() },
   returns: v.union(pageDtoValidator, v.null()),
   handler: async (ctx, args) => {
-    const page = await readablePageByHandle(ctx, ctx.network, args.handle)
+    const page = await readablePageByHandle(ctx, ctx.network, args.handle, ctx.person._id)
     if (!page) return null
     const [card, bannerUrl, followerCount, postCount, following, role] = await Promise.all([
       pageCardOf(ctx, page),
@@ -346,7 +348,7 @@ export const discover = networkQuery({
     const rows = await discoveryQuery(ctx, ctx.network, discoveryFilterOf(args)).take(limit)
     const isFollowed = await followingFlags(ctx, readerOf(ctx))
     const out: PageSummary[] = []
-    for (const page of rows) out.push(await toPageSummary(ctx, page, await isFollowed(page._id)))
+    for (const page of rows) if (await canReadModeratedContent(ctx, "page", page._id, ctx.person._id)) out.push(await toPageSummary(ctx, page, await isFollowed(page._id)))
     return out
   },
 })
@@ -362,7 +364,7 @@ export const paginateDiscover = networkQuery({
     const result = await discoveryQuery(ctx, ctx.network, discoveryFilterOf(args)).paginate(clampPage(args.paginationOpts))
     const isFollowed = await followingFlags(ctx, readerOf(ctx))
     const page: PageSummary[] = []
-    for (const row of result.page) page.push(await toPageSummary(ctx, row, await isFollowed(row._id)))
+    for (const row of result.page) if (await canReadModeratedContent(ctx, "page", row._id, ctx.person._id)) page.push(await toPageSummary(ctx, row, await isFollowed(row._id)))
     return { ...result, page }
   },
 })
@@ -473,7 +475,7 @@ export const pagePosts = networkQuery({
   returns: v.object({ items: v.array(feedItemValidator), nextCursor: v.union(cursorValidator, v.null()) }),
   handler: async (ctx, args) => {
     const reader = readerOf(ctx)
-    const page = await readablePageByHandle(ctx, ctx.network, args.handle)
+    const page = await readablePageByHandle(ctx, ctx.network, args.handle, ctx.person._id)
     if (!page) return { items: [], nextCursor: null }
     const limit = clampLimit(args.limit)
     const [reason, cursorCreationTime] = await Promise.all([pageViewingReason(ctx, reader, page._id), cursorCreationTimeOf(ctx, args.cursor)])
