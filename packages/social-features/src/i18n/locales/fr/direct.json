@@ -1,0 +1,112 @@
+{
+  "close": "Fermer",
+  "back": "Retour au réseau",
+  "person": "Membre du réseau",
+  "failed": "Cette conférence est indisponible. Réessayez dans quelques instants.",
+  "retry": "Réessayer",
+  "loading": "Chargement des conférences…",
+  "pending": "Veuillez patienter…",
+  "more": "Voir plus",
+  "start": "Passer en direct",
+  "join": "Rejoindre la salle",
+  "leave": "Quitter la salle",
+  "end": "Terminer la conférence",
+  "cancel": "Annuler la conférence",
+  "endConfirm": "Confirmer la fin de cette conférence pour tous les participants ?",
+  "confirm": "Confirmer",
+  "keep": "Continuer la conférence",
+  "waiting": "La conférence n'a pas encore commencé.",
+  "joinDescription": "Entrez dans la salle pour écouter le direct. Le micro et la caméra d'un spectateur restent éteints.",
+  "anotherRoom": "Vous avez déjà une conférence en cours. Quittez-la avant de rejoindre une autre salle.",
+  "returnToRoom": "Revenir à la conférence",
+  "ongoing": "Conférence en cours",
+  "stage": "Scène de la conférence",
+  "emptyStage": "Aucun intervenant à l'écran pour le moment.",
+  "microphoneOff": "Couper le micro",
+  "microphoneOn": "Allumer le micro",
+  "cameraOff": "Couper la caméra",
+  "cameraOn": "Allumer la caméra",
+  "counters": "{{present}} présents · {{admitted}} admissions depuis le début",
+  "recording": "Cette conférence est enregistrée. L'hôte décidera ensuite de la publication de la rediffusion.",
+  "status": {
+    "scheduled": "À venir",
+    "live": "En direct",
+    "ended": "Terminée"
+  },
+  "audience": {
+    "public": "Tout le réseau",
+    "connections": "Mes relations",
+    "followers": "Abonnés de la page",
+    "invitees": "Invités seulement"
+  },
+  "phase": {
+    "idle": "Hors de la salle",
+    "preparing": "Préparation",
+    "ready": "Prêt à rejoindre",
+    "connecting": "Connexion à la salle…",
+    "connected": "Connecté à la salle",
+    "reconnecting": "Reconnexion en cours…",
+    "disconnected": "Connexion interrompue",
+    "error": "Connexion refusée"
+  },
+  "create": {
+    "title": "Créer une conférence",
+    "description": "Préparez votre conférence ; vous la démarrerez après avoir vérifié votre matériel.",
+    "name": "Titre",
+    "audience": "Audience",
+    "capacity": "Nombre maximal de spectateurs",
+    "networkOnly": "Cette conférence reste dans ce réseau, même avec l'audience « Tout le réseau ».",
+    "record": "Enregistrer cette conférence",
+    "recordDescription": "L'enregistrement est annoncé aux participants. Il restera privé tant que vous ne déciderez pas de le publier après la conférence.",
+    "announce": "Publier une annonce dans le fil",
+    "submit": "Préparer la conférence",
+    "invalidTitle": "Saisissez un titre de 1 à {{max}} caractères.",
+    "invalidCapacity": "Choisissez de 1 à {{max}} spectateurs.",
+    "invited_one": "{{count}} personne proposée comme intervenante.",
+    "invited_other": "{{count}} personnes proposées comme spectateurs."
+  },
+  "directory": {
+    "title": "Conférences",
+    "filters": "Afficher les conférences",
+    "live": "En direct",
+    "replays": "Rediffusions",
+    "mine": "Mes conférences",
+    "empty": {
+      "live": "Aucune conférence en direct accessible pour le moment.",
+      "replays": "Aucune rediffusion publiée accessible pour le moment.",
+      "mine": "Vous n'avez pas encore créé de conférence."
+    }
+  },
+  "preflight": {
+    "description": "Vérifiez votre micro et votre caméra avant de prévenir votre audience. Ce test reste sur votre appareil.",
+    "audioOnly": "Audio seul, sans caméra",
+    "preview": "Aperçu de ma caméra",
+    "check": "Vérifier mon matériel",
+    "ready": "Votre matériel a répondu. Vous pouvez passer en direct.",
+    "failed": "Votre matériel n'a pas pu être préparé. Vérifiez les autorisations du navigateur."
+  },
+  "replay": {
+    "none": "Cette conférence n'a pas de rediffusion disponible.",
+    "pending": "L'enregistrement est en préparation.",
+    "ready": "Rediffusion prête",
+    "failed": "L'enregistrement n'a pas pu être préparé.",
+    "expired": "La conservation de cette rediffusion est terminée.",
+    "player": "Lire la rediffusion",
+    "captions": "Sous-titres",
+    "publish": "Publier la rediffusion",
+    "keepPrivate": "Garder pour moi",
+    "publication": {
+      "undecided": "La publication reste à décider.",
+      "published": "La rediffusion est publiée pour l'audience autorisée.",
+      "private": "La rediffusion est gardée pour vous."
+    }
+  },
+  "media": {
+    "microphoneFailed": "Le micro n'a pas démarré."
+  },
+  "coexistence": {
+    "microphoneMuted": "Appel en cours : le micro du direct est coupé, le son est baissé.",
+    "volumeReduced": "Appel en cours : le son du direct est baissé."
+  },
+  "joinPublisherDescription": "Vous allez rejoindre l'antenne. Choisissez le micro et la caméra que vous souhaitez activer en entrant."
+}

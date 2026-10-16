@@ -382,6 +382,8 @@ export function PostCard({ post, now, onTag, onMention }: PostCardProps) {
           <PostMedia media={post.media} gutter={POST_CARD_GUTTER} />
         ) : null}
 
+        {post.live ? <Link href={routes.conference(post.live.sessionId)} className="mt-3 flex min-h-11 items-center justify-between gap-3 rounded-xl border border-border bg-muted p-4"><span>{post.live.title}</span><span>{t(`direct:status.${post.live.status}`)}</span></Link> : null}
+
         {post.share ? (
           <SharedPostCard share={post.share} now={now} onTag={onTag} onMention={onMention} />
         ) : null}

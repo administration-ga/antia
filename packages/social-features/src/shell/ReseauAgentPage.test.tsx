@@ -154,10 +154,10 @@ describe("ReseauAgentPage — la page réseau", () => {
     expect(screen.getByTestId("FeedPage")).toBeTruthy()
   })
 
-  it("rend au bureau les volets SERVIS — jamais « Conférences » — et le fil ouvert", () => {
+  it("rend au bureau les volets servis et le fil ouvert", () => {
     page()
     const onglets = within(screen.getByRole("tablist", { name: "Volets du réseau" })).getAllByRole("tab")
-    expect(onglets.map((onglet) => onglet.textContent)).toEqual(["Fil", "Relations", "Groupes", "Pages", "Évènements", "Enregistrements"])
+    expect(onglets.map((onglet) => onglet.textContent)).toEqual(["Fil", "Relations", "Groupes", "Pages", "Conférences", "Évènements", "Enregistrements"])
     expect(screen.getByRole("tab", { name: "Fil" }).getAttribute("aria-selected")).toBe("true")
     expect(screen.getByRole("tabpanel").getAttribute("aria-labelledby")).toBe("reseau-tab-fil")
     expect(screen.getByRole("heading", { level: 1, name: "Réseau" })).toBeTruthy()
@@ -165,12 +165,12 @@ describe("ReseauAgentPage — la page réseau", () => {
     expect(screen.getByTestId("StoriesTray")).toBeTruthy()
   })
 
-  it("rabat une adresse de conférence sur le fil plutôt que sur un écran vide", () => {
+  it("ouvre les conférences depuis leur adresse", () => {
     mocks.tab = "conferences"
     page()
-    expect(screen.getByRole("tab", { name: "Fil" }).getAttribute("aria-selected")).toBe("true")
-    expect(screen.getByRole("heading", { level: 2, name: "Fil" })).toBeTruthy()
-    expect(screen.getByTestId("FeedPage")).toBeTruthy()
+    expect(screen.getByRole("tab", { name: "Conférences" }).getAttribute("aria-selected")).toBe("true")
+    expect(screen.getByRole("button", { name: "Mes conférences" })).toBeTruthy()
+    expect(screen.queryByTestId("FeedPage")).toBeNull()
   })
 
   it("ouvre le rail droit par la carte iCom, puis la découverte", () => {

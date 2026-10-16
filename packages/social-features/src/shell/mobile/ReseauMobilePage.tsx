@@ -33,6 +33,9 @@ import { EvenementsPanel } from "../../features/reseau-personnel/EvenementsPanel
 import { GroupsPanel } from "../../features/reseau-personnel/GroupsPanel"
 import { PagesPanel } from "../../features/reseau-personnel/PagesPanel"
 import { PeoplePanel } from "../../features/reseau-personnel/PeoplePanel"
+import { CreateDirectDialog } from "../../features/direct/CreateDirectDialog"
+import { DirectsPanel } from "../../features/direct/DirectsPanel"
+
 import { useCreationController } from "../../features/reseau-personnel/use-creation-controller"
 import { useReseauFeedState, type ReseauFeedState } from "../../features/reseau-personnel/useReseauFeedState"
 import { StoryCreateSheet } from "../../features/stories/StoryCreateSheet"
@@ -156,6 +159,7 @@ export function ReseauMobilePage() {
           ne permettait pas (R-02). */}
       <PostComposerSheet open={creation.open === "publication"} onClose={creation.close} />
       <StoryCreateSheet open={creation.open === "actu"} onClose={creation.close} onPublished={creation.close} />
+      {creation.open === "conference" ? <CreateDirectDialog onClose={creation.close} /> : null}
     </ReseauMobileShell>
   )
 }
@@ -215,9 +219,8 @@ function ReseauMobileMainPanel({
     case "pages":
       return <PagesPanel />
     case "conferences":
-      // Jamais atteint : `servedReseauTab` rabat ce volet sur le fil tant que
-      // le module `live` ne le sert pas.
-      return null
+      // F3a : mêmes conférences dans les deux coquilles.
+      return <DirectsPanel />
     case "events":
       // Sans `onCreateEvent` : le catalogue de création mène l'évènement à ce
       // volet même — un bouton qui y renverrait tournerait en rond.

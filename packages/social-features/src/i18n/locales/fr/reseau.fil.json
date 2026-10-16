@@ -97,6 +97,10 @@
       "album": {
         "label": "Album",
         "description": "Une collection de photos, rangée et légendée, sur votre profil."
+      },
+      "conference": {
+        "label": "Conférence",
+        "description": "Préparer un direct dans ce réseau."
       }
     }
   },

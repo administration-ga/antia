@@ -32,6 +32,7 @@
  */
 
 import type { TFunction } from "i18next"
+import type { DirectAudience } from "@antia/social-domain/live/domain"
 
 import { storyAuthorName, type StoryTrayGroup } from "./stories-tray"
 
@@ -55,7 +56,7 @@ export interface LiveDirectCard {
 	 * (« Invités seulement ») : un invité voit la conférence dans ses directs
 	 * en cours.
 	 */
-	audience: "public" | "connections" | "invitees"
+	audience: DirectAudience
 	startedAt: number
 	/** `displayName` nul : rien à nommer (contrat `counterpartLabel`) — libellé neutre à l'écran. */
 	host: { displayName: string | null; handle: string | null; avatarUrl: string | null }

@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/ReseauAgentPage.tsx @ ad2e7fdc2 — adaptations : RÉÉCRIT pour la page réseau du moteur, déplacée dans la coque (`shell/`) — l'accueil de l'application (`useRoutes().home()`, volets par `reseau-agent-nav`), sans l'espace agent : orchestration des volets, bascule téléphone/bureau, carte d'identité épinglée, onglets « chemise », outils du fil, stories, composeurs et rails GARDÉS ; volet « Conférences », rail des directs et dialogue de conférence RETIRÉS (module `live` : `servedReseauTab` rabat leurs adresses sur le fil) ; volet Pages et rail « Pages à suivre » par les composants RÉÉCRITS sur les pages du moteur ; rail droit ouvert par la carte iCom (`MessagerieDock`) ; grille sans le rail de l'hôte — le menu vertical (`ReseauMenuRail`) est la navigation dès 812 px de conteneur et les trois colonnes tiennent dès 1 108 px (paliers du socle « rail rétracté », plus aucune lecture de `[data-espace-rail]`), la porte iCom compacte s'efface au seul palier où la carte est visible ; feuille sortie du JSX dans une constante de module (`RESEAU_DESKTOP_CSS`) — un littéral enfant de `<style>` passerait pour une chaîne d'interface — avec la cadence des blocs en valeur (`--sp-4`, jeton absent du moteur, retiré) ; onglets « chemise » et feuille du kit d'espace par `@antia/ui/espace-kit` ; identifiants de la tablist `reseau-panel` / `reseau-tab-` (plus d'iProfil) ; volet Évènements monté sans `onCreateEvent` — l'intention de composition d'iAgenda (absent du moteur) n'existe plus et le catalogue de création mène l'évènement au volet lui-même : un bouton qui y renverrait tournerait en rond ; lecteur des statuts sur `useRoutes().stories()` (paramètre `auteur`), surfaces `reseau` du plateau retirées ; ma fiche lue sur la personne du moteur (identifiant seulement PUBLIÉ, portrait servi par la garde) ; résultats de recherche clés sur `_id` ; textes par l'i18n (`reseau:reseauAgentPage.*`, volets et portées par leurs clés, `t` passé aux modules purs) ; « iRéseau » devient « réseau » ; commentaires rapportés au moteur.
+// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/ReseauAgentPage.tsx @ ad2e7fdc2 — adaptations : RÉÉCRIT pour la page réseau du moteur, déplacée dans la coque (`shell/`) — l'accueil de l'application (`useRoutes().home()`, volets par `reseau-agent-nav`), sans l'espace agent : orchestration des volets, bascule téléphone/bureau, carte d'identité épinglée, onglets « chemise », outils du fil, stories, composeurs et rails GARDÉS ; volet « Conférences » et dialogue branchés au moteur `live` (F3a), rail avancé différé ; volet Pages et rail « Pages à suivre » par les composants RÉÉCRITS sur les pages du moteur ; rail droit ouvert par la carte iCom (`MessagerieDock`) ; grille sans le rail de l'hôte — le menu vertical (`ReseauMenuRail`) est la navigation dès 812 px de conteneur et les trois colonnes tiennent dès 1 108 px (paliers du socle « rail rétracté », plus aucune lecture de `[data-espace-rail]`), la porte iCom compacte s'efface au seul palier où la carte est visible ; feuille sortie du JSX dans une constante de module (`RESEAU_DESKTOP_CSS`) — un littéral enfant de `<style>` passerait pour une chaîne d'interface — avec la cadence des blocs en valeur (`--sp-4`, jeton absent du moteur, retiré) ; onglets « chemise » et feuille du kit d'espace par `@antia/ui/espace-kit` ; identifiants de la tablist `reseau-panel` / `reseau-tab-` (plus d'iProfil) ; volet Évènements monté sans `onCreateEvent` — l'intention de composition d'iAgenda (absent du moteur) n'existe plus et le catalogue de création mène l'évènement au volet lui-même : un bouton qui y renverrait tournerait en rond ; lecteur des statuts sur `useRoutes().stories()` (paramètre `auteur`), surfaces `reseau` du plateau retirées ; ma fiche lue sur la personne du moteur (identifiant seulement PUBLIÉ, portrait servi par la garde) ; résultats de recherche clés sur `_id` ; textes par l'i18n (`reseau:reseauAgentPage.*`, volets et portées par leurs clés, `t` passé aux modules purs) ; « iRéseau » devient « réseau » ; commentaires rapportés au moteur.
 "use client"
 
 /**
@@ -77,6 +77,9 @@ import { ProfileMiniCard } from "../features/reseau-personnel/ProfileMiniCard"
 import { appendPage, feedCursorKey, loadMoreAnnouncement, shouldShowLoadMore } from "../features/reseau-personnel/reseau-feed-pages"
 import { emptyFeedText, formatUnreadBadge, searchStatusText } from "../features/reseau-personnel/shared"
 import { SuggestionsPanel } from "../features/reseau-personnel/SuggestionsPanel"
+import { CreateDirectDialog } from "../features/direct/CreateDirectDialog"
+import { DirectsPanel } from "../features/direct/DirectsPanel"
+
 import { useCreationController } from "../features/reseau-personnel/use-creation-controller"
 import { useReseauFeedState } from "../features/reseau-personnel/useReseauFeedState"
 // Import DIRECT des symboles (et non de l'index de la tranche `stories`) : le
@@ -612,6 +615,7 @@ function ReseauAgentPageInner() {
                     </Button>
                     {/* iCom est une surface dédiée : cette porte permanente ne
                         réintroduit pas « Messages » dans les onglets/rail. */}
+                    <Button size="sm" icon="video" onClick={() => creation.openCreation("conference")} style={{ borderRadius: 999 }}>{t("direct:create.title")}</Button>
                     <ReseauDesktopIcomLink />
                   </div>
                 }
@@ -904,7 +908,7 @@ function ReseauAgentPageInner() {
                 onOpenGroup={openGroup}
                 onBack={closeGroup}
               />
-            ) : /* « Conférences » n'est jamais montré (`servedReseauTab`), et le
+            ) : main === "conferences" ? <DirectsPanel /> : /* le
                  volet « Activité » a disparu le 2026-09-06 (R-03) : le relevé
                  des notifications est le contenu de la CLOCHE. */
             null}
@@ -933,6 +937,7 @@ function ReseauAgentPageInner() {
           `container-type` de `.rp-scope` ne la concerne pas. */}
       <StoryCreateSheet open={creation.open === "actu"} onClose={creation.close} onPublished={creation.close} />
       <PostComposerSheet open={creation.open === "publication"} onClose={creation.close} />
+      {creation.open === "conference" ? <CreateDirectDialog onClose={creation.close} /> : null}
     </div>
   )
 }

@@ -14,7 +14,7 @@ import {
 
 const t = createAppI18n({ locale: "fr", appResources: { fr: {}, en: {} }, defaultNS: "reseau" }).getFixedT("fr")
 
-const TOUS: readonly CreationKind[] = ["publication", "actu", "evenement", "album"]
+const TOUS: readonly CreationKind[] = ["publication", "actu", "evenement", "conference", "album"]
 
 /** Une personne qui a un profil public — donc une adresse où poser un album. */
 const AVEC_HANDLE = { handle: "m.ndong" }
@@ -29,23 +29,23 @@ describe("creationEntries — ce que « Créer » propose", () => {
   it("porte les TROIS formats au téléphone, dans l'ordre du rendu", () => {
     // L'ordre est un contrat : la carte de choix le lit tel quel, et le
     // déplacer changerait la cible sous le doigt d'un geste appris.
-    expect(creationEntries({ mobile: true }).map((entry) => entry.kind)).toEqual(["publication", "actu", "evenement"])
-    expect(creationEntries({ mobile: true }).map((entry) => t(entry.labelKey))).toEqual(["Publication", "Actu", "Évènement"])
+    expect(creationEntries({ mobile: true }).map((entry) => entry.kind)).toEqual(["publication", "actu", "evenement", "conference"])
+    expect(creationEntries({ mobile: true }).map((entry) => t(entry.labelKey))).toEqual(["Publication", "Actu", "Évènement", "Conférence"])
   })
 
   it("s'en tient au geste permanent au bureau", () => {
     // La barre d'identité épinglée le porte déjà ; l'actu a la vignette
     // « Créer » de sa rangée, l'évènement a son volet. Deux portes pour une
     // même carte, à trente pixels d'écart, se lisent comme deux objets.
-    expect(creationEntries().map((entry) => entry.kind)).toEqual(["publication"])
-    expect(creationEntries({ mobile: false }).map((entry) => entry.kind)).toEqual(["publication"])
+    expect(creationEntries().map((entry) => entry.kind)).toEqual(["publication", "conference"])
+    expect(creationEntries({ mobile: false }).map((entry) => entry.kind)).toEqual(["publication", "conference"])
   })
 
-  it("n'offre la conférence NULLE PART : le direct n'existe pas encore", () => {
+  it("offre la conférence aux deux coquilles depuis F3a", () => {
     for (const mobile of [true, false]) {
       for (const context of [{}, AVEC_HANDLE]) {
         const kinds = creationEntries({ mobile, ...context }).map((entry) => entry.kind as string)
-        expect(kinds).not.toContain("conference")
+        expect(kinds).toContain("conference")
       }
     }
   })
@@ -66,11 +66,12 @@ describe("creationEntries — ce que « Créer » propose", () => {
     // Contrairement à l'actu (vignette de la rangée) et à l'évènement (son
     // volet), l'album n'a AUCUNE autre porte : il doit donc figurer au bureau
     // comme au téléphone, et en DERNIER — l'ordre est lu tel quel par la carte.
-    expect(creationEntries({ ...AVEC_HANDLE }).map((e) => e.kind)).toEqual(["publication", "album"])
+    expect(creationEntries({ ...AVEC_HANDLE }).map((e) => e.kind)).toEqual(["publication", "conference", "album"])
     expect(creationEntries({ mobile: true, ...AVEC_HANDLE }).map((e) => e.kind)).toEqual([
       "publication",
       "actu",
       "evenement",
+      "conference",
       "album",
     ])
     expect(t(creationEntry("album").labelKey)).toBe("Album")
@@ -99,7 +100,7 @@ describe("creationEntries — ce que « Créer » propose", () => {
   it("rend une liste NEUVE — la carte ne peut pas figer le catalogue", () => {
     const first = creationEntries({ mobile: true })
     first.pop()
-    expect(creationEntries({ mobile: true })).toHaveLength(3)
+    expect(creationEntries({ mobile: true })).toHaveLength(4)
   })
 
   it("le catalogue du bureau est inclus dans celui du téléphone", () => {
@@ -118,6 +119,7 @@ describe("creationSurfaceFor", () => {
     expect(creationSurfaceFor("actu")).toBe("story_composer")
     expect(creationSurfaceFor("evenement")).toBe("events_route")
     expect(creationSurfaceFor("album")).toBe("profil_albums_route")
+    expect(creationSurfaceFor("conference")).toBe("direct_dialog")
   })
 
   it("donne à chaque format une surface DISTINCTE", () => {
@@ -128,7 +130,7 @@ describe("creationSurfaceFor", () => {
 
 describe("creationLaunchFor — ouvrir en place, ou naviguer", () => {
   it("ouvre une surface EN PLACE pour les deux formats qui en ont une", () => {
-    for (const kind of ["publication", "actu"] as const) {
+    for (const kind of ["publication", "actu", "conference"] as const) {
       expect(creationLaunchFor(kind, {}, ROUTES)).toEqual({ action: "surface", kind })
     }
   })

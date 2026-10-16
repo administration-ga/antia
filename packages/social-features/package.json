@@ -16,7 +16,8 @@
     "./reseau-personnel": "./src/features/reseau-personnel/index.ts",
     "./albums": "./src/features/reseau-albums/index.ts",
     "./notifications": "./src/features/notifications/index.ts",
-    "./*": "./src/*.ts"
+    "./*": "./src/*.ts",
+    "./direct": "./src/features/direct/index.ts"
   },
   "scripts": {
     "typecheck": "tsgo --noEmit -p tsconfig.json",
@@ -38,7 +39,10 @@
     "react-i18next": "catalog:",
     "react-qr-code": "catalog:",
     "sonner": "catalog:",
-    "tslib": "catalog:"
+    "tslib": "catalog:",
+    "@hookform/resolvers": "catalog:",
+    "react-hook-form": "catalog:",
+    "zod": "catalog:"
   },
   "peerDependencies": {
     "react": "catalog:",

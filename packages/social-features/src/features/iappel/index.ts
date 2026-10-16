@@ -280,6 +280,7 @@ export {
 } from "./ConferenceHintCard"
 export {
 	useLaunchConference,
+	useConferenceLaunchAvailable,
 	CONFERENCE_LAUNCH_AVAILABLE,
 	type ConferenceLaunchRequest,
 } from "./use-launch-conference"

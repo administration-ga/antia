@@ -1,0 +1,112 @@
+{
+  "close": "Close",
+  "back": "Back to the network",
+  "person": "Network member",
+  "failed": "This conference is unavailable. Try again shortly.",
+  "retry": "Retry",
+  "loading": "Loading conferences…",
+  "pending": "Please wait…",
+  "more": "Load more",
+  "start": "Go live",
+  "join": "Join the room",
+  "leave": "Leave the room",
+  "end": "End the conference",
+  "cancel": "Cancel the conference",
+  "endConfirm": "End this conference for all participants?",
+  "confirm": "Confirm",
+  "keep": "Continue the conference",
+  "waiting": "The conference has not started yet.",
+  "joinDescription": "Enter the room to listen to the broadcast. A viewer's microphone and camera stay off.",
+  "anotherRoom": "You already have an ongoing conference. Leave it before joining another room.",
+  "returnToRoom": "Return to the conference",
+  "ongoing": "Ongoing conference",
+  "stage": "Conference stage",
+  "emptyStage": "No speakers on screen yet.",
+  "microphoneOff": "Mute microphone",
+  "microphoneOn": "Enable microphone",
+  "cameraOff": "Disable camera",
+  "cameraOn": "Enable camera",
+  "counters": "{{present}} present · {{admitted}} admissions since the start",
+  "recording": "This conference is being recorded. The host will decide whether to publish the replay afterwards.",
+  "status": {
+    "scheduled": "Upcoming",
+    "live": "Live",
+    "ended": "Ended"
+  },
+  "audience": {
+    "public": "Whole network",
+    "connections": "My connections",
+    "followers": "Page followers",
+    "invitees": "Invitees only"
+  },
+  "phase": {
+    "idle": "Outside the room",
+    "preparing": "Preparing",
+    "ready": "Ready to join",
+    "connecting": "Connecting to the room…",
+    "connected": "Connected to the room",
+    "reconnecting": "Reconnecting…",
+    "disconnected": "Connection interrupted",
+    "error": "Connection refused"
+  },
+  "create": {
+    "title": "Create a conference",
+    "description": "Prepare your conference; you will start it after checking your equipment.",
+    "name": "Title",
+    "audience": "Audience",
+    "capacity": "Maximum number of viewers",
+    "networkOnly": "This conference stays in this network, even with the “Whole network” audience.",
+    "record": "Record this conference",
+    "recordDescription": "Participants are informed about recording. It will remain private until you decide to publish it after the conference.",
+    "announce": "Publish an announcement in the feed",
+    "submit": "Prepare the conference",
+    "invalidTitle": "Enter a title of 1 to {{max}} characters.",
+    "invalidCapacity": "Choose between 1 and {{max}} viewers.",
+    "invited_one": "{{count}} person proposed as a speaker.",
+    "invited_other": "{{count}} people proposed as viewers."
+  },
+  "directory": {
+    "title": "Conferences",
+    "filters": "Show conferences",
+    "live": "Live",
+    "replays": "Replays",
+    "mine": "My conferences",
+    "empty": {
+      "live": "No accessible live conferences at the moment.",
+      "replays": "No accessible published replays at the moment.",
+      "mine": "You have not created a conference yet."
+    }
+  },
+  "preflight": {
+    "description": "Check your microphone and camera before notifying your audience. This check stays on your device.",
+    "audioOnly": "Audio only, without camera",
+    "preview": "My camera preview",
+    "check": "Check my equipment",
+    "ready": "Your equipment responded. You can go live.",
+    "failed": "Your equipment could not be prepared. Check your browser permissions."
+  },
+  "replay": {
+    "none": "No replay is available for this conference.",
+    "pending": "The recording is being prepared.",
+    "ready": "Replay ready",
+    "failed": "The recording could not be prepared.",
+    "expired": "This replay has reached the end of its retention period.",
+    "player": "Play the replay",
+    "captions": "Captions",
+    "publish": "Publish the replay",
+    "keepPrivate": "Keep for myself",
+    "publication": {
+      "undecided": "Publication is awaiting your decision.",
+      "published": "The replay is published for the authorised audience.",
+      "private": "The replay is kept for you."
+    }
+  },
+  "media": {
+    "microphoneFailed": "The microphone did not start."
+  },
+  "coexistence": {
+    "microphoneMuted": "Call in progress: the broadcast microphone is muted and its audio is lowered.",
+    "volumeReduced": "Call in progress: the broadcast audio is lowered."
+  },
+  "joinPublisherDescription": "You are about to join the stage. Choose the microphone and camera you want to enable on entry."
+}

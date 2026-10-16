@@ -74,19 +74,20 @@ export interface ConferenceLaunchRequest {
 	people?: readonly ConferenceLaunchPersonInput[] | null
 }
 
-/**
- * La conférence du réseau est son DIRECT, servi par le lot `live` du moteur : tant
- * qu'il n'est pas là, aucun hôte ne consomme la demande déposée ici. Les écrans
- * lisent ce drapeau pour ne PAS proposer le geste (un bouton sans effet serait
- * pire qu'une ligne qui informe) ; il passe à `true` avec l'hôte de conférence.
- */
-export const CONFERENCE_LAUNCH_AVAILABLE: boolean = false
+/** Le lancement est servi depuis F3a : DirectSessionHost consomme la demande dans la coque. */
+export const CONFERENCE_LAUNCH_AVAILABLE: boolean = true
+
+/** Une route réservée pour un lot futur n'est pas encore une route servie. */
+export function useConferenceLaunchAvailable(): boolean {
+	const network = useOptionalNetwork()
+	return CONFERENCE_LAUNCH_AVAILABLE && network?.liveAvailable === true
+}
 
 export function useLaunchConference(): (request: ConferenceLaunchRequest) => void {
 	const { t } = useTranslation("iappel")
 	const network = useOptionalNetwork()
 	// Hors de tout réseau, aucun espace personnel ici.
-	const personalSpaceHere = network !== null && network.personalSpaceIsElsewhere === false
+	const personalSpaceHere = network !== null && network.liveAvailable && network.personalSpaceIsElsewhere === false
 	return useCallback(
 		(request: ConferenceLaunchRequest) => {
 			// ⚠️ Le refus AVANT la réduction : l'appel ne rétrécit pas pour rien.

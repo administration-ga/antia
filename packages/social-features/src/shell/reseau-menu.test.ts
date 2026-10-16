@@ -3,7 +3,6 @@ import { describe, expect, it } from "vitest"
 
 import { createAppI18n } from "../i18n"
 import {
-	RESEAU_AGENT_TAB_DEFAULT,
 	RESEAU_AGENT_TAB_IDS,
 	RESEAU_AGENT_TABS,
 	reseauAgentHref,
@@ -31,15 +30,15 @@ const LINKS: ShortcutLinks = {
 }
 
 describe("les volets servis — dérivés du contrat, jamais recopiés", () => {
-	it("gardent l'ordre du contrat et n'écartent QUE les conférences (module `live`)", () => {
-		expect(RESEAU_SERVED_TAB_IDS).toEqual(RESEAU_AGENT_TAB_IDS.filter((id) => id !== "conferences"))
-		expect(isServedReseauTab("conferences")).toBe(false)
+	it("gardent l'ordre du contrat et incluent les conférences (F3a)", () => {
+		expect(RESEAU_SERVED_TAB_IDS).toEqual(RESEAU_AGENT_TAB_IDS)
+		expect(isServedReseauTab("conferences")).toBe(true)
 		for (const id of RESEAU_SERVED_TAB_IDS) expect(isServedReseauTab(id)).toBe(true)
 	})
 
-	it("rabattent un volet non servi sur le volet par défaut, et laissent les autres", () => {
+	it("servent chaque volet du contrat", () => {
 		// Une adresse ancienne (`?tab=directs`) ne doit pas ouvrir un écran vide.
-		expect(servedReseauTab("conferences")).toBe(RESEAU_AGENT_TAB_DEFAULT)
+		expect(servedReseauTab("conferences")).toBe("conferences")
 		for (const id of RESEAU_SERVED_TAB_IDS) expect(servedReseauTab(id)).toBe(id)
 	})
 })
@@ -53,7 +52,7 @@ describe("menuItemsFor — les volets, dérivés et non recopiés", () => {
 		// notifications est le contenu de la cloche, pas une destination.
 		expect(ids).not.toContain("activite")
 		// Sans directs servis, aucune entrée ne mène à un volet vide.
-		expect(ids).not.toContain("conferences")
+		expect(ids).toContain("conferences")
 	})
 
 	it("suit AUTOMATIQUEMENT la liste complète des volets", () => {

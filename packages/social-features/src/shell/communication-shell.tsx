@@ -19,13 +19,14 @@ import { useNetwork } from "@antia/api/network"
 import { configureDockStorage } from "../features/messagerie/dock-store"
 import { configureCallStoreStorage } from "../stores"
 import { GlobalCallSurfaceHost } from "./communication/global-call-surface-host"
+import { DirectSessionHost } from "./communication/direct-session-host"
 import { usePresenceHeartbeat } from "./presence/use-presence-heartbeat"
 
 export function CommunicationShell() {
-  const { storagePrefix } = useNetwork()
+  const { storagePrefix, liveAvailable } = useNetwork()
   // Idempotent et synchrone : le dock lit son état au premier rendu.
   configureDockStorage(storagePrefix)
   configureCallStoreStorage(storagePrefix)
   usePresenceHeartbeat()
-  return <GlobalCallSurfaceHost />
+  return <><GlobalCallSurfaceHost />{liveAvailable ? <DirectSessionHost /> : null}</>
 }

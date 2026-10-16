@@ -76,7 +76,7 @@ import { ConferenceHintCard } from "../iappel/ConferenceHintCard"
 import { conferenceHintCopy, planConferenceHint } from "../iappel/conference-hint"
 import { effectiveCapacity } from "../iappel/group-call-capacity"
 import { PresenceDot, useConnectionsPresence } from "../iappel/presence-dot"
-import { CONFERENCE_LAUNCH_AVAILABLE, useLaunchConference } from "../iappel/use-launch-conference"
+import { useConferenceLaunchAvailable, useLaunchConference } from "../iappel/use-launch-conference"
 import { Avatar } from "../reseau-personnel/Avatar"
 import { ConversationHeader } from "./ConversationHeader"
 import { GroupeAvatar } from "./GroupeAvatar"
@@ -1279,6 +1279,7 @@ export function MessagerieConversationView({
 	 * seule requête, trois déclencheurs.
 	 */
 	const launchConference = useLaunchConference()
+	const conferenceAvailable = useConferenceLaunchAvailable()
 	const lancerConference = useCallback(() => {
 		setErreur(null)
 		setConferenceAvantAppel(false)
@@ -1303,7 +1304,7 @@ export function MessagerieConversationView({
 		})
 	}, [launchConference, membres, groupe.data, threadId])
 	/** Le geste n'est proposé que si une conférence peut réellement s'ouvrir (lot `live`). */
-	const lancerConferenceSiPossible = CONFERENCE_LAUNCH_AVAILABLE ? lancerConference : null
+	const lancerConferenceSiPossible = conferenceAvailable ? lancerConference : null
 
 	/**
 	 * Le focus REVIENT au bouton d'appel quand T1 se ferme sans suite.

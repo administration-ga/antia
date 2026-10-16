@@ -97,6 +97,10 @@
       "album": {
         "label": "Album",
         "description": "A collection of photos, ordered and captioned, on your profile."
+      },
+      "conference": {
+        "label": "Conference",
+        "description": "Prepare a broadcast in this network."
       }
     }
   },

@@ -103,12 +103,11 @@ describe("ReseauMobileTabBar", () => {
   })
 
   it("n'offre aucun volet que la page ne sert pas", () => {
-    // « Conférences » attend le module `live` : un onglet vers un volet vide
-    // serait un cul-de-sac.
+    // F3a : le volet Conférences est désormais servi par la page.
     render(at(HOME, <ReseauMobileTabBar active="fil" badges={{}} />))
-    expect(screen.queryByRole("link", { name: /Conférences/i })).toBeNull()
+    expect(screen.getByRole("link", { name: /Conférences/i })).toHaveAttribute("href", `${HOME}?tab=conferences`)
     const volets = screen.getByRole("group", { name: "Sous-menus du réseau" }).querySelectorAll("a")
-    expect(volets).toHaveLength(6)
+    expect(volets).toHaveLength(7)
   })
 
   it("adresse chaque volet sur la base injectée par l'application", () => {

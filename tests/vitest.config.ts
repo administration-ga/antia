@@ -9,6 +9,9 @@ export default defineConfig({
     name: "ratchets",
     root: fileURLToPath(new URL(".", import.meta.url)),
     environment: "node",
+    // Mac 16 Go, arbre partagé : les scans simultanés de tous les cliquets
+    // provoquaient du swap et des délais dépassés, sans violation détectée.
+    maxWorkers: 2,
     include: ["ratchets/**/*.test.ts"],
   },
 })

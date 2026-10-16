@@ -12,6 +12,9 @@ import { createInstance, type i18n as I18nInstance, type Resource } from "i18nex
 
 import { serverCodeResources } from "@antia/social-contracts/i18n"
 
+import enDirect from "./locales/en/direct.json"
+import frDirect from "./locales/fr/direct.json"
+
 import enSocial from "./locales/en/social.json"
 import frSocial from "./locales/fr/social.json"
 import enMessagerieConversation from "./locales/en/messagerie.conversation.json"
@@ -69,6 +72,7 @@ export function isSupportedLocale(value: unknown): value is Locale {
 export const engineResources = {
   fr: {
     social: frSocial,
+    direct: frDirect,
     messagerie: { ...frMessagerieConversation, ...frMessagerieDock, ...frMessagerieGroupes },
     iappel: { ...frIappelCore, ...frIappelSurfaces, ...frIappelStores },
     stories: frStories,
@@ -80,6 +84,7 @@ export const engineResources = {
   },
   en: {
     social: enSocial,
+    direct: enDirect,
     messagerie: { ...enMessagerieConversation, ...enMessagerieDock, ...enMessagerieGroupes },
     iappel: { ...enIappelCore, ...enIappelSurfaces, ...enIappelStores },
     stories: enStories,

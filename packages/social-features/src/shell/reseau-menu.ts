@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/reseau-menu.ts @ ad2e7fdc2 — adaptations : déplacé dans la coque (`shell/`) ; volets SERVIS par le moteur décidés ici (`RESEAU_SERVED_TAB_IDS`, `isServedReseauTab`, `servedReseauTab` : « Conférences » attend le module `live`, aucun onglet, rail ni entrée de menu n'y mène) ; entrées décrites par la CLÉ i18n du volet (`labelKey`) au lieu d'un libellé ; adresses composées sur la BASE de la page réseau injectée (`menuItemsFor(counts, base)`) et sur la table des routes (`shortcutsFor(pages, groups, links, max)` : fiche d'une page par `links.page(handle)`, groupe par `reseauAgentGroupeHref(id, links.home)`) — plus aucune route de l'espace en dur ; phrase de la pastille par l'i18n (`menuBadgeLabel(item, t)`, clés qualifiées `reseau:reseauMenu.*`, pluriel par `count`) ; commentaires rapportés au moteur.
+// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/reseau-menu.ts @ ad2e7fdc2 — adaptations : déplacé dans la coque (`shell/`) ; volets SERVIS par le moteur décidés ici (`RESEAU_SERVED_TAB_IDS`, `isServedReseauTab`, `servedReseauTab` : « Conférences » est servi depuis F3a) ; entrées décrites par la CLÉ i18n du volet (`labelKey`) au lieu d'un libellé ; adresses composées sur la BASE de la page réseau injectée (`menuItemsFor(counts, base)`) et sur la table des routes (`shortcutsFor(pages, groups, links, max)` : fiche d'une page par `links.page(handle)`, groupe par `reseauAgentGroupeHref(id, links.home)`) — plus aucune route de l'espace en dur ; phrase de la pastille par l'i18n (`menuBadgeLabel(item, t)`, clés qualifiées `reseau:reseauMenu.*`, pluriel par `count`) ; commentaires rapportés au moteur.
 /**
  * reseau-menu — ce que le RAIL-MENU de bureau porte, hors de tout composant.
  *
@@ -49,17 +49,8 @@ import {
 // LES VOLETS SERVIS
 // ═══════════════════════════════════════════════════════════════════════════
 
-/**
- * Les volets que le moteur NE sert PAS encore.
- *
- * « Conférences » attend le module `live` : tant que ses directs et ses
- * rediffusions ne sont pas servis, le volet n'aurait rien à montrer — et une
- * entrée qui mène à un écran vide est un cul-de-sac, pas un volet. Le contrat
- * de navigation (`reseau-agent-nav.ts`) le garde, pour que ses adresses et ses
- * alias restent stables le jour où il revient ; c'est ICI, en un mot, qu'il
- * revient.
- */
-const RESEAU_UNSERVED_TAB_IDS: readonly ReseauAgentTabId[] = Object.freeze(["conferences"])
+/** Les volets différés : liste vide depuis le branchement des conférences en F3a. */
+const RESEAU_UNSERVED_TAB_IDS: readonly ReseauAgentTabId[] = Object.freeze([])
 
 /**
  * Les volets RENDUS par la page réseau, dans l'ordre du contrat — la seule

@@ -66,6 +66,28 @@ async function cast() {
   return { t, root, testClosed, alice, bob, carol }
 }
 
+describe("préflight — configuration avant toute diffusion", () => {
+  it("confirme la configuration de l'hôte sans démarrer la session ni délivrer de jeton", async () => {
+    withLiveKit()
+    const { t, root, alice } = await cast()
+    const sessionId = await insertSession(t, { networkId: root, host: alice, status: "scheduled" })
+    expect(await alice.as.action(L.checkBroadcastConfiguration, { networkId: root, sessionId })).toEqual({ ready: true })
+    expect((await t.run((ctx) => ctx.db.get(sessionId)))?.status).toBe("scheduled")
+  })
+
+  it("refuse avant lecture de configuration un autre réseau ou un lecteur sans droit d'hôte", async () => {
+    vi.spyOn(console, "error").mockImplementation(() => {})
+    const { t, root, testClosed, alice, bob } = await cast()
+    await joinAlso(t, testClosed, alice)
+    const elsewhere = await insertSession(t, { networkId: testClosed, host: alice, status: "scheduled" })
+    const here = await insertSession(t, { networkId: root, host: alice, status: "scheduled" })
+    expect(await codeOf(alice.as.action(L.checkBroadcastConfiguration, { networkId: root, sessionId: elsewhere }))).toBe("notFound")
+    expect(await codeOf(bob.as.action(L.checkBroadcastConfiguration, { networkId: root, sessionId: here }))).toBe("notFound")
+    expect(await codeOf(alice.as.action(L.checkBroadcastConfiguration, { networkId: root, sessionId: here }))).toBe("mediaServerNotConfigured")
+    expect((await t.run((ctx) => ctx.db.get(here)))?.status).toBe("scheduled")
+  })
+})
+
 describe("requestDirectToken — le jeton que la base a décidé", () => {
   it("l'intervenant publie, le spectateur regarde caché ; le sujet d'auth en préfixe, un nonce par connexion, la personne en attributs", async () => {
     withLiveKit()

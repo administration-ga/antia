@@ -17,6 +17,8 @@ export default defineConfig({
     // (environnement proche du sandbox Convex) ; `node` par défaut pour les
     // tests de modules purs, comme au socle (ADR-0003 du socle).
     environment: "node",
+    // Même borne que workspace-run : deux processus de test sur le Mac 16 Go.
+    maxWorkers: 2,
     // Les composants montés dans les tests (limiteur de débit) chargent leurs
     // modules par `import.meta.glob` : ils doivent passer par Vite.
     server: { deps: { inline: ["convex-test", "@convex-dev/rate-limiter"] } },

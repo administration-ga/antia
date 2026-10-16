@@ -67,6 +67,7 @@ export function EngineTestWrapper(props: {
           personId={props.personId ?? TEST_PERSON_ID}
           charte="antia"
           routes={props.routes ?? TEST_ROUTES}
+          liveAvailable
         >
           {props.children}
         </NetworkProvider>

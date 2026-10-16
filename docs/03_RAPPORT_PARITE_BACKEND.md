@@ -1268,3 +1268,16 @@ audience, scène, vie de la salle, médias ; intégration et `verify` par la ses
   commentaire) : parité du socle ; à déclarer en exceptions du cliquet `rate-limited-writes` (PA5).
 - **Effacement** des tables `live*` : PA5 (aucun index par personne).
 - **Écrans** (salle, antenne, console de l'hôte, rediffusion, carte du direct dans le fil) : PA6, lot F3.
+
+
+## Complément F3a — configuration avant diffusion (16/10/2026)
+
+`live.livekitActions.checkBroadcastConfiguration` vérifie la session dans le réseau puis le
+droit d’hôte, avant de lire la configuration LiveKit. Sans configuration, la conférence reste
+programmée : le front ne demande pas les périphériques et n’appelle pas `goLive`. Aucun secret,
+jeton, admission ou réveil du service dans ce contrôle ; les gardes du démarrage et du jeton
+restent exercées lors de ces gestes. Deux tests ajoutés (configuration sans démarrage, refus
+indistinct avant configuration) ; fichier `livekitActions.test.ts` : 6 cas verts.
+
+`bun run verify` final : 1 101 cas backend verts. La disponibilité réelle du SFU reste une
+recette distincte ; les premières surfaces du direct sont détaillées dans le rapport 04.

@@ -226,3 +226,66 @@ nommé dans l'en-tête du fichier de test.
   réseau ne doit pas monter le volet Relations générique.
 - Écrans absents au socle aussi : blocage d'une personne, clôture et archivage d'un groupe, `ContactsRail`
   sans point de montage.
+
+## F3a — Première tranche des conférences (16/10/2026)
+
+Le backend `live` permet la première tranche de PA6/F3. **F3 reste en cours** : cette tranche
+n'affirme pas la parité du studio et de la console d'antenne du socle.
+
+Source : `ad2e7fdc2` ; le diff du périmètre direct, stores, hôtes et points de branchement contre
+l'`origin/main` local du socle (`25398f565`) est vide. Copies dans les fichiers réels d'ANTIA.
+
+### Surfaces branchées
+
+- Volet Conférences au bureau et au téléphone : directs, rediffusions publiées, mes conférences,
+  trois listes paginées. Une page vide avec curseur garde « Voir plus » ; changement de réseau
+  remet les cartes à zéro, refus de lecture masque les cartes mémorisées.
+- « Créer une conférence » depuis le bureau, le catalogue mobile et iCom. Titre, audience
+  personnelle, capacité, annonce explicite ; invités et fil source d'iCom conservés et rejugés
+  côté serveur. Formulaire RHF/Zod, clé idempotente conservée après un échec.
+- `/conference/[id]` sous le gabarit persistant des membres, sur la route injectée déjà prévue
+  par l'application. Une annonce de publication et une carte des actus y ouvrent la même salle.
+- Préparation locale du matériel, puis démarrage. Contrôle `checkBroadcastConfiguration` :
+  adhésion et lecture de session avant configuration, hôte seul, aucun jeton ni admission,
+  aucun réveil du service. La configuration manquante refuse AVANT les périphériques et le
+  passage en direct. Ce contrôle n'est pas une preuve de disponibilité du serveur média.
+- Store de session, registre de salle, propriétaire unique LiveKit et cohabitation iAppel copiés
+  du socle ; micro et son du direct suivent la ligne d'appel. Salle et baux dans la coque,
+  pas dans la page : navigation et largeur ne remontent pas la connexion ; fin, révocation
+  de lecture et changement de réseau la ferment. Changement de rôle exige un nouveau geste
+  d'entrée et un nouveau jeton. Présence : hôte 15 s, spectateur 30 s, depuis le domaine.
+- Rediffusion servie par la garde du moteur, lecture avec sous-titres si présents ; hôte :
+  publication ou conservation privée. L'enregistrement est **décoché par défaut dans ce
+  formulaire**, demandé explicitement et annoncé dans la salle ; le défaut du backend reste
+  inchangé. Aucune suppression de rediffusion exposée par cette tranche.
+- Activation explicite par `NetworkProvider.liveAvailable` : ANTIA la pose avec sa route servie ;
+  DIASPORALE garde sa route réservée sans activer la création iCom, le lecteur des directs ni
+  l’hôte. Test de l’absence de capacité par défaut.
+- Textes français et anglais ; jetons existants, aucun changement de primitive ui.
+
+### Parité restante pour F3b
+
+Studio complet (présentation, spotlight, partage d'écran et disposition), commentaires et
+réactions, invitations et demandes d'antenne, participants, exclusions/sourdines, délégations,
+création au nom d'une page et audience followers, sélection nominative libre, gestion avancée
+et retrait/reprise de rediffusion, import des sous-titres, carte flottante complète et rail
+compact du fil. Une publication `root` ne devient pas un direct hors réseau.
+
+### Recette et validation
+
+- Chrome réel sur le serveur local, compte fictif de recette : entrée, profil de test, création
+  d'une conférence avec annonce explicite ; carte « À venir » dans le fil, page de conférence
+  ouverte ; démarrage désactivé avant préparation. Aucun secret ni donnée réelle utilisés.
+- Tests de composant : entrée seulement sur clic, même propriétaire après navigation, jeton
+  tardif après départ, changement de réseau/rôle et fin serveur, retour de place après refus,
+  préflight avant démarrage et arrêt des pistes tardives ; confidentialité et rejeu du formulaire ;
+  curseurs et isolation des listes. Tests purs/store du socle portés.
+- La recette vidéo/audio/SFU/Egress réelle, la conservation et publication d'un vrai replay,
+  les appareils réels, la passe mobile/sombre exhaustive et l'audit AA restent à faire.
+- `bun run verify` final : vert ; 1 101 cas Convex, 53 cliquets, 2 792 cas social-features,
+  10 espaces de travail typés/testés et lint sans erreur (avertissements non bloquants conservés).
+- Vérification bornée à deux workers pour Convex, cliquets et surfaces jsdom : des scans
+  simultanés avaient dépassé 5 s sur la machine en charge, sans violation de code. Les délais
+  et assertions restent inchangés.
+- Contrôle de configuration aussi éprouvé au navigateur : refus traduit du service média
+  absent, aucun démarrage ; vidéo/audio réelle non validée.

@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/stories/StoriesViewerPage.tsx @ ad2e7fdc2 — adaptations : adresses par la table des routes de l'application (`useRoutes().home()` pour la sortie, `useRoutes().conference(id)` pour rejoindre un direct) au lieu des routes de l'espace du socle ; plateau de `stories.stories.tray` du moteur (réseau de `useNetwork()`, instant ARRONDI figé au montage — `storyQueryInstant`) ; mon handle tiré de `people.persons.getMyPerson` (seulement si mon profil est publié, comme le profil de réseau du socle) ; directs en cours NON branchés (`direct.sessions.listLive` n'existe pas encore : lot `live`) — liste vide, chemin de rendu des cartes de direct gardé ; scope de surface et origine du composeur (ADR-0079 du socle) retirés avec les surfaces du moteur ; libellés traduits (clés `stories:storiesViewerPage.*`).
+// Dupliqué de socle/packages/agent-features/src/features/stories/StoriesViewerPage.tsx @ ad2e7fdc2 — adaptations : adresses par la table des routes de l'application (`useRoutes().home()` pour la sortie, `useRoutes().conference(id)` pour rejoindre un direct) au lieu des routes de l'espace du socle ; plateau de `stories.stories.tray` du moteur (réseau de `useNetwork()`, instant ARRONDI figé au montage — `storyQueryInstant`) ; mon handle tiré de `people.persons.getMyPerson` (seulement si mon profil est publié, comme le profil de réseau du socle) ; directs en cours par `live.sessions.listLive` du moteur, réseau courant, première page bornée à 20 ; scope de surface et origine du composeur (ADR-0079 du socle) retirés avec les surfaces du moteur ; libellés traduits (clés `stories:storiesViewerPage.*`).
 "use client"
 
 /**
@@ -65,20 +65,11 @@ import {
 	viewerBodyState,
 	viewerItemKey,
 	viewerItemLabel,
-	type LiveDirectCard,
 	type ViewerItem,
 } from "./stories-viewer"
 
 /** Le paramètre d'entrée — un handle, jamais un identifiant technique. */
 export const STORIES_AUTHOR_PARAM = "auteur"
-
-/**
- * Les directs EN COURS — aucun tant que le lot `live` du moteur n'est pas
- * branché (la liste du socle, `direct.sessions.listLive`, n'y existe pas
- * encore). Une constante, et non un tableau neuf par rendu : la pile se
- * recompose à chaque rendu et ses entrées doivent rester stables.
- */
-const NO_LIVE_DIRECTS: readonly LiveDirectCard[] = []
 
 export interface StoriesViewerPageProps {
 	/** Ouvrir le composeur au montage — la route « nouvelle actu ». */
@@ -103,7 +94,7 @@ function StoriesViewerInner({ openCreate }: { openCreate: boolean }) {
 	const pathname = usePathname()
 	const searchParams = useSearchParams()
 	const mobile = useIsReseauMobile()
-	const { networkId } = useNetwork()
+	const { networkId, liveAvailable } = useNetwork()
 
 	const [now, setNow] = useState(() => Date.now())
 	// L'instant des lectures, FIGÉ au montage (cf. l'en-tête).
@@ -119,7 +110,8 @@ function StoriesViewerInner({ openCreate }: { openCreate: boolean }) {
 		api.modules.people.persons.getMyPerson,
 		{},
 	)
-	const liveDirects = NO_LIVE_DIRECTS
+	const live = useAuthenticatedConvexQuery(api.modules.live.sessions.listLive, liveAvailable ? { networkId, limit: 20 } : "skip")
+	const liveDirects = live.data?.items ?? []
 
 	// Mon handle de RÉSEAU : celui d'un profil publié. Le plateau ne porte le
 	// handle d'un auteur que si son profil l'est — un handle choisi mais non

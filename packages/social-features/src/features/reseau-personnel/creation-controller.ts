@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/creation-controller.ts @ ad2e7fdc2 — adaptations : format « Conférence » retiré (le direct n'existe pas encore dans le moteur, lot `live` : ni surface `direct_dialog`, ni entrée de catalogue) ; l'évènement mène au volet Évènements de la page réseau, carte de création ouverte (`buildAgendaCreateHref(null, home)` : l'intention de composition, consommée par le volet, au lieu d'iAgenda absent du moteur ; surface `events_route`) ; adresses composées sur les routes INJECTÉES — `creationLaunchFor(kind, context, routes)` reçoit `routes` (`home`, `profile` de `useRoutes()`) en DERNIER paramètre, l'album va à l'onglet Albums du profil (`albumsTabHref(personHref(handle, routes.profile), …)`) et, sans identifiant, à la page réseau (où l'invitation à publier son profil s'affiche) au lieu du dossier iProfil ; constantes `CREATION_EVENT_HREF` et `CREATION_ALBUM_FALLBACK_HREF` remplacées par `creationEventHref(home)` ; formats décrits par des CLÉS i18n (`labelKey`, `descriptionKey`, clés qualifiées `reseau:creationController.*`) ; « agent » → « personne ».
+// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/creation-controller.ts @ ad2e7fdc2 — adaptations : routes injectées, formats traduits ; évènement dans son volet, album sur le profil ; conférence rétablie en F3a avec son dialogue branché au moteur.
 /**
  * creation-controller — CE QU'ON PEUT CRÉER dans le réseau, et par quelle surface.
  *
@@ -37,17 +37,16 @@ import { buildAgendaCreateHref } from "./agenda-create-intent"
 import { personHref } from "./author-link"
 
 /**
- * Les quatre formats qu'une personne peut créer depuis le réseau aujourd'hui.
+ * Les cinq formats que le réseau sert depuis F3a.
  *
- * ⚠️ La « Conférence » du socle n'y figure pas : le direct n'existe pas encore
- * dans le moteur (lot `live`), et un format indisponible n'a pas à figurer
- * dans le catalogue.
+ * La conférence ouvre un dialogue en place, comme au socle.
  */
 export type CreationKind =
   | "publication"
   | "actu"
   | "evenement"
   | "album"
+  | "conference"
 
 /**
  * Ce que l'appelant sait de la personne — aujourd'hui, son handle de réseau.
@@ -89,6 +88,7 @@ export type CreationSurface =
   | "story_composer"
   | "events_route"
   | "profil_albums_route"
+  | "direct_dialog"
 
 /**
  * L'adresse du volet Évènements de la page réseau, carte de création OUVERTE
@@ -123,6 +123,7 @@ const ENTRIES: Readonly<Record<CreationKind, CreationEntry>> = Object.freeze({
   actu: entryKeys("actu", "camera"),
   evenement: entryKeys("evenement", "calendar"),
   album: entryKeys("album", "image"),
+  conference: entryKeys("conference", "video"),
 })
 
 /**
@@ -148,8 +149,8 @@ export function creationEntries(
   options: { mobile?: boolean } & CreationContext = {}
 ): CreationEntry[] {
   const kinds: CreationKind[] = options.mobile
-    ? ["publication", "actu", "evenement"]
-    : ["publication"]
+    ? ["publication", "actu", "evenement", "conference"]
+    : ["publication", "conference"]
   if (usableHandle(options) !== null) kinds.push("album")
   return kinds.map((kind) => ENTRIES[kind])
 }
@@ -169,6 +170,8 @@ export function creationSurfaceFor(kind: CreationKind): CreationSurface {
       return "events_route"
     case "album":
       return "profil_albums_route"
+    case "conference":
+      return "direct_dialog"
   }
 }
 

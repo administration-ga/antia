@@ -13,6 +13,7 @@ const mocks = vi.hoisted(() => ({
 	calls: [] as QueryCall[],
 	tray: undefined as { groups: unknown[]; truncated: boolean } | undefined,
 	me: null as null | { handle?: string; published: boolean },
+	live: { items: [] as unknown[] },
 }))
 
 vi.mock("@antia/api/engine", () => ({
@@ -29,6 +30,7 @@ vi.mock("@antia/api/engine", () => ({
 					publish: "publish",
 				},
 			},
+			live: { sessions: { listLive: "listLive" } },
 			people: { persons: { getMyPerson: "getMyPerson" } },
 			media: { media: { generateUploadUrl: "generateUploadUrl" } },
 		},
@@ -40,6 +42,7 @@ vi.mock("@antia/api/hooks", () => ({
 		mocks.calls.push({ reference, args })
 		if (args === "skip") return { data: undefined, isError: false, refetch: vi.fn() }
 		if (reference === "tray") return { data: mocks.tray, isError: false, refetch: vi.fn() }
+		if (reference === "listLive") return { data: mocks.live, isError: false, refetch: vi.fn() }
 		if (reference === "getMyPerson") return { data: mocks.me, isError: false, refetch: vi.fn() }
 		// Les séries : en vol — l'écran dit « Chargement… », ce test ne lit que leurs arguments.
 		return { data: undefined, isError: false, refetch: vi.fn() }
@@ -100,6 +103,7 @@ beforeEach(() => {
 	mocks.calls = []
 	mocks.tray = undefined
 	mocks.me = null
+	mocks.live = { items: [] }
 })
 
 afterEach(() => {
@@ -107,12 +111,24 @@ afterEach(() => {
 })
 
 describe("StoriesViewerPage", () => {
+  it("montre les directs avant les actus et n'ouvre leur salle que par le geste explicite", () => {
+    mocks.tray = { groups: [], truncated: false }
+    mocks.live.items = [{ sessionId: "live-test", title: "Direct du réseau", audience: "followers", startedAt: NOW, host: { displayName: "Awa", handle: "awa", avatarUrl: null }, counters: { viewerGrantCount: 0, comments: 0, reactions: 0 }, isHost: false }]
+    const router = memoryRouter({ pathname: TEST_ROUTES.stories() })
+    renderWithEngine(<StoriesViewerPage />, { router: router.implementation })
+    expect(screen.getByRole("heading", { name: "Direct du réseau" })).toBeTruthy()
+    expect(router.calls).not.toContainEqual({ method: "push", href: TEST_ROUTES.conference("live-test") })
+    fireEvent.click(screen.getByRole("button", { name: /Rejoindre/ }))
+    expect(router.calls).toContainEqual({ method: "push", href: TEST_ROUTES.conference("live-test") })
+  })
+
 	it("demande le plateau du réseau courant à l'instant ARRONDI au pas", () => {
 		renderWithEngine(<StoriesViewerPage />)
 		expect(argsOf("tray").at(-1)).toEqual({
 			networkId: TEST_NETWORK_ID,
 			now: NOW - (NOW % STORY_QUERY_STEP_MS),
 		})
+		expect(argsOf("listLive").at(-1)).toEqual({ networkId: TEST_NETWORK_ID, limit: 20 })
 		expect(screen.getByText("Chargement…")).toBeInTheDocument()
 	})
 

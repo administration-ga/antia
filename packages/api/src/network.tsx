@@ -48,6 +48,8 @@ export interface NetworkContextValue {
   charte: string
   /** Préfixe des clés de stockage local et de session : un état par réseau. */
   storagePrefix: string
+  /** L'application sert réellement sa route de conférence (activation explicite F3a). */
+  liveAvailable: boolean
   /** Contrat d'`OrgProvider` lu par les surfaces du socle : toujours l'espace personnel. */
   personalMode: true
   personalSpaceIsElsewhere: false
@@ -63,6 +65,7 @@ export function NetworkProvider(props: {
   personId: Id<"persons">
   charte: string
   routes: EngineRoutes
+  liveAvailable?: boolean
   children: ReactNode
 }) {
   const value: NetworkContextValue = {
@@ -71,6 +74,7 @@ export function NetworkProvider(props: {
     personId: props.personId,
     charte: props.charte,
     storagePrefix: `antia:${props.slug}:`,
+    liveAvailable: props.liveAvailable === true,
     personalMode: true,
     personalSpaceIsElsewhere: false,
     activeOrgId: null,

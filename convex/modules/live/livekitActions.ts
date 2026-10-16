@@ -103,6 +103,22 @@ function egressClientFor(config: LiveKitConfig): EgressClient {
  * pour tous — filet de la rétrogradation. La PERSONNE voyage dans les
  * attributs du participant : l'écran pose chaque vidéo sur sa vignette.
  */
+/**
+ * Configuration AVANT le préflight et le passage en direct. Hôte seul,
+ * après la garde de session ; aucun jeton, admission, réveil ou secret.
+ * Le démarrage et la délivrance rejouent ensuite leurs gardes.
+ */
+export const checkBroadcastConfiguration = networkAction({
+  args: { sessionId: v.id("liveSessions") },
+  returns: v.object({ ready: v.literal(true) }),
+  handler: async (ctx, args): Promise<{ ready: true }> => {
+    const session = await ctx.runQuery(api.modules.live.sessions.get, { networkId: ctx.networkId, sessionId: args.sessionId })
+    if (session.viewerRole !== "host" || session.status === "ended") return fail("notFound")
+    getLiveKitConfig()
+    return { ready: true }
+  },
+})
+
 export const requestDirectToken = networkAction({
   args: { sessionId: v.id("liveSessions") },
   returns: v.object({ token: v.string(), roomName: v.string(), wsUrl: v.string(), role: directConnectionRoleValidator }),
