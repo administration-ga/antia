@@ -54,7 +54,7 @@
  * porte la recherche et la portée.
  */
 
-import { useRoutes } from "@antia/api/network"
+import { useNetwork, useRoutes } from "@antia/api/network"
 import { Alert, Button, Select, SkeletonCard, TextInput } from "@antia/ui"
 import { EspaceDossierTabs, EspaceKitStyles } from "@antia/ui/espace-kit"
 import { useIsReseauMobile } from "@antia/ui/overlay"
@@ -77,7 +77,7 @@ import { ProfileMiniCard } from "../features/reseau-personnel/ProfileMiniCard"
 import { appendPage, feedCursorKey, loadMoreAnnouncement, shouldShowLoadMore } from "../features/reseau-personnel/reseau-feed-pages"
 import { emptyFeedText, formatUnreadBadge, searchStatusText } from "../features/reseau-personnel/shared"
 import { SuggestionsPanel } from "../features/reseau-personnel/SuggestionsPanel"
-import { CreateDirectDialog } from "../features/direct/CreateDirectDialog"
+import { DirectsLiveRail } from "../features/direct/DirectsLiveRail"
 import { DirectsPanel } from "../features/direct/DirectsPanel"
 
 import { useCreationController } from "../features/reseau-personnel/use-creation-controller"
@@ -486,6 +486,7 @@ function ReseauAgentPageSwitch() {
 }
 
 function ReseauAgentPageInner() {
+  const { liveAvailable } = useNetwork()
   const { t } = useTranslation("reseau")
   const routes = useRoutes()
   const {
@@ -929,6 +930,7 @@ function ReseauAgentPageInner() {
           {rails.suggestions ? <SuggestionsPanel /> : null}
           {rails.pagesToFollow ? <PagesSuggestionsRail /> : null}
           {rails.events ? <EvenementsRail now={now} /> : null}
+          {rails.liveDirects && liveAvailable ? <DirectsLiveRail now={now} /> : null}
         </aside>
       </div>
 
@@ -937,7 +939,7 @@ function ReseauAgentPageInner() {
           `container-type` de `.rp-scope` ne la concerne pas. */}
       <StoryCreateSheet open={creation.open === "actu"} onClose={creation.close} onPublished={creation.close} />
       <PostComposerSheet open={creation.open === "publication"} onClose={creation.close} />
-      {creation.open === "conference" ? <CreateDirectDialog onClose={creation.close} /> : null}
+
     </div>
   )
 }

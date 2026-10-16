@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/DirectsPanel.tsx @ ad2e7fdc2 — adaptations : première tranche réécrite sur les trois listes paginées du moteur, réseau et routes injectés, libellés i18n ; pas de gestion de page ni de conservation sur les vignettes.
+// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/DirectsPanel.tsx @ ad2e7fdc2 — adaptations : première tranche réécrite sur les trois listes paginées du moteur, réseau et routes injectés, libellés i18n ; création page et métadonnées de conservation sur les vignettes (F3c).
 "use client"
 
 import { api, type Id } from "@antia/api/engine"
@@ -10,33 +10,31 @@ import type { FunctionArgs } from "convex/server"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 
-import { CreateDirectDialog } from "./CreateDirectDialog"
+import { requestConferenceLaunch } from "../iappel/conference-launch-store"
 
 type Mode = "live" | "replays" | "mine"
-type Card = { sessionId: Id<"liveSessions">; title: string; status?: "scheduled" | "live" | "ended" }
+type Card = { sessionId: Id<"liveSessions">; title: string; status?: "scheduled" | "live" | "ended"; audience?: string; host?: { displayName: string | null }; durationMs?: number | null; endedAt?: number; replay?: { status: string; egressState: string; publication: string; retentionUntil: number | null } | null }
 
 export function DirectsPanel() {
   const { t } = useTranslation("direct")
   const { networkId } = useNetwork()
   const [mode, setMode] = useState<Mode>("live")
-  const [create, setCreate] = useState(false)
   return (
     <section aria-label={t("directory.title")} className="flex flex-col gap-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 className="text-lg font-semibold">{t("directory.title")}</h2>
-        <Button icon="video" onClick={() => setCreate(true)}>{t("create.title")}</Button>
+        <Button icon="video" onClick={() => requestConferenceLaunch({ userIds: [] })}>{t("create.title")}</Button>
       </div>
       <div className="flex flex-wrap gap-2" role="group" aria-label={t("directory.filters")}>
         {(["live", "replays", "mine"] as const).map((value) => <Button key={value} variant={mode === value ? "primary" : "ghost"} aria-pressed={mode === value} onClick={() => setMode(value)}>{t(`directory.${value}`)}</Button>)}
       </div>
       <DirectList key={`${networkId}:${mode}`} mode={mode} />
-      {create ? <CreateDirectDialog onClose={() => setCreate(false)} /> : null}
     </section>
   )
 }
 
 function DirectList({ mode }: { mode: Mode }) {
-  const { t } = useTranslation("direct")
+  const { t, i18n } = useTranslation("direct")
   const { networkId } = useNetwork()
   const routes = useRoutes()
   const [liveCursor, setLiveCursor] = useState<FunctionArgs<typeof api.modules.live.sessions.listLive>["cursor"]>()
@@ -64,6 +62,10 @@ function DirectList({ mode }: { mode: Mode }) {
           <Link href={routes.conference(card.sessionId)} className="flex min-h-11 items-center justify-between gap-3 font-medium">
             <span>{card.title}</span><span className="text-sm text-muted-foreground">{t(`status.${card.status ?? (mode === "live" ? "live" : "ended")}`)}</span>
           </Link>
+          {card.host ? <p className="text-sm text-muted-foreground">{card.host.displayName ?? t("person")}</p> : null}
+          {card.audience ? <p className="text-sm text-muted-foreground">{t(`audience.${card.audience}`)}</p> : null}
+          {card.replay ? <div className="flex flex-col gap-1 text-sm"><p>{t(`replay.egress.${card.replay.egressState}`)}</p><p>{t(`replay.publication.${card.replay.publication}`)}</p>{card.replay.retentionUntil ? <p>{t("replay.retention", { date: new Intl.DateTimeFormat(i18n.language, { dateStyle: "long" }).format(card.replay.retentionUntil) })}</p> : null}</div> : null}
+          {card.durationMs ? <p className="text-sm text-muted-foreground">{t("replay.durationMinutes", { minutes: Math.max(1, Math.round(card.durationMs / 60_000)) })}</p> : null}
         </li>)}
       </ul>
       {query.data?.nextCursor ? <Button variant="ghost" disabled={query.isFetching} onClick={more}>{t("more")}</Button> : null}

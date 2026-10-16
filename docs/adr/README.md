@@ -11,3 +11,4 @@ réservent contre `origin/main` et les PR ouvertes de ce dépôt.
 | [0003](0003-federation-entrante-par-contrats-signes.md) | Fédération entrante par contrats signés ; aucune lecture de base externe | Proposé |
 | [0004](0004-duplication-depuis-le-socle-dix-regles.md) | Duplication depuis le socle : dix règles, provenance, parité prouvée | Proposé |
 | [0005](0005-studio-persistant-et-droits-d-antenne.md) | Studio persistant, identités exactes et droits d'antenne servis par le moteur | Accepté |
+| [0006](0006-creation-et-rediffusion-dans-le-contexte-du-direct.md) | Création, rediffusion et fenêtre dans le contexte du direct | Accepté |

@@ -63,7 +63,24 @@
     "invalidTitle": "Saisissez un titre de 1 à {{max}} caractères.",
     "invalidCapacity": "Choisissez de 1 à {{max}} spectateurs.",
     "invited_one": "{{count}} personne proposée comme intervenante.",
-    "invited_other": "{{count}} personnes proposées comme spectateurs."
+    "invited_other": "{{count}} personnes proposées comme spectateurs.",
+    "identity": "Parler en mon nom ou au nom d’une page",
+    "personal": "En mon nom",
+    "pageUnavailable": "Cette page n’est plus disponible pour la création. Choisissez une autre identité.",
+    "pagesFailed": "Vos pages ne peuvent pas être chargées. Vous pouvez créer en votre nom.",
+    "guestsDescription": "Choisissez des invités et leur rôle proposé. Leur accès sera vérifié de nouveau à la création et au démarrage. Au maximum 200 invités, dont sept intervenants.",
+    "searchBound": "Recherche limitée à 50 résultats parmi vos relations et les membres du fil source. Affinez avec un nom ou un identifiant.",
+    "handle": "@{{handle}}",
+    "unnamedGuest": "Invité {{number}}",
+    "guestUnavailable": "Cette personne n’est plus éligible dans ce contexte. Retirez-la de la sélection.",
+    "guestRole": "Rôle proposé pour {{name}}",
+    "removeGuest": "Retirer {{name}}",
+    "guestsChanged": "Certains invités ne sont plus éligibles. Retirez-les avant de préparer la conférence.",
+    "checkingGuests": "Vérification des invités…",
+    "noPageAnnouncement": "Une conférence de page limitée à vos relations ne peut pas publier une annonce au nom de la page.",
+    "signedPage": "Au nom de {{name}}",
+    "guestName": "{{name}} (@{{handle}})",
+    "remove": "Retirer"
   },
   "directory": {
     "title": "Conférences",
@@ -99,7 +116,38 @@
       "undecided": "La publication reste à décider.",
       "published": "La rediffusion est publiée pour l'audience autorisée.",
       "private": "La rediffusion est gardée pour vous."
-    }
+    },
+    "management": "Rediffusion et conservation",
+    "egress": {
+      "requested": "Enregistrement demandé",
+      "active": "Enregistrement en cours",
+      "processing": "Rediffusion en préparation",
+      "ready": "Rediffusion disponible",
+      "failed": "Rediffusion non produite",
+      "expired": "Rediffusion retirée ou conservation écoulée"
+    },
+    "durationHours": "Durée : {{hours}} h {{minutes}}",
+    "durationMinutes": "Durée : {{minutes}} min",
+    "retention": "Disponible jusqu’au {{date}}",
+    "retentionPassed": "L’échéance de conservation est atteinte.",
+    "fileUnavailable": "Le fichier n’est pas disponible à la lecture. Sa garde peut encore être en cours.",
+    "playbackEnded": "Lecture terminée.",
+    "playbackFailed": "La rediffusion n’a pas pu être lue. Réessayez.",
+    "published": "Rediffusion publiée pour son audience autorisée.",
+    "keptPrivate": "Rediffusion gardée pour vous.",
+    "recoverDescription": "Rechercher une copie déjà enregistrée. Cette opération ne recrée pas un enregistrement.",
+    "recover": "Récupérer l’enregistrement",
+    "recoveryScheduled": "Récupération demandée. L’état sera mis à jour à son arrivée.",
+    "visibility": "Audience de la rediffusion",
+    "visibilityUpdated": "Audience mise à jour.",
+    "fixedAudience": "La rediffusion reste réservée à : {{audience}}.",
+    "captionsDescription": "Importez un fichier WebVTT (.vtt), de 2 Mio au maximum. Il remplacera la piste précédente et passera par la vérification des fichiers.",
+    "captionsLanguage": "Langue des sous-titres",
+    "importCaptions": "Importer une piste WebVTT",
+    "importAccepted": "Piste reçue. Elle sera lisible après vérification du fichier.",
+    "withdraw": "Retirer l’enregistrement",
+    "withdrawConfirm": "Retirer définitivement la vidéo et ses sous-titres ? Les fichiers déjà téléchargés ailleurs ne peuvent pas être effacés.",
+    "withdrawn": "Enregistrement retiré."
   },
   "media": {
     "microphoneFailed": "Le micro n'a pas démarré."
@@ -289,5 +337,58 @@
       "soutien": "Soutien · {{count}}",
       "instructif": "Instructif · {{count}}"
     }
+  },
+  "captionsLang": {
+    "fr": "Français",
+    "en": "Anglais"
+  },
+  "captionsRefusal": {
+    "ok": "Piste reçue.",
+    "missing": "Le fichier est vide ou n’est plus disponible.",
+    "too_large": "La piste dépasse la limite de 2 Mio.",
+    "wrong_type": "Choisissez une piste WebVTT (.vtt)."
+  },
+  "floating": {
+    "label": "Conférence : {{title}} — fenêtre",
+    "move": "Déplacer la conférence avec les flèches ; Maj pour accélérer, Origine et Fin pour les coins, double-clic pour réinitialiser",
+    "expand": "Déplier",
+    "minimize": "Réduire",
+    "preview": "Aperçu de la conférence",
+    "leaveTitle": "Quitter la conférence ?",
+    "hostLeaveDescription": "Terminer ferme la conférence pour tous. Quitter sans terminer coupe votre micro et votre caméra ; votre absence peut ensuite interrompre la conférence.",
+    "speakerLeaveDescription": "Votre micro et votre caméra seront coupés, et vous quitterez l’antenne. La conférence continue.",
+    "endForAll": "Terminer pour tous",
+    "leaveKeepLive": "Quitter sans terminer",
+    "leaveStage": "Quitter l’antenne"
+  },
+  "rail": {
+    "title": "Conférences en direct",
+    "profile": "Profil de {{name}}",
+    "since": "En direct depuis {{minutes}} min",
+    "emptyWindow": "Aucun direct accessible dans cette fenêtre. Poursuivez avec « Voir plus »."
+  },
+  "replayFailure": {
+    "recording_unavailable": "Le service d’enregistrement n’est pas configuré.",
+    "ended_before_start": "La conférence s’est terminée avant le démarrage de l’enregistrement.",
+    "media_server_unresponsive": "Le service de diffusion n’a pas répondu.",
+    "recorder_unresponsive": "Le service d’enregistrement n’a pas répondu.",
+    "room_never_opened": "La salle n’a pas été ouverte.",
+    "start_refused": "Le démarrage de l’enregistrement a été refusé.",
+    "egress_failed": "L’enregistrement a échoué.",
+    "egress_aborted": "L’enregistrement a été interrompu.",
+    "egress_limit_reached": "La limite du service d’enregistrement a été atteinte.",
+    "no_file_delivered": "Aucun fichier n’a été livré.",
+    "never_started": "L’enregistrement n’a jamais démarré.",
+    "never_delivered": "Le fichier n’a pas été reçu dans le délai prévu.",
+    "egress_not_found": "L’enregistrement demandé n’a pas été retrouvé.",
+    "file_not_retrieved": "Le fichier enregistré n’a pas pu être récupéré.",
+    "transfer_invalid_location": "L’emplacement du fichier a été refusé.",
+    "transfer_download_failed": "Le transfert du fichier a échoué.",
+    "transfer_empty": "Le fichier reçu est vide.",
+    "transfer_too_large": "Le fichier reçu dépasse la limite autorisée.",
+    "transfer_length_mismatch": "La taille du fichier reçu ne correspond pas à celle annoncée.",
+    "transfer_timeout": "Le transfert du fichier a dépassé le délai prévu.",
+    "transfer_upload_failed": "Le fichier n’a pas pu être enregistré dans le stockage.",
+    "upload_refused": "La politique de dépôt a refusé le fichier."
   }
 }

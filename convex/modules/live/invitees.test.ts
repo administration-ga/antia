@@ -824,3 +824,29 @@ describe("Invités — refus du moteur (cas neufs des adaptations)", () => {
     expect(await ruleOf(c.host.as.query(INVITEES.checkEligibility, { networkId: c.root, personIds: many }))).toBe("LIVE_INVITEE_CHECK_TOO_MANY")
   }, 30_000)
 })
+
+
+describe("F3c — invités du brouillon followers", () => {
+  it("ne propose plus de page officielle après perte de l'identité forte", async () => {
+    const c = await setup()
+    expect((await c.host.as.query(api.modules.pages.pages.myPages, { networkId: c.root })).some((page) => page.pageId === c.pageId)).toBe(true)
+    await c.t.run(async (ctx) => { await ctx.db.patch(c.pageId, { trust: "official", ownerKind: "institution" }) })
+    expect(await c.host.as.query(api.modules.pages.pages.myPages, { networkId: c.root })).toEqual([])
+    expect(await codeOf(c.host.as.query(INVITEES.searchCandidates, { networkId: c.root, followersPageId: c.pageId }))).toBe("pageRoleRequired")
+  })
+  it("rejuge le cercle avant la création, puis après le désabonnement", async () => {
+    const c = await setup()
+    const args = { networkId: c.root, followersPageId: c.pageId }
+    expect((await c.host.as.query(INVITEES.searchCandidates, args)).candidates.map((person) => person.personId)).toEqual([c.colleague.personId])
+    expect((await c.host.as.query(INVITEES.checkEligibility, { ...args, personIds: [c.friend.personId, c.colleague.personId] })).eligible.map((person) => person.personId)).toEqual([c.colleague.personId])
+    await c.colleague.as.mutation(api.modules.pages.pages.unfollow, { networkId: c.root, pageId: c.pageId })
+    expect((await c.host.as.query(INVITEES.checkEligibility, { ...args, personIds: [c.colleague.personId] })).eligible).toEqual([])
+  })
+  it("refuse le contexte de page à un non-signataire et depuis un autre réseau", async () => {
+    const c = await setup()
+    expect(await codeOf(c.friend.as.query(INVITEES.searchCandidates, { networkId: c.root, followersPageId: c.pageId }))).toBe("pageRoleRequired")
+    expect(await codeOf(c.friend.as.query(INVITEES.checkEligibility, { networkId: c.root, followersPageId: c.pageId, personIds: [c.colleague.personId] }))).toBe("pageRoleRequired")
+    await joinAlso(c.t, c.testClosed, c.host)
+    expect(await codeOf(c.host.as.query(INVITEES.searchCandidates, { networkId: c.testClosed, followersPageId: c.pageId }))).toBe("notFound")
+  })
+})

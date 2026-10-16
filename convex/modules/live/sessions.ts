@@ -1,4 +1,4 @@
-// Dupliqué de socle/convex/modules/direct/sessions.ts @ ad2e7fdc2 — adaptations : PERSONNES ET RÉSEAUX — constructeurs bornés `networkMutation`/`networkQuery` (adhésion par le constructeur) au lieu d'`authMutation`/`authQuery`, `networkId` posé sur la session et sur ses lignes d'hôte et d'invités, toute session lue DANS le réseau de la fonction (inconnue ou d'un autre réseau : `notFound` indistinct ; garde `assertVisibleDirectSession(ctx, directCaller(ctx), …)`), personnes (`Id<"persons">`, `hostPersonId`, `targetPersonId`, `spotlight.personId`, `speakers[].personId`), noms du profil PUBLIÉ (`miniProfileCache` du moteur : nom neutre `null` au lieu d'un nom de repli) ; V36/V37 — l'audience `organisation` devient `followers` : page du moteur EXIGÉE (`LIVE_FOLLOWERS_REQUIRES_PAGE`), parler au nom d'une page exige d'en être SIGNATAIRE VIVANT (`pages/access.requireManagedPage`, refus `notFound` ou `pageRoleRequired`) au lieu de `getMembership` + `assertCanDoTask("communication.publish")`, un invité ne franchit jamais ce cercle (`followersPage`), la découverte précharge les PAGES SUIVIES d'ici (`followedPageIds`) au lieu de `validatedOrgIds` ; DÉCOUVERTE préfixée par le réseau (fenêtres et curseurs relus dans le réseau de la fonction), liens du lecteur préchargés par une aide commune (`discoveryFacts`) et chacun OMIS quand l'ensemble borné est tronqué (la décision relit alors la source par candidat, au lieu d'un ensemble tronqué en silence) ; fil source = fil de GROUPE du moteur (`groups/access.requireLiveMembership` dans le réseau ; la portée « personnel »/« poste » n'existe plus) ; D14 — débit `live.create` sur `create`, APRÈS le rejeu idempotent ; D28 — aucun compteur sur la session : `get` et les vignettes lisent `liveSessionCounters` (`access.sessionCountersOf`), la fin recompose par l'écrivain unique (`reap.recomputeAggregates`) ; CLOCHE — `notifyPersonal` en boucle bornée (200 par source) remplacé par la diffusion par lots chaînés (`notifications/fanout`, source `liveSessionAudience`) : démarrage `live_started`, publication de l'enregistrement `live_replay_published`, l'audience rejugée par destinataire au moment de sonner (abonnés et signataires vivants de la page pour `followers`, relations puis abonnés de l'hôte, invités vivants à la publication), les invités vivants sautés au démarrage (ils ont `live_invite`) ; ANNONCE — `writePersonalPost` → `posts/postWrite.writePost` (session portée par `liveSessionId`, visibilité `network` : la session ne se lit que dans son réseau), corps jugé par `assertPersonalPostBody` du domaine ; ERREURS — phrases → règles `LIVE_*` (`failRule`, `checked`) et `directNotFound()`, `rethrowDirectDomain` retiré ; DÉLIVRANCE — URLs de rediffusion et de sous-titres par la garde des fichiers (`servableUrl`, D05) ; références du moteur (`internal.modules.live.livekitActions.*`, `internal.modules.live.invitationSettle.*`, `api.modules.live.sessions.listMineStatusPage`) et index du moteur (`by_network_host_status`, `by_network_host_idempotencyKey`, `by_network_status_startedAt`, `by_network_status_replayStatus_endedAt`) ; décision sur l'enregistrement par `directReplayDecisionValidator` (mêmes littéraux) ; commentaires rapportés au moteur.
+// Dupliqué de socle/convex/modules/direct/sessions.ts @ ad2e7fdc2 — adaptations : PERSONNES ET RÉSEAUX — constructeurs bornés `networkMutation`/`networkQuery` (adhésion par le constructeur) au lieu d'`authMutation`/`authQuery`, `networkId` posé sur la session et sur ses lignes d'hôte et d'invités, toute session lue DANS le réseau de la fonction (inconnue ou d'un autre réseau : `notFound` indistinct ; garde `assertVisibleDirectSession(ctx, directCaller(ctx), …)`), personnes (`Id<"persons">`, `hostPersonId`, `targetPersonId`, `spotlight.personId`, `speakers[].personId`), noms du profil PUBLIÉ (`miniProfileCache` du moteur : nom neutre `null` au lieu d'un nom de repli) ; V36/V37 — l'audience `organisation` devient `followers` : page du moteur EXIGÉE (`LIVE_FOLLOWERS_REQUIRES_PAGE`), parler au nom d'une page exige d'en être SIGNATAIRE VIVANT (`pages/access.requireManagedPage`, refus `notFound` ou `pageRoleRequired`) au lieu de `getMembership` + `assertCanDoTask("communication.publish")`, un invité ne franchit jamais ce cercle (`followersPage`), la découverte précharge les PAGES SUIVIES d'ici (`followedPageIds`) au lieu de `validatedOrgIds` ; DÉCOUVERTE préfixée par le réseau (fenêtres et curseurs relus dans le réseau de la fonction), liens du lecteur préchargés par une aide commune (`discoveryFacts`) et chacun OMIS quand l'ensemble borné est tronqué (la décision relit alors la source par candidat, au lieu d'un ensemble tronqué en silence) ; fil source = fil de GROUPE du moteur (`groups/access.requireLiveMembership` dans le réseau ; la portée « personnel »/« poste » n'existe plus) ; D14 — débit `live.create` sur `create`, APRÈS le rejeu idempotent ; D28 — aucun compteur sur la session : `get` et les vignettes lisent `liveSessionCounters` (`access.sessionCountersOf`), la fin recompose par l'écrivain unique (`reap.recomputeAggregates`) ; CLOCHE — `notifyPersonal` en boucle bornée (200 par source) remplacé par la diffusion par lots chaînés (`notifications/fanout`, source `liveSessionAudience`) : démarrage `live_started`, publication de l'enregistrement `live_replay_published`, l'audience rejugée par destinataire au moment de sonner (abonnés et signataires vivants de la page pour `followers`, relations puis abonnés de l'hôte, invités vivants à la publication), les invités vivants sautés au démarrage (ils ont `live_invite`) ; ANNONCE — identité de page transmise à writePost pour public/followers (F3c) ; `writePersonalPost` → `posts/postWrite.writePost` (session portée par `liveSessionId`, visibilité `network` : la session ne se lit que dans son réseau), corps jugé par `assertPersonalPostBody` du domaine ; ERREURS — phrases → règles `LIVE_*` (`failRule`, `checked`) et `directNotFound()`, `rethrowDirectDomain` retiré ; DÉLIVRANCE — URLs de rediffusion et de sous-titres par la garde des fichiers (`servableUrl`, D05) ; références du moteur (`internal.modules.live.livekitActions.*`, `internal.modules.live.invitationSettle.*`, `api.modules.live.sessions.listMineStatusPage`) et index du moteur (`by_network_host_status`, `by_network_host_idempotencyKey`, `by_network_status_startedAt`, `by_network_status_replayStatus_endedAt`) ; décision sur l'enregistrement par `directReplayDecisionValidator` (mêmes littéraux) ; commentaires rapportés au moteur.
 /**
  * Le CYCLE DE VIE d'un direct — créer, démarrer, terminer, lire.
  * API publique : `api.modules.live.sessions.*`
@@ -33,7 +33,7 @@ import { servableUrl } from "../files/storageGuard"
 import { acceptedCounterpartIds, blockedCounterpartIds } from "../graph/graph"
 import { requireLiveMembership } from "../groups/access"
 import { enqueueFanout, liveSessionAudiencePhases } from "../notifications/fanout"
-import { requireManagedPage } from "../pages/access"
+import { pageCardOf, readablePageOrNull, requireManagedPage } from "../pages/access"
 import { followedPageIds } from "../pages/follows"
 import { miniProfileCache } from "../people/miniProfile"
 import { writePost } from "../posts/postWrite"
@@ -282,6 +282,7 @@ export const create = networkMutation({
         // La session ne se lit que DANS son réseau : son annonce n'en sort pas.
         visibility: "network",
         liveSessionId: sessionId,
+        ...(args.pageId === undefined ? {} : { pageId: args.pageId }),
       })
       await ctx.db.patch(sessionId, { announcePostId: postId, updatedAt: now })
     }
@@ -441,6 +442,8 @@ export const end = networkMutation({
 export type DirectSessionDto = {
   sessionId: Id<"liveSessions">
   title: string
+  /** Identité de signature lisible, jamais une permission. */
+  page?: { pageId: Id<"pages">; name: string; handle: string } | null
   status: "scheduled" | "live" | "ended"
   // Le TYPE du domaine, jamais une union recopiée.
   audience: DirectAudience
@@ -588,6 +591,8 @@ export const get = networkQuery({
 
     const profileOf = miniProfileCache(ctx)
     const host = await profileOf(session.hostPersonId)
+    const signedPage = session.pageId === undefined ? null : await readablePageOrNull(ctx, ctx.network, session.pageId)
+    const page = signedPage === null ? null : await pageCardOf(ctx, signedPage)
 
     const speakerRows = await ctx.db
       .query("liveSpeakers")
@@ -671,6 +676,7 @@ export const get = networkQuery({
     return {
       sessionId: session._id,
       title: session.title,
+      page: page === null ? null : { pageId: page.pageId, name: page.name, handle: page.handle },
       status: session.status,
       audience: session.audience,
       chatMode: session.chatMode,

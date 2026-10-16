@@ -337,15 +337,19 @@ describe("création et annonce", () => {
     expect((await sessionDoc(t, ici))?.networkId).toBe(root)
   })
 
-  it("une conférence réservée aux abonnés d'une page ne s'annonce pas (refus de la publication, comme au socle) — rien n'est créé", async () => {
-    const { t, root, alice } = await cast()
+  it("annonce une conférence followers avec la signature de page et garde les invités privés", async () => {
+    const { t, root, alice, bob, carol } = await cast()
     const pageId = await insertPage(t, root, alice)
+    await followPage(t, pageId, bob)
+    const { sessionId } = await alice.as.mutation(S.create, { networkId: root, title: "Annonce aux abonnés", audience: "followers", pageId, chatMode: "open", announce: true })
+    const doc = await sessionDoc(t, sessionId)
+    expect(doc?.announcePostId).toBeDefined()
+    const post = await bob.as.query(api.modules.posts.posts.getPost, { networkId: root, postId: doc!.announcePostId! })
+    expect(post.page?.pageId).toBe(pageId)
+    expect(post.audience).toBe("followers")
+    expect(await codeOf(carol.as.query(api.modules.posts.posts.getPost, { networkId: root, postId: doc!.announcePostId! }))).toBe("notFound")
+    expect((await alice.as.query(S.get, { networkId: root, sessionId })).page?.pageId).toBe(pageId)
     tick(CREATE_SPACING_MS)
-    expect(await ruleOf(alice.as.mutation(S.create, { networkId: root, title: "Annonce aux abonnés", audience: "followers", pageId, chatMode: "open", announce: true }))).toBe(
-      "POST_FOLLOWERS_REQUIRES_PAGE",
-    )
-    expect(await alice.as.query(S.listMine, { networkId: root })).toEqual([])
-    // « Invités seulement » ne s'annonce pas non plus — refus de la session, avant toute écriture.
     expect(await ruleOf(alice.as.mutation(S.create, { networkId: root, title: "Réservée", audience: "invitees", chatMode: "open", announce: true }))).toBe("LIVE_INVITEES_NOT_ANNOUNCED")
   })
 })

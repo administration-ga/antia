@@ -1,4 +1,4 @@
-// Dupliqué de socle/convex/modules/direct/invitees.ts @ ad2e7fdc2 — adaptations : personnes et réseaux — constructeurs bornés (`networkQuery`/`networkMutation`, lecteur `directCaller`), tables `live*`, invité désigné par une PERSONNE (`personId`, liste `personIds` de `checkEligibility`, DTO compris) ; audience « organisation » retirée (V39) : une conférence réservée aux abonnés d'une page (`followers`) ne convie que le CERCLE de la page — abonnés et signataires vivants (`inviteePageRequirement`, `followsOrSignsPage`) — au lieu des agents rattachés (`validatedOrgIds`) ; « compte citoyen ou inactif » → personne effacée ou non membre active du réseau (`isInviteeAccountEligible(ctx, networkId, personId)`) ; fil source = fil de GROUPE du moteur (`groupThreads`, garde `requireLiveMembership` du réseau) — la portée « personnel » / « poste » n'existe plus, et son refus `THREAD_NOT_FOUND` devient le `notFound` indistinct de la garde ; relations et blocages lus par le graphe du moteur (`acceptedCounterpartIds` dans le réseau, `blockedCounterpartIds`) ; profils PUBLIÉS (`miniProfileCache` du moteur : nom `null` sans profil publié, liste triée sur le nom publié, à défaut l'identifiant) ; recherche repliée par `foldDiacritics` du domaine (même repli des accents) ; cloche par la porte unique (`notifyPerson`, `resolveNotifications` dans le réseau de la session, genre `live_invite`, sujet `liveSession`) ; refus à CODE : `LIVE_INVITEE_NOT_ELIGIBLE` (le refus indistinct d'un ajout), `LIVE_ENDED`, `LIVE_INVITEE_CHECK_TOO_MANY{max}`, bornes de la liste par `checked` (`LIVE_INVITEES_TOO_MANY`, `LIVE_SPEAKER_INVITEES_TOO_MANY`), `notFound` et `liveRoleRequired` des gardes ; débit `live.inviteesAdd` sur `add` (D14, ordre du moteur : adhésion → visibilité → débit → droit) ; coupure SFU par le sujet d'authentification de la personne (`persons.authUserId`) vers `livekitActions.applyDirectSfuState`.
+// Dupliqué de socle/convex/modules/direct/invitees.ts @ ad2e7fdc2 — adaptations : contexte de brouillon followers gardé avant recherche et vérification (F3c) ; personnes et réseaux — constructeurs bornés (`networkQuery`/`networkMutation`, lecteur `directCaller`), tables `live*`, invité désigné par une PERSONNE (`personId`, liste `personIds` de `checkEligibility`, DTO compris) ; audience « organisation » retirée (V39) : une conférence réservée aux abonnés d'une page (`followers`) ne convie que le CERCLE de la page — abonnés et signataires vivants (`inviteePageRequirement`, `followsOrSignsPage`) — au lieu des agents rattachés (`validatedOrgIds`) ; « compte citoyen ou inactif » → personne effacée ou non membre active du réseau (`isInviteeAccountEligible(ctx, networkId, personId)`) ; fil source = fil de GROUPE du moteur (`groupThreads`, garde `requireLiveMembership` du réseau) — la portée « personnel » / « poste » n'existe plus, et son refus `THREAD_NOT_FOUND` devient le `notFound` indistinct de la garde ; relations et blocages lus par le graphe du moteur (`acceptedCounterpartIds` dans le réseau, `blockedCounterpartIds`) ; profils PUBLIÉS (`miniProfileCache` du moteur : nom `null` sans profil publié, liste triée sur le nom publié, à défaut l'identifiant) ; recherche repliée par `foldDiacritics` du domaine (même repli des accents) ; cloche par la porte unique (`notifyPerson`, `resolveNotifications` dans le réseau de la session, genre `live_invite`, sujet `liveSession`) ; refus à CODE : `LIVE_INVITEE_NOT_ELIGIBLE` (le refus indistinct d'un ajout), `LIVE_ENDED`, `LIVE_INVITEE_CHECK_TOO_MANY{max}`, bornes de la liste par `checked` (`LIVE_INVITEES_TOO_MANY`, `LIVE_SPEAKER_INVITEES_TOO_MANY`), `notFound` et `liveRoleRequired` des gardes ; débit `live.inviteesAdd` sur `add` (D14, ordre du moteur : adhésion → visibilité → débit → droit) ; coupure SFU par le sujet d'authentification de la personne (`persons.authUserId`) vers `livekitActions.applyDirectSfuState`.
 /**
  * Les INVITÉS NOMINATIFS d'une conférence (ADR-0150).
  * API publique : `api.modules.live.invitees.*`
@@ -41,6 +41,7 @@ import { acceptedCounterpartIds, blockedCounterpartIds } from "../graph/graph"
 import { liveMembers, requireLiveMembership } from "../groups/access"
 import { notifyPerson, resolveNotifications } from "../notifications/notify"
 import { miniProfileCache } from "../people/miniProfile"
+import { requireManagedPage } from "../pages/access"
 import {
   assertVisibleDirectSession,
   banRow,
@@ -224,6 +225,7 @@ export const searchCandidates = networkQuery({
     sourceThreadId: v.optional(v.id("groupThreads")),
     search: v.optional(v.string()),
     sessionId: v.optional(v.id("liveSessions")),
+    followersPageId: v.optional(v.id("pages")),
   },
   returns: v.object({ candidates: v.array(candidateValidator) }),
   handler: async (ctx, args): Promise<{ candidates: DirectInviteeCandidateDto[] }> => {
@@ -231,6 +233,9 @@ export const searchCandidates = networkQuery({
     let threadId: Id<"groupThreads"> | null = null
     let followersPage: Doc<"pages"> | null = null
     let sessionForFilter: Id<"liveSessions"> | null = null
+    if (args.sessionId === undefined && args.followersPageId !== undefined) {
+      followersPage = (await requireManagedPage(ctx, { networkId: ctx.networkId, personId: me }, args.followersPageId, "signatory")).page
+    }
 
     if (args.sessionId !== undefined) {
       const session = await assertVisibleDirectSession(ctx, directCaller(ctx), args.sessionId)
@@ -350,10 +355,12 @@ export const checkEligibility = networkQuery({
   args: {
     personIds: v.array(v.id("persons")),
     sourceThreadId: v.optional(v.id("groupThreads")),
+    followersPageId: v.optional(v.id("pages")),
   },
   returns: v.object({ eligible: v.array(eligibleInviteeValidator) }),
   handler: async (ctx, args): Promise<{ eligible: DirectEligibleInviteeDto[] }> => {
     const me = ctx.person._id
+    const followersPage = args.followersPageId === undefined ? null : (await requireManagedPage(ctx, { networkId: ctx.networkId, personId: me }, args.followersPageId, "signatory")).page
     let sourceThreadId: Id<"groupThreads"> | null = null
     if (args.sourceThreadId !== undefined) {
       // Le fil fourni doit être le MIEN, dans ce réseau : même refus que le fil absent.
@@ -381,7 +388,7 @@ export const checkEligibility = networkQuery({
           hostPersonId: me,
           targetPersonId: personId,
           sourceThreadId,
-          followersPage: null,
+          followersPage,
         }))
       ) {
         continue

@@ -61,6 +61,7 @@ import { Avatar } from "./Avatar"
 import { countryName, countryOptions, followActionErrorMessage, ownerKindLabel, pageActionErrorMessage, pageBadgeView, pageInvitationText, pageRoleLabel } from "./pages-panel"
 import { PostCard } from "./PostCard"
 import { PostComposer } from "./PostComposer"
+import { CreateDirectDialog } from "../direct/CreateDirectDialog"
 import { ProfilFrame } from "./ProfilFrame"
 import {
   canManagePageAs,
@@ -183,7 +184,8 @@ export function ProfilPagePage({ handle }: ProfilPagePageProps) {
 /** La fiche chargée : identité, gestes, gestion, revendication, mur. */
 function PageProfile({ page }: { page: PageDto }) {
   const { t, i18n } = useTranslation("reseau")
-  const { networkId } = useNetwork()
+  const { networkId, liveAvailable } = useNetwork()
+  const [conference, setConference] = useState(false)
   const follow = useMutation(api.modules.pages.pages.follow)
   const unfollow = useMutation(api.modules.pages.pages.unfollow)
   const [followPending, setFollowPending] = useState(false)
@@ -312,6 +314,8 @@ function PageProfile({ page }: { page: PageDto }) {
       {/* En tête du mur, réservé à qui tient un rôle VIVANT sur la page — la
           QUESTION est relue ici pour l'affichage, la GARDE est refaite à
           l'écriture par `publishAsPage`. */}
+      {canPublish && liveAvailable && page.networkId === networkId ? <Button icon="video" onClick={() => setConference(true)}>{t("direct:create.title")}</Button> : null}
+      {conference && canPublish && liveAvailable && page.networkId === networkId ? <CreateDirectDialog key={`${networkId}:${page.pageId}`} asPage={{ pageId: page.pageId, name: page.name }} onClose={() => setConference(false)} /> : null}
       {canPublish ? <PostComposer asPage={{ pageId: page.pageId, displayName: page.name, avatarUrl: page.logoUrl }} /> : null}
 
       <PageWall page={page} canPublish={canPublish} />

@@ -3,6 +3,7 @@
 
 import { act, renderHook } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
+import { consumeConferenceLaunch, getConferenceLaunchRequest } from "../iappel/conference-launch-store"
 import { useCreationController } from "./use-creation-controller"
 
 describe("useCreationController", () => {
@@ -68,4 +69,17 @@ describe("useCreationController", () => {
     expect(push).not.toHaveBeenCalled()
     expect(result.current.creation.open).toBeNull()
   })
+})
+
+
+it("confie le brouillon de conférence à l'hôte au-delà de la bascule", () => {
+  consumeConferenceLaunch()
+  const view = renderHook(() => useCreationController())
+  act(() => view.result.current.openCreation("conference"))
+  const request = getConferenceLaunchRequest()
+  expect(request?.userIds).toEqual([])
+  expect(view.result.current.open).toBeNull()
+  view.unmount()
+  expect(getConferenceLaunchRequest()).toBe(request)
+  consumeConferenceLaunch()
 })

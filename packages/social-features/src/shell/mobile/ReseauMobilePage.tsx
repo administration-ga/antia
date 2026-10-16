@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/mobile/ReseauMobilePage.tsx @ ad2e7fdc2 — adaptations : déplacé dans la coque (`shell/mobile/`) — le pilote de la page réseau du moteur au téléphone (`useRoutes().home()`) ; volets SERVIS seuls (`servedReseauTab` : « Conférences », son volet et son dialogue de création attendent le module `live` — `DirectsPanel` et `CreateDirectDialog` retirés, une adresse de conférence aboutit au fil) ; volet Pages par le `PagesPanel` réécrit sur les pages du moteur ; onglet actif jugé sur la base injectée (`activeReseauTab(pathname, tab, home)`) et vues immersives sur la table des routes (`shouldShowTabBar(pathname, routes)`) ; ma fiche lue sur la personne du moteur (identifiant et profil seulement PUBLIÉS, portrait servi par la garde) — mon profil sur `useRoutes().profile(handle)` au lieu du dossier de l'espace ; gestes de création décidés par le catalogue du moteur sur les routes injectées (`creationLaunchFor(kind, { handle }, useRoutes())`) ; le volet Évènements n'est plus monté avec `onCreateEvent` — l'intention de composition d'iAgenda (absent du moteur) n'existe plus et le catalogue mène l'évènement au volet lui-même : un bouton qui y renverrait tournerait en rond ; actu du fil ouverte en place (`onCreateStory`) ; titre et volet nommés par l'i18n (`reseau:reseauMobilePage.title`, clés du volet) ; « iRéseau » devient « réseau » ; même état partagé (`useReseauFeedState`, un seul appel).
+// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/mobile/ReseauMobilePage.tsx @ ad2e7fdc2 — adaptations : déplacé dans la coque (`shell/mobile/`) — le pilote de la page réseau du moteur au téléphone (`useRoutes().home()`) ; volets servis par `servedReseauTab`, Conférences par `DirectsPanel` et création confiée à l’hôte persistant du membre (F3c) ; volet Pages par le `PagesPanel` réécrit sur les pages du moteur ; onglet actif jugé sur la base injectée (`activeReseauTab(pathname, tab, home)`) et vues immersives sur la table des routes (`shouldShowTabBar(pathname, routes)`) ; ma fiche lue sur la personne du moteur (identifiant et profil seulement PUBLIÉS, portrait servi par la garde) — mon profil sur `useRoutes().profile(handle)` au lieu du dossier de l'espace ; gestes de création décidés par le catalogue du moteur sur les routes injectées (`creationLaunchFor(kind, { handle }, useRoutes())`) ; le volet Évènements n'est plus monté avec `onCreateEvent` — l'intention de composition d'iAgenda (absent du moteur) n'existe plus et le catalogue mène l'évènement au volet lui-même : un bouton qui y renverrait tournerait en rond ; actu du fil ouverte en place (`onCreateStory`) ; titre et volet nommés par l'i18n (`reseau:reseauMobilePage.title`, clés du volet) ; « iRéseau » devient « réseau » ; même état partagé (`useReseauFeedState`, un seul appel).
 "use client"
 
 /**
@@ -33,7 +33,6 @@ import { EvenementsPanel } from "../../features/reseau-personnel/EvenementsPanel
 import { GroupsPanel } from "../../features/reseau-personnel/GroupsPanel"
 import { PagesPanel } from "../../features/reseau-personnel/PagesPanel"
 import { PeoplePanel } from "../../features/reseau-personnel/PeoplePanel"
-import { CreateDirectDialog } from "../../features/direct/CreateDirectDialog"
 import { DirectsPanel } from "../../features/direct/DirectsPanel"
 
 import { useCreationController } from "../../features/reseau-personnel/use-creation-controller"
@@ -159,7 +158,7 @@ export function ReseauMobilePage() {
           ne permettait pas (R-02). */}
       <PostComposerSheet open={creation.open === "publication"} onClose={creation.close} />
       <StoryCreateSheet open={creation.open === "actu"} onClose={creation.close} onPublished={creation.close} />
-      {creation.open === "conference" ? <CreateDirectDialog onClose={creation.close} /> : null}
+
     </ReseauMobileShell>
   )
 }

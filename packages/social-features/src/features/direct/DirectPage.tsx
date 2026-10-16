@@ -19,6 +19,8 @@ import { postEngineErrorText } from "../reseau-personnel/post-overflow"
 import { describeCallMediaError } from "../iappel/media-errors"
 import { DirectStudio } from "./DirectStudio"
 import { DirectManagement } from "./DirectManagement"
+import { DirectExitDialog } from "./DirectExitDialog"
+import { DirectReplay } from "./DirectReplay"
 
 export type DirectSession = FunctionReturnType<typeof api.modules.live.sessions.get>
 
@@ -46,6 +48,7 @@ function DirectSessionView({ session }: { session: DirectSession }) {
   const room = useDirectRoom(session.sessionId)
   const [pending, setPending] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [leaving, setLeaving] = useState(false)
   const [exit, setExit] = useState(false)
   const [localTracks, setLocalTracks] = useState<LocalTrack[]>([])
   const [checked, setChecked] = useState(false)
@@ -123,7 +126,7 @@ function DirectSessionView({ session }: { session: DirectSession }) {
     await join()
   })
   const quit = () => {
-    if (held) directSessionStore.leave()
+    if (directSessionStore.getState().sessionId === session.sessionId) directSessionStore.leave()
     if (session.viewerRole === "speaker") void leaveStage({ networkId, sessionId: session.sessionId }).catch(() => undefined)
     void leaveViewer({ networkId, sessionId: session.sessionId }).catch(() => undefined)
   }
@@ -131,7 +134,7 @@ function DirectSessionView({ session }: { session: DirectSession }) {
     <section className="flex min-w-0 flex-col gap-5" aria-label={session.title}>
       <Link href={routes.home()} className="inline-flex min-h-11 items-center text-sm">{t("back")}</Link>
       <header className="flex flex-wrap items-center justify-between gap-3">
-        <div><p className="text-sm text-muted-foreground">{t(`status.${session.status}`)}</p><h1 className="text-2xl font-semibold">{session.title}</h1><p className="text-sm text-muted-foreground">{session.host.displayName ?? t("person")}</p></div>
+        <div><p className="text-sm text-muted-foreground">{t(`status.${session.status}`)}</p><h1 className="text-2xl font-semibold">{session.title}</h1><p className="text-sm text-muted-foreground">{session.host.displayName ?? t("person")}</p>{session.page ? <Link href={routes.page(session.page.handle)} className="text-sm">{t("create.signedPage", { name: session.page.name })}</Link> : null}</div>
         <span className="rounded-full border border-border px-3 py-1 text-sm">{t(`audience.${session.audience}`)}</span>
       </header>
       {anotherRoom ? <p role="alert">{t("anotherRoom")} <Link href={routes.conference(state.sessionId!)}>{t("returnToRoom")}</Link></p> : null}
@@ -149,7 +152,7 @@ function DirectSessionView({ session }: { session: DirectSession }) {
       {session.status === "scheduled" && session.viewerRole !== "host" ? <p>{t("waiting")}</p> : null}
       {session.status === "live" ? <>
         {held && room ? (
-          <RoomContext.Provider value={room}><DirectStudio session={session} onLeave={quit} onEnd={session.permissions.endOrTransfer ? () => setExit(true) : undefined} /></RoomContext.Provider>
+          <RoomContext.Provider value={room}><DirectStudio session={session} onLeave={() => session.viewerRole === "viewer" || state.phase !== "connected" ? quit() : setLeaving(true)} onEnd={session.permissions.endOrTransfer ? () => setExit(true) : undefined} /></RoomContext.Provider>
         ) : (
           <div className="flex flex-col gap-3 rounded-xl border border-border bg-card p-6">
             <p>{t(session.viewerRole === "viewer" ? "joinDescription" : "joinPublisherDescription")}</p>
@@ -165,41 +168,17 @@ function DirectSessionView({ session }: { session: DirectSession }) {
           {!room ? <Button variant="ghost" onClick={quit}>{t("leave")}</Button> : null}
         </div> : null}
         <p className="text-sm text-muted-foreground">{t("counters", { present: session.counters.present, admitted: session.counters.viewers })}</p>
-        {session.replay ? <p className="text-sm">{t("recording")}</p> : null}
+        {session.replay ? <p className="text-sm">{t(`replay.egress.${session.replay.egressState}`)}</p> : null}
       </> : null}
       </div>
       {session.status !== "ended" ? <DirectManagement session={session} admitted={held && state.credentials?.role === "viewer" && state.phase === "connected"} /> : null}
       </div>
       {session.status === "ended" ? <DirectReplay session={session} /> : null}
+      {leaving && session.status !== "ended" ? <DirectExitDialog session={session} onCancel={() => setLeaving(false)} onLeave={() => { quit(); setLeaving(false) }} /> : null}
       {session.status !== "ended" && session.permissions.endOrTransfer ? <>
         <Button variant="ghost" disabled={pending} onClick={() => setExit(true)}>{t(session.status === "scheduled" ? "cancel" : "end")}</Button>
         {exit ? <div role="group" aria-label={t("endConfirm")} className="flex flex-col gap-3 rounded-xl border border-border p-4"><p>{t("endConfirm")}</p><div className="flex gap-3"><Button disabled={pending} onClick={() => void attempt(async () => { await end({ networkId, sessionId: session.sessionId }); quit(); setExit(false) })}>{t("confirm")}</Button><Button variant="ghost" onClick={() => setExit(false)}>{t("keep")}</Button></div></div> : null}
       </> : null}
     </section>
   )
-}
-
-function DirectReplay({ session }: { session: DirectSession }) {
-  const { t } = useTranslation("direct")
-  const { networkId } = useNetwork()
-  const decide = useMutation(api.modules.live.sessions.decideReplayPublication)
-  const [pending, setPending] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const replay = session.replay
-  const choice = async (decision: "published" | "private") => {
-    setPending(true)
-    setError(null)
-    try { await decide({ networkId, sessionId: session.sessionId, decision }) } catch (failure) { setError(postEngineErrorText(failure, "direct:failed", t)) } finally { setPending(false) }
-  }
-  return <div className="flex flex-col gap-3 rounded-xl border border-border bg-card p-5">
-    <p>{t(replay ? `replay.${replay.status}` : "replay.none")}</p>
-    {replay?.url ? <video src={replay.url} controls playsInline preload="metadata" aria-label={t("replay.player")} className="aspect-video w-full rounded-lg">
-      {replay.captionsUrl ? <track kind="captions" src={replay.captionsUrl} srcLang={replay.captionsLang ?? "fr"} label={t("replay.captions")} default /> : null}
-    </video> : null}
-    {replay?.canManage ? <>
-      <p>{t(`replay.publication.${replay.publication}`)}</p>
-      <div className="flex flex-wrap gap-3"><Button disabled={pending || replay.status !== "ready"} onClick={() => void choice("published")}>{t("replay.publish")}</Button><Button variant="ghost" disabled={pending} onClick={() => void choice("private")}>{t("replay.keepPrivate")}</Button></div>
-    </> : null}
-    {error ? <p role="alert">{error}</p> : null}
-  </div>
 }

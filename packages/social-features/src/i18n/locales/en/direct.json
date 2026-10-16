@@ -63,7 +63,24 @@
     "invalidTitle": "Enter a title of 1 to {{max}} characters.",
     "invalidCapacity": "Choose between 1 and {{max}} viewers.",
     "invited_one": "{{count}} person proposed as a speaker.",
-    "invited_other": "{{count}} people proposed as viewers."
+    "invited_other": "{{count}} people proposed as viewers.",
+    "identity": "Speak as myself or a page",
+    "personal": "As myself",
+    "pageUnavailable": "This page is no longer available for creation. Choose another identity.",
+    "pagesFailed": "Your pages could not be loaded. You can create as yourself.",
+    "guestsDescription": "Choose guests and their proposed roles. Access is checked again when creating and starting the conference. Up to 200 guests, including seven speakers.",
+    "searchBound": "Search returns up to 50 matches among your connections and source thread members. Refine by name or handle.",
+    "handle": "@{{handle}}",
+    "unnamedGuest": "Guest {{number}}",
+    "guestUnavailable": "This person is no longer eligible in this context. Remove them from the selection.",
+    "guestRole": "Proposed role for {{name}}",
+    "removeGuest": "Remove {{name}}",
+    "guestsChanged": "Some guests are no longer eligible. Remove them before preparing the conference.",
+    "checkingGuests": "Checking guests…",
+    "noPageAnnouncement": "A page conference limited to your connections cannot post an announcement as the page.",
+    "signedPage": "On behalf of {{name}}",
+    "guestName": "{{name}} (@{{handle}})",
+    "remove": "Remove"
   },
   "directory": {
     "title": "Conferences",
@@ -99,7 +116,38 @@
       "undecided": "Publication is awaiting your decision.",
       "published": "The replay is published for the authorised audience.",
       "private": "The replay is kept for you."
-    }
+    },
+    "management": "Replay and retention",
+    "egress": {
+      "requested": "Recording requested",
+      "active": "Recording in progress",
+      "processing": "Replay being prepared",
+      "ready": "Replay available",
+      "failed": "Replay not produced",
+      "expired": "Replay withdrawn or retention ended"
+    },
+    "durationHours": "Duration: {{hours}} h {{minutes}}",
+    "durationMinutes": "Duration: {{minutes}} min",
+    "retention": "Available until {{date}}",
+    "retentionPassed": "The retention deadline has been reached.",
+    "fileUnavailable": "The file is not available for playback. File verification may still be in progress.",
+    "playbackEnded": "Playback ended.",
+    "playbackFailed": "The replay could not be played. Try again.",
+    "published": "Replay published for its permitted audience.",
+    "keptPrivate": "Replay kept for you.",
+    "recoverDescription": "Retrieve an existing recording. This does not create a new recording.",
+    "recover": "Recover recording",
+    "recoveryScheduled": "Recovery requested. The status will update when it arrives.",
+    "visibility": "Replay audience",
+    "visibilityUpdated": "Audience updated.",
+    "fixedAudience": "The replay remains restricted to: {{audience}}.",
+    "captionsDescription": "Import a WebVTT (.vtt) file, up to 2 MiB. It replaces the previous track and goes through file verification.",
+    "captionsLanguage": "Caption language",
+    "importCaptions": "Import a WebVTT track",
+    "importAccepted": "Track received. It will be available after file verification.",
+    "withdraw": "Withdraw recording",
+    "withdrawConfirm": "Permanently remove the video and captions? Copies already downloaded elsewhere cannot be erased.",
+    "withdrawn": "Recording withdrawn."
   },
   "media": {
     "microphoneFailed": "The microphone did not start."
@@ -289,5 +337,58 @@
       "soutien": "Support · {{count}}",
       "instructif": "Informative · {{count}}"
     }
+  },
+  "captionsLang": {
+    "fr": "French",
+    "en": "English"
+  },
+  "captionsRefusal": {
+    "ok": "Track received.",
+    "missing": "The file is empty or no longer available.",
+    "too_large": "The track exceeds the 2 MiB limit.",
+    "wrong_type": "Choose a WebVTT (.vtt) track."
+  },
+  "floating": {
+    "label": "Conference: {{title}} — window",
+    "move": "Move the conference with arrow keys; Shift for larger steps, Home and End for corners, double-click to reset",
+    "expand": "Expand",
+    "minimize": "Minimize",
+    "preview": "Conference preview",
+    "leaveTitle": "Leave the conference?",
+    "hostLeaveDescription": "Ending closes the conference for everyone. Leaving without ending turns off your microphone and camera; your absence may then interrupt the conference.",
+    "speakerLeaveDescription": "Your microphone and camera will turn off and you will leave the stage. The conference continues.",
+    "endForAll": "End for everyone",
+    "leaveKeepLive": "Leave without ending",
+    "leaveStage": "Leave the stage"
+  },
+  "rail": {
+    "title": "Live conferences",
+    "profile": "Profile of {{name}}",
+    "since": "Live for {{minutes}} min",
+    "emptyWindow": "No accessible live conference in this window. Continue with “Show more”."
+  },
+  "replayFailure": {
+    "recording_unavailable": "The recording service is not configured.",
+    "ended_before_start": "The conference ended before recording started.",
+    "media_server_unresponsive": "The broadcast service did not respond.",
+    "recorder_unresponsive": "The recording service did not respond.",
+    "room_never_opened": "The room was never opened.",
+    "start_refused": "Recording could not be started.",
+    "egress_failed": "Recording failed.",
+    "egress_aborted": "Recording was interrupted.",
+    "egress_limit_reached": "The recording service limit was reached.",
+    "no_file_delivered": "No file was delivered.",
+    "never_started": "Recording never started.",
+    "never_delivered": "The file was not received within the expected time.",
+    "egress_not_found": "The requested recording was not found.",
+    "file_not_retrieved": "The recorded file could not be retrieved.",
+    "transfer_invalid_location": "The file location was refused.",
+    "transfer_download_failed": "File transfer failed.",
+    "transfer_empty": "The received file is empty.",
+    "transfer_too_large": "The received file exceeds the permitted limit.",
+    "transfer_length_mismatch": "The received file size does not match the declared size.",
+    "transfer_timeout": "File transfer timed out.",
+    "transfer_upload_failed": "The file could not be saved to storage.",
+    "upload_refused": "The upload policy refused the file."
   }
 }

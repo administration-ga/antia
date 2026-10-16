@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/use-creation-controller.ts @ ad2e7fdc2 — adaptations : code inchangé ; commentaires rapportés au réseau du moteur (« iRéseau » → le réseau, formats du catalogue du moteur — sans la conférence).
+// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/use-creation-controller.ts @ ad2e7fdc2 — adaptations : F3c : conférence confiée à l’hôte persistant pour conserver son brouillon à la bascule mobile ; commentaires rapportés au réseau du moteur (« iRéseau » → le réseau, formats du catalogue du moteur).
 "use client"
 
 /**
@@ -29,12 +29,14 @@
  * `post-draft-store.ts` — un état de MODULE — parce qu'elle doit survivre au
  * remplacement de l'arbre à 959→960→959 : le hook est appelé une fois par
  * coquille (bureau, téléphone), donc un `useState` se perd à la bascule, en
- * même temps que la feuille et le brouillon qu'elle portait. Les autres
- * formats restent locaux : ils n'ont rien à conserver.
+ * même temps que la feuille et le brouillon qu'elle portait. La CONFÉRENCE
+ * confie aussi son ouverture et son brouillon à l'hôte persistant. Les autres
+ * formats restent locaux.
  */
 
 import { useCallback, useMemo, useState } from "react"
 import type { CreationKind } from "./creation-controller"
+import { consumeConferenceLaunch, requestConferenceLaunch } from "../iappel/conference-launch-store"
 import { postDraftStore, usePostComposerOpen } from "./post-draft-store"
 
 export interface CreationController {
@@ -51,6 +53,13 @@ export function useCreationController(): CreationController {
   const composerOpen = usePostComposerOpen()
 
   const openCreation = useCallback((kind: CreationKind) => {
+    if (kind === "conference") {
+      setLocal(null)
+      postDraftStore.setComposerOpen(false)
+      requestConferenceLaunch({ userIds: [] })
+      return
+    }
+    consumeConferenceLaunch()
     if (kind === "publication") {
       // Une valeur, jamais un ensemble : ouvrir la publication referme ce qui
       // l'était (deux surfaces montées = deux pièges de focus empilés).
@@ -62,6 +71,7 @@ export function useCreationController(): CreationController {
     setLocal(kind)
   }, [])
   const close = useCallback(() => {
+    consumeConferenceLaunch()
     postDraftStore.setComposerOpen(false)
     setLocal(null)
   }, [])

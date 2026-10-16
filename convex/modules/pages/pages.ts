@@ -272,7 +272,9 @@ export const myPages = networkQuery({
       // Une invitation en attente ne donne aucune page au nom de laquelle parler.
       if (row.acceptedAt === undefined) continue
       const page = await ctx.db.get(row.pageId)
-      if (page && page.status === "active") out.push({ ...(await pageCardOf(ctx, page)), role: row.role })
+      if (!page || page.networkId !== ctx.networkId) continue
+      const role = await liveSignatoryRole(ctx, page, ctx.person._id)
+      if (role !== null) out.push({ ...(await pageCardOf(ctx, page)), role })
     }
     return out
   },

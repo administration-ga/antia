@@ -17,6 +17,7 @@ const mocks = vi.hoisted(() => ({
   path: "/conference/session-a", networkId: "network-a", mounted: vi.fn(), unmounted: vi.fn(),
   session: null as unknown,
 }))
+vi.mock("@antia/ui/overlay", () => ({ useIsReseauMobile: () => false }))
 vi.mock("@antia/api/network", () => ({
   useNetwork: () => ({ networkId: mocks.networkId, personId: "person-a", charte: "antia" }),
   useRoutes: () => ({ home: () => "/fil", conference: (id: string) => `/conference/${id}` }),

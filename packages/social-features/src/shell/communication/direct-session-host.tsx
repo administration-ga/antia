@@ -1,18 +1,18 @@
-// Dupliqué de socle/packages/agent-features/src/shell/direct-session-host.tsx @ ad2e7fdc2 — adaptations : première tranche réécrite sur le moteur, baux et rôle dans la coque persistante, réseau courant ; retour compact hors de la route injectée au lieu du studio flottant complet.
+// Dupliqué de socle/packages/agent-features/src/shell/direct-session-host.tsx @ ad2e7fdc2 — adaptations : première tranche réécrite sur le moteur, baux et rôle dans la coque persistante, réseau courant ; carte flottante consommant le registre hors route injectée (F3c).
 "use client"
 
 import { api, type Id } from "@antia/api/engine"
 import { useAuthenticatedConvexQuery } from "@antia/api/hooks"
 import { useNetwork, useRoutes } from "@antia/api/network"
-import { Link, usePathname } from "@antia/api/routing"
-import { Button } from "@antia/ui"
+import { usePathname } from "@antia/api/routing"
 import { useMutation } from "convex/react"
 import { useEffect } from "react"
-import { useTranslation } from "react-i18next"
 import { DIRECT_HOST_HEARTBEAT_MS, DIRECT_PRESENCE_HEARTBEAT_MS } from "@antia/social-domain/live/domain"
 
 import { DirectCallCoexistence } from "../../components/direct/DirectCallCoexistence"
 import { DirectRoomMount } from "../../components/direct/DirectRoomMount"
+import { DirectFloatingCard } from "../../features/direct/DirectFloatingCard"
+import { directPresentationPlace } from "../../features/direct/direct-floating"
 import { CreateDirectDialog } from "../../features/direct/CreateDirectDialog"
 import { shouldBeatViewerPresence } from "../../features/direct/direct-presence"
 import { consumeConferenceLaunch, useConferenceLaunchRequest } from "../../features/iappel/conference-launch-store"
@@ -33,8 +33,7 @@ export function DirectSessionHost() {
 }
 
 function ActiveDirect({ sessionId }: { sessionId: Id<"liveSessions"> }) {
-  const { t } = useTranslation("direct")
-  const { networkId, charte } = useNetwork()
+  const { networkId } = useNetwork()
   const routes = useRoutes()
   const pathname = usePathname()
   const state = useDirectSessionStore()
@@ -73,9 +72,6 @@ function ActiveDirect({ sessionId }: { sessionId: Id<"liveSessions"> }) {
   }, [beatsViewer, networkId, sessionId, viewerHeartbeat, leaveViewer])
   return <>
     <DirectRoomMount sessionId={sessionId} />
-    {pathname !== routes.conference(sessionId) && (state.credentials || state.phase === "connecting" || state.phase === "error") ? <aside data-charte={charte} aria-label={t("ongoing")} className="fixed bottom-20 left-3 z-40 flex max-w-[calc(100vw-1.5rem)] flex-wrap items-center gap-3 rounded-xl border border-border bg-card p-3 shadow-lg sm:bottom-5">
-      <Link href={routes.conference(sessionId)} className="max-w-64 truncate text-sm font-semibold">{session.data?.title ?? t("ongoing")}</Link>
-      <Button variant="ghost" onClick={() => { directSessionStore.leave(); void leaveViewer({ networkId, sessionId }).catch(() => undefined); if (role === "speaker") void leaveStage({ networkId, sessionId }).catch(() => undefined) }}>{t("leave")}</Button>
-    </aside> : null}
+    {directPresentationPlace({ heldSessionId: state.sessionId, hasCredentials: !!state.credentials, pendingOrError: state.phase === "connecting" || state.phase === "error", pathname, conferenceHref: routes.conference(sessionId) }) === "floating" ? <DirectFloatingCard session={session.data} onLeave={() => { if (directSessionStore.getState().sessionId === sessionId) directSessionStore.leave(); void leaveViewer({ networkId, sessionId }).catch(() => undefined); if (role === "speaker") void leaveStage({ networkId, sessionId }).catch(() => undefined) }} /> : null}
   </>
 }

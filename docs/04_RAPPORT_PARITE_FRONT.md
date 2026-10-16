@@ -369,3 +369,91 @@ propriétaire. Les tests de scène/contrôles avec une salle simulée ne la prou
   Codex du 16/10, `antia-f3b-delegations.png` et `antia-f3b-mobile.png`.
 - Reste : média réel, scène de plusieurs appareils, écran partagé réel, plein écran
   réel avec SFU, Egress, passe sombre exhaustive et audit AA complet.
+
+
+## F3c — Création, rediffusion et continuité de présentation (16/10/2026)
+
+Les surfaces prévues pour F3c sont branchées aux routes réelles et au moteur live.
+Sources relues par Git sur le socle origin/main `25398f565` : périmètre porté
+identique à `ad2e7fdc2`. Décision : [ADR-0006](adr/0006-creation-et-rediffusion-dans-le-contexte-du-direct.md).
+
+### Création et identité
+
+- Formulaire : identité personnelle ou page à signature vivante, followers seulement
+  avec une page ; entrée directe depuis la fiche de page du réseau courant.
+- Le moteur myPages rejoue maintenant le rôle vivant (dont identité forte d'une
+  page officielle), et ne propose aucune page étrangère à ce réseau.
+- Choix nominatif initial : recherche parmi les relations/fil source, ajout/retrait,
+  spectateur/intervenant, distinction par identifiant public, vérification réactive
+  de toute la sélection ; 200 invités et sept intervenants au maximum.
+- searchCandidates/checkEligibility acceptent le contexte de brouillon followers
+  gardé par requireManagedPage ; create et goLive rejugent encore les droits.
+- Annonce de page : pageId conservé dans writePost, même audience public/followers,
+  visibilité network ; absence de lecture chez un non-abonné testée. L'annonce
+  invitees reste interdite, et celle d'une page vers les relations n'est pas proposée.
+- Identité de page lisible projetée sur sessions.get ; la conférence affiche sa
+  signature et le lien de page. La découverte continue d'afficher son hôte personnel.
+- Brouillon lancé depuis réseau/répertoire/iCom monté dans DirectSessionHost : titre,
+  audience et invités survivent à la bascule 959/960 px, sans second dialogue.
+  Clé idempotente du brouillon, enregistrement et annonce décochés, droits de
+  signature et d'invités rejugés avant l'écriture.
+
+### Rediffusion
+
+- États Egress distincts et motifs fermés traduits ; durée et échéance visibles,
+  dernière semaine signalée, fichier indisponible distingué de l'absence de replay.
+- Publication/conservation privée pendant pending ou ready, audience limitée par
+  celle du direct ; followers/invitees gardent leur cercle. Retrait confirmé en
+  place, annulation sans écriture et focus restitué ; perte d'autorité masque la
+  confirmation et la ferme. Récupération uniquement si recoverable, sans capture neuve.
+- Import de piste WebVTT en texte : MIME/taille filtrés avant lecture, action du moteur,
+  langue fr/en, refus et réception nommés. Une lecture tardive après révocation ou
+  démontage ne déclenche aucune importation ; la garde serveur rejoue l'autorité.
+- Réception de piste distincte de la servabilité ; aucune URL de dépôt ni URL vidéo
+  en catalogue. Lecteur : langue de piste, fin, erreur et réessai, pas d'autoplay.
+- Mes conférences affiche état, publication et échéance ; catalogue replay : durée,
+  hôte et audience, en conservant les curseurs de découverte.
+
+### Fenêtre et rail
+
+- Carte avec miniature, pilule réduite et bande mobile, retour et commandes d'intention
+  média ; aucun LiveKitRoom ni RoomAudioRenderer supplémentaire. Miniature : écran,
+  spotlight, orateur, hôte ; identité exacte et roster vivant du DTO.
+- Déplacement pointeur/clavier, Échap réduit, stockage de session par réseau ; pose
+  remesurée au passage carte/pilule. Les obstacles et le clamp de la coque sont réutilisés.
+- Quitter comme hôte/intervenant est confirmé, terminer suit endOrTransfer ; spectateur
+  quitte explicitement. Les baux et l'audio restent dans l'hôte persistant.
+- Réponses tardives : une création après changement de réseau ne navigue plus ;
+  une fermeture démontée ne quitte pas une nouvelle salle. Ces cas sont testés.
+- Rail du bureau : activation liveAvailable, trois cartes par fenêtre, profil et
+  conférence en liens frères ; fenêtre vide avec curseur poursuivable, panne dite,
+  fin vide silencieuse, réinitialisation au changement de réseau. Pas de doublon
+  quand le volet Conférences occupe déjà la colonne principale.
+
+### Vérification finale
+
+- `bun run verify` sur les sources finales : **code 0**. Codegen Node 22, typage
+  Convex/tests et dix espaces de travail, 1 107 cas moteur, 53 garde-fous, 24 scripts,
+  2 891 cas social-features (177 fichiers), tous les autres paquets/apps testés et
+  lint neuf espaces sans erreur. Avertissements hérités inchangés : 69 social-features,
+  six ui. Délais et assertions fonctionnels inchangés.
+- Log final : `/tmp/antia-f3c-verify-delivery.log`. Les essais antérieurs et leur
+  correction de fixture ne sont pas présentés comme le verdict final.
+- Chrome réel, serveur 3030 et compte fictif déjà présent : formulaire bureau/mobile,
+  identité/nom de l'invité, rôle proposé, brouillon conservé à la bascule ; création
+  nominative locale `v571tsd1pcq12x9wchkxke8g9x8gc00t`, sans annonce ni enregistrement.
+  Son volet Invités confirme un intervenant proposé hors antenne. Aucun débordement
+  documentaire à 320, 375 et 1280 px. Captures `antia-f3c-form-mobile.png` et
+  `antia-f3c-invites*.png` dans le dossier de visualisation Codex de cette session.
+
+### Limites de preuve et suite
+
+- Le compte local déclaré n'a aucune page gérable : page/followers/signature et
+  annulation/récupération/import/lecteur sont vérifiés par les tests, sans prétendre
+  une recette de page officielle ou d'un média réel. Fenêtre et déplacements :
+  tests de présentation/surface, sans connexion SFU réelle.
+- Configuration LiveKit, recette multi-appareils audio/vidéo/partage/plein écran,
+  Egress réel, conservation de 90 jours, passe sombre exhaustive et audit AA restent
+  à valider. Aucun environnement, secret, push ni publication de production modifié.
+- Le moteur conserve les bornes des recherches de pages/invités (50), l'épingle
+  locale du studio et les chantiers PA4/PA5 (débits avancés/effacement) du plan.
