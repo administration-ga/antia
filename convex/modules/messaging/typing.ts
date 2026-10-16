@@ -1,4 +1,4 @@
-// Dupliqué de socle/convex/functions/chats.ts (l. 1728-1840, `setTyping`, `clearTyping`, `listTyping`, `purgeExpiredTyping`) @ ad2e7fdc2 — adaptations : participant, réseau et blocage par la garde du fil ; les personnes qui écrivent nommées par le contrat `counterpartLabel` (plus de repli sur l'e-mail, D21) ; débit des signaux ; `listTyping` reçoit l'instant en argument (D16 : plus de `Date.now()` dans une query — le client l'arrondit à la seconde, la souscription reste cachable).
+// Dupliqué de socle/convex/functions/chats.ts (l. 1728-1840, `setTyping`, `clearTyping`, `listTyping`, `purgeExpiredTyping`) @ ad2e7fdc2 — adaptations : participant, réseau et blocage par la garde du fil ; les personnes qui écrivent nommées par le contrat `counterpartLabel` (plus de repli sur l'e-mail, D21) ; débit des signaux ; `listTyping` reçoit l'instant en argument (D16 : plus de `Date.now()` dans une query — le client l'arrondit à la seconde, la souscription reste cachable) ; purge poursuivie par lots chaînés de 500 (lot 17).
 /**
  * « En train d'écrire » — une ligne éphémère par (fil, personne), qui expire
  * six secondes après le dernier signal ; un cron purge les lignes expirées.
@@ -6,6 +6,7 @@
 import type { CounterpartLabel } from "@antsia/social-contracts/counterpart"
 import { v } from "convex/values"
 
+import { internal } from "../../_generated/api"
 import type { Id } from "../../_generated/dataModel"
 import { internalMutation } from "../../_generated/server"
 import { networkMutation, networkQuery } from "../../lib/functions"
@@ -14,6 +15,7 @@ import { counterpartOf, requireThread } from "./participation"
 
 /** Durée de vie d'un signal avant expiration automatique. */
 const TYPING_TTL_MS = 6_000
+const PURGE_BATCH = 500
 
 /** Signaler que j'écris — un upsert par (fil, personne). Le client le rejoue toutes les ~2 s. */
 export const setTyping = networkMutation({
@@ -80,8 +82,10 @@ export const purgeExpiredTyping = internalMutation({
     const expired = await ctx.db
       .query("personalTyping")
       .withIndex("by_expires", (q) => q.lt("expiresAt", Date.now()))
-      .take(500)
+      .take(PURGE_BATCH)
     for (const row of expired) await ctx.db.delete(row._id)
+    // Les lignes retirées quittent l'index : la suite reprend les suivantes.
+    if (expired.length === PURGE_BATCH) await ctx.scheduler.runAfter(0, internal.modules.messaging.typing.purgeExpiredTyping, {})
     return { purged: expired.length }
   },
 })

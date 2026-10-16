@@ -35,4 +35,19 @@ describe("file-delivery-gate — toute URL de fichier passe par la garde (D05)",
     expect(detectRawGetUrl("convex/modules/people/profile.ts", source).map((finding) => finding.line)).toEqual([2])
     expect(detectRawGetUrl(FILE_DELIVERY_GATE, source)).toEqual([])
   })
+
+  it("test du test : crochets et alias locaux du stockage ne contournent pas la porte", () => {
+    const source = [
+      'ctx.storage["getUrl"](id)',
+      'ctx["storage"].getUrl(id)',
+      'const store = ctx.storage; store.getUrl(id)',
+      'const { storage: bucket } = ctx; bucket.getUrl(id)',
+      'const { getUrl: read } = ctx.storage; read(id)',
+      'const direct = ctx.storage.getUrl; direct(id)',
+      'map["getUrl"](id)',
+      'const other = map; other.getUrl(id)',
+      '// ctx.storage.getUrl(id)',
+    ].join("\n")
+    expect(detectRawGetUrl("convex/modules/media/fixture.ts", source).map((finding) => finding.line)).toEqual([1, 2, 3, 4, 5, 6])
+  })
 })

@@ -1,8 +1,8 @@
 ---
 title: "ANTSIA — Rapport de parité du backend (PA3)"
 version: "0.1"
-date: "2026-10-15"
-statut: "En cours — un chapitre par module dupliqué, dans l'ordre de l'owner map (docs/02 §4.2)"
+date: "2026-10-16"
+statut: "PA3 achevé — lots 2 à 17 vérifiés ; compléments PA4/PA5 distincts"
 projet: "ANTSIA"
 source: "socle administration.ga, origin/main = ad2e7fdc2"
 ---
@@ -32,6 +32,9 @@ l'owner map), les tests portés et neufs, les écarts assumés. Un module n'entr
 | 14 | `albums` (photos par réseau sous la garde des fichiers, purge sans orphelin) | `daf3750` | 1 fichier convex (26 cas) + 1 fichier domaine (32 cas) | D05, D09, D14 |
 | 15 | `calls` (appels 1:1 et de groupe, sonnerie, attente, journal, présence, réglages, messagerie vocale, jeton LiveKit) | voir journal git (`feat(calls)`) | 4 fichiers convex (114 cas) + 2 purs du module (22 cas) + 3 bibliothèques LiveKit (21 cas) + 1 fichier domaine (14 cas) + 2 fichiers contrats (29 cas) | D02, D05, D11, D13, D14, D16, D19, D21, D26, D27 |
 | 16 | `live` (le direct : sessions, découverte, audience, antenne, orateurs, délégations, modération, présences, récolte, commentaires, réactions, rediffusion Egress, jeton, route du webhook, crons) | `78e2dca` (fondation), lot 16b | 25 fichiers convex du module (≈ 430 cas) + 4 bibliothèques Egress (≈ 50 cas) + 4 purs du domaine (≈ 60 cas) | D05, D10, D11, D14, D16, D19, D28, D35 |
+
+Le lot 17 (crons et cliquets PA3, `feat(maintenance)`) complète cet inventaire :
+13 nouveaux cas backend et 49 nouveaux cas de cliquets ; verify complet vert.
 
 Ordre suivi (owner map §4.2), avec un écart : le lot 1 (modules purs) est porté avec chaque module qui le
 consomme ; l'avis de verdict des fichiers (`files/notify`) est arrivé avec le module `notifications` (lot 5), dont il
@@ -1281,3 +1284,64 @@ indistinct avant configuration) ; fichier `livekitActions.test.ts` : 6 cas verts
 
 `bun run verify` final : 1 101 cas backend verts. La disponibilité réelle du SFU reste une
 recette distincte ; les premières surfaces du direct sont détaillées dans le rapport 04.
+
+## Lot 17 — crons et garde-fous (16/10/2026)
+
+Le registre `convex/crons.ts` porte les dix passages PA3 attendus : saisie personnelle et de
+groupe, stories, présence, appels, récolte du direct, rétention et réconciliation des replays,
+relance des analyses et purge des blobs infectés. Le cron de compteurs DIASPORALE est conservé.
+Sources de référence : owner map §4.2/§8 ; socle `origin/main` lu au commit `25398f565`,
+dont les crons des appels et du direct reprennent les cadences inventoriées à `ad2e7fdc2`.
+
+### Corrections et bornes
+
+- Saisie : 500 lignes expirées par transaction ; un lot plein programme sa suite. Les signaux
+  encore actifs et ceux dont l'échéance égale l'instant du passage restent présents.
+- Fichiers : 50 analyses périmées par état, 50 blobs par passage ; les lots pleins continuent.
+  Les lignes quittent leur file par changement d'état/date ou `blobPurgedAt`. Le plafond de
+  tentatives et le coupe-circuit de l'analyse restent appliqués ; la purge garde le verdict
+  et produit une seule trace système par blob.
+- Appels : une chaîne par état, pages de 50. Des groupes protégés en tête n'empêchent plus
+  d'examiner les suivants. L'âge ne se déduit plus de l'ordre de création ; l'instant des
+  composés et sonneries voyage avec le curseur. Une invitation échue ne protège plus un
+  appel dont sa tâche d'expiration a été perdue.
+- Direct : les conférences programmées expirées sont également parcourues par chaîne de 50,
+  indépendamment des directs vivants. Leur borne de cinq sessions par transaction, mesurée
+  au lot 16, reste inchangée. L'expiration par cron retire aussi la langue des sous-titres.
+- Stories, présence, replays : passages indexés et bornés déjà livrés, gardés par leurs tests.
+
+### Cliquets du §8
+
+- Nouveau `crons-contract` : les dix identifiants, méthodes, cadences, cibles et arguments
+  PA3 sont contrôlés par AST. Le registre doit être créé depuis Convex et exporté ; les
+  inscriptions restent directes, uniques, ASCII et internes. Les extensions DIASPORALE/PA5
+  ne sont pas enfermées dans l'inventaire PA3.
+- Réseau : imports renommés et exports locaux séparés détectés ; une citation de
+  `requireMembership` ne remplace plus l'appel attendu sur le réseau du handler.
+- Fichiers : accès entre crochets et alias locaux du stockage détectés ; admission et
+  fraîcheur analysées sur de vrais appels, commentaires et chaînes exclus. `networkAction`
+  et constructeurs renommés entrent dans l'analyse des arguments de fichier.
+- Notifications : insertions analysées par AST, dont crochets et alias ; une chaîne contenant
+  `//` ne peut plus masquer l'insertion suivante.
+- Les modules actuels sont tous classés ; aucun contournement actuel du backend n'a été
+  trouvé par l'audit. Les nouvelles fixtures démontrent les contournements des détecteurs.
+
+### Vérification et limites
+
+`bun run verify` final **code 0**, le 16/10/2026 : codegen sous Node 22, typage Convex et
+tests, typage/tests des dix espaces et lint des neuf espaces sans erreur. **5 403 tests** :
+1 124 backend, 102 cliquets, 24 scripts, 418 domaine, 86 UI, 56 contrats, 50 API,
+2 891 surfaces, 5 application ANTSIA, 238 domaine DIASPORALE, 254 surfaces DIASPORALE
+et 155 application DIASPORALE. Les 69 avertissements surfaces et six UI hérités restent
+présents. Passage ciblé préalable : 76 backend et 102 cliquets, code 0.
+Logs `/tmp/antsia-pa3-lot17-{targeted,verify}.log`. Backend local : codegen et déploiement
+de développement acceptés, `health:ping` → `ok` ; application 3030 rétablie, HTTP 200.
+Les tests fonctionnels utilisent uniquement le backend simulé, ses tables et son planificateur
+réels. Ils couvrent saturation, suite, conservation du vivant, expiration et rejeu ; le registre
+réel est importé et toutes ses cibles sont vérifiées comme mutations internes exportées.
+
+Ces contrôles statiques ne prouvent pas le contrôle de flux complet, la bonne identité de chaque
+fichier ni les références calculées entre modules. Les gardes à l'exécution et les tests restent
+nécessaires. `rate-limited-writes` relève de PA5, `sign-out-everywhere` de PA4 et les cliquets
+front de PA6. Rétention des notifications, effacement et fédération restent en PA5. Aucune
+recette de médias LiveKit ni publication en production dans ce lot.

@@ -1,4 +1,4 @@
-// Dupliqué de socle/convex/modules/reseauPersonnel/groupes.ts (l. 1997-2087 : `setGroupTyping`, `clearGroupTyping`, `listGroupTyping`, `purgeExpiredGroupTyping`) @ ad2e7fdc2 — adaptations : garde du fil par réseau ; les personnes qui écrivent nommées par le contrat `counterpartLabel` (jamais d'e-mail) ; `listGroupTyping` reçoit l'instant en argument (D16 : plus de `Date.now()` dans une query) ; débit des signaux.
+// Dupliqué de socle/convex/modules/reseauPersonnel/groupes.ts (l. 1997-2087 : `setGroupTyping`, `clearGroupTyping`, `listGroupTyping`, `purgeExpiredGroupTyping`) @ ad2e7fdc2 — adaptations : garde du fil par réseau ; les personnes qui écrivent nommées par le contrat `counterpartLabel` (jamais d'e-mail) ; `listGroupTyping` reçoit l'instant en argument (D16 : plus de `Date.now()` dans une query) ; débit des signaux ; purge poursuivie par lots chaînés de 500 (lot 17).
 /**
  * « En train d'écrire » dans un groupe — une ligne éphémère par (fil,
  * personne), qui expire six secondes après le dernier signal ; un cron purge.
@@ -7,6 +7,7 @@ import type { CounterpartLabel } from "@antsia/social-contracts/counterpart"
 import { GROUP_MEMBERS_MAX } from "@antsia/social-contracts/groupCapacity"
 import { v } from "convex/values"
 
+import { internal } from "../../_generated/api"
 import type { Id } from "../../_generated/dataModel"
 import { internalMutation } from "../../_generated/server"
 import { networkMutation, networkQuery } from "../../lib/functions"
@@ -89,6 +90,7 @@ export const purgeExpiredGroupTyping = internalMutation({
       .withIndex("by_expires", (q) => q.lt("expiresAt", Date.now()))
       .take(PURGE_BATCH)
     for (const row of expired) await ctx.db.delete(row._id)
+    if (expired.length === PURGE_BATCH) await ctx.scheduler.runAfter(0, internal.modules.groups.typing.purgeExpiredGroupTyping, {})
     return { purged: expired.length }
   },
 })

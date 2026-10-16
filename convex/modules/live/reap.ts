@@ -1,4 +1,4 @@
-// Dupliqué de socle/convex/modules/direct/reap.ts @ ad2e7fdc2 — adaptations : D28 — les compteurs agrégés s'écrivent dans `liveSessionCounters` (UNE ligne par session, `networkId` de la session, insérée à la première valeur non nulle, réécrite SEULEMENT si une valeur change ; ligne absente = zéros), jamais plus sur la session, que toute la salle regarde ; quatre sources : commentaires publiés (fenêtre annoncée, `reconcileCommentCount` tel quel), réactions par personne, présents (`countPresentViewers`, rapatriée dans `access.ts` par la fondation, même lecture que l'admission) et admissions distinctes (`countViewerGrants`, l'agrégat qu'alimente la première admission — au socle, l'admission incrémentait la session ; la recomposition le recopie désormais) ; `recomputeAggregates` reçoit donc aussi `runQuery` (lecture de l'agrégat) ; tables `liveSessions`, `liveComments`, `liveReactions`, `liveHostPresence` ; le bail lu par `hostPresence.loadHostLease` / `leaseFacts` (la raison du socle pour le relire à la main — des tests du client qui importaient `reap` — n'existe pas dans le moteur, dont l'écran n'importe jamais `convex/`) ; arrêt de l'Egress planifié vers `live/livekitActions.stopDirectEgress`, solde des invitations vers `live/invitationSettle.expireSessionInvitations` ; passages SYSTÈME tous réseaux (index global `by_status`) ; directs VIVANTS balayés par TRANCHES CHAÎNÉES (pagination de l'index, `REAP_LIVE_BATCH` = cinq sessions par transaction, borne calculée sur le pire cas des limites de lecture d'une mutation, suite planifiée par `runAfter(0, reapStaleDirects, { cursor })`) au lieu des cinquante plus anciens d'un coup (`take(50)` : au-delà du cinquantième, un direct n'était ni recompté ni récolté, et cinquante sessions saturées faisaient tomber la transaction) — args `{ cursor?: string | null }`, le cron appelle sans argument, retour `null` explicite ; les sessions programmées restent examinées cinquante à la fois, en tête de passage seulement, et chaque direct vivant par `reapLiveSession` (même logique) ; commentaires rapportés au moteur.
+// Dupliqué de socle/convex/modules/direct/reap.ts @ ad2e7fdc2 — adaptations : D28 — les compteurs agrégés s'écrivent dans `liveSessionCounters` (UNE ligne par session, `networkId` de la session, insérée à la première valeur non nulle, réécrite SEULEMENT si une valeur change ; ligne absente = zéros), jamais plus sur la session, que toute la salle regarde ; quatre sources : commentaires publiés (fenêtre annoncée, `reconcileCommentCount` tel quel), réactions par personne, présents (`countPresentViewers`, rapatriée dans `access.ts` par la fondation, même lecture que l'admission) et admissions distinctes (`countViewerGrants`, l'agrégat qu'alimente la première admission — au socle, l'admission incrémentait la session ; la recomposition le recopie désormais) ; `recomputeAggregates` reçoit donc aussi `runQuery` (lecture de l'agrégat) ; tables `liveSessions`, `liveComments`, `liveReactions`, `liveHostPresence` ; le bail lu par `hostPresence.loadHostLease` / `leaseFacts` (la raison du socle pour le relire à la main — des tests du client qui importaient `reap` — n'existe pas dans le moteur, dont l'écran n'importe jamais `convex/`) ; arrêt de l'Egress planifié vers `live/livekitActions.stopDirectEgress`, solde des invitations vers `live/invitationSettle.expireSessionInvitations` ; passages SYSTÈME tous réseaux (index global `by_status`) ; directs VIVANTS balayés par TRANCHES CHAÎNÉES (pagination de l'index, `REAP_LIVE_BATCH` = cinq sessions par transaction, borne calculée sur le pire cas des limites de lecture d'une mutation, suite planifiée par `runAfter(0, reapStaleDirects, { cursor })`) au lieu des cinquante plus anciens d'un coup (`take(50)` : au-delà du cinquantième, un direct n'était ni recompté ni récolté, et cinquante sessions saturées faisaient tomber la transaction) — args `{ cursor?: string | null }`, le cron appelle sans argument, retour `null` explicite ; les sessions programmées sont examinées cinquante à la fois en tête puis par une chaîne indépendante `sweepScheduledDirects`, à instant figé, sans relancer le balayage live, et chaque direct vivant par `reapLiveSession` (même logique) ; commentaires rapportés au moteur.
 /**
  * La RÉCOLTE des directs — miroir du nettoyage des appels.
  *
@@ -38,11 +38,9 @@ import { AGGREGATE_COMMENTS_SCAN, DIRECT_LIVE_MAX_DURATION_MS, DIRECT_SCHEDULED_
 import { leaseFacts, loadHostLease } from "./hostPresence"
 
 /**
- * Sessions PROGRAMMÉES examinées en tête de passage — les plus anciennes
- * d'abord (index `by_status`, ordre de création). Aucune n'est oubliée : si
- * les cinquante plus anciennes sont jeunes, les suivantes le sont plus encore ;
- * si elles sont toutes périmées, elles quittent l'index et le passage suivant
- * prend les cinquante d'après.
+ * Sessions PROGRAMMÉES examinées par transaction. La tête du passage traite
+ * un lot ; s'il est plein, une chaîne distincte parcourt le reste de l'index,
+ * sans relancer la récolte des directs vivants à chaque page.
  */
 const REAP_SCAN = 50
 
@@ -190,7 +188,7 @@ export async function recomputeAggregates(ctx: Pick<MutationCtx, "db" | "runQuer
  * Passage SYSTÈME : toutes les sessions, tous réseaux (index global `by_status`).
  *
  * ⚠️ PAR TRANCHES CHAÎNÉES : le cron appelle SANS argument et commence un
- * passage (les programmées, puis la première page de directs vivants) ; chaque
+ * passage (un lot de programmées, puis la première page de directs vivants) ; chaque
  * transaction n'examine qu'UNE page de `REAP_LIVE_BATCH` directs vivants
  * (pagination de l'index, les plus anciens d'abord) et planifie aussitôt la
  * suite avec son curseur, jusqu'au bout de l'index. Un direct clos dans une
@@ -198,7 +196,8 @@ export async function recomputeAggregates(ctx: Pick<MutationCtx, "db" | "runQuer
  * passage est pris en fin de chaîne, ou au passage suivant. Si un passage
  * déborde sur le suivant, deux chaînes se croisent sans dommage : une session
  * close par l'une sort de l'index de l'autre (transactions sérialisables), et
- * les compteurs ne s'écrivent que s'ils changent.
+ * les compteurs ne s'écrivent que s'ils changent. Les programmées suivent une
+ * chaîne indépendante si leur premier lot est plein, à l'instant du passage.
  */
 export const reapStaleDirects = internalMutation({
   args: {
@@ -221,16 +220,10 @@ export const reapStaleDirects = internalMutation({
         .query("liveSessions")
         .withIndex("by_status", (q) => q.eq("status", "scheduled"))
         .take(REAP_SCAN)
-      for (const session of scheduled) {
-        if (now - session.createdAt > DIRECT_SCHEDULED_MAX_AGE_MS) {
-          await ctx.db.patch(session._id, {
-            status: "ended",
-            endedAt: now,
-            endReason: "never_started",
-            updatedAt: now,
-          })
-        }
-      }
+      await endExpiredScheduledSessions(ctx, scheduled, now)
+      // Les sessions closes quittent l'index. Celles qui restent jeunes ne
+      // doivent pas retenir la tête de la file : la suite pagine depuis là.
+      if (scheduled.length === REAP_SCAN) await ctx.scheduler.runAfter(0, internal.modules.live.reap.sweepScheduledDirects, { cursor: null, now })
     }
 
     // Les directs vivants : UNE page bornée par transaction, la suite planifiée.
@@ -245,6 +238,30 @@ export const reapStaleDirects = internalMutation({
     return null
   },
 })
+
+/** Les programmées poursuivent leur propre chaîne, sans refaire le balayage live. */
+export const sweepScheduledDirects = internalMutation({
+  args: { cursor: v.union(v.string(), v.null()), now: v.number() },
+  returns: v.null(),
+  handler: async (ctx, args): Promise<null> => {
+    const page = await ctx.db
+      .query("liveSessions")
+      .withIndex("by_status", (q) => q.eq("status", "scheduled"))
+      .paginate({ cursor: args.cursor, numItems: REAP_SCAN })
+    await endExpiredScheduledSessions(ctx, page.page, args.now)
+    if (!page.isDone) {
+      await ctx.scheduler.runAfter(0, internal.modules.live.reap.sweepScheduledDirects, { cursor: page.continueCursor, now: args.now })
+    }
+    return null
+  },
+})
+
+async function endExpiredScheduledSessions(ctx: MutationCtx, sessions: Doc<"liveSessions">[], now: number): Promise<void> {
+  for (const session of sessions) {
+    if (now - session.createdAt <= DIRECT_SCHEDULED_MAX_AGE_MS) continue
+    await ctx.db.patch(session._id, { status: "ended", endedAt: now, endReason: "never_started", updatedAt: now })
+  }
+}
 
 /**
  * Récolter UN direct vivant : la limite absolue, puis le bail de l'hôte, puis

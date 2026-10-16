@@ -95,7 +95,9 @@ Cliquets en place (`tests/ratchets/`) : `no-cross-product-imports`, `no-any-vali
 `deploy-catalog`, et pour la garde des fichiers (PA3) `file-delivery-gate`, `upload-policy`,
 `fresh-upload`, `storage-arg-freshness`, et pour la cloche `notifications-writer` (seule
 `convex/modules/notifications/notify.ts` écrit dans `notifications`), et pour le journal des décisions
-`operator-audit` (toute `operatorMutation` appelle `appendAudit`). À venir : `rate-limited-writes` (PA5), `sign-out-everywhere` (PA4).
+`operator-audit` (toute `operatorMutation` appelle `appendAudit`), `crons-contract`
+(dix passages PA3 : registre branché, identifiants ASCII uniques, cibles internes,
+cadences et arguments contrôlés ; lot 17). À venir : `rate-limited-writes` (PA5), `sign-out-everywhere` (PA4).
 
 ## Pièges déjà payés
 

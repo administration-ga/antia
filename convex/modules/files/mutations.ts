@@ -1,4 +1,4 @@
-// Dupliqué de socle/convex/modules/fileGuard/mutations.ts @ ad2e7fdc2 — adaptations : table `fileScans` ; quarantaine iDocument et triage IA retirés (le statut bloquant EST la retenue ; l'avis part par la cloche sociale, `notify.ts`) ; libération par un MODÉRATEUR du réseau du fichier ou un opérateur (au lieu de `settings.manage` d'une administration), relance par un opérateur (au lieu du superadmin) ; `logAudit` (journal de l'archive iDocument) remplacé par le journal du moteur (`appendAudit` : libération, relance, purge, avec la qualité de l'acteur) ; débit sur les gestes humains ; coupe-circuit respecté par l'analyse et le balayeur (fail-closed) ; purge indexée sur `blobPurgedAt` (D31 : une ligne purgée ne bloque plus la file) ; `_ageScanForTests` non recopiée (les tests vieillissent la ligne eux-mêmes) ; refus à code du moteur. ; `_markRunning` rend la taille STOCKÉE (`sizeBytes`, table `_storage`) pour que l'analyse écarte un fichier trop gros AVANT de le télécharger (lot 16).
+// Dupliqué de socle/convex/modules/fileGuard/mutations.ts @ ad2e7fdc2 — adaptations : table `fileScans` ; quarantaine iDocument et triage IA retirés (le statut bloquant EST la retenue ; l'avis part par la cloche sociale, `notify.ts`) ; libération par un MODÉRATEUR du réseau du fichier ou un opérateur (au lieu de `settings.manage` d'une administration), relance par un opérateur (au lieu du superadmin) ; `logAudit` (journal de l'archive iDocument) remplacé par le journal du moteur (`appendAudit` : libération, relance, purge, avec la qualité de l'acteur) ; débit sur les gestes humains ; coupe-circuit respecté par l'analyse et le balayeur (fail-closed) ; purge indexée sur `blobPurgedAt` (D31 : une ligne purgée ne bloque plus la file) ; `_ageScanForTests` non recopiée (les tests vieillissent la ligne eux-mêmes) ; refus à code du moteur. ; `_markRunning` rend la taille STOCKÉE (`sizeBytes`, table `_storage`) pour que l'analyse écarte un fichier trop gros AVANT de le télécharger (lot 16) ; lots pleins poursuivis par chaîne pour la relance et la purge (lot 17).
 /**
  * Garde des fichiers — MUTATIONS.
  *
@@ -249,11 +249,13 @@ export const retryStale = internalMutation({
     if (isKillSwitched(process.env)) return 0
     const threshold = Date.now() - FILE_GUARD_RUNNING_STALE_MS
     let touched = 0
+    let saturated = false
     for (const status of ["pending", "running"] as const) {
       const stale = await ctx.db
         .query("fileScans")
         .withIndex("by_status_updatedAt", (q) => q.eq("status", status).lt("updatedAt", threshold))
         .take(SWEEP_TAKE)
+      if (stale.length === SWEEP_TAKE) saturated = true
       for (const scan of stale) {
         touched += 1
         const now = Date.now()
@@ -267,6 +269,8 @@ export const retryStale = internalMutation({
         await ctx.scheduler.runAfter(0, internal.modules.files.scan.runScan, { scanId: scan._id })
       }
     }
+    // Chaque ligne a changé d'état ou d'updatedAt, donc sort de la file périmée.
+    if (saturated) await ctx.scheduler.runAfter(0, internal.modules.files.mutations.retryStale, {})
     return touched
   },
 })
@@ -303,6 +307,9 @@ export const purgeQuarantinedBlobs = internalMutation({
         at: now,
       })
     }
+    // blobPurgedAt fait sortir les lignes traitées de cet index ; aucun ancien
+    // verdict ne peut retenir la tête de la file jusqu'au cron du lendemain.
+    if (candidates.length === PURGE_TAKE) await ctx.scheduler.runAfter(0, internal.modules.files.mutations.purgeQuarantinedBlobs, {})
     return candidates.length
   },
 })

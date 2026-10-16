@@ -86,4 +86,25 @@ describe("network-scoped-functions — toute fonction sociale est bornée par le
     const findings = detectUnscopedFunctions("convex/modules/posts/posts.ts", source)
     expect(findings.map((finding) => finding.line)).toEqual([1, 13])
   })
+
+  it("test du test : imports renommés et exports locaux restent gardés ; citer une garde ne suffit pas", () => {
+    const source = [
+      'import { query as read } from "../../_generated/server"',
+      'import { networkQuery as scoped, requireMembership as membership } from "../../lib/functions"',
+      'export const aliasLeak = read({ args: {}, handler: async () => null })',
+      'const localLeak = read({ args: {}, handler: async () => null })',
+      'export { localLeak as separatedLeak }',
+      'export const copiedLeak = localLeak',
+      'export const fakeGuard = read({ args: { networkId: v.id("networks") }, handler: async () => { /* requireMembership(ctx, id) */ return "requireMembership(" } })',
+      'export const wrongNetwork = read({ args: { networkId: v.id("networks") }, handler: async (ctx, args) => { await membership(ctx, args.otherId, "declaree"); return null } })',
+      'export const unawaited = read({ args: { networkId: v.id("networks") }, handler: async (ctx, args) => { membership(ctx, args.networkId, "declaree"); return null } })',
+      'export const nestedOnly = read({ args: { networkId: v.id("networks") }, handler: async (ctx, args) => { const ignored = async () => { await membership(ctx, args.networkId, "declaree") }; return null } })',
+      'export const scopedAlias = scoped({ args: {}, handler: async () => null })',
+      'const localOk = read({ args: { networkId: v.id("networks") }, handler: async (ctx, args) => { await membership(ctx, args.networkId, "declaree"); return null } })',
+      'export { localOk as separatedOk }',
+      'const hidden = read({ args: {}, handler: async () => null })',
+    ].join("\n")
+    const findings = detectUnscopedFunctions("convex/modules/posts/fixture.ts", source)
+    expect(findings.map((finding) => finding.message.match(/« (.*?) »/)?.[1])).toEqual(["aliasLeak", "separatedLeak", "copiedLeak", "fakeGuard", "wrongNetwork", "unawaited", "nestedOnly"])
+  })
 })

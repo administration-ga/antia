@@ -345,6 +345,60 @@ describe("les transitions de la récolte", () => {
 })
 
 describe("les tranches chaînées — aucun direct oublié au-delà du cinquantième", () => {
+  it("cinquante programmées jeunes ne masquent pas les 51 oubliées suivantes ; leur chaîne ne relance pas celle des directs vivants", async () => {
+    const { t, root, testClosed, alice, bob } = await cast()
+    const jeunes: Id<"liveSessions">[] = []
+    const oubliees: Id<"liveSessions">[] = []
+    for (let index = 0; index < 50; index += 1) jeunes.push(await insertSession(t, { networkId: root, host: alice, status: "scheduled" }))
+    for (let index = 0; index < 51; index += 1) {
+      const sessionId = await insertSession(t, { networkId: testClosed, host: alice, status: "scheduled" })
+      await t.run((ctx) => ctx.db.patch(sessionId, { createdAt: T0 - DIRECT_SCHEDULED_MAX_AGE_MS - 1 }))
+      oubliees.push(sessionId)
+    }
+    jeunes.push(await insertSession(t, { networkId: root, host: alice, status: "scheduled" }))
+    const vivants = await directsVivants(t, root, alice, bob, REAP_LIVE_BATCH + 2)
+
+    await recolter(t)
+    expect(await examines(t)).toBe(REAP_LIVE_BATCH)
+    expect((await planifiees(t)).filter((job) => job.name === "modules/live/reap:sweepScheduledDirects")).toEqual([
+      { name: "modules/live/reap:sweepScheduledDirects", args: { cursor: null, now: T0 } },
+    ])
+    await t.finishAllScheduledFunctions(vi.runAllTimers)
+
+    for (const sessionId of oubliees) expect(await sessionDoc(t, sessionId)).toMatchObject({ status: "ended", endReason: "never_started", endedAt: T0 })
+    for (const sessionId of jeunes) expect(must(await sessionDoc(t, sessionId)).status).toBe("scheduled")
+    for (const sessionId of vivants) expect(must(await sessionDoc(t, sessionId)).status).toBe("live")
+    expect(await examines(t)).toBe(REAP_LIVE_BATCH + 2)
+    expect(await suites(t)).toHaveLength(1)
+    const jobs = await t.run((ctx) => ctx.db.system.query("_scheduled_functions").take(50))
+    const scheduledJobs = jobs.filter((job) => job.name === "modules/live/reap:sweepScheduledDirects")
+    expect(scheduledJobs).toHaveLength(3)
+    expect(scheduledJobs.every((job) => job.state.kind === "success")).toBe(true)
+    expect(scheduledJobs.map((job) => job.args[0])).toEqual([
+      { cursor: null, now: T0 },
+      { cursor: expect.any(String), now: T0 },
+      { cursor: expect.any(String), now: T0 },
+    ])
+  })
+
+  it("123 programmées oubliées : un lot de 50 en tête, les suivantes par le planificateur, sans réécrire une fin au rejeu", async () => {
+    const { t, root, alice } = await cast()
+    for (let index = 0; index < 123; index += 1) {
+      const sessionId = await insertSession(t, { networkId: root, host: alice, status: "scheduled" })
+      await t.run((ctx) => ctx.db.patch(sessionId, { createdAt: T0 - DIRECT_SCHEDULED_MAX_AGE_MS - 1 }))
+    }
+    const endedCount = () => t.run(async (ctx) => (await ctx.db.query("liveSessions").withIndex("by_status", (q) => q.eq("status", "ended")).take(200)).length)
+    await recolter(t)
+    expect(await endedCount()).toBe(50)
+    await t.finishAllScheduledFunctions(vi.runAllTimers)
+    expect(await endedCount()).toBe(123)
+    const before = await t.run((ctx) => ctx.db.query("liveSessions").take(200))
+    tick(60_000)
+    await recolter(t)
+    await t.finishAllScheduledFunctions(vi.runAllTimers)
+    expect(await t.run((ctx) => ctx.db.query("liveSessions").take(200))).toEqual(before)
+  })
+
   it(`53 directs vivants : TOUS récoltés, ${REAP_LIVE_BATCH} au plus par transaction, chaque suite planifiée avec son curseur`, async () => {
     const { t, root, alice, bob } = await cast()
     const total = 53

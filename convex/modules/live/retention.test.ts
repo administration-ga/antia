@@ -172,4 +172,59 @@ describe("politique de rétention Direct", () => {
     )
     expect(expired).toHaveLength(DIRECT_REPLAY_PURGE_BATCH)
   })
+
+  it("le cron retire aussi la langue des sous-titres expirés, leurs blobs et leurs analyses ; il préserve une rediffusion retenue", async () => {
+    const t = testConvex()
+    const { root } = await seed(t)
+    const alice = await enter(t, root, "alice")
+    async function insertReplay(retentionUntil: number) {
+      return await t.run(async (ctx) => {
+        const videoId = await ctx.storage.store(new Blob(["video"]))
+        const captionsId = await ctx.storage.store(new Blob(["WEBVTT"], { type: "text/vtt" }))
+        for (const storageId of [videoId, captionsId]) {
+          await ctx.db.insert("fileScans", { storageId, networkId: root, status: "skipped", source: "generated", skipReason: "server_generated", attempts: 0, createdAt: T0, updatedAt: T0 })
+        }
+        const sessionId = await ctx.db.insert("liveSessions", {
+          networkId: root,
+          hostPersonId: alice.personId,
+          title: "Rediffusion sous-titrée",
+          roomName: `retention-${crypto.randomUUID()}`,
+          status: "ended",
+          audience: "public",
+          chatMode: "open",
+          maxViewers: 10,
+          replayRequested: true,
+          replayStatus: "ready",
+          replayStorageId: videoId,
+          replayCaptionsStorageId: captionsId,
+          replayCaptionsLang: "fr",
+          replayRetentionUntil: retentionUntil,
+          createdAt: T0 - 2,
+          startedAt: T0 - 1,
+          endedAt: T0,
+          updatedAt: T0,
+        })
+        return { sessionId, videoId, captionsId }
+      })
+    }
+    const expired = await insertReplay(T0 - 1)
+    const retained = await insertReplay(T0 + DIRECT_REPLAY_RETENTION_MS)
+    const retainedBefore = await t.run((ctx) => ctx.db.get(retained.sessionId))
+
+    await t.mutation(internal.modules.live.replay.purgeExpiredReplays, {})
+    const expiredAfter = await t.run((ctx) => ctx.db.get(expired.sessionId))
+    expect(expiredAfter).toMatchObject({ replayStatus: "expired", replayPurgedAt: T0 })
+    expect(expiredAfter?.replayCaptionsLang).toBeUndefined()
+    for (const storageId of [expired.videoId, expired.captionsId]) {
+      expect(await t.run((ctx) => ctx.db.system.get("_storage", storageId))).toBeNull()
+      expect(await scanOf(t, storageId)).toBeNull()
+    }
+    expect(await t.run((ctx) => ctx.db.get(retained.sessionId))).toEqual(retainedBefore)
+    for (const storageId of [retained.videoId, retained.captionsId]) {
+      expect(await t.run((ctx) => ctx.db.system.get("_storage", storageId))).not.toBeNull()
+      expect(await scanOf(t, storageId)).not.toBeNull()
+    }
+    await t.mutation(internal.modules.live.replay.purgeExpiredReplays, {})
+    expect(await t.run((ctx) => ctx.db.get(expired.sessionId))).toEqual(expiredAfter)
+  })
 })

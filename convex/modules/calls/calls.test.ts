@@ -527,9 +527,11 @@ describe("cleanupStaleCalls — le filet des appels périmés", () => {
     const placed = await call(root, alice, bob)
     if (!placed.admitted) throw new Error("refusé")
     await t.mutation(internal.modules.calls.cleanup.cleanupStaleCalls, {})
+    await t.finishAllScheduledFunctions(() => vi.advanceTimersByTime(1))
     expect((await callDoc(t, placed.callId))?.callStatus).toBe("initiating")
     tick(31_000)
     await t.mutation(internal.modules.calls.cleanup.cleanupStaleCalls, {})
+    await t.finishAllScheduledFunctions(() => vi.advanceTimersByTime(1))
     expect(await callDoc(t, placed.callId)).toMatchObject({ status: "ended", callStatus: "missed", endReason: "timeout" })
   })
 
