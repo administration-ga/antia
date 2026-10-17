@@ -278,3 +278,15 @@ chat d’accueil restent actifs ;3030 reste en pause. Les changements des deux
 chats d’accueil sont préservés et ne sont pas committés par cette session.
 Ce passage valide le code courant ; la recette native des images multiples
 et de la vidéo reste ouverte pour la sélection manuelle des fichiers.
+
+Les trois preuves DIASPORALE sont committées localement dans `2df3f43`
+(`docs/01`, `docs/04`, `docs/10`), couplées au présent bilan ANTSIA `15004a2`.
+Au moment de préparer la fenêtre privée native du compte fictif auteur, CUA
+confirme que le Mac s’est de nouveau verrouillé. Le court créneau CPU est
+rendu immédiatement ; aucune connexion privée ni sélection ni publication
+de fichier n’a eu lieu. Le déverrouillage manuel est demandé, puis l’accès
+normal privé devra être préparé avant de présenter la sélection humaine.
+Ne pas annoncer un composeur auteur visible et prêt dans le Chrome natif.
+Le refus d’accès de l’outil aux fichiers de test reste un blocage distinct du
+verrouillage du Mac. Aucun contournement, changement de session existante ni
+promotion du compte fictif de lecture n’est effectué.
