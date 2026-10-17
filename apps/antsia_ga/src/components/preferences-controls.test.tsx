@@ -144,6 +144,13 @@ describe("PreferencesControls — formulaire réel et snapshots réactifs", () =
     expect(alert?.textContent).toContain("Saisissez un fuseau horaire valable")
     expect(described).toContain(alert?.id)
     expect(document.activeElement).toBe(field("timeZone"))
+    expect(container.querySelector("fieldset")?.disabled).toBe(false)
+    // Le même défaut doit reprendre le focus à chaque tentative, même si
+    // le message d'erreur n'a pas changé depuis la précédente validation.
+    container.querySelector<HTMLButtonElement>('button[type="submit"]')?.focus()
+    await submit()
+    expect(document.activeElement).toBe(field("timeZone"))
+    expect(state.mutation).not.toHaveBeenCalled()
   })
 
   it("un refus serveur conserve le brouillon et expose un retour d'erreur sans message brut", async () => {

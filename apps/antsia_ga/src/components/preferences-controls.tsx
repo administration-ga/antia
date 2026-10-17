@@ -45,6 +45,8 @@ export function PreferencesControls() {
   const titleId = `${id}-title`
   const errorId = `${id}-error`
   const failureRef = useRef<HTMLParagraphElement>(null)
+  const localeRef = useRef<HTMLSelectElement>(null)
+  const timeZoneRef = useRef<HTMLInputElement>(null)
   const saving = useRef(false)
   // Un ancien snapshot peut encore être rendu après la réponse à la mutation.
   // Attendre l'écho des valeurs enregistrées évite de réafficher ce snapshot.
@@ -55,10 +57,20 @@ export function PreferencesControls() {
   const form = useForm<PreferenceValues>({
     resolver: zodResolver(personalPreferencesSchema({ invalidLocale: t("preferences.invalidLocale"), invalidTimeZone: t("preferences.invalidTimeZone") })),
     defaultValues: { locale: snapshotLocale, timeZone: snapshotTimeZone },
-    shouldFocusError: true,
+    // Les champs sont désactivés pendant la validation : le focus intervient
+    // après leur réactivation, plutôt que dans la réponse du resolver.
+    shouldFocusError: false,
   })
-  const { errors, isDirty, isSubmitting } = form.formState
+  const { errors, isDirty, isSubmitting, submitCount } = form.formState
   const { getValues, reset } = form
+  const localeField = form.register("locale")
+  const timeZoneField = form.register("timeZone")
+
+  useEffect(() => {
+    if (isSubmitting || submitCount === 0) return
+    const invalidField = errors.locale?.message ? localeRef.current : errors.timeZone?.message ? timeZoneRef.current : null
+    invalidField?.focus({ preventScroll: true })
+  }, [errors.locale?.message, errors.timeZone?.message, isSubmitting, submitCount])
 
   useEffect(() => {
     if (!person || isDirty || isSubmitting || saving.current) return
@@ -137,7 +149,8 @@ export function PreferencesControls() {
                 className="min-h-11 min-w-0 w-full rounded-lg border border-input bg-background px-3 text-base text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring aria-[invalid=true]:border-destructive"
                 aria-invalid={errors.locale ? true : undefined}
                 aria-describedby={`${localeId}-hint${errors.locale ? ` ${localeId}-error` : ""}`}
-                {...form.register("locale")}
+                {...localeField}
+                ref={(element) => { localeRef.current = element; localeField.ref(element) }}
               >
                 <option value="fr">{t("preferences.french")}</option>
                 <option value="en">{t("preferences.english")}</option>
@@ -153,7 +166,8 @@ export function PreferencesControls() {
                 className="min-w-0"
                 aria-invalid={errors.timeZone ? true : undefined}
                 aria-describedby={`${timeZoneId}-hint${errors.timeZone ? ` ${timeZoneId}-error` : ""}`}
-                {...form.register("timeZone")}
+                {...timeZoneField}
+                ref={(element) => { timeZoneRef.current = element; timeZoneField.ref(element) }}
               />
             </Field>
           </fieldset>
