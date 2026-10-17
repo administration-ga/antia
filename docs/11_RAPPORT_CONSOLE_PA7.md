@@ -96,6 +96,32 @@ Les options CLI explicites sont conservées, le typage natif reste obligatoire,
 et ses erreurs produisent un code de sortie non nul. Verify conserve toutes ses
 étapes, avec les espaces de travail en série.
 
+## Consolidation après coordination DIASPORALE
+
+Le commit **8737055** corrige le focus des préférences d’ANTSIA : la validation
+réactivait le fieldset après que React Hook Form avait tenté le focus. Le champ
+invalide reçoit maintenant le focus après cette réactivation, à chaque tentative,
+y compris si le message reste identique. L’assertion initiale est conservée et
+renforcée par une seconde soumission ; onze tests ciblés, typage et lint verts.
+
+La dernière passe commune, incluant ce correctif et les sources DIASPORALE gelées,
+a terminé **code0,6 786 tests**, dix typages/neuflints0erreur ; journal
+/tmp/diasporale-pd4-hidden-bookmarks-verify-analysis15.log. Les tentatives
+interrompues et leurs dépassements de délai restent conservés et ne sont pas
+additionnés à cette preuve. La recette Chrome DIASPORALE a été retardée par la
+compilation ; aucune recette visuelle ANTSIA n’est revendiquée.
+
+Cette passe emploie temporairement le backend local sous Node22 avec
+ANALYZE_CONCURRENCY=1 et ISOLATE_ANALYZE_USER_TIMEOUT_SECONDS=15 : concurrence
+réduite et budget de chargement des modules porté de4s à15s. Le budget des
+fonctions reste1s et les tests30s, avec leurs assertions et validateurs intacts.
+Aucun fichier d’environnement, réglage Convex hébergé ni donnée n’a été modifié.
+Preuve minimale sans secrets : /tmp/antsia-pa7-backend-local-analysis15-proof.json.
+Ce résultat local paramétré est distinct de la première passe verte au budget
+par défaut et ne prouve aucune livraison ou capacité de production.
+Référence du binaire exact : [réglages officiels Convex](https://github.com/get-convex/convex-backend/blob/precompiled-2026-10-10-72ce13c/crates/common/src/knobs.rs#L849-L864),
+[concurrence d’analyse](https://github.com/get-convex/convex-backend/blob/precompiled-2026-10-10-72ce13c/crates/common/src/knobs.rs#L1009-L1013).
+
 ## Limites et préalables externes
 
 - Les clients OIDC IDN de sandbox ne sont pas configurés. La recette réelle avec
@@ -106,7 +132,9 @@ et ses erreurs produisent un code de sortie non nul. Verify conserve toutes ses
   Un rejeu still_failing n'est pas annoncé comme une livraison.
 - Les compteurs sont des instantanés techniques datés, et les lectures sont bornées :
   au plus 100 équipes, 100 références de membre par équipe et 500 au total.
-- Seule l'archive de compilation PA6 autorisée a été retirée ; les deux .next
-  ANTSIA étaient déjà absents. Sources, dépendances et données conservées.
+- Au déblocage initial, seule l’archive PA6 autorisée avait été retirée et les
+  deux .next étaient absents. Après le contrôle3032, le cache console193MiB
+  recréé a été retiré selon le même accord lorsque le disque a chuté sous1Gio.
+  Sources, dépendances, données et caches DIASPORALE conservés.
 - DIASPORALE est préservée dans l'arbre partagé. Aucun push, merge, production,
   commande Convex de production, modification manuelle d'environnement ou PA8/PA9.
