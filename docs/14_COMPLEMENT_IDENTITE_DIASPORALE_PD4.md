@@ -318,3 +318,93 @@ dans ce chat ; aucun envoi automatisé ni publication média effectué.
 L’onglet ANTSIA est conservé. Le refus d’accès de l’outil aux fichiers reste
 respecté et les essais multi-image / vidéo restent ouverts dans l’attente de
 l’intervention humaine.
+
+### Corrections de surfaces et nouvelle sélection — contrôle différé
+
+Deux nouvelles demandes humaines inversent les fonds et cartes. Le propriétaire
+ANTSIA ajuste seulement les classes de surfaces de `AccessHomeScreen` et
+`SignInCard`, rendu contrôlé à1280/375. Le propriétaire DIASPORALE ajuste son
+thème clair, les alias de `extras.css`, la vitrine existante et ses traductions,
+ainsi que l’ancienne assertion de contraste incompatible avec ce changement.
+Sa charte3.3 et ses captures de `/charte` montrent un fond clair et des cartes
+gris clair, neuf contrastes conformes et aucun débordement mobile. Les preuves
+visuelles concernent les contextes effectivement observés, sans revendiquer
+une recette authentifiée du fil depuis l’IAB anonyme.
+
+Ces huit fichiers de code/style/tests/traductions changent l’empreinte : le
+passage7 179 est désormais historique. Le nouvel inventaire en lecture seule
+contient encore1 570fichiers, SHA256
+`235e940c3c648495c936a57544af2d4d62ae8698d1162ea2f57a2edeb49c71ae`,
+préparé dans `/tmp/antsia-diasporale-pd4-surfaces-source-before.json`.
+Aucun contrôle lourd n’a été lancé sur cet instantané.
+
+L’humain avait annoncé deux PNG sélectionnés. À la reprise, le propriétaire
+PD4 observe une ouverture de session puis le fil sans composeur ; le post
+textuel préexistant ne contient aucun média et le composeur rouvert n’a ni
+fichier ni aperçu. La cause n’est pas établie : les photos ne sont pas validées
+et aucun nouveau post textuel n’est créé pour prétendre à une recette média.
+
+Tous les propriétaires confirment le gel des sources et l’absence d’édition,
+HMR provoqué, redémarrage, navigation ou contrôle pendant la nouvelle sélection
+manuelle des photos puis de la vidéo. PD4 a déjà rendu la main à l’humain ; le
+créneau zéro fichier n’est donc plus garanti. Le codegen et le contrôle officiel
+centralisé sont différés jusqu’à sa confirmation de fin des deux essais ou
+d’abandon explicite de la sélection. Aucun test ciblé ou codegen parallèle,
+aucun changement de garde ; les deux applications restent actives.
+
+### Vérification finale des surfaces figées — réussie
+
+Le créneau média est clôturé par une nouvelle demande humaine de vérification
+complète dans le chat d’accueil. Cette clôture n’est pas interprétée comme une
+recette photos/vidéo réussie. Une première passe officielle, session80168,
+termine avec code0 et7 179tests, mais deux composants ANTSIA changent pendant
+son exécution : elle ne constitue pas une preuve d’un instantané stable.
+
+La capture humaine suivante précise que la correction ANTSIA vise `/fil`
+connecté en clair, avec choix explicite **fond blanc, cartes beige**. Le thème
+`packages/ui/src/themes/antsia.css` est ajusté par son propriétaire, rendu
+natif observé et sombre conservé. Ses trois chemins applicatifs sont ensuite
+figés, avec les sept chemins de correction DIASPORALE déjà figés.
+
+La reprise officielle **session85261, code0**, valide cet état final :
+**7 179 tests**, dix typages et dix jobs de tests d’espaces de travail,
+neuf lints sans erreur. **94 avertissements de lint** restent visibles.
+Ventilation des tests :6 912Vitest et267Bun (scripts29 et domaineDIASPORALE238).
+Journal : `/tmp/antsia-diasporale-surfaces-verify-final-20261017.log` ;
+résumé : même préfixe suivi de `-summary.json`.
+
+Les **1 580 fichiers** sont strictement identiques avant/après ; cette couverture
+inclut aussi les fichiers de configuration, Dockerfile, HTML et scripts shell.
+Inventaires :
+`/tmp/antsia-diasporale-surfaces-verify-20261017-source-final-before.json`
+et `-after.json`. SHA256 de l’inventaire JSON compact :
+`0107f0a643cc31c3f6f2a6dc18a4065b77a9fc7f46e8cc917cc7d581042cd6b7`.
+SHA256 des octets des fichiers JSON formatés, identiques entre eux :
+`4b8158ed19bf3b879d9dfef65ab15ee1c4242327d65e4e68f75f64a30cf150bc`.
+Les deux calculs ont été relus dans ANTSIA, ainsi que le total et les lints
+(y compris le groupe singulier d’un avertissement).
+
+Diagnostic médias, lecture seule bornée : la publication fictive précisément
+demandée est relue dans le moteur local3210, une seule ligne et identifiant
+correspondant vérifié avant toute sortie. Elle est publiée/non retirée, champ
+`media` absent, longueur effective0. Seules ces métadonnées sont rapportées,
+aucun contenu privé ni secret, aucune mutation. Le moteur conserve les médias
+sur ce champ et le résolveur de lecture lit ce même champ : ce constat n’est
+pas une simple perte de projection. La cause de l’absence n’est pas établie.
+
+La relecture du composeur confirme l’envoi dès sélection, l’assemblage des
+médias prêts au submit et leur transmission par l’adaptateur ; le bouton
+« Joindre » est de typebutton. Les fichiers ne font pas partie du brouillon
+durable. Ces constats ne prouvent pas une cause de publication sans pièces
+jointes. Les autres agents confirment n’avoir pas manipulé ce composeur.
+Une observation native montre toutefois AX3030 puis capture3031 sans clic
+intermédiaire de l’observateur ; le changement de contexte n’est pas attribué.
+Une capture humaine du composeur attendu est demandée par PD4 pour distinguer
+fenêtre, profil et état. **Multi-image et vidéo restent non validées.**
+
+Les preuves DIASPORALE sont actualisées dans son commit documentaire local
+`e84790a`, uniquement docs01/04/10. Les corrections applicatives des autres
+chats restent conservées hors des commits de cette session. Plus aucun job
+lourd, les deux Next et le moteur local restent actifs sous mandat humain ;
+aucune livraison en production, modification d’environnement ou suppression
+de données.
