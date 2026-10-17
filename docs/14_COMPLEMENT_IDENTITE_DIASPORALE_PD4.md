@@ -290,3 +290,31 @@ Ne pas annoncer un composeur auteur visible et prêt dans le Chrome natif.
 Le refus d’accès de l’outil aux fichiers de test reste un blocage distinct du
 verrouillage du Mac. Aucun contournement, changement de session existante ni
 promotion du compte fictif de lecture n’est effectué.
+
+### Coordination autorisée et applications simultanées
+
+L’humain autorise explicitement la coordination du chat « Lancer l’app
+ANTSIA localement ». Ses sources restent figées et sont toujours identiques
+aux 1 570 fichiers du passage commun. Une première bascule vers ANTSIA est
+effectuée sous son choix « Ouvrir ANTSIA maintenant », après les points sûrs
+des deux recettes DIASPORALE et sans fichier sélectionné.
+
+Une nouvelle demande humaine dans le chat d’accueil autorise ensuite
+expressément **DIASPORALE et ANTSIA en même temps**, avec consommation mémoire
+limitée. Cette demande remplace l’alternance pour cette visite. Le propriétaire
+reprend les deux Next en Node22 / Webpack, old-space2048MiB et
+UV_THREADPOOL_SIZE2 chacun ; les accueils sont chauffés séquentiellement et
+répondent200. L’héritage de la limite est contrôlé dans leurs traces
+(heapSizeLimit2096MiB, espaces auxiliaires compris) ; pression normale et
+41% de mémoire libre au contrôle du propriétaire. Le backend3210 est conservé.
+Aucune source applicative ni environnement persistant modifié.
+
+DIASPORALE reprend normalement son onglet Chrome de test : compte auteur
+« Relations Recette » confirmé, brouillon de81caractères restauré, portée
+diaspora / tous les membres, partage ANTSIA décoché, aucun média. Une nouvelle
+connexion privée n’est pas nécessaire. Le composeur est réellement visible
+nativement et la demande de sélection manuelle des deux PNG est présentée
+dans ce chat ; aucun envoi automatisé ni publication média effectué.
+L’onglet ANTSIA est conservé. Le refus d’accès de l’outil aux fichiers reste
+respecté et les essais multi-image / vidéo restent ouverts dans l’attente de
+l’intervention humaine.
