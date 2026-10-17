@@ -16,3 +16,4 @@ réservent contre `origin/main` et les PR ouvertes de ce dépôt.
 | [0008](0008-preuves-serveur-et-revocation-immediate-des-sessions.md) | Preuves serveur, rattachement explicite et révocation immédiate des sessions | Accepté |
 | [0009](0009-gardes-et-droits-personnels-pa5.md) | Gardes et droits personnels PA5 : modération, débit, données, notifications et fédération | Accepté |
 | [0010](0010-preferences-de-presentation-et-mesure-facultative.md) | Préférences de présentation, cache cohérent et mesure facultative PA6 | Accepté |
+| [0011](0011-console-idn-et-archivage-a-deux-personnes.md) | Console IDN, journal préalable et archivage à deux personnes | Accepté |
