@@ -119,6 +119,33 @@ export const publishMyProfile = personMutation({
 })
 
 /**
+ * @selfScoped Édite le nom choisi et l'accroche du profil déjà constitué de la
+ * personne de la session. Le retrait et la confidentialité sont conservés :
+ * seule `publishMyProfile` exprime un geste de (re)publication. Accessible comme
+ * les autres réglages personnels même si les réseaux refusent la personne.
+ * `expectedPersonId` corrèle l'écran à la session courante après un changement
+ * de compte ; il ne choisit jamais la personne à modifier.
+ */
+export const updateMyProfile = personMutation({
+  args: { displayName: v.string(), headline: v.optional(v.string()), expectedPersonId: v.optional(v.id("persons")) },
+  returns: v.object({ updatedAt: v.number() }),
+  handler: async (ctx, args) => {
+    if (args.expectedPersonId !== undefined && args.expectedPersonId !== ctx.person._id) return notFound()
+    await enforceRateLimit(ctx, "person.profile", ctx.person._id)
+    if (!ctx.person.handle || !ctx.person.displayName || ctx.person.publishedAt === undefined || ctx.person.erasedAt !== undefined) return fail("profileRequired")
+    const displayName = checked(() => assertDisplayName(args.displayName))
+    const headline = checked(() => assertHeadline(args.headline))
+    const root = await getRootNetwork(ctx)
+    if (!root) return notFound()
+    await moderateContentWrite(ctx, { networkId: root._id, ownerPersonId: ctx.person._id, kind: "person", id: ctx.person._id, text: `${displayName} ${headline ?? ""}` })
+    const updatedAt = Date.now()
+    await ctx.db.patch(ctx.person._id, { displayName, headline, updatedAt })
+    await syncPersonDirectory(ctx, ctx.person._id)
+    return { updatedAt }
+  },
+})
+
+/**
  * @selfScoped La personne de la session RETIRE son profil : elle cesse d'être
  * trouvable et son nom redevient neutre partout. Rien n'est effacé — ni ses
  * publications, ni ses liens. Idempotent ; republier le rétablit.

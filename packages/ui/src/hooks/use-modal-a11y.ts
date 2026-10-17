@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/ui-v2/src/hooks/use-modal-a11y.ts @ ad2e7fdc2 — adaptations : aucune (copie textuelle) ; en-tête de provenance.
+// Dupliqué de socle/packages/ui-v2/src/hooks/use-modal-a11y.ts @ ad2e7fdc2 — adaptations : lever l'inertage détenu par le hook avant de restituer le focus à la fermeture ; en-tête de provenance.
 "use client"
 
 /**
@@ -144,12 +144,13 @@ export function useModalA11y({
 
     return () => {
       if (trapFocus) document.removeEventListener("keydown", onKeyDown)
-      // 5. Restitution focus
-      previousActive?.focus?.()
-      // 6. Retrait de l'inert
+      // 5. Réactiver la page avant d'y restituer le focus : le navigateur
+      //    natif refuse de focaliser une cible qui appartient encore à inert.
       for (const el of inertedSiblings) {
         el.removeAttribute("inert")
       }
+      // 6. Restitution focus
+      previousActive?.focus?.()
     }
   }, []) // 1× au mount, cleanup au démontage
 }
