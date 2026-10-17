@@ -565,12 +565,19 @@ Journal final : `/tmp/antsia-pa6-verify-final.log`. Les deux cycles précédents
 avant durcissement, sont conservés séparément ; ils ne sont pas le verdict final.
 Commits source locaux : `263d7df` (consentement), `aebd48b` (front et intégration).
 
-Disponibilité HTTP par requêtes HEAD, sans observation de page : `/entrer` et
-`/mes-donnees` **200**. `/fil` a dépassé 45 secondes pendant sa compilation.
-Le cache Webpack signale **ENOSPC**, avec environ 116 Mo libres sur le volume Data.
-Le seul serveur 3030 a été arrêté pour suspendre cette compilation ; backend3210
-prêt. Aucun cache supprimé. Accord demandé pour vider le cache de téléchargement
-Bun (environ1,6 Go mesurés), avant reprise3030 et contrôle du fil.
+Disponibilité HTTP par requêtes HEAD, sans observation de page : `/entrer`,
+`/mes-donnees` et `/fil` **200 après reprise**. Backend3210 en ligne, fonctions
+prêtes sous Node22 ; un seul Next3030 sous Node22, heap2048, lancement en terminal
+persistant. Le fil a recompilé en9,7s. Ces réponses ne prouvent pas une recette
+authentifiée ni un rendu visuel.
+
+Incident local : le premier contrôle du fil a dépassé45s puis180s ; Webpack
+signalait ENOSPC (environ116Mo libres). Le cache de téléchargement Bun a été vidé
+sur accord explicite de l’utilisateur ; aucun autre cache ni donnée supprimé,
+dépendances installées conservées. Les fichiers de compilation interrompue sont
+archivés dans `/tmp/antsia-pa6-next-before-recovery`, puis3030/3210 relancés en
+terminal persistant. Le volume a affiché≈1,7Go libres après nettoyage/reprise,
+puis≈496Mo après compilation : disponibilité rétablie, marge disque encore faible.
 
 ### Réconciliation et limites
 
