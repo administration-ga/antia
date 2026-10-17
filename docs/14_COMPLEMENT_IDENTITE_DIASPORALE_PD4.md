@@ -166,3 +166,115 @@ Le Cortex reste suspendu : inventaire en lecture seule confirme l’absence de
 `.git/HEAD` et d’`avancement.md` ANTSIA dans le vault. Le contexte actif et le
 verrou préexistant sont conservés. Aucune réparation, suppression ni écriture
 Cortex n’a été tentée. Les commits applicatifs utilisent leurs chemins propres.
+
+## Reprise après déverrouillage — 2026-10-17
+
+L’humain a confirmé le déverrouillage et demandé la fin de la recette médias et
+de la vérification commune. Le blocage de verrouillage décrit ci-dessus est
+levé. Le premier contrôle trouve 12 449 824 Kio libres et les services arrêtés ;
+aucun nettoyage supplémentaire n’est effectué. Le chat d’accueil reprend le
+moteur local3210 puis le seul Next3031 en mode moteur, Node22 et Webpack.
+Compilation initiale réussie et HTTP200 confirmés par ce propriétaire ; ses
+deux services restent conservés, sans lancement de3030.
+
+Les 1569 fichiers de l’empreinte finale ont été relus : aucun fichier changé
+ou manquant, empreinte de référence identique. Le passage officiel7173/code0
+reste applicable à ces sources ; il n’est pas présenté comme un nouveau
+passage. Les modifications d’accueil non committées restent conservées.
+
+Contrôles réels ANTSIA refaits après ce redémarrage : `health:ping` retourne
+`ok`, `updateMyProfile` sans session refuse `unauthenticated`, et les quatre
+projections publiques PA8 gardent leurs états attendus (deux publications
+`network` absentes, publication native `root` présente, publication enfant
+retirée de `root` absente). Aucune écriture anonyme ni exposition nouvelle.
+
+DIASPORALE a retrouvé la session fictive et une photo déjà enregistrée dans
+le fil. Sa recette Chrome confirme l’image1600×900 effectivement chargée,
+l’ouverture depuis l’original et son partage cité, les largeurs320/375/1280,
+les thèmes clair/sombre, le confinement de Tab/Maj+Tab et la fermeture par
+Échap rendant précisément le focus au déclencheur. Captures inspectées par
+son propriétaire. Cette preuve native s’ajoute aux tests automatisés.
+
+Le refus d’accès de `upload_file` aux fichiers de test reste respecté : aucune
+nouvelle copie ni autre mécanisme d’envoi essayé. La lecture de médias déjà
+présents ne vaut pas recette d’un nouvel envoi. DIASPORALE a atteint la fin des
+paginations des fils consultés (81 publications initiales,45diaspora,
+82récentes) : la photo et son partage sont les seuls médias disponibles ;
+aucune vidéo ni série d’images permettant les deux autres essais. Les deux
+ressources image répondent200. Le404favicon est distinct du lecteur.
+
+Après le créneau CPU coordonné, le profil fictif a été réellement relu dans
+Chrome : publication enregistrée, action « Retirer mon profil », privé
+désactivé. Le formulaire ouvert puis annulé confirme le nom d’origine
+« Relations Recette » et l’accroche exactement vide. Annuaire masqué,
+consentement annuaire désactivé et adhésions DIASPORALE vérifiée / ANTSIA
+déclarée conservés. Son adresse de profil fonctionne à nouveau dans cette
+session, y compris après rechargement ; console sans nouvelle erreur. La
+republication explicite précédente avait réussi : aucune nouvelle mutation
+de republication ni sauvegarde n’a été effectuée pendant ce contrôle.
+
+Les images multiples et la lecture vidéo restent ouvertes faute de médias
+existants et d’accès autorisé aux fichiers de test par l’outil. Leur sélection
+manuelle humaine dans le composeur normal est nécessaire pour poursuivre ;
+aucune garde ni contrôle d’accès n’est désactivé. PD4 reste ouvert jusqu’à ces
+constats. Le créneau CPU de DIASPORALE est rendu, ses sources restent gelées.
+
+### Nouvel état d’accueil à inclure dans la vérification
+
+Un contrôle supplémentaire juste avant le commit documentaire détecte six
+fichiers ANTSIA modifiés depuis l’empreinte précédente et un nouveau test de
+la route `entrer`. Le chat « Lancer l’app ANTSIA localement » a terminé une
+autre demande humaine, limitée explicitement à ANTSIA : intentions connexion /
+inscription transmises par la page serveur, état de déconnexion incomplète,
+présentation et textes de l’accueil. Son dernier tour est terminé et ses
+changements restent conservés. Ses contrôles ciblés ne remplacent pas le
+passage commun complet.
+
+Le commit documentaire a été arrêté avant toute mise à l’index. Les 7 173
+tests sont désormais une preuve de l’ancien instantané. L’inventaire suivant
+comprend 1 570 fichiers, dont `apps/antsia_ga/src/app/entrer/page.test.tsx` ;
+une nouvelle vérification commune et un contrôle de non-dérive sont requis.
+Le serveur ANTSIA3030, identifié par son processus et son dossier de travail,
+est mis en pause par SIGINT pour respecter la règle d’un seul Next. Le moteur
+3210 et DIASPORALE3031 du chat d’accueil restent conservés.
+
+Le Chrome natif conserve un autre compte fictif, en attente, qui peut relire
+le profil republié et les deux commentaires corrigés, sans commande d’édition
+ni champ de réponse. Ce contrôle de lecture est réellement joué ; ce compte
+et sa session restent conservés. Le composeur auteur dans Chrome DevTools
+n’est pas visible dans l’inventaire natif : aucune sélection humaine prête
+n’est annoncée dans ce navigateur. Une connexion normale du compte fictif
+auteur dans une fenêtre privée visible est la préparation envisagée ; elle
+ne vaut ni sélection ni envoi de médias.
+
+### Vérification commune de l’état courant — réussie
+
+Le nouveau `bun run verify` officiel se termine avec **code0 et 7 179 tests
+réussis**, le 17 octobre de 19:18 à 19:22 (Paris), session94825.
+Journal : `/tmp/antsia-diasporale-pd4-verify-resume-final.log`.
+Codegen et typages stricts réussis ; les dix espaces de travail passent leurs
+typages et leurs tests, les neuf lints ne signalent aucune erreur. Les
+93 avertissements restent visibles : UI6, social-features74, appANTSIA8,
+appDIASPORALE5. Aucun contrôle ni délai de test n’a été désactivé ou augmenté.
+
+Ventilation : Convex1610, cliquets124, scripts29, social-domain475,
+contrats57, API190, UI88, social-features3166, domaineDIASPORALE238,
+surfacesDIASPORALE391, console78, applicationANTSIA115,
+applicationDIASPORALE618. Les six cas supplémentaires de l’application
+ANTSIA sont inclus dans ce total, les ciblés antérieurs ne sont pas ajoutés.
+
+Les **1 570 fichiers** de code, tests, styles, manifestes et verrou sont
+identiques avant et après. Le nouveau test de la route d’accès est inclus ;
+les documents, environnements, caches et fichiers générés restent exclus.
+Snapshots : `/tmp/antsia-diasporale-pd4-resume-source-before.json` et
+`/tmp/antsia-diasporale-pd4-resume-source-after.json`.
+SHA256 commun :
+`809adebcdcf0f469ab27993c8a98f437728b27cba6cf5e12a7febe4325f3eb51`.
+Le préflight confirme également que le backend vivant correspond au
+`deploymentName` de la configuration locale ; aucune cible distante utilisée.
+
+Le job lourd est terminé et le créneau CPU rendu. Les services3210/3031 du
+chat d’accueil restent actifs ;3030 reste en pause. Les changements des deux
+chats d’accueil sont préservés et ne sont pas committés par cette session.
+Ce passage valide le code courant ; la recette native des images multiples
+et de la vidéo reste ouverte pour la sélection manuelle des fichiers.
