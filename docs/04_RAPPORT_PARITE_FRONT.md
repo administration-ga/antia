@@ -566,7 +566,7 @@ avant durcissement, sont conservés séparément ; ils ne sont pas le verdict fi
 Commits source locaux : `263d7df` (consentement), `aebd48b` (front et intégration).
 
 Disponibilité HTTP par requêtes HEAD, sans observation de page : `/entrer`,
-`/mes-donnees` et `/fil` **200 après reprise**. Backend3210 en ligne, fonctions
+`/mes-donnees` et `/fil` **200 après reprise**. Backend3210 observé en ligne, fonctions
 prêtes sous Node22 ; un seul Next3030 sous Node22, heap2048, lancement en terminal
 persistant. Le fil a recompilé en9,7s. Ces réponses ne prouvent pas une recette
 authentifiée ni un rendu visuel.
@@ -577,7 +577,11 @@ sur accord explicite de l’utilisateur ; aucun autre cache ni donnée supprimé
 dépendances installées conservées. Les fichiers de compilation interrompue sont
 archivés dans `/tmp/antsia-pa6-next-before-recovery`, puis3030/3210 relancés en
 terminal persistant. Le volume a affiché≈1,7Go libres après nettoyage/reprise,
-puis≈496Mo après compilation : disponibilité rétablie, marge disque encore faible.
+puis≈496Mo après compilation. Au dernier contrôle, il ne restait qu’environ229Mo :
+nouvel ENOSPC Webpack et backend3210 arrêté. Les deux lanceurs de cette session ont
+été suspendus pour arrêter les écritures et tentatives répétées. La reprise a donc
+été constatée temporairement ; la disponibilité locale durable reste bloquée par
+la saturation du disque. Aucun nettoyage supplémentaire n’a été effectué.
 
 ### Réconciliation et limites
 
