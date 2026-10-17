@@ -127,13 +127,27 @@ lock ; environnements, documents, cache et code généré exclus.
 SHA256 `c1a685a4d04d8b30a71a04d4838b31498ee7de70da22fa6c5a3fdb9e56a09225`.
 Snapshots `/tmp/antsia-diasporale-pd4-corrected-source-before.json` et `-after.json`.
 
-Recette navigateur DIASPORALE sur3031 : son dernier retour confirme dans Chrome
-la modification d’un commentaire et de sa réponse avec marqueur « modifié »,
-l’annulation conservant le texte, le focus des champs et la feuille contenue
-aux largeurs320/375. Les scènes profil retiré/médias et leurs limites relèvent
-du rapport propriétaire `../DIASPORALE/docs/10_VISIONNEUSE_COMMENTAIRES_IDENTITE_PD4.md` ;
-aucune preuve supplémentaire n’est inventée depuis le suivi automatique devenu
-indisponible. Le compte et les nouveaux fichiers de recette sont fictifs.
+Recette navigateur DIASPORALE sur3031 : retour final de son propriétaire,
+consigné dans `../DIASPORALE/docs/10_VISIONNEUSE_COMMENTAIRES_IDENTITE_PD4.md`,
+relue après ses commits `8a44990`, `baee6c0` et `6c7bb0c` :
+
+- Commentaire et réponse modifiés avec marqueur « modifié », textes persistants
+  après navigation ; annulation conservant le texte et rendant le focus.
+  Feuille contenue aux largeurs320/375/1280, clair/sombre effectivement joués.
+- **Profil retiré édité sans republication implicite**, état relu après
+  rechargement ; mode privé désactivé et adhésions conservées à l’écran. Nom
+  initial et accroche vide restaurés. Le résultat d’une republication explicite
+  activée ensuite reste à relire : incident local de session/budget1s inchangé,
+  puis Mac verrouillé confirmé par CUA. Aucun résultat de republication inventé.
+- Médias :23tests verts, mais `upload_file` refuse les chemins de fixtures,
+  même dans le workspace ; aucun fichier envoyé. Lecture native images/vidéo
+  encore ouverte, sans modification de la garde ni contournement du refus.
+
+Déverrouillage manuel demandé par DIASPORALE ; ses opérations Chrome sont
+arrêtées pendant cette attente. **PD4 n’est pas clôturé.** Le compte et les
+fichiers de recette sont fictifs. Le complément ANTSIA est le commit `0693832`,
+cinq chemins, couplé aux commits DIASPORALE ci-dessus. Aucun code n’a changé
+depuis les empreintes du passage commun7173/code0.
 
 Le contrôle d’accueil dans l’IAB a été refusé automatiquement sur l’ancien
 écran `data:ERR_CONNECTION_REFUSED` de l’onglet : pas de contournement ni autre
