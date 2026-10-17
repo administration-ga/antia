@@ -74,7 +74,10 @@ une recette navigateur authentifiée sur un client IDN réel.
 - Backend local 3210 prêt sous Node 22, sans rattachement cloud. Console 3032 :
   accueil, /entrer et /sante-fonctionnelle **HEAD 200** ; journal
   /tmp/antsia-pa7-console-head.log. Cela prouve le service et la compilation des
-  routes, pas une navigation authentifiée ni un audit visuel.
+  routes, pas une navigation authentifiée ni un audit visuel. Après ce contrôle,
+  seul le Next 3032 de cette session a été arrêté pour le créneau DIASPORALE ;
+  le backend 3210 est conservé. La disponibilité actuelle du frontend dépend
+  de cette coordination, distincte des statuts HEAD constatés.
 
 La preuve porte sur l'arbre partagé gelé, comprenant les cinq fichiers moteur
 DIASPORALE conservés hors du commit PA7. Leurs évolutions ultérieures demandent
