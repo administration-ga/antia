@@ -84,9 +84,25 @@ export function convexArgs(argv) {
   return first === undefined || first.startsWith("-") ? [DEFAULT_SUBCOMMAND, ...argv] : [...argv]
 }
 
+/**
+ * Codegen garde son typage strict, avec le compilateur natif déjà utilisé par
+ * verify. Le tsc embarqué relançait deux analyses de plusieurs minutes pour
+ * une seule erreur, sous forte pression mémoire. Dev et les autres commandes
+ * gardent leurs options ; une option CLI explicite est également conservée.
+ */
+export function codegenPlan(args) {
+  const nativeTypecheck = args[0] === "codegen"
+  const explicitTypecheck = args.some((arg) => arg === "--typecheck" || arg.startsWith("--typecheck="))
+  return {
+    cliArgs: nativeTypecheck && !explicitTypecheck ? [...args, "--typecheck", "disable"] : [...args],
+    nativeTypecheck,
+  }
+}
+
 function main() {
   const root = resolve(dirname(fileURLToPath(import.meta.url)), "..")
   const args = convexArgs(process.argv.slice(2))
+  const plan = codegenPlan(args)
   const currentVersion = versionOf("node") ?? ""
   const binDir = pickNodeBinDir({ currentVersion, candidates: candidateBinDirs(), versionAt: versionOf })
   const env = { ...process.env }
@@ -99,10 +115,19 @@ function main() {
     )
   }
   const convexBin = join(root, "node_modules", ".bin", "convex")
-  const child = spawn(convexBin, args, { cwd: root, env, stdio: "inherit" })
-  for (const signal of ["SIGINT", "SIGTERM"]) process.on(signal, () => child.kill(signal))
+  const child = spawn(convexBin, plan.cliArgs, { cwd: root, env, stdio: "inherit" })
+  let activeChild = child
+  for (const signal of ["SIGINT", "SIGTERM"]) process.on(signal, () => activeChild.kill(signal))
   child.on("exit", (code, signal) => {
-    process.exitCode = code ?? (signal ? 1 : 0)
+    if (code !== 0 || signal || !plan.nativeTypecheck) {
+      process.exitCode = code ?? 1
+      return
+    }
+    console.log("[convex-dev] Typage strict Convex : tsgo, même configuration que verify.")
+    const checker = spawn(join(root, "node_modules", ".bin", "tsgo"), ["--noEmit", "-p", "convex/tsconfig.json"], { cwd: root, env, stdio: "inherit" })
+    activeChild = checker
+    checker.on("error", () => { console.error("[convex-dev] Compilateur natif Convex indisponible."); process.exitCode = 1 })
+    checker.on("exit", (typeCode) => { process.exitCode = typeCode ?? 1 })
   })
 }
 

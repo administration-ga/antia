@@ -48,14 +48,21 @@ export const getDeadLetter = operatorQuery({
   handler: async (ctx, args) => {
     const row = await ctx.db.get(args.deadLetterId)
     if (!row) return notFound()
-    return row
+    return deadLetterMetadata(row)
   },
 })
 
 export const paginateDeadLetters = operatorQuery({
   args: { networkId: v.id("networks"), status: v.union(v.literal("dead_letter"), v.literal("resolved")), paginationOpts: paginationOptsValidator },
-  handler: async (ctx, args) => await ctx.db.query("federationDeadLetters").withIndex("by_network_status_failedAt", (q) => q.eq("networkId", args.networkId).eq("status", args.status)).order("desc").paginate({ ...args.paginationOpts, numItems: Math.min(20, Math.max(1, args.paginationOpts.numItems)) }),
+  handler: async (ctx, args) => {
+    const result = await ctx.db.query("federationDeadLetters").withIndex("by_network_status_failedAt", (q) => q.eq("networkId", args.networkId).eq("status", args.status)).order("desc").paginate({ ...args.paginationOpts, numItems: Math.min(20, Math.max(1, args.paginationOpts.numItems)) })
+    return { ...result, page: result.page.map(deadLetterMetadata) }
+  },
 })
+
+function deadLetterMetadata(row: import("../../_generated/dataModel").Doc<"federationDeadLetters">) {
+  return { _id: row._id, networkId: row.networkId, emitterId: row.emitterId, environment: row.environment, contract: row.contract, status: row.status, reason: row.reason, attempts: row.attempts, firstFailedAt: row.firstFailedAt, lastAttemptAt: row.lastAttemptAt, resolvedAt: row.resolvedAt ?? null, eventId: row.eventId, receiptId: row.receiptId }
+}
 
 export const paginateReceipts = operatorQuery({
   args: { networkId: v.id("networks"), paginationOpts: paginationOptsValidator },

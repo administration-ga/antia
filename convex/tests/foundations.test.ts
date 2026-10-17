@@ -10,7 +10,7 @@ import { api, internal } from "../_generated/api"
 import type { Id } from "../_generated/dataModel"
 import { requireMembership } from "../lib/access"
 import { SEED_CONFIRMATION, seedsAllowed } from "../seeds/foundations"
-import { testConvex } from "../test.setup"
+import { createTestOperatorProof, testConvex } from "../test.setup"
 
 type T = ReturnType<typeof testConvex>
 
@@ -29,10 +29,11 @@ async function onboardedPerson(t: T, subject: string, handle: string) {
   return { as, personId }
 }
 
-async function makeOperator(t: T, personId: Id<"persons">) {
+async function makeOperator(t: T, person: Awaited<ReturnType<typeof onboardedPerson>>, role: "platform_operator" | "platform_admin" = "platform_operator") {
   await t.run(async (ctx) => {
-    await ctx.db.insert("operators", { personId, role: "platform_operator", grantedAt: Date.now() })
+    await ctx.db.insert("operators", { personId: person.personId, role, grantedAt: Date.now() })
   })
+  await createTestOperatorProof(t, person.as, person.personId)
 }
 
 async function membershipOf(t: T, networkId: Id<"networks">, personId: Id<"persons">) {
@@ -177,7 +178,7 @@ describe("suspension à la racine = partout (invariant 3, R7)", () => {
     const { as, personId } = await onboardedPerson(t, "auth-6", "sanctionne")
     await as.mutation(api.modules.people.memberships.joinNetwork, { networkId: testClosed, facet: { values: { countryOfResidence: "FR" }, visibilities: {} } })
     const operator = await onboardedPerson(t, "auth-op", "operateur")
-    await makeOperator(t, operator.personId)
+    await makeOperator(t, operator)
     await operator.as.mutation(api.modules.people.memberships.suspendEverywhere, { personId, reason: "Harcèlement répété (test)" })
 
     // La garde refuse partout, y compris dans le réseau fermé où l'adhésion locale est intacte.
@@ -204,7 +205,7 @@ describe("étanchéité et refus indistinct (invariants 1 et 8, R10)", () => {
     const t = testConvex()
     const { root, testClosed } = await seed(t)
     const operator = await onboardedPerson(t, "auth-op2", "operateur.deux")
-    await makeOperator(t, operator.personId)
+    await makeOperator(t, operator, "platform_admin")
     const other = await operator.as.mutation(api.modules.networks.networks.create, {
       slug: "autre-ferme",
       kind: "closed",
@@ -251,7 +252,7 @@ describe("console du moteur : les réseaux se créent et s'archivent sans déplo
     expect(await errorCode(visitor.mutation(api.modules.networks.networks.create, { slug: "nouveau", kind: "closed", ...args }))).toBe("operatorRequired")
 
     const operator = await onboardedPerson(t, "auth-op3", "operateur.trois")
-    await makeOperator(t, operator.personId)
+    await makeOperator(t, operator, "platform_admin")
     expect(await errorCode(operator.as.mutation(api.modules.networks.networks.create, { slug: "racine-bis", kind: "root", ...args }))).toBe("conflict")
     expect(await errorCode(operator.as.mutation(api.modules.networks.networks.create, { slug: "A!", kind: "closed", ...args }))).toBe("invalidArgument")
     const created = await operator.as.mutation(api.modules.networks.networks.create, { slug: "ville-test", kind: "closed", ...args })
@@ -259,7 +260,11 @@ describe("console du moteur : les réseaux se créent et s'archivent sans déplo
 
     expect(await errorCode(operator.as.mutation(api.modules.networks.networks.archive, { networkId: created, reason: "court" }))).toBe("invalidArgument")
     expect(await errorCode(operator.as.mutation(api.modules.networks.networks.archive, { networkId: root, reason: "La racine ne s'archive jamais." }))).toBe("invalidArgument")
-    await operator.as.mutation(api.modules.networks.networks.archive, { networkId: created, reason: "Réseau de test fermé après la recette." })
+    const approver = await onboardedPerson(t, "auth-op4", "administrateur.quatre")
+    await makeOperator(t, approver, "platform_admin")
+    const reason = "Réseau de test fermé après la recette."
+    const { archiveRequestId } = await operator.as.mutation(api.modules.networks.networks.requestArchive, { networkId: created, reason })
+    await approver.as.mutation(api.modules.networks.networks.archive, { networkId: created, reason, archiveRequestId })
     expect(await t.query(api.modules.networks.networks.getBySlug, { slug: "ville-test" })).toBeNull()
     const history = await t.run(async (ctx) =>
       ctx.db

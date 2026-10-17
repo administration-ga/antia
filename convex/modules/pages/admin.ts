@@ -24,6 +24,7 @@ import { internal } from "../../_generated/api"
 import type { Doc } from "../../_generated/dataModel"
 import { checked, failRule, notFound } from "../../lib/errors"
 import { operatorMutation, operatorQuery } from "../../lib/functions"
+import { requirePlatformAdmin } from "../../lib/operatorIdentity"
 import { enforceRateLimit } from "../../lib/rateLimit"
 import { contentVisibilityValidator, pageTrustValidator } from "../../lib/validators"
 import { hasStrongIdentityFor } from "../people/persons"
@@ -68,6 +69,7 @@ export const createInstitutionPage = operatorMutation({
   },
   returns: v.object({ pageId: v.id("pages"), handle: v.string(), created: v.boolean() }),
   handler: async (ctx, args) => {
+    requirePlatformAdmin(ctx)
     await enforceRateLimit(ctx, "operator.page", ctx.person._id)
     const motive = checked(() => assertDecisionReason(args.reason, 10))
     const network = await ctx.db.get(args.networkId)
@@ -127,6 +129,7 @@ export const setPageTrust = operatorMutation({
   args: { pageId: v.id("pages"), trust: pageTrustValidator, reason: v.string() },
   returns: v.object({ changed: v.boolean() }),
   handler: async (ctx, args) => {
+    requirePlatformAdmin(ctx)
     await enforceRateLimit(ctx, "operator.page", ctx.person._id)
     const motive = checked(() => assertDecisionReason(args.reason, 10))
     const page = await ctx.db.get(args.pageId)
@@ -157,6 +160,7 @@ export const setPageStatus = operatorMutation({
   args: { pageId: v.id("pages"), status: pageStatusValidator, reason: v.string() },
   returns: v.object({ changed: v.boolean() }),
   handler: async (ctx, args) => {
+    requirePlatformAdmin(ctx)
     await enforceRateLimit(ctx, "operator.page", ctx.person._id)
     const motive = checked(() => assertDecisionReason(args.reason, 10))
     const page = await ctx.db.get(args.pageId)
@@ -188,6 +192,7 @@ export const setPageHandle = operatorMutation({
   args: { pageId: v.id("pages"), handle: v.string(), reason: v.string() },
   returns: v.object({ handle: v.string() }),
   handler: async (ctx, args) => {
+    requirePlatformAdmin(ctx)
     await enforceRateLimit(ctx, "operator.page", ctx.person._id)
     const motive = checked(() => assertDecisionReason(args.reason, 10))
     const page = await ctx.db.get(args.pageId)
@@ -221,6 +226,7 @@ export const grantPageAdmin = operatorMutation({
   args: { pageId: v.id("pages"), personId: v.id("persons"), reason: v.string() },
   returns: v.object({ invited: v.boolean() }),
   handler: async (ctx, args) => {
+    requirePlatformAdmin(ctx)
     await enforceRateLimit(ctx, "operator.page", ctx.person._id)
     const motive = checked(() => assertDecisionReason(args.reason, 10))
     const page = await ctx.db.get(args.pageId)

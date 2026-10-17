@@ -13,7 +13,8 @@ import betterAuthTest from "@convex-dev/better-auth/test"
 import rateLimiterTest from "@convex-dev/rate-limiter/test"
 import { convexTest, type TestConvex } from "convex-test"
 
-import { components } from "./_generated/api"
+import { api, components, internal } from "./_generated/api"
+import type { Id } from "./_generated/dataModel"
 import schema from "./schema"
 
 // `import.meta.glob` est une primitive de Vite (vitest), remplacée au transform.
@@ -59,6 +60,25 @@ export async function createTestSession(t: BackendTest, userId: string, expiresA
     throw new Error("Le composant Better Auth n'a pas créé la session de test")
   }
   return session._id
+}
+
+/** Fixture explicite PA7 : vraie session, compte IDN, preuve interne et lien vivant. */
+export async function createTestOperatorProof(t: BackendTest, as: ReturnType<BackendTest["withIdentity"]>, personId: Id<"persons">, loa: 1 | 2 | 3 = 2): Promise<void> {
+  const identity = await as.run(async (ctx) => ctx.auth.getUserIdentity())
+  if (!identity || typeof identity.sessionId !== "string") throw new Error("Session de fixture opérateur absente")
+  const idnSubject = "idn-operator-fixture-" + personId
+  const now = Date.now()
+  const accounts = await t.query(components.betterAuth.adapter.findMany, { model: "account", where: [{ field: "userId", value: identity.subject }, { field: "providerId", value: "idn" }], paginationOpts: { cursor: null, numItems: 2 } })
+  const subject = accounts.page[0]?.accountId ?? idnSubject
+  if (!accounts.page.length) await t.mutation(components.betterAuth.adapter.create, { input: { model: "account", data: { userId: identity.subject, providerId: "idn", accountId: subject, createdAt: now, updatedAt: now } } })
+  await t.mutation(internal.modules.people.identity.recordIdnProof, { subject, loa })
+  await t.run(async (ctx) => {
+    const existing = await ctx.db.query("identityLinks").withIndex("by_person_and_provider", (q) => q.eq("personId", personId).eq("provider", "idn")).unique()
+    if (existing) await ctx.db.patch(existing._id, { subject, loa, revokedAt: undefined, linkedAt: now })
+    else await ctx.db.insert("identityLinks", { personId, provider: "idn", subject, loa, linkedAt: now })
+  })
+  await t.mutation(internal.modules.platform.operatorAccess.recordIdnSession, { sessionId: identity.sessionId, authUserId: identity.subject, idnSubject: subject, loa })
+  if (loa >= 2) await as.mutation(api.modules.platform.operatorAccess.recordAccess, {})
 }
 
 /**

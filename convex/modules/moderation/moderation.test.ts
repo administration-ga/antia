@@ -6,7 +6,7 @@ import { afterEach, describe, expect, it, vi } from "vitest"
 import { api, internal } from "../../_generated/api"
 import type { Id } from "../../_generated/dataModel"
 import { SEED_CONFIRMATION } from "../../seeds/foundations"
-import { testConvex } from "../../test.setup"
+import { createTestOperatorProof, testConvex } from "../../test.setup"
 
 type T = ReturnType<typeof testConvex>
 type Person = { as: ReturnType<T["withIdentity"]>; personId: Id<"persons"> }
@@ -58,6 +58,7 @@ describe("gardes de signalement", () => {
     const bob = await enter(t, root, "bob")
     const operator = await enter(t, root, "operateur")
     await t.run(async (ctx) => ctx.db.insert("operators", { personId: operator.personId, role: "platform_operator", grantedAt: 1 }))
+    await createTestOperatorProof(t, operator.as, operator.personId)
     const { postId } = await alice.as.mutation(api.modules.posts.posts.publish, { networkId: root, body: "Litigieux" })
     const { reportId } = await bob.as.mutation(api.modules.moderation.moderation.reportPost, { networkId: root, postId, reason: "harassment" })
     expect(await codeOf(bob.as.query(api.modules.moderation.moderation.paginateQueue, { networkId: root, paginationOpts: PAGE }))).toBe("notFound")

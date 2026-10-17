@@ -7,7 +7,7 @@ import { api, internal } from "../../_generated/api"
 import type { Id } from "../../_generated/dataModel"
 import type { MutationCtx } from "../../_generated/server"
 import { SEED_CONFIRMATION } from "../../seeds/foundations"
-import { testConvex } from "../../test.setup"
+import { createTestOperatorProof, testConvex } from "../../test.setup"
 import { appendAudit } from "./audit"
 
 type T = ReturnType<typeof testConvex>
@@ -37,6 +37,7 @@ async function makeOperator(t: T, person: Person, role: "platform_operator" | "p
   await t.run(async (ctx) => {
     await ctx.db.insert("operators", { personId: person.personId, role, grantedAt: Date.now() })
   })
+  await createTestOperatorProof(t, person.as, person.personId)
   return person
 }
 
@@ -60,7 +61,7 @@ async function caught(promise: Promise<unknown>): Promise<unknown> {
 }
 
 async function journal(operator: Person, networkId?: Id<"networks">) {
-  return (await operator.as.query(api.modules.platform.audit.paginateAudit, { ...(networkId ? { networkId } : {}), paginationOpts: PAGE })).page
+  return (await operator.as.query(api.modules.platform.audit.paginateAudit, { ...(networkId ? { networkId } : {}), paginationOpts: PAGE })).page.filter((line) => line.action !== "console.access")
 }
 
 describe("une décision de console écrit sa ligne — qui, à quel titre, pourquoi", () => {
@@ -94,24 +95,30 @@ describe("une décision de console écrit sa ligne — qui, à quel titre, pourq
     ])
   })
 
-  it("réseau : créer, régler, archiver — trois lignes ; un réglage sans motif n'en invente pas", async () => {
+  it("réseau : créer, régler, demander l'archivage et l'approuver — quatre lignes ; un réglage sans motif n'en invente pas", async () => {
     vi.useFakeTimers()
     const t = testConvex()
     const { root } = await seed(t)
-    const operator = await makeOperator(t, await enter(t, root, "operateur"))
+    const operator = await makeOperator(t, await enter(t, root, "operateur"), "platform_admin")
     const created = await operator.as.mutation(api.modules.networks.networks.create, { slug: "ville-test", kind: "closed", ...NETWORK_SETTINGS })
     vi.advanceTimersByTime(1_000)
     await operator.as.mutation(api.modules.networks.networks.update, { networkId: created, ...NETWORK_SETTINGS, name: "Ville test (renommée)" })
     vi.advanceTimersByTime(1_000)
     expect(engineErrorCode(await caught(operator.as.mutation(api.modules.networks.networks.archive, { networkId: created, reason: "x".repeat(501) })))).toBe("invalidArgument")
-    await operator.as.mutation(api.modules.networks.networks.archive, { networkId: created, reason: "Réseau de recette fermé." })
+    const approver = await makeOperator(t, await enter(t, root, "approbatrice"), "platform_admin")
+    const reason = "Réseau de recette fermé."
+    const { archiveRequestId } = await operator.as.mutation(api.modules.networks.networks.requestArchive, { networkId: created, reason })
+    vi.advanceTimersByTime(1_000)
+    await approver.as.mutation(api.modules.networks.networks.archive, { networkId: created, reason, archiveRequestId })
 
     const lines = await journal(operator, created)
-    expect(lines.map((line) => line.action)).toEqual(["network.archive", "network.update", "network.create"])
-    expect(lines.every((line) => line.capacity === "platform_operator" && line.subject.id === created)).toBe(true)
-    expect(lines[0]?.details).toEqual({ reason: "Réseau de recette fermé." })
-    expect(lines[1]?.details).toBeNull()
-    expect(lines[2]?.details).toEqual({ slug: "ville-test", kind: "closed" })
+    expect(lines.map((line) => line.action)).toEqual(["network.archive", "network.archive_request", "network.update", "network.create"])
+    expect(lines.every((line) => line.capacity === "platform_admin" && line.networkId === created)).toBe(true)
+    expect(lines[0]).toMatchObject({ actor: { personId: approver.personId }, subject: { table: "networks", id: created }, details: { reason, requestReason: reason, archiveRequestId } })
+    expect(JSON.stringify(lines[0]?.details)).not.toContain(operator.personId)
+    expect(lines[1]).toMatchObject({ actor: { personId: operator.personId }, subject: { table: "networkArchiveRequests", id: archiveRequestId }, details: { reason } })
+    expect(lines[2]?.details).toBeNull()
+    expect(lines[3]?.details).toEqual({ slug: "ville-test", kind: "closed" })
   })
 })
 

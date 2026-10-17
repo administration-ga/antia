@@ -7,8 +7,8 @@
   "home": {
     "eyebrow": "Restricted access",
     "title": "{{brand}} engine console",
-    "lead": "Console access is being prepared. Management tools are not open yet.",
-    "access": "Signing in to the engine does not grant administration rights.",
+    "lead": "Manage networks, teams and engine operations.",
+    "access": "Restricted to authorised operators signing in with IDN.",
     "healthLink": "Service status"
   },
   "health": {
@@ -27,12 +27,133 @@
     "backendMissing": "The engine is not configured for this console.",
     "connected": "Engine session is open.",
     "signedOut": "You are not signed in to the engine.",
-    "noAuthority": "Signing in does not grant administration rights. Console tools remain unavailable.",
+    "noAuthority": "An IDN identity at level 2 or above and a current operator authorisation are required. You can sign in with IDN again.",
     "signIn": "Sign in",
     "signOut": "Sign out everywhere",
     "signingOut": "Signing out…",
     "globalSignOutFailed": "The local session was closed, but revocation on other devices could not be confirmed.",
     "localSignOutFailed": "Local cleanup could not be completed. Reload the page and check your session.",
-    "continue": "Reload home"
+    "continue": "Reload home",
+    "denied": "Console access is not authorised for this session.",
+    "recording": "Recording secure access…"
+  },
+  "signIn": {
+    "title": "Sign in to the console",
+    "idn": "Sign in with IDN",
+    "connecting": "Opening IDN…",
+    "loading": "Checking IDN availability…",
+    "help": "Use your authorised IDN identity to access engine tools.",
+    "unavailable": "IDN sign-in for this console is not configured yet. The owner must create and configure its OIDC client.",
+    "minimum": "IDN level 2 minimum. Signing in does not create an authorisation.",
+    "configurationFailed": "Sign-in availability cannot be checked."
+  },
+  "common": {
+    "loading": "Loading data…",
+    "loadFailed": "Data could not be loaded. Your permissions have not changed.",
+    "actionFailed": "The action could not be confirmed. Your input has been kept; try again.",
+    "saving": "Saving…",
+    "pendingNavigation": "A decision is in progress. Wait for its result before changing views.",
+    "closeNotice": "Dismiss this notification",
+    "notices": "Console notifications"
+  },
+  "console": {
+    "navigation": "Console tools",
+    "network": "Working network",
+    "networkHint": "Network-specific tools use this selection. Audit logs and health cover the engine.",
+    "role": {
+      "platform_operator": "Platform operator",
+      "platform_admin": "Platform administrator"
+    },
+    "selectNetwork": "Choose a network"
+  },
+  "sections": {
+    "networks": "Networks",
+    "teams": "Moderation teams",
+    "appeals": "Appeals",
+    "federation": "Federation",
+    "pages": "Official pages",
+    "incidents": "Incidents",
+    "audit": "Decision log",
+    "health": "Engine health",
+    "export": "Aggregate exports"
+  },
+  "networks": {
+    "lead": "Manage networks and their policies here. Archiving retains the data.",
+    "create": "Create a network",
+    "createTitle": "New network",
+    "createHint": "A child network becomes available without deployment. Choose generic admission unless the DIASPORALE slice is required.",
+    "settings": "Network settings",
+    "settingsHint": "The identifier and admission type are fixed at creation. Every change to settings has a reason and is recorded.",
+    "readOnly": "Settings are available for review. Only administrators may edit active networks.",
+    "save": "Save settings",
+    "saved": "Network settings have been saved.",
+    "created": "The network has been created.",
+    "unsaved": "Your input contains unsaved changes.",
+    "leaveConfirm": "Leave this form and discard unsaved changes?",
+    "manage": "Manage this network",
+    "view": "View this network",
+    "back": "Back to networks",
+    "empty": "No networks are available.",
+    "unavailable": "This network is no longer available in this list.",
+    "bounded": "The list is limited to 200 active and 200 archived networks, plus the root.",
+    "invalid": "Check this field's value and limits.",
+    "facetInvalid": "The facet JSON schema does not match the contract: typed fields, admitted visibility and no more than 24 fields.",
+    "countryInvalid": "Use only two-letter uppercase ISO country codes separated by commas.",
+    "reasonRequired": "The reason must contain between 10 and 500 characters.",
+    "slugHint": "3 to 32 characters: lowercase letters, digits and hyphens, with no double hyphen. The identifier is immutable.",
+    "policyHint": "Open: generic admission; declared or verified: status rules; mirror: signed projections only.",
+    "visibilityHint": "Distribution to the root remains subject to a public audience and publication rules.",
+    "valuesHint": "Distinct comma-separated values; up to 50 values of 80 characters each.",
+    "countryHint": "ISO alpha-2 codes (GA, FR…) separated by commas. Empty: no declared countries. The admission slice determines their effect.",
+    "themeHint": "Identifier of an installed theme: {{themes}}. An identifier alone does not install a theme.",
+    "managedHint": "The DIASPORALE slice applies its own admission rules. This choice is fixed at creation and does not recreate an existing DIASPORALE network.",
+    "facetHint": "Empty: no facet. Closed JSON { fields: […] }: key, kind, required and defaultVisibility. Arbitrary values will not be submitted.",
+    "reasonHint": "10 to 500 characters. The reason is recorded in the decision log.",
+    "fields": {
+      "slug": "Public identifier",
+      "name": "Network name",
+      "membershipPolicy": "Membership policy",
+      "defaultVisibility": "Default visibility",
+      "reachValues": "Admitted scopes",
+      "openCountries": "Open countries",
+      "theme": "Theme",
+      "managedBy": "Network admission",
+      "facetSchema": "Facet schema (JSON)",
+      "reason": "Decision reason",
+      "status": "Status"
+    },
+    "policies": {
+      "open": "Open",
+      "declared_or_verified": "Declared or verified",
+      "mirror": "Signed mirror"
+    },
+    "visibilities": {
+      "network": "Within this network",
+      "root": "Distribution to the ANTSIA root"
+    },
+    "statuses": {
+      "active": "Active",
+      "archived": "Archived"
+    },
+    "admission": {
+      "generic": "Generic engine admission",
+      "diaspora": "DIASPORALE admission slice"
+    }
+  },
+  "archive": {
+    "title": "Archive with two-person approval",
+    "help": "The root cannot be archived. For this network, a proposal with a reason must be approved by a different authorised person. No data is deleted.",
+    "request": "Propose archiving",
+    "requested": "The archive proposal was recorded. It awaits a different authorised person.",
+    "approve": "Approve and archive",
+    "approved": "The network was archived after two-person approval.",
+    "cancel": "Withdraw my proposal",
+    "cancelled": "The archive proposal was withdrawn.",
+    "empty": "No pending archive proposals.",
+    "own": "Your proposal awaits a second approval.",
+    "pending": "A proposal awaits your decision.",
+    "expired": "This proposal expired; a new request is required.",
+    "expires": "Expires: {{at}} ({{zone}}).",
+    "decisionReason": "Reason for approval or withdrawal"
   }
 }

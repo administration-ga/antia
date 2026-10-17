@@ -6,7 +6,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { api, internal } from "../../_generated/api"
 import type { Id } from "../../_generated/dataModel"
 import { SEED_CONFIRMATION } from "../../seeds/foundations"
-import { testConvex } from "../../test.setup"
+import { createTestOperatorProof, testConvex } from "../../test.setup"
 
 type T = ReturnType<typeof testConvex>
 type Person = { as: ReturnType<T["withIdentity"]>; personId: Id<"persons">; handle: string }
@@ -57,8 +57,9 @@ async function setStatus(t: T, networkId: Id<"networks">, person: Person, status
 
 async function makeOperator(t: T, person: Person): Promise<void> {
   await t.run(async (ctx) => {
-    await ctx.db.insert("operators", { personId: person.personId, role: "platform_operator", grantedAt: 1 })
+    await ctx.db.insert("operators", { personId: person.personId, role: "platform_admin", grantedAt: 1 })
   })
+  await createTestOperatorProof(t, person.as, person.personId)
 }
 
 async function connect(t: T, networkId: Id<"networks">, a: Person, b: Person): Promise<void> {
@@ -188,7 +189,7 @@ describe("création d'une page", () => {
     expect(await alice.as.query(P.getPage, { networkId: root, handle: first.handle })).toMatchObject({ badge: "official", ownerKind: "institution", viewer: { role: null } })
     expect(await operator.as.mutation(ADMIN.createInstitutionPage, args)).toEqual({ pageId: first.pageId, handle: first.handle, created: false })
     const journal = await t.run(async (ctx) => await ctx.db.query("engineAudit").withIndex("by_subject_at", (q) => q.eq("subjectTable", "pages").eq("subjectId", first.pageId)).take(5))
-    expect(journal).toMatchObject([{ action: "page.create_official", capacity: "platform_operator", actorPersonId: operator.personId }])
+    expect(journal).toMatchObject([{ action: "page.create_official", capacity: "platform_admin", actorPersonId: operator.personId }])
   })
 })
 

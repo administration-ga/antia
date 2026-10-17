@@ -14,7 +14,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 import { api, internal } from "../../_generated/api"
 import type { Doc, Id } from "../../_generated/dataModel"
-import { testConvex } from "../../test.setup"
+import { createTestOperatorProof, testConvex } from "../../test.setup"
 import { connect, enter, followPage, grantAt, insertPage, insertSession, joinAlso, type Person, seed, type T, T0 } from "./fixtures.setup"
 
 const SFU_STATE = "modules/live/livekitActions:applyDirectSfuState"
@@ -84,7 +84,8 @@ async function unfollowPage(t: T, pageId: Id<"pages">, person: Person): Promise<
 
 async function operatorIn(t: T, root: Id<"networks">): Promise<Person> {
   const operator = await enter(t, root, "console")
-  await t.run(async (ctx) => ctx.db.insert("operators", { personId: operator.personId, role: "platform_operator", grantedAt: 1 }))
+  await t.run(async (ctx) => ctx.db.insert("operators", { personId: operator.personId, role: "platform_admin", grantedAt: 1 }))
+  await createTestOperatorProof(t, operator.as, operator.personId)
   return operator
 }
 

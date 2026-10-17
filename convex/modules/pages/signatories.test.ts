@@ -12,7 +12,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { api, internal } from "../../_generated/api"
 import type { Id } from "../../_generated/dataModel"
 import { SEED_CONFIRMATION } from "../../seeds/foundations"
-import { testConvex } from "../../test.setup"
+import { createTestOperatorProof, testConvex } from "../../test.setup"
 
 type T = ReturnType<typeof testConvex>
 type Person = { as: ReturnType<T["withIdentity"]>; personId: Id<"persons">; handle: string }
@@ -59,8 +59,9 @@ async function verify(t: T, networkId: Id<"networks">, person: Person): Promise<
 
 async function makeOperator(t: T, person: Person): Promise<void> {
   await t.run(async (ctx) => {
-    await ctx.db.insert("operators", { personId: person.personId, role: "platform_operator", grantedAt: 1 })
+    await ctx.db.insert("operators", { personId: person.personId, role: "platform_admin", grantedAt: 1 })
   })
+  await createTestOperatorProof(t, person.as, person.personId)
 }
 
 /** Un lien IDN de garantie 2 : l'identité forte qu'exige une page officielle. */

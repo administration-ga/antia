@@ -7,7 +7,7 @@ import type { Id } from "../../_generated/dataModel"
 import { groupThread } from "../calls/fixtures.setup"
 import { insertPage, insertSession } from "../live/fixtures.setup"
 import { SEED_CONFIRMATION } from "../../seeds/foundations"
-import { testConvex } from "../../test.setup"
+import { createTestOperatorProof, testConvex } from "../../test.setup"
 
 type T = ReturnType<typeof testConvex>
 type Person = { as: ReturnType<T["withIdentity"]>; personId: Id<"persons"> }
@@ -67,6 +67,7 @@ describe("PA5 / R7 — cinq déclarants, retrait, suspension et recours", () => 
     // Décision initiale réseau : recours à la plateforme, par un décideur distinct.
     const operator = await enter(f.t, f.root, "operatrice")
     await f.t.run(async (ctx) => await ctx.db.insert("operators", { personId: operator.personId, role: "platform_operator", grantedAt: Date.now() }))
+    await createTestOperatorProof(f.t, operator.as, operator.personId)
     await operator.as.mutation(M.reviewPlatformAppeal, { appealId, overturn: true, reason: "Réexamen favorable à l'auteur." })
     expect(await errorCode(f.author.as.mutation(P.publish, { networkId: f.root, body: "Accès rétabli" }))).toBe(null)
     expect(await f.admin.as.query(P.getPost, { networkId: f.root, postId: f.postId })).toMatchObject({ body: "Publication de recette" })

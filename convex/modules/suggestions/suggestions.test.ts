@@ -137,6 +137,23 @@ describe("catalogue des suggestions — filtres", () => {
 })
 
 describe("masquage d'une suggestion", () => {
+  it("la liste générique des suggestions masquées refuse un réseau devenu gouverné, même pour un masquage déjà connu", async () => {
+    const t = testConvex()
+    const { root, testClosed } = await seed(t)
+    const me = await enter(t, root, "moi")
+    const other = await enter(t, root, "autre")
+    await t.run(async (ctx) => {
+      for (const person of [me, other]) await ctx.db.insert("networkMemberships", { networkId: testClosed, personId: person.personId, status: "declaree", role: "member", directoryListed: false, joinedAt: 1, statusChangedAt: 1 })
+      await ctx.db.insert("suggestionDismissals", { networkId: testClosed, personId: me.personId, dismissedPersonId: other.personId, createdAt: Date.now() })
+    })
+    const args = { networkId: testClosed, paginationOpts: { numItems: 10, cursor: null } }
+    expect((await me.as.query(SG.paginateDismissed, args)).page).toMatchObject([{ targetPersonId: other.personId, handle: "autre" }])
+    await t.run(async (ctx) => await ctx.db.patch(testClosed, { managedBy: "diaspora" }))
+    expect(await codeOf(me.as.query(SG.paginateDismissed, args))).toBe("policyRefused")
+    // Le masquage n'est pas effacé : sa lecture appartient désormais à la tranche.
+    expect(await t.run(async (ctx) => (await ctx.db.query("suggestionDismissals").withIndex("by_network_person_createdAt", (q) => q.eq("networkId", testClosed).eq("personId", me.personId)).take(5)).length)).toBe(1)
+  })
+
   it("survit au rechargement, se liste, se lève ; `includeDismissed` la rend avec son drapeau", async () => {
     const t = testConvex()
     const { root } = await seed(t)

@@ -33,11 +33,13 @@ import { action, mutation, query, type QueryCtx } from "../_generated/server"
 import { assertSocialWriteAllowed } from "../modules/moderation/policy"
 import { requireMembership, requirePerson } from "./access"
 import { fail } from "./errors"
+import { requireOperatorSession } from "./operatorIdentity"
 import { type ActionWriteBucket, enforceRateLimit, type RateLimitBucket } from "./rateLimit"
 
 type NetworkExtra = { minStatus?: ActiveMembershipStatus }
 type NetworkMutationExtra = NetworkExtra & { writeBucket?: RateLimitBucket }
 type NetworkActionExtra = NetworkExtra & { readOnly?: true; writeBucket?: ActionWriteBucket }
+type OperatorExtra = { allowUnloggedAccess?: true }
 
 /**
  * Les admissions d'une action, posées par `lib/actionAccess.ts`. Références
@@ -100,25 +102,31 @@ export const personMutation = customMutation(mutation, {
 })
 
 /** L'opérateur de plateforme vivant lié à la session ; `operatorRequired` sinon. */
-export async function requireOperator(ctx: QueryCtx): Promise<{ person: Doc<"persons">; operator: Doc<"operators"> }> {
+export async function requireOperator(ctx: QueryCtx): Promise<{ person: Doc<"persons">; operator: Doc<"operators">; operatorSessionProof: Doc<"operatorSessionProofs"> }> {
   const person = await requirePerson(ctx)
   const operator = await ctx.db
     .query("operators")
     .withIndex("by_person", (q) => q.eq("personId", person._id))
     .unique()
   if (!operator || operator.revokedAt !== undefined) return fail("operatorRequired")
-  return { person, operator }
+  const operatorSessionProof = await requireOperatorSession(ctx, person)
+  return { person, operator, operatorSessionProof }
 }
 
 export const operatorQuery = customQuery(query, {
   args: {},
-  input: async (ctx) => ({ ctx: await requireOperator(ctx), args: {} }),
+  input: async (ctx, _args, extra: OperatorExtra) => {
+    const access = await requireOperator(ctx)
+    if (!extra.allowUnloggedAccess && access.operatorSessionProof.accessLoggedAt === undefined) return fail("operatorRequired")
+    return { ctx: access, args: {} }
+  },
 })
 
 export const operatorMutation = customMutation(mutation, {
   args: {},
-  input: async (ctx) => {
+  input: async (ctx, _args, extra: OperatorExtra) => {
     const access = await requireOperator(ctx)
+    if (!extra.allowUnloggedAccess && access.operatorSessionProof.accessLoggedAt === undefined) return fail("operatorRequired")
     await enforceRateLimit(ctx, "operator.write", access.person._id)
     return { ctx: access, args: {} }
   },

@@ -8,6 +8,7 @@ export default defineConfig({
   },
   test: {
     name: "admin-antsia-ga",
+    maxWorkers: 2,
     environment: "node",
     include: ["src/**/*.test.ts", "src/**/*.test.tsx"],
   },

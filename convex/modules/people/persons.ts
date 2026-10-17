@@ -14,6 +14,7 @@ import { getCurrentPerson } from "../../lib/access"
 import { fail } from "../../lib/errors"
 import { enforceRateLimit } from "../../lib/rateLimit"
 import { getActiveIdentity } from "../../lib/session"
+import { bindOperatorSession } from "../../lib/operatorIdentity"
 import { badgeValidator, consentPurposeValidator, localeValidator } from "../../lib/validators"
 import { resolveFileDelivery, withheldCodeOf, withheldCodeValidator } from "../files/storageGuard"
 import { syncIdentityForPerson } from "./identity"
@@ -118,6 +119,7 @@ export const ensureMyPerson = mutation({
       .unique()
     if (existing) {
       await syncIdentityForPerson(ctx, existing)
+      await bindOperatorSession(ctx, identity.sessionId, existing)
       return existing._id
     }
     await enforceRateLimit(ctx, "person.ensure", identity.subject)
@@ -126,6 +128,7 @@ export const ensureMyPerson = mutation({
     const person = await ctx.db.get(personId)
     if (!person) return fail("unauthenticated")
     await syncIdentityForPerson(ctx, person)
+    await bindOperatorSession(ctx, identity.sessionId, person)
     return personId
   },
 })

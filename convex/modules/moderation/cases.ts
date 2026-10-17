@@ -114,10 +114,12 @@ export const paginateQueue = networkQuery({
 })
 
 export const paginatePlatformQueue = operatorQuery({
-  args: { paginationOpts: paginationOptsValidator },
+  args: { networkId: v.optional(v.id("networks")), paginationOpts: paginationOptsValidator },
   handler: async (ctx, args) => {
-    const page = await ctx.db.query("appeals").withIndex("by_level_status_createdAt", (q) => q.eq("level", "platform").eq("status", "open")).paginate(pageOptions(args.paginationOpts))
-    return { ...page, page: page.page.map((row) => ({ appealId: row._id, reportId: row.reportId, networkId: row.networkId, status: row.status, reason: row.reason, createdAt: row.createdAt })) }
+    const page = args.networkId
+      ? await ctx.db.query("appeals").withIndex("by_network_status_createdAt", (q) => q.eq("networkId", args.networkId as Id<"networks">).eq("status", "open")).paginate(pageOptions(args.paginationOpts))
+      : await ctx.db.query("appeals").withIndex("by_level_status_createdAt", (q) => q.eq("level", "platform").eq("status", "open")).paginate(pageOptions(args.paginationOpts))
+    return { ...page, page: page.page.filter((row) => row.level === "platform").map((row) => ({ appealId: row._id, reportId: row.reportId, networkId: row.networkId, status: row.status, reason: row.reason, createdAt: row.createdAt })) }
   },
 })
 

@@ -23,7 +23,13 @@
     "next": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",
-    "react-i18next": "catalog:"
+    "react-i18next": "catalog:",
+    "@antsia/social-domain": "workspace:*",
+    "@hookform/resolvers": "catalog:",
+    "react-hook-form": "catalog:",
+    "zod": "catalog:",
+    "sonner": "catalog:",
+    "lucide-react": "catalog:"
   },
   "devDependencies": {
     "@antsia/eslint-config": "workspace:*",
@@ -36,6 +42,9 @@
     "eslint": "catalog:",
     "tailwindcss": "catalog:",
     "typescript": "catalog:",
-    "vitest": "catalog:"
+    "vitest": "catalog:",
+    "@testing-library/react": "catalog:",
+    "@testing-library/user-event": "catalog:",
+    "jsdom": "catalog:"
   }
 }

@@ -59,7 +59,7 @@ function propertyName(name: ts.PropertyName): string | undefined {
   return undefined
 }
 
-function referencedMethod(node: ts.Node): string | undefined {
+function referencedMethod(node: ts.Node, names: ReadonlySet<string>): string | undefined {
   if (ts.isPropertyAccessExpression(node)) return node.name.text
   if (ts.isElementAccessExpression(node)) return stringConstant(node.argumentExpression)
   if (ts.isBindingElement(node) && ts.isObjectBindingPattern(node.parent)) {
@@ -67,6 +67,9 @@ function referencedMethod(node: ts.Node): string | undefined {
   }
   if (ts.isCallExpression(node) && ts.isIdentifier(unwrap(node.expression))) {
     const identifier = unwrap(node.expression) as ts.Identifier
+    // Seules les commandes surveillées exigent une résolution lexicale.
+    // Chercher les déclarations de chaque hook/appel du parc rendait ce scan quadratique.
+    if (!names.has(identifier.text)) return undefined
     const initializer = localConstant(identifier)
     // Une commande locale peut s'appeler signOut. Son corps est lui-même
     // parcouru : une méthode SDK utilisée dedans reste détectée.
@@ -80,7 +83,7 @@ function detectMethods(file: string, text: string, names: ReadonlySet<string>): 
   const source = parseSource(file, text)
   const findings: Finding[] = []
   walk(source, (node) => {
-    const method = referencedMethod(node)
+    const method = referencedMethod(node, names)
     if (method && names.has(method)) findings.push({ file, line: lineOf(source, node.getStart(source)), message: `accès « ${method} » hors de la porte de déconnexion complète` })
   })
   return findings

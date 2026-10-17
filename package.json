@@ -91,7 +91,7 @@
     "test:domain": "bun run --cwd packages/social-domain test",
     "typecheck": "node scripts/workspace-run.mjs typecheck --concurrency=2",
     "lint": "node scripts/workspace-run.mjs lint --concurrency=2",
-    "verify": "bun run codegen && bun run typecheck:convex && bun run typecheck:tests && bun run test && node scripts/workspace-run.mjs typecheck --concurrency=2 && node scripts/workspace-run.mjs test --concurrency=2 && node scripts/workspace-run.mjs lint --concurrency=2",
+    "verify": "bun run codegen && bun run typecheck:convex && bun run typecheck:tests && bun run test && node scripts/workspace-run.mjs typecheck --concurrency=1 && node scripts/workspace-run.mjs test --concurrency=1 && node scripts/workspace-run.mjs lint --concurrency=1",
     "dev:convex": "node scripts/convex-dev.mjs",
     "dev:antsia": "node scripts/workspace-run.mjs dev --filter=antsia-ga",
     "dev:admin": "node scripts/workspace-run.mjs dev --filter=admin-antsia-ga",

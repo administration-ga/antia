@@ -27,6 +27,16 @@ export const networkSettingsFields = {
 }
 
 export const networksTables = {
+  networkArchiveRequests: defineTable({
+    networkId: v.id("networks"), requestedByPersonId: v.optional(v.id("persons")),
+    requesterSessionProofId: v.id("operatorSessionProofs"),
+    reason: v.string(), expectedUpdatedAt: v.number(),
+    settingsVersion: v.optional(v.id("networkSettingsHistory")),
+    status: v.union(v.literal("pending"), v.literal("approved"), v.literal("cancelled")),
+    requestedAt: v.number(), expiresAt: v.number(),
+    approvedByPersonId: v.optional(v.id("persons")), decidedAt: v.optional(v.number()),
+  }).index("by_network_status_expiry", ["networkId", "status", "expiresAt"]),
+
   networks: defineTable({
     slug: v.string(),
     kind: networkKindValidator,

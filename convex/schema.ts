@@ -19,6 +19,7 @@ import { pagesTables } from "./modules/pages/tables"
 import { dataTables } from "./modules/people/dataTables"
 import { peopleTables } from "./modules/people/tables"
 import { platformTables } from "./modules/platform/tables"
+import { consoleTables } from "./modules/platform/consoleTables"
 import { postsTables } from "./modules/posts/tables"
 import { storiesTables } from "./modules/stories/tables"
 import { suggestionsTables } from "./modules/suggestions/tables"
@@ -45,6 +46,7 @@ export default defineSchema(
     ...peopleTables,
     ...dataTables,
     ...platformTables,
+    ...consoleTables,
     ...postsTables,
     ...engagementTables,
     ...filesTables,

@@ -19,6 +19,8 @@ export const AUDIT_ACTIONS = [
   "network.create",
   "network.update",
   "network.archive",
+  "network.archive_request", "network.archive_cancel",
+  "console.access", "console.incident_open", "console.incident_resolve", "console.metrics_refresh",
   // Console : adhésions (suspension à la racine, qui vaut partout)
   "membership.suspend_everywhere",
   "membership.lift_suspension",
@@ -53,7 +55,7 @@ export const AUDIT_CAPACITIES = ["platform_admin", "platform_operator", "network
 export type AuditCapacity = (typeof AUDIT_CAPACITIES)[number]
 
 /** Les tables qu'une décision peut viser — une référence, jamais un contenu. */
-export const AUDIT_SUBJECT_TABLES = ["networks", "persons", "fileScans", "contentReports", "pages", "pageClaims", "reports", "moderationTeams", "sanctions", "appeals", "moderationPolicies", "blockedTerms", "moderationContentStates", "moderationTransparency", "dataErasureJobs", "dataExports", "federationEmitters", "federationDeadLetters"] as const
+export const AUDIT_SUBJECT_TABLES = ["networks", "networkArchiveRequests", "operators", "consoleIncidents", "consoleMetrics", "persons", "fileScans", "contentReports", "pages", "pageClaims", "reports", "moderationTeams", "sanctions", "appeals", "moderationPolicies", "blockedTerms", "moderationContentStates", "moderationTransparency", "dataErasureJobs", "dataExports", "federationEmitters", "federationDeadLetters"] as const
 export type AuditSubjectTable = (typeof AUDIT_SUBJECT_TABLES)[number]
 
 export type AuditSubject = { table: AuditSubjectTable; id: string }

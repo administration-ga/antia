@@ -5,7 +5,7 @@ import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vite
 
 import { api, internal } from "../../_generated/api"
 import { SEED_CONFIRMATION } from "../../seeds/foundations"
-import { testConvex } from "../../test.setup"
+import { createTestOperatorProof, testConvex } from "../../test.setup"
 import { readFederationBody } from "./http"
 
 type T = ReturnType<typeof testConvex>
@@ -35,10 +35,11 @@ async function admin(t: T, role: "platform_admin" | "platform_operator" = "platf
   const personId = await t.run(async (ctx) => {
     const personId = await ctx.db.insert("persons", { authUserId: subject, createdAt: T0, updatedAt: T0 })
     await ctx.db.insert("operators", { personId, role, grantedAt: T0 })
-    if (strong) await ctx.db.insert("identityLinks", { personId, provider: "idn", subject: `proof-${subject}`, loa: 2, linkedAt: T0 })
     return personId
   })
-  return { personId, as: t.withIdentity({ subject }) }
+  const as = t.withIdentity({ subject })
+  if (strong) await createTestOperatorProof(t, as, personId)
+  return { personId, as }
 }
 
 async function fixture() {
@@ -188,7 +189,7 @@ describe("PA5 — inbox signée réelle, registre fermé et rejeu audité", () =
     const args = { networkId: f.root, slug: "another-test", environment: "sandbox" as const, enabled: true, keyEnvName: KEY_NAME, allowedContracts: ["RESEAU-PUBLIC-V1"], reason: CONFIG_REASON }
     const operator = await admin(f.t, "platform_operator"), weakAdmin = await admin(f.t, "platform_admin", false)
     expect(await codeOf(operator.as.mutation(api.modules.federation.emitters.configure, args))).toBe("notFound")
-    expect(await codeOf(weakAdmin.as.mutation(api.modules.federation.emitters.configure, args))).toBe("notFound")
+    expect(await codeOf(weakAdmin.as.mutation(api.modules.federation.emitters.configure, args))).toBe("operatorRequired")
     expect(await codeOf(f.actor.as.mutation(api.modules.federation.emitters.configure, { ...args, reason: "x" }))).toBe("invalidArgument")
     expect(await codeOf(f.actor.as.mutation(api.modules.federation.emitters.configure, { ...args, keyEnvName: "AUTH_SECRET" }))).toBe("invalidArgument")
     expect(await codeOf(f.actor.as.mutation(api.modules.federation.emitters.configure, args))).toBe("conflict") // une variable de clé par émetteur/environnement.
@@ -196,7 +197,7 @@ describe("PA5 — inbox signée réelle, registre fermé et rejeu audité", () =
     const proof = await f.t.run(async (ctx) => ctx.db.query("identityLinks").withIndex("by_person_and_provider", (q) => q.eq("personId", f.actor.personId).eq("provider", "idn")).unique())
     if (!proof) throw new Error("Preuve de fixture absente")
     await f.t.run(async (ctx) => ctx.db.patch(proof._id, { revokedAt: T0 }))
-    expect(await codeOf(f.actor.as.mutation(api.modules.federation.emitters.configure, args))).toBe("notFound")
+    expect(await codeOf(f.actor.as.mutation(api.modules.federation.emitters.configure, args))).toBe("operatorRequired")
   })
 
   it("DLQ opérateur seule ; rejeu motivé laisse les deux traces sans changer d'identifiants", async () => {
@@ -208,10 +209,17 @@ describe("PA5 — inbox signée réelle, registre fermé et rejeu audité", () =
     const ordinarySubject = `ordinary-${crypto.randomUUID()}`
     await f.t.run(async (ctx) => ctx.db.insert("persons", { authUserId: ordinarySubject, createdAt: T0, updatedAt: T0 }))
     expect(await codeOf(f.t.withIdentity({ subject: ordinarySubject }).query(api.modules.federation.replay.getDeadLetter, { deadLetterId: letter._id }))).toBe("operatorRequired")
-    expect((await f.actor.as.query(api.modules.federation.replay.getDeadLetter, { deadLetterId: letter._id })).rawBody).toBe(body())
+    const deadLetter = await f.actor.as.query(api.modules.federation.replay.getDeadLetter, { deadLetterId: letter._id })
+    expect(deadLetter).not.toHaveProperty("rawBody")
+    expect(deadLetter).not.toHaveProperty("bodySha256")
+    expect(letter.rawBody).toBe(body()) // Le corps exact reste contrôlable seulement en base, jamais dans le DTO opérateur.
+    const letters = await f.actor.as.query(api.modules.federation.replay.paginateDeadLetters, { networkId: f.root, status: "dead_letter", paginationOpts: { cursor: null, numItems: 10 } })
+    expect(letters.page).toHaveLength(1)
+    expect(letters.page[0]).not.toHaveProperty("rawBody")
+    expect(letters.page[0]).not.toHaveProperty("bodySha256")
     const weakAdmin = await admin(f.t, "platform_admin", false), basicOperator = await admin(f.t, "platform_operator")
     const replayArgs = { deadLetterId: letter._id, reason: "Relecture après contrôle de recette" }
-    expect(await codeOf(weakAdmin.as.mutation(api.modules.federation.replay.replay, replayArgs))).toBe("notFound")
+    expect(await codeOf(weakAdmin.as.mutation(api.modules.federation.replay.replay, replayArgs))).toBe("operatorRequired")
     expect(await codeOf(basicOperator.as.mutation(api.modules.federation.replay.replay, replayArgs))).toBe("notFound")
     expect(await codeOf(f.actor.as.mutation(api.modules.federation.replay.replay, { deadLetterId: letter._id, reason: "x" }))).toBe("invalidArgument")
     const replayed = await f.actor.as.mutation(api.modules.federation.replay.replay, { deadLetterId: letter._id, reason: "Relecture après contrôle de recette" })

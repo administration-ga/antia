@@ -3,8 +3,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { Resend } from "@convex-dev/resend"
 
-import { api, components } from "../_generated/api"
-import { testConvex } from "../test.setup"
+import { api, components, internal } from "../_generated/api"
+import { createTestSession, testConvex } from "../test.setup"
 
 const PRIMARY_ORIGIN = "http://localhost:3030"
 const PEER_ORIGIN = "http://localhost:3031"
@@ -82,6 +82,44 @@ async function loggedIn(t: T, channel: "email" | "phone" = "email") {
   const session: unknown = await t.query(components.betterAuth.adapter.findOne, { model: "session", where: [{ field: "token", value: token }] })
   expect(session).not.toBeNull()
   return { result, token, user, session: record(session), userId: textField(user, "id"), sessionId: textField(session, "_id") }
+}
+
+type EngineAuth = ReturnType<typeof import("./auth")["createAuth"]>
+type ProofHookInput = { path: string; context: { newSession?: { session: Record<string, unknown> & { id: string; userId: string } } } }
+
+/** Les callbacks du VRAI plugin sont invoqués directement ; ce n'est pas une recette HTTP OIDC. */
+function idnCallbackHooks(auth: EngineAuth) {
+  const oauth = auth.options.plugins?.find((plugin) => plugin.id === "generic-oauth")
+  if (!oauth || !("options" in oauth)) throw new Error("Plugin IDN de fixture absent")
+  const options = record(oauth.options)
+  if (!Array.isArray(options.config) || options.config.length !== 1) throw new Error("Fournisseur IDN de fixture absent")
+  const provider = record(options.config[0])
+  if (typeof provider.mapProfileToUser !== "function") throw new Error("Mapping IDN de fixture absent")
+  const proofPlugin = auth.options.plugins?.find((plugin) => plugin.id === "engine-idn-session-proof")
+  const hook = proofPlugin && "hooks" in proofPlugin && proofPlugin.hooks && "after" in proofPlugin.hooks ? proofPlugin.hooks.after?.[0] : undefined
+  if (!hook) throw new Error("Hook de preuve IDN de fixture absent")
+  return {
+    mapProfile: provider.mapProfileToUser as (profile: Record<string, unknown>) => Promise<unknown>,
+    matches: hook.matcher as unknown as (input: { path: string }) => boolean,
+    runAfter: hook.handler as unknown as (input: ProofHookInput) => Promise<unknown>,
+  }
+}
+
+function configureIdnFixture() {
+  vi.stubEnv("IDN_CLIENT_ID", "sandbox-client-fixture")
+  vi.stubEnv("IDN_CLIENT_SECRET", "fictional-idn-secret-for-tests")
+  vi.stubEnv("IDN_ISSUER", "https://idn.example.test")
+}
+
+async function callbackSessionFixture(t: T) {
+  const now = Date.now()
+  const user = await t.mutation(components.betterAuth.adapter.create, { input: { model: "user", data: { name: "Nom civil fictif non social", email: "idn-session@example.test", emailVerified: true, createdAt: now, updatedAt: now } } })
+  const userId = textField(user, "_id")
+  const sessionId = await createTestSession(t, userId)
+  const session = await t.query(components.betterAuth.adapter.findOne, { model: "session", where: [{ field: "_id", value: sessionId }] })
+  const subject = "idn-session-fixture"
+  await t.mutation(components.betterAuth.adapter.create, { input: { model: "account", data: { userId, providerId: "idn", accountId: subject, createdAt: now, updatedAt: now } } })
+  return { userId, sessionId, subject, session: { ...record(session), id: sessionId, userId } }
 }
 
 describe("connexion légère e-mail et SMS réelle dans Better Auth", () => {
@@ -325,5 +363,76 @@ describe("composition du fournisseur d'identité", () => {
       return { providerId: provider.providerId, pkce: provider.pkce, scopes: provider.scopes, redirectURI: provider.redirectURI }
     })
     expect(config).toEqual({ providerId: "idn", pkce: true, scopes: ["openid", "profile", "email"], redirectURI: `${PRIMARY_ORIGIN}/api/auth/oauth2/callback/idn` })
+  })
+})
+
+describe("PA7 / preuve de session IDN : callbacks réels invoqués directement, sans recette OIDC externe", () => {
+  it("une vraie session OTP reste sans autorité de console malgré un compte et un lien IDN de garantie 2", async () => {
+    const t = testConvex({ automaticSessions: false })
+    const { userId, sessionId } = await loggedIn(t)
+    const subject = "idn-previous-link-fixture"
+    const now = Date.now()
+    await t.mutation(components.betterAuth.adapter.create, { input: { model: "account", data: { userId, providerId: "idn", accountId: subject, createdAt: now, updatedAt: now } } })
+    await t.mutation(internal.modules.people.identity.recordIdnProof, { subject, loa: 2 })
+    const as = t.withIdentity({ subject: userId, sessionId })
+    const personId = await as.mutation(api.modules.people.persons.ensureMyPerson, {})
+    await t.run(async (ctx) => await ctx.db.insert("operators", { personId, role: "platform_admin", grantedAt: now }))
+    const link = await t.run(async (ctx) => await ctx.db.query("identityLinks").withIndex("by_person_and_provider", (q) => q.eq("personId", personId).eq("provider", "idn")).unique())
+    expect(link).toMatchObject({ subject, loa: 2 })
+    expect(await t.run(async (ctx) => await ctx.db.query("operatorSessionProofs").withIndex("by_session", (q) => q.eq("sessionId", sessionId)).unique())).toBeNull()
+    await expect(as.query(api.modules.platform.operatorAccess.myOperator, {})).rejects.toMatchObject({ data: { code: "operatorRequired" } })
+  })
+
+  it("le mapping et le middleware du même createAuth scellent une session Better Auth réelle, puis la lient à la personne sans état civil", async () => {
+    configureIdnFixture()
+    const t = testConvex({ automaticSessions: false })
+    const fixture = await callbackSessionFixture(t)
+    const mapped = await t.action(async (ctx) => {
+      const { createAuth } = await import("./auth")
+      const hooks = idnCallbackHooks(createAuth(ctx))
+      expect(hooks.matches({ path: "/sign-in/email-otp" })).toBe(false)
+      const user = await hooks.mapProfile({ sub: fixture.subject, email: "idn-session@example.test", email_verified: true, loa: 2, name: "Nom civil fictif IDN" })
+      expect(hooks.matches({ path: "/oauth2/callback/idn" })).toBe(true)
+      await hooks.runAfter({ path: "/oauth2/callback/idn", context: { newSession: { session: fixture.session } } })
+      return user
+    })
+    expect(mapped).toMatchObject({ email: "idn-session@example.test", emailVerified: true })
+    expect(record(mapped).name).not.toBe("Nom civil fictif IDN")
+    const before = await t.run(async (ctx) => await ctx.db.query("operatorSessionProofs").withIndex("by_session", (q) => q.eq("sessionId", fixture.sessionId)).unique())
+    expect(before).toMatchObject({ sessionId: fixture.sessionId, authUserId: fixture.userId, idnSubject: fixture.subject, loa: 2, expiresAt: record(fixture.session).expiresAt })
+    expect(before?.expiresAt).toBeGreaterThan(Date.now())
+    expect(before?.personId).toBeUndefined()
+    expect(before).not.toHaveProperty("email")
+    expect(before).not.toHaveProperty("name")
+    expect(await t.run(async (ctx) => await ctx.db.query("persons").first())).toBeNull()
+    const as = t.withIdentity({ subject: fixture.userId, sessionId: fixture.sessionId })
+    const personId = await as.mutation(api.modules.people.persons.ensureMyPerson, {})
+    const proof = await t.run(async (ctx) => await ctx.db.query("operatorSessionProofs").withIndex("by_session", (q) => q.eq("sessionId", fixture.sessionId)).unique())
+    expect(proof?.personId).toBe(personId)
+    const person = await t.run(async (ctx) => await ctx.db.get(personId))
+    expect(person?.displayName).toBeUndefined()
+    expect(person?.handle).toBeUndefined()
+    expect(person?.publishedAt).toBeUndefined()
+    expect(await t.run(async (ctx) => await ctx.db.query("networkMemberships").first())).toBeNull()
+  })
+
+  it("sans garantie ou sans nouvelle session, le mapping ne dépose aucune preuve de session ; les hooks OTP frais ne correspondent jamais", async () => {
+    configureIdnFixture()
+    for (const missing of ["loa", "newSession"] as const) {
+      const t = testConvex({ automaticSessions: false })
+      const fixture = await callbackSessionFixture(t)
+      await t.action(async (ctx) => {
+        const { createAuth } = await import("./auth")
+        const hooks = idnCallbackHooks(createAuth(ctx))
+        for (const path of ["/sign-in/email-otp", "/phone-number/verify"]) expect(hooks.matches({ path })).toBe(false)
+        await hooks.mapProfile({ sub: fixture.subject, email: "idn-session@example.test", email_verified: true, ...(missing === "loa" ? {} : { loa: 2 }) })
+        await hooks.runAfter({ path: "/oauth2/callback/idn", context: missing === "newSession" ? {} : { newSession: { session: fixture.session } } })
+        // Une instance de requête neuve ne reprend jamais la preuve de ce callback.
+        const nextRequest = idnCallbackHooks(createAuth(ctx))
+        for (const path of ["/sign-in/email-otp", "/phone-number/verify"]) expect(nextRequest.matches({ path })).toBe(false)
+      })
+      expect(await t.run(async (ctx) => await ctx.db.query("operatorSessionProofs").withIndex("by_session", (q) => q.eq("sessionId", fixture.sessionId)).unique())).toBeNull()
+      expect(await t.run(async (ctx) => await ctx.db.query("persons").first())).toBeNull()
+    }
   })
 })

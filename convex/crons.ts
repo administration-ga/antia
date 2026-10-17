@@ -59,5 +59,7 @@ crons.daily("notifications-reserve-digests", { hourUTC: 7, minuteUTC: 0 }, inter
 crons.daily("notifications-retention-active", { hourUTC: 3, minuteUTC: 45 }, internal.modules.notifications.retention.run, {})
 crons.interval("data-resume-erasure", { minutes: 15 }, internal.modules.people.erasure.resumeDueErasures, {})
 crons.daily("data-purge-export-receipts", { hourUTC: 4, minuteUTC: 30 }, internal.modules.people.erasure.purgeExpiredExports, {})
+// PA7 : la lecture ferme immédiatement les preuves expirées ; rétention par lots de 100.
+crons.daily("operators-purge-expired-idn-proofs", { hourUTC: 3, minuteUTC: 55 }, internal.modules.platform.operatorAccess.purgeExpiredProofs, {})
 
 export default crons

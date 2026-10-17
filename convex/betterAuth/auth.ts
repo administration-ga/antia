@@ -188,6 +188,9 @@ export const createAuth = (ctx: GenericCtx<DataModel>, requestOrigin?: string | 
   const allowedOrigins = trustedOrigins()
   const isLocalDev = devToolsAllowed()
   const idnOptions = idnConfiguration()
+  // Propre à CETTE requête : seul le profil du callback OIDC peut sceller
+  // la nouvelle session. Un lien de compte ou un OTP ne le peuvent pas.
+  let idnLoginProof: ReturnType<typeof idnProfileProof> | null = null
   type OAuthConfig = Parameters<typeof genericOAuth>[0]["config"][number]
   const idnProvider: OAuthConfig[] = idnOptions ? [{
     ...idn({ ...idnOptions, scopes: ["openid", "profile", "email"] }),
@@ -197,6 +200,7 @@ export const createAuth = (ctx: GenericCtx<DataModel>, requestOrigin?: string | 
       if (!canRunMutation(ctx)) throw new APIError("SERVICE_UNAVAILABLE", { message: "idnUnavailable", code: "idnUnavailable" })
       const proof = idnProfileProof(profile)
       await ctx.runMutation(internal.modules.people.identity.recordIdnProof as never, proof as never)
+      idnLoginProof = proof
       // Le nom social est choisi à l'accueil ; aucun état civil n'est recopié.
       return { email: String(profile.email).trim().toLowerCase(), emailVerified: true, name: BRAND_NAME }
     },
@@ -232,6 +236,21 @@ export const createAuth = (ctx: GenericCtx<DataModel>, requestOrigin?: string | 
       useSecureCookies: isLocalDev ? false : undefined,
     },
     plugins: [
+      {
+        id: "engine-idn-session-proof",
+        hooks: { after: [{
+          matcher: () => idnLoginProof !== null,
+          handler: createAuthMiddleware(async (hookCtx) => {
+            const proof = idnLoginProof
+            const session = hookCtx.context.newSession?.session
+            if (!proof || proof.loa === undefined || !session) return
+            if (!canRunMutation(ctx)) throw new APIError("SERVICE_UNAVAILABLE", { message: "idnUnavailable", code: "idnUnavailable" })
+            await ctx.runMutation(internal.modules.platform.operatorAccess.recordIdnSession as never, {
+              sessionId: session.id, authUserId: session.userId, idnSubject: proof.subject, loa: proof.loa,
+            } as never)
+          }),
+        }] },
+      },
       convex({ authConfig, jwt: { expirationSeconds: 60 * 30 } }) as unknown as BetterAuthPlugin,
       crossDomain({ siteUrl: resolveSiteUrl(requestOrigin, allowedOrigins, siteUrl) }),
       oneTimeToken({ expiresIn: 3, storeToken: "plain" }),

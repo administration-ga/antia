@@ -13,7 +13,7 @@ import { api, internal } from "../_generated/api"
 import type { Id } from "../_generated/dataModel"
 import { admitToNetwork, setDirectoryListed, writeNetworkFacet } from "../modules/people/admission"
 import { SEED_CONFIRMATION } from "../seeds/foundations"
-import { testConvex } from "../test.setup"
+import { createTestOperatorProof, testConvex } from "../test.setup"
 
 type T = ReturnType<typeof testConvex>
 
@@ -231,8 +231,9 @@ describe("console : la tranche se pose à la naissance du réseau, jamais sur la
     const t = testConvex()
     const operator = await onboardedPerson(t, "auth-gop", "operateur.g")
     await t.run(async (ctx) => {
-      await ctx.db.insert("operators", { personId: operator.personId, role: "platform_operator", grantedAt: Date.now() })
+      await ctx.db.insert("operators", { personId: operator.personId, role: "platform_admin", grantedAt: Date.now() })
     })
+    await createTestOperatorProof(t, operator.as, operator.personId)
     const settings = { name: "Réseau", membershipPolicy: "open" as const, defaultVisibility: "network" as const, reachValues: [], theme: "antsia" }
     expect(
       await errorCode(operator.as.mutation(api.modules.networks.networks.create, { slug: "racine-gouvernee", kind: "root", managedBy: "diaspora", ...settings })),
