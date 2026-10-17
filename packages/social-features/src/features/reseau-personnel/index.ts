@@ -93,6 +93,16 @@ export { SharePostDialog } from "./SharePostDialog"
 // ── Relations et groupes ────────────────────────────────────────────────────
 export { PeoplePanel, PeopleSearchPanel, FollowsSection, SentInvitationsSection } from "./PeoplePanel"
 export { BlockedPeopleSection } from "./BlockedPeopleSection"
+// Chaînes natives partagées avec les applications : pas de copie du réducteur.
+export {
+  appendCursorPage,
+  initialCursorPages,
+  mergedCursorRows,
+  nextCursor,
+  recordCursorPage,
+  removeCursorRows,
+} from "./cursor-pages"
+export type { CursorPage, CursorPageMount, CursorPageSnapshot, CursorPagesState } from "./cursor-pages"
 export type { FollowsSectionProps, SentInvitationsSectionProps } from "./PeoplePanel"
 // Les décisions PURES du volet Relations : sous-vues et leur adresse, ligne de
 // titre d'une carte, droit d'affichage de la présence. Exportées pour qu'un
