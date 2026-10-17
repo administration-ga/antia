@@ -5,7 +5,7 @@
  * chaque lecture, à partir des liens d'identité (invariant 5).
  */
 import { computePersonBadges, hasStrongIdentity } from "@antsia/social-domain/badges"
-import { isConsentInForce } from "@antsia/social-domain/consent"
+import { isConsentInForce, type ConsentPurpose } from "@antsia/social-domain/consent"
 import { v } from "convex/values"
 
 import type { Doc, Id } from "../../_generated/dataModel"
@@ -69,12 +69,20 @@ export const getMyPerson = query({
   handler: async (ctx) => {
     const person = await getCurrentPerson(ctx)
     if (!person) return null
-    // borné : un consentement par finalité et par réseau, six finalités.
+    // borné : un consentement par finalité et par réseau, sept finalités.
     const consents = await ctx.db
       .query("consents")
       .withIndex("by_person_and_purpose", (q) => q.eq("personId", person._id))
       .take(100)
-    const purposes = [...new Set(consents.map((consent) => consent.purpose))].filter((purpose) => isConsentInForce(consents, purpose))
+    const applicableConsents = consents.filter((consent) => consent.purpose !== "usage_analytics")
+    const purposes: ConsentPurpose[] = [...new Set(applicableConsents.map((consent) => consent.purpose))].filter((purpose) => isConsentInForce(applicableConsents, purpose))
+    // borné : une seule preuve analytics, la plus récente ; historique et réseaux ne l'élargissent pas.
+    const latestAnalytics = await ctx.db
+      .query("consents")
+      .withIndex("by_person_and_purpose", (q) => q.eq("personId", person._id).eq("purpose", "usage_analytics"))
+      .order("desc")
+      .take(1)
+    if (latestAnalytics[0]?.networkId === undefined && isConsentInForce(latestAnalytics, "usage_analytics")) purposes.push("usage_analytics")
     return {
       _id: person._id,
       ...(person.handle ? { handle: person.handle } : {}),
