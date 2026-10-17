@@ -1,7 +1,7 @@
 ---
 title: "ANTSIA — Rapport de parité du front (PA6)"
-date: "2026-10-15"
-source: "socle administration.ga, origin/main = ad2e7fdc2 (copie propre, lecture seule)"
+date: "2026-10-17"
+source: "socle administration.ga : ad2e7fdc2 pour les duplications initiales ; origin/main relu à 25398f565 pour la consolidation PA6 (lecture seule)"
 statut: "Tenu à jour à chaque lot du front ; la carte de duplication est docs/02_OWNER_MAP_DUPLICATION.md §4.3 et §7, le détail fichier par fichier ses annexes A5 et A6"
 ---
 
@@ -459,3 +459,131 @@ identique à `ad2e7fdc2`. Décision : [ADR-0006](adr/0006-creation-et-rediffusio
   à valider. Aucun environnement, secret, push ni publication de production modifié.
 - Le moteur conserve les bornes des recherches de pages/invités (50), l'épingle
   locale du studio et les chantiers PA4/PA5 (débits avancés/effacement) du plan.
+
+
+## PA6 — Consolidation des sept tranches (17/10/2026)
+
+Cette section est l’état courant. Les sections F1/F2/F3 ci-dessus sont les preuves
+historiques de leurs lots, avec leurs limites au moment de l’exécution. Plan de
+reprise : `docs/09_PLAN_EXECUTION_PA6.md` ; décision : ADR-0010. Base conservée :
+PA5 `639d987`, graphe `1637c12`, demandes/blocages `a2350ca`.
+
+### Préférences, coque et contrats
+
+- Fuseau personnel prioritaire, navigateur en repli après un premier rendu UTC stable.
+  Langue et fuseau enregistrés explicitement dans `/mes-donnees`, sans écraser les
+  champs modifiés lors d’une lecture distante ; attente de l’écho serveur après succès.
+  Erreurs nommées et focalisées, avertissement de brouillon et garde de sortie.
+- Système/clair/sombre dans le menu du bureau, la feuille mobile et les réglages ;
+  stockage par réseau, suivi système et autre onglet, `.dark` et `color-scheme`,
+  stockage indisponible toléré. Le changement préserve les enfants montés. La sortie
+  conserve cette seule préférence non personnelle et purge les brouillons voisins.
+- Couple Convex/TanStack connecté une fois par URL dans le document, cache SSR
+  isolé par requête. La porte de session et la sortie avec nouveau document restent
+  en place. Le renouvellement transitoire ne remplace plus le fuseau personnel.
+- `MessagerieSource.useMessageWrites()` porte les 23 écritures de messages et
+  groupes, dépôts, transferts et épingles. Types dérivés de l’API ; réseau injecté
+  après les arguments du consommateur, brouillon/idempotence/refus conservés.
+- Navigation mobile des réglages vers la route réellement servie ; aucune ancienne
+  coque `espace-personnel` réintroduite dans les surfaces (cliquet d’import dédié).
+
+| Tranche montée | Consolidation PA6 |
+|---|---|
+| Réseau personnel | Dates des publications/citations/commentaires/profil/pages/signets ; calendrier et composition d’évènement dans le fuseau lecteur ; refus des trous DST ; origine, carte d’évènement, lacunes et erreurs du fil ; signets en collection mobile |
+| Albums | Galerie et gestion déjà montées ; routes et jetons conservés, aucun nouveau format absolu de date trouvé dans ces écrans |
+| Stories | Dates des vues selon le lecteur ; hôte persistant et composeur/lecteur existants conservés |
+| Notifications | Date de chaque ligne selon le lecteur ; cloche, genres et gestes existants conservés |
+| Messagerie | Heures, jours, groupes et rappels cohérents avec le lecteur ; source étendue aux écritures et continuée dans la conversation |
+| Appels | Journal, calendrier civil, indicateur de présence et échéance DND « demain matin » selon le lecteur ; aucune nouvelle salle ou route audio |
+| Direct | Dates des listes/replays selon le lecteur ; studio F3b/F3c, salle et droits d’antenne conservés |
+
+Le fil ne présente plus une panne ou une première fenêtre encore poursuivable comme
+un résultat complet vide. Origine et évènement utilisent leur vraie projection :
+attribution sans adresse de réseau inventée, dates/statut/réponse sans participants,
+lieu ou droit fabriqué. L’annonce de direct existante reste unique.
+
+### Mesure facultative
+
+- Désactivée sans origine HTTPS admise, clé publique admise et accord global explicite.
+  `usage_analytics` est facultatif, horodaté, version `2026-10-17`, révocable et jamais
+  dérivé d’une adhésion. La dernière preuve indexée est seule effective, y compris
+  après plus de cent cycles ; les preuves anciennes, révoquées ou limitées à un réseau
+  ne l’activent pas.
+- Projection fermée : catégorie d’écran, réseau admis, langue, UUID éphémère. Aucun
+  message, contenu, handle, IDN, identifiant social, URL privée ou replay ; pas de SDK.
+  Capture sans cookie/referrer/redirection, dix tentatives/minute et délai de cinq
+  secondes, sans retries automatiques. Retrait : pause avant mutation et abort ; échec
+  serveur dit explicitement. Nouvel accord : nouvel UUID, quota conservé.
+- StrictMode n’annule plus l’unique capture : la première pose est annulée avant la
+  microtask, puis la deuxième lance une requête. Les catégories viennent des routes,
+  sans exposer leurs segments privés. Le raccord n’affirme pas les funnels PA10.
+- Les deux variables publiques facultatives sont reliées au Dockerfile, au catalogue,
+  à Cloud Build et à la CSP de la seule app ANTSIA. Absentes, elles restent vides et
+  n’empêchent pas la construction ; les variables nécessaires restent obligatoires.
+  Aucun environnement réel ou service externe configuré pendant ce lot.
+
+### Relecture UI et accessibilité
+
+Les constats source des skills `web-design-guidelines` et `accessibility-review` ont
+été corrigés : cibles d’identifiants et DND de 44 px, focus visible des retours au
+contenu, cible du lien d’évitement même sans backend, champ de recours relié à ses
+instructions/erreurs, spinner respectant le mouvement réduit, erreur d’horaire
+annoncée avec focus, landmark principal conservé autour du panneau d’onglet.
+Les liens internes quittant un brouillon et la fermeture du document avertissent
+avant sa perte ; une déconnexion volontaire reste libre de remplacer le document.
+
+Contraste rendu, reflow/zoom à 320 px, clavier et lecteur d’écran réels n’ont pas été
+mesurés dans cette passe. L’observation navigateur a été refusée par la politique
+de l’outil ; aucun autre canal n’a été utilisé pour contourner ce refus. Les tests
+DOM sont des preuves de contrats, pas une certification WCAG AA.
+
+### Vérification finale
+
+`NODE_OPTIONS=--max-old-space-size=1536 bun run verify` : **code 0 sur les sources
+finales**, **6 506 tests**. Codegen sous Node 22, typage Convex/tests et dix espaces,
+neuf lints sans erreur. Avertissements : 71 social-features, six UI, un ANTSIA et
+deux DIASPORALE ; les contrats DOM ne sont pas une validation AA rendue.
+
+| Périmètre | Tests verts |
+|---|---:|
+| Convex | 1 491 |
+| Cliquets | 124 |
+| Scripts | 26 |
+| social-domain | 463 |
+| ui | 86 |
+| social-contracts | 57 |
+| api | 190 |
+| social-features | 3 154 |
+| Console ANTSIA | 10 |
+| App ANTSIA | 43 |
+| Domaine DIASPORALE | 238 |
+| Surfaces DIASPORALE | 259 |
+| App DIASPORALE | 365 |
+
+Journal final : `/tmp/antsia-pa6-verify-final.log`. Les deux cycles précédents
+échoués sur câblage Cloud Build et fixtures partielles, ainsi que le cycle vert
+avant durcissement, sont conservés séparément ; ils ne sont pas le verdict final.
+Commits source locaux : `263d7df` (consentement), `aebd48b` (front et intégration).
+
+Disponibilité HTTP par requêtes HEAD, sans observation de page : `/entrer` et
+`/mes-donnees` **200**. `/fil` a dépassé 45 secondes pendant sa compilation.
+Le cache Webpack signale **ENOSPC**, avec environ 116 Mo libres sur le volume Data.
+Le seul serveur 3030 a été arrêté pour suspendre cette compilation ; backend3210
+prêt. Aucun cache supprimé. Accord demandé pour vider le cache de téléchargement
+Bun (environ1,6 Go mesurés), avant reprise3030 et contrôle du fil.
+
+### Réconciliation et limites
+
+- PA4 a livré la sortie partout ; PA5 a livré les transports push/digest. Les recettes
+  de fournisseurs restent ouvertes : un handler ou un test n’est pas une réception.
+- F3a/F3b/F3c ont livré conférences, studio, antenne et replays ; les mentions « direct
+  absent » de F1/F2 sont historiques. LiveKit/SFU/Egress et plusieurs appareils ne sont
+  toujours pas validés réellement dans cette passe.
+- Les signets, lacunes/origine/évènement et réglages de coque ci-dessus ferment leurs
+  écarts d’implémentation F2. Le blocage/déblocage personnel est livré par PA5/PD4.
+- Clôture/archivage de groupe et ContactsRail n’avaient pas d’écran monté au socle :
+  aucun nouvel écran n’est inventé ici. Pages officielles, console et réseau gouverné
+  demandent leurs recettes et lots propriétaires ; PA7/PA8 ne sont pas exécutés.
+- PA6 reste ouvert pour sa recette Chrome 320/375/1280 px, sombre et AA, et ses médias
+  réels. Hébergement, IDN sandbox, PostHog réel/résidence UE/rétention et configurations
+  sensibles restent au propriétaire. Aucun push, merge ou déploiement de production.

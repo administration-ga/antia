@@ -15,3 +15,4 @@ réservent contre `origin/main` et les PR ouvertes de ce dépôt.
 | [0007](0007-nom-canonique-antsia.md) | Nom canonique ANTSIA et reprise des données et préférences existantes | Accepté |
 | [0008](0008-preuves-serveur-et-revocation-immediate-des-sessions.md) | Preuves serveur, rattachement explicite et révocation immédiate des sessions | Accepté |
 | [0009](0009-gardes-et-droits-personnels-pa5.md) | Gardes et droits personnels PA5 : modération, débit, données, notifications et fédération | Accepté |
+| [0010](0010-preferences-de-presentation-et-mesure-facultative.md) | Préférences de présentation, cache cohérent et mesure facultative PA6 | Accepté |
