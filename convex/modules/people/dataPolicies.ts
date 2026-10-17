@@ -15,6 +15,9 @@ export const DATA_TABLE_POLICIES: Record<string, { shared?: boolean; owners?: re
   networkArchiveRequests: {shared: true},
   consoleIncidents: {shared: true},
   consoleMetrics: {shared: true},
+  // Agrégats publics PA8 : aucun identifiant personnel ni contenu dans ces lignes.
+  publicSnapshots: {shared: true},
+  publicAggregateJobs: {shared: true},
   devOtpCodes: {},
   engineAudit: {shared: true},
   posts: {owners: ["authorPersonId"]},

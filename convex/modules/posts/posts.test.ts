@@ -208,12 +208,12 @@ describe("contexte de lecture — un réseau fermé et la racine (R4)", () => {
     expect((await myFeed(alice, testClosed, { scope: "recents" })).items).toEqual([])
   })
 
-  it("une publication native de la racine ne se lit pas depuis un réseau fermé ; « aussi sur ANTSIA » n'a pas d'effet à la racine", async () => {
+  it("un geste explicite ouvre une native publique sans ouvrir le réseau fermé", async () => {
     const t = testConvex()
     const { root, testClosed } = await seed(t)
     const alice = await enter(t, root, "alice", testClosed)
     const { postId } = await alice.as.mutation(api.modules.posts.posts.publish, { networkId: root, body: "Native de la racine", alsoOnRoot: true })
-    expect((await getPost(alice, root, postId)).visibility).toBe("network")
+    expect((await getPost(alice, root, postId)).visibility).toBe("root")
     expect(await codeOf(getPost(alice, testClosed, postId))).toBe("notFound")
   })
 })

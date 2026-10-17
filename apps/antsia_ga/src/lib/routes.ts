@@ -16,6 +16,47 @@ export const routes = {
   application: (origin: string) => new URL("/", origin).href,
   welcome: () => "/bienvenue",
   feed: () => "/fil",
+  memberPost: (id: string) => `/fil?${new URLSearchParams({ post: id })}`,
+  discover: () => "/decouvrir",
+  publicProfile: (handle: string) => `/@${encodeURIComponent(handle)}`,
+  officialPage: (handle: string) => `/pages/${encodeURIComponent(handle)}`,
+  publication: (id: string) => `/publications/${encodeURIComponent(id)}`,
+  tag: (tag: string) => `/tags/${encodeURIComponent(tag)}`,
+  province: (slug: string) => `/provinces/${encodeURIComponent(slug)}`,
+  nationalFeed: () => "/fil?portee=national",
+  memberProvince: (slug: string) => `/fil?${new URLSearchParams({ portee: "province", province: slug })}`,
+  memberTag: (tag: string) => `/fil?${new URLSearchParams({ portee: "national", tag })}`,
+  memberFeedWindow: (filter: { province?: string; tag?: string }, cursor?: string) => {
+    const query = new URLSearchParams({ portee: filter.province ? "province" : "national" })
+    if (filter.province) query.set("province", filter.province)
+    if (filter.tag) query.set("tag", filter.tag)
+    if (cursor) query.set("curseur", cursor)
+    return `/fil?${query}`
+  },
+  groups: () => "/groupes",
+  events: () => "/evenements",
+  memberTab: (tab: "groupes" | "evenements") => `/fil?${new URLSearchParams({ tab })}`,
+  direct: (id: string) => `/direct/${encodeURIComponent(id)}`,
+  publicAlbum: (handle: string, albumId: string) => `/@${encodeURIComponent(handle)}/albums/${encodeURIComponent(albumId)}`,
+  about: () => "/a-propos",
+  legal: () => "/mentions-legales",
+  privacy: () => "/confidentialite",
+  transparency: () => "/transparence",
+  moderation: () => "/moderation",
+  moderationView: (view: "reports" | "pending" | "appeals", team?: string, cursor?: string) => {
+    const query = new URLSearchParams({ vue: view })
+    if (team && view !== "appeals") query.set("equipe", team)
+    if (cursor) query.set("curseur", cursor)
+    return `/moderation?${query}`
+  },
+  settings: () => "/parametres",
+  dataSettings: () => "/parametres/donnees",
+  authSession: () => "/api/auth/get-session",
+  authToken: () => "/api/auth/convex/token",
+  publicSessionBridge: () => "/api/session-bridge",
+  apdpvp: () => "https://www.apdpvp.ga/textes-et-decisions/",
+  officialJournal: () => "https://journal-officiel.ga/20085-025-2023-/",
+  gdpr: () => "https://eur-lex.europa.eu/eli/reg/2016/679/oj?locale=fr",
   /** iCom en pages (téléphone, liens directs) : la messagerie et ses sous-adresses. */
   messages: () => "/messages",
   /** Statuts (stories) en plein écran. */

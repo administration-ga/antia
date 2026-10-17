@@ -1,12 +1,19 @@
 /*
  * Thème du réseau public ANTSIA (`apps/antsia_ga`, `data-charte="antsia"`).
  *
- * VIDE À DESSEIN jusqu'à la passe de direction artistique (`frontend-design`,
- * prompt PA8, arbitrage A8 du cahier) : l'application hérite de la charte de
- * base (`styles/charte.css`, la charte « Personnel » de l'espace agent).
+ * PA8 : parchemin et bleu Gabon, signature du fil d'origine. Le contraste
+ * sombre reste porté par les rôles nocturnes du contrat commun.
  * Règles : ne redéclarer QUE des jetons déclarés par la charte de base
  * (cliquet `theme-contract`) ; aucune couleur littérale hors de ce fichier et
  * de la charte ; les couleurs du drapeau restent décoratives.
  */
 [data-charte="antsia"] {
+  --background: var(--esp-neutral-100);
+  --foreground: var(--esp-neutral-800);
+  --card: var(--esp-neutral-0);
+  --card-foreground: var(--esp-neutral-800);
+  --primary: var(--esp-blue-600);
+  --primary-foreground: var(--esp-neutral-0);
+  --font-sans: "Inter", system-ui, sans-serif;
+  --font-display: var(--font-familjen-grotesk, "Familjen Grotesk"), "Inter", system-ui, sans-serif;
 }

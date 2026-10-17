@@ -2,7 +2,7 @@
 // Écrit pour le moteur (lot F2) : `PostCard` n'avait pas de test au socle — carte d'une personne, carte d'une page (identité de la page, signataire nommé), nom neutre d'un auteur sans profil publié.
 import { fireEvent, screen, waitFor, within } from "@testing-library/react"
 import { ViewerPreferencesProvider } from "@antsia/api/viewer-preferences"
-import { beforeEach, describe, expect, it, vi } from "vitest"
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 import { renderWithEngine, TEST_NETWORK_ID, TEST_PERSON_ID } from "../../tests/engine-wrapper"
 
@@ -14,7 +14,7 @@ vi.mock("@antsia/api/engine", () => ({
   api: {
     modules: {
       engagement: { engagement: { toggleReaction: "toggleReaction", paginateComments: "paginateComments", paginateReplies: "paginateReplies", comment: "comment", removeComment: "removeComment", editComment: "editComment" } },
-      posts: { posts: { remove: "remove", edit: "edit", pinOnMyWall: "pinOnMyWall", publish: "publish" } },
+      posts: { posts: { remove: "remove", withdrawFromRoot: "withdrawFromRoot", edit: "edit", pinOnMyWall: "pinOnMyWall", publish: "publish" } },
       pages: { pages: { removePagePost: "removePagePost" } },
       moderation: { moderation: { reportPost: "reportPost", reportComment: "reportComment" } },
       marks: { marks: { toggleMark: "toggleMark", hidePost: "hidePost", unhidePost: "unhidePost", muteAuthor: "muteAuthor", unmuteAuthor: "unmuteAuthor" } },
@@ -62,8 +62,25 @@ const base: PostCardPost = {
 beforeEach(() => {
   mocks.calls = []
 })
+afterEach(() => vi.restoreAllMocks())
 
 describe("PostCard (vérification)", () => {
+  it("le propriétaire retire la diffusion sans supprimer sa publication, après confirmation", async () => {
+    const confirm = vi.spyOn(window, "confirm").mockReturnValue(false)
+    const { rerender } = renderWithEngine(<PostCard post={{ ...base, isMine: true, visibility: "root" }} now={1_700_000_060_000} />)
+    fireEvent.click(screen.getByRole("button", { name: "Retirer de la lecture publique" }))
+    expect(mocks.calls).not.toContainEqual(expect.objectContaining({ ref: "withdrawFromRoot" }))
+    confirm.mockReturnValue(true)
+    fireEvent.click(screen.getByRole("button", { name: "Retirer de la lecture publique" }))
+    await waitFor(() => expect(mocks.calls).toContainEqual({ ref: "withdrawFromRoot", args: { networkId: TEST_NETWORK_ID, postId: "posts_1" } }))
+    expect(mocks.calls.some((call) => call.ref === "remove" || call.ref === "removePagePost")).toBe(false)
+    rerender(<PostCard post={{ ...base, isMine: true, visibility: "network" }} now={1_700_000_060_000} />)
+    expect(screen.queryByRole("button", { name: "Retirer de la lecture publique" })).toBeNull()
+  })
+  it("un lecteur ne reçoit jamais le geste de retrait de diffusion de l'auteur", () => {
+    renderWithEngine(<PostCard post={{ ...base, visibility: "root" }} now={1_700_000_060_000} />)
+    expect(screen.queryByRole("button", { name: "Retirer de la lecture publique" })).toBeNull()
+  })
   it("personne : lien de profil injecté, badge calculé, gestes du réseau", async () => {
     renderWithEngine(<PostCard post={base} now={1_700_000_060_000} />)
     const link = screen.getByRole("link", { name: "Awa" })

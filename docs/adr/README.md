@@ -17,3 +17,4 @@ réservent contre `origin/main` et les PR ouvertes de ce dépôt.
 | [0009](0009-gardes-et-droits-personnels-pa5.md) | Gardes et droits personnels PA5 : modération, débit, données, notifications et fédération | Accepté |
 | [0010](0010-preferences-de-presentation-et-mesure-facultative.md) | Préférences de présentation, cache cohérent et mesure facultative PA6 | Accepté |
 | [0011](0011-console-idn-et-archivage-a-deux-personnes.md) | Console IDN, journal préalable et archivage à deux personnes | Accepté |
+| [0012](0012-projections-publiques-et-session-ssr-antsia.md) | Projections publiques, diffusion choisie et session SSR propre à ANTSIA | Accepté pour la recette locale |

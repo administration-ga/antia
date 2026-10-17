@@ -24,7 +24,7 @@ type NetworkActor = { networkId: Id<"networks">; person: Doc<"persons">; members
 const motiveOf = (reason: string) => checked(() => assertDecisionReason(reason, 3))
 const pageOptions = (opts: { cursor: string | null; numItems: number }) => ({ ...opts, numItems: Math.max(1, Math.min(50, opts.numItems)) })
 
-async function teamCapacity(ctx: ReadCtx, actor: NetworkActor, scope: string, teamId?: Id<"moderationTeams">): Promise<AuditCapacity | null> {
+export async function teamCapacity(ctx: ReadCtx, actor: NetworkActor, scope: string, teamId?: Id<"moderationTeams">): Promise<AuditCapacity | null> {
   if (actor.membership.role === "network_admin") return "network_admin"
   if (teamId === undefined) return networkRoleCapacity(actor.membership.role)
   const team = await ctx.db.get(teamId)
@@ -44,6 +44,23 @@ async function requireNetworkAdmin(actor: NetworkActor): Promise<void> {
 function queueDto(row: Doc<"reports">) {
   return { reportId: row._id, networkId: row.networkId, target: row.target, teamId: row.teamId ?? null, level: row.level, reason: row.reason, status: row.status, createdAt: row.createdAt, decisionReason: row.decisionReason ?? null }
 }
+
+/** Capacités vivantes pour l'entrée nationale, sans création de rôle ni divulgation des coéquipiers. */
+export const myCapacity = networkQuery({
+  minStatus: "declaree",
+  args: {},
+  returns: v.object({ networkWide: v.boolean(), canReviewAppeals: v.boolean(), teams: v.array(v.object({ teamId: v.id("moderationTeams"), name: v.string(), scope: v.union(moderationSurfaceValidator, v.null()) })) }),
+  handler: async (ctx) => {
+    const rows = await ctx.db.query("moderationTeams").withIndex("by_network_active", (q) => q.eq("networkId", ctx.networkId).eq("active", true)).take(101)
+    if (rows.length > 100) return fail("policyRefused")
+    const teams = []
+    for (const team of rows) {
+      const member = await ctx.db.query("moderationTeamMembers").withIndex("by_team_person", (q) => q.eq("teamId", team._id).eq("personId", ctx.person._id)).unique()
+      if (ctx.membership.role === "network_admin" || member?.active) teams.push({ teamId: team._id, name: team.name, scope: team.scope ?? null })
+    }
+    return { networkWide: ctx.membership.role === "network_admin" || ctx.membership.role === "network_moderator", canReviewAppeals: ctx.membership.role === "network_admin", teams }
+  },
+})
 
 export const report = networkMutation({
   minStatus: "en_attente",

@@ -43,6 +43,7 @@ import {
 } from "@antsia/social-domain/feedScale"
 import { DIRECT_STATUSES } from "@antsia/social-domain/live/domain"
 import { effectiveVisibility } from "@antsia/social-domain/network"
+import { PROVINCE_SLUGS } from "@antsia/social-domain/provinces"
 import { pageFeedAdmissionFor, PAGES_FEED_MAX } from "@antsia/social-domain/pages"
 import { extractHashtags } from "@antsia/social-domain/richText"
 import { buildSearchableText, foldSearchQuery } from "@antsia/social-domain/searchText"
@@ -53,6 +54,7 @@ import { canReadModeratedContent, moderateContentWrite } from "../moderation/pol
 import type { Doc, Id } from "../../_generated/dataModel"
 import type { QueryCtx } from "../../_generated/server"
 import { checked, fail, notFound } from "../../lib/errors"
+import { isActiveMember } from "../../lib/access"
 import { networkMutation, networkQuery } from "../../lib/functions"
 import { enforceRateLimit } from "../../lib/rateLimit"
 import {
@@ -77,7 +79,7 @@ import { requireLiveThematicGroupMembership } from "../thematicGroups/access"
 import { assertVisiblePost, canSeePostDoc, isInReadingContext, type ReaderContext } from "./access"
 import { markPostRemoved } from "./contentRemoval"
 import { countComments, countShares, summarizeReactions } from "./counters"
-import { notifyMentions, writePost } from "./postWrite"
+import { notifyMentions, withdrawPostRootVisibility, writePost } from "./postWrite"
 
 type ReadCtx = Pick<QueryCtx, "db">
 
@@ -177,6 +179,7 @@ export const feedItemValidator = v.object({
   page: v.union(pageCardValidator, v.null()),
   reach: v.union(v.string(), v.null()),
   country: v.union(v.string(), v.null()),
+  province: v.optional(v.union(literals(PROVINCE_SLUGS), v.null())),
   origin: originValidator,
   /** Pourquoi cette ligne est là — l'écran le dit, il ne le devine pas. */
   reason: literals(FEED_REASONS),
@@ -292,6 +295,7 @@ export async function toFeedItem(ctx: QueryCtx, post: Doc<"posts">, reader: Read
     page,
     reach: post.reach ?? null,
     country: post.country ?? null,
+    province: post.province ?? null,
     origin,
     reason,
     viewer: { bookmarked: enrich.marks.bookmarked.has(post._id), notifying: enrich.marks.notifying.has(post._id) },
@@ -483,7 +487,7 @@ async function isBlockedWithAuthor(ctx: ReadCtx, reader: ReaderContext, graph: R
   return graph.blocked.truncated ? await isBlockedBetween(ctx, reader.personId, authorPersonId) : false
 }
 
-const readerOf = (ctx: { person: Doc<"persons">; network: Doc<"networks"> }): ReaderContext => ({ personId: ctx.person._id, network: ctx.network })
+export const readerOf = (ctx: { person: Doc<"persons">; network: Doc<"networks"> }): ReaderContext => ({ personId: ctx.person._id, network: ctx.network })
 
 /** Ce que le lecteur est pour les PAGES : celles qu'il suit (ensemble borné), et ses faits par page, lus une fois. */
 export type ReaderPages = {
@@ -542,7 +546,7 @@ export async function pageViewingReason(ctx: ReadCtx, reader: ReaderContext, pag
  * appartenance au groupe ; partage par la garde de visibilité (aplati sur
  * l'original) ; vérité du STOCKAGE pour les médias ; le domaine juge l'ensemble.
  * `alsoOnRoot` est le geste explicite « publier aussi sur ANTSIA », qui ne vaut
- * que pour une audience publique dans un réseau fermé.
+ * que pour une audience publique ; à la racine, il ouvre explicitement la lecture sans compte.
  */
 export const publish = networkMutation({
   minStatus: "declaree",
@@ -555,6 +559,7 @@ export const publish = networkMutation({
     sharedPostId: v.optional(v.id("posts")),
     reach: v.optional(v.string()),
     country: v.optional(v.string()),
+    province: v.optional(literals(PROVINCE_SLUGS)),
     alsoOnRoot: v.optional(v.boolean()),
     idempotencyKey: v.optional(v.string()),
   },
@@ -624,6 +629,7 @@ export const publish = networkMutation({
       ...(media.length > 0 ? { media } : {}),
       ...(shared ? { sharedPostId: shared._id } : {}),
       ...placed,
+      ...(args.province !== undefined ? { province: args.province } : {}),
       ...(args.idempotencyKey !== undefined ? { idempotencyKey: args.idempotencyKey } : {}),
     })
 
@@ -664,6 +670,24 @@ export const remove = networkMutation({
     const post = await myPostFrom(ctx, readerOf(ctx), args.postId)
     await markPostRemoved(ctx, post, Date.now())
     return { removed: true as const }
+  },
+})
+
+/** Retirer seulement la lecture sans compte ; l'origine conserve sa publication et ses lecteurs membres. */
+export const withdrawFromRoot = networkMutation({
+  args: { postId: v.id("posts") }, returns: v.object({ withdrawn: v.literal(true) }),
+  handler: async (ctx, args) => {
+    await enforceRateLimit(ctx, "post.remove", ctx.person._id)
+    const post = await ctx.db.get(args.postId)
+    if (!post) return notFound()
+    const origin = await ctx.db.get(post.networkId)
+    if (!origin || origin.status !== "active" || (origin._id !== ctx.networkId && (ctx.network.kind !== "root" || origin.kind !== "closed" || origin.parentId !== ctx.networkId))) return notFound()
+    if (post.pageId !== undefined) {
+      const page = await ctx.db.get(post.pageId)
+      if (!page || page.networkId !== origin._id || await liveSignatoryRole(ctx, page, ctx.person._id) === null) return notFound()
+    } else if (post.authorPersonId !== ctx.person._id || !await isActiveMember(ctx, origin._id, ctx.person._id)) return notFound()
+    await withdrawPostRootVisibility(ctx, post, origin, ctx.person._id)
+    return { withdrawn: true as const }
   },
 })
 
@@ -767,6 +791,7 @@ export const feed = networkQuery({
     const enrich = enrichment(ctx, marks)
     const page: FeedItem[] = []
     for (const post of result.page) {
+      if (!(await canSeePostDoc(ctx, reader, post))) continue
       if (post.pageId !== undefined) {
         const pageReason = await admitPagePost(pages, post, post.pageId, "recents")
         if (pageReason === null || hidden.ids.has(post._id)) continue
@@ -871,6 +896,7 @@ export const myFeed = networkQuery({
     let lastExamined: Doc<"posts"> | null = null
     for (const post of candidates) {
       lastExamined = post
+      if (!(await canSeePostDoc(ctx, reader, post))) continue
       if (post.pageId !== undefined) {
         const pageReason = await admitPagePost(pages, post, post.pageId, scope)
         // Le masquage s'applique ; la sourdine non (elle vise une personne, c'est la page qui parle).

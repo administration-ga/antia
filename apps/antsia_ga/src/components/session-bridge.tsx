@@ -1,0 +1,78 @@
+"use client"
+
+import { useConvexAuth } from "convex/react"
+import { type ReactNode, useEffect, useRef, useState } from "react"
+import { useTranslation } from "react-i18next"
+import { isSigningOutEverywhere } from "@antsia/api/sign-out-everywhere"
+
+import { authClient } from "@/lib/auth-client"
+import { BRIDGE_RESUME_EVENT, BRIDGE_TIMEOUT_MS } from "@/lib/session-bridge"
+import { clearLocalSessionForAnonymousBridge, currentSessionBridgeGeneration, requestSessionBridge, rotateSessionBridgeFence } from "@/lib/session-bridge-client"
+
+/** La génération ferme l'ancien reçu AVANT que le SDK ne consomme un éventuel OTT. */
+export function SessionBridgePreflight({ children }: { children: ReactNode }) {
+  const { t } = useTranslation("publicNetwork")
+  const [phase, setPhase] = useState<"pending" | "ready" | "error">("pending")
+  const pending = useRef<Promise<boolean> | null>(null)
+  useEffect(() => {
+    let cancelled = false
+    if (!pending.current) pending.current = (async () => {
+        const generation = rotateSessionBridgeFence()
+        // Pas de marque anonyme avant la purge/proof du SDK. Même un OTT sans API sera fermé.
+        return requestSessionBridge("DELETE", { generation, anonymous: false })
+    })()
+    void pending.current.then((cleared) => { if (!cancelled) setPhase(cleared ? "ready" : "error") }).catch(() => { if (!cancelled) setPhase("error") })
+    return () => { cancelled = true }
+  }, [])
+  if (phase === "ready") return children
+  return <BridgeStatus failed={phase === "error"} label={t(phase === "error" ? "session.unavailable" : "session.preparing")} />
+}
+
+function BridgeStatus({ label, failed }: { label: string; failed: boolean }) {
+  const { t } = useTranslation("publicNetwork")
+  return <div role={failed ? "alert" : "status"} className="mx-auto flex min-h-[50dvh] max-w-lg flex-col items-center justify-center gap-4 px-5 text-center"><p>{label}</p>{failed ? <button className="min-h-11 rounded-lg border border-border bg-card px-4 focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring" onClick={() => window.location.reload()}>{t("states.retry")}</button> : null}</div>
+}
+
+/** Monté APRÈS LiveSessionGate : promotion seulement après les barrières session/JWT réussies. */
+export function SessionBridge({ children }: { children: ReactNode }) {
+  const { isAuthenticated, isLoading } = useConvexAuth()
+  const { t } = useTranslation("publicNetwork")
+  const [phase, setPhase] = useState<"pending" | "ready" | "error">("pending")
+  const [resume, setResume] = useState<string | null>(null)
+  useEffect(() => {
+    const requested = (event: Event) => {
+      if (event instanceof CustomEvent && typeof event.detail === "string") setResume(event.detail)
+    }
+    window.addEventListener(BRIDGE_RESUME_EVENT, requested)
+    return () => window.removeEventListener(BRIDGE_RESUME_EVENT, requested)
+  }, [])
+  useEffect(() => {
+    if (isLoading || isSigningOutEverywhere()) return
+    const generation = resume ?? currentSessionBridgeGeneration()
+    if (!generation) { setPhase("error"); return }
+    let cancelled = false
+    const controller = new AbortController()
+    setPhase("pending")
+    async function synchronize() {
+      let admitted = false
+      let timer: ReturnType<typeof setTimeout> | undefined
+      try {
+        if (isAuthenticated) {
+          const cookie = authClient.getCookie()
+          const result = await Promise.race([authClient.convex.token({ fetchOptions: { throw: false, signal: controller.signal } }), new Promise<never>((_resolve, reject) => { timer = setTimeout(() => { controller.abort(); reject(new Error("bridgeTimeout")) }, BRIDGE_TIMEOUT_MS) })])
+          if (!result.error && typeof result.data?.token === "string" && currentSessionBridgeGeneration() === generation && authClient.getCookie() === cookie && !isSigningOutEverywhere()) admitted = await requestSessionBridge("POST", { generation: generation!, cookie, jwt: result.data.token }, fetch, controller.signal)
+        } else {
+          const anonymous = clearLocalSessionForAnonymousBridge()
+          admitted = await requestSessionBridge("DELETE", { generation: generation!, anonymous }) && anonymous
+        }
+      } catch { admitted = false }
+      finally { if (timer !== undefined) clearTimeout(timer) }
+      if (!cancelled && !isSigningOutEverywhere()) setPhase(admitted ? "ready" : "error")
+    }
+    void synchronize()
+    return () => { cancelled = true; controller.abort() }
+    // Une rotation ne déclenche rien : seul un nouveau montage/état prouvé ou un geste de reprise le fait.
+  }, [isAuthenticated, isLoading, resume])
+  if (phase === "ready") return children
+  return <BridgeStatus failed={phase === "error"} label={t(phase === "error" ? "session.unavailable" : "session.confirming")} />
+}

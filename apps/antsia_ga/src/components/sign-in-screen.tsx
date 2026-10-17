@@ -11,6 +11,9 @@ import { CenteredStatus } from "@/components/shared/controls"
 import { useSessionState } from "@/components/use-session-state"
 import { authClient } from "@/lib/auth-client"
 import { routes } from "@/lib/routes"
+import { fencedIdentityEntryClient } from "@/lib/session-bridge-client"
+
+const entryClient = fencedIdentityEntryClient(authClient)
 
 /** Indice de développement local seulement ; le serveur décide s'il peut le rendre. */
 function DevCodeHint({ identifier }: { identifier: string }) {
@@ -42,7 +45,7 @@ export function SignInScreen() {
   return (
     <main id="contenu" className="mx-auto flex min-h-dvh w-full max-w-md flex-col justify-center px-5 py-12">
       {signOutIncomplete ? <p role="alert" className="mb-6 rounded-lg border border-border bg-muted p-4 text-sm">{tIdentity("signOutIncomplete")}</p> : null}
-      <IdentityEntry authClient={authClient} configuration={configuration} callbackURL={routes.welcome()} onAuthenticated={() => window.location.assign(routes.welcome())} renderLocalCode={(identifier) => <DevCodeHint identifier={identifier} />} />
+      <IdentityEntry authClient={entryClient} configuration={configuration} callbackURL={routes.welcome()} onAuthenticated={() => window.location.assign(routes.welcome())} renderLocalCode={(identifier) => <DevCodeHint identifier={identifier} />} />
     </main>
   )
 }

@@ -38,6 +38,7 @@
 
 import { PERSONAL_REACH_AUDIENCES } from "@antsia/social-domain/content"
 import { PAGE_POST_AUDIENCES } from "@antsia/social-domain/pages"
+import { isProvinceSlug, type ProvinceSlug } from "@antsia/social-domain/provinces"
 
 import {
   DEFAULT_AUDIENCE,
@@ -121,6 +122,9 @@ export interface PostDraftState {
   body: string
   audience: ReachAudience
   pageAudience: PageAudience
+  /** Choix explicite, faux pour les brouillons antérieurs à PA8. */
+  alsoOnRoot?: boolean
+  province?: ProvinceSlug
   /** Tirée à la NAISSANCE du brouillon, renouvelée au seul succès. */
   idempotencyKey: string
   media: readonly PostDraftMedia[]
@@ -156,6 +160,7 @@ export function emptyDraft(idempotencyKey: string): PostDraftState {
     body: "",
     audience: DEFAULT_AUDIENCE,
     pageAudience: DEFAULT_PAGE_AUDIENCE,
+    alsoOnRoot: false,
     idempotencyKey,
     media: EMPTY_MEDIA,
   }
@@ -218,14 +223,25 @@ export function draftSetAudience(
   draft: PostDraftState,
   audience: ReachAudience,
 ): PostDraftState {
-  return draft.audience === audience ? draft : { ...draft, audience }
+  if (draft.audience === audience && (audience === "public" || !draft.alsoOnRoot)) return draft
+  return { ...draft, audience, ...(audience !== "public" ? { alsoOnRoot: false } : {}) }
 }
 
 export function draftSetPageAudience(
   draft: PostDraftState,
   pageAudience: PageAudience,
 ): PostDraftState {
-  return draft.pageAudience === pageAudience ? draft : { ...draft, pageAudience }
+  if (draft.pageAudience === pageAudience && (pageAudience === "public" || !draft.alsoOnRoot)) return draft
+  return { ...draft, pageAudience, ...(pageAudience !== "public" ? { alsoOnRoot: false } : {}) }
+}
+
+/** Une cible de groupe n'accepte jamais de choix public. La province reste volontaire. */
+export function draftSetPublication(draft: PostDraftState, key: string, choice: { alsoOnRoot: boolean; province?: ProvinceSlug }): PostDraftState {
+  const eligible = key === "feed" ? draft.audience === "public" : key.startsWith("page:") && draft.pageAudience === "public"
+  const alsoOnRoot = eligible && choice.alsoOnRoot === true
+  const province = key.startsWith("group:") ? undefined : isProvinceSlug(choice.province) ? choice.province : undefined
+  if (draft.alsoOnRoot === alsoOnRoot && draft.province === province) return draft
+  return { ...draft, alsoOnRoot, province }
 }
 
 export function draftAddMedia(
@@ -419,7 +435,7 @@ function parseMedia(value: unknown): PostDraftMedia | null {
   }
 }
 
-function parseDraft(value: unknown): PostDraftState | null {
+function parseDraft(value: unknown, key: string): PostDraftState | null {
   if (typeof value !== "object" || value === null) return null
   const record = value as Record<string, unknown>
   if (
@@ -447,6 +463,8 @@ function parseDraft(value: unknown): PostDraftState | null {
     body: typeof record.body === "string" ? record.body : "",
     audience,
     pageAudience,
+    alsoOnRoot: record.alsoOnRoot === true && (key === "feed" ? audience === "public" : key.startsWith("page:") && pageAudience === "public"),
+    ...(isProvinceSlug(record.province) && !key.startsWith("group:") ? { province: record.province } : {}),
     idempotencyKey: record.idempotencyKey,
     media,
   }
@@ -470,7 +488,7 @@ export function parseDrafts(raw: string | null | undefined): PostDraftsState {
         record.drafts as Record<string, unknown>,
       )) {
         if (!isPostDraftKey(key)) continue
-        const draft = parseDraft(value)
+        const draft = parseDraft(value, key)
         if (draft === null) continue
         drafts[key] = draft
       }

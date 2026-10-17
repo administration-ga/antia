@@ -31,6 +31,12 @@ import { api } from "@antsia/api/engine"
 import type { Id } from "@antsia/api/engine"
 import { useNetwork } from "@antsia/api/network"
 import { POST_MEDIA_ALT_MAX_LENGTH } from "@antsia/social-domain/content"
+import { LEGACY_ROOT_NETWORK_SLUG, ROOT_NETWORK_SLUG } from "@antsia/social-domain/network"
+import { BRAND_NAME } from "@antsia/social-contracts/brand"
+import { GABON_PROVINCES, PROVINCE_SLUGS, isProvinceSlug } from "@antsia/social-domain/provinces"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useForm } from "react-hook-form"
+import { z } from "zod"
 import {
   Alert,
   Button,
@@ -41,7 +47,7 @@ import {
   TextInput,
 } from "@antsia/ui"
 import { useMutation } from "convex/react"
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useId, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { Avatar } from "./Avatar"
@@ -165,6 +171,8 @@ const COMPOSER_CSS = `
           }
         `
 
+const publicationSchema = z.object({ alsoOnRoot: z.boolean(), province: z.union([z.literal(""), z.enum(PROVINCE_SLUGS)]) })
+
 export function PostComposer({
   group,
   asPage,
@@ -172,7 +180,7 @@ export function PostComposer({
   onPublished,
 }: PostComposerProps = {}) {
   const { t } = useTranslation("reseau")
-  const { networkId, personId, storagePrefix } = useNetwork()
+  const { networkId, personId, storagePrefix, slug } = useNetwork()
   // ── Erreur de PROGRAMMATION, traitée explicitement : un composeur ne
   // publie jamais à la fois dans un groupe et au nom d'une page. Avant tout
   // hook, pour que l'échec soit le même à chaque rendu (cf. en-tête du
@@ -216,6 +224,23 @@ export function PostComposer({
   const [seedKey] = useState(newIdempotencyKey)
   const draft = usePostDraft(draftKey, seedKey)
   const { body, audience, pageAudience, idempotencyKey } = draft
+  const isRoot = slug === ROOT_NETWORK_SLUG || slug === LEGACY_ROOT_NETWORK_SLUG
+  const canOpenPublic = !group && (!asPage || isRoot) && (asPage ? pageAudience : audience) === "public"
+  const publicationId = useId()
+  const publicationForm = useForm<z.infer<typeof publicationSchema>>({
+    resolver: zodResolver(publicationSchema),
+    values: { alsoOnRoot: canOpenPublic && draft.alsoOnRoot === true, province: isRoot && draft.province ? draft.province : "" },
+  })
+  const previousTarget = useRef(draftKey)
+  useEffect(() => {
+    if (!canOpenPublic || previousTarget.current !== draftKey) postDraftStore.setPublication(draftKey, { alsoOnRoot: false, province: draft.province })
+    previousTarget.current = draftKey
+  }, [canOpenPublic, draftKey, draft.province])
+  const contextKey = `${networkId}:${personId}:${draftKey}`
+  const currentContext = useRef(contextKey)
+  currentContext.current = contextKey
+  const active = useRef(true)
+  useEffect(() => { active.current = true; return () => { active.current = false } }, [])
 
   const [submitting, setSubmitting] = useState(false)
   const [focused, setFocused] = useState(false)
@@ -260,8 +285,10 @@ export function PostComposer({
     : AUDIENCE_OPTIONS.find((option) => option.value === audience)?.hintKey
   const hint = hintKey === undefined ? undefined : t(hintKey)
 
-  const handleSubmit = async () => {
+  const handleSubmit = publicationForm.handleSubmit(async (publication) => {
     if (!canSubmit) return
+    if (postDraftStore.scope() !== personId || postDraftStore.storagePrefix() !== storagePrefix) return
+    const submittedContext = contextKey
     setSubmitting(true)
     try {
       // Le dépôt passe par la garde des fichiers : une URL par média, pour
@@ -270,6 +297,11 @@ export function PostComposer({
         generateUploadUrl({ networkId, usage: "media_social" })
       )
       const mediaArg = uploaded.length > 0 ? { media: uploaded } : {}
+      if (!active.current || submittedContext !== currentContext.current) return
+      const chosenPublication = {
+        ...(canOpenPublic && publication.alsoOnRoot ? { alsoOnRoot: true } : {}),
+        ...(isRoot && !group && isProvinceSlug(publication.province) ? { province: publication.province } : {}),
+      }
       if (asPage) {
         await publishAsPage({
           networkId,
@@ -278,6 +310,7 @@ export function PostComposer({
           audience: pageAudience,
           ...mediaArg,
           idempotencyKey,
+          ...chosenPublication,
         })
       } else {
         await publish({
@@ -290,11 +323,13 @@ export function PostComposer({
             : { audience }),
           ...mediaArg,
           idempotencyKey,
+          ...chosenPublication,
         })
       }
       // Vidage au SEUL succès : corps, médias, aperçus révoqués — et clé
       // d'idempotence NEUVE. Un échec ne passe jamais par ici, c'est ce qui
       // rend le renvoi sûr.
+      if (!active.current || submittedContext !== currentContext.current) return
       postDraftStore.clear(draftKey)
       toast.success(t("postComposer.toast.published"))
       // APRÈS le nettoyage : la surface qui se referme démonte ce composeur,
@@ -303,11 +338,13 @@ export function PostComposer({
     } catch (error) {
       // La clé n'est PAS renouvelée sur échec : c'est ce qui rend le renvoi
       // sûr — le serveur reconnaîtra le rejeu au lieu de publier deux fois.
-      toast.error(postEngineErrorText(error, "reseau:postComposer.toast.failed", t))
+      if (active.current && submittedContext === currentContext.current) toast.error(postEngineErrorText(error, "reseau:postComposer.toast.failed", t))
     } finally {
-      setSubmitting(false)
+      if (active.current) setSubmitting(false)
     }
-  }
+  })
+
+  if (postDraftStore.scope() !== personId || postDraftStore.storagePrefix() !== storagePrefix) return null
 
   return (
     <Card
@@ -517,6 +554,20 @@ export function PostComposer({
           </ul>
         ) : null}
 
+        {!group ? <fieldset disabled={submitting} className="flex min-w-0 flex-col gap-3 rounded-xl border border-border p-3">
+          <legend className="px-1 text-sm font-medium">{t("postComposer.publication.legend")}</legend>
+          {canOpenPublic ? <label htmlFor={`${publicationId}-public`} className="flex min-h-11 cursor-pointer items-center gap-3 rounded-lg px-2 text-sm focus-within:ring-2 focus-within:ring-ring">
+            <input id={`${publicationId}-public`} type="checkbox" aria-describedby={`${publicationId}-hint`} {...publicationForm.register("alsoOnRoot", { onChange: (event) => postDraftStore.setPublication(draftKey, { alsoOnRoot: event.target.checked === true, province: draft.province }) })} />
+            <span>{t(isRoot ? "postComposer.publication.withoutAccount" : "postComposer.publication.alsoOnRoot", { brand: BRAND_NAME })}</span>
+          </label> : null}
+          <p id={`${publicationId}-hint`} role="status" className="text-xs text-muted-foreground">{t(asPage && !isRoot ? "postComposer.publication.pagePolicyHint" : canOpenPublic && draft.alsoOnRoot ? "postComposer.publication.publicHint" : "postComposer.publication.memberHint", { brand: BRAND_NAME })}</p>
+          {isRoot ? <label htmlFor={`${publicationId}-province`} className="flex flex-col gap-1.5 text-sm"><span>{t("postComposer.publication.provinceLabel")}</span>
+            <select id={`${publicationId}-province`} aria-describedby={`${publicationId}-province-hint`} className="min-h-11 w-full rounded-lg border border-input bg-background px-3 text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" {...publicationForm.register("province", { onChange: (event) => postDraftStore.setPublication(draftKey, { alsoOnRoot: canOpenPublic && draft.alsoOnRoot === true, ...(isProvinceSlug(event.target.value) ? { province: event.target.value } : {}) }) })}>
+              <option value="">{t("postComposer.publication.noProvince")}</option>{GABON_PROVINCES.map((province) => <option key={province.slug} value={province.slug}>{province.name}</option>)}
+            </select><span id={`${publicationId}-province-hint`} className="text-xs text-muted-foreground">{t("postComposer.publication.provinceHint")}</span>
+          </label> : null}
+        </fieldset> : null}
+
         <div className="rp-composer-controls">
           <div>
             <input
@@ -557,7 +608,7 @@ export function PostComposer({
                   style={{
                     borderRadius: 10,
                     border: "1px solid var(--ink-300)",
-                    minHeight: 36,
+                    minHeight: 44,
                     paddingBlock: 8,
                     fontSize: 12.5,
                   }}

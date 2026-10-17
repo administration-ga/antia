@@ -1,8 +1,9 @@
 // Dupliqué de socle/convex/modules/reseauPersonnel/tables.ts (l. 137-300) @ ad2e7fdc2 — adaptations : `networkId` et visibilité `network`/`root` sur chaque publication, index préfixés par le réseau ; `onRoot` dénormalisé (lisible depuis la racine) et index de la racine ; portée (`reach`) et pays (`country`) des réseaux à portées ; auteurs et réacteurs en personnes ; AUCUN compteur sur la publication (D01) : réactions par fragments (`postReactionShards`), partages par l'agrégat `engineCounters` ; index jamais lus non recopiés (`by_directSessionId`, `by_eventId`, `by_sharedPostId`, D35) ; mur de groupe préfixé par le réseau ; la PAGE de la publication (lot 13 : `pageId`, mur et fenêtres de fil d'une page, dans son réseau et depuis la racine) ; l'évènement annoncé porté par la publication (lot 12, sans index : rien ne le relit par là) ; la session de DIRECT annoncée (`directSessionId` du socle → `liveSessionId`, lot 16, sans index pour la même raison) ; recherche `search_body_v2` filtrée par réseau, statut et racine.
 import { defineTable } from "convex/server"
 import { v } from "convex/values"
+import { PROVINCE_SLUGS } from "@antsia/social-domain/provinces"
 
-import { contentVisibilityValidator, postAudienceValidator, postStatusValidator } from "../../lib/validators"
+import { contentVisibilityValidator, literals, postAudienceValidator, postStatusValidator } from "../../lib/validators"
 import { storedMediaValidator } from "../media/media"
 
 export const postsTables = {
@@ -56,6 +57,8 @@ export const postsTables = {
     reach: v.optional(v.string()),
     /** Pays (ISO 3166-1 alpha-2) ; exigé par la portée locale. */
     country: v.optional(v.string()),
+    /** Attribution volontaire du contenu, stable ; jamais la facette courante de l'auteur. */
+    province: v.optional(literals(PROVINCE_SLUGS)),
     tags: v.optional(v.array(v.string())),
     mentionedPersonIds: v.optional(v.array(v.id("persons"))),
     /** Corps et tags, repliés pour l'index plein texte (chaîne vide pour un partage sans mot). */
@@ -73,6 +76,7 @@ export const postsTables = {
     .index("by_network_author_status_publishedAt", ["networkId", "authorPersonId", "status", "publishedAt"])
     // Les mêmes, lus depuis la RACINE (natifs et `root` de tous les réseaux).
     .index("by_root_status_publishedAt", ["onRoot", "status", "publishedAt"])
+    .index("by_root_province_status_publishedAt", ["onRoot", "province", "status", "publishedAt"])
     .index("by_root_author_status_publishedAt", ["onRoot", "authorPersonId", "status", "publishedAt"])
     // Le MUR d'un groupe thématique (et la cascade de sa suppression).
     .index("by_network_group_status_publishedAt", ["networkId", "groupId", "status", "publishedAt"])

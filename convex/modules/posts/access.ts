@@ -16,6 +16,7 @@ import { canReadModeratedContent } from "../moderation/policy"
 import type { Doc, Id } from "../../_generated/dataModel"
 import type { QueryCtx } from "../../_generated/server"
 import { notFound } from "../../lib/errors"
+import { isActiveMember } from "../../lib/access"
 import { isBlockedBetween, isConnectedTo } from "../graph/graph"
 import { liveSignatoryRole } from "../pages/access"
 import { isFollowingPage } from "../pages/follows"
@@ -42,8 +43,13 @@ export function isInReadingContext(post: Doc<"posts">, network: Doc<"networks">)
  */
 export async function canSeePostDoc(ctx: ReadCtx, reader: ReaderContext, post: Doc<"posts">): Promise<boolean> {
   if (!isInReadingContext(post, reader.network)) return false
+  const origin = await ctx.db.get(post.networkId)
+  if (!origin || origin.status !== "active") return false
+  if (reader.network.kind === "root" && origin._id !== reader.network._id && (origin.kind !== "closed" || origin.parentId !== reader.network._id)) return false
   if (!(await canReadModeratedContent(ctx, "post", post._id, reader.personId))) return false
   if (post.pageId !== undefined) return await canSeePagePostDoc(ctx, reader, post, post.pageId)
+  const author = await ctx.db.get(post.authorPersonId)
+  if (!author || author.erasedAt !== undefined || author.deletionRequestedAt !== undefined || !(await isActiveMember(ctx, post.networkId, post.authorPersonId))) return false
   const isAuthor = post.authorPersonId === reader.personId
   const isBlockedWithAuthor = isAuthor ? false : await isBlockedBetween(ctx, reader.personId, post.authorPersonId)
   const isConnected = !isAuthor && post.audience === "connections" ? await isConnectedTo(ctx, post.networkId, reader.personId, post.authorPersonId) : false
@@ -75,7 +81,7 @@ export async function canSeePostDoc(ctx: ReadCtx, reader: ReaderContext, post: D
  */
 async function canSeePagePostDoc(ctx: ReadCtx, reader: ReaderContext, post: Doc<"posts">, pageId: Id<"pages">): Promise<boolean> {
   const page = await ctx.db.get(pageId)
-  if (!page || page.status !== "active" || !(await canReadModeratedContent(ctx, "page", page._id, reader.personId))) return false
+  if (!page || page.networkId !== post.networkId || page.status !== "active" || !(await canReadModeratedContent(ctx, "page", page._id, reader.personId))) return false
   const isPageAudience =
     post.audience === "followers"
       ? (await isFollowingPage(ctx, pageId, reader.personId)) || (await liveSignatoryRole(ctx, page, reader.personId)) !== null

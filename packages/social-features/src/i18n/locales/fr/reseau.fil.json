@@ -199,7 +199,15 @@
     "commentWithCount": "Commenter · {{formatted}}",
     "share": "Relayer",
     "shareWithCount": "Relayer · {{formatted}}",
-    "shareUnavailable": "Publication indisponible."
+    "shareUnavailable": "Publication indisponible.",
+    "publication": {
+      "withdraw": "Retirer de la lecture publique",
+      "withdrawing": "Retrait de la lecture publique…",
+      "withdrawConfirm": "Retirer cette publication de la lecture sans compte sur {{brand}} ? Elle sera conservée pour les membres selon son audience.",
+      "withdrawn": "La publication a été retirée de la lecture sans compte.",
+      "withdrawFailed": "Le retrait de la lecture publique n’a pas pu être enregistré.",
+      "availableOnRoot": "Lisible aussi dans {{brand}}."
+    }
   },
   "sharePostDialog": {
     "title": "Partager la publication de {{name}}",
@@ -289,6 +297,17 @@
     "toast": {
       "published": "Publication en ligne.",
       "failed": "La publication n'a pas pu être enregistrée."
+    },
+    "publication": {
+      "legend": "Diffusion de la publication",
+      "withoutAccount": "Accessible sans compte",
+      "alsoOnRoot": "Publier aussi sur {{brand}}, accessible sans compte",
+      "publicHint": "Cette publication pourra être lue et partagée sans compte sur {{brand}}. Votre choix concerne ce contenu, pas la confidentialité de votre profil.",
+      "memberHint": "Sans ce choix, la publication reste réservée aux membres selon l’audience choisie.",
+      "provinceLabel": "Province du contenu (facultatif)",
+      "noProvince": "Aucune province attribuée",
+      "provinceHint": "Choisissez une province seulement si le contenu la concerne. Aucun lieu n’est déduit de votre profil.",
+      "pagePolicyHint": "La diffusion suit les réglages de cette page."
     }
   },
   "postComposerSheet": {

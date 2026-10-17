@@ -60,6 +60,7 @@ import {
   draftSetAudience,
   draftSetBody,
   draftSetPageAudience,
+  draftSetPublication,
   dropDraft,
   initialPostDrafts,
   isPristine,
@@ -73,6 +74,7 @@ import {
   type PostDraftsState,
 } from "./post-draft"
 import type { PageAudience, ReachAudience } from "./shared"
+import type { ProvinceSlug } from "@antsia/social-domain/provinces"
 
 /**
  * Le segment propre aux brouillons, entre le préfixe du RÉSEAU et l'AUTEUR.
@@ -237,6 +239,12 @@ export const postDraftStore = {
    */
   setScope(next: string | null): void {
     if (next === scope) return
+    if (scope !== null) {
+      // Une identité remplacée ne transporte ni texte ni opt-in vers la suivante.
+      for (const localId of runtime.keys()) releaseRuntimeMedia(localId)
+      state = initialPostDrafts()
+      notify()
+    }
     scope = next
     adoptStoredDrafts()
   },
@@ -265,6 +273,10 @@ export const postDraftStore = {
 
   setPageAudience(key: string, pageAudience: PageAudience): void {
     write(key, (draft) => draftSetPageAudience(draft, pageAudience))
+  },
+
+  setPublication(key: string, choice: { alsoOnRoot: boolean; province?: ProvinceSlug }): void {
+    write(key, (draft) => draftSetPublication(draft, key, choice))
   },
 
   /**

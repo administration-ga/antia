@@ -199,7 +199,15 @@
     "commentWithCount": "Comment · {{formatted}}",
     "share": "Repost",
     "shareWithCount": "Repost · {{formatted}}",
-    "shareUnavailable": "Post unavailable."
+    "shareUnavailable": "Post unavailable.",
+    "publication": {
+      "withdraw": "Withdraw from public reading",
+      "withdrawing": "Withdrawing from public reading…",
+      "withdrawConfirm": "Withdraw this post from reading without an account on {{brand}}? It will remain available to members according to its audience.",
+      "withdrawn": "The post has been withdrawn from reading without an account.",
+      "withdrawFailed": "Withdrawal from public reading could not be saved.",
+      "availableOnRoot": "Also readable in {{brand}}."
+    }
   },
   "sharePostDialog": {
     "title": "Share {{name}}'s post",
@@ -289,6 +297,17 @@
     "toast": {
       "published": "Post published.",
       "failed": "The post could not be saved."
+    },
+    "publication": {
+      "legend": "Post distribution",
+      "withoutAccount": "Available without an account",
+      "alsoOnRoot": "Also publish on {{brand}}, available without an account",
+      "publicHint": "This post may be read and shared without an account on {{brand}}. Your choice applies to this content, not to your profile privacy.",
+      "memberHint": "Without this choice, the post remains restricted to members according to its audience.",
+      "provinceLabel": "Content province (optional)",
+      "noProvince": "No province assigned",
+      "provinceHint": "Choose a province only if the content concerns it. No location is inferred from your profile.",
+      "pagePolicyHint": "Distribution follows this page’s settings."
     }
   },
   "postComposerSheet": {

@@ -14,6 +14,7 @@
  */
 import { assertGroupAudienceShape, assertPageAudienceShape, type PersonalPostAudience } from "@antsia/social-domain/content"
 import type { ContentVisibility } from "@antsia/social-domain/network"
+import type { ProvinceSlug } from "@antsia/social-domain/provinces"
 import { extractHashtags } from "@antsia/social-domain/richText"
 import { buildSearchableText } from "@antsia/social-domain/searchText"
 
@@ -29,6 +30,7 @@ import { isFollowingPage } from "../pages/follows"
 import { resolveMentionedPersonIds } from "../people/miniProfile"
 import { isLiveThematicGroupMember } from "../thematicGroups/access"
 import { recordPagePost, recordShare } from "./counters"
+import { appendAudit } from "../platform/audit"
 
 export type PostWriteInput = {
   network: Doc<"networks">
@@ -46,6 +48,7 @@ export type PostWriteInput = {
   /** Portée et pays DÉJÀ jugés contre le réseau (`assertPostReach`). */
   reach?: string
   country?: string
+  province?: ProvinceSlug
   idempotencyKey?: string
   /** L'évènement ANNONCÉ — l'organisateur est DÉJÀ vérifié par l'appelant. */
   eventId?: Id<"events">
@@ -58,6 +61,13 @@ export type PostWriteInput = {
 /** Lisible depuis la racine : née à la racine, ou `root`. */
 export function isOnRoot(network: Pick<Doc<"networks">, "kind">, visibility: ContentVisibility): boolean {
   return network.kind === "root" || visibility === "root"
+}
+
+/** Retrait de la projection choisie, sans supprimer la publication ni rétablir un autre état. */
+export async function withdrawPostRootVisibility(ctx: MutationCtx, post: Doc<"posts">, network: Doc<"networks">, actorPersonId?: Id<"persons">): Promise<void> {
+  if (post.visibility !== "root") return
+  await ctx.db.patch(post._id, { visibility: "network", onRoot: isOnRoot(network, "network"), updatedAt: Date.now() })
+  await appendAudit(ctx, { action: "post.root_withdraw", capacity: actorPersonId ? "member" : "system", ...(actorPersonId ? { actorPersonId } : {}), networkId: post.networkId, subject: { table: "posts", id: post._id }, details: { ...(actorPersonId ? {} : { recette: true }) } })
 }
 
 /**
@@ -133,6 +143,7 @@ export async function writePost(ctx: MutationCtx, input: PostWriteInput): Promis
     ...(input.groupId ? { groupId: input.groupId } : {}),
     ...(input.reach !== undefined ? { reach: input.reach } : {}),
     ...(input.country !== undefined ? { country: input.country } : {}),
+    ...(input.province !== undefined ? { province: input.province } : {}),
     ...(tags.length > 0 ? { tags } : {}),
     ...(mentionedPersonIds.length > 0 ? { mentionedPersonIds } : {}),
     searchText: buildSearchableText(input.body, tags.join(" ")),

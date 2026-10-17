@@ -21,11 +21,13 @@ import { useNetwork, useRoutes } from "@antsia/api/network"
 import { Link } from "@antsia/api/routing"
 import { useViewerTimeZone } from "@antsia/api/viewer-preferences"
 import type { Badge } from "@antsia/social-domain/badges"
+import { BRAND_NAME } from "@antsia/social-contracts/brand"
+import { LEGACY_ROOT_NETWORK_SLUG, ROOT_NETWORK_SLUG } from "@antsia/social-domain/network"
 import { Button, Card, TextArea } from "@antsia/ui"
 import { useMutation } from "convex/react"
 import type { FunctionReturnType } from "convex/server"
-import { MessageCircle, Share2 } from "lucide-react"
-import { useState } from "react"
+import { GlobeLock, MessageCircle, Share2 } from "lucide-react"
+import { useEffect, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 
@@ -97,7 +99,7 @@ interface PostCardProps {
 
 export function PostCard({ post, now, onTag, onMention }: PostCardProps) {
   const { t, i18n } = useTranslation("reseau")
-  const { networkId, personId } = useNetwork()
+  const { networkId, personId, slug } = useNetwork()
   const routes = useRoutes()
   const timeZone = useViewerTimeZone()
   const [showComments, setShowComments] = useState(false)
@@ -105,6 +107,13 @@ export function PostCard({ post, now, onTag, onMention }: PostCardProps) {
   const [pendingReaction, setPendingReaction] = useState(false)
   const [editing, setEditing] = useState(false)
   const [editedBody, setEditedBody] = useState(post.body)
+  const [withdrawing, setWithdrawing] = useState(false)
+  const withdrawalLock = useRef(false)
+  const live = useRef(true)
+  const context = `${networkId}:${personId}:${post._id}`
+  const latestContext = useRef(context)
+  latestContext.current = context
+  useEffect(() => { live.current = true; return () => { live.current = false } }, [])
   const [reportTarget, setReportTarget] = useState<
     | { kind: "post" }
     | { kind: "comment"; commentId: Id<"postComments"> }
@@ -113,6 +122,7 @@ export function PostCard({ post, now, onTag, onMention }: PostCardProps) {
 
   const toggleReaction = useMutation(api.modules.engagement.engagement.toggleReaction)
   const removePost = useMutation(api.modules.posts.posts.remove)
+  const withdrawFromRoot = useMutation(api.modules.posts.posts.withdrawFromRoot)
   const removePagePost = useMutation(api.modules.pages.pages.removePagePost)
   const editPost = useMutation(api.modules.posts.posts.edit)
   const pinPost = useMutation(api.modules.posts.posts.pinOnMyWall)
@@ -181,6 +191,22 @@ export function PostCard({ post, now, onTag, onMention }: PostCardProps) {
    */
   const isOwn =
     post.isMine || (page !== null && post.reason === "own" && post.author.personId === personId)
+
+  const withdrawPublic = async () => {
+    if (!isOwn || post.visibility !== "root" || withdrawalLock.current || !window.confirm(t("postCard.publication.withdrawConfirm", { brand: BRAND_NAME }))) return
+    withdrawalLock.current = true
+    setWithdrawing(true)
+    const submittedContext = context
+    try {
+      await withdrawFromRoot({ networkId, postId: post._id })
+      if (live.current && latestContext.current === submittedContext) toast.success(t("postCard.publication.withdrawn"))
+    } catch (error) {
+      if (live.current && latestContext.current === submittedContext) toast.error(postEngineErrorText(error, "reseau:postCard.publication.withdrawFailed", t))
+    } finally {
+      withdrawalLock.current = false
+      if (live.current) setWithdrawing(false)
+    }
+  }
 
   const handleReaction = async (kind: ReactionKind) => {
     setPendingReaction(true)
@@ -342,6 +368,11 @@ export function PostCard({ post, now, onTag, onMention }: PostCardProps) {
             }
           />
         </header>
+
+        {isOwn && post.visibility === "root" && post.audience === "public" ? <>
+          {slug !== ROOT_NETWORK_SLUG && slug !== LEGACY_ROOT_NETWORK_SLUG ? <p className="text-xs text-muted-foreground">{t("postCard.publication.availableOnRoot", { brand: BRAND_NAME })}</p> : null}
+          <Button type="button" variant="ghost" disabled={withdrawing} aria-busy={withdrawing || undefined} className="self-start" style={{ minHeight: 44, whiteSpace: "normal" }} onClick={() => void withdrawPublic()}><GlobeLock aria-hidden="true" size={16} />{t(withdrawing ? "postCard.publication.withdrawing" : "postCard.publication.withdraw")}</Button>
+        </> : null}
 
         {editing ? (
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>

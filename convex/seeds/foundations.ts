@@ -17,6 +17,7 @@
  */
 import { BRAND_NAME } from "@antsia/social-contracts/brand"
 import { LEGACY_ROOT_NETWORK_SLUG, ROOT_NETWORK_SLUG } from "@antsia/social-domain/network"
+import { PROVINCE_SLUGS } from "@antsia/social-domain/provinces"
 import { v } from "convex/values"
 
 import type { Id } from "../_generated/dataModel"
@@ -74,6 +75,7 @@ export const run = internalMutation({
       name: BRAND_NAME,
       membershipPolicy: "open",
       defaultVisibility: "network",
+      facetSchema: { fields: [{ key: "province", kind: "enum", required: false, defaultVisibility: "hidden", enumValues: [...PROVINCE_SLUGS] }] },
       reachValues: [],
       theme: "antsia",
       status: "active",

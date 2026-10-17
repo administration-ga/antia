@@ -17,6 +17,7 @@ import { Toaster } from "sonner"
 import { APP_NAMESPACE, appResources } from "@/i18n/resources"
 import { authClient } from "@/lib/auth-client"
 import { UsagePermissionProvider } from "./analytics-permission"
+import { SessionBridge, SessionBridgePreflight } from "./session-bridge"
 
 const CONVEX_URL = process.env.NEXT_PUBLIC_CONVEX_URL ?? ""
 
@@ -39,7 +40,7 @@ function EngineToaster() {
 }
 
 /** Session Better Auth + client Convex ; sans moteur configuré, un avertissement plutôt qu'un écran blanc. */
-function SessionProviders({ children }: { children: ReactNode }) {
+export function SessionProviders({ children }: { children: ReactNode }) {
   const { t } = useTranslation(APP_NAMESPACE)
   if (!CONVEX_URL) {
     return (
@@ -51,15 +52,15 @@ function SessionProviders({ children }: { children: ReactNode }) {
     )
   }
   return (
-    <EngineConvexProvider
+    <SessionBridgePreflight><EngineConvexProvider
       convexUrl={CONVEX_URL}
       authClient={authClient as unknown as RefreshableCrossDomainAuthClient}
       ensurePerson={api.modules.people.persons.ensureMyPerson}
       isSessionActive={api.modules.platform.authentication.mySession}
       labels={{ loading: t("session.loading"), failed: t("session.failed"), retry: t("session.retry") }}
     >
-      <PersonalLocale>{children}</PersonalLocale>
-    </EngineConvexProvider>
+      <SessionBridge><PersonalLocale>{children}</PersonalLocale></SessionBridge>
+    </EngineConvexProvider></SessionBridgePreflight>
   )
 }
 
@@ -67,7 +68,7 @@ export function Providers({ locale, children }: { locale: Locale; children: Reac
   return (
     <I18nProvider locale={locale} appResources={appResources} defaultNS={APP_NAMESPACE} defaultVariables={{ brand: BRAND_NAME }}>
       <AppearanceProvider storagePrefix="antsia:antsia:">
-        <UsagePermissionProvider><SessionProviders>{children}</SessionProviders></UsagePermissionProvider>
+        <UsagePermissionProvider>{children}</UsagePermissionProvider>
         <EngineToaster />
       </AppearanceProvider>
     </I18nProvider>

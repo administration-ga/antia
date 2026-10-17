@@ -69,8 +69,7 @@ export type NetworkShapeError =
 
 /**
  * Cohérence d'un réseau : la racine n'a pas de parent, est ouverte et sa
- * visibilité par défaut est `network` (dans la racine, `network` et `root`
- * désignent le même espace : on écrit toujours `network`) ; un réseau fermé a
+ * visibilité par défaut est `network` (aucune ouverture anonyme d'office) ; un réseau fermé a
  * un parent ; un miroir est fermé.
  */
 export function validateNetworkShape(shape: NetworkShape): NetworkShapeError[] {
@@ -88,7 +87,8 @@ export function validateNetworkShape(shape: NetworkShape): NetworkShapeError[] {
 
 /**
  * Visibilité effective d'un contenu publié dans un réseau (invariant 4) :
- * - dans la racine, tout est `network` (c'est déjà la racine) ;
+ * - dans la racine, `root` exige une audience publique ET un geste explicite ;
+ *   la règle du réseau ne peut jamais ouvrir anonymement une publication native ;
  * - ailleurs, `root` exige une audience PUBLIQUE, puis soit le geste explicite
  *   de l'auteur (« publier aussi sur ANTSIA »), soit une règle (règle de page,
  *   visibilité par défaut du réseau) ; sinon le contenu reste dans son réseau.
@@ -99,7 +99,7 @@ export function effectiveVisibility(input: {
   authorRequestedRoot: boolean
   ruleVisibility: ContentVisibility
 }): ContentVisibility {
-  if (input.networkKind === "root") return "network"
+  if (input.networkKind === "root") return input.audienceIsPublic && input.authorRequestedRoot ? "root" : "network"
   if (!input.audienceIsPublic) return "network"
   if (input.authorRequestedRoot) return "root"
   return input.ruleVisibility

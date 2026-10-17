@@ -1,0 +1,180 @@
+{
+  "nav": {
+    "label": "Navigation publique",
+    "footer": "Informations et droits",
+    "discover": "Découvrir",
+    "transparency": "Transparence",
+    "enter": "Entrer",
+    "myFeed": "Mon fil",
+    "about": "À propos",
+    "legal": "Mentions légales",
+    "privacy": "Confidentialité",
+    "data": "Mes données",
+    "signOut": "Déconnexion",
+    "signingOut": "Déconnexion…"
+  },
+  "home": {
+    "eyebrow": "Le réseau public gabonais",
+    "title": "Un pays. Des liens. Votre voix.",
+    "lead": "Lire les publications ouvertes, retrouver les pages officielles et participer aux échanges, avec une identité sociale qui vous appartient.",
+    "join": "Rejoindre {{brand}}",
+    "read": "Lire le réseau public",
+    "contextTitle": "Une origine lisible, un partage choisi",
+    "contextBody": "Les échanges d’un réseau fermé y restent. Une contribution apparaît ici quand son auteur choisit sa diffusion publique sur {{brand}}."
+  },
+  "snapshot": {
+    "title": "Repères du réseau",
+    "updated": "Dernière mesure : {{date}}",
+    "pending": "Les mesures publiques ne sont pas encore disponibles.",
+    "posts": "Publications ouvertes sur cette période",
+    "pages": "Pages Officiel",
+    "bounded": "Mesure bornée : certaines publications, pages ou certains sujets peuvent être omis.",
+    "period": "Du {{start}} au {{end}}"
+  },
+  "feed": {
+    "title": "Le fil d’origine",
+    "lead": "Des publications accessibles sans compte. Pour publier ou participer, ouvrez votre espace membre.",
+    "emptyTitle": "Aucune publication publique dans cette vue",
+    "emptyBody": "Les contenus réservés aux membres restent dans leur contexte. Vous pouvez consulter une autre province ou rejoindre le réseau.",
+    "filteredWindow": "Cette fenêtre ne contient aucune publication visible. Une page suivante reste disponible.",
+    "pagination": "Pagination des publications publiques",
+    "first": "Première page",
+    "next": "Page suivante"
+  },
+  "discover": {
+    "title": "Découvrir le réseau",
+    "lead": "Suivre une province ou un sujet, puis lire les contributions que leurs auteurs ont choisies de rendre publiques.",
+    "member": "Ouvrir la vue membre",
+    "trends": "Sujets mesurés",
+    "period": "Du {{start}} au {{end}}"
+  },
+  "provinces": {
+    "title": "Les neuf provinces",
+    "lead": "La province d’une publication est choisie par son auteur. Elle n’indique ni sa résidence ni sa position."
+  },
+  "tag": {
+    "title": "Le sujet #{{tag}}"
+  },
+  "post": {
+    "title": "Publication publique",
+    "withdrawnAuthor": "Profil non publié",
+    "badges": "Indications de confiance",
+    "origin": "Origine : {{name}}",
+    "publicAudience": "Accessible sans compte",
+    "edited": "Modifiée le {{date}}",
+    "participate": "Entrer pour participer",
+    "original": "Lire la publication originale",
+    "originalUnavailable": "La publication originale n’est plus disponible dans cette vue."
+  },
+  "badges": {
+    "official": "Officiel",
+    "verified": "Vérifié",
+    "public_agent": "Agent public",
+    "community": "Communauté"
+  },
+  "media": {
+    "image": "Image de la publication",
+    "video": "Vidéo de la publication",
+    "pending": "Ce média est en cours d’analyse.",
+    "quarantined": "Ce média est retenu par la protection des fichiers.",
+    "unavailable": "Ce média est indisponible."
+  },
+  "profile": {
+    "public": "Profil public réduit",
+    "reduced": "Cet aperçu contient uniquement les informations que la personne a publiées. Les relations et les échanges restent dans l’espace membre.",
+    "member": "Ouvrir le profil dans le réseau"
+  },
+  "page": {
+    "member": "Suivre cette page dans le réseau"
+  },
+  "states": {
+    "retry": "Réessayer",
+    "home": "Revenir à l’accueil",
+    "continue": "Continuer la connexion",
+    "refused": {
+      "title": "Contenu indisponible",
+      "body": "Cette adresse ne peut pas être consultée dans cette session. Vous pouvez revenir à l’accueil ou confirmer votre connexion."
+    },
+    "unavailable": {
+      "title": "La lecture est momentanément indisponible",
+      "body": "Les publications ne peuvent pas être chargées actuellement. Réessayez dans un instant."
+    },
+    "handoff": {
+      "title": "Reprise de votre connexion",
+      "body": "Votre session doit être confirmée avant de lire le contenu."
+    }
+  },
+  "session": {
+    "preparing": "Préparation de la connexion…",
+    "confirming": "Confirmation de votre session…",
+    "unavailable": "La session ne peut pas être confirmée. Réessayez pour reprendre la connexion.",
+    "handoffRefused": "Le transfert de connexion n’a pas pu être confirmé. Ouvrez une nouvelle connexion.",
+    "resume": "Confirmer à nouveau la session"
+  },
+  "transparency": {
+    "title": "Transparence de la modération",
+    "lead": "Des totaux agrégés par période, sans identité, motif individuel ou contenu de dossier.",
+    "threshold": "Une période n’est publiée que si elle compte au moins {{count}} dossiers et {{count}} auteurs distincts.",
+    "period": "Du {{start}} au {{end}}",
+    "suppressed": "Total non publié",
+    "cases_one": "{{count}} dossier",
+    "cases_other": "{{count}} dossiers",
+    "empty": "Aucune période agrégée disponible pour le moment."
+  },
+  "legal": {
+    "eyebrow": "Comprendre {{brand}}",
+    "draft": "Version de travail. Les informations juridiques et les modalités du service restent soumises à validation avant une mise en ligne publique.",
+    "sources": "Textes de référence",
+    "apdpvp": "APDPVP : textes et décisions",
+    "journal": "Journal officiel : loi n° 025/2023 du 12 juillet 2023",
+    "gdpr": "EUR-Lex : règlement général sur la protection des données",
+    "about": {
+      "title": "Un réseau, plusieurs contextes",
+      "lead": "{{brand}} relie la vie publique du réseau et les contributions partagées volontairement depuis ses réseaux enfants.",
+      "purpose": {
+        "title": "La personne garde son identité sociale",
+        "body": "Une personne choisit son identifiant et son profil. Un réseau supplémentaire ajoute un contexte de participation ; il ne crée pas une seconde personne."
+      },
+      "contexts": {
+        "title": "Rendre public reste un choix",
+        "body": "Un contenu réservé à un réseau fermé ne s’affiche pas dans cette lecture publique. La diffusion sur {{brand}} exige un choix explicite et une audience publique ; le retrait de cette diffusion s’applique aussi ici."
+      },
+      "trust": {
+        "title": "Les indications de confiance sont calculées",
+        "body": "Officiel décrit la confiance attribuée à une page institutionnelle. Vérifié et Agent public reposent sur des preuves d’identité actives. Communauté désigne la participation sans ces preuves supplémentaires. Ces indications ne garantissent pas la véracité d’une publication."
+      }
+    },
+    "legal": {
+      "title": "Mentions légales",
+      "lead": "Les informations nécessaires à l’identification de l’éditeur et aux conditions du service sont en cours de validation.",
+      "publisher": {
+        "title": "Éditeur et responsabilités",
+        "body": "Le projet est porté par NTSAGUI Digital. La dénomination juridique complète, les coordonnées de contact et la responsabilité de publication doivent être renseignées et validées avant publication. Le prestataire technique et les lieux de traitement restent à définir."
+      },
+      "law": {
+        "title": "Protection des données",
+        "body": "Le cadre gabonais comprend la loi n° 001/2011, modifiée par la loi n° 025/2023 du 12 juillet 2023. Les démarches auprès de l’APDPVP et les conditions d’application du RGPD, notamment son article 3, doivent être examinées avec un juriste selon les traitements et les publics concernés."
+      },
+      "publication": {
+        "title": "État de validation",
+        "body": "Ces textes ne constituent pas une déclaration de conformité, une attestation de l’APDPVP ni une preuve de localisation des données. La mise en ligne reste soumise à la validation des textes et des conditions d’exploitation."
+      }
+    },
+    "privacy": {
+      "title": "Confidentialité et vos choix",
+      "lead": "Comprendre ce qui est public et retrouver les commandes de votre profil, de vos consentements et de vos données.",
+      "profile": {
+        "title": "Vos publications et votre profil",
+        "body": "La lecture sans compte montre uniquement les projections publiques admises : publications ouvertes, profils réduits et pages Officiel. Le mode privé et le retrait du profil sont globaux au moteur. Retirer un profil ne supprime pas automatiquement ses publications ; leurs commandes de retrait et vos droits sur les données sont distincts."
+      },
+      "cookies": {
+        "title": "Connexion et mesure facultative",
+        "body": "Des cookies propres à {{brand}} permettent de corréler la session du navigateur avec la lecture serveur. Ils servent la connexion et sa fermeture. La mesure d’usage facultative exige un consentement spécifique ; la lecture publique n’accorde pas ce consentement."
+      },
+      "rights": {
+        "title": "Vos commandes de données",
+        "body": "L’espace Mes données donne accès aux préférences, consentements, notifications, demandes d’export, d’effacement et aux recours. Il reste accessible en cas de suspension du réseau. Les coordonnées du responsable, les bases juridiques, durées de conservation et modalités de réponse doivent être complétées lors de la validation juridique."
+      }
+    }
+  }
+}

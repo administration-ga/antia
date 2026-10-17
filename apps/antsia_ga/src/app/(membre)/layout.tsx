@@ -1,6 +1,7 @@
 import type { ReactNode } from "react"
 
 import { NetworkShell } from "@/components/network-shell"
+import { SessionProviders } from "@/components/providers"
 
 /**
  * Le gabarit des pages de MEMBRE (fil, messagerie, statuts) : la coque du réseau
@@ -10,5 +11,5 @@ import { NetworkShell } from "@/components/network-shell"
  * communication, à une position stable de l'arbre).
  */
 export default function MemberLayout({ children }: { children: ReactNode }) {
-  return <NetworkShell>{children}</NetworkShell>
+  return <SessionProviders><NetworkShell>{children}</NetworkShell></SessionProviders>
 }

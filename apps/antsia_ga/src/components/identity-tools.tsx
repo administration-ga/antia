@@ -13,10 +13,12 @@ import { useMemberSession } from "./network-shell"
 import { Button } from "./shared/controls"
 import { authClient } from "@/lib/auth-client"
 import { routes } from "@/lib/routes"
+import { resumeSessionBridge, rotateSessionBridgeFence } from "@/lib/session-bridge-client"
 
 /** Identité et passage entre applications, ouverts par un contrôle explicite. */
 export function IdentityTools() {
   const { t } = useTranslation("antsia")
+  const { t: tPublic } = useTranslation("publicNetwork")
   const { person } = useMemberSession()
   const configuration = useQuery(api.modules.platform.authentication.configuration, {})
   const [open, setOpen] = useState(false)
@@ -70,6 +72,7 @@ export function IdentityTools() {
               setLinking(true)
               let timer: ReturnType<typeof setTimeout> | undefined
               try {
+                rotateSessionBridgeFence()
                 const result = await Promise.race([
                   authClient.oauth2.link({ providerId: "idn", callbackURL: routes.feed(), fetchOptions: { signal: controller.signal } }),
                   new Promise<never>((_resolve, reject) => {
@@ -90,10 +93,14 @@ export function IdentityTools() {
           <p className="text-sm font-medium">{t("identity.applications")}</p>
           {configuration?.applications.filter((app) => app.key !== "antsia_ga").map((app) => (
             <Button key={app.key} variant="ghost" disabled={sso.pending} onClick={async () => {
+              try {
+              rotateSessionBridgeFence()
               const result = await sso.navigateExternal(routes.application(app.origin))
               if (result.kind === "refused") toast.error(t("identity.handoffFailed"))
+              } catch { toast.error(t("identity.handoffFailed")) }
             }}>{t(`identity.${app.key}`)}</Button>
           ))}
+          <Button variant="outline" onClick={() => { try { resumeSessionBridge() } catch { toast.error(t("identity.handoffFailed")) } }}>{tPublic("session.resume")}</Button>
         </section>
       ) : null}
     </div>

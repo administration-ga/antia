@@ -3,17 +3,20 @@ import type { ReactNode } from "react"
 
 import { Providers } from "@/components/providers"
 import { getAppT } from "@/i18n/server"
+import { configuredMetadataOrigin, getPublicLocale } from "@/lib/server-session"
 
 // Feuille de LiveKit (salles d'appel) AVANT celle de l'application : la couche
 // de communication du moteur (classes `.iappel-*`) la surcharge.
 import "@livekit/components-styles"
 import "./globals.css"
 
-export function generateMetadata(): Metadata {
-  const { t } = getAppT()
+export async function generateMetadata(): Promise<Metadata> {
+  const { t } = getAppT(await getPublicLocale())
+  const origin = configuredMetadataOrigin()
   return {
     title: t("meta.title"),
     description: t("meta.description"),
+    ...(origin ? { metadataBase: new URL(origin) } : {}),
   }
 }
 
@@ -23,8 +26,8 @@ export const viewport: Viewport = {
   viewportFit: "cover",
 }
 
-export default function RootLayout({ children }: { children: ReactNode }) {
-  const { locale, t } = getAppT()
+export default async function RootLayout({ children }: { children: ReactNode }) {
+  const { locale, t } = getAppT(await getPublicLocale())
   return (
     <html lang={locale} data-charte="antsia" suppressHydrationWarning>
       <body className="min-h-dvh">

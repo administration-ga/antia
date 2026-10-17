@@ -88,6 +88,8 @@ vi.mock("@antsia/ui", () => ({
 }))
 
 import { postDraftKey } from "./post-draft"
+import { NetworkProvider } from "@antsia/api/network"
+import { TEST_ROUTES } from "../../tests/engine-wrapper"
 import { configurePostDraftStorage, postDraftStorageKey, postDraftStore, usePostDraft } from "./post-draft-store"
 import { PostComposer } from "./PostComposer"
 
@@ -152,6 +154,59 @@ beforeEach(() => {
   vi.stubGlobal("URL", {
     createObjectURL: (file: File) => `blob:${file.name}`,
     revokeObjectURL: () => undefined,
+  })
+})
+
+describe("PA8 — publication accessible sans compte par geste explicite", () => {
+  it("le changement d'audience vers le public n'est pas un consentement, le geste seul est transmis", async () => {
+    render(<PostComposer />)
+    fireEvent.change(zoneDeTexte(), { target: { value: "Choix explicite" } })
+    fireEvent.change(screen.getByRole("combobox"), { target: { value: "public" } })
+    const publicChoice = screen.getByRole("checkbox") as HTMLInputElement
+    expect(publicChoice.checked).toBe(false)
+    fireEvent.click(publicChoice)
+    fireEvent.click(screen.getByRole("button", { name: "Publier" }))
+    await waitFor(() => expect(mocks.publish).toHaveBeenCalledTimes(1))
+    expect(mocks.publish.mock.calls[0]?.[0]).toMatchObject({ audience: "public", alsoOnRoot: true, body: "Choix explicite" })
+  })
+  it("un aller-retour par Connexions révoque le choix public du brouillon", async () => {
+    render(<PostComposer />)
+    const audience = screen.getByRole("combobox")
+    fireEvent.change(audience, { target: { value: "public" } })
+    fireEvent.click(screen.getByRole("checkbox"))
+    fireEvent.change(audience, { target: { value: "connections" } })
+    expect(screen.queryByRole("checkbox")).toBeNull()
+    fireEvent.change(audience, { target: { value: "public" } })
+    expect((screen.getByRole("checkbox") as HTMLInputElement).checked).toBe(false)
+    fireEvent.change(zoneDeTexte(), { target: { value: "Réservé aux membres" } })
+    fireEvent.click(screen.getByRole("button", { name: "Publier" }))
+    await waitFor(() => expect(mocks.publish).toHaveBeenCalledTimes(1))
+    expect(mocks.publish.mock.calls[0]?.[0]).not.toHaveProperty("alsoOnRoot")
+  })
+  it("la province du contenu est facultative et volontaire, pas déduite du profil", async () => {
+    render(<NetworkProvider networkId={TEST_NETWORK_ID} personId={TEST_PERSON_ID} slug="antsia" charte="antsia" routes={TEST_ROUTES}><PostComposer /></NetworkProvider>)
+    const province = screen.getByRole("combobox", { name: /Province du contenu/ }) as HTMLSelectElement
+    expect(province.value).toBe("")
+    fireEvent.change(province, { target: { value: "nyanga" } })
+    fireEvent.change(zoneDeTexte(), { target: { value: "Rencontre dans la Nyanga" } })
+    fireEvent.click(screen.getByRole("button", { name: "Publier" }))
+    await waitFor(() => expect(mocks.publish).toHaveBeenCalledTimes(1))
+    expect(mocks.publish.mock.calls[0]?.[0]).toMatchObject({ province: "nyanga", audience: "connections" })
+    expect(mocks.publish.mock.calls[0]?.[0]).not.toHaveProperty("alsoOnRoot")
+  })
+  it("une page native racine possède son propre choix explicite, une page enfant conserve sa règle", async () => {
+    const page = { pageId: "pages_public" as never, displayName: "Page de recette", avatarUrl: null }
+    const { unmount } = render(<PostComposer asPage={page} />)
+    expect(screen.queryByRole("checkbox")).toBeNull()
+    expect(screen.getByText("La diffusion suit les réglages de cette page.")).toBeTruthy()
+    unmount()
+    render(<NetworkProvider networkId={TEST_NETWORK_ID} personId={TEST_PERSON_ID} slug="antsia" charte="antsia" routes={TEST_ROUTES}><PostComposer asPage={page} /></NetworkProvider>)
+    expect((screen.getByRole("checkbox", { name: "Accessible sans compte" }) as HTMLInputElement).checked).toBe(false)
+    fireEvent.click(screen.getByRole("checkbox", { name: "Accessible sans compte" }))
+    fireEvent.change(zoneDeTexte(), { target: { value: "Communication publique choisie" } })
+    fireEvent.click(screen.getByRole("button", { name: "Publier en tant que Page de recette" }))
+    await waitFor(() => expect(mocks.publishAsPage).toHaveBeenCalledTimes(1))
+    expect(mocks.publishAsPage.mock.calls[0]?.[0]).toMatchObject({ pageId: "pages_public", audience: "public", alsoOnRoot: true })
   })
 })
 

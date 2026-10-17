@@ -3,7 +3,7 @@
 import { BRAND_NAME } from "@antsia/social-contracts/brand"
 import { NotificationBell } from "@antsia/social-features/notifications"
 import { cn } from "@antsia/ui/lib/cn"
-import { LogOut, MessageCircle, UserRound } from "lucide-react"
+import { Compass, LogOut, MessageCircle, ShieldCheck, UserRound } from "lucide-react"
 import Link from "next/link"
 import { type ReactNode, useState } from "react"
 import { useTranslation } from "react-i18next"
@@ -28,6 +28,7 @@ const NAV_LINK =
  */
 export function MemberTopBar({ onMobile = "visible" }: { onMobile?: "visible" | "hidden" }) {
   const { t } = useTranslation("antsia")
+  const { t: tMember } = useTranslation("memberNetwork")
   const { person } = useMemberSession()
   const [signingOut, setSigningOut] = useState(false)
   const myHandle = person.published && person.handle ? person.handle : null
@@ -39,11 +40,14 @@ export function MemberTopBar({ onMobile = "visible" }: { onMobile?: "visible" | 
         onMobile === "hidden" && "hidden min-[960px]:block",
       )}
     >
-      <div className="mx-auto flex max-w-7xl items-center justify-between gap-2 px-4 py-2 sm:px-5">
-        <Link href={routes.feed()} className="text-lg font-semibold tracking-tight">
+      <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-2 px-4 py-2 sm:px-5">
+        <Link href={routes.feed()} className="inline-flex min-h-11 items-center rounded-lg px-1 text-lg font-semibold tracking-tight focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
           {BRAND_NAME}
         </Link>
-        <nav aria-label={t("nav.label")} className="flex items-center gap-1">
+        <nav aria-label={t("nav.label")} className="flex flex-wrap items-center gap-1">
+          <Link href={routes.nationalFeed()} className={NAV_LINK} aria-label={tMember("nav.national")}><Compass aria-hidden="true" className="size-4" /><span className="hidden lg:inline">{tMember("nav.national")}</span></Link>
+          <Link href={routes.discover()} className={NAV_LINK}>{tMember("nav.discover")}</Link>
+          <Link href={routes.moderation()} className={NAV_LINK} aria-label={tMember("nav.moderation")}><ShieldCheck aria-hidden="true" className="size-4" /><span className="hidden lg:inline">{tMember("nav.moderation")}</span></Link>
           <NotificationBell />
           <IdentityTools />
           <Link href={routes.messages()} className={NAV_LINK} aria-label={t("nav.messages")}>

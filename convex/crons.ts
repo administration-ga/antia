@@ -62,4 +62,7 @@ crons.daily("data-purge-export-receipts", { hourUTC: 4, minuteUTC: 30 }, interna
 // PA7 : la lecture ferme immédiatement les preuves expirées ; rétention par lots de 100.
 crons.daily("operators-purge-expired-idn-proofs", { hourUTC: 3, minuteUTC: 55 }, internal.modules.platform.operatorAccess.purgeExpiredProofs, {})
 
+// PA8 : mesures publiques par générations et tranches bornées, sans identités.
+crons.interval("public-refresh-aggregates", { minutes: 15 }, internal.modules.public.aggregate.refresh, {})
+
 export default crons

@@ -20,6 +20,8 @@ export const SOCIAL_MODULE_DIRECTORIES: readonly string[] = [
   "convex/modules/networks",
   "convex/modules/people",
   "convex/modules/posts",
+  "convex/modules/public",
+  "convex/modules/discovery",
   "convex/modules/engagement",
   "convex/modules/media",
   "convex/modules/graph",

@@ -16,6 +16,7 @@ import { pageTrustRank, assertMemberCreatableOwnerKind, assertPageHandle, assert
 import { assertCountryCode, assertPostContent, assertPostMedia, assertPostReach, REACH_REQUIRING_COUNTRY } from "@antsia/social-domain/content"
 import { cursorForFeedPost } from "@antsia/social-domain/feedScale"
 import { effectiveVisibility } from "@antsia/social-domain/network"
+import { PROVINCE_SLUGS } from "@antsia/social-domain/provinces"
 import { foldSearchQuery } from "@antsia/social-domain/searchText"
 import { paginationOptsValidator, type PaginationResult } from "convex/server"
 import { type Infer, v } from "convex/values"
@@ -27,7 +28,7 @@ import type { QueryCtx } from "../../_generated/server"
 import { checked, fail, failRule, notFound } from "../../lib/errors"
 import { networkMutation, networkQuery } from "../../lib/functions"
 import { enforceRateLimit } from "../../lib/rateLimit"
-import { contentVisibilityValidator, pageOwnerKindValidator } from "../../lib/validators"
+import { contentVisibilityValidator, literals, pageOwnerKindValidator } from "../../lib/validators"
 import { servableUrl } from "../files/storageGuard"
 import { declaredMediaValidator, verifyDeclaredMedia } from "../media/media"
 import { enqueueFanout } from "../notifications/fanout"
@@ -400,6 +401,8 @@ export const publishAsPage = networkMutation({
     media: v.optional(v.array(declaredMediaValidator)),
     audience: v.optional(pagePostAudienceValidator),
     reach: v.optional(v.string()),
+    province: v.optional(literals(PROVINCE_SLUGS)),
+    alsoOnRoot: v.optional(v.boolean()),
     idempotencyKey: v.optional(v.string()),
   },
   returns: v.object({ postId: v.id("posts"), created: v.boolean() }),
@@ -422,7 +425,8 @@ export const publishAsPage = networkMutation({
     )
     const body = checked(() => assertPostContent({ body: args.body, mediaCount: media.length, isShare: false }))
     const placed = placePagePost(page, args.reach, ctx.network.reachValues)
-    const visibility = effectiveVisibility({ networkKind: ctx.network.kind, audienceIsPublic: audience === "public", authorRequestedRoot: false, ruleVisibility: page.visibility })
+    // Le nouveau choix sans compte porte les NATIVES ; les pages enfants gardent leur règle collective.
+    const visibility = effectiveVisibility({ networkKind: ctx.network.kind, audienceIsPublic: audience === "public", authorRequestedRoot: ctx.network.kind === "root" && (args.alsoOnRoot ?? false), ruleVisibility: page.visibility })
     const { postId } = await writePost(ctx, {
       network: ctx.network,
       authorPersonId: ctx.person._id,
@@ -431,6 +435,7 @@ export const publishAsPage = networkMutation({
       visibility,
       ...(media.length > 0 ? { media } : {}),
       ...placed,
+      ...(args.province !== undefined ? { province: args.province } : {}),
       ...(args.idempotencyKey !== undefined ? { idempotencyKey: args.idempotencyKey } : {}),
       pageId: page._id,
     })
