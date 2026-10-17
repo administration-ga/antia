@@ -1,4 +1,19 @@
 {
+  "post": {
+    "origin": "Publié depuis {{name}}",
+    "event": {
+      "label": "Évènement annoncé",
+      "scheduled": "Évènement prévu",
+      "cancelled": "Évènement annulé",
+      "timeZone": "Heures affichées dans votre fuseau : {{timeZone}}",
+      "participation": "Votre réponse enregistrée : {{response}}"
+    }
+  },
+  "feedPages": {
+    "errorTitle": "Fil indisponible",
+    "errorMessage": "Les publications n’ont pas pu être chargées.",
+    "incomplete": "Ce fil est incomplet. Certaines publications peuvent ne pas être affichées."
+  },
   "reseauFeedPages": {
     "loadMore": {
       "none": "Aucune publication supplémentaire.",

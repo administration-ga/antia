@@ -1,24 +1,28 @@
 "use client"
 
 import type { RefreshableCrossDomainAuthClient } from "@antsia/api/cross-domain-session-bootstrap"
+import { useStableConvexAuth } from "@antsia/api/hooks"
 import { EngineConvexProvider } from "@antsia/api/next-provider"
+import { ViewerPreferencesProvider } from "@antsia/api/viewer-preferences"
+import { AppearanceProvider, useOptionalAppearance } from "@antsia/social-features/shell/appearance"
 import { BRAND_NAME } from "@antsia/social-contracts/brand"
 import type { Locale } from "@antsia/social-features/i18n"
 import { I18nProvider } from "@antsia/social-features/i18n/client"
 import { api } from "@convex/_generated/api"
-import { useConvexAuth, useQuery } from "convex/react"
+import { useQuery } from "convex/react"
 import { type ReactNode, useEffect } from "react"
 import { useTranslation } from "react-i18next"
 import { Toaster } from "sonner"
 
 import { APP_NAMESPACE, appResources } from "@/i18n/resources"
 import { authClient } from "@/lib/auth-client"
+import { UsagePermissionProvider } from "./analytics-permission"
 
 const CONVEX_URL = process.env.NEXT_PUBLIC_CONVEX_URL ?? ""
 
 /** La préférence personnelle s'applique après preuve de session, sans recopier les claims IDN. */
 function PersonalLocale({ children }: { children: ReactNode }) {
-  const { isAuthenticated } = useConvexAuth()
+  const { isAuthenticated } = useStableConvexAuth()
   const person = useQuery(api.modules.people.persons.getMyPerson, isAuthenticated ? {} : "skip")
   const { i18n } = useTranslation()
   useEffect(() => {
@@ -26,7 +30,12 @@ function PersonalLocale({ children }: { children: ReactNode }) {
     document.documentElement.lang = person.locale
     if (i18n.language !== person.locale) void i18n.changeLanguage(person.locale)
   }, [person?.locale, i18n])
-  return <>{children}</>
+  return <ViewerPreferencesProvider timeZone={person?.timeZone}>{children}</ViewerPreferencesProvider>
+}
+
+function EngineToaster() {
+  const appearance = useOptionalAppearance()
+  return <Toaster theme={appearance?.resolvedAppearance ?? "light"} position="top-center" richColors closeButton />
 }
 
 /** Session Better Auth + client Convex ; sans moteur configuré, un avertissement plutôt qu'un écran blanc. */
@@ -34,7 +43,7 @@ function SessionProviders({ children }: { children: ReactNode }) {
   const { t } = useTranslation(APP_NAMESPACE)
   if (!CONVEX_URL) {
     return (
-      <main className="mx-auto flex min-h-dvh max-w-xl flex-col justify-center px-6">
+      <main id="contenu" tabIndex={-1} className="mx-auto flex min-h-dvh max-w-xl flex-col justify-center px-6 focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring">
         <p role="alert" className="rounded-xl border border-border bg-card p-4 text-card-foreground">
           {t("session.backendMissing")}
         </p>
@@ -57,8 +66,10 @@ function SessionProviders({ children }: { children: ReactNode }) {
 export function Providers({ locale, children }: { locale: Locale; children: ReactNode }) {
   return (
     <I18nProvider locale={locale} appResources={appResources} defaultNS={APP_NAMESPACE} defaultVariables={{ brand: BRAND_NAME }}>
-      <SessionProviders>{children}</SessionProviders>
-      <Toaster position="top-center" richColors closeButton />
+      <AppearanceProvider storagePrefix="antsia:antsia:">
+        <UsagePermissionProvider><SessionProviders>{children}</SessionProviders></UsagePermissionProvider>
+        <EngineToaster />
+      </AppearanceProvider>
     </I18nProvider>
   )
 }

@@ -16,6 +16,8 @@ const state = vi.hoisted(() => ({
   ensurePerson: vi.fn(async () => undefined),
   useQuery: vi.fn(),
   useMutation: vi.fn(),
+  connections: [] as Array<{ url: string; query: unknown }>,
+  providerClients: [] as unknown[],
 }))
 
 // Le rendu serveur vérifie les surfaces réellement montées. Ce harnais retient
@@ -51,15 +53,19 @@ vi.mock("convex/react", () => ({
 }))
 vi.mock("@convex-dev/react-query", () => ({
   ConvexQueryClient: class {
+    constructor(readonly url: string) {}
     convexClient = {}
     hashFn() { return () => "query" }
     queryFn() { return () => undefined }
-    connect() {}
+    connect(query: unknown) { state.connections.push({ url: this.url, query }) }
   },
 }))
 vi.mock("@tanstack/react-query", () => ({
   QueryClient: class {},
-  QueryClientProvider: ({ children }: { children: ReactNode }) => children,
+  QueryClientProvider: ({ children, client }: { children: ReactNode; client: unknown }) => {
+    state.providerClients.push(client)
+    return children
+  },
 }))
 vi.mock("./stable-convex-better-auth-provider", () => ({
   StableConvexBetterAuthProvider: ({ children }: { children: ReactNode }) => children,
@@ -81,12 +87,12 @@ const authClient = {
 const reload = vi.fn()
 const labels = { loading: "Vérification de la session", failed: "Échec", retry: "Réessayer" }
 
-function render(withSessionGate = true): string {
+function render(withSessionGate = true, convexUrl = "https://engine.example"): string {
   state.effects = []
   state.stateIndex = 0
   state.refIndex = 0
   return renderToStaticMarkup(
-    <EngineConvexProvider convexUrl="https://engine.example" authClient={authClient} ensurePerson={ensurePerson} isSessionActive={withSessionGate ? sessionQuery : undefined} labels={labels}>
+    <EngineConvexProvider convexUrl={convexUrl} authClient={authClient} ensurePerson={ensurePerson} isSessionActive={withSessionGate ? sessionQuery : undefined} labels={labels}>
       <div>Contenu personnel</div>
     </EngineConvexProvider>,
   )
@@ -112,6 +118,8 @@ beforeEach(() => {
   state.refs = []
   state.stateIndex = 0
   state.refIndex = 0
+  state.connections = []
+  state.providerClients = []
   vi.stubGlobal("window", { location: { reload } })
 })
 afterEach(() => {
@@ -123,6 +131,37 @@ afterEach(() => {
 })
 
 describe("EngineConvexProvider — garde réactive de session", () => {
+  it("un remontage rend le même cache que celui auquel Convex est connecté", () => {
+    const url = "https://remount.example"
+    render(false, url)
+    runEffects()
+    const first = state.providerClients.at(-1)
+    // Nouvelle instance de la coque, même document : les hooks locaux repartent.
+    state.stateValues = []
+    state.refs = []
+    render(false, url)
+    runEffects()
+    expect(state.providerClients.at(-1)).toBe(first)
+    expect(state.connections).toEqual([{ url, query: first }])
+  })
+
+  it("deux moteurs gardent des caches et des connexions distincts", () => {
+    render(false, "https://first-pair.example")
+    runEffects()
+    render(false, "https://second-pair.example")
+    runEffects()
+    expect(state.providerClients[0]).not.toBe(state.providerClients[1])
+    expect(state.connections.map((entry) => entry.query)).toEqual(state.providerClients)
+  })
+
+  it("ne partage aucun cache TanStack entre deux requêtes serveur", () => {
+    vi.stubGlobal("window", undefined)
+    render(false, "https://server-pair.example")
+    render(false, "https://server-pair.example")
+    expect(state.providerClients[0]).not.toBe(state.providerClients[1])
+    expect(state.connections).toEqual([])
+  })
+
   it("ne synchronise aucune personne pendant notre déconnexion même si un ancien état authentifié revient", () => {
     state.authenticated = true
     state.active = true

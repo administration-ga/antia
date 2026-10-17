@@ -18,7 +18,9 @@
     "./notifications": "./src/features/notifications/index.ts",
     "./identity": "./src/features/identity/index.ts",
     "./*": "./src/*.ts",
-    "./direct": "./src/features/direct/index.ts"
+    "./direct": "./src/features/direct/index.ts",
+    "./shell/appearance": "./src/shell/appearance/index.ts",
+    "./shell/analytics": "./src/shell/analytics/index.ts"
   },
   "scripts": {
     "typecheck": "tsgo --noEmit -p tsconfig.json",

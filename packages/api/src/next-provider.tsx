@@ -11,28 +11,35 @@ import type { RefreshableCrossDomainAuthClient } from "./cross-domain-session-bo
 import { isSigningOutEverywhere } from "./sign-out-everywhere"
 import { type SessionBootstrapLabels, StableConvexBetterAuthProvider } from "./stable-convex-better-auth-provider"
 
-/** Un client Convex par URL et par onglet : les montages successifs (StrictMode) le partagent. */
-const clients = new Map<string, ConvexQueryClient>()
-/** URL dont le client est déjà relié à TanStack Query (une seule fois par onglet). */
-const connectedUrls = new Set<string>()
+/** Le couple reste indivisible : Convex doit notifier le cache réellement monté. */
+type EngineClients = { convex: ConvexQueryClient; query: QueryClient; connected: boolean }
+const clients = new Map<string, EngineClients>()
 
-function convexClientFor(convexUrl: string): ConvexQueryClient {
-  let client = clients.get(convexUrl)
-  if (!client) {
-    client = new ConvexQueryClient(convexUrl)
-    clients.set(convexUrl, client)
-  }
-  return client
+function engineClientsFor(convexUrl: string): EngineClients {
+  // Aucun cache partagé entre requêtes serveur ; un couple par URL dans le document client.
+  const known = typeof window === "undefined" ? undefined : clients.get(convexUrl)
+  if (known) return known
+  const convex = new ConvexQueryClient(convexUrl)
+  const query = new QueryClient({
+    defaultOptions: {
+      queries: {
+        queryKeyHashFn: convex.hashFn(),
+        queryFn: convex.queryFn(),
+        refetchOnWindowFocus: false,
+        refetchOnReconnect: false,
+        staleTime: 5 * 60 * 1000,
+      },
+    },
+  })
+  const pair: EngineClients = { convex, query, connected: false }
+  if (typeof window !== "undefined") clients.set(convexUrl, pair)
+  return pair
 }
 
-function connectOnce(convexUrl: string, client: ConvexQueryClient, queryClient: QueryClient): void {
-  if (connectedUrls.has(convexUrl)) return
-  try {
-    client.connect(queryClient)
-  } catch {
-    // « already subscribed » : le client est de fait connecté.
-  }
-  connectedUrls.add(convexUrl)
+function connectOnce(pair: EngineClients): void {
+  if (pair.connected) return
+  pair.convex.connect(pair.query)
+  pair.connected = true
 }
 
 /** Crée la personne du moteur à la première session authentifiée (rien n'est recopié ni publié). */
@@ -137,32 +144,17 @@ export function EngineConvexProvider(props: {
   labels: SessionBootstrapLabels
   children: ReactNode
 }) {
-  const convexQueryClient = convexClientFor(props.convexUrl)
-  const queryClient = useMemo(
-    () =>
-      new QueryClient({
-        defaultOptions: {
-          queries: {
-            queryKeyHashFn: convexQueryClient.hashFn(),
-            queryFn: convexQueryClient.queryFn(),
-            refetchOnWindowFocus: false,
-            refetchOnReconnect: false,
-            staleTime: 5 * 60 * 1000,
-          },
-        },
-      }),
-    [convexQueryClient],
-  )
+  const pair = useMemo(() => engineClientsFor(props.convexUrl), [props.convexUrl])
 
   useEffect(() => {
-    connectOnce(props.convexUrl, convexQueryClient, queryClient)
-  }, [props.convexUrl, convexQueryClient, queryClient])
+    connectOnce(pair)
+  }, [pair])
 
   const content = <PersonSync ensurePerson={props.ensurePerson}>{props.children}</PersonSync>
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <StableConvexBetterAuthProvider client={convexQueryClient.convexClient} authClient={props.authClient} labels={props.labels}>
+    <QueryClientProvider client={pair.query}>
+      <StableConvexBetterAuthProvider client={pair.convex.convexClient} authClient={props.authClient} labels={props.labels}>
         {props.isSessionActive ? (
           <LiveSessionGate query={props.isSessionActive} loadingLabel={props.labels.loading}>{content}</LiveSessionGate>
         ) : content}

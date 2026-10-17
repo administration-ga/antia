@@ -191,6 +191,7 @@
         "@types/react-dom": "catalog:",
         "@typescript/native-preview": "catalog:",
         "eslint": "catalog:",
+        "jsdom": "catalog:",
         "tailwindcss": "catalog:",
         "typescript": "catalog:",
         "vitest": "catalog:",

@@ -3,6 +3,8 @@
 /** Protections personnelles : deux sources natives, aucune identité projetée. */
 import { api, type Id } from "@antsia/api/engine"
 import { useAuthenticatedConvexQuery } from "@antsia/api/hooks"
+import { useViewerTimeZone } from "@antsia/api/viewer-preferences"
+import { formatViewerDate } from "@antsia/api/civil-date"
 import { useNetwork } from "@antsia/api/network"
 import { Button } from "@antsia/ui"
 import { EspaceDialog, EspaceKitStyles } from "@antsia/ui/espace-kit"
@@ -75,6 +77,7 @@ function BlockedQueryPage(props: {
 function BlockedPeoplePages() {
   const { networkId } = useNetwork()
   const { t, i18n } = useTranslation("reseau")
+  const timeZone = useViewerTimeZone()
   const [chains, setChains] = useState(initialBlockChains)
   const [confirming, setConfirming] = useState<BlockRow | null>(null)
   const [busy, setBusy] = useState(false)
@@ -164,7 +167,7 @@ function BlockedPeoplePages() {
               <li key={row.targetPersonId} className="rp-person-tile">
                 <p style={{ margin: 0, fontSize: 14, color: "var(--ink-900)" }}>{t("peoplePanel.blocks.neutral")}</p>
                 <p style={{ margin: 0, fontSize: 12, color: "var(--ink-600)" }}>
-                  <time dateTime={new Date(row.at).toISOString()}>{t("peoplePanel.blocks.blockedAt", { date: new Intl.DateTimeFormat(i18n.language, { dateStyle: "medium" }).format(row.at) })}</time>
+                  <time dateTime={new Date(row.at).toISOString()}>{t("peoplePanel.blocks.blockedAt", { date: formatViewerDate(row.at, i18n.language, { dateStyle: "medium" }, timeZone) })}</time>
                 </p>
                 <Button variant="secondary" size="sm" disabled={busy} aria-describedby={scopeId} onClick={() => {
                   if (active.current && !running.current) setConfirming(row)

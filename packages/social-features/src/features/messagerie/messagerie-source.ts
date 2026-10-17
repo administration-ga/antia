@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/messagerie/messagerie-source.ts @ ad2e7fdc2 — adaptations : SEULE la source personnelle demeure (`SOURCE_AGENT`) — `SOURCE_POSTE`, `useOptionalOrg`, l'espace « poste » et son texte d'administration absente retirés ; branchée sur le moteur, réseau courant en argument (`useNetwork().networkId`) : fils par `messaging.inbox.paginateMyThreads` (la fenêtre ET les pages, curseur à deux côtés `low`/`high`), `messaging.inbox.getThread`, `messaging.inbox.totalUnread`, groupes par la première page de `groups.threads.paginateMyGroupThreads`, `groups.threads.totalUnread`, appel par `calls.direct.callMember` (cible `{ personId }` quand l'écran la connaît, sinon `{ handle }`) ; données TYPÉES depuis l'API (`MessagerieThread`, `MessagerieGroupThread`, curseurs tirés de `FunctionReturnType`) au lieu de `any` ; dédoublonnage des pages par `threadId` ; `ResultatAppel` aligné sur le moteur (identifiants `Id<"calls">` et `Id<"persons">`, appelé rendu par le moteur, même d'un appel adressé par identifiant public, ni phrase serveur ni renvoi de secrétariat) et normalisé par `resultatAppelDe`.
+// Dupliqué de socle/packages/agent-features/src/features/messagerie/messagerie-source.ts @ ad2e7fdc2 — adaptations : SEULE la source personnelle demeure (`SOURCE_AGENT`) — `SOURCE_POSTE`, `useOptionalOrg`, l'espace « poste » et son texte d'administration absente retirés ; branchée sur le moteur, réseau courant en argument (`useNetwork().networkId`) : fils par `messaging.inbox.paginateMyThreads` (la fenêtre ET les pages, curseur à deux côtés `low`/`high`), `messaging.inbox.getThread`, `messaging.inbox.totalUnread`, groupes par la première page de `groups.threads.paginateMyGroupThreads`, `groups.threads.totalUnread`, appel par `calls.direct.callMember` (cible `{ personId }` quand l'écran la connaît, sinon `{ handle }`) ; données TYPÉES depuis l'API (`MessagerieThread`, `MessagerieGroupThread`, curseurs tirés de `FunctionReturnType`) au lieu de `any` ; dédoublonnage des pages par `threadId` ; `ResultatAppel` aligné sur le moteur (identifiants `Id<"calls">` et `Id<"persons">`, appelé rendu par le moteur, même d'un appel adressé par identifiant public, ni phrase serveur ni renvoi de secrétariat) et normalisé par `resultatAppelDe` ; PA6 : `useMessageWrites` porte les 23 écritures 1:1/groupe, dépôt, épingle et transfert, arguments/résultats dérivés de l’API, réseau courant injecté par la source avant livraison.
 "use client"
 
 /**
@@ -35,7 +35,7 @@ import {
 } from "@antsia/api/hooks"
 import { useNetwork } from "@antsia/api/network"
 import type { CallAdmissionReason } from "@antsia/social-domain/callJournal"
-import type { FunctionReturnType } from "convex/server"
+import type { FunctionArgs, FunctionReturnType } from "convex/server"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { etatDeQuery, type EtatListe } from "../../shell/query-state"
 
@@ -281,6 +281,65 @@ export function resultatAppelDe(
 	}
 }
 
+/** Les portes d’écriture de la boîte, tirées de l’API générée du moteur. */
+const MESSAGE_WRITE_REFS = {
+	send: api.modules.messaging.messages.sendMessage,
+	startThread: api.modules.messaging.inbox.startThreadWithHandle,
+	markRead: api.modules.messaging.messages.markRead,
+	setTyping: api.modules.messaging.typing.setTyping,
+	clearTyping: api.modules.messaging.typing.clearTyping,
+	uploadUrl1a1: api.modules.messaging.messages.generateAttachmentUploadUrl,
+	deleteForAll: api.modules.messaging.messages.deleteMessage,
+	editMessage: api.modules.messaging.messages.editMessage,
+	deleteForMe: api.modules.messaging.messages.deleteMessageForMe,
+	react1a1: api.modules.messaging.reactions.toggleMessageReaction,
+	sendGroup: api.modules.groups.messages.sendGroupMessage,
+	markGroupRead: api.modules.groups.threads.markGroupRead,
+	setGroupTyping: api.modules.groups.typing.setGroupTyping,
+	clearGroupTyping: api.modules.groups.typing.clearGroupTyping,
+	uploadUrlGroupe: api.modules.groups.messages.generateAttachmentUploadUrl,
+	reactGroupe: api.modules.groups.messages.toggleGroupMessageReaction,
+	deleteGroupForMe: api.modules.groups.messages.deleteGroupMessageForMe,
+	editGroupMessage: api.modules.groups.messages.editGroupMessage,
+	deleteGroupForAll: api.modules.groups.messages.deleteGroupMessage,
+	setPinned: api.modules.messaging.pins.setPinnedMessage,
+	setGroupPinned: api.modules.groups.messages.setGroupPinnedMessage,
+	forwardMessage: api.modules.messaging.forward.forwardMessage,
+	forwardGroupMessage: api.modules.messaging.forward.forwardGroupMessage,
+} as const
+
+type MessageWriteReference = (typeof MESSAGE_WRITE_REFS)[keyof typeof MESSAGE_WRITE_REFS]
+
+/** Le réseau appartient à la source, jamais à l’appelant de l’écriture. */
+export type MessageWriteArgs<Reference extends MessageWriteReference> = Omit<FunctionArgs<Reference>, "networkId">
+
+export interface MessageWriteMutation<Reference extends MessageWriteReference> {
+	mutateAsync: (args: MessageWriteArgs<Reference>) => Promise<FunctionReturnType<Reference>>
+	isPending: boolean
+}
+
+export type MessageWrites = {
+	[Name in keyof typeof MESSAGE_WRITE_REFS]: MessageWriteMutation<(typeof MESSAGE_WRITE_REFS)[Name]>
+}
+
+/**
+ * Injection fermée du réseau courant, après les arguments : même un appelant
+ * JavaScript qui glisse un `networkId` ne peut pas choisir un autre réseau.
+ * L’assertion ne change que la recomposition générique Omit + networkId ; les
+ * arguments et résultats publics restent ceux de chaque référence générée.
+ */
+function useNetworkMessageMutation<Reference extends MessageWriteReference>(
+	reference: Reference,
+	networkId: Id<"networks">,
+): MessageWriteMutation<Reference> {
+	const { mutateAsync, isPending } = useConvexMutationQuery(reference)
+	const write = useCallback(
+		(args: MessageWriteArgs<Reference>) => mutateAsync({ ...args, networkId } as FunctionArgs<Reference>),
+		[mutateAsync, networkId],
+	)
+	return useMemo(() => ({ mutateAsync: write, isPending }), [write, isPending])
+}
+
 export interface MessagerieSource {
 	espace: MessagerieEspace
 	/** Les fils 1:1 de MA boîte — une fenêtre (la première page). */
@@ -326,6 +385,8 @@ export interface MessagerieSource {
 	 * bouton lui-même n'aurait pas lieu d'être.
 	 */
 	supporteGroupes: boolean
+	/** Toutes les écritures de message et de dépôt de cette boîte. */
+	useMessageWrites: () => MessageWrites
 	/** Demander un appel, et rendre un résultat normalisé. */
 	useStartCall: () => {
 		appeler: (demande: DemandeAppel) => Promise<ResultatAppel>
@@ -498,6 +559,34 @@ export const SOURCE_AGENT: MessagerieSource = {
 	},
 	supporteBrouillon: true,
 	supporteGroupes: true,
+	useMessageWrites() {
+		const { networkId } = useNetwork()
+		return {
+			send: useNetworkMessageMutation(MESSAGE_WRITE_REFS.send, networkId),
+			startThread: useNetworkMessageMutation(MESSAGE_WRITE_REFS.startThread, networkId),
+			markRead: useNetworkMessageMutation(MESSAGE_WRITE_REFS.markRead, networkId),
+			setTyping: useNetworkMessageMutation(MESSAGE_WRITE_REFS.setTyping, networkId),
+			clearTyping: useNetworkMessageMutation(MESSAGE_WRITE_REFS.clearTyping, networkId),
+			uploadUrl1a1: useNetworkMessageMutation(MESSAGE_WRITE_REFS.uploadUrl1a1, networkId),
+			deleteForAll: useNetworkMessageMutation(MESSAGE_WRITE_REFS.deleteForAll, networkId),
+			editMessage: useNetworkMessageMutation(MESSAGE_WRITE_REFS.editMessage, networkId),
+			deleteForMe: useNetworkMessageMutation(MESSAGE_WRITE_REFS.deleteForMe, networkId),
+			react1a1: useNetworkMessageMutation(MESSAGE_WRITE_REFS.react1a1, networkId),
+			sendGroup: useNetworkMessageMutation(MESSAGE_WRITE_REFS.sendGroup, networkId),
+			markGroupRead: useNetworkMessageMutation(MESSAGE_WRITE_REFS.markGroupRead, networkId),
+			setGroupTyping: useNetworkMessageMutation(MESSAGE_WRITE_REFS.setGroupTyping, networkId),
+			clearGroupTyping: useNetworkMessageMutation(MESSAGE_WRITE_REFS.clearGroupTyping, networkId),
+			uploadUrlGroupe: useNetworkMessageMutation(MESSAGE_WRITE_REFS.uploadUrlGroupe, networkId),
+			reactGroupe: useNetworkMessageMutation(MESSAGE_WRITE_REFS.reactGroupe, networkId),
+			deleteGroupForMe: useNetworkMessageMutation(MESSAGE_WRITE_REFS.deleteGroupForMe, networkId),
+			editGroupMessage: useNetworkMessageMutation(MESSAGE_WRITE_REFS.editGroupMessage, networkId),
+			deleteGroupForAll: useNetworkMessageMutation(MESSAGE_WRITE_REFS.deleteGroupForAll, networkId),
+			setPinned: useNetworkMessageMutation(MESSAGE_WRITE_REFS.setPinned, networkId),
+			setGroupPinned: useNetworkMessageMutation(MESSAGE_WRITE_REFS.setGroupPinned, networkId),
+			forwardMessage: useNetworkMessageMutation(MESSAGE_WRITE_REFS.forwardMessage, networkId),
+			forwardGroupMessage: useNetworkMessageMutation(MESSAGE_WRITE_REFS.forwardGroupMessage, networkId),
+		}
+	},
 	useStartCall() {
 		const { networkId } = useNetwork()
 		const m = useConvexMutationQuery(api.modules.calls.direct.callMember)

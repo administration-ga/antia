@@ -3,13 +3,15 @@
 import { NetworkProvider } from "@antsia/api/network"
 import { NextRouterAdapter } from "@antsia/api/routing/next"
 import { CommunicationShell } from "@antsia/social-features/shell"
-import { useRouter } from "next/navigation"
+import { PostHogProvider } from "@antsia/social-features/shell/analytics"
+import { usePathname, useRouter } from "next/navigation"
 import { createContext, type ReactNode, useContext, useEffect } from "react"
 import { useTranslation } from "react-i18next"
 
 import { CenteredStatus } from "@/components/shared/controls"
 import { type SessionState, useSessionState } from "@/components/use-session-state"
-import { engineRoutes, routes } from "@/lib/routes"
+import { engineRoutes, routes, usageScreenForPath } from "@/lib/routes"
+import { usageConfiguration, useUsagePermission } from "./analytics-permission"
 
 /** La charte d'antsia.ga, redéclarée par les surfaces portalisées (dock, appel, stories). */
 const CHARTE = "antsia"
@@ -32,7 +34,9 @@ export function useMemberSession(): MemberSession {
  * couche de communication montée UNE fois (iCom, appels, présence).
  */
 export function NetworkShell({ children }: { children: ReactNode }) {
-  const { t } = useTranslation("antsia")
+  const { t, i18n } = useTranslation("antsia")
+  const pathname = usePathname()
+  const permission = useUsagePermission()
   const router = useRouter()
   const session = useSessionState()
 
@@ -48,8 +52,10 @@ export function NetworkShell({ children }: { children: ReactNode }) {
     <NextRouterAdapter>
       <NetworkProvider networkId={session.root._id} slug={session.root.slug} personId={session.person._id} charte={CHARTE} routes={engineRoutes} liveAvailable>
         <MemberSessionContext.Provider value={session}>
-          <CommunicationShell />
-          {children}
+          <PostHogProvider configuration={usageConfiguration} consented={!permission.paused && session.person.consentsInForce.includes("usage_analytics")} screen={usageScreenForPath(pathname)} networkSlug={session.root.slug} locale={i18n.resolvedLanguage === "en" ? "en" : "fr"}>
+            <CommunicationShell />
+            {children}
+          </PostHogProvider>
         </MemberSessionContext.Provider>
       </NetworkProvider>
     </NextRouterAdapter>

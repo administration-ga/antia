@@ -54,7 +54,9 @@ export function personalStateKeys(storage: LocalPurgeStorage): string[] {
   const keys: string[] = []
   for (let index = 0; index < storage.length; index += 1) {
     const key = storage.key(index)
-    if (key && (AUTH_STORAGE_KEYS.some((authKey) => key === authKey) || PERSONAL_STATE_STORAGE_PREFIXES.some((prefix) => key.startsWith(prefix)))) keys.push(key)
+    // Conserver uniquement le choix d'apparence du réseau, jamais un brouillon voisin.
+    const appearancePreference = key !== null && /^antsia:[a-z0-9-]+:appearance$/.test(key)
+    if (key && !appearancePreference && (AUTH_STORAGE_KEYS.some((authKey) => key === authKey) || PERSONAL_STATE_STORAGE_PREFIXES.some((prefix) => key.startsWith(prefix)))) keys.push(key)
   }
   return keys
 }

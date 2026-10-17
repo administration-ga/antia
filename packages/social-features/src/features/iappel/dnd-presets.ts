@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/iappel/dnd-presets.ts @ ad2e7fdc2 — adaptations : portée du silence retirée (`DndScope`, `DND_SCOPE_OPTIONS` — option « Appels poste seulement » et type tiré d'un validateur Convex) : le « ne pas déranger » du moteur n'a pas de portée (`calls.preferences.setDnd({ until })`), tous les appels étant personnels ; borne de durée lue dans le contrat du moteur (`MAX_DND_DURATION_MS` de `@antsia/social-contracts/calls`) ; libellés des pastilles en CLÉS i18n (`labelKey`, clés `iappel:dndPresets.…`, traduites par l'écran).
+// Dupliqué de socle/packages/agent-features/src/features/iappel/dnd-presets.ts @ ad2e7fdc2 — adaptations : portée du silence retirée (`DndScope`, `DND_SCOPE_OPTIONS` — option « Appels poste seulement » et type tiré d'un validateur Convex) : le « ne pas déranger » du moteur n'a pas de portée (`calls.preferences.setDnd({ until })`), tous les appels étant personnels ; borne de durée lue dans le contrat du moteur (`MAX_DND_DURATION_MS` de `@antsia/social-contracts/calls`) ; libellés des pastilles en CLÉS i18n (`labelKey`, clés `iappel:dndPresets.…`, traduites par l'écran) ; PA6 : demain à 08:00 est converti depuis le jour civil du fuseau personnel, paramètre facultatif pour le repli appareil ; les durées relatives restent absolues.
 /**
  * Les PRESETS du « Ne pas déranger » — un seul vocabulaire pour toutes les
  * surfaces (réglages des appels, menu avatar).
@@ -13,21 +13,19 @@
  * traduit (`t(pill.labelKey)`).
  */
 
+import { civilDateTimeMs, tomorrowCivilDate } from "@antsia/api/civil-date"
 import { MAX_DND_DURATION_MS } from "@antsia/social-contracts/calls"
 
-/** Demain 08:00, en heure locale de l'appareil. */
-export function tomorrowAt8(now: number): number {
-	const target = new Date(now)
-	target.setDate(target.getDate() + 1)
-	target.setHours(8, 0, 0, 0)
-	return target.getTime()
+/** Demain 08:00 dans le fuseau du lecteur ; sans préférence, repli appareil. */
+export function tomorrowAt8(now: number, timeZone?: string): number {
+	return civilDateTimeMs(tomorrowCivilDate(now, timeZone), "08:00", timeZone)
 }
 
-export const DND_DURATION_PILLS: { labelKey: string; computeUntil: () => number }[] = [
+export const DND_DURATION_PILLS: { labelKey: string; computeUntil: (timeZone?: string) => number }[] = [
 	{ labelKey: "iappel:dndPresets.thirtyMinutes", computeUntil: () => Date.now() + 30 * 60 * 1000 },
 	{ labelKey: "iappel:dndPresets.oneHour", computeUntil: () => Date.now() + 60 * 60 * 1000 },
 	{ labelKey: "iappel:dndPresets.twoHours", computeUntil: () => Date.now() + 2 * 60 * 60 * 1000 },
-	{ labelKey: "iappel:dndPresets.tomorrowMorning", computeUntil: () => tomorrowAt8(Date.now()) },
+	{ labelKey: "iappel:dndPresets.tomorrowMorning", computeUntil: (timeZone) => tomorrowAt8(Date.now(), timeZone) },
 	{
 		labelKey: "iappel:dndPresets.untilDisabled",
 		// Le serveur refuse tout `until` à plus de MAX_DND_DURATION_MS (7 jours) :

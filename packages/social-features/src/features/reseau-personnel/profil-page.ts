@@ -1,4 +1,4 @@
-// Réécrit d'après socle/packages/agent-features/src/features/reseau-personnel/profil-page.ts @ ad2e7fdc2 — ce qui change : la fiche d'une page à IDENTITÉ PROPRE du moteur (plus d'administration derrière) ; refus indistinct, libellés, mur vide et compteurs traduits (`t` en DERNIER paramètre, clés qualifiées `reseau:profilPage.*`, nombres mis en forme dans la langue courante, toujours sans plafond) ; le bouton de suivi et le compteur d'abonnés reprennent les décisions du volet (`followLabel`, `formatFollowerCount` : un seul mot pour un même geste) ; le droit de publier se lit dans le RÔLE VIVANT du lecteur (`viewer.role`, signataire ou administrateur) au lieu de `canPublish` ; ajouts : note de rôle, revendication et demande de vérification (`pageClaimAction`, statut, pièces jugées par la politique de dépôt), identité modifiable jugée par les règles du domaine (`checkPageIdentity`), identifiant d'un signataire à inviter, taille de page du mur.
+// Réécrit d'après socle/packages/agent-features/src/features/reseau-personnel/profil-page.ts @ ad2e7fdc2 — ce qui change : la fiche d'une page à IDENTITÉ PROPRE du moteur (plus d'administration derrière) ; refus indistinct, libellés, mur vide et compteurs traduits (`t` en DERNIER paramètre, clés qualifiées `reseau:profilPage.*`, nombres mis en forme dans la langue courante, toujours sans plafond) ; le bouton de suivi et le compteur d'abonnés reprennent les décisions du volet (`followLabel`, `formatFollowerCount` : un seul mot pour un même geste) ; le droit de publier se lit dans le RÔLE VIVANT du lecteur (`viewer.role`, signataire ou administrateur) au lieu de `canPublish` ; ajouts : note de rôle, revendication et demande de vérification (`pageClaimAction`, statut, pièces jugées par la politique de dépôt), identité modifiable jugée par les règles du domaine (`checkPageIdentity`), identifiant d'un signataire à inviter, taille de page du mur. ; PA6 : préférence de fuseau injectée, calendrier grégorien et caches langue/fuseau.
 /**
  * profil-page — décisions VÉRIFIABLES de la fiche d'une page (`ProfilPagePage`,
  * montée par l'application sur `useRoutes().page(handle)`).
@@ -13,6 +13,7 @@
  */
 
 import type { Badge } from "@antsia/social-domain/badges"
+import { formatViewerDate } from "@antsia/api/civil-date"
 import {
   assertPageClaimEvidenceCount,
   assertPageName,
@@ -176,10 +177,10 @@ export function claimStatusText(status: PageClaimStatus, t: TFunction): string {
 }
 
 /** La date d'une demande, dans la langue courante. */
-export function claimSubmittedText(createdAt: number, locale: string, t: TFunction): string {
+export function claimSubmittedText(createdAt: number, locale: string, t: TFunction, timeZone?: string): string {
   let date: string
   try {
-    date = new Intl.DateTimeFormat(locale, { dateStyle: "long" }).format(new Date(createdAt))
+    date = formatViewerDate(createdAt, locale, { dateStyle: "long" }, timeZone)
   } catch {
     date = new Date(createdAt).toISOString().slice(0, 10)
   }

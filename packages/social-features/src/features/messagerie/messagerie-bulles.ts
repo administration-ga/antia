@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/messagerie/messagerie-bulles.ts @ ad2e7fdc2 — adaptations : dates et heures par la langue courante (paramètre `locale` : `GroupMessagesOptions.locale`, `dayLabel(at, now, locale, t)`, `bubbleTime(at, locale)`) au lieu de « fr-FR » en dur, formateurs mis en cache par langue ; libellés par clés i18n qualifiées (`messagerie:messagerieBulles.*`) — `MESSAGE_DELETED_LABEL`/`MESSAGE_MASKED_LABEL` deviennent `MESSAGE_DELETED_KEY`/`MESSAGE_MASKED_KEY`, `t` en dernier paramètre de `dayLabel`, `groupMessages` et `bubbleText`.
+// Dupliqué de socle/packages/agent-features/src/features/messagerie/messagerie-bulles.ts @ ad2e7fdc2 — adaptations : dates et heures par la langue courante (paramètre `locale` : `GroupMessagesOptions.locale`, `dayLabel(at, now, locale, t)`, `bubbleTime(at, locale)`) au lieu de « fr-FR » en dur, formateurs mis en cache par langue ; libellés par clés i18n qualifiées (`messagerie:messagerieBulles.*`) — `MESSAGE_DELETED_LABEL`/`MESSAGE_MASKED_LABEL` deviennent `MESSAGE_DELETED_KEY`/`MESSAGE_MASKED_KEY`, `t` en dernier paramètre de `dayLabel`, `groupMessages` et `bubbleText`. ; PA6 : préférence de fuseau injectée, calendrier grégorien et caches langue/fuseau.
 /**
  * messagerie-bulles — la mise en SALVES du fil de messages.
  *
@@ -35,7 +35,7 @@
  * et l'écran afficherait un fil entièrement à gauche pendant une seconde.
  *
  * ⚠️ Les dates et les heures se disent dans la LANGUE de l'écran (`locale`),
- * au fuseau du navigateur : un « 3 août » figé en français sous une interface
+ * au fuseau du lecteur : un « 3 août » figé en français sous une interface
  * anglaise, ou une heure ramenée à un fuseau qui n'est pas celui du lecteur,
  * seraient deux façons d'afficher le faux.
  *
@@ -44,6 +44,7 @@
  */
 
 import type { TFunction } from "i18next"
+import { civilDateParts, formatViewerDate, isPreviousCivilDay, sameCivilDay } from "@antsia/api/civil-date"
 
 /** Deux prises de parole séparées de plus que ça ne sont plus une salve. */
 export const BULLE_GAP_MS = 5 * 60 * 1000
@@ -89,6 +90,8 @@ export interface GroupMessagesOptions {
 	now: number
 	/** La langue de l'écran (`i18n.language`), pour nommer les jours. */
 	locale: string
+	/** La préférence du lecteur ; absente, compatibilité avec le fuseau personnel. */
+	timeZone?: string
 	/** Le silence au-delà duquel une salve se coupe. */
 	gapMs?: number
 }
@@ -100,29 +103,6 @@ const FORMATS = {
 } as const satisfies Record<string, Intl.DateTimeFormatOptions>
 
 /**
- * Un formateur par (langue, format), construit une fois : un fil de cent
- * bulles ne refabrique pas cent fois le même objet `Intl`.
- */
-const formateurs = new Map<string, Intl.DateTimeFormat>()
-function formateur(locale: string, format: keyof typeof FORMATS): Intl.DateTimeFormat {
-	const cle = `${locale}|${format}`
-	const connu = formateurs.get(cle)
-	if (connu !== undefined) return connu
-	const neuf = new Intl.DateTimeFormat(locale, FORMATS[format])
-	formateurs.set(cle, neuf)
-	return neuf
-}
-
-/** Deux instants tombent-ils le même jour civil ? */
-function memeJour(a: Date, b: Date): boolean {
-	return (
-		a.getFullYear() === b.getFullYear() &&
-		a.getMonth() === b.getMonth() &&
-		a.getDate() === b.getDate()
-	)
-}
-
-/**
  * Le libellé d'un séparateur de date.
  *
  * « Aujourd'hui » et « Hier » plutôt qu'une date : ce sont les deux seuls
@@ -132,19 +112,12 @@ function memeJour(a: Date, b: Date): boolean {
  *
  * Un instant non fini rend une chaîne VIDE, jamais « 1 janvier 1970 ».
  */
-export function dayLabel(at: number, now: number, locale: string, t: TFunction): string {
+export function dayLabel(at: number, now: number, locale: string, t: TFunction, timeZone?: string): string {
 	if (!Number.isFinite(at)) return ""
-	const quand = new Date(at)
-	const maintenant = new Date(now)
-	if (memeJour(quand, maintenant)) return t("messagerie:messagerieBulles.today")
-
-	const hier = new Date(maintenant)
-	hier.setDate(hier.getDate() - 1)
-	if (memeJour(quand, hier)) return t("messagerie:messagerieBulles.yesterday")
-
-	return quand.getFullYear() === maintenant.getFullYear()
-		? formateur(locale, "jour").format(quand)
-		: formateur(locale, "jourAn").format(quand)
+	if (sameCivilDay(at, now, timeZone)) return t("messagerie:messagerieBulles.today")
+	if (isPreviousCivilDay(at, now, timeZone)) return t("messagerie:messagerieBulles.yesterday")
+	const sameYear = civilDateParts(at, timeZone).year === civilDateParts(now, timeZone).year
+	return formatViewerDate(at, locale, FORMATS[sameYear ? "jour" : "jourAn"], timeZone)
 }
 
 /** De moi ? Le correspondant d'abord, mon identifiant à défaut (cf. en-tête). */
@@ -193,10 +166,7 @@ export function groupMessages<M extends GroupableMessage>(
 			debuts.push(true)
 			continue
 		}
-		const jourChange = !memeJour(
-			new Date(message.createdAt),
-			new Date(precedent.createdAt),
-		)
+		const jourChange = !sameCivilDay(message.createdAt, precedent.createdAt, options.timeZone)
 		const auteurChange = String(message.senderId) !== String(precedent.senderId)
 		const silence = message.createdAt - precedent.createdAt > gapMs
 		debuts.push(jourChange || auteurChange || silence)
@@ -207,7 +177,7 @@ export function groupMessages<M extends GroupableMessage>(
 		const precedent = i > 0 ? messages[i - 1]! : null
 		const jourChange =
 			precedent === null ||
-			!memeJour(new Date(message.createdAt), new Date(precedent.createdAt))
+			!sameCivilDay(message.createdAt, precedent.createdAt, options.timeZone)
 
 		if (jourChange) {
 			rows.push({
@@ -217,7 +187,7 @@ export function groupMessages<M extends GroupableMessage>(
 				// bâtie sur l'horodatage collisionnerait pour deux messages simultanés.
 				id: `d-${message.id}`,
 				at: message.createdAt,
-				label: dayLabel(message.createdAt, options.now, options.locale, t),
+				label: dayLabel(message.createdAt, options.now, options.locale, t, options.timeZone),
 			})
 		}
 
@@ -264,7 +234,7 @@ export function bubbleText(
 }
 
 /** L'heure sous une bulle, dans la langue de l'écran — vide sur un instant non fini. */
-export function bubbleTime(at: number, locale: string): string {
+export function bubbleTime(at: number, locale: string, timeZone?: string): string {
 	if (!Number.isFinite(at)) return ""
-	return formateur(locale, "heure").format(new Date(at))
+	return formatViewerDate(at, locale, FORMATS.heure, timeZone)
 }

@@ -1,5 +1,8 @@
-// Dupliqué de socle/packages/agent-features/src/features/messagerie/MessagerieListView.tsx @ ad2e7fdc2 — adaptations : branche « poste » élaguée (sur-titre de la fonction `poste.positionTitle`, commentaires de l'espace de poste) ; DTO du moteur (`threadId` au lieu de `chatId`, `counterpart.personId`, nom NULLABLE → libellé neutre traduit) ; aperçu composé par `apercuFil` (vocal, pièces, appel, retrait — le moteur ne dénormalise que la nature du dernier message) et pictogramme des pièces sur `attachments` ; dates dans la langue courante (`formatThreadTime(…, i18n.language)`) ; toutes les chaînes d'interface traduites (clés `messagerieListView.*`, pluriels) ; présence lue par personne (`presenceOf(personId)`) ; import inutilisé (`ChevronDown`) retiré.
+// Dupliqué de socle/packages/agent-features/src/features/messagerie/MessagerieListView.tsx @ ad2e7fdc2 — adaptations : branche « poste » élaguée (sur-titre de la fonction `poste.positionTitle`, commentaires de l'espace de poste) ; DTO du moteur (`threadId` au lieu de `chatId`, `counterpart.personId`, nom NULLABLE → libellé neutre traduit) ; aperçu composé par `apercuFil` (vocal, pièces, appel, retrait — le moteur ne dénormalise que la nature du dernier message) et pictogramme des pièces sur `attachments` ; dates dans la langue courante (`formatThreadTime(…, i18n.language)`) ; toutes les chaînes d'interface traduites (clés `messagerieListView.*`, pluriels) ; présence lue par personne (`presenceOf(personId)`) ; préférence de fuseau fournie par useViewerTimeZone ; PA6 : dates et jours civils dans le fuseau personnel du lecteur (repli appareil).
+// L'import inutilisé ChevronDown reste retiré ; le hook de fuseau est une dépendance exécutable.
 "use client"
+
+import { useViewerTimeZone } from "@antsia/api/viewer-preferences"
 
 /**
  * MessagerieListView — la liste des conversations, dans la carte OU sur la page.
@@ -125,6 +128,7 @@ export function MessagerieListView({
 	presenceOf,
 }: MessagerieListViewProps) {
 	const { t, i18n } = useTranslation("messagerie")
+	const timeZone = useViewerTimeZone()
 	const [recherche, setRecherche] = useState("")
 	const [filtre, setFiltre] = useState<FiltreConversations>("toutes")
 	const threads = source.useThreadsPage()
@@ -431,7 +435,7 @@ export function MessagerieListView({
 														</>
 													) : (
 														<span className="msg-row-time">
-															{formatThreadTime(fil.lastMessageAt, maintenant, langue)}
+															{formatThreadTime(fil.lastMessageAt, maintenant, langue, timeZone)}
 														</span>
 													)}
 												</button>
@@ -473,7 +477,7 @@ export function MessagerieListView({
 													</>
 												) : (
 													<span className="msg-row-time">
-														{formatThreadTime(groupe.lastMessageAt, maintenant, langue)}
+														{formatThreadTime(groupe.lastMessageAt, maintenant, langue, timeZone)}
 													</span>
 												)}
 											</button>

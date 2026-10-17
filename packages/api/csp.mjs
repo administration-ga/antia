@@ -97,7 +97,7 @@ export function buildContentSecurityPolicy(options) {
 
 /**
  * En-têtes de sécurité statiques communs aux applications du moteur.
- * @param {{ convexUrl?: string, livekitUrl?: string, isDev: boolean }} options
+ * @param {{ convexUrl?: string, livekitUrl?: string, isDev: boolean, extraConnect?: string[] }} options
  * @returns {{ key: string, value: string }[]}
  */
 export function securityHeaders(options) {

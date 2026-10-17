@@ -1,5 +1,7 @@
 "use client"
 import { useStableConvexAuth } from "@antsia/api/hooks"
+import { formatViewerDate } from "@antsia/api/civil-date"
+import { useViewerTimeZone } from "@antsia/api/viewer-preferences"
 import { BRAND_NAME } from "@antsia/social-contracts/brand"
 import { ROOT_NETWORK_SLUG } from "@antsia/social-domain/network"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -17,6 +19,8 @@ import { toast } from "sonner"
 import { z } from "zod"
 import { Button, Card, CenteredStatus, Field, TextArea, TextInput } from "./shared/controls"
 import { NotificationControls } from "./notification-controls"
+import { PreferencesControls } from "./preferences-controls"
+import { AnalyticsControls } from "./analytics-controls"
 import { routes } from "@/lib/routes"
 import { signOutAndRedirect } from "@/lib/sign-out"
 
@@ -29,7 +33,7 @@ function AppealForm({ reportId }: { reportId: Id<"reports"> }) {
     catch { toast.error(t("personal.error")) }
   })}>
     <Field id={`appeal-${reportId}`} label={t("personal.appealLabel")} hint={t("personal.appealHint")} error={form.formState.errors.reason?.message}>
-      <TextArea id={`appeal-${reportId}`} maxLength={500} {...form.register("reason")} disabled={form.formState.isSubmitting} />
+      <TextArea id={`appeal-${reportId}`} aria-invalid={Boolean(form.formState.errors.reason)} aria-describedby={`appeal-${reportId}-hint${form.formState.errors.reason ? ` appeal-${reportId}-error` : ""}`} maxLength={500} {...form.register("reason")} disabled={form.formState.isSubmitting} />
     </Field>
     <Button variant="outline" pending={form.formState.isSubmitting} type="submit">{t("personal.appeal")}</Button>
   </form>
@@ -51,6 +55,7 @@ function Decisions() {
 
 function DataRights() {
   const { t, i18n } = useTranslation("antsia")
+  const timeZone = useViewerTimeZone()
   const convex = useConvex()
   const job = useQuery(api.modules.people.erasure.myErasure, {})
   const exportData = useMutation(api.modules.people.erasure.exportMyData)
@@ -103,7 +108,7 @@ function DataRights() {
     </Card>
     <Card><h2 className="text-xl font-semibold">{t("personal.eraseTitle")}</h2><p className="my-3 text-sm text-muted-foreground">{t("personal.eraseLead")}</p>
       {job === undefined ? <p role="status">{t("personal.loading")}</p> : job ? <>
-        <p role="status" className="mb-4">{t("personal.eraseRequested", { date: new Intl.DateTimeFormat(i18n.language, { dateStyle: "long" }).format(job.dueAt) })}</p>
+        <p role="status" className="mb-4">{t("personal.eraseRequested", { date: formatViewerDate(job.dueAt, i18n.language, { dateStyle: "long" }, timeZone) })}</p>
         <Button variant="outline" pending={canceling} disabled={!job.canCancel} onClick={async () => { setCanceling(true); try { await cancel({}); toast.success(t("personal.eraseCancelled")) } catch { toast.error(t("personal.error")) } finally { setCanceling(false) } }}>{t("personal.cancelErase")}</Button>
       </> : <form className="flex flex-col gap-3" noValidate onSubmit={form.handleSubmit(async () => {
         try { await erase({ confirmation: "DELETE_MY_ANTSIA_ACCOUNT" }); form.reset() } catch { toast.error(t("personal.error")) }
@@ -132,9 +137,9 @@ export function PersonalControls() {
     <header className="border-b border-border"><nav className="mx-auto flex max-w-5xl items-center justify-between gap-3 px-4 py-3" aria-label={t("nav.label")}>
       <Link href={routes.feed()} className="font-semibold">{BRAND_NAME}</Link><Button variant="ghost" pending={leaving} onClick={async () => { setLeaving(true); await signOutAndRedirect() }}><LogOut aria-hidden="true" className="size-4" />{t("nav.signOut")}</Button>
     </nav></header>
-    <main id="contenu" className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-4 py-8">
+    <main id="contenu" tabIndex={-1} className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-4 py-8 focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring">
       <header><ShieldCheck aria-hidden="true" className="mb-3 size-6 text-primary" /><h1 className="text-3xl">{t("personal.title")}</h1><p className="mt-3 text-muted-foreground">{t("personal.lead")}</p><Link className="mt-4 inline-flex min-h-11 items-center text-sm underline" href={routes.feed()}>{t("personal.home")}</Link></header>
-      <DataRights /><Decisions />
+      <PreferencesControls /><AnalyticsControls /><DataRights /><Decisions />
       {root && memberships?.some((membership) => membership.networkId === root._id) ? <NotificationControls networkId={root._id} canActivate={Boolean(active)} /> : null}
     </main>
   </div>

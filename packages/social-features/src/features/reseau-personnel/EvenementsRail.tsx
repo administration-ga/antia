@@ -1,27 +1,27 @@
-// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/EvenementsRail.tsx @ ad2e7fdc2 — adaptations : mon agenda dans le réseau courant (`events.events.myAgenda` → `{ items }`, `networkId` par `useNetwork()`) ; lien « Voir tout » composé sur la base injectée de la page réseau (`reseauAgentHref("evenements", useRoutes().home())`) ; dates dans le fuseau du navigateur et la langue courante ; organisateur nommé par le contrat `counterpartLabel` (nom neutre quand le profil n'est pas publié) ; toutes les chaînes par l'i18n (espace `reseau`, clés `evenementsRail.*`).
+// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/EvenementsRail.tsx @ ad2e7fdc2 — adaptations : mon agenda dans le réseau courant (`events.events.myAgenda` → `{ items }`, `networkId` par `useNetwork()`) ; lien « Voir tout » composé sur la base injectée de la page réseau (`reseauAgentHref("evenements", useRoutes().home())`) ; dates dans le fuseau du navigateur et la langue courante ; organisateur nommé par le contrat `counterpartLabel` (nom neutre quand le profil n'est pas publié) ; toutes les chaînes par l'i18n (espace `reseau`, clés `evenementsRail.*`). ; PA6 : dates et jours civils dans le fuseau personnel du lecteur (repli appareil).
 "use client"
 
 /** Aperçu compact des prochains évènements dans le rail de découverte. */
 
+import { useViewerTimeZone } from "@antsia/api/viewer-preferences"
 import { api } from "@antsia/api/engine"
 import { useAuthenticatedConvexQuery } from "@antsia/api/hooks"
 import { useNetwork, useRoutes } from "@antsia/api/network"
 import { Link } from "@antsia/api/routing"
 import { Badge, Button, Card, SkeletonCard } from "@antsia/ui"
-import { useState } from "react"
 import { useTranslation } from "react-i18next"
 
 import { RESEAU_SURFACE_STYLE } from "../../shell/design-styles"
 import { reseauAgentHref } from "../../shell/reseau-agent-nav"
 import { Avatar } from "./Avatar"
-import { eventPersonName, eventsForRail, formatEventRange, viewerTimeZone } from "./evenements-list"
+import { eventPersonName, eventsForRail, formatEventRange } from "./evenements-list"
 
 export function EvenementsRail({ now }: { now: number }) {
   const { t, i18n } = useTranslation("reseau")
   const { networkId } = useNetwork()
   const home = useRoutes().home()
-  /** Le fuseau du lecteur — celui de son navigateur, lu une fois. */
-  const [timeZone] = useState(viewerTimeZone)
+  /** La préférence du lecteur, réactive sans démonter le rail. */
+  const timeZone = useViewerTimeZone()
   const agenda = useAuthenticatedConvexQuery(api.modules.events.events.myAgenda, { networkId, now })
 
   if (agenda.isLoading) return <SkeletonCard />

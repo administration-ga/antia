@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/messagerie/IcomPublicReminders.tsx @ ad2e7fdc2 — adaptations : rappels lus par `pages.followedUpdates.list` du moteur (réseau courant, DTO projeté par `pageUpdateFromEngine`) ; badge de la page CALCULÉ par le serveur (libellé `social:badges.…`) au lieu d'un « Page officielle » posé sur toute page ; destination par la table des routes injectée (`useRoutes()`) : la page quand l'application la sert, sinon un rappel sans lien ; « Tout voir » mène à l'accueil du réseau (`routes.home()`) ; textes traduits (i18n `messagerie`, clés `icomPublicReminders.…`) ; « iRéseau » devient « le réseau » ; feuille de style sortie du JSX dans une constante de module (`ICOM_PUBLIC_REMINDERS_CSS`) — un littéral enfant de `<style>` passerait pour une chaîne d'interface — règles inchangées.
+// Dupliqué de socle/packages/agent-features/src/features/messagerie/IcomPublicReminders.tsx @ ad2e7fdc2 — adaptations : rappels lus par `pages.followedUpdates.list` du moteur (réseau courant, DTO projeté par `pageUpdateFromEngine`) ; badge de la page CALCULÉ par le serveur (libellé `social:badges.…`) au lieu d'un « Page officielle » posé sur toute page ; destination par la table des routes injectée (`useRoutes()`) : la page quand l'application la sert, sinon un rappel sans lien ; « Tout voir » mène à l'accueil du réseau (`routes.home()`) ; textes traduits (i18n `messagerie`, clés `icomPublicReminders.…`) ; « iRéseau » devient « le réseau » ; feuille de style sortie du JSX dans une constante de module (`ICOM_PUBLIC_REMINDERS_CSS`) — un littéral enfant de `<style>` passerait pour une chaîne d'interface — règles inchangées. ; PA6 : dates et jours civils dans le fuseau personnel du lecteur (repli appareil).
 "use client"
 
 /**
@@ -9,6 +9,7 @@
  * frontière reste ainsi lisible : privé ici, public là-bas.
  */
 
+import { useViewerTimeZone } from "@antsia/api/viewer-preferences"
 import { api } from "@antsia/api/engine"
 import { useAuthenticatedConvexQuery } from "@antsia/api/hooks"
 import { useNetwork, useRoutes } from "@antsia/api/network"
@@ -178,6 +179,7 @@ export function IcomPublicRemindersView({
   onRetry,
 }: IcomPublicRemindersViewProps) {
   const { t } = useTranslation("messagerie")
+  const timeZone = useViewerTimeZone()
   const routes = useRoutes()
   const titleId = useId()
 
@@ -243,7 +245,7 @@ export function IcomPublicRemindersView({
                       className="icom-public-reminder-time"
                       dateTime={new Date(reminder.publishedAt).toISOString()}
                     >
-                      {publicReminderTime(reminder, now, t)}
+                      {publicReminderTime(reminder, now, t, timeZone)}
                     </time>
                   </>
                 )

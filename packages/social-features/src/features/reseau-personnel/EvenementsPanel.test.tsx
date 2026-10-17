@@ -21,6 +21,8 @@ import type { ButtonHTMLAttributes, InputHTMLAttributes, ReactNode, SelectHTMLAt
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 import type { Id } from "@antsia/api/engine"
+import { ViewerPreferencesProvider } from "@antsia/api/viewer-preferences"
+import { toast } from "sonner"
 
 import { createAppI18n } from "../../i18n"
 import { memoryRouter, renderWithEngine, TEST_NETWORK_ID, TEST_ROUTES } from "../../tests/engine-wrapper"
@@ -442,7 +444,38 @@ describe("créer un évènement — l'hôte, ou le volet lui-même", () => {
     fireEvent.change(screen.getByLabelText("Fin"), { target: { value: "10:00" } })
     fireEvent.click(screen.getByRole("button", { name: "Créer l'évènement" }))
 
-    expect(screen.getByText("La fin doit être postérieure au début")).toBeTruthy()
+    expect(screen.getByRole("alert")).toHaveTextContent("La fin doit être postérieure au début")
+    expect(screen.getByLabelText("Fin")).toHaveFocus()
+    expect(mocks.create).not.toHaveBeenCalled()
+  })
+
+  it("enregistre le fuseau personnel affiché et ses instants, même loin du navigateur", async () => {
+    mocks.agenda.data = agenda([])
+    renderWithEngine(<ViewerPreferencesProvider timeZone="Asia/Tokyo"><EvenementsPanel now={NOW} /></ViewerPreferencesProvider>)
+    fireEvent.click(screen.getByRole("button", { name: "Créer un évènement" }))
+    expect(screen.getByText(/Asia\/Tokyo/)).toBeTruthy()
+    fireEvent.change(screen.getByLabelText("Titre"), { target: { value: "Rencontre à Tokyo" } })
+    fireEvent.change(screen.getByLabelText("Date"), { target: { value: "2026-09-10" } })
+    fireEvent.change(screen.getByLabelText("Début"), { target: { value: "09:00" } })
+    fireEvent.change(screen.getByLabelText("Fin"), { target: { value: "10:30" } })
+    fireEvent.click(screen.getByRole("button", { name: "Créer l'évènement" }))
+    await waitFor(() => expect(mocks.create).toHaveBeenCalledOnce())
+    expect(mocks.create.mock.calls[0]?.[0]).toMatchObject({ timeZone: "Asia/Tokyo", startAt: Date.UTC(2026, 8, 10, 0), endAt: Date.UTC(2026, 8, 10, 1, 30) })
+  })
+
+  it("refuse une heure DST inexistante, avec un retour d'erreur et aucune création", () => {
+    mocks.agenda.data = agenda([])
+    vi.mocked(toast.error).mockClear()
+    renderWithEngine(<ViewerPreferencesProvider timeZone="Europe/Paris"><EvenementsPanel now={NOW} /></ViewerPreferencesProvider>)
+    fireEvent.click(screen.getByRole("button", { name: "Créer un évènement" }))
+    fireEvent.change(screen.getByLabelText("Titre"), { target: { value: "Rencontre matinale" } })
+    fireEvent.change(screen.getByLabelText("Date"), { target: { value: "2026-03-29" } })
+    fireEvent.change(screen.getByLabelText("Début"), { target: { value: "02:30" } })
+    fireEvent.change(screen.getByLabelText("Fin"), { target: { value: "03:30" } })
+    fireEvent.click(screen.getByRole("button", { name: "Créer l'évènement" }))
+    expect(toast.error).toHaveBeenCalledOnce()
+    expect(screen.getByRole("alert")).toHaveTextContent("Cette date ou cette heure n’existe pas")
+    expect(screen.getByLabelText("Début")).toHaveFocus()
     expect(mocks.create).not.toHaveBeenCalled()
   })
 })

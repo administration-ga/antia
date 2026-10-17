@@ -3,7 +3,7 @@ import { mkdirSync, mkdtempSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
 
-import { buildPlan, checkCatalog, externalRootWorkspaces, readCatalog } from "./deploy-app.mjs"
+import { buildPlan, checkCatalog, externalRootWorkspaces, readCatalog, requiredBuildArgs } from "./deploy-app.mjs"
 
 describe("catalogue réel du moteur", () => {
   test("est sain : paquets, ports, Dockerfiles, ARG NEXT_PUBLIC_* et listes blanches", () => {
@@ -22,7 +22,23 @@ describe("catalogue réel du moteur", () => {
     const substitutions = plan.build[plan.build.indexOf("--substitutions") + 1]
     expect(substitutions).toContain("_NEXT_PUBLIC_CONVEX_URL=u")
     expect(substitutions).toContain("_NEXT_PUBLIC_DIASPORALE_DATA_SOURCE=,")
-    expect(substitutions.split(",").filter((entry) => entry.startsWith("_NEXT_PUBLIC_")).length).toBe(6)
+    expect(substitutions.split(",").filter((entry) => entry.startsWith("_NEXT_PUBLIC_")).length).toBe(8)
+  })
+
+  test("la mesure facultative absente reste vide, sans imposer sa configuration ni inscrire un marqueur", () => {
+    const catalog = readCatalog()
+    const plan = buildPlan(catalog, "antsia_ga", {})
+    expect(plan.dockerLocal).toContain("NEXT_PUBLIC_POSTHOG_KEY=")
+    expect(plan.dockerLocal).toContain("NEXT_PUBLIC_POSTHOG_HOST=")
+    expect(plan.build.join(" ")).toContain("_NEXT_PUBLIC_POSTHOG_KEY=,_NEXT_PUBLIC_POSTHOG_HOST=")
+    expect(requiredBuildArgs(plan.app)).toEqual(["NEXT_PUBLIC_CONVEX_URL", "NEXT_PUBLIC_SITE_URL", "NEXT_PUBLIC_BUILD_SHA"])
+  })
+
+  test("un champ facultatif ne peut pas rendre optionnelle la connexion Convex", () => {
+    expect(requiredBuildArgs({ build_args: ["NEXT_PUBLIC_CONVEX_URL"], optional_build_args: ["NEXT_PUBLIC_CONVEX_URL"] })).toEqual(["NEXT_PUBLIC_CONVEX_URL"])
+    const catalog = readCatalog()
+    catalog.applications.antsia_ga.optional_build_args.push("NEXT_PUBLIC_CONVEX_URL")
+    expect(checkCatalog(catalog)).toContain("antsia_ga : variable facultative non admise NEXT_PUBLIC_CONVEX_URL")
   })
 
   test("une application externe (DIASPORALE) a son plan, avec ses propres variables", () => {

@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/messagerie/groupe-gestion.ts @ ad2e7fdc2 — adaptations : prédicats d'autorité lus dans le domaine du moteur (`@antsia/social-domain/groupThreads`) ; dates dans le fuseau du NAVIGATEUR et la langue courante (`dateDuGroupe` reçoit `locale`, plus de fuseau gabonais ni de `fr-FR` écrits en dur) ; tri et recherche sans langue écrite en dur (`ordonnerMembres` et `vueDeGestion` reçoivent `locale`, casse rabattue par `toLowerCase`) ; libellés de rôle, phrases de confirmation et lignes système traduits (`t` en DERNIER paramètre de `libelleDeRole`, `vueDeGestion`, `phraseDeSuppression`, `phraseDeDepart`, `phraseDEffacement`, `phraseDeRetrait`, `ligneSystemeDeGroupe` ; clés qualifiées `messagerie:groupeGestion.…`) ; places restantes comptées sur l'EFFECTIF du serveur (`effectif`, la fiche ne porte plus la liste complète des membres) ; projections `membreDuGroupe` et `convieDuGroupe` des DTO à libellé du moteur (`counterpartLabel` : nom nul = libellé neutre traduit).
+// Dupliqué de socle/packages/agent-features/src/features/messagerie/groupe-gestion.ts @ ad2e7fdc2 — adaptations : prédicats d'autorité lus dans le domaine du moteur (`@antsia/social-domain/groupThreads`) ; dates dans le fuseau du NAVIGATEUR et la langue courante (`dateDuGroupe` reçoit `locale`, plus de fuseau gabonais ni de `fr-FR` écrits en dur) ; tri et recherche sans langue écrite en dur (`ordonnerMembres` et `vueDeGestion` reçoivent `locale`, casse rabattue par `toLowerCase`) ; libellés de rôle, phrases de confirmation et lignes système traduits (`t` en DERNIER paramètre de `libelleDeRole`, `vueDeGestion`, `phraseDeSuppression`, `phraseDeDepart`, `phraseDEffacement`, `phraseDeRetrait`, `ligneSystemeDeGroupe` ; clés qualifiées `messagerie:groupeGestion.…`) ; places restantes comptées sur l'EFFECTIF du serveur (`effectif`, la fiche ne porte plus la liste complète des membres) ; projections `membreDuGroupe` et `convieDuGroupe` des DTO à libellé du moteur (`counterpartLabel` : nom nul = libellé neutre traduit). ; PA6 : préférence de fuseau injectée, calendrier grégorien et caches langue/fuseau.
 /**
  * groupe-gestion — ce qu'un membre peut FAIRE dans un groupe, et ce que le
  * panneau doit lui montrer.
@@ -23,6 +23,7 @@
  * plafond déjà miroité par le composeur.
  */
 
+import { formatViewerDate } from "@antsia/api/civil-date"
 import {
 	canDeleteGroupThread,
 	canInviteToGroupThread,
@@ -334,7 +335,7 @@ export function filtrerMembres<T extends MembreDuGroupe>(
 }
 
 /**
- * Dates du groupe, dans le fuseau du NAVIGATEUR et la langue de l'écran
+ * Dates du groupe, dans le fuseau du LECTEUR et la langue de l'écran
  * (`locale` ; absente : celle de l'environnement). Le socle les figeait dans
  * le fuseau gabonais et en français : une personne du réseau vit où elle vit.
  */
@@ -342,11 +343,12 @@ export function dateDuGroupe(
 	timestamp: number,
 	avecHeure = false,
 	locale?: string,
+	timeZone?: string,
 ): string {
-	return new Intl.DateTimeFormat(locale, {
+	return formatViewerDate(timestamp, locale, {
 		dateStyle: "medium",
 		...(avecHeure ? { timeStyle: "short" as const } : {}),
-	}).format(new Date(timestamp))
+	}, timeZone)
 }
 
 /**

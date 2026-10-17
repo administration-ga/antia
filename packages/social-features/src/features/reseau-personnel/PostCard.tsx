@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/PostCard.tsx @ ad2e7fdc2 — adaptations : la carte est la PROJECTION du moteur (`PostCardPost` = `FunctionReturnType<typeof api.modules.posts.posts.getPost>`, rendue telle quelle par le fil, la recherche, les murs, les groupes et les pages : `_id`, `isMine`, `author.personId`, `page`, réactions `counts`) au lieu du DTO du socle (`postId`, `authorUserId`, `authorKind`, `signedBy`, `page.orgId`) ; identité d'auteur par `PostIdentityLines` (nom, badges CALCULÉS par le serveur — ni fonction ni administration) et `author-link` (lien, forme de pastille, signature) avec les adresses INJECTÉES (`useRoutes()` : profil d'une personne, `page(handle)` d'une page) ; une publication de PAGE parle sous l'identité de la page (nom, logo, badge de confiance), son auteur n'en est que le signataire ; nom neutre traduit pour un profil non publié ; branche des directs retirée (`direct-status`, carte d'annonce et lien de conférence : le direct n'existe pas encore dans le moteur) ; gestes du moteur avec le réseau courant (`engagement.engagement.toggleReaction`, `posts.posts.{edit, remove, pinOnMyWall}`, `pages.pages.removePagePost` pour une publication de page, `moderation.moderation.{reportPost, reportComment}`) ; l'épinglage personnel n'est pas offert sur une publication de page ; libellés, toasts et noms accessibles par l'i18n (clés `reseau:postCard.*`) ; refus du moteur dit par son code (`postEngineErrorText`) ; partage cité avec la page de l'original quand c'est une page qui parle, ses mots-dièse et mentions suivant les gestionnaires de la carte.
+// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/PostCard.tsx @ 25398f565 — adaptations : la carte est la PROJECTION du moteur (`PostCardPost` = `FunctionReturnType<typeof api.modules.posts.posts.getPost>`, rendue telle quelle par le fil, la recherche, les murs, les groupes et les pages : `_id`, `isMine`, `author.personId`, `page`, réactions `counts`) au lieu du DTO du socle (`postId`, `authorUserId`, `authorKind`, `signedBy`, `page.orgId`) ; identité d'auteur par `PostIdentityLines` (nom, badges CALCULÉS par le serveur — ni fonction ni administration) et `author-link` (lien, forme de pastille, signature) avec les adresses INJECTÉES (`useRoutes()` : profil d'une personne, `page(handle)` d'une page) ; une publication de PAGE parle sous l'identité de la page (nom, logo, badge de confiance), son auteur n'en est que le signataire ; nom neutre traduit pour un profil non publié ; annonce du direct branchée sur sa projection vivante et la route de conférence injectée ; gestes du moteur avec le réseau courant (`engagement.engagement.toggleReaction`, `posts.posts.{edit, remove, pinOnMyWall}`, `pages.pages.removePagePost` pour une publication de page, `moderation.moderation.{reportPost, reportComment}`) ; l'épinglage personnel n'est pas offert sur une publication de page ; libellés, toasts et noms accessibles par l'i18n (clés `reseau:postCard.*`) ; refus du moteur dit par son code (`postEngineErrorText`) ; partage cité avec la page de l'original quand c'est une page qui parle, ses mots-dièse et mentions suivant les gestionnaires de la carte. ; PA6 : dates de publication et citation dans la préférence du lecteur, origine réseau attribuée sans lien, carte de l’évènement annoncé avec dates/statut/réponse réellement projetés et sans droits inventés.
 "use client"
 
 /**
@@ -19,6 +19,7 @@ import { api } from "@antsia/api/engine"
 import type { Id } from "@antsia/api/engine"
 import { useNetwork, useRoutes } from "@antsia/api/network"
 import { Link } from "@antsia/api/routing"
+import { useViewerTimeZone } from "@antsia/api/viewer-preferences"
 import type { Badge } from "@antsia/social-domain/badges"
 import { Button, Card, TextArea } from "@antsia/ui"
 import { useMutation } from "convex/react"
@@ -41,6 +42,7 @@ import {
   type AuthorKind,
 } from "./author-link"
 import { CommentsSurface } from "./CommentsSurface"
+import { formatEventRange, myResponseLabel } from "./evenements-list"
 import { PostMedia } from "./PostMedia"
 import { PostOverflowMenu } from "./PostOverflowMenu"
 import { postEngineErrorText } from "./post-overflow"
@@ -94,9 +96,10 @@ interface PostCardProps {
 }
 
 export function PostCard({ post, now, onTag, onMention }: PostCardProps) {
-  const { t } = useTranslation("reseau")
+  const { t, i18n } = useTranslation("reseau")
   const { networkId, personId } = useNetwork()
   const routes = useRoutes()
+  const timeZone = useViewerTimeZone()
   const [showComments, setShowComments] = useState(false)
   const [sharing, setSharing] = useState(false)
   const [pendingReaction, setPendingReaction] = useState(false)
@@ -268,8 +271,14 @@ export function PostCard({ post, now, onTag, onMention }: PostCardProps) {
                 </>
               ) : null}
               <time dateTime={new Date(post.publishedAt).toISOString()}>
-                {formatRelativeDate(post.publishedAt, now, t)}
+                {formatRelativeDate(post.publishedAt, now, t, timeZone)}
               </time>
+              {post.origin !== null ? (
+                <>
+                  <span aria-hidden="true">·</span>
+                  <span>{t("post.origin", { name: post.origin.name })}</span>
+                </>
+              ) : null}
               {/*
                * La signataire est NOMMÉE, jamais mise en avant : la page
                * publie, la personne signe. D'où cette ligne discrète plutôt
@@ -383,6 +392,25 @@ export function PostCard({ post, now, onTag, onMention }: PostCardProps) {
         ) : null}
 
         {post.live ? <Link href={routes.conference(post.live.sessionId)} className="mt-3 flex min-h-11 items-center justify-between gap-3 rounded-xl border border-border bg-muted p-4"><span>{post.live.title}</span><span>{t(`direct:status.${post.live.status}`)}</span></Link> : null}
+
+        {post.event !== null ? (
+          <section aria-label={t("post.event.label")} className="grid gap-2 rounded-xl border border-border bg-muted p-4">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <span className="text-xs font-semibold text-muted-foreground">{t("post.event.label")}</span>
+              <span className={post.event.status === "cancelled" ? "text-xs font-semibold text-destructive" : "text-xs font-semibold text-muted-foreground"}>
+                {t(`post.event.${post.event.status}`)}
+              </span>
+            </div>
+            <h3 className="m-0 text-sm font-semibold text-foreground">{post.event.title}</h3>
+            <p className="m-0 text-sm text-foreground">{formatEventRange(post.event.startAt, post.event.endAt, i18n.language, timeZone)}</p>
+            <p className="m-0 text-xs text-muted-foreground">{t("post.event.timeZone", { timeZone })}</p>
+            {post.event.myParticipation !== null ? (
+              <p className="m-0 text-xs text-muted-foreground">
+                {t("post.event.participation", { response: myResponseLabel(post.event.myParticipation, t) })}
+              </p>
+            ) : null}
+          </section>
+        ) : null}
 
         {post.share ? (
           <SharedPostCard share={post.share} now={now} onTag={onTag} onMention={onMention} />
@@ -534,6 +562,7 @@ function SharedPostCard({
   onMention?: (handle: string) => void
 }) {
   const { t } = useTranslation("reseau")
+  const timeZone = useViewerTimeZone()
   if (!share.available) {
     return (
       <div
@@ -595,7 +624,7 @@ function SharedPostCard({
           <span style={{ color: "var(--ink-600)" }}>
             {" · "}
             <time dateTime={new Date(share.publishedAt).toISOString()}>
-              {formatRelativeDate(share.publishedAt, now, t)}
+              {formatRelativeDate(share.publishedAt, now, t, timeZone)}
             </time>
           </span>
         </p>

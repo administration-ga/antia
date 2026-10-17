@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/messagerie/messagerie-liste.ts @ ad2e7fdc2 — adaptations : branche « poste » élaguée (recherche par fonction, `poste.positionTitle`) ; nom du correspondant NULLABLE (contrat `counterpartLabel` du moteur) ; dates dans la langue courante (`locale` en paramètre, formats mis en cache par langue) et « hier » rendu par `Intl.RelativeTimeFormat` ; aperçu et état vide traduits (`t` en dernier paramètre, clés qualifiées) ; `apercuFil` ajouté — le moteur ne dénormalise que le texte et la NATURE du dernier message (`lastMessageKind`, `lastMessageAttachmentCount`, `lastMessageDeleted`), la phrase d'un vocal, de pièces, d'un appel ou d'un retrait se compose ici ; l'état vide ne dépend plus d'une source sans groupes (une seule source, personnelle).
+// Dupliqué de socle/packages/agent-features/src/features/messagerie/messagerie-liste.ts @ ad2e7fdc2 — adaptations : branche « poste » élaguée (recherche par fonction, `poste.positionTitle`) ; nom du correspondant NULLABLE (contrat `counterpartLabel` du moteur) ; dates dans la langue courante (`locale` en paramètre, formats mis en cache par langue) et « hier » rendu par `Intl.RelativeTimeFormat` ; aperçu et état vide traduits (`t` en dernier paramètre, clés qualifiées) ; `apercuFil` ajouté — le moteur ne dénormalise que le texte et la NATURE du dernier message (`lastMessageKind`, `lastMessageAttachmentCount`, `lastMessageDeleted`), la phrase d'un vocal, de pièces, d'un appel ou d'un retrait se compose ici ; l'état vide ne dépend plus d'une source sans groupes (une seule source, personnelle). ; PA6 : préférence de fuseau injectée, calendrier grégorien et caches langue/fuseau.
 /**
  * messagerie-liste — ce que la LISTE des conversations décide.
  *
@@ -10,6 +10,7 @@
  */
 
 import type { TFunction } from "i18next"
+import { civilDateParts, formatViewerDate, isPreviousCivilDay, sameCivilDay } from "@antsia/api/civil-date"
 
 /** Le minimum qu'une ligne de conversation doit porter pour être filtrée. */
 export interface FiltrableThread {
@@ -51,41 +52,14 @@ export function filtrerThreads<T extends FiltrableThread>(
 	})
 }
 
-/** Deux instants tombent-ils le même jour civil ? */
-function memeJour(a: Date, b: Date): boolean {
-	return (
-		a.getFullYear() === b.getFullYear() &&
-		a.getMonth() === b.getMonth() &&
-		a.getDate() === b.getDate()
-	)
-}
-
-/** Les formats d'une langue — construits une fois, puis réutilisés. */
-interface FormatsDeLangue {
-	heure: Intl.DateTimeFormat
-	jourMois: Intl.DateTimeFormat
-	jourMoisAn: Intl.DateTimeFormat
-	relatif: Intl.RelativeTimeFormat
-}
-
-const FORMATS = new Map<string, FormatsDeLangue>()
-
-function formatsPour(locale: string): FormatsDeLangue {
-	const connus = FORMATS.get(locale)
-	if (connus !== undefined) return connus
-	const formats: FormatsDeLangue = {
-		heure: new Intl.DateTimeFormat(locale, { hour: "2-digit", minute: "2-digit" }),
-		jourMois: new Intl.DateTimeFormat(locale, { day: "numeric", month: "short" }),
-		jourMoisAn: new Intl.DateTimeFormat(locale, {
-			day: "numeric",
-			month: "short",
-			year: "numeric",
-		}),
-		// `numeric: "auto"` : « hier » / « yesterday », et non « il y a 1 jour ».
-		relatif: new Intl.RelativeTimeFormat(locale, { numeric: "auto" }),
+const relativeFormatters = new Map<string, Intl.RelativeTimeFormat>()
+function yesterdayLabel(locale: string): string {
+	let formatter = relativeFormatters.get(locale)
+	if (!formatter) {
+		formatter = new Intl.RelativeTimeFormat(locale, { numeric: "auto" })
+		relativeFormatters.set(locale, formatter)
 	}
-	FORMATS.set(locale, formats)
-	return formats
+	return formatter.format(-1, "day")
 }
 
 /**
@@ -97,7 +71,7 @@ function formatsPour(locale: string): FormatsDeLangue {
  * exacte n'apprend plus rien et vole la place du nom.
  *
  * `locale` : la langue de l'écran (`i18n.language`), jamais une langue écrite
- * en dur. Le fuseau est celui du navigateur.
+ * en dur. Le fuseau choisi est passé par les écrans.
  *
  * `null` — un fil sans message — rend une chaîne VIDE, jamais « 1 janv. 1970 ».
  */
@@ -105,21 +79,13 @@ export function formatThreadTime(
 	at: number | null,
 	now: number,
 	locale: string,
+	timeZone?: string,
 ): string {
 	if (at === null || !Number.isFinite(at)) return ""
-	const quand = new Date(at)
-	const maintenant = new Date(now)
-	const formats = formatsPour(locale)
-
-	if (memeJour(quand, maintenant)) return formats.heure.format(quand)
-
-	const hier = new Date(maintenant)
-	hier.setDate(hier.getDate() - 1)
-	if (memeJour(quand, hier)) return formats.relatif.format(-1, "day")
-
-	return quand.getFullYear() === maintenant.getFullYear()
-		? formats.jourMois.format(quand)
-		: formats.jourMoisAn.format(quand)
+	if (sameCivilDay(at, now, timeZone)) return formatViewerDate(at, locale, { hour: "2-digit", minute: "2-digit" }, timeZone)
+	if (isPreviousCivilDay(at, now, timeZone)) return yesterdayLabel(locale)
+	const sameYear = civilDateParts(at, timeZone).year === civilDateParts(now, timeZone).year
+	return formatViewerDate(at, locale, { day: "numeric", month: "short", ...(sameYear ? {} : { year: "numeric" as const }) }, timeZone)
 }
 
 /**

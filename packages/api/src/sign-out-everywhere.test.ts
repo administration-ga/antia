@@ -129,6 +129,13 @@ describe("signOutEverywhere — révocation prouvée avant nettoyage", () => {
 })
 
 describe("signOutEverywhere — état moteur et aucune purge étrangère", () => {
+  it("conserve l'apparence non personnelle mais purge les brouillons et les clés voisines", async () => {
+    const store = storage({ "antsia:antsia:appearance": "dark", "antsia:diasporale:appearance": "light", "antsia:antsia:appearance:draft": "private", "antsia:antsia:post-drafts:v1:p1": "private" })
+    const { authClient } = client()
+    const result = await signOutEverywhere(authClient, { storages: [store] })
+    expect([...store.map.keys()]).toEqual(["antsia:antsia:appearance", "antsia:diasporale:appearance"])
+    expect(result.purged).toEqual(["antsia:antsia:appearance:draft", "antsia:antsia:post-drafts:v1:p1"])
+  })
   it("purge les deux noms du moteur et les deux clés auth dans les deux storages", async () => {
     const local = storage({ "antsia:antsia:ringtone-muted": "1", "antia:antia:ringtone-muted": "1", "better-auth_cookie": "secret", theme: "dark", i18nextLng: "fr", "diasporale:demonstration:v1": "demo", "other-product:profile": "other" })
     const session = storage({ "antsia:diasporale:messagerie-dock:v6": "private", "antia:diasporale:post-drafts:v1:p1": "private", "better-auth_session_data": "private", "better-auth_cookie_extra": "other", "citizen-reduce-motion": "1" })

@@ -12,6 +12,7 @@
     "./stable-convex-better-auth-provider": "./src/stable-convex-better-auth-provider.tsx",
     "./next-provider": "./src/next-provider.tsx",
     "./network": "./src/network.tsx",
+    "./viewer-preferences": "./src/viewer-preferences.tsx",
     "./routing": "./src/routing/index.ts",
     "./routing/next": "./src/routing/adapters/next.tsx",
     "./*": "./src/*.ts"

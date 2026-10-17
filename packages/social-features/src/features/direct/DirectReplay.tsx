@@ -1,6 +1,8 @@
-// Dupliqué de socle/packages/agent-features/src/features/direct/ReplayManagementPanel.tsx @ ad2e7fdc2 — adaptations : DTO/réseau moteur, lecteur et décisions réunis, action VTT typée, confirmation en place, i18n et jetons ; aucune URL de dépôt ni seconde capture.
+// Dupliqué de socle/packages/agent-features/src/features/direct/ReplayManagementPanel.tsx @ ad2e7fdc2 — adaptations : DTO/réseau moteur, lecteur et décisions réunis, action VTT typée, confirmation en place, i18n et jetons ; aucune URL de dépôt ni seconde capture. ; PA6 : dates et jours civils dans le fuseau personnel du lecteur (repli appareil).
 "use client"
 
+import { formatViewerDate } from "@antsia/api/civil-date"
+import { useViewerTimeZone } from "@antsia/api/viewer-preferences"
 import { api } from "@antsia/api/engine"
 import { useNetwork } from "@antsia/api/network"
 import { DIRECT_REPLAY_CAPTIONS_LANGS, DIRECT_REPLAY_FAILURE_REASONS } from "@antsia/social-domain/live/replayComposition"
@@ -15,6 +17,7 @@ import { useDirectClock, useDirectCommand } from "./use-direct-command"
 
 export function DirectReplay({ session }: { session: DirectSession }) {
   const { t, i18n } = useTranslation("direct")
+  const timeZone = useViewerTimeZone()
   const { networkId } = useNetwork()
   const decide = useMutation(api.modules.live.sessions.decideReplayPublication)
   const visibility = useMutation(api.modules.live.sessions.setReplayVisibility)
@@ -70,7 +73,7 @@ export function DirectReplay({ session }: { session: DirectSession }) {
     <h2 className="font-semibold">{t("replay.management")}</h2>
     <p role="status">{t(replay ? `replay.egress.${replay.egressState}` : "replay.none")}</p>
     {duration ? <p className="text-sm">{t(duration.hours ? "replay.durationHours" : "replay.durationMinutes", { hours: duration.hours, minutes: duration.hours ? String(duration.minutes).padStart(2, "0") : duration.totalMinutes })}</p> : null}
-    {replay?.retentionUntil ? <p className={`text-sm ${replayRetentionIsNear(replay.retentionUntil, now) ? "font-semibold" : "text-muted-foreground"}`}>{replay.retentionUntil <= now ? t("replay.retentionPassed") : t("replay.retention", { date: new Intl.DateTimeFormat(i18n.language, { dateStyle: "long" }).format(replay.retentionUntil) })}</p> : null}
+    {replay?.retentionUntil ? <p className={`text-sm ${replayRetentionIsNear(replay.retentionUntil, now) ? "font-semibold" : "text-muted-foreground"}`}>{replay.retentionUntil <= now ? t("replay.retentionPassed") : t("replay.retention", { date: formatViewerDate(replay.retentionUntil, i18n.language, { dateStyle: "long" }, timeZone) })}</p> : null}
     {canManage && replay?.egressState === "failed" ? <p role="alert">{failure ? t(`replayFailure.${failure}`) : t("replay.failed")}</p> : null}
     {replay?.url ? <video key={`${replay.url}:${replay.captionsUrl}:${replay.captionsLang}:${playerVersion}`} src={replay.url} controls playsInline preload="metadata" aria-label={t("replay.player")} className="aspect-video w-full rounded-lg" onPlay={() => setPlayback("idle")} onEnded={() => setPlayback("ended")} onError={() => setPlayback("error")}>
       {replay.captionsUrl ? <track kind="captions" src={replay.captionsUrl} srcLang={replay.captionsLang ?? "fr"} label={t(`captionsLang.${replay.captionsLang === "en" ? "en" : "fr"}`)} default /> : null}

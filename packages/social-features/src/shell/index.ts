@@ -5,3 +5,6 @@
 export { CommunicationShell } from "./communication-shell"
 export { usePresenceHeartbeat } from "./presence/use-presence-heartbeat"
 export { MyPresenceRow } from "./account/my-presence-row"
+
+export { AppearanceProvider, AppearanceControl, useOptionalAppearance } from "./appearance"
+export { PostHogProvider, resolvePostHogConfiguration } from "./analytics"

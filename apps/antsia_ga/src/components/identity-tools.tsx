@@ -29,7 +29,7 @@ export function IdentityTools() {
   useEffect(() => () => { linkRequest.current?.abort() }, [])
   useEffect(() => {
     if (!open) return
-    panel.current?.querySelector<HTMLButtonElement>("button:not(:disabled)")?.focus()
+    panel.current?.querySelector<HTMLElement>("button:not(:disabled), a[href], select:not(:disabled), input:not(:disabled)")?.focus()
     const close = (event: KeyboardEvent) => {
       if (event.key !== "Escape") return
       event.preventDefault()

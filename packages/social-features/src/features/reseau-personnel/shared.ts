@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/shared.ts @ ad2e7fdc2 — adaptations : miroirs du serveur remplacés par la source de vérité du moteur (`@antsia/social-domain/content` : bornes, audiences, raisons du fil, réactions, photo de profil ; `/pages` : audiences d'une page ; `/notifications` : genres de la cloche) ; aucune trace d'organisation ni de poste (audience « organisation », raison « collegue » et voix « Mon administration » retirées ; la note aux abonnés d'une page devient l'audience `followers`) ; genres de la cloche aux noms du moteur (`live_*`, `event_invite`) ; libellés par l'i18n — les constantes portent des CLÉS (`labelKey`, `hintKey`), les fonctions reçoivent `t` en DERNIER paramètre (clés qualifiées `reseau:shared.*`) ; dates absolues dans la langue courante (formateur `datetime` d'i18next, plus de « fr-FR » en dur) ; pluriels par `count`.
+// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/shared.ts @ ad2e7fdc2 — adaptations : miroirs du serveur remplacés par la source de vérité du moteur (`@antsia/social-domain/content` : bornes, audiences, raisons du fil, réactions, photo de profil ; `/pages` : audiences d'une page ; `/notifications` : genres de la cloche) ; aucune trace d'organisation ni de poste (audience « organisation », raison « collegue » et voix « Mon administration » retirées ; la note aux abonnés d'une page devient l'audience `followers`) ; genres de la cloche aux noms du moteur (`live_*`, `event_invite`) ; libellés par l'i18n — les constantes portent des CLÉS (`labelKey`, `hintKey`), les fonctions reçoivent `t` en DERNIER paramètre (clés qualifiées `reseau:shared.*`) ; dates absolues dans la langue courante (formateur `datetime` d'i18next, plus de « fr-FR » en dur) ; pluriels par `count`. ; PA6 : préférence de fuseau injectée, calendrier grégorien et caches langue/fuseau.
 /**
  * Logique DÉCIDABLE du réseau — libellés, dates, bornes, états vides.
  *
@@ -12,6 +12,7 @@
  * l'espace `reseau` comme celui d'un autre.
  */
 
+import { resolveViewerTimeZone } from "@antsia/api/civil-date"
 import {
   AVATAR_MAX_BYTES as DOMAIN_AVATAR_MAX_BYTES,
   AVATAR_MIME_TYPES,
@@ -213,7 +214,7 @@ const ABSOLUTE_DATE_FORMAT: Readonly<Intl.DateTimeFormatOptions> = {
  * dans la langue de `t` (formateur `datetime` d'i18next) et le fuseau du
  * navigateur.
  */
-export function formatRelativeDate(at: number, now: number, t: TFunction): string {
+export function formatRelativeDate(at: number, now: number, t: TFunction, timeZone?: string): string {
   const seconds = Math.max(0, Math.floor((now - at) / 1000))
   if (seconds < 60) return t("reseau:shared.relativeDate.now")
   const minutes = Math.floor(seconds / 60)
@@ -224,7 +225,7 @@ export function formatRelativeDate(at: number, now: number, t: TFunction): strin
   if (days < 7) return t("reseau:shared.relativeDate.days", { days })
   return t("reseau:shared.relativeDate.absolute", {
     date: new Date(at),
-    formatParams: { date: ABSOLUTE_DATE_FORMAT },
+    formatParams: { date: { ...ABSOLUTE_DATE_FORMAT, timeZone: resolveViewerTimeZone(timeZone) } },
   })
 }
 

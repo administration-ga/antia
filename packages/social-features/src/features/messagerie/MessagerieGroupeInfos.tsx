@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/messagerie/MessagerieGroupeInfos.tsx @ ad2e7fdc2 — adaptations : fonctions du moteur `groups.threads.*`, `groups.invites.*`, `groups.cascade.deleteGroup` (réseau courant, membre visé par sa PERSONNE `memberPersonId`) ; la fiche (`getGroupThread`) ne porte plus les membres : membres et invitations en attente lus par `paginateGroupMembers` et `paginateGroupPendingInvites`, chargés jusqu'au bout (borné par le plafond de structure) et places comptées sur l'effectif du serveur ; noms par le contrat `counterpartLabel` (nom nul = libellé neutre) ; photo déposée par `generateGroupAvatarUploadUrl` et posée avec son type, refusée par `refusPhotoDeGroupe` ; ressources lues dans le DTO des messages du moteur (`content`, `attachmentFiles`) ; lien d'invitation sur la base `useRoutes().messages()` ; recherche de relations sans langue écrite en dur (`normaliseRecherche`) ; échec de copie du lien dit tel quel (le socle le noyait dans le refus générique) ; dates dans la langue courante ; textes traduits (i18n `messagerie`, clés `messagerieGroupeInfos.…`) ; « Groupe iCom » et « espace agent » deviennent « réseau » ; code QR sans couleur littérale (encre héritée, fond transparent).
+// Dupliqué de socle/packages/agent-features/src/features/messagerie/MessagerieGroupeInfos.tsx @ ad2e7fdc2 — adaptations : fonctions du moteur `groups.threads.*`, `groups.invites.*`, `groups.cascade.deleteGroup` (réseau courant, membre visé par sa PERSONNE `memberPersonId`) ; la fiche (`getGroupThread`) ne porte plus les membres : membres et invitations en attente lus par `paginateGroupMembers` et `paginateGroupPendingInvites`, chargés jusqu'au bout (borné par le plafond de structure) et places comptées sur l'effectif du serveur ; noms par le contrat `counterpartLabel` (nom nul = libellé neutre) ; photo déposée par `generateGroupAvatarUploadUrl` et posée avec son type, refusée par `refusPhotoDeGroupe` ; ressources lues dans le DTO des messages du moteur (`content`, `attachmentFiles`) ; lien d'invitation sur la base `useRoutes().messages()` ; recherche de relations sans langue écrite en dur (`normaliseRecherche`) ; échec de copie du lien dit tel quel (le socle le noyait dans le refus générique) ; dates dans la langue courante ; textes traduits (i18n `messagerie`, clés `messagerieGroupeInfos.…`) ; « Groupe iCom » et « espace agent » deviennent « réseau » ; code QR sans couleur littérale (encre héritée, fond transparent). ; PA6 : dates et jours civils dans le fuseau personnel du lecteur (repli appareil).
 "use client"
 
 /**
@@ -15,6 +15,7 @@
  * se comptent sur l'EFFECTIF rendu par le serveur, exact dès le premier rendu.
  */
 
+import { useViewerTimeZone } from "@antsia/api/viewer-preferences"
 import { api } from "@antsia/api/engine"
 import type { Id } from "@antsia/api/engine"
 import {
@@ -126,6 +127,7 @@ export function MessagerieGroupeInfos({
 	callPending = false,
 }: MessagerieGroupeInfosProps) {
 	const { t, i18n } = useTranslation("messagerie")
+	const timeZone = useViewerTimeZone()
 	const { networkId } = useNetwork()
 	const routes = useRoutes()
 	const locale = i18n.language
@@ -589,7 +591,7 @@ export function MessagerieGroupeInfos({
 								<p className="msg-infos-created">
 									{t("messagerieGroupeInfos.createdBy", {
 										nom: data.createdBy.displayName?.trim() || t("messagerieGroupeInfos.createdByFallback"),
-										date: dateDuGroupe(data.createdAt, true, locale),
+										date: dateDuGroupe(data.createdAt, true, locale, timeZone),
 									})}
 								</p>
 								{vue.renommer && data.avatarUrl !== null ? (
@@ -688,7 +690,7 @@ export function MessagerieGroupeInfos({
 														<Avatar displayName={membre.displayName} avatarUrl={membre.avatarUrl} hasIdentity={membre.handle !== null} size={40} />
 														<div className="msg-row-main">
 															<span className="msg-row-name">{membre.isMe ? t("messagerieGroupeInfos.memberMe", { nom: membre.displayName }) : membre.displayName}</span>
-															<span className="msg-row-preview">{t("messagerieGroupeInfos.memberSince", { role: membre.roleLabel, date: dateDuGroupe(membre.joinedAt, false, locale) })}</span>
+															<span className="msg-row-preview">{t("messagerieGroupeInfos.memberSince", { role: membre.roleLabel, date: dateDuGroupe(membre.joinedAt, false, locale, timeZone) })}</span>
 															<div className="msg-infos-member-footer">
 																{membre.handle === null ? <span /> : <span className="msg-row-handle">@{membre.handle}</span>}
 																<div className="msg-infos-member-actions">
@@ -723,7 +725,7 @@ export function MessagerieGroupeInfos({
 											<li key={convie.userId}>
 												<div className="msg-row" style={{ cursor: "default" }}>
 													<Avatar displayName={convie.displayName} avatarUrl={convie.avatarUrl} hasIdentity={convie.handle !== null} size={36} />
-													<span className="msg-row-main"><span className="msg-row-name">{convie.displayName}</span><span className="msg-row-preview">{t("messagerieGroupeInfos.invitedOn", { date: dateDuGroupe(convie.invitedAt, false, locale) })}</span></span>
+													<span className="msg-row-main"><span className="msg-row-name">{convie.displayName}</span><span className="msg-row-preview">{t("messagerieGroupeInfos.invitedOn", { date: dateDuGroupe(convie.invitedAt, false, locale, timeZone) })}</span></span>
 												</div>
 											</li>
 										))}

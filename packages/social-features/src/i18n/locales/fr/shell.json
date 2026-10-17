@@ -1,4 +1,10 @@
 {
+  "appearance": {
+    "label": "Apparence",
+    "system": "Système",
+    "light": "Clair",
+    "dark": "Sombre"
+  },
   "espaceFloatingCard": {
     "close": "Fermer",
     "stepProgress": "Étape {{current}} sur {{total}} : {{label}}"

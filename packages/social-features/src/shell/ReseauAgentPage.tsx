@@ -624,7 +624,7 @@ function ReseauAgentPageInner() {
             </div>
           </div>
 
-          <main id={PANEL_ID} role="tabpanel" aria-labelledby={`${TAB_ID_PREFIX}${shownTab}`} className="rp-main">
+          <main className="rp-main">
             {/* La tablist « chemise » du kit d'espace. Une seule pastille : les
                 activités non lues vivent sur la CLOCHE du chrome (R-03). */}
             <EspaceDossierTabs
@@ -642,6 +642,7 @@ function ReseauAgentPageInner() {
               }))}
             />
 
+            <div id={PANEL_ID} role="tabpanel" aria-labelledby={`${TAB_ID_PREFIX}${shownTab}`} className="flex min-w-0 flex-col gap-[var(--rp-stack-gap)]">
             {/* La carte de tête du volet ouvert : son titre, sa description, et
                 — sur le fil UNIQUEMENT — la recherche et la portée. */}
             <section className="rp-volet-head esk-card" aria-label={t(currentTab.labelKey)} data-tools={shownTab === "fil" ? "true" : undefined}>
@@ -919,6 +920,7 @@ function ReseauAgentPageInner() {
             <p role="status" aria-live="polite" className="sr-only">
               {announcement}
             </p>
+            </div>
           </main>
         </div>
 

@@ -23,6 +23,13 @@ import { fileURLToPath, pathToFileURL } from "node:url"
 
 export const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..")
 export const ECOSYSTEMS = resolve(ROOT, "..")
+const OPTIONAL_PUBLIC_ARGS = new Set(["NEXT_PUBLIC_POSTHOG_KEY", "NEXT_PUBLIC_POSTHOG_HOST"])
+
+/** Seules les options explicitement admises peuvent rester absentes au build. */
+export function requiredBuildArgs(app) {
+  const optional = new Set((app.optional_build_args ?? []).filter((name) => OPTIONAL_PUBLIC_ARGS.has(name)))
+  return (app.build_args ?? []).filter((name) => !optional.has(name))
+}
 
 export function readCatalog(root = ROOT) {
   return JSON.parse(readFileSync(join(root, "deploy", "catalog.json"), "utf8"))
@@ -82,6 +89,9 @@ export function checkCatalog(catalog, root = ROOT) {
   if (cloudbuild === null) problems.push("deploy/cloudbuild.yaml introuvable")
   const externals = existsSync(join(root, "package.json")) ? externalRootWorkspaces(root) : []
   for (const [key, app] of Object.entries(catalog.applications ?? {})) {
+    for (const arg of app.optional_build_args ?? []) {
+      if (!OPTIONAL_PUBLIC_ARGS.has(arg) || !(app.build_args ?? []).includes(arg)) problems.push(`${key} : variable facultative non admise ${arg}`)
+    }
     for (const field of ["package", "path", "service", "dockerfile", "site_url", "dev_port", "build_args"]) {
       if (app[field] === undefined) problems.push(`${key} : champ « ${field} » manquant`)
     }
@@ -120,14 +130,16 @@ export function buildPlan(catalog, appKey, env = process.env) {
   const project = env.ANTSIA_GCP_PROJECT ?? "<ANTSIA_GCP_PROJECT>"
   const region = env.ANTSIA_GCP_REGION ?? "<ANTSIA_GCP_REGION>"
   const image = `${region}-docker.pkg.dev/${project}/antsia/${app.service}:latest`
-  const buildArgs = (app.build_args ?? []).flatMap((name) => ["--build-arg", `${name}=${env[name] ?? `<${name}>`}`])
+  const required = new Set(requiredBuildArgs(app))
+  const valueOf = (name) => env[name] ?? (required.has(name) ? `<${name}>` : "")
+  const buildArgs = (app.build_args ?? []).flatMap((name) => ["--build-arg", `${name}=${valueOf(name)}`])
   // Toutes les clés du gabarit Cloud Build : celles de l'application, et vides
   // celles des autres (la substitution reste stricte).
   const allArgs = [...new Set(Object.values(catalog.applications).flatMap((entry) => entry.build_args ?? []))]
   const substitutions = [
     `_DOCKERFILE=${app.dockerfile}`,
     `_IMAGE=${image}`,
-    ...allArgs.map((name) => `_${name}=${(app.build_args ?? []).includes(name) ? (env[name] ?? `<${name}>`) : ""}`),
+    ...allArgs.map((name) => `_${name}=${(app.build_args ?? []).includes(name) ? valueOf(name) : ""}`),
   ].join(",")
   return {
     app,
@@ -173,8 +185,8 @@ function main() {
     console.log("\nRien n'a été publié (ajouter --execute, sur décision du propriétaire).")
     return
   }
-  // Jamais un marqueur `<NOM>` inscrit dans un bundle : chaque variable de build doit être posée.
-  const missing = ["ANTSIA_GCP_PROJECT", "ANTSIA_GCP_REGION", ...(plan.app.build_args ?? [])].filter((name) => !process.env[name])
+  // Les variables nécessaires doivent être posées ; seules les options admises restent vides.
+  const missing = ["ANTSIA_GCP_PROJECT", "ANTSIA_GCP_REGION", ...requiredBuildArgs(plan.app)].filter((name) => !process.env[name])
   if (missing.length > 0 || process.env.ANTSIA_DEPLOY_AUTORISE !== "oui") {
     console.error(`✗ publication refusée : ${missing.length > 0 ? `variables manquantes (${missing.join(", ")})` : ""}${process.env.ANTSIA_DEPLOY_AUTORISE !== "oui" ? " ANTSIA_DEPLOY_AUTORISE≠oui (décision du propriétaire)" : ""}`)
     process.exitCode = 1

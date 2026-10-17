@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/evenements-list.ts @ ad2e7fdc2 — adaptations : `EvenementListItem` tiré de l'API du moteur (`events.events.myAgenda`, organisateur nommé par le contrat `counterpartLabel`) au lieu d'un miroir recopié ; statuts et bornes tirés du domaine (`@antsia/social-domain/events`) ; jour civil et dates dans le FUSEAU DU LECTEUR (paramètre `timeZone`, `viewerTimeZone()` = celui du navigateur) et la LANGUE courante (paramètre `locale` de `formatEventRange`) au lieu du fuseau de Libreville et du français imposés à tous ; libellés par l'i18n — `EVENT_SECTION_TITLES` → `EVENT_SECTION_TITLE_KEYS`, `t` en DERNIER paramètre de `myResponseLabel`, `emptyAgendaText`, `announceAudienceLabel`, `announceSummary` (clés `reseau:evenementsList.*`, pluriels par `count`) ; ajoutés pour la composition d'un évènement sur la page réseau (la composition vivait dans iAgenda, absent du moteur) : bornes et calculs du formulaire repris de `iagenda/personal-event-form.ts` (`isEndAfterStart`, `tomorrowLocalDate`, `localDateTimeMs`, `validateEventTitle`), récapitulatif des invitations (`eventInviteReportLabel`), réponse d'un invité (`participantStatusLabel`), nom neutre (`eventPersonName`) et lecture des refus du moteur (`eventActionErrorText`).
+// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/evenements-list.ts @ ad2e7fdc2 — adaptations : `EvenementListItem` tiré de l'API du moteur (`events.events.myAgenda`, organisateur nommé par le contrat `counterpartLabel`) au lieu d'un miroir recopié ; statuts et bornes tirés du domaine (`@antsia/social-domain/events`) ; jour civil et dates dans le FUSEAU DU LECTEUR (paramètre `timeZone`, `viewerTimeZone()` = celui du navigateur) et la LANGUE courante (paramètre `locale` de `formatEventRange`) au lieu du fuseau de Libreville et du français imposés à tous ; libellés par l'i18n — `EVENT_SECTION_TITLES` → `EVENT_SECTION_TITLE_KEYS`, `t` en DERNIER paramètre de `myResponseLabel`, `emptyAgendaText`, `announceAudienceLabel`, `announceSummary` (clés `reseau:evenementsList.*`, pluriels par `count`) ; ajoutés pour la composition d'un évènement sur la page réseau (la composition vivait dans iAgenda, absent du moteur) : bornes et calculs du formulaire repris de `iagenda/personal-event-form.ts` (`isEndAfterStart`, `tomorrowLocalDate`, `localDateTimeMs`, `validateEventTitle`), récapitulatif des invitations (`eventInviteReportLabel`), réponse d'un invité (`participantStatusLabel`), nom neutre (`eventPersonName`) et lecture des refus du moteur (`eventActionErrorText`). ; PA6 : préférence de fuseau injectée, calendrier grégorien et caches langue/fuseau.
 /**
  * evenements-list — ce que le volet ÉVÈNEMENTS décide, hors de tout composant.
  *
@@ -13,13 +13,14 @@
  * ⚠️ LE JOUR CIVIL EST CELUI DU LECTEUR. Le socle affichait tout à l'heure
  * de Libreville ; le moteur sert des réseaux dont les membres vivent sur
  * plusieurs fuseaux. Chaque fonction qui raisonne en jour reçoit donc le
- * fuseau en PARAMÈTRE — l'écran passe celui du navigateur (`viewerTimeZone`),
+ * fuseau en PARAMÈTRE — l'écran passe la préférence personnelle (`useViewerTimeZone`),
  * un test passe le sien. Jamais un fuseau imposé.
  *
  * Aucun import React ni runtime Convex : ce module ne connaît que des données.
  */
 
 import type { api } from "@antsia/api/engine"
+import { browserTimeZone, civilDateTimeMs, civilDayKey, formatViewerDate, tomorrowCivilDate } from "@antsia/api/civil-date"
 import { engineErrorCode, engineErrorRule } from "@antsia/social-contracts/errors"
 import type { PersonalReachAudience } from "@antsia/social-domain/content"
 import {
@@ -44,30 +45,9 @@ export type EvenementListItem = FunctionReturnType<typeof api.modules.events.eve
 // Le jour civil DU LECTEUR — la seule notion de « aujourd'hui » du module
 // ═══════════════════════════════════════════════════════════════
 
-/** Le fuseau du LECTEUR — celui de son navigateur. Jamais un fuseau imposé. */
+/** Repli des anciens consommateurs ; les écrans préfèrent désormais la préférence personnelle. */
 export function viewerTimeZone(): string {
-  return new Intl.DateTimeFormat().resolvedOptions().timeZone
-}
-
-const dayKeyFormatters = new Map<string, Intl.DateTimeFormat>()
-
-/**
- * Le formateur de la clé de jour : calendrier grégorien et chiffres latins
- * forcés, pour que la clé ne dépende jamais de la langue du système.
- */
-function dayKeyFormatter(timeZone: string): Intl.DateTimeFormat {
-  const known = dayKeyFormatters.get(timeZone)
-  if (known !== undefined) return known
-  const formatter = new Intl.DateTimeFormat(undefined, {
-    timeZone,
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    calendar: "gregory",
-    numberingSystem: "latn",
-  })
-  dayKeyFormatters.set(timeZone, formatter)
-  return formatter
+  return browserTimeZone()
 }
 
 /**
@@ -78,9 +58,7 @@ function dayKeyFormatter(timeZone: string): Intl.DateTimeFormat {
  * conversion de fuseau.
  */
 function dayKey(ms: number, timeZone: string): string {
-  const parts = dayKeyFormatter(timeZone).formatToParts(new Date(ms))
-  const part = (type: Intl.DateTimeFormatPartTypes) => parts.find((entry) => entry.type === type)?.value ?? ""
-  return `${part("year")}-${part("month")}-${part("day")}`
+  return civilDayKey(ms, timeZone)
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -329,17 +307,6 @@ const EVENT_TIME_OPTIONS: Readonly<Intl.DateTimeFormatOptions> = {
   minute: "2-digit",
 }
 
-const rangeFormatters = new Map<string, Intl.DateTimeFormat>()
-
-function rangeFormatter(kind: "date" | "time", locale: string, timeZone: string): Intl.DateTimeFormat {
-  const key = `${kind}|${locale}|${timeZone}`
-  const known = rangeFormatters.get(key)
-  if (known !== undefined) return known
-  const formatter = new Intl.DateTimeFormat(locale, { ...(kind === "date" ? EVENT_DATE_OPTIONS : EVENT_TIME_OPTIONS), timeZone })
-  rangeFormatters.set(key, formatter)
-  return formatter
-}
-
 /**
  * La plage lisible d'un évènement, dans la LANGUE de l'écran (`locale`) et le
  * FUSEAU du lecteur (`timeZone`) — quel que soit le fuseau dans lequel il a été
@@ -355,15 +322,15 @@ function rangeFormatter(kind: "date" | "time", locale: string, timeZone: string)
  *    défensive pour rester réutilisable ailleurs sans porter cette hypothèse.
  */
 export function formatEventRange(startsAt: number, endsAt: number | null, locale: string, timeZone: string): string {
-  const startDate = rangeFormatter("date", locale, timeZone).format(new Date(startsAt))
-  const startTime = rangeFormatter("time", locale, timeZone).format(new Date(startsAt))
+  const startDate = formatViewerDate(startsAt, locale, EVENT_DATE_OPTIONS, timeZone)
+  const startTime = formatViewerDate(startsAt, locale, EVENT_TIME_OPTIONS, timeZone)
   if (endsAt === null) return `${startDate}, ${startTime}`
 
-  const endTime = rangeFormatter("time", locale, timeZone).format(new Date(endsAt))
+  const endTime = formatViewerDate(endsAt, locale, EVENT_TIME_OPTIONS, timeZone)
   if (dayKey(startsAt, timeZone) === dayKey(endsAt, timeZone)) {
     return `${startDate}, ${startTime} → ${endTime}`
   }
-  const endDate = rangeFormatter("date", locale, timeZone).format(new Date(endsAt))
+  const endDate = formatViewerDate(endsAt, locale, EVENT_DATE_OPTIONS, timeZone)
   return `${startDate}, ${startTime} → ${endDate}, ${endTime}`
 }
 
@@ -394,13 +361,11 @@ export function isEndAfterStart(startAt: number, endAt: number): boolean {
 /**
  * `AAAA-MM-JJ` local — la valeur par défaut du champ date (demain).
  *
- * ⚠️ En heure LOCALE du navigateur de l'organisateur : c'est ce fuseau-là qui
- * est FIXÉ à la création côté serveur. `now` est un PARAMÈTRE.
+ * Dans le fuseau CHOISI par l'organisateur, fixé à la création côté serveur.
+ * Le lendemain est un jour civil, même s'il dure 23 ou 25 heures.
  */
-export function tomorrowLocalDate(now: number): string {
-  const date = new Date(now + 24 * 3600 * 1000)
-  const pad = (value: number) => String(value).padStart(2, "0")
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`
+export function tomorrowLocalDate(now: number, timeZone?: string): string {
+  return tomorrowCivilDate(now, timeZone)
 }
 
 /**
@@ -409,8 +374,8 @@ export function tomorrowLocalDate(now: number): string {
  * Rend `NaN` sur une saisie incomplète ou illisible — l'appelant le teste
  * (`Number.isFinite`) et le DIT, plutôt que d'envoyer un instant absurde.
  */
-export function localDateTimeMs(date: string, time: string): number {
-  return new Date(`${date}T${time}:00`).getTime()
+export function localDateTimeMs(date: string, time: string, timeZone?: string): number {
+  return civilDateTimeMs(date, time, timeZone)
 }
 
 /** Le titre proposé est-il recevable ? `null` quand ça passe, la phrase du refus sinon. */

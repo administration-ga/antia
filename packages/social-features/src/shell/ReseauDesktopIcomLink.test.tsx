@@ -15,14 +15,31 @@ const mocks = vi.hoisted(() => ({
   detach: vi.fn(),
 }))
 
-vi.mock("@antsia/api/engine", () => ({
-  api: {
-    modules: {
-      messaging: { inbox: { totalUnread: "totalUnread" } },
-      groups: { threads: { totalUnread: "groupesTotalUnread" } },
+vi.mock("@antsia/api/engine", async (importOriginal) => {
+  const original = await importOriginal<typeof import("@antsia/api/engine")>()
+  const modules = original.api.modules
+  return {
+    ...original,
+    api: {
+      modules: {
+        messaging: {
+          inbox: { totalUnread: "totalUnread", startThreadWithHandle: modules.messaging.inbox.startThreadWithHandle },
+          messages: modules.messaging.messages,
+          typing: modules.messaging.typing,
+          pins: modules.messaging.pins,
+          reactions: modules.messaging.reactions,
+          forward: modules.messaging.forward,
+        },
+        groups: {
+          threads: { totalUnread: "groupesTotalUnread", markGroupRead: modules.groups.threads.markGroupRead },
+          messages: modules.groups.messages,
+          typing: modules.groups.typing,
+        },
+        calls: modules.calls,
+      },
     },
-  },
-}))
+  }
+})
 
 vi.mock("@antsia/api/hooks", () => ({
   useAuthenticatedConvexQuery: (reference: string) =>

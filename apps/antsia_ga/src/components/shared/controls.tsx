@@ -31,7 +31,7 @@ export function Button({
         className,
       )}
     >
-      {pending ? <LoaderCircle aria-hidden="true" className="size-4 animate-spin" /> : null}
+      {pending ? <LoaderCircle aria-hidden="true" className="size-4 animate-spin motion-reduce:animate-none" /> : null}
       {children}
     </button>
   )
@@ -76,7 +76,7 @@ export function Card({ className, children }: { className?: string; children: Re
 export function CenteredStatus({ label }: { label: string }) {
   return (
     <div role="status" className="flex min-h-[50dvh] items-center justify-center gap-3 text-muted-foreground">
-      <LoaderCircle aria-hidden="true" className="size-5 animate-spin" />
+      <LoaderCircle aria-hidden="true" className="size-5 animate-spin motion-reduce:animate-none" />
       <span>{label}</span>
     </div>
   )

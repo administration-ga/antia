@@ -1,4 +1,5 @@
 "use client"
+import { useViewerTimeZone } from "@antsia/api/viewer-preferences"
 
 import { DISPLAY_NAME_MAX_LENGTH, HANDLE_MAX_LENGTH, HANDLE_MIN_LENGTH } from "@antsia/social-domain/content"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -54,7 +55,8 @@ export function WelcomeScreen() {
     }, t("antsia:welcome.invalidTimeZone")),
   })
   type Values = z.infer<typeof schema>
-  const form = useForm<Values>({ resolver: zodResolver(schema), defaultValues: { displayName: "", handle: "", consent: false, locale: "fr", timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone } })
+  const viewerTimeZone = useViewerTimeZone()
+  const form = useForm<Values>({ resolver: zodResolver(schema), defaultValues: { displayName: "", handle: "", consent: false, locale: "fr", timeZone: "UTC" } })
 
   const person = session.status === "welcome" ? session.person : null
   const consentInForce = person?.consentsInForce.includes("social_profile") ?? false
@@ -62,10 +64,10 @@ export function WelcomeScreen() {
     if (person?.displayName && !form.getValues("displayName")) form.setValue("displayName", person.displayName)
     if (person?.handle && !form.getValues("handle")) form.setValue("handle", person.handle)
     if (person?.locale && !form.getFieldState("locale").isDirty) form.setValue("locale", person.locale)
-    if (person?.timeZone && !form.getFieldState("timeZone").isDirty) form.setValue("timeZone", person.timeZone)
+    if (!form.getFieldState("timeZone").isDirty) form.setValue("timeZone", person?.timeZone ?? viewerTimeZone)
     // Un consentement déjà en vigueur ne se redemande pas : la case n'est pas affichée.
     if (consentInForce) form.setValue("consent", true)
-  }, [person?.displayName, person?.handle, person?.locale, person?.timeZone, consentInForce, form])
+  }, [person?.displayName, person?.handle, person?.locale, person?.timeZone, consentInForce, viewerTimeZone, form])
 
   useEffect(() => {
     if (session.status === "restricted") router.replace(routes.personalControls())
@@ -144,7 +146,7 @@ export function WelcomeScreen() {
                     key={suggestion.handle}
                     type="button"
                     onClick={() => form.setValue("handle", suggestion.handle, { shouldValidate: true })}
-                    className="rounded-full border border-border bg-background px-3 py-1 hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    className="min-h-11 rounded-full border border-border bg-background px-3 py-1 hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   >
                     @{suggestion.handle}
                   </button>

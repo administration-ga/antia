@@ -1,4 +1,4 @@
-// Réécrit d'après socle/packages/agent-features/src/features/reseau-personnel/ProfilPagePage.tsx @ ad2e7fdc2 — ce qui change : la fiche d'une page à IDENTITÉ PROPRE du moteur (nom, sigle, logo, bannière, description, nature, pays) lue par `pages.pages.getPage` dans le réseau courant, au lieu d'une page d'administration dérivée de son organisation ; badge CALCULÉ par le serveur (Officiel, Vérifié, Communauté) ; suivi par `follow`/`unfollow` du moteur, refus lu dans son CODE ; publier au nom de la page réservé au RÔLE VIVANT du lecteur (`viewer.role`) — le composeur partagé reçoit `asPage` ; mur par `pagePosts` (fenêtres chaînées, curseur composite du moteur, éléments rendus par `PostCard`) ; adresses par la table des routes injectée (retour au volet par `reseauAgentHref("pages", routes.home())`, mots-clés par `reseauAgentTagHref`, mentions vers le PROFIL d'une personne, jamais vers une page) ; panne de la fiche et du mur dite avec Réessayer ; textes traduits (clés `profilPagePage.…`, décisions dans `profil-page.ts`) ; ajouts : invitation à signer (accepter, décliner), revendication ou demande de vérification pièces à l'appui (`pages.claims.*`), gestion pour un administrateur vivant — identité (`pages.identity.updatePageIdentity`), logo et bannière par la garde des fichiers (`generatePageImageUploadUrl`, `setPageImage`), signataires (`pages.signatories.*`) ; props inchangés (`handle`).
+// Réécrit d'après socle/packages/agent-features/src/features/reseau-personnel/ProfilPagePage.tsx @ ad2e7fdc2 — ce qui change : la fiche d'une page à IDENTITÉ PROPRE du moteur (nom, sigle, logo, bannière, description, nature, pays) lue par `pages.pages.getPage` dans le réseau courant, au lieu d'une page d'administration dérivée de son organisation ; badge CALCULÉ par le serveur (Officiel, Vérifié, Communauté) ; suivi par `follow`/`unfollow` du moteur, refus lu dans son CODE ; publier au nom de la page réservé au RÔLE VIVANT du lecteur (`viewer.role`) — le composeur partagé reçoit `asPage` ; mur par `pagePosts` (fenêtres chaînées, curseur composite du moteur, éléments rendus par `PostCard`) ; adresses par la table des routes injectée (retour au volet par `reseauAgentHref("pages", routes.home())`, mots-clés par `reseauAgentTagHref`, mentions vers le PROFIL d'une personne, jamais vers une page) ; panne de la fiche et du mur dite avec Réessayer ; textes traduits (clés `profilPagePage.…`, décisions dans `profil-page.ts`) ; ajouts : invitation à signer (accepter, décliner), revendication ou demande de vérification pièces à l'appui (`pages.claims.*`), gestion pour un administrateur vivant — identité (`pages.identity.updatePageIdentity`), logo et bannière par la garde des fichiers (`generatePageImageUploadUrl`, `setPageImage`), signataires (`pages.signatories.*`) ; props inchangés (`handle`). ; PA6 : dates et jours civils dans le fuseau personnel du lecteur (repli appareil).
 "use client"
 
 /**
@@ -33,6 +33,7 @@
  * qui défile ; la variante carrée de la pastille est celle d'une page.
  */
 
+import { useViewerTimeZone } from "@antsia/api/viewer-preferences"
 import { api, type Id } from "@antsia/api/engine"
 import { useAuthenticatedConvexQuery } from "@antsia/api/hooks"
 import { useNetwork, useRoutes } from "@antsia/api/network"
@@ -611,6 +612,7 @@ function PageClaimSection({
   embedded?: boolean
 }) {
   const { t, i18n } = useTranslation("reseau")
+  const timeZone = useViewerTimeZone()
   const { networkId } = useNetwork()
   const claims = useAuthenticatedConvexQuery(api.modules.pages.claims.paginateMyPageClaims, {
     networkId,
@@ -688,7 +690,7 @@ function PageClaimSection({
     body = (
       <>
         <p style={{ ...MUTED_TEXT_STYLE, color: "var(--ink-800)" }}>{claimStatusText("pending", t)}</p>
-        <p style={MUTED_TEXT_STYLE}>{claimSubmittedText(latest.createdAt, i18n.language, t)}</p>
+        <p style={MUTED_TEXT_STYLE}>{claimSubmittedText(latest.createdAt, i18n.language, t, timeZone)}</p>
         <div style={ACTIONS_STYLE}>
           <Button variant="secondary" disabled={pending} style={RESEAU_SECONDARY_ACTION_STYLE} onClick={() => void withdraw(latest.claimId)}>
             {t("profilPagePage.claim.withdraw")}

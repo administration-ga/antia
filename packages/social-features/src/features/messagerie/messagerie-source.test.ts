@@ -41,6 +41,7 @@ describe("la source personnelle — la seule du moteur", () => {
 				"supporteBrouillon",
 				"supporteGroupes",
 				"useGroupThreads",
+					"useMessageWrites",
 				"useStartCall",
 				"useThreadById",
 				"useThreads",

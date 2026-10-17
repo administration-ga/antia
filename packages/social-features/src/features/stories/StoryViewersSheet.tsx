@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/stories/StoryViewersSheet.tsx @ ad2e7fdc2 — adaptations : branché sur `stories.stories.viewers` du moteur (réseau courant de `useNetwork()`, pagination NATIVE de Convex au lieu de la chaîne de curseurs `seenAt` — plus d'ex æquo perdu à une frontière de page) ; spectateur au contrat `counterpartLabel` (`personId`, nom nullable dit par le libellé neutre) ; tiroir `@antsia/ui/sheet` avec le nom traduit de sa croix ; libellés traduits (clés `stories:storyViewersSheet.*`).
+// Dupliqué de socle/packages/agent-features/src/features/stories/StoryViewersSheet.tsx @ ad2e7fdc2 — adaptations : branché sur `stories.stories.viewers` du moteur (réseau courant de `useNetwork()`, pagination NATIVE de Convex au lieu de la chaîne de curseurs `seenAt` — plus d'ex æquo perdu à une frontière de page) ; spectateur au contrat `counterpartLabel` (`personId`, nom nullable dit par le libellé neutre) ; tiroir `@antsia/ui/sheet` avec le nom traduit de sa croix ; libellés traduits (clés `stories:storyViewersSheet.*`). ; PA6 : dates et jours civils dans le fuseau personnel du lecteur (repli appareil).
 "use client"
 
 /**
@@ -19,6 +19,7 @@
  * repousse son pied rend ce pied inatteignable.
  */
 
+import { useViewerTimeZone } from "@antsia/api/viewer-preferences"
 import { api, type Id } from "@antsia/api/engine"
 import { useAuthenticatedPaginatedQuery } from "@antsia/api/hooks"
 import { useNetwork } from "@antsia/api/network"
@@ -71,6 +72,7 @@ export function StoryViewersSheet({
 
 function ViewersList({ storyId, now }: { storyId: Id<"stories">; now: number }) {
 	const { t } = useTranslation("stories")
+	const timeZone = useViewerTimeZone()
 	const { networkId } = useNetwork()
 	const viewers = useAuthenticatedPaginatedQuery(
 		api.modules.stories.stories.viewers,
@@ -135,7 +137,7 @@ function ViewersList({ storyId, now }: { storyId: Id<"stories">; now: number }) 
 							color: "var(--muted-foreground)",
 						}}
 					>
-						{formatRelativeDate(seenAt, now, t)}
+						{formatRelativeDate(seenAt, now, t, timeZone)}
 					</span>
 				</div>
 			))}

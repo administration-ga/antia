@@ -187,5 +187,37 @@
     },
     "pushDisable": "Désactiver les notifications sur cet appareil",
     "weeklyLimitError": "Choisissez un nombre entier entre 0 et 100."
+  },
+  "preferences": {
+    "title": "Vos préférences",
+    "lead": "Choisissez votre langue et le fuseau utilisé pour les dates et les heures dans tous vos réseaux.",
+    "localeLabel": "Langue de l’interface",
+    "localeHint": "La langue choisie s’applique après l’enregistrement.",
+    "french": "Français",
+    "english": "Anglais",
+    "timeZoneLabel": "Fuseau horaire personnel",
+    "timeZoneHint": "Utilisez un nom de fuseau, par exemple Africa/Libreville ou Europe/Paris. Les heures d’été et d’hiver sont prises en compte.",
+    "invalidLocale": "Choisissez le français ou l’anglais.",
+    "invalidTimeZone": "Saisissez un fuseau horaire valable, par exemple Africa/Libreville.",
+    "loading": "Chargement de vos préférences…",
+    "save": "Enregistrer mes préférences",
+    "saving": "Enregistrement…",
+    "saved": "Vos préférences ont été enregistrées.",
+    "appearanceHint": "L’apparence change immédiatement. Ce choix est conservé pour ce réseau sur cet appareil.",
+    "unsaved": "Vos modifications ne sont pas enregistrées. Enregistrez vos préférences avant de quitter cette page.",
+    "leaveConfirm": "Quitter cette page sans enregistrer vos préférences ?"
+  },
+  "analytics": {
+    "title": "Mesure d’usage facultative",
+    "lead": "Avec votre accord, ANTSIA peut mesurer les catégories d’écrans consultés, le réseau et la langue, associés à un identifiant temporaire du navigateur. Aucun message, contenu, identifiant social, adresse de profil ni enregistrement de session n’est envoyé.",
+    "active": "Votre accord est enregistré. La mesure est active sur les écrans des membres.",
+    "inactive": "La mesure d’usage est désactivée dans ce navigateur.",
+    "unconfigured": "Le service de mesure n’est pas configuré. Vous pouvez toujours retirer un accord existant.",
+    "grant": "Autoriser la mesure d’usage",
+    "revoke": "Retirer mon accord",
+    "granted": "Votre accord a été enregistré.",
+    "revoked": "Votre accord a été retiré.",
+    "grantFailed": "L’accord n’a pas pu être enregistré. Réessayez.",
+    "revokeFailed": "La mesure est arrêtée dans ce navigateur, mais le retrait n’a pas pu être enregistré. Réessayez avant de fermer la page."
   }
 }

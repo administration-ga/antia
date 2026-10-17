@@ -27,6 +27,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@antsia/ui/sheet"
 import { useTranslation } from "react-i18next"
 
 import { markStoriesOpenedFromApp } from "../../features/stories/stories-entry"
+import { AppearanceControl } from "../appearance"
 import { isServedReseauTab } from "../reseau-menu"
 import { reseauMobileMenuSections, type ReseauMenuDestinations } from "./reseau-mobile-tabs"
 
@@ -99,6 +100,7 @@ export function ReseauMobileMenuSheet({ open, onOpenChange }: ReseauMobileMenuSh
               </div>
             </section>
           ))}
+          <AppearanceControl />
         </div>
       </SheetContent>
     </Sheet>

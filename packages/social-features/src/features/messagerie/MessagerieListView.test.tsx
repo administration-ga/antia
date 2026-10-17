@@ -16,26 +16,40 @@ import { afterEach, describe, expect, it, vi } from "vitest"
 
 import { renderWithEngine } from "../../tests/engine-wrapper"
 
-vi.mock("@antsia/api/engine", () => ({
-	api: {
-		modules: {
-			messaging: {
-				inbox: {
-					paginateMyThreads: "paginateMyThreads",
-					getThread: "getThread",
-					totalUnread: "totalUnread",
+vi.mock("@antsia/api/engine", async (importOriginal) => {
+	const original = await importOriginal<typeof import("@antsia/api/engine")>()
+	const modules = original.api.modules
+	return {
+		...original,
+		api: {
+			modules: {
+				messaging: {
+					inbox: {
+						paginateMyThreads: "paginateMyThreads",
+						getThread: "getThread",
+						totalUnread: "totalUnread",
+						startThreadWithHandle: modules.messaging.inbox.startThreadWithHandle,
+					},
+					messages: modules.messaging.messages,
+					typing: modules.messaging.typing,
+					pins: modules.messaging.pins,
+					reactions: modules.messaging.reactions,
+					forward: modules.messaging.forward,
 				},
-			},
-			groups: {
-				threads: {
-					paginateMyGroupThreads: "paginateMyGroupThreads",
-					totalUnread: "groupesTotalUnread",
+				groups: {
+					threads: {
+						paginateMyGroupThreads: "paginateMyGroupThreads",
+						totalUnread: "groupesTotalUnread",
+						markGroupRead: modules.groups.threads.markGroupRead,
+					},
+					messages: modules.groups.messages,
+					typing: modules.groups.typing,
 				},
+				calls: { direct: { callMember: "callMember" } },
 			},
-			calls: { direct: { callMember: "callMember" } },
 		},
-	},
-}))
+	}
+})
 
 vi.mock("@antsia/api/hooks", () => ({
 	useAuthenticatedConvexQuery: () => ({
@@ -126,6 +140,7 @@ function sourceFactice(
 	}
 	return {
 		espace: "personnel",
+		useMessageWrites: () => { throw new Error("La liste ne doit monter aucune écriture de conversation") },
 		useThreads: () => liste,
 		useThreadsPage: () => ({
 			...liste,

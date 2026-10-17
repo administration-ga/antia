@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/iappel/call-timer.ts @ ad2e7fdc2 — adaptations : heure relative du journal traduite par i18n (`locale` puis `t` ajoutés en derniers paramètres de `formatClockTime`, clés `iappel:callTimer.…`) ; dates formatées dans la langue courante (`Intl` avec `locale`, plus de `fr-FR` en dur).
+// Dupliqué de socle/packages/agent-features/src/features/iappel/call-timer.ts @ ad2e7fdc2 — adaptations : heure relative du journal traduite par i18n (`locale` puis `t` ajoutés en derniers paramètres de `formatClockTime`, clés `iappel:callTimer.…`) ; dates formatées dans la langue courante (`Intl` avec `locale`, plus de `fr-FR` en dur). ; PA6 : préférence de fuseau injectée, calendrier grégorien et caches langue/fuseau.
 /**
  * call-timer — combien de temps dure un appel, et depuis quand.
  *
@@ -25,6 +25,7 @@
  */
 
 import type { TFunction } from "i18next"
+import { civilDateParts, formatViewerDate, isPreviousCivilDay, sameCivilDay } from "@antsia/api/civil-date"
 
 /**
  * Rend une durée au format d'un chronomètre d'appel : `MM:SS`, ou `H:MM:SS`
@@ -61,15 +62,6 @@ export function elapsedSince(startedAt: number | null | undefined, now: number):
 	return diff > 0 ? diff : 0
 }
 
-/** Un jour civil, comparé sur l'heure LOCALE de la machine — jamais en UTC. */
-function isSameLocalDay(a: Date, b: Date): boolean {
-	return (
-		a.getFullYear() === b.getFullYear() &&
-		a.getMonth() === b.getMonth() &&
-		a.getDate() === b.getDate()
-	)
-}
-
 /**
  * Heure relative COURTE pour un journal d'appels, dans la langue de l'écran.
  *
@@ -79,10 +71,10 @@ function isSameLocalDay(a: Date, b: Date): boolean {
  * puis jour + mois — avec l'année seulement si elle diffère de celle de
  * `now`, sans quoi CHAQUE ligne d'un vieux journal l'afficherait pour rien).
  *
- * Les jours se comparent sur l'heure LOCALE de la machine qui affiche : c'est
+ * Les jours se comparent sur le fuseau choisi par la personne : c'est
  * un journal lu par une personne sur son appareil, pas un log serveur en UTC.
  */
-export function formatClockTime(at: number, now: number, locale: string, t: TFunction): string {
+export function formatClockTime(at: number, now: number, locale: string, t: TFunction, timeZone?: string): string {
 	const diffMs = now - at
 
 	// Un horodatage dans le futur (dérive d'horloge, ligne qui vient d'arriver
@@ -91,20 +83,14 @@ export function formatClockTime(at: number, now: number, locale: string, t: TFun
 	if (diffMs < 60_000) return t("iappel:callTimer.justNow")
 	if (diffMs < 3_600_000) return t("iappel:callTimer.minutesAgo", { minutes: Math.floor(diffMs / 60_000) })
 
-	const date = new Date(at)
-	const today = new Date(now)
-	if (isSameLocalDay(date, today)) {
-		return new Intl.DateTimeFormat(locale, { hour: "2-digit", minute: "2-digit" }).format(date)
+	if (sameCivilDay(at, now, timeZone)) {
+		return formatViewerDate(at, locale, { hour: "2-digit", minute: "2-digit" }, timeZone)
 	}
-
-	const yesterday = new Date(today)
-	yesterday.setDate(yesterday.getDate() - 1)
-	if (isSameLocalDay(date, yesterday)) return t("iappel:callTimer.yesterday")
-
-	const sameYear = date.getFullYear() === today.getFullYear()
-	return new Intl.DateTimeFormat(locale, {
+	if (isPreviousCivilDay(at, now, timeZone)) return t("iappel:callTimer.yesterday")
+	const sameYear = civilDateParts(at, timeZone).year === civilDateParts(now, timeZone).year
+	return formatViewerDate(at, locale, {
 		day: "numeric",
 		month: "long",
 		year: sameYear ? undefined : "numeric",
-	}).format(date)
+	}, timeZone)
 }

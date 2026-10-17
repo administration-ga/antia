@@ -20,6 +20,8 @@ import { useNetwork } from "@antsia/api/network"
 import { SkeletonCard } from "@antsia/ui"
 import { EspaceEmptyState } from "@antsia/ui/espace-kit"
 import { Fragment, useEffect, type ReactNode } from "react"
+import { useTranslation } from "react-i18next"
+import { ReseauQueryError } from "../../shell/ReseauQueryError"
 import { PostCard } from "./PostCard"
 import { PagesSuggestionsRail } from "./PagesSuggestionsRail"
 import { SuggestionsPanel } from "./SuggestionsPanel"
@@ -78,6 +80,7 @@ export function FeedPage({
   onBoundaryShift: (pageIndex: number, cursor: ReseauFeedCursor | null) => void
   emptyFallback: ReactNode
 }) {
+  const { t } = useTranslation("reseau")
   const { networkId } = useNetwork()
   const page = useAuthenticatedConvexQuery(
     api.modules.posts.posts.myFeed,
@@ -103,7 +106,7 @@ export function FeedPage({
    * respecter (double rendu du mode strict, rendu abandonné, concurrence).
    */
   useEffect(() => {
-    if (page.data === undefined) return
+    if (page.data === undefined || page.isError) return
     if (isLast) {
       onTail(pageKey, nextCursor)
       return
@@ -120,6 +123,7 @@ export function FeedPage({
     onBoundaryShift,
     onTail,
     page.data,
+    page.isError,
     pageIndex,
     pageKey,
   ])
@@ -133,12 +137,18 @@ export function FeedPage({
     )
   }
 
-  if (items.length === 0) return isFirst ? <>{emptyFallback}</> : null
+  if (page.isError) {
+    return <ReseauQueryError title={t("feedPages.errorTitle")} message={t("feedPages.errorMessage")} onRetry={() => { void page.refetch() }} />
+  }
+
+  const lacuna = page.data?.lacunar ? <p role="status" className="rounded-xl border border-border bg-muted p-3 text-sm text-muted-foreground">{t("feedPages.incomplete")}</p> : null
+  if (items.length === 0) return <>{lacuna}{isFirst && !page.data?.lacunar && nextCursor === null ? emptyFallback : null}</>
 
   const interleaveIndex = interleaveAfter ? interleaveAfter(items.length) : null
 
   return (
     <>
+      {lacuna}
       {items.map((post, index) => (
         <Fragment key={post._id}>
           <PostCard post={post} now={now} onTag={onTag} onMention={onMention} />

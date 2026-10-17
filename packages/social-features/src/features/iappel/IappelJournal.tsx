@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/iappel/IappelJournal.tsx @ ad2e7fdc2 — adaptations : journal du moteur (`calls.history.listCallHistory` du réseau courant, `{ calls, truncated }`) passé tel quel à `groupCallJournal` — le serveur a classé, l'identité du lecteur n'est plus lue (`users.getMe` retiré) ; acquittement par `calls.preferences.markJournalSeen` (sur soi) ; branche poste élaguée (prop `scope`, fonction, renvoi au secrétariat, appel prioritaire, raisons « hors horaires » et « secrétariat indisponible ») ; correspondant nommé par son libellé (`counterpartLabel`, nom neutre traduit) ; libellés traduits (i18n `iappel`), dates dans la langue courante.
+// Dupliqué de socle/packages/agent-features/src/features/iappel/IappelJournal.tsx @ ad2e7fdc2 — adaptations : journal du moteur (`calls.history.listCallHistory` du réseau courant, `{ calls, truncated }`) passé tel quel à `groupCallJournal` — le serveur a classé, l'identité du lecteur n'est plus lue (`users.getMe` retiré) ; acquittement par `calls.preferences.markJournalSeen` (sur soi) ; branche poste élaguée (prop `scope`, fonction, renvoi au secrétariat, appel prioritaire, raisons « hors horaires » et « secrétariat indisponible ») ; correspondant nommé par son libellé (`counterpartLabel`, nom neutre traduit) ; libellés traduits (i18n `iappel`), dates dans la langue courante. ; PA6 : préférence de fuseau injectée, calendrier grégorien et caches langue/fuseau.
 "use client"
 
 /**
@@ -18,6 +18,8 @@
  */
 
 import { api } from "@antsia/api/engine"
+import { civilDayKey, formatViewerDate, isPreviousCivilDay, sameCivilDay } from "@antsia/api/civil-date"
+import { useViewerTimeZone } from "@antsia/api/viewer-preferences"
 import { useAuthenticatedConvexQuery } from "@antsia/api/hooks"
 import { useNetwork } from "@antsia/api/network"
 import { useMutation } from "convex/react"
@@ -55,37 +57,23 @@ export interface IappelJournalProps {
 
 type JournalFilter = "all" | "missed"
 
-/** Un jour civil, comparé sur l'heure LOCALE de l'appareil qui affiche. */
-function isSameLocalDay(a: Date, b: Date): boolean {
-	return (
-		a.getFullYear() === b.getFullYear() &&
-		a.getMonth() === b.getMonth() &&
-		a.getDate() === b.getDate()
-	)
-}
-
 /**
  * L'intitulé du jour d'une ligne : « Aujourd'hui », « Hier », sinon la date en
  * toutes lettres — jamais une heure seule, ce serait ambigu une fois les
  * entrées regroupées sur plusieurs jours.
  */
-function dayLabelOf(at: number, t: TFunction, locale: string): string {
-	const date = new Date(at)
-	const today = new Date()
-	if (isSameLocalDay(date, today)) return t("iappel:iappelJournal.today")
-
-	const yesterday = new Date(today)
-	yesterday.setDate(yesterday.getDate() - 1)
-	if (isSameLocalDay(date, yesterday)) return t("iappel:iappelJournal.yesterday")
-
-	return new Intl.DateTimeFormat(locale, {
+function dayLabelOf(at: number, now: number, t: TFunction, locale: string, timeZone: string): string {
+	if (sameCivilDay(at, now, timeZone)) return t("iappel:iappelJournal.today")
+	if (isPreviousCivilDay(at, now, timeZone)) return t("iappel:iappelJournal.yesterday")
+	return formatViewerDate(at, locale, {
 		weekday: "long",
 		day: "numeric",
 		month: "long",
-	}).format(date)
+	}, timeZone)
 }
 
 interface JournalDayGroup {
+	day: string
 	label: string
 	entries: JournalEntry[]
 }
@@ -96,15 +84,16 @@ interface JournalDayGroup {
  * consécutives, un simple passage suffit — pas besoin de re-trier ni de
  * construire une table intermédiaire par clé de date.
  */
-function groupByDay(entries: readonly JournalEntry[], t: TFunction, locale: string): JournalDayGroup[] {
+function groupByDay(entries: readonly JournalEntry[], now: number, t: TFunction, locale: string, timeZone: string): JournalDayGroup[] {
 	const groups: JournalDayGroup[] = []
 	for (const entry of entries) {
-		const label = dayLabelOf(entry.at, t, locale)
+		const day = civilDayKey(entry.at, timeZone)
+		const label = dayLabelOf(entry.at, now, t, locale, timeZone)
 		const current = groups[groups.length - 1]
-		if (current !== undefined && current.label === label) {
+		if (current !== undefined && current.day === day) {
 			current.entries.push(entry)
 		} else {
-			groups.push({ label, entries: [entry] })
+			groups.push({ day, label, entries: [entry] })
 		}
 	}
 	return groups
@@ -166,6 +155,7 @@ export function IappelJournal({
 	onWrite,
 }: IappelJournalProps) {
 	const { t, i18n } = useTranslation("iappel")
+	const timeZone = useViewerTimeZone()
 	const { networkId } = useNetwork()
 	const [filter, setFilter] = useState<JournalFilter>("all")
 
@@ -194,7 +184,8 @@ export function IappelJournal({
 
 	const entries = filter === "missed" ? journal.missed : journal.all
 	const locale = i18n.language
-	const dayGroups = useMemo(() => groupByDay(entries, t, locale), [entries, t, locale])
+	const now = Date.now()
+	const dayGroups = useMemo(() => groupByDay(entries, now, t, locale, timeZone), [entries, now, t, locale, timeZone])
 
 	return (
 		<div role="region" aria-label={t("iappelJournal.label")}>
@@ -235,7 +226,7 @@ export function IappelJournal({
 				</p>
 			) : (
 				dayGroups.map((group, index) => (
-					<div key={`${index}-${group.label}`}>
+					<div key={`${index}-${group.day}`}>
 						<p
 							style={{
 								margin: 0,
@@ -293,7 +284,7 @@ export function IappelJournal({
 											}}
 										>
 											<span style={{ fontSize: 11.5, color: "var(--ink-500)" }}>
-												{formatClockTime(entry.at, Date.now(), locale, t)}
+												{formatClockTime(entry.at, now, locale, t, timeZone)}
 											</span>
 											{entry.durationMs !== null ? (
 												<span

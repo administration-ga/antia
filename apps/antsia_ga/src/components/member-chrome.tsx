@@ -80,7 +80,7 @@ export function MemberPage({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-dvh bg-background">
       <MemberTopBar />
-      <main id="contenu" className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-5">
+      <main id="contenu" tabIndex={-1} className="focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring mx-auto w-full max-w-7xl px-4 py-6 sm:px-5">
         {children}
       </main>
     </div>

@@ -242,7 +242,8 @@
       "missingTiming": "Renseignez la date et les heures de l'évènement.",
       "cancel": "Annuler",
       "submit": "Créer l'évènement",
-      "submitting": "Création…"
+      "submitting": "Création…",
+      "invalidCivilTime": "Cette date ou cette heure n’existe pas dans le fuseau choisi. Choisissez un autre horaire."
     },
     "invite": {
       "open": "Inviter des relations",

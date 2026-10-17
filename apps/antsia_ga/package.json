@@ -43,6 +43,7 @@
     "eslint": "catalog:",
     "tailwindcss": "catalog:",
     "typescript": "catalog:",
-    "vitest": "catalog:"
+    "vitest": "catalog:",
+    "jsdom": "catalog:"
   }
 }

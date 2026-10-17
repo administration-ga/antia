@@ -19,7 +19,7 @@ export function FeedScreen() {
       <MemberTopBar onMobile="hidden" />
       {/* La page porte son propre `<main>` (le volet ouvert) : cette enveloppe
           n'est que la cible du lien d'évitement. */}
-      <div id="contenu" tabIndex={-1} className="flex flex-1 flex-col outline-none min-[960px]:min-h-0">
+      <div id="contenu" tabIndex={-1} className="flex flex-1 flex-col focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring min-[960px]:min-h-0">
         <ReseauAgentPage />
       </div>
     </div>

@@ -1,6 +1,8 @@
 // Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/BookmarksPanel.tsx @ ad2e7fdc2 — adaptations : mes signets dans le réseau courant (`marks.marks.paginateBookmarks` et `toggleMark` du moteur, `networkId` par `useNetwork()`) ; en-tête d'un aperçu décidé par `bookmarkIdentity` (la PAGE quand la publication parle en son nom, sinon l'auteur, sinon un nom neutre) ; dates relatives dans la langue courante (`formatRelativeDate(…, t)`) ; refus du moteur lus par code (`markActionErrorText`) ; état vide par `reseauEmptyState("signets", home, t)` (lien vers le fil composé sur la base injectée) ; toutes les chaînes par l'i18n (espace `reseau`, clés `bookmarksPanel.*`) ; état vide du kit d'espace (`@antsia/ui/espace-kit`).
 "use client"
 
+import { useViewerTimeZone } from "@antsia/api/viewer-preferences"
+
 /**
  * Volet « Enregistrements » — les publications mises de côté.
  *
@@ -57,6 +59,7 @@ function BookmarksPanelContent({
   onOpenPost: (postId: string) => void
 }) {
   const { t } = useTranslation("reseau")
+  const timeZone = useViewerTimeZone()
   const { networkId } = useNetwork()
   const home = useRoutes().home()
   const bookmarks = useAuthenticatedPaginatedQuery(api.modules.marks.marks.paginateBookmarks, { networkId }, { initialNumItems: BOOKMARKS_PAGE_SIZE })
@@ -102,7 +105,7 @@ function BookmarksPanelContent({
   }
 
   return (
-    <div style={{ display: "grid", gap: 12 }}>
+    <div data-collection="bookmarks" style={{ display: "grid", gap: 12 }}>
       <p
         style={{
           margin: 0,
@@ -128,8 +131,8 @@ function BookmarksPanelContent({
                   <span style={{ fontSize: 13, fontWeight: 600 }}>{identity.name}</span>
                   <span style={{ fontSize: 11.5, color: "var(--muted-foreground)" }}>
                     {t("bookmarksPanel.dates", {
-                      published: formatRelativeDate(item.publishedAt, now, t),
-                      marked: formatRelativeDate(item.markedAt, now, t),
+                      published: formatRelativeDate(item.publishedAt, now, t, timeZone),
+                      marked: formatRelativeDate(item.markedAt, now, t, timeZone),
                     })}
                   </span>
                 </span>

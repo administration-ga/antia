@@ -1,6 +1,8 @@
-// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/DirectsPanel.tsx @ ad2e7fdc2 — adaptations : première tranche réécrite sur les trois listes paginées du moteur, réseau et routes injectés, libellés i18n ; création page et métadonnées de conservation sur les vignettes (F3c).
+// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/DirectsPanel.tsx @ ad2e7fdc2 — adaptations : première tranche réécrite sur les trois listes paginées du moteur, réseau et routes injectés, libellés i18n ; création page et métadonnées de conservation sur les vignettes (F3c). ; PA6 : dates et jours civils dans le fuseau personnel du lecteur (repli appareil).
 "use client"
 
+import { formatViewerDate } from "@antsia/api/civil-date"
+import { useViewerTimeZone } from "@antsia/api/viewer-preferences"
 import { api, type Id } from "@antsia/api/engine"
 import { useAuthenticatedConvexQuery } from "@antsia/api/hooks"
 import { useNetwork, useRoutes } from "@antsia/api/network"
@@ -35,6 +37,7 @@ export function DirectsPanel() {
 
 function DirectList({ mode }: { mode: Mode }) {
   const { t, i18n } = useTranslation("direct")
+  const timeZone = useViewerTimeZone()
   const { networkId } = useNetwork()
   const routes = useRoutes()
   const [liveCursor, setLiveCursor] = useState<FunctionArgs<typeof api.modules.live.sessions.listLive>["cursor"]>()
@@ -64,7 +67,7 @@ function DirectList({ mode }: { mode: Mode }) {
           </Link>
           {card.host ? <p className="text-sm text-muted-foreground">{card.host.displayName ?? t("person")}</p> : null}
           {card.audience ? <p className="text-sm text-muted-foreground">{t(`audience.${card.audience}`)}</p> : null}
-          {card.replay ? <div className="flex flex-col gap-1 text-sm"><p>{t(`replay.egress.${card.replay.egressState}`)}</p><p>{t(`replay.publication.${card.replay.publication}`)}</p>{card.replay.retentionUntil ? <p>{t("replay.retention", { date: new Intl.DateTimeFormat(i18n.language, { dateStyle: "long" }).format(card.replay.retentionUntil) })}</p> : null}</div> : null}
+          {card.replay ? <div className="flex flex-col gap-1 text-sm"><p>{t(`replay.egress.${card.replay.egressState}`)}</p><p>{t(`replay.publication.${card.replay.publication}`)}</p>{card.replay.retentionUntil ? <p>{t("replay.retention", { date: formatViewerDate(card.replay.retentionUntil, i18n.language, { dateStyle: "long" }, timeZone) })}</p> : null}</div> : null}
           {card.durationMs ? <p className="text-sm text-muted-foreground">{t("replay.durationMinutes", { minutes: Math.max(1, Math.round(card.durationMs / 60_000)) })}</p> : null}
         </li>)}
       </ul>

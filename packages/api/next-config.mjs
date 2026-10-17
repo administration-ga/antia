@@ -43,7 +43,7 @@ export function readEnvFile(file) {
  *   d'environnement à recopier par application.
  * - En production, les valeurs arrivent par les ARG du Dockerfile (catalogue).
  *
- * @param {{ appDir: string, engineRoot?: string, transpilePackages?: string[] }} options
+ * @param {{ appDir: string, engineRoot?: string, transpilePackages?: string[], usageAnalytics?: { host?: string, projectToken?: string } }} options
  * @returns {import("next").NextConfig}
  */
 export function createEngineNextConfig(options) {
@@ -57,6 +57,9 @@ export function createEngineNextConfig(options) {
   // client reçoit l'URL avec son jeton d'appel). Posée par le propriétaire avec les
   // clés LiveKit du déploiement — sans elle, aucune origine média n'est ouverte.
   const livekitUrl = process.env.LIVEKIT_WS_URL ?? local.LIVEKIT_WS_URL ?? ""
+  const analyticsKey = options.usageAnalytics?.projectToken ?? ""
+  const analyticsHost = options.usageAnalytics?.host ?? ""
+  const analyticsOrigin = optionalAnalyticsOrigin(analyticsHost, analyticsKey)
 
   return {
     output: "standalone",
@@ -81,7 +84,21 @@ export function createEngineNextConfig(options) {
       CONVEX_SITE_URL: convexSiteUrl,
     },
     async headers() {
-      return [{ source: "/(.*)", headers: securityHeaders({ convexUrl, livekitUrl, isDev }) }]
+      return [{ source: "/(.*)", headers: securityHeaders({ convexUrl, livekitUrl, isDev, extraConnect: analyticsOrigin ? [analyticsOrigin] : [] }) }]
     },
   }
+}
+
+/** Configuration facultative : aucune origine ajoutée sans clé publique admise.
+ * @param {string} host
+ * @param {string} projectToken
+ * @returns {string | null}
+ */
+export function optionalAnalyticsOrigin(host, projectToken) {
+  if (!/^phc_[A-Za-z0-9]{20,128}$/.test(projectToken) || /^phc_(?:placeholder|replace|example|your|insert|change|todo|test)/i.test(projectToken) || !host || host.trim() !== host || /\s/.test(host)) return null
+  try {
+    const url = new URL(host)
+    if (url.protocol !== "https:" || url.username || url.password || url.search || url.hash || url.pathname !== "/") return null
+    return url.origin
+  } catch { return null }
 }

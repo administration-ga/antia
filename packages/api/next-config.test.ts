@@ -4,7 +4,22 @@ import { join } from "node:path"
 
 import { describe, expect, it } from "vitest"
 
-import { readEnvFile } from "./next-config.mjs"
+import { optionalAnalyticsOrigin, readEnvFile } from "./next-config.mjs"
+
+describe("optional analytics CSP origin", () => {
+  const token = `phc_${"a".repeat(24)}`
+  it("n'ouvre aucune origine sans configuration complète", () => {
+    expect(optionalAnalyticsOrigin("", token)).toBeNull()
+    expect(optionalAnalyticsOrigin("https://usage.example.test", "")).toBeNull()
+    expect(optionalAnalyticsOrigin("https://usage.example.test", `phx_${"a".repeat(24)}`)).toBeNull()
+  })
+  it("admet uniquement une origine HTTPS exacte sans credentials ni instructions CSP", () => {
+    expect(optionalAnalyticsOrigin("https://usage.example.test", token)).toBe("https://usage.example.test")
+    for (const host of ["http://usage.example.test", "https://name:secret@usage.example.test", "https://usage.example.test/path", "https://usage.example.test?key=1", "https://usage.example.test#fragment", "https://usage.example.test 'unsafe-inline'"]) {
+      expect(optionalAnalyticsOrigin(host, token)).toBeNull()
+    }
+  })
+})
 
 describe("readEnvFile", () => {
   it("lit le format écrit par le CLI Convex (commentaires, lignes vides)", () => {

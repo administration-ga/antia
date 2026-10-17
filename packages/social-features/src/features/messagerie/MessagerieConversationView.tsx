@@ -1,5 +1,7 @@
-// Dupliqué de socle/packages/agent-features/src/features/messagerie/MessagerieConversationView.tsx @ ad2e7fdc2 — adaptations : iDocument retiré (dialogues « Joindre depuis » et « Enregistrer dans », `idocument.importSettings`, coffre `vaultOrgId`, `canSaveToVault`, pièces du coffre) ; espace de poste retiré (`useOptionalOrg`, `scopeCommunication`, fonction au-dessus du titre `postEyebrow`, `poste.positionTitle`, `orgName`, phrase « échanges de poste… », renvoi au secrétariat) ; fonctions du moteur, réseau courant passé à chacune (`useNetwork().networkId`) : 1:1 sur `messaging.{messages,typing,pins,reactions}.*`, groupe sur `groups.{threads,messages,typing}.*`, brouillon sur `messaging.inbox.startThreadWithHandle`, destinataire sur `people.profile.getPublicProfile`, appel 1:1 par la source (`useStartCall` : la personne ET son identifiant public, refus à code normalisé, sans renvoi de secrétariat), appel de groupe sur `calls.groupCalls.startFromThread` (personnes choisies par `personIds`), transfert par les références typées `messaging.forward.*` ; plafond d'appel CONSTANT (`GROUP_CALL_MAX_PARTICIPANTS`, aucun compte exempté : `threadCallCapacity` retirée) ; membres du groupe lus à la demande (`groups.threads.paginateGroupMembers`, la fiche ne les porte plus) ; « écrit… » interrogé avec un instant arrondi rafraîchi par pas (`listTyping`/`listGroupTyping` prennent `now`) ; DTO du moteur (personnes nommées par `counterpartLabel`, pièces retenues par la garde des fichiers, `isMine`) et MON identifiant lu au réseau (`useNetwork().personId`) ; droit d'épingle de groupe par la règle du domaine (`isGroupThreadManager`) ; libellés traduits (espace de noms `messagerie`, clés `messagerieConversationView.*`), refus par code (`messageErreurLisible(err, t)`), dates par la langue courante ; correctif (16/10, constat de DIASPORALE) : un brouillon vers une personne avec qui un fil existe déjà ouvre CE fil et son historique (`useOpenExistingThreadForDraft`, `messaging.inbox.findThreadWithHandle`) au lieu d'une conversation vide.
+// Dupliqué de socle/packages/agent-features/src/features/messagerie/MessagerieConversationView.tsx @ ad2e7fdc2 — adaptations : iDocument retiré (dialogues « Joindre depuis » et « Enregistrer dans », `idocument.importSettings`, coffre `vaultOrgId`, `canSaveToVault`, pièces du coffre) ; espace de poste retiré (`useOptionalOrg`, `scopeCommunication`, fonction au-dessus du titre `postEyebrow`, `poste.positionTitle`, `orgName`, phrase « échanges de poste… », renvoi au secrétariat) ; fonctions du moteur, réseau courant passé à chacune (`useNetwork().networkId`) : 1:1 sur `messaging.{messages,typing,pins,reactions}.*`, groupe sur `groups.{threads,messages,typing}.*`, brouillon sur `messaging.inbox.startThreadWithHandle`, destinataire sur `people.profile.getPublicProfile`, appel 1:1 par la source (`useStartCall` : la personne ET son identifiant public, refus à code normalisé, sans renvoi de secrétariat), appel de groupe sur `calls.groupCalls.startFromThread` (personnes choisies par `personIds`), transfert par les références typées `messaging.forward.*` ; plafond d'appel CONSTANT (`GROUP_CALL_MAX_PARTICIPANTS`, aucun compte exempté : `threadCallCapacity` retirée) ; membres du groupe lus à la demande (`groups.threads.paginateGroupMembers`, la fiche ne les porte plus) ; « écrit… » interrogé avec un instant arrondi rafraîchi par pas (`listTyping`/`listGroupTyping` prennent `now`) ; DTO du moteur (personnes nommées par `counterpartLabel`, pièces retenues par la garde des fichiers, `isMine`) et MON identifiant lu au réseau (`useNetwork().personId`) ; droit d'épingle de groupe par la règle du domaine (`isGroupThreadManager`) ; libellés traduits (espace de noms `messagerie`, clés `messagerieConversationView.*`), refus par code (`messageErreurLisible(err, t)`), dates par la langue courante ; PA6 : écritures 1:1/groupe, dépôts, épingles et transferts délégués à `source.useMessageWrites()` (arguments sans réseau ; la source injecte le réseau courant), appels et lectures conservés ; correctif (16/10, constat de DIASPORALE) : un brouillon vers une personne avec qui un fil existe déjà ouvre CE fil et son historique (`useOpenExistingThreadForDraft`, `messaging.inbox.findThreadWithHandle`) au lieu d'une conversation vide.
 "use client"
+
+import { useViewerTimeZone } from "@antsia/api/viewer-preferences"
 
 /**
  * MessagerieConversationView — UNE conversation, dans la carte OU sur la page.
@@ -94,7 +96,7 @@ import type { MessageActionId } from "./message-actions"
 import type { MessageAttachmentData } from "./MessageAttachment"
 import { MessageBubble, type BubbleMessage } from "./MessageBubble"
 import { PinnedMessageBanner } from "./PinnedMessageBanner"
-import { forwardTargetArg, transfertApi } from "./transfert-api"
+import { forwardTargetArg } from "./transfert-api"
 import {
 	MessageComposer,
 	type ComposerMediaDraft,
@@ -233,6 +235,7 @@ export function MessagerieConversationView({
 	source = SOURCE_AGENT,
 }: MessagerieConversationViewProps) {
 	const { t, i18n } = useTranslation("messagerie")
+	const timeZone = useViewerTimeZone()
 	/**
 	 * Le réseau de TOUTES les fonctions de cette vue, et MOI dans ce réseau :
 	 * le serveur marque mes messages, mais savoir qui je suis sans attendre le
@@ -510,77 +513,37 @@ export function MessagerieConversationView({
 	/** Mes groupes du réseau, pour la liste des cibles. */
 	const groupesListe = source.useGroupThreads()
 
-	// ── Mutations ─────────────────────────────────────────────────────────
-	const send = useConvexMutationQuery(api.modules.messaging.messages.sendMessage)
-	const startThread = useConvexMutationQuery(
-		api.modules.messaging.inbox.startThreadWithHandle,
-	)
-	const { mutateAsync: markRead } = useConvexMutationQuery(
-		api.modules.messaging.messages.markRead,
-	)
-	const setTyping = useConvexMutationQuery(api.modules.messaging.typing.setTyping)
-	const clearTyping = useConvexMutationQuery(
-		api.modules.messaging.typing.clearTyping,
-	)
-	const uploadUrl1a1 = useConvexMutationQuery(
-		api.modules.messaging.messages.generateAttachmentUploadUrl,
-	)
-	const deleteForAll = useConvexMutationQuery(
-		api.modules.messaging.messages.deleteMessage,
-	)
-	const editMessage = useConvexMutationQuery(
-		api.modules.messaging.messages.editMessage,
-	)
-	const deleteForMe = useConvexMutationQuery(
-		api.modules.messaging.messages.deleteMessageForMe,
-	)
-	const react1a1 = useConvexMutationQuery(
-		api.modules.messaging.reactions.toggleMessageReaction,
-	)
-	/** L'appel 1:1 — c'est la SOURCE qui sait joindre une personne de sa boîte. */
+	// ── Écritures de la SOURCE ─────────────────────────────────────────────
+	// La boîte choisit aussi ses écritures et injecte son réseau ; la vue garde
+	// les gestes, brouillons, clés idempotentes et refus, sans choisir une porte.
+	const {
+		send,
+		startThread,
+		setTyping,
+		clearTyping,
+		uploadUrl1a1,
+		deleteForAll,
+		editMessage,
+		deleteForMe,
+		react1a1,
+		sendGroup,
+		setGroupTyping,
+		clearGroupTyping,
+		uploadUrlGroupe,
+		reactGroupe,
+		deleteGroupForMe,
+		editGroupMessage,
+		deleteGroupForAll,
+		setPinned,
+		setGroupPinned,
+		forwardMessage,
+		forwardGroupMessage,
+		markRead: { mutateAsync: markRead },
+		markGroupRead: { mutateAsync: markGroupRead },
+	} = source.useMessageWrites()
+	/** L’appel 1:1 reste un geste distinct fourni par la source. */
 	const appelDeLaSource = source.useStartCall()
 
-	const sendGroup = useConvexMutationQuery(
-		api.modules.groups.messages.sendGroupMessage,
-	)
-	const { mutateAsync: markGroupRead } = useConvexMutationQuery(
-		api.modules.groups.threads.markGroupRead,
-	)
-	const setGroupTyping = useConvexMutationQuery(
-		api.modules.groups.typing.setGroupTyping,
-	)
-	const clearGroupTyping = useConvexMutationQuery(
-		api.modules.groups.typing.clearGroupTyping,
-	)
-	const uploadUrlGroupe = useConvexMutationQuery(
-		api.modules.groups.messages.generateAttachmentUploadUrl,
-	)
-	const reactGroupe = useConvexMutationQuery(
-		api.modules.groups.messages.toggleGroupMessageReaction,
-	)
-	const deleteGroupForMe = useConvexMutationQuery(
-		api.modules.groups.messages.deleteGroupMessageForMe,
-	)
-	// IC-13 (B) : le groupe a reçu les gestes de l'AUTEUR — `…ForMe` demeure,
-	// c'est un geste différent (cf. `message-actions.ts`).
-	const editGroupMessage = useConvexMutationQuery(
-		api.modules.groups.messages.editGroupMessage,
-	)
-	const deleteGroupForAll = useConvexMutationQuery(
-		api.modules.groups.messages.deleteGroupMessage,
-	)
-	// ADR-0143 §5 : l'épingle (une par fil, visible de tous) et le transfert
-	// vers une cible EXPLICITE — le serveur re-contrôle tout à la livraison.
-	const setPinned = useConvexMutationQuery(
-		api.modules.messaging.pins.setPinnedMessage,
-	)
-	const setGroupPinned = useConvexMutationQuery(
-		api.modules.groups.messages.setGroupPinnedMessage,
-	)
-	const forwardMessage = useConvexMutationQuery(transfertApi.forwardMessage)
-	const forwardGroupMessage = useConvexMutationQuery(
-		transfertApi.forwardGroupMessage,
-	)
 	const startCall = useConvexMutationQuery(
 		api.modules.calls.groupCalls.startFromThread,
 	)
@@ -702,10 +665,11 @@ export function MessagerieConversationView({
 					counterpartId: correspondantId,
 					now: Date.now(),
 					locale: i18n.language,
+					timeZone,
 				},
 				t,
 			),
-		[bulles, selfId, correspondantId, i18n.language, t],
+		[bulles, selfId, correspondantId, i18n.language, timeZone, t],
 	)
 
 	// ── Acquittement de lecture ───────────────────────────────────────────
@@ -718,16 +682,16 @@ export function MessagerieConversationView({
 		submittedReceiptRef.current = cle
 		const promesse =
 			groupeId !== null
-				? markGroupRead({ networkId, threadId: groupeId })
+				? markGroupRead({ threadId: groupeId })
 				: filId !== null
-					? markRead({ networkId, threadId: filId })
+					? markRead({ threadId: filId })
 					: null
 		void promesse?.catch(() => {
 			// Un échec réseau autorise un retry ; un acquittement plus récent ne
 			// doit jamais être effacé par le rattrapage d'un plus ancien.
 			if (submittedReceiptRef.current === cle) submittedReceiptRef.current = null
 		})
-	}, [open, dernierAt, conversationKey, filId, groupeId, networkId, markRead, markGroupRead])
+	}, [open, dernierAt, conversationKey, filId, groupeId, markRead, markGroupRead])
 
 	// ── Suivi du bas ──────────────────────────────────────────────────────
 	const sauterEnBas = useCallback(() => {
@@ -824,7 +788,6 @@ export function MessagerieConversationView({
 				setReply(null)
 				try {
 					await sendGroup.mutateAsync({
-						networkId,
 						threadId: groupeId,
 						content: payload.text,
 						...(pieces === undefined ? {} : { attachmentFiles: pieces }),
@@ -834,7 +797,7 @@ export function MessagerieConversationView({
 						idempotencyKey: getKey(),
 					})
 					rotate()
-					void clearGroupTyping.mutateAsync({ networkId, threadId: groupeId })
+					void clearGroupTyping.mutateAsync({ threadId: groupeId })
 				} catch (err) {
 					// Le texte REVIENT dans le composeur : un refus ne mange pas la frappe.
 					dockStore.setDraftText(conversationKey, payload.text)
@@ -849,7 +812,6 @@ export function MessagerieConversationView({
 				setReply(null)
 				try {
 					await send.mutateAsync({
-						networkId,
 						threadId: filId,
 						content: payload.text,
 						...(pieces === undefined ? {} : { attachmentFiles: pieces }),
@@ -859,7 +821,7 @@ export function MessagerieConversationView({
 						idempotencyKey: getKey(),
 					})
 					rotate()
-					void clearTyping.mutateAsync({ networkId, threadId: filId })
+					void clearTyping.mutateAsync({ threadId: filId })
 				} catch (err) {
 					dockStore.setDraftText(conversationKey, payload.text)
 					setErreur(messageErreurLisible(err, t))
@@ -873,7 +835,6 @@ export function MessagerieConversationView({
 			// emporterait sinon le texte avec lui, sans que rien ne l'ait envoyé.
 			try {
 				const { threadId: neuf } = await startThread.mutateAsync({
-					networkId,
 					handle,
 					initialMessage: payload.text,
 					...(pieces === undefined ? {} : { initialAttachmentFiles: pieces }),
@@ -895,7 +856,6 @@ export function MessagerieConversationView({
 			groupeId,
 			filId,
 			handle,
-			networkId,
 			conversationKey,
 			reply,
 			send,
@@ -916,11 +876,11 @@ export function MessagerieConversationView({
 		if (!shouldPingTyping(lastPingRef.current, now)) return
 		lastPingRef.current = now
 		if (groupeId !== null) {
-			void setGroupTyping.mutateAsync({ networkId, threadId: groupeId })
+			void setGroupTyping.mutateAsync({ threadId: groupeId })
 			return
 		}
-		if (filId !== null) void setTyping.mutateAsync({ networkId, threadId: filId })
-	}, [groupeId, filId, networkId, setGroupTyping, setTyping])
+		if (filId !== null) void setTyping.mutateAsync({ threadId: filId })
+	}, [groupeId, filId, setGroupTyping, setTyping])
 
 	// ── Réactions et suppressions ─────────────────────────────────────────
 	const reagir = useCallback(
@@ -929,18 +889,16 @@ export function MessagerieConversationView({
 			const promesse =
 				groupeId !== null
 					? reactGroupe.mutateAsync({
-							networkId,
 							messageId: message.id as Id<"groupMessages">,
 							kind: reaction,
 						})
 					: react1a1.mutateAsync({
-							networkId,
 							messageId: message.id as Id<"personalMessages">,
 							kind: reaction,
 						})
 			void promesse.catch((err: unknown) => setErreur(messageErreurLisible(err, t)))
 		},
-		[groupeId, networkId, reactGroupe, react1a1, t],
+		[groupeId, reactGroupe, react1a1, t],
 	)
 
 	const agir = useCallback(
@@ -954,11 +912,9 @@ export function MessagerieConversationView({
 					const promesse =
 						groupeId !== null
 							? deleteGroupForMe.mutateAsync({
-									networkId,
 									messageId: message.id as Id<"groupMessages">,
 								})
 							: deleteForMe.mutateAsync({
-									networkId,
 									messageId: message.id as Id<"personalMessages">,
 								})
 					void promesse.catch((err: unknown) =>
@@ -973,11 +929,9 @@ export function MessagerieConversationView({
 					const promesse =
 						groupeId !== null
 							? deleteGroupForAll.mutateAsync({
-									networkId,
 									messageId: message.id as Id<"groupMessages">,
 								})
 							: deleteForAll.mutateAsync({
-									networkId,
 									messageId: message.id as Id<"personalMessages">,
 								})
 					void promesse.catch((err: unknown) =>
@@ -1003,13 +957,11 @@ export function MessagerieConversationView({
 					const promesse =
 						groupeId !== null
 							? setGroupPinned.mutateAsync({
-									networkId,
 									threadId: groupeId,
 									messageId: cible as Id<"groupMessages"> | null,
 								})
 							: filId !== null
 								? setPinned.mutateAsync({
-										networkId,
 										threadId: filId,
 										messageId: cible as Id<"personalMessages"> | null,
 									})
@@ -1093,14 +1045,12 @@ export function MessagerieConversationView({
 			try {
 				if (groupeId !== null) {
 					await editGroupMessage.mutateAsync({
-						networkId,
 						messageId: editing.messageId as Id<"groupMessages">,
 						content: texte,
 					})
 					return
 				}
 				await editMessage.mutateAsync({
-					networkId,
 					messageId: editing.messageId as Id<"personalMessages">,
 					content: texte,
 				})
@@ -1109,7 +1059,7 @@ export function MessagerieConversationView({
 				throw err
 			}
 		},
-		[editing, groupeId, networkId, editGroupMessage, editMessage, t],
+		[editing, groupeId, editGroupMessage, editMessage, t],
 	)
 
 	/**
@@ -1142,13 +1092,11 @@ export function MessagerieConversationView({
 				const to = forwardTargetArg(row.to)
 				if (groupeId !== null) {
 					await forwardGroupMessage.mutateAsync({
-						networkId,
 						messageId: transfert.id as Id<"groupMessages">,
 						to,
 					})
 				} else {
 					await forwardMessage.mutateAsync({
-						networkId,
 						messageId: transfert.id as Id<"personalMessages">,
 						to,
 					})
@@ -1161,26 +1109,24 @@ export function MessagerieConversationView({
 				setTransfertEnCours(null)
 			}
 		},
-		[transfert, groupeId, networkId, forwardMessage, forwardGroupMessage, t],
+		[transfert, groupeId, forwardMessage, forwardGroupMessage, t],
 	)
 
 	const desepingler = useCallback(() => {
 		const promesse =
 			groupeId !== null
 				? setGroupPinned.mutateAsync({
-						networkId,
 						threadId: groupeId,
 						messageId: null,
 					})
 				: filId !== null
 					? setPinned.mutateAsync({
-							networkId,
 							threadId: filId,
 							messageId: null,
 						})
 					: null
 		void promesse?.catch((err: unknown) => setErreur(messageErreurLisible(err, t)))
-	}, [groupeId, filId, networkId, setPinned, setGroupPinned, t])
+	}, [groupeId, filId, setPinned, setGroupPinned, t])
 
 	// ── Appels ────────────────────────────────────────────────────────────
 	/**
@@ -1828,8 +1774,8 @@ export function MessagerieConversationView({
 						onSend={envoyer}
 						generateUploadUrl={async () =>
 							estGroupe
-								? await uploadUrlGroupe.mutateAsync({ networkId })
-								: await uploadUrl1a1.mutateAsync({ networkId })
+								? await uploadUrlGroupe.mutateAsync({})
+								: await uploadUrl1a1.mutateAsync({})
 						}
 						// Le micro n'est offert que sur la page : dans une carte de
 						// 312 px, il prendrait la place du bouton d'envoi sur un poste
@@ -1839,11 +1785,11 @@ export function MessagerieConversationView({
 						onTyping={signalerLaFrappe}
 						onBlurTyping={() => {
 							if (groupeId !== null) {
-								void clearGroupTyping.mutateAsync({ networkId, threadId: groupeId })
+								void clearGroupTyping.mutateAsync({ threadId: groupeId })
 								return
 							}
 							if (filId !== null) {
-								void clearTyping.mutateAsync({ networkId, threadId: filId })
+								void clearTyping.mutateAsync({ threadId: filId })
 							}
 						}}
 						onError={setErreur}

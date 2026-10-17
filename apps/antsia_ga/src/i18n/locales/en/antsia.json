@@ -187,5 +187,37 @@
     },
     "pushDisable": "Disable notifications on this device",
     "weeklyLimitError": "Choose a whole number between 0 and 100."
+  },
+  "preferences": {
+    "title": "Your preferences",
+    "lead": "Choose your language and the time zone used for dates and times across your networks.",
+    "localeLabel": "Interface language",
+    "localeHint": "Your chosen language applies after saving.",
+    "french": "French",
+    "english": "English",
+    "timeZoneLabel": "Personal time zone",
+    "timeZoneHint": "Use a time zone name, such as Africa/Libreville or Europe/Paris. Daylight saving time is taken into account.",
+    "invalidLocale": "Choose French or English.",
+    "invalidTimeZone": "Enter a valid time zone, such as Africa/Libreville.",
+    "loading": "Loading your preferences…",
+    "save": "Save my preferences",
+    "saving": "Saving…",
+    "saved": "Your preferences have been saved.",
+    "appearanceHint": "Appearance changes immediately. This choice is saved for this network on this device.",
+    "unsaved": "Your changes have not been saved. Save your preferences before leaving this page.",
+    "leaveConfirm": "Leave this page without saving your preferences?"
+  },
+  "analytics": {
+    "title": "Optional usage measurement",
+    "lead": "With your permission, ANTSIA may measure the categories of screens viewed, the network and language, associated with a temporary browser identifier. No message, content, social identifier, profile address or session recording is sent.",
+    "active": "Your permission is recorded. Measurement is active on member screens.",
+    "inactive": "Usage measurement is disabled in this browser.",
+    "unconfigured": "The measurement service is not configured. You can still withdraw existing permission.",
+    "grant": "Allow usage measurement",
+    "revoke": "Withdraw permission",
+    "granted": "Your permission was recorded.",
+    "revoked": "Your permission was withdrawn.",
+    "grantFailed": "Your permission could not be recorded. Try again.",
+    "revokeFailed": "Measurement has stopped in this browser, but your withdrawal could not be recorded. Try again before closing this page."
   }
 }

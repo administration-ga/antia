@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/messagerie/icom-public-reminders.ts @ ad2e7fdc2 — adaptations : DTO du moteur (`pages.followedUpdates.list` : `{ postId, publishedAt, excerpt, page }`, la page en carte `PageCard`) projeté par `pageUpdateFromEngine` ; BADGE de la page porté par le rappel (`pageBadge`, calculé par le serveur — une page de communauté n'est plus dite « officielle ») ; destination par la table des routes INJECTÉE et la règle d'`author-link` (`publicReminderHref(reminder, routes)` : une page sans route de page ne mène nulle part, jamais au profil d'une personne homonyme) ; heure relative traduite (`publicReminderTime(reminder, now, t)`).
+// Dupliqué de socle/packages/agent-features/src/features/messagerie/icom-public-reminders.ts @ ad2e7fdc2 — adaptations : DTO du moteur (`pages.followedUpdates.list` : `{ postId, publishedAt, excerpt, page }`, la page en carte `PageCard`) projeté par `pageUpdateFromEngine` ; BADGE de la page porté par le rappel (`pageBadge`, calculé par le serveur — une page de communauté n'est plus dite « officielle ») ; destination par la table des routes INJECTÉE et la règle d'`author-link` (`publicReminderHref(reminder, routes)` : une page sans route de page ne mène nulle part, jamais au profil d'une personne homonyme) ; heure relative traduite (`publicReminderTime(reminder, now, t)`). ; PA6 : préférence de fuseau injectée, calendrier grégorien et caches langue/fuseau.
 /**
  * Adaptateur pur des rappels PUBLICS montrés sous les statuts d'iCom.
  *
@@ -149,6 +149,7 @@ export function publicReminderTime(
   reminder: IcomPublicReminder,
   now: number,
   t: TFunction,
+  timeZone?: string,
 ): string {
-  return formatRelativeDate(reminder.publishedAt, now, t)
+  return formatRelativeDate(reminder.publishedAt, now, t, timeZone)
 }

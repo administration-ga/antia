@@ -242,7 +242,8 @@
       "missingTiming": "Fill in the date and times of the event.",
       "cancel": "Cancel",
       "submit": "Create the event",
-      "submitting": "Creating…"
+      "submitting": "Creating…",
+      "invalidCivilTime": "This date or time does not exist in the selected time zone. Choose another time."
     },
     "invite": {
       "open": "Invite connections",

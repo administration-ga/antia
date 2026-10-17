@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/notifications/ReseauNotificationRow.tsx @ ad2e7fdc2 — adaptations : ligne = le DTO de la cloche du moteur (`notifications.bell.paginateNotifications`, type tiré de l'API : sujet `{ kind, id }`, acteur par mini-profil au nom NULLABLE, état vivant d'une invitation et d'un fichier retenu) au lieu de la forme à colonnes `subject…Id` ; phrase de TOUS les genres du moteur (`notificationRowSentence` : ceux de `shared.notificationSentence` et ceux que le moteur ajoute, nom neutre sans profil publié ; la page d'un `page_post` NOMMÉE avec son badge calculé) ; ligne de résultat par `notificationRowNote` (invitation tranchée, fichier libéré ou de nouveau analysé) ; cible composée sur les adresses injectées (`useRoutes()`) ; rappel de l'hôte par `targetCallback` (plus de cible « direct ») ; décision d'invitation sur `graph.connections.{pendingState, respondToConnection}` du réseau courant (`useNetwork()`), un refus qui ne dit rien de l'invitation (débit, adhésion) se dit par son code (`errors:<code>`) et garde les boutons ; libellés, dates relatives et refus traduits (espace `notifications`, clés `reseauNotificationRow.…`) ; commentaires sans l'onglet « Administration » ni le volet « Activité » de l'espace agent.
+// Dupliqué de socle/packages/agent-features/src/features/notifications/ReseauNotificationRow.tsx @ ad2e7fdc2 — adaptations : ligne = le DTO de la cloche du moteur (`notifications.bell.paginateNotifications`, type tiré de l'API : sujet `{ kind, id }`, acteur par mini-profil au nom NULLABLE, état vivant d'une invitation et d'un fichier retenu) au lieu de la forme à colonnes `subject…Id` ; phrase de TOUS les genres du moteur (`notificationRowSentence` : ceux de `shared.notificationSentence` et ceux que le moteur ajoute, nom neutre sans profil publié ; la page d'un `page_post` NOMMÉE avec son badge calculé) ; ligne de résultat par `notificationRowNote` (invitation tranchée, fichier libéré ou de nouveau analysé) ; cible composée sur les adresses injectées (`useRoutes()`) ; rappel de l'hôte par `targetCallback` (plus de cible « direct ») ; décision d'invitation sur `graph.connections.{pendingState, respondToConnection}` du réseau courant (`useNetwork()`), un refus qui ne dit rien de l'invitation (débit, adhésion) se dit par son code (`errors:<code>`) et garde les boutons ; libellés, dates relatives et refus traduits (espace `notifications`, clés `reseauNotificationRow.…`) ; commentaires sans l'onglet « Administration » ni le volet « Activité » de l'espace agent. ; PA6 : dates et jours civils dans le fuseau personnel du lecteur (repli appareil).
 "use client"
 
 /**
@@ -19,6 +19,7 @@
  * (le DTO ne porte que le genre, l'acteur et une référence).
  */
 
+import { useViewerTimeZone } from "@antsia/api/viewer-preferences"
 import { api } from "@antsia/api/engine"
 import type { Id } from "@antsia/api/engine"
 import { useNetwork, useRoutes } from "@antsia/api/network"
@@ -82,6 +83,7 @@ export function NotificationRow({
 	onMarkReadExplicitly,
 }: NotificationRowProps) {
 	const { t } = useTranslation("notifications")
+	const timeZone = useViewerTimeZone()
 	const routes = useRoutes()
 	const action = notificationRowAction(item, routes, targets, t)
 	// Ce que l'invitation (ou le fichier retenu) est DEVENU. Une demande de
@@ -146,7 +148,7 @@ export function NotificationRow({
 					}}
 				>
 					<time dateTime={new Date(item.createdAt).toISOString()}>
-						{formatRelativeDate(item.createdAt, now, t)}
+						{formatRelativeDate(item.createdAt, now, t, timeZone)}
 					</time>
 				</p>
 				{resultText !== null ? (

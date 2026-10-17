@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/EvenementsPanel.tsx @ ad2e7fdc2 — adaptations : mon agenda dans le réseau courant (`events.events.myAgenda` → `{ items, truncated }`, `respond`, `cancel` avec `networkId` par `useNetwork()`), la lacune de l'agenda borné se dit ; jour civil et dates dans le fuseau du NAVIGATEUR et la langue courante (plus de fuseau ni de langue imposés) ; organisateur nommé par le contrat `counterpartLabel` (nom neutre quand le profil n'est pas publié) ; refus du moteur lus par code (`eventActionErrorText`) ; état vide par `reseauEmptyState("agenda", home, t)` ; toutes les chaînes par l'i18n (espace `reseau`, clés `evenementsPanel.*` et `evenementsList.*`) ; COMPOSITION AJOUTÉE (iAgenda, qui la portait au socle, n'existe pas dans le moteur) : carte de création sur place (`events.events.create`, fuseau du navigateur fixé à la création, clé d'idempotence tirée à l'ouverture), ouverte par le bouton « Créer un évènement » quand aucun hôte ne fournit `onCreateEvent`, ou par l'INTENTION portée par l'adresse (`?nouveau=evenement&retour=…`, `agenda-create-intent`, consommée une fois puis retirée de l'URL, retour rendu après la création) ; l'organisateur invite ses relations depuis la carte (`events.events.invite` par le sélecteur de relations, récapitulatif sans mensonge poli) ; la liste des invités et de leurs réponses se déplie (`events.events.paginateEventParticipants`, paginée) ; primitives de `@antsia/ui`, kit d'espace de `@antsia/ui/espace-kit` (phrases de la pagination par `useEspacePaginationLabels`).
+// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/EvenementsPanel.tsx @ ad2e7fdc2 — adaptations : mon agenda dans le réseau courant (`events.events.myAgenda` → `{ items, truncated }`, `respond`, `cancel` avec `networkId` par `useNetwork()`), la lacune de l'agenda borné se dit ; jour civil et dates dans le fuseau du NAVIGATEUR et la langue courante (plus de fuseau ni de langue imposés) ; organisateur nommé par le contrat `counterpartLabel` (nom neutre quand le profil n'est pas publié) ; refus du moteur lus par code (`eventActionErrorText`) ; état vide par `reseauEmptyState("agenda", home, t)` ; toutes les chaînes par l'i18n (espace `reseau`, clés `evenementsPanel.*` et `evenementsList.*`) ; COMPOSITION AJOUTÉE (iAgenda, qui la portait au socle, n'existe pas dans le moteur) : carte de création sur place (`events.events.create`, fuseau du navigateur fixé à la création, clé d'idempotence tirée à l'ouverture), ouverte par le bouton « Créer un évènement » quand aucun hôte ne fournit `onCreateEvent`, ou par l'INTENTION portée par l'adresse (`?nouveau=evenement&retour=…`, `agenda-create-intent`, consommée une fois puis retirée de l'URL, retour rendu après la création) ; l'organisateur invite ses relations depuis la carte (`events.events.invite` par le sélecteur de relations, récapitulatif sans mensonge poli) ; la liste des invités et de leurs réponses se déplie (`events.events.paginateEventParticipants`, paginée) ; primitives de `@antsia/ui`, kit d'espace de `@antsia/ui/espace-kit` (phrases de la pagination par `useEspacePaginationLabels`). ; PA6 : dates et jours civils dans le fuseau personnel du lecteur (repli appareil).
 "use client"
 
 /**
@@ -29,6 +29,7 @@
  * n'apparaît qu'en vraie attente (`query-state`).
  */
 
+import { useViewerTimeZone } from "@antsia/api/viewer-preferences"
 import { api, type Id } from "@antsia/api/engine"
 import { useAuthenticatedConvexQuery, useAuthenticatedPaginatedQuery } from "@antsia/api/hooks"
 import { useNetwork, useRoutes } from "@antsia/api/network"
@@ -70,7 +71,6 @@ import {
   participantStatusLabel,
   tomorrowLocalDate,
   validateEventTitle,
-  viewerTimeZone,
   type EvenementListItem,
   type EventInviteOutcome,
   type EventSectionKey,
@@ -120,8 +120,7 @@ export function EvenementsPanel({
   const router = useRouter()
   const pathname = usePathname()
   const search = useSearchParams().toString()
-  /** Le fuseau du lecteur — celui de son navigateur, lu une fois. */
-  const [timeZone] = useState(viewerTimeZone)
+  const timeZone = useViewerTimeZone()
   const locale = i18n.language
   const paginationLabels = useEspacePaginationLabels()
 
@@ -461,7 +460,7 @@ function EventCard({
  * Créer un évènement — sur place, dans le volet.
  *
  * Trois règles héritées de la tranche serveur, visibles ici :
- *  · le FUSEAU est fixé à la création — celui du navigateur de l'organisateur,
+ *  · le FUSEAU est fixé à la création — celui choisi par l'organisateur,
  *    affiché pour que la fixation ne soit pas silencieuse ;
  *  · la clé d'idempotence est tirée à l'OUVERTURE de la carte, jamais à
  *    l'envoi — un double clic ou un renvoi réseau ne crée qu'un évènement ;
@@ -474,12 +473,13 @@ function CreateEventCard({ timeZone, onCreated, onCancel }: { timeZone: string; 
   const { networkId } = useNetwork()
   const create = useMutation(api.modules.events.events.create)
   const [title, setTitle] = useState("")
-  const [date, setDate] = useState(() => tomorrowLocalDate(Date.now()))
+  const [date, setDate] = useState(() => tomorrowLocalDate(Date.now(), timeZone))
   const [startTime, setStartTime] = useState("10:00")
   const [endTime, setEndTime] = useState("11:00")
   const [location, setLocation] = useState("")
   const [description, setDescription] = useState("")
   const [timeError, setTimeError] = useState<string | null>(null)
+  const formRef = useRef<HTMLFormElement>(null)
   const [submitting, setSubmitting] = useState(false)
   const [idempotencyKey] = useState(newIdempotencyKey)
 
@@ -487,16 +487,23 @@ function CreateEventCard({ timeZone, onCreated, onCancel }: { timeZone: string; 
 
   const submit = async () => {
     if (submitting || validateEventTitle(title, t) !== null) return
-    const startAt = localDateTimeMs(date, startTime)
-    const endAt = localDateTimeMs(date, endTime)
+    const startAt = localDateTimeMs(date, startTime, timeZone)
+    const endAt = localDateTimeMs(date, endTime, timeZone)
     if (!Number.isFinite(startAt) || !Number.isFinite(endAt)) {
-      toast.error(t("evenementsPanel.composer.missingTiming"))
+      const message = t(date && startTime && endTime ? "evenementsPanel.composer.invalidCivilTime" : "evenementsPanel.composer.missingTiming")
+      setTimeError(message)
+      toast.error(message)
+      const inputs = formRef.current?.querySelectorAll<HTMLInputElement>('[type="time"]')
+      if (!date) formRef.current?.querySelector<HTMLInputElement>('[type="date"]')?.focus()
+      else inputs?.[!Number.isFinite(startAt) ? 0 : 1]?.focus()
       return
     }
     // Contrôle CLIENT, avant l'envoi : le serveur refuse aussi une fin qui
     // précède le début — dire la règle ici évite un aller-retour perdu.
     if (!isEndAfterStart(startAt, endAt)) {
       setTimeError(t(END_BEFORE_START_KEY))
+      toast.error(t(END_BEFORE_START_KEY))
+      formRef.current?.querySelectorAll<HTMLInputElement>('[type="time"]')[1]?.focus()
       return
     }
     setTimeError(null)
@@ -524,6 +531,7 @@ function CreateEventCard({ timeZone, onCreated, onCancel }: { timeZone: string; 
   return (
     <Card padded style={RESEAU_SURFACE_STYLE}>
       <form
+        ref={formRef}
         aria-label={t("evenementsPanel.composer.form")}
         style={{ display: "grid", gap: 12 }}
         onSubmit={(submitEvent) => {
@@ -531,6 +539,7 @@ function CreateEventCard({ timeZone, onCreated, onCancel }: { timeZone: string; 
           void submit()
         }}
       >
+        {timeError ? <p role="alert" className="sr-only">{timeError}</p> : null}
         <div style={{ display: "grid", gap: 2 }}>
           <h2 style={{ margin: 0, fontSize: 15, fontWeight: 700 }}>{t("evenementsPanel.composer.title")}</h2>
           <p style={MUTED_TEXT_STYLE}>{t("evenementsPanel.composer.zone", { timeZone })}</p>

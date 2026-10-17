@@ -28,6 +28,7 @@ import { useState } from "react"
 import { useTranslation } from "react-i18next"
 
 import { Avatar } from "../features/reseau-personnel/Avatar"
+import { AppearanceControl } from "./appearance"
 import { RESEAU_SURFACE_STYLE } from "./design-styles"
 import type { ReseauAgentTabId } from "./reseau-agent-nav"
 import { menuBadgeLabel, menuItemsFor, SHORTCUTS_MAX, shortcutsFor, type ReseauMenuCounts } from "./reseau-menu"
@@ -258,6 +259,7 @@ export function ReseauMenuRail({
 						</ul>
 					</section>
 				) : null}
+				<AppearanceControl />
 			</nav>
 		</Card>
 	)

@@ -160,6 +160,8 @@ describe("ReseauAgentPage — la page réseau", () => {
     expect(onglets.map((onglet) => onglet.textContent)).toEqual(["Fil", "Relations", "Groupes", "Pages", "Conférences", "Évènements", "Enregistrements"])
     expect(screen.getByRole("tab", { name: "Fil" }).getAttribute("aria-selected")).toBe("true")
     expect(screen.getByRole("tabpanel").getAttribute("aria-labelledby")).toBe("reseau-tab-fil")
+    expect(screen.getByRole("main").contains(screen.getByRole("tabpanel"))).toBe(true)
+    expect(screen.getByRole("tabpanel").contains(screen.getByRole("tablist"))).toBe(false)
     expect(screen.getByRole("heading", { level: 1, name: "Réseau" })).toBeTruthy()
     expect(screen.getByTestId("FeedPage")).toBeTruthy()
     expect(screen.getByTestId("StoriesTray")).toBeTruthy()

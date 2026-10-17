@@ -1,4 +1,19 @@
 {
+  "post": {
+    "origin": "Posted from {{name}}",
+    "event": {
+      "label": "Announced event",
+      "scheduled": "Scheduled event",
+      "cancelled": "Cancelled event",
+      "timeZone": "Times shown in your time zone: {{timeZone}}",
+      "participation": "Your recorded response: {{response}}"
+    }
+  },
+  "feedPages": {
+    "errorTitle": "Feed unavailable",
+    "errorMessage": "Posts could not be loaded.",
+    "incomplete": "This feed is incomplete. Some posts may not be displayed."
+  },
   "reseauFeedPages": {
     "loadMore": {
       "none": "No more posts.",
