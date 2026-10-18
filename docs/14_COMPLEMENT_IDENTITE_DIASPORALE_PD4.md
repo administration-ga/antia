@@ -2,6 +2,29 @@
 
 Date : 2026-10-17. Base PA8 : `eae3a3e`.
 
+## État de recette au 18 octobre 2026
+
+Le défaut de concurrence du composeur DIASPORALE est corrigé dans le commit
+local `9317ec5`. La vidéo exacte de 14,92 secondes a été relue après
+rechargement et contrôlée dans la visionneuse sur ordinateur, puis en vue
+téléphone émulée. Les boutons **Partager → Copier le lien** des deux réseaux
+sont branchés et contrôlés dans Chrome aux deux formats. Le fil ANTSIA s’ouvre
+directement sans Réessayer après les rechargements éprouvés.
+
+La vérification commune finale, **session 96367, code 0**, passe **7 212 tests**,
+dix typages et dix jobs de tests d’espaces de travail, neuf lints sans erreur
+(93 avertissements). Les **1 583 fichiers** de source/configuration sont
+strictement identiques avant/après. Le détail et les journaux sont consignés
+à la fin de ce document. Il s’agit d’une preuve locale, sans publication.
+
+**La galerie à deux photos reste non validée** : la publication annoncée n’a
+pas été identifiée dans le moteur local. Le lien exact est demandé à l’humain
+avec le nouveau bouton de copie. La preuve vidéo et les tests automatisés
+ne sont pas attribués à cette galerie. Les sections suivantes conservent la
+chronologie de l’implémentation et des contrôles.
+
+## Cadre initial de coordination
+
 La demande humaine DIASPORALE porte sur sa visionneuse médias, l’édition des
 commentaires et le complément PD4, en coordination avec ANTSIA. DIASPORALE garde
 ses consommateurs, ses ports et sa recette. ANTSIA réserve uniquement
@@ -452,3 +475,219 @@ restent à confirmer**, distinctement de cette vérification automatisée.
 La preuve de correction détaillée vit dans DIASPORALE `docs/12`.
 Le correctif et ses sept cas sont enregistrés dans le commit local DIASPORALE
 `9317ec5`, limité au composeur, à son test et à cette preuve documentaire.
+
+Actualisation de la préparation native : deux fenêtres privées n’ont plus été
+retrouvées par le contrôle, sans cause établie. Une page du Chrome DevTools
+distinct montre bien le compte auteur et un composeur vide, mais sa présence au
+premier plan natif n’est pas prouvée : elle ne sert pas de passage de main.
+Une dernière fenêtre privée native est ensuite présente, mais rencontre une
+connexion refusée puis un `ChunkLoadError`. Aucun fichier ni clic de publication.
+
+Le journal du propriétaire de3031 confirme un redémarrage **automatique** au
+seuil mémoire pendant la compilation de `/bienvenue`, parent82353 conservé,
+worker82354 remplacé par94491. Aucune purge ni relance doublée. Après compilation,
+les deux applications répondent ; la relecture indépendante donne `/bienvenue`
+200 en0,115s et `/_next/static/chunks/app/layout.js` 200 en0,167s. Un rechargement
+normal de la même fenêtre auteur est demandé pour reprendre les nouveaux chunks.
+Ce constat n’établit pas la cause des deux anciens posts sans média.
+
+Un chantier humain distinct corrige ensuite la session d’entrée ANTSIA dans
+`session-bridge.tsx` et son test. Son propriétaire rapporte24tests ciblés,
+typage/lint et recette du fil réussis. Ce changement **postérieur** n’est pas
+inclus dans l’inventaire de la vérification7 186 ci-dessus ; aucun paquet auth
+partagé ni composeur DIASPORALE n’est modifié par ce chantier.
+
+Dernière observation avant passage de main : le rechargement normal réussit,
+le compte auteur privé est confirmé et son composeur natif est ouvert avec
+corps0/2000, zéro pièce, portée France par défaut, tous membres, ANTSIA décoché.
+À l’observation suivante, le contrôle revient au Chrome normal du lecteur en
+attente, sans geste de sélection/fermeture attribuable au contrôleur. Aucune
+portée n’est changée et aucun fichier/Publish n’est envoyé. Le contrôle natif
+est arrêté. L’intervention requise est uniquement de placer la fenêtre privée
+auteur « Relations Recette / Nouvelle publication » au premier plan et de la
+laisser stable, avant toute nouvelle sélection de fichiers. Les médias réels
+restent non validés ; la cause du changement de fenêtre est inconnue.
+
+L’humain confirme ensuite « Fenêtre auteur au premier plan ». Les autres
+contrôles sont suspendus. L’observation native ne corrèle toujours pas ce
+contexte : AX `chrome://newtab` du profil habituel puis capture du fil ANTSIA
+`localhost:3030/fil`, sans clic du contrôleur intermédiaire. Capture de diagnostic
+`/tmp/diasporale-native-surface-20261018.jpg`, inspectée dans ce chat : elle ne
+montre pas le composeur demandé. Un nouveau processus Chrome et de nouveaux
+identifiants d’onglets sont constatés ; aucun rapport Chrome du jour trouvé
+dans le dossier utilisateur consulté, aucune cause de redémarrage établie.
+Aucun média ni publication envoyé. La prochaine identification doit passer par
+une pièce jointe réellement reçue ou le partage direct de l’onglet souhaité,
+plutôt que par une nouvelle sélection de fichiers à l’aveugle.
+
+Nouveau point exploitable : pendant un contrôle mobile distinct, le fil du
+lecteur montre une publication existante de Relations Recette, texte « test »,
+avec un lecteur vidéo arrêté à0:00/0:14 et « Agrandir la vidéo ». Son lien lu
+dans l’interface est `/publication/kn795ekrtd65evydvry3973ff58gh306`.
+Les captures DIASPORALE `docs/recette/fils-mobiles-2026-10-18/`
+`diasporale-375x667-haut.jpg` et `-cartes.jpg` sont des observations de présence,
+pas de lecture. La seconde est inspectée ici.
+
+La lecture backend en une ligne, sans mutation, vérifie l’identifiant exact
+avant toute sortie : statutpublished, texte correspondant, `media.length=1`,
+vidéoMP4,22 869 119octets,1290×2796, durée déclarée14 920ms et référence de
+stockage présente. Ni clé ni URL de stockage ni contenu privé rapporté. Cela
+confirme son enregistrement actuel ; aucune attribution de création à cette
+session ni confusion avec la mire muette de2s. Le créneau UI est réservé à
+PD4 pour la lecture/pause/visionneuse de ce post existant, sans nouvel upload
+ni publication. Les deux photos restent non validées.
+
+Premier résultat natif du post exact, onglet313 : lecteur en attente corrélé,
+vidéo décodée1 290×2 796, durée14,92s, `readyState=4`, aucune erreur.
+La lecture du fil progresse de0 à2,448s puis pause constatée à2,461s.
+La visionneuse s’ouvre avec le focus sur Fermer, compteur1/1, sa propre vidéo
+à0 en pause et sans autoplay ; celle du fil reste en pause à2,461s.
+La suite termine le contrôle : visionneuse de0 à7,696s puis pause à7,708s,
+Tab/Maj+Tab contenus, Échap ferme et rend le focus au bouton d’agrandissement.
+Un second cycle confirme la pause de la grille lors de l’ouverture et le
+démontage de la vidéo de la visionneuse en fermant pendant sa lecture.
+
+Dans le détail du post exact, après rechargement normal unique, le même lecteur
+en attente est conservé. La vidéo est redécodée sans erreur ; la grille
+progresse de0 à7,198s puis pause à7,210s, la visionneuse de0 à5,093s puis pause
+à5,106s. La capture `DIASPORALE/docs/recette/pd4-video-2026-10-18/`
+`visionneuse-pause-5s.jpg` et son `preuve.json` sont relus ici : lecteur à0:05,
+durée et mesures cohérentes. Bureau clair1 100×690, sans débordement horizontal.
+Retour final au fil : aucun dialogue, vidéo en pause à0, aucune erreur ni
+avertissement console. Aucun upload ni publication par les agents. La piste
+audio, un appareil physique et les variantes responsive/sombre de cette vidéo
+ne sont pas éprouvés par ce contrôle.
+
+L’inventaire est borné aux30cartes déjà chargées, sans pagination : une vidéo,
+aucune image ; les trois posts d’essai photos identifiés n’ont aucun média.
+La recette de galerie à deux photos reste donc ouverte. La méthode de reprise
+proposée à l’humain est de publier manuellement deux photos **sans texte** puis
+transmettre leur lien ; ce schéma bloque un nouveau post sans média et permet
+au lecteur corrélé de vérifier ensuite stockage, rechargement et galerie, sans
+dépendre du ciblage de la fenêtre auteur ni contourner le transfert refusé.
+
+L’humain confirme ensuite dans les deux chats DIASPORALE que les deux photos
+sont publiées sans texte. Un seul pilote est conservé : le chat des accueils
+possède désormais l’onglet313, PD4 respecte cette propriété et reste hors UI.
+Après Récents et un rechargement normal, aucun nouveau post sans texte à deux
+photos n’est visible. La lecture backend est bornée à une ligne et ne sort
+qu’un booléen de corrélation : la dernière publication reste exactement le
+post vidéo déjà vérifié. Aucun candidat supplémentaire n’est donc déduit.
+Le lien exact de la publication annoncée est demandé à l’humain par les
+accueils ; cette information conditionne la recette ordinateur puis téléphone.
+Aucune nouvelle publication, sélection ou pagination à l’aveugle.
+
+Le propriétaire ANTSIA transmet ensuite le gel final de cinq fichiers du pont
+de session. Le délai de transport client passe à 15 secondes, tandis que la
+vérification serveur conserve sa borne de 4 secondes. Les réponses valides
+initiales à 5 secondes, l’annulation et les réponses tardives sont couvertes :
+29 tests ciblés passent, ainsi que le codegen, le typage et le lint ciblés.
+Trois ouvertures réelles du fil après relance/rechargement, dont une au format
+téléphone, aboutissent sans Réessayer. La preuve
+`docs/recette/session-sans-reessayer-2026-10-18/README.md` est relue ici, ainsi
+que sa capture : fond blanc, cartes beige, fil connecté, aucun écran d’erreur.
+Cette évolution n’est pas couverte par le passage historique à 7 186 tests.
+
+L’humain indique également que le partage ne propose pas de lien et demande
+explicitement le bouton de partage dans le chat des accueils. Ce chat prend
+seul en charge le correctif des cartes/du partage et des traductions associées :
+copier le lien d’une publication lisible reste une lecture ; citer dans le fil
+conserve les conditions de publication existantes. Le lien exact des deux
+photos reste attendu. La prochaine vérification commune attend le gel de ce
+correctif et inclura les cinq fichiers ANTSIA, sans contrôle lourd concurrent.
+
+Le correctif Partager est ensuite figé dans cinq chemins DIASPORALE : le
+composant de partage, la carte, son test et les deux traductions. Onze tests
+ciblés passent, avec codegen et typage ciblé réussis. La recette Chrome du
+lecteur confirme la copie et son message de réussite sur ordinateur et en
+émulation iPhone SE 375 × 667, puis le retour du focus à Partager après Échap.
+Le document et le panneau mesurent 375 pixels sans débordement horizontal.
+La preuve `DIASPORALE/docs/recette/partage-2026-10-18/README.md` est relue ici.
+
+Cette même recette complète la vidéo exacte en vue téléphone : lecture réelle
+jusqu’à 2,914 secondes, pause à 2,928 secondes, agrandissement sans lecture
+automatique et fermeture par Échap avec retour au déclencheur. La capture
+`telephone-video.jpg`, inspectée ici, montre la même vidéo de 14 secondes dans
+la visionneuse. Il s’agit d’une émulation locale, sans preuve sur appareil
+physique ni contrôle de la piste audio. L’émulation et l’inspecteur sont fermés
+à la fin. Les deux photos restent non identifiées et non validées.
+
+Le passage commun est lancé une seule fois en session 36733, après inventaire
+de 1 582 fichiers. La configuration de lancement présente est maintenant
+incluse, en plus du périmètre précédent. Le gel reçu pendant le début du
+passage est confronté à l’inventaire initial : empreinte strictement identique,
+`2aee6e37b83e52ab1d44909eab2e646878d1d63736fdaedb69ad6abe5c7adef6`.
+Journal `/tmp/antsia-diasporale-final-verify-20261018.log`. Le passage termine
+avec **code 1**, sur le contrôle typographique français de la nouvelle clé
+`post.shareActions.copyFailed` : une espace ASCII précède le deux-points.
+Les 404 autres tests du paquet, dont les onze cas de la carte/du partage,
+passent. L’inventaire après confirme les mêmes 1 582 fichiers et la même
+empreinte ; cet échec est donc reproductible sur un état stable. Aucun lint
+global ni test des applications suivant ce paquet n’est présumé exécuté.
+
+Correction limitée à cette clé : remplacement par une espace insécable U+00A0.
+Avant la relance, l’humain demande dans le chat des accueils le même bouton de
+partage dans ANTSIA. La prochaine passe complète est différée pour inclure ce
+petit ajout et éviter deux exécutions successives. Son propriétaire peut
+modifier uniquement les cartes/actions de partage, leurs traductions/tests
+et l’injection de route associée ; les cinq fichiers d’auth restent gelés.
+Le créneau lourd est rendu pendant ce travail ciblé. Aucun nouveau résultat
+global vert n’est annoncé à ce stade.
+
+Le partage ANTSIA est ensuite figé dans neuf chemins, sans backend, thème ni
+fichier d’auth modifié. Le dialogue existant propose la copie du lien membre
+injecté par `engineRoutes.post = routes.memberPost` ; la citation reste un
+geste séparé, soumis à l’audience et à la disponibilité de l’original. Sans
+route ni citation possible, le bouton est masqué. Les 41 tests/assertions
+ciblés, le codegen et le typage ciblé passent. Le lint ciblé n’a aucune erreur.
+
+La preuve `docs/recette/partage-2026-10-18/README.md` et la capture téléphone
+sont relues ici. Chrome confirme « Lien copié. » sur ordinateur et en
+émulation 375 × 667 ; le lien ouvre exactement la publication F3 attendue,
+Échap rend le focus à Partager, et le document reste large de 375 pixels.
+Le dialogue mesure 343 pixels avec un bord de 16 pixels. Les neuf empreintes
+de la preuve correspondent au source actuel et à l’inventaire du passage
+commun. Aucun envoi ni changement de session pendant cette recette.
+
+Nouvelle exécution commune unique après ce gel : **session 48757**, journal
+`/tmp/antsia-diasporale-final-recheck-20261018.log`, inventaire de **1 583
+fichiers**, SHA256 compact
+`2573f493635bba14d916f9623cf48c26e35a3cd99a16ac7d0e4f916cb13d45bd`.
+Les sources des trois propriétaires restent figées pendant le passage.
+L’inventaire après est identique. Le passage termine néanmoins avec **code 1**
+sur le seul test de copie refusée DIASPORALE : la requête `findByText` normalise
+l’espace insécable du DOM, contrairement à son attente textuelle exacte.
+Les locales et les 404 autres tests du paquet passent. Les 3 175 tests des
+composants ANTSIA passent également ; aucun résultat global vert n’est déduit.
+
+Correction du test uniquement : attendre le rôle accessible `alert`, puis
+comparer son `textContent` brut à la traduction exacte, y compris U+00A0.
+Cette assertion vérifie à la fois l’annonce accessible et le texte français,
+sans affaiblir le cas de refus ni changer le comportement. Le codegen est
+réexécuté avec succès, puis tout le paquet DIASPORALE et son typage sont lancés
+avant la prochaine vérification complète. Les sources ANTSIA restent figées.
+
+Le ciblé complet termine avec **405/405 tests** et typage code 0. Le nouveau
+passage officiel **session 96367** termine ensuite avec **code 0** : **7 212
+tests** (6 945 Vitest et 267 Bun), dix typages, dix jobs de tests et neuf lints,
+**zéro erreur, 93 avertissements**. Aucun contrôle ni assertion n’est supprimé.
+Les 1 583 fichiers de source/configuration sont identiques avant/après ; SHA256
+du JSON compact :
+`79d3b36c8e4612d090aebbc77d28637d2d30495a4823c581b7874006b6c242b0`.
+
+Preuves de ce dernier état :
+
+- Journal `/tmp/antsia-diasporale-shared-verify-20261018.log`.
+- Résumé `/tmp/antsia-diasporale-shared-verify-20261018-summary.json`.
+- Inventaires `/tmp/antsia-diasporale-shared-verify-20261018-source-before.json`
+  et `-source-after.json`.
+- Capture et reçu du partage ANTSIA : `docs/recette/partage-2026-10-18/`.
+- Capture et reçu du partage/vidéo téléphone DIASPORALE :
+  `../DIASPORALE/docs/recette/partage-2026-10-18/`.
+- Vidéo bureau et rechargement :
+  `../DIASPORALE/docs/recette/pd4-video-2026-10-18/`.
+
+La dernière lecture backend est limitée à une ligne et confirme encore que
+le dernier post est la vidéo exacte déjà vérifiée ; aucun nouveau post photo
+n’est déduit. La question humaine demandant le lien de la publication à deux
+photos reste ouverte. Le créneau lourd est rendu ; aucun autre job n’est lancé.
