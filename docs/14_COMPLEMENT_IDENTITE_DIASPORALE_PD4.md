@@ -408,3 +408,47 @@ chats restent conservées hors des commits de cette session. Plus aucun job
 lourd, les deux Next et le moteur local restent actifs sous mandat humain ;
 aucune livraison en production, modification d’environnement ou suppression
 de données.
+
+### Reprise du 18 octobre — course du composeur corrigée
+
+La capture annoncée dans les deux chats n’est pas jointe aux messages reçus.
+Le propriétaire DIASPORALE réserve à cette session son `composer.tsx`,
+l’adaptateur et leurs tests ; il conserve la recette Chrome native. Les deux
+serveurs Next et le même backend local sont repris par leurs propriétaires,
+sans suppression de données ni modification d’environnement.
+
+Le vrai composeur transmet correctement deux médias prêts, dans l’ordre choisi,
+même si les dépôts terminent dans l’ordre inverse. Un dépôt refusé bloque la
+publication, et fermer/rouvrir la feuille conserve ses pièces. En revanche, une
+sélection **pendant une publication déjà partie** appelle encore `uploadMedia` :
+les aperçus tardifs apparaissent, mais la requête initiale ne contient aucun
+média et son succès les efface. Ce défaut est reproduit ; son lien avec les
+deux anciens posts textuels reste non établi.
+
+Correction minimale dans le composeur DIASPORALE réellement servi : verrou
+synchrone avant validation, double envoi et événement de sélection tardif
+ignorés, contrôles gelés pendant l’envoi, verrou libéré même après refus.
+Sept nouveaux tests couvrent ce défaut, les deux photos, les refus, la reprise
+avec les mêmes dépôts/clé, la vidéo seule et la validation refusée. Aucun
+contrat moteur, adaptateur, garde des fichiers, thème ou environnement modifié.
+
+Le passage officiel **session53670, code0** valide **7 186 tests**
+(6 919Vitest +267Bun), dix typages, dix jobs de tests et neuf lints : zéro erreur,
+94avertissements préexistants. Les **1 581fichiers** de sources/configuration
+sont strictement identiques avant/après. SHA256 du JSON compact :
+`a85d56b7e759a20422e290a2439b7d784e123580b2b4ffbddcbc88b3e91f439a`.
+Journal `/tmp/antsia-diasporale-media-verify-20261018.log`, résumé même préfixe
+suivi de `-summary.json`, inventaires
+`/tmp/antsia-diasporale-media-20261018-source-before.json` et `-after.json`.
+Le créneau lourd est rendu après ce passage ; aucun contrôle parallèle.
+
+La session auteur fictive DIASPORALE est ouverte par le parcours normal dans
+une fenêtre privée séparée. Le compte de lecture en attente est conservé.
+La prochaine recette utilise un composeur **sans texte** pour que l’absence de
+pièces ne puisse produire un nouveau post textuel. Les fichiers doivent être
+sélectionnés manuellement après préparation ; la limite d’accès de l’outil de
+transfert n’est pas contournée. **Les deux photos et la lecture vidéo réelles
+restent à confirmer**, distinctement de cette vérification automatisée.
+La preuve de correction détaillée vit dans DIASPORALE `docs/12`.
+Le correctif et ses sept cas sont enregistrés dans le commit local DIASPORALE
+`9317ec5`, limité au composeur, à son test et à cette preuve documentaire.
