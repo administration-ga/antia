@@ -101,6 +101,7 @@ import type * as modules_diaspora_contentCounters from "../modules/diaspora/cont
 import type * as modules_diaspora_contentPreferences from "../modules/diaspora/contentPreferences.js";
 import type * as modules_diaspora_conversationContexts from "../modules/diaspora/conversationContexts.js";
 import type * as modules_diaspora_conversationSync from "../modules/diaspora/conversationSync.js";
+import type * as modules_diaspora_demoAccounts from "../modules/diaspora/demoAccounts.js";
 import type * as modules_diaspora_directory from "../modules/diaspora/directory.js";
 import type * as modules_diaspora_facet from "../modules/diaspora/facet.js";
 import type * as modules_diaspora_facts from "../modules/diaspora/facts.js";
@@ -508,6 +509,7 @@ declare const fullApi: ApiFromModules<{
   "modules/diaspora/contentPreferences": typeof modules_diaspora_contentPreferences;
   "modules/diaspora/conversationContexts": typeof modules_diaspora_conversationContexts;
   "modules/diaspora/conversationSync": typeof modules_diaspora_conversationSync;
+  "modules/diaspora/demoAccounts": typeof modules_diaspora_demoAccounts;
   "modules/diaspora/directory": typeof modules_diaspora_directory;
   "modules/diaspora/facet": typeof modules_diaspora_facet;
   "modules/diaspora/facts": typeof modules_diaspora_facts;
