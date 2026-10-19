@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/ReseauDesktopIcomLink.tsx @ ad2e7fdc2 — adaptations : déplacé dans la coque (`shell/`) ; décomptes par la source personnelle d'iCom du moteur (`SOURCE_AGENT.useUnreadTotals`, réseau courant) ; nom accessible et mot visible par l'i18n (`desktopIcomLabel(unread, t)` : `t` en DERNIER paramètre, clés qualifiées `reseau:reseauDesktopIcomLink.*`, pluriel par `count`) ; « Réseau personnel » et « iRéseau » deviennent « réseau » ; rendu, détachement du dock et pastille inchangés.
+// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/ReseauDesktopIcomLink.tsx @ ad2e7fdc2 — adaptations : déplacé dans la coque (`shell/`) ; décomptes par la source personnelle d'iCom du moteur (`SOURCE_AGENT.useUnreadTotals`, réseau courant) ; nom accessible et mot visible par l'i18n (`desktopIcomLabel(unread, t)` : `t` en DERNIER paramètre, clés qualifiées `reseau:reseauDesktopIcomLink.*`, pluriel par `count`) ; « Réseau personnel » et « iRéseau » deviennent « réseau » ; rendu, détachement du dock et pastille inchangés ; P02 (18/10/2026) : sous la navigation par destinations déclarée par l'application, la porte s'efface — la destination Messages du rail porte le même geste (détacher iCom en place) et la même pastille.
 "use client"
 
 /**
@@ -17,6 +17,7 @@ import { useTranslation } from "react-i18next"
 import { dockStore } from "../features/messagerie/dock-store"
 import { combinerNonLus, SOURCE_AGENT, type TotalNonLus } from "../features/messagerie/messagerie-source"
 import { formatUnreadBadge } from "../features/reseau-personnel/shared"
+import { useReseauDestinationRoutes } from "./reseau-menu-destinations-ui"
 
 /**
  * Les deux décomptes du SERVEUR, réunis en un chiffre (IC-06).
@@ -42,7 +43,11 @@ export function ReseauDesktopIcomLink() {
   const nonLus = SOURCE_AGENT.useUnreadTotals()
   const unread = icomUnreadTotal(nonLus.directs, nonLus.groupes)
   const badge = formatUnreadBadge(unread)
+  /* Navigation par destinations : la destination Messages du rail détache la
+     même carte et porte la même pastille — deux portes côte à côte, non. */
+  const destinations = useReseauDestinationRoutes() !== null
 
+  if (destinations) return null
   return (
     <button
       type="button"

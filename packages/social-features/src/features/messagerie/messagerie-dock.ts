@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/messagerie/messagerie-dock.ts @ ad2e7fdc2 — adaptations : aucune (copie textuelle) ; en-tête de provenance.
+// Dupliqué de socle/packages/agent-features/src/features/messagerie/messagerie-dock.ts @ ad2e7fdc2 — adaptations : aucune (copie textuelle) ; en-tête de provenance ; CC-5 : clé de destination contextuelle `contexte:` (`contextualConversationKey`, jamais lue par `parseKey`).
 /**
  * messagerie-dock — l'ÉTAT de la messagerie, hors React.
  *
@@ -96,6 +96,27 @@ export function draftKey(handle: string): ConversationKey {
 
 export function groupeKey(threadId: string): ConversationKey {
 	return `groupe:${threadId}`
+}
+
+/** Canal commercial distinct des fils personnels et des groupes. */
+export function commercialKey(threadId: string): ConversationKey { return `commerce:${threadId}` }
+
+/** Injection de destination uniquement : le dock personnel conserve ses trois genres. */
+export function parseCommercialKey(key: ConversationKey): string | null {
+	return key.startsWith("commerce:") && key.length > "commerce:".length ? key.slice("commerce:".length) : null
+}
+
+/**
+ * CC-5 (ADR-0025) : conversation CONTEXTUELLE (mise en relation ouverte par un objet), troisième
+ * famille distincte des fils personnels, des groupes et du canal commercial. Même doctrine que
+ * `commercialKey` : injection de destination seulement — `parseKey` ne la reconnaît pas, le dock
+ * personnel ne l'interprète jamais, et aucun identifiant n'est converti d'une famille à l'autre.
+ */
+export function contextualConversationKey(threadId: string): ConversationKey { return `contexte:${threadId}` }
+
+/** L'identifiant du fil contextuel d'une clé, ou `null` pour toute autre famille. */
+export function parseContextualConversationKey(key: ConversationKey): string | null {
+	return key.startsWith("contexte:") && key.length > "contexte:".length ? key.slice("contexte:".length) : null
 }
 
 /**

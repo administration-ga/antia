@@ -40,12 +40,19 @@ import type { TFunction } from "i18next"
 export type FeedCursor<TPostId extends string = string> = {
   publishedAt: number
   postId: TPostId
+  strategy?: "legacy" | "materialized"
+  generation?: number
+  windowStart?: number
+  postCreationTime?: number
 }
 
 export function feedCursorKey<TPostId extends string>(
   cursor: FeedCursor<TPostId> | null,
 ): string {
-  return cursor === null ? "first" : `${cursor.publishedAt}:${cursor.postId}`
+  if (cursor === null) return "first"
+  const anchor = `${cursor.publishedAt}:${cursor.postId}`
+  // Les murs anciens conservent leur clé ; une génération du fil ne peut réutiliser cette frontière.
+  return cursor.strategy === undefined ? anchor : `${anchor}:${cursor.strategy}:${cursor.generation ?? ""}:${cursor.windowStart ?? ""}:${cursor.postCreationTime ?? ""}`
 }
 
 export interface FeedPagesState<TCursor = FeedCursor> {

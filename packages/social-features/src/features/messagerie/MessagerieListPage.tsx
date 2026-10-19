@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/messagerie/MessagerieListPage.tsx @ ad2e7fdc2 — adaptations : barre basse réécrite dans la coque (`shell/mobile/IcomMobileTabBar`, mêmes props `active` et `badges`), toujours rendue sur cette page (seule la liste porte la barre : le garde `shouldShowTabBar` du chrome de l'espace agent, toujours vrai ici, est retiré) ; base de la messagerie INJECTÉE (`useRoutes().messages()`) ; pastille des Statuts sur `stories.stories.tray` du moteur (réseau courant, instant arrondi à la minute ; plus de « surface iCom ») ; titre de page traduit ; doc du chrome de l'espace agent retirée.
+// Dupliqué de socle/packages/agent-features/src/features/messagerie/MessagerieListPage.tsx @ ad2e7fdc2 — adaptations : barre basse réécrite dans la coque (`shell/mobile/IcomMobileTabBar`, mêmes props `active` et `badges`), toujours rendue sur cette page (seule la liste porte la barre : le garde `shouldShowTabBar` du chrome de l'espace agent, toujours vrai ici, est retiré) ; base de la messagerie INJECTÉE (`useRoutes().messages()`) ; pastille des Statuts sur `stories.stories.tray` du moteur (réseau courant, instant arrondi à la minute ; plus de « surface iCom ») ; titre de page traduit ; doc du chrome de l'espace agent retirée ; CC-5 : conversations contextuelles injectables (`contextual`) — liste « Mises en relation » transmise à la vue Conversations, lignes d'appel contextuel rouvertes par leur conversation.
 "use client"
 
 /**
@@ -59,7 +59,8 @@ import {
 	lireJetonInvitationGroupe,
 } from "./groupe-invitation-link"
 import { ICOM_BRIQUE_PARAM, parseIcomBrique } from "./icom-mobile-tabs"
-import { draftKey, groupeKey } from "./messagerie-dock"
+import type { ContextualMessagesInjection } from "./contextual-conversation-model"
+import { contextualConversationKey, draftKey, groupeKey } from "./messagerie-dock"
 import { MessagerieGroupeInvite } from "./MessagerieGroupeInvite"
 import { MessagerieListView } from "./MessagerieListView"
 import { conversationHref } from "./messagerie-routes"
@@ -87,16 +88,22 @@ function useMinuteNow(): number {
 	return now
 }
 
-/** `useSearchParams` impose la frontière Suspense (même règle que le fil). */
-export function MessagerieListPage() {
+/**
+ * `useSearchParams` impose la frontière Suspense (même règle que le fil).
+ *
+ * CC-5 : `contextual` (facultatif) — les conversations contextuelles injectées par l'application :
+ * leur liste sert le filtre « Mises en relation » de la vue Conversations, et une ligne d'appel
+ * contextuel du journal se rouvre par sa conversation (jamais par l'appel personnel).
+ */
+export function MessagerieListPage({ contextual }: { contextual?: ContextualMessagesInjection } = {}) {
 	return (
 		<Suspense fallback={null}>
-			<MessagerieListPageInner />
+			<MessagerieListPageInner contextual={contextual} />
 		</Suspense>
 	)
 }
 
-function MessagerieListPageInner() {
+function MessagerieListPageInner({ contextual }: { contextual?: ContextualMessagesInjection }) {
 	const { t } = useTranslation("messagerie")
 	const nav = useMessagerieRouterNav()
 	const router = useRouter()
@@ -152,7 +159,7 @@ function MessagerieListPageInner() {
 						}
 					/>
 				) : brique === "ichat" ? (
-					<MessagerieListView variant="page" nav={nav} unread={unread} />
+					<MessagerieListView variant="page" nav={nav} unread={unread} renderContextualList={contextual?.renderList} />
 				) : brique === "actus" ? (
 					<IcomActusPanel />
 				) : (
@@ -164,7 +171,10 @@ function MessagerieListPageInner() {
 						journal={
 							brique === "iappel"
 								? (viewControls) => (
-									<IcomAppelJournal leadingControls={viewControls} />
+									<IcomAppelJournal
+										leadingControls={viewControls}
+										onOpenContextualThread={contextual ? (threadId) => nav.openConversation(contextualConversationKey(threadId)) : undefined}
+									/>
 								)
 								: undefined
 						}

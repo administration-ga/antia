@@ -14,15 +14,18 @@ import { useTranslation } from "react-i18next"
 import { RESEAU_SURFACE_STYLE } from "../../shell/design-styles"
 import { reseauAgentHref } from "../../shell/reseau-agent-nav"
 import { Avatar } from "./Avatar"
-import { eventPersonName, eventsForRail, formatEventRange } from "./evenements-list"
+import { AssociationAgendaCard } from "./AssociationAgendaCard"
+import { agendaRowsForRail } from "./association-agenda"
+import { eventPersonName, formatEventRange } from "./evenements-list"
 
 export function EvenementsRail({ now }: { now: number }) {
   const { t, i18n } = useTranslation("reseau")
-  const { networkId } = useNetwork()
-  const home = useRoutes().home()
+  const { networkId, personId } = useNetwork()
+  const routes = useRoutes()
+  const home = routes.home()
   /** La préférence du lecteur, réactive sans démonter le rail. */
   const timeZone = useViewerTimeZone()
-  const agenda = useAuthenticatedConvexQuery(api.modules.events.events.myAgenda, { networkId, now })
+  const agenda = useAuthenticatedConvexQuery(api.modules.events.events.myAgenda, { networkId, now, ...(personId ? { expectedReaderPersonId: personId } : {}) })
 
   if (agenda.isLoading) return <SkeletonCard />
   if (agenda.isError) {
@@ -36,7 +39,7 @@ export function EvenementsRail({ now }: { now: number }) {
     )
   }
 
-  const events = eventsForRail(agenda.data?.items ?? [], now, timeZone)
+  const events = agendaRowsForRail(agenda.data?.items ?? [], agenda.data?.associationItems ?? [], now, timeZone)
   if (events.length === 0) return null
 
   return (
@@ -55,7 +58,7 @@ export function EvenementsRail({ now }: { now: number }) {
             {t("evenementsRail.title")}
           </h2>
           <Link
-            href={reseauAgentHref("evenements", home)}
+            href={routes.agenda?.() ?? reseauAgentHref("evenements", home)}
             style={{
               display: "inline-flex",
               minHeight: 44,
@@ -80,7 +83,9 @@ export function EvenementsRail({ now }: { now: number }) {
             listStyle: "none",
           }}
         >
-          {events.map((event) => {
+          {events.map((row) => {
+            if (row.kind === "association") return <li key={`association:${row.event.eventId}`}><AssociationAgendaCard event={row.event} locale={i18n.language} timeZone={timeZone} /></li>
+            const event = row.event
             const organizerName = eventPersonName(event.organizer.displayName, t)
             return (
               <li key={event.eventId} style={{ display: "flex", gap: 10 }}>

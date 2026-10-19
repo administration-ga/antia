@@ -28,7 +28,7 @@
  * barre se rendrait en cinq liens empilés, sans icônes ni pastilles.
  */
 
-import { useRoutes } from "@antsia/api/network"
+import { useNetwork, useRoutes } from "@antsia/api/network"
 import { Link } from "@antsia/api/routing"
 import { Icon } from "@antsia/ui"
 import { MOBILE_ONLY_CLASS } from "@antsia/ui/overlay"
@@ -42,6 +42,7 @@ import {
   icomMobileTabText,
   type IcomMobileBrique,
 } from "../../features/messagerie/icom-mobile-tabs"
+import { ICOM_VIEWS } from "../../features/messagerie/icom-views"
 
 export interface IcomMobileTabBarProps {
   /** La brique affichée — le retour (`menu_principal`) n'est jamais actif. */
@@ -52,6 +53,7 @@ export interface IcomMobileTabBarProps {
 export function IcomMobileTabBar({ active, badges }: IcomMobileTabBarProps) {
   const { t } = useTranslation("messagerie")
   const routes = useRoutes()
+  const destinations = useNetwork().navigation === "destinations"
   const bases = { home: routes.home(), messages: routes.messages() }
   const subtabsRef = useRef<HTMLDivElement>(null)
   const menu = icomMobileTabText(ICOM_MOBILE_MENU_TAB.id, t)
@@ -90,10 +92,10 @@ export function IcomMobileTabBar({ active, badges }: IcomMobileTabBarProps) {
             role="group"
             aria-label={t("icomMobileTabBar.subtabsLabel")}
           >
-            {ICOM_MOBILE_SUBTABS.map((tab) => {
+            {ICOM_MOBILE_SUBTABS.filter((tab) => !destinations || tab.id !== "actus").map((tab) => {
               const badge = icomMobileBadge(tab.id, badges, t)
               const isActive = tab.id === active
-              const { shortLabel } = icomMobileTabText(tab.id, t)
+              const shortLabel = destinations ? t(ICOM_VIEWS.find((view) => view.brique === tab.id)?.labelKey ?? "icomViews.conversations") : icomMobileTabText(tab.id, t).shortLabel
 
               return (
                 <Link

@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/iappel/call-surface-plan.ts @ ad2e7fdc2 — adaptations : branche de la file du centre d'appels élaguée (`kind === "queue"`, absente du moteur) : tout slot non terminé est un appel de cette surface.
+// Dupliqué de socle/packages/agent-features/src/features/iappel/call-surface-plan.ts @ ad2e7fdc2 — adaptations : branche de la file du centre d'appels élaguée (`kind === "queue"`, absente du moteur) : tout slot non terminé est un appel de cette surface ; P05 (18/10/2026) : le slot TERMINÉ qui reste l'actif est au premier plan (écran de fin, refus d'admission compris).
 /**
  * call-surface-plan — OÙ et COMMENT la surface d'appel se pose.
  *
@@ -84,7 +84,19 @@ function isSurfaceSlot(slot: SurfaceSlotView): boolean {
 }
 
 export function planCallSurface(input: CallSurfacePlanInput): CallSurfacePlan {
-	const slots = input.slots.filter(isSurfaceSlot)
+	/**
+	 * P05 (18/10/2026) — l'appel TERMINÉ qui tient encore la ligne reste à
+	 * l'écran : c'est son écran de fin (« Occupé », « Pas de réponse »,
+	 * « Ne pas déranger »…) avec ses actions. Le magasin le garde exprès
+	 * (`markSlotEnded`, `openRefusedCall` : « l'écran de fin doit rester
+	 * affiché ») ; l'écarter ici rendait un refus d'admission totalement
+	 * INVISIBLE — l'appelant touchait « Appeler » et rien ne se passait.
+	 * Un appel terminé qui n'est PAS l'actif (un autre a repris la ligne)
+	 * ne monte toujours rien.
+	 */
+	const slots = input.slots.filter(
+		(slot) => isSurfaceSlot(slot) || (slot.status === "ended" && slot.meetingId === input.activeSlotId),
+	)
 	if (slots.length === 0) {
 		return {
 			front: null,

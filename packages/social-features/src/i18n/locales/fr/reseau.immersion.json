@@ -1,0 +1,36 @@
+{
+  "immersiveFeed": {
+    "label": "Fil en immersion, une publication par écran",
+    "slotLabel": "Publication de {{name}}",
+    "keyboardHint": "Flèches haut et bas, ou Page précédente et Page suivante : publication précédente ou suivante. Une publication plus longue que l'écran défile d'abord.",
+    "loading": "Chargement des publications…",
+    "loadingMore": "Chargement de la suite…",
+    "loadMore": "Charger la suite",
+    "end": "Vous avez vu toutes les publications disponibles de ce fil.",
+    "emptyWindow": "Aucune publication dans cette partie du fil. La suite peut en contenir.",
+    "incompleteShort": "Fil incomplet",
+    "preparingShort": "Fil en préparation",
+    "newPosts_one": "{{count}} nouvelle publication",
+    "newPosts_many": "{{count}} nouvelles publications",
+    "newPosts_other": "{{count}} nouvelles publications",
+    "newPostsShown": "Retour aux publications les plus récentes.",
+    "removed": "Cette publication n'est plus disponible. La lecture continue avec la suivante.",
+    "restoring": "Le fil a été actualisé. Retour à la publication que vous lisiez…",
+    "restored": "Retour à la publication que vous lisiez.",
+    "restoreMissing": "La publication que vous lisiez n'est plus dans ce fil."
+  },
+  "feedMode": {
+    "groupLabel": "Affichage du fil",
+    "list": "Liste",
+    "immersive": "Immersion",
+    "lowHeight": "L'écran est trop bas pour l'immersion : le fil reste en liste. L'immersion revient dès que la hauteur le permet."
+  },
+  "mediaPlayback": {
+    "play": "Lire la vidéo",
+    "sound": "Son de la vidéo",
+    "suspended": {
+      "call": "Lecture suspendue pendant l'appel.",
+      "hidden": "Lecture suspendue pendant votre absence."
+    }
+  }
+}

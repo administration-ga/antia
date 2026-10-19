@@ -81,6 +81,7 @@ import {
 } from "./messagerie-composer"
 import { ReplyPreview, type ReplyPreviewData } from "./ReplyPreview"
 import { VoiceRecorderButton } from "./VoiceRecorderButton"
+import { AbandonedMessageSend, MessageSendInProgress } from "./messagerie-send-intent"
 
 /** Ce qu'une piece devient une fois montee — la forme attendue du serveur. */
 export interface UploadedAttachment {
@@ -165,6 +166,10 @@ interface ComposerPiece {
 }
 
 export interface MessageComposerProps {
+	/** Délimite les opérations asynchrones ; absent sur les anciens appelants. */
+	contextKey?: string
+	/** La session et la conversation sont encore celles du geste initial. */
+	isContextCurrent?: () => boolean
 	/** Le texte en cours — porte par le store, jamais par un `useState` local. */
 	value: string
 	onChange: (value: string) => void
@@ -193,10 +198,16 @@ export interface MessageComposerProps {
 		text: string
 		attachments: UploadedAttachment[]
 	}) => Promise<void> | void
+	/** Admission et nettoyage terminés : l'appelant peut alors changer de route. */
+	onSent?: () => void
 	/** L'URL de televersement — la mutation du fil courant (1:1 ou groupe). */
 	generateUploadUrl: () => Promise<string>
 	/** Le micro est-il offert ? Faux dans la carte du bureau. */
 	allowVoice: boolean
+	/** Droit de dépôt courant ; faux ferme aussi l'admission par collage/glisser. */
+	allowAttachments?: boolean
+	/** Borne plus stricte d'un canal spécialisé ; admission avant téléversement. */
+	maxAttachments?: number
 	/** `Echap` : revenir en arriere sans rien perdre. */
 	onEscape?: () => void
 	/** La frappe, pour le signal « ecrit... ». */
@@ -210,7 +221,13 @@ export interface MessageComposerProps {
 	accept?: string
 }
 
-export function MessageComposer({
+export function MessageComposer(props: MessageComposerProps) {
+	return <MessageComposerContent key={props.contextKey ?? "local"} {...props} />
+}
+
+function MessageComposerContent({
+	contextKey,
+	isContextCurrent,
 	value,
 	onChange,
 	placeholder,
@@ -222,8 +239,11 @@ export function MessageComposer({
 	onSubmitEdit,
 	mediaDraft,
 	onSend,
+	onSent,
 	generateUploadUrl,
 	allowVoice,
+	allowAttachments = true,
+	maxAttachments,
 	onEscape,
 	onTyping,
 	onBlurTyping,
@@ -238,6 +258,15 @@ export function MessageComposer({
 	const inputRef = useRef<HTMLTextAreaElement>(null)
 	const fileRef = useRef<HTMLInputElement>(null)
 	const compteurRef = useRef(0)
+	const operationLock = useRef(false)
+	const mounted = useRef(true)
+	const currentContext = useRef(contextKey)
+	currentContext.current = contextKey
+	useEffect(() => {
+		mounted.current = true
+		return () => { mounted.current = false }
+	}, [])
+	const operationIsCurrent = useCallback((scope: string | undefined) => mounted.current && currentContext.current === scope && (isContextCurrent?.() ?? true), [isContextCurrent])
 
 	const enEdition = editing !== null && editing !== undefined
 	/**
@@ -332,9 +361,14 @@ export function MessageComposer({
 
 	const admettre = useCallback(
 		(files: FileList | File[]) => {
+			if (!allowAttachments || disabled) return
 			const acceptes: File[] = []
 			let dejaLa = pieces.length
 			for (const file of Array.from(files)) {
+				if (maxAttachments !== undefined && dejaLa >= maxAttachments) {
+					onError?.(t("messagerie:messagerieComposer.tooMany", { max: maxAttachments }))
+					continue
+				}
 				const refus = attachmentRejection(
 					{ file, alreadyPending: dejaLa },
 					i18n.language,
@@ -363,7 +397,7 @@ export function MessageComposer({
 				}),
 			])
 		},
-		[pieces.length, mediaDraft, onError, i18n.language, t],
+		[allowAttachments, maxAttachments, disabled, pieces.length, mediaDraft, onError, i18n.language, t],
 	)
 
 	/** Retirer une pièce, des deux côtés du même geste. */
@@ -381,7 +415,9 @@ export function MessageComposer({
 	/** Monte un fichier et rend la forme que le serveur attend. */
 	const televerser = useCallback(
 		async (file: File, durationMs?: number): Promise<UploadedAttachment> => {
+			const scope = contextKey
 			const url = await generateUploadUrl()
+			if (!operationIsCurrent(scope)) throw new AbandonedMessageSend()
 			const response = await fetch(url, {
 				method: "POST",
 				headers: { "Content-Type": file.type },
@@ -391,6 +427,7 @@ export function MessageComposer({
 				throw new ComposerError(t("messageComposer.uploadFailed"))
 			}
 			const { storageId } = (await response.json()) as { storageId: string }
+			if (!operationIsCurrent(scope)) throw new AbandonedMessageSend()
 			const duree =
 				durationMs === undefined
 					? undefined
@@ -403,25 +440,30 @@ export function MessageComposer({
 				...(duree === undefined ? {} : { durationMs: duree }),
 			}
 		},
-		[generateUploadUrl, t],
+		[generateUploadUrl, contextKey, operationIsCurrent, t],
 	)
 
 	/** Enregistrer la MODIFICATION — aucun téléversement n'entre ici. */
 	const enregistrerEdition = useCallback(async (): Promise<void> => {
 		const texte = editText.trim()
-		if (texte.length === 0 || uploading) return
+		if (texte.length === 0 || uploading || disabled || operationLock.current) return
+		const scope = contextKey
+		const editedId = editing?.messageId
+		operationLock.current = true
 		setUploading(true)
 		try {
 			await onSubmitEdit?.(texte)
-			onCancelEdit?.()
+			if (operationIsCurrent(scope) && editIdRef.current === editedId) onCancelEdit?.()
 		} catch (err) {
-			onError?.(texteDEchec(err, t("messageComposer.editFailed"), t))
+			if (operationIsCurrent(scope)) onError?.(texteDEchec(err, t("messageComposer.editFailed"), t))
 		} finally {
-			setUploading(false)
+			operationLock.current = false
+			if (operationIsCurrent(scope)) setUploading(false)
 		}
-	}, [editText, uploading, onSubmitEdit, onCancelEdit, onError, t])
+	}, [editText, uploading, disabled, contextKey, editing?.messageId, operationIsCurrent, onSubmitEdit, onCancelEdit, onError, t])
 
 	const envoyer = useCallback(async (): Promise<void> => {
+		if (disabled || operationLock.current || !operationIsCurrent(contextKey)) return
 		if (enEdition) {
 			await enregistrerEdition()
 			return
@@ -442,6 +484,8 @@ export function MessageComposer({
 		}
 		const aMonter = pieces
 		const localIds = aMonter.map((item) => item.localId)
+		const scope = contextKey
+		operationLock.current = true
 		setUploading(true)
 		try {
 			const montees = await Promise.all(
@@ -465,6 +509,7 @@ export function MessageComposer({
 						throw new ComposerError(t("messageComposer.reselectPiece"))
 					}
 					const uploaded = await televerser(item.file, item.durationMs)
+					if (!operationIsCurrent(scope)) throw new AbandonedMessageSend()
 					if (mediaDraft !== undefined) {
 						mediaDraft.markUploaded(item.localId, uploaded.storageId)
 					} else {
@@ -479,7 +524,9 @@ export function MessageComposer({
 					return uploaded
 				}),
 			)
+			if (!operationIsCurrent(scope)) throw new AbandonedMessageSend()
 			await onSend({ text: texte, attachments: montees })
+			if (!operationIsCurrent(scope)) throw new AbandonedMessageSend()
 			// La mutation — et pas le seul téléversement — est le point de succès.
 			// Une pièce ajoutée pendant l'envoi n'appartient pas à cette intention et
 			// reste donc dans la liste.
@@ -490,7 +537,9 @@ export function MessageComposer({
 					current.filter((item) => !partis.has(item.localId)),
 				)
 			}
+			onSent?.()
 		} catch (err) {
+			if (!operationIsCurrent(scope) || err instanceof AbandonedMessageSend) return
 			// Marquer l'échec ne DÉGRADE jamais une pièce déjà montée : la règle
 			// est dans `markMediaFailed`, le magasin la fait respecter.
 			if (mediaDraft !== undefined) {
@@ -498,9 +547,10 @@ export function MessageComposer({
 					if (item.storageId === null) mediaDraft.markFailed(item.localId)
 				}
 			}
-			onError?.(texteDEchec(err, t("messageComposer.sendFailed"), t))
+			onError?.(err instanceof MessageSendInProgress ? t("messageComposer.sendAlreadyPending") : texteDEchec(err, t("messageComposer.sendFailed"), t))
 		} finally {
-			setUploading(false)
+			operationLock.current = false
+			if (operationIsCurrent(scope)) setUploading(false)
 		}
 	}, [
 		enEdition,
@@ -512,8 +562,12 @@ export function MessageComposer({
 		uploading,
 		televerser,
 		onSend,
+		onSent,
 		onError,
 		t,
+		disabled,
+		contextKey,
+		operationIsCurrent,
 	])
 
 	/** Le vocal part SEUL et tout de suite : c'est le geste, il ne se compose pas. */
@@ -523,6 +577,9 @@ export function MessageComposer({
 			durationMs: number
 			mimeType: string
 		}): Promise<void> => {
+			if (disabled || operationLock.current || !operationIsCurrent(contextKey)) return
+			const scope = contextKey
+			operationLock.current = true
 			setUploading(true)
 			const localId = `pending-voice-${String(Date.now())}-${String(
 				compteurRef.current + 1,
@@ -531,8 +588,11 @@ export function MessageComposer({
 			let montee: UploadedAttachment | undefined
 			try {
 				montee = await televerser(note.file, note.durationMs)
+				if (!operationIsCurrent(scope)) throw new AbandonedMessageSend()
 				await onSend({ text: "", attachments: [montee] })
-			} catch {
+				if (operationIsCurrent(scope)) onSent?.()
+			} catch (error) {
+				if (!operationIsCurrent(scope) || error instanceof AbandonedMessageSend) return
 				// Un vocal refusé redevient une pièce prête à être renvoyée. Sa durée
 				// voyage avec le fichier afin que le retry ne dégrade pas le lecteur.
 				if (mediaDraft !== undefined) {
@@ -558,10 +618,11 @@ export function MessageComposer({
 				}
 				onError?.(t("messageComposer.voiceFailed"))
 			} finally {
-				setUploading(false)
+				operationLock.current = false
+				if (operationIsCurrent(scope)) setUploading(false)
 			}
 		},
-		[televerser, onSend, onError, mediaDraft, t],
+		[televerser, onSend, onSent, onError, mediaDraft, t, disabled, contextKey, operationIsCurrent],
 	)
 
 	const onKeyDown = useCallback(
@@ -683,6 +744,7 @@ export function MessageComposer({
 					multiple
 					accept={accept}
 					className="sr-only"
+					disabled={disabled || !allowAttachments}
 					tabIndex={-1}
 					onChange={(event) => {
 						if (event.target.files !== null) admettre(event.target.files)
@@ -691,7 +753,7 @@ export function MessageComposer({
 						event.target.value = ""
 					}}
 				/>
-				<button
+				{allowAttachments ? <button
 					type="button"
 					className="msg-icon-btn"
 					aria-label={t("messageComposer.attachFile")}
@@ -702,7 +764,7 @@ export function MessageComposer({
 					onClick={() => fileRef.current?.click()}
 				>
 					<Paperclip aria-hidden="true" size={17} />
-				</button>
+				</button> : null}
 
 				<textarea
 					ref={inputRef}

@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/ReseauAgentPage.tsx @ ad2e7fdc2 — adaptations : RÉÉCRIT pour la page réseau du moteur, déplacée dans la coque (`shell/`) — l'accueil de l'application (`useRoutes().home()`, volets par `reseau-agent-nav`), sans l'espace agent : orchestration des volets, bascule téléphone/bureau, carte d'identité épinglée, onglets « chemise », outils du fil, stories, composeurs et rails GARDÉS ; volet « Conférences » et dialogue branchés au moteur `live` (F3a), rail avancé différé ; volet Pages et rail « Pages à suivre » par les composants RÉÉCRITS sur les pages du moteur ; rail droit ouvert par la carte iCom (`MessagerieDock`) ; grille sans le rail de l'hôte — le menu vertical (`ReseauMenuRail`) est la navigation dès 812 px de conteneur et les trois colonnes tiennent dès 1 108 px (paliers du socle « rail rétracté », plus aucune lecture de `[data-espace-rail]`), la porte iCom compacte s'efface au seul palier où la carte est visible ; feuille sortie du JSX dans une constante de module (`RESEAU_DESKTOP_CSS`) — un littéral enfant de `<style>` passerait pour une chaîne d'interface — avec la cadence des blocs en valeur (`--sp-4`, jeton absent du moteur, retiré) ; onglets « chemise » et feuille du kit d'espace par `@antsia/ui/espace-kit` ; identifiants de la tablist `reseau-panel` / `reseau-tab-` (plus d'iProfil) ; volet Évènements monté sans `onCreateEvent` — l'intention de composition d'iAgenda (absent du moteur) n'existe plus et le catalogue de création mène l'évènement au volet lui-même : un bouton qui y renverrait tournerait en rond ; lecteur des statuts sur `useRoutes().stories()` (paramètre `auteur`), surfaces `reseau` du plateau retirées ; ma fiche lue sur la personne du moteur (identifiant seulement PUBLIÉ, portrait servi par la garde) ; résultats de recherche clés sur `_id` ; textes par l'i18n (`reseau:reseauAgentPage.*`, volets et portées par leurs clés, `t` passé aux modules purs) ; « iRéseau » devient « réseau » ; commentaires rapportés au moteur.
+// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/ReseauAgentPage.tsx @ ad2e7fdc2 — adaptations : RÉÉCRIT pour la page réseau du moteur, déplacée dans la coque (`shell/`) — l'accueil de l'application (`useRoutes().home()`, volets par `reseau-agent-nav`), sans l'espace agent : orchestration des volets, bascule téléphone/bureau, carte d'identité épinglée, onglets « chemise », outils du fil, stories, composeurs et rails GARDÉS ; volet « Conférences » et dialogue branchés au moteur `live` (F3a), rail avancé différé ; volet Pages et rail « Pages à suivre » par les composants RÉÉCRITS sur les pages du moteur ; rail droit ouvert par la carte iCom (`MessagerieDock`) ; grille sans le rail de l'hôte — le menu vertical (`ReseauMenuRail`) est la navigation dès 812 px de conteneur et les trois colonnes tiennent dès 1 108 px (paliers du socle « rail rétracté », plus aucune lecture de `[data-espace-rail]`), la porte iCom compacte s'efface au seul palier où la carte est visible ; feuille sortie du JSX dans une constante de module (`RESEAU_DESKTOP_CSS`) — un littéral enfant de `<style>` passerait pour une chaîne d'interface — avec la cadence des blocs en valeur (`--sp-4`, jeton absent du moteur, retiré) ; onglets « chemise » et feuille du kit d'espace par `@antsia/ui/espace-kit` ; identifiants de la tablist `reseau-panel` / `reseau-tab-` (plus d'iProfil) ; volet Évènements monté sans `onCreateEvent` — l'intention de composition d'iAgenda (absent du moteur) n'existe plus et le catalogue de création mène l'évènement au volet lui-même : un bouton qui y renverrait tournerait en rond ; lecteur des statuts sur `useRoutes().stories()` (paramètre `auteur`), surfaces `reseau` du plateau retirées ; ma fiche lue sur la personne du moteur (identifiant seulement PUBLIÉ, portrait servi par la garde) ; résultats de recherche clés sur `_id` ; textes par l'i18n (`reseau:reseauAgentPage.*`, volets et portées par leurs clés, `t` passé aux modules purs) ; « iRéseau » devient « réseau » ; commentaires rapportés au moteur ; P02 (18/10/2026) : le rail-menu reçoit le geste de création du lieu (`onCreate`), lu seulement sous la navigation par destinations déclarée par l'application ; P04 (18/10/2026) : quand l'application déclare le fil immersif, le fil et ses mots-clés reçoivent une bascule Liste/Immersion dans les outils du fil (Liste par défaut au bureau, choix mémorisé par réseau) et l'Immersion monte le lecteur immersif DANS la colonne de lecture, à la place de la liste, avec la même chaîne de pages — rail, volets et colonne d'iCom inchangés.
 "use client"
 
 /**
@@ -59,7 +59,7 @@ import { Alert, Button, Select, SkeletonCard, TextInput } from "@antsia/ui"
 import { EspaceDossierTabs, EspaceKitStyles } from "@antsia/ui/espace-kit"
 import { useIsReseauMobile } from "@antsia/ui/overlay"
 import { Search } from "lucide-react"
-import { Suspense } from "react"
+import { Suspense, useCallback } from "react"
 import { useTranslation } from "react-i18next"
 
 import { MessagerieDock } from "../features/messagerie/MessagerieDock"
@@ -79,6 +79,11 @@ import { emptyFeedText, formatUnreadBadge, searchStatusText } from "../features/
 import { SuggestionsPanel } from "../features/reseau-personnel/SuggestionsPanel"
 import { DirectsLiveRail } from "../features/direct/DirectsLiveRail"
 import { DirectsPanel } from "../features/direct/DirectsPanel"
+import { FeedListReturn } from "../features/feed-immersion/FeedListReturn"
+import { FeedModeToggle } from "../features/feed-immersion/FeedModeToggle"
+import { FeedSurfaceMemoryProvider } from "../features/feed-immersion/feed-post-memory"
+import { ImmersiveFeedReader } from "../features/feed-immersion/ImmersiveFeedReader"
+import { useFeedImmersion } from "../features/feed-immersion/use-feed-immersion"
 
 import { useCreationController } from "../features/reseau-personnel/use-creation-controller"
 import { useReseauFeedState } from "../features/reseau-personnel/useReseauFeedState"
@@ -128,7 +133,8 @@ export const RESEAU_DESKTOP_CSS = `
           /* Contrat visuel du bureau : une seule cadence entre les blocs et
              un seul rayon pour toutes les surfaces de premier niveau. */
           --rp-stack-gap: 16px;
-          --rp-surface-radius: 18px;
+          /* Le rayon des surfaces vient de la charte (--rp-surface-radius,
+             18 px par défaut, redéclarable par un thème) : il n'est plus fixé ici. */
           container-type: inline-size;
           container-name: rp-page;
           box-sizing: border-box;
@@ -552,6 +558,115 @@ function ReseauAgentPageInner() {
    */
   const creation = useCreationController()
 
+  /*
+   * P04 — le fil IMMERSIF, quand l'application le déclare : le fil et ses
+   * mots-clés seulement ; Liste par défaut au bureau, l'Immersion se choisit
+   * dans les outils du fil. `null` sans déclaration : rien ne change.
+   */
+  const feedId = main !== "feed" ? null : view.kind === "feed" ? `fil:${scope}` : view.kind === "tag" ? `fil:${scope}:tag:${view.tag}` : null
+  const immersion = useFeedImmersion({ feedId, depth: pages.cursors.length })
+  const canLoadMore = shouldShowLoadMore(pages, tailCursor)
+  const loadMore = useCallback(() => {
+    setPages((state) => appendPage(state, tailCursor))
+  }, [setPages, tailCursor])
+
+  /* Les morceaux de la tête du fil, rendus tels quels en liste et repris en
+     premier créneau du lecteur en immersion (P04) : la vue en cours et son
+     retour, l'invitation reçue, la rangée des actus. */
+  const feedHeading =
+    heading !== null ? (
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 10,
+          flexWrap: "wrap",
+        }}
+      >
+        <span style={{ fontSize: 13, color: "var(--ink-700)" }}>
+          {view.kind === "search" ? searchStatusText(view.query, search.data?.items.length ?? 0, search.isLoading, t) : heading}
+        </span>
+        {viewNeedsReturn(view) ? (
+          <Button variant="ghost" size="sm" icon="arrowLeft" onClick={backToFeed}>
+            {viewReturnLabel(view, t)}
+          </Button>
+        ) : null}
+      </div>
+    ) : null
+
+  /* Une invitation reçue est une action attendue DE MOI : elle ne dort pas
+     derrière un volet qu'il faut penser à ouvrir. */
+  const invitationsBanner =
+    view.kind === "feed" && shouldSurfaceInvitations(pendingCount) ? (
+      <Alert tone="info" title={invitationsBannerLabel(pendingCount ?? 0, t)}>
+        <Button variant="secondary" size="sm" icon="users" onClick={() => goToTab("relations")}>
+          {t("reseauAgentPage.seeRequests")}
+        </Button>
+      </Alert>
+    ) : null
+
+  /* ── Les STORIES : la MÊME rangée qu'au téléphone, au même endroit
+     relatif — en tête du fil. Une rangée qui n'existerait qu'au téléphone
+     ferait disparaître les stories de la moitié des usages. */
+  const storiesRow =
+    view.kind === "feed" ? (
+      <>
+        <StoriesStyles />
+        <StoriesTray
+          myHandle={myHandle}
+          myAvatarUrl={person?.avatar?.url ?? null}
+          now={now}
+          onOpen={(handle) => {
+            markStoriesOpenedFromApp()
+            const base = routes.stories()
+            router.push(handle === null ? base : `${base}?${new URLSearchParams({ [STORIES_AUTHOR_PARAM]: handle }).toString()}`)
+          }}
+          // Au bureau, créer OUVRE la carte compacte en place —
+          // naviguer plein écran pour un formulaire était le défaut
+          // signalé le 2026-08-20.
+          onCreate={() => creation.openCreation("actu")}
+        />
+      </>
+    ) : null
+
+  /*
+   * Une CHAÎNE de pages montées : chacune porte son curseur et son propre
+   * abonnement, donc les hooks restent hors de toute boucle conditionnelle et
+   * chaque page garde le temps réel. Voir `reseau-feed-pages.ts` pour ce
+   * qu'on a écarté (limite gonflée, défilement infini) et pourquoi. LA MÊME
+   * chaîne en liste et en immersion.
+   */
+  const feedPages = pages.cursors.map((cursor, index) => (
+    <FeedPage
+      key={feedCursorKey(cursor)}
+      cursor={cursor}
+      pageIndex={index}
+      pageKey={feedCursorKey(cursor)}
+      nextMountedCursor={pages.cursors[index + 1]}
+      tag={view.kind === "tag" ? view.tag : undefined}
+      scope={scope}
+      now={now}
+      isFirst={index === 0}
+      isLast={index === pages.cursors.length - 1}
+      interleaveAfter={index === 0 ? suggestionsInterleaveIndex : null}
+      onTag={openTag}
+      onMention={openMention}
+      onTail={reportTail}
+      onBoundaryShift={rebaseAfterPage}
+      emptyFallback={
+        <EmptyFeed
+          text={emptyFeedText(
+            {
+              hasConnections: (connections.data ?? []).length > 0,
+              hasFollows: (follows.data ?? []).length > 0,
+            },
+            t,
+          )}
+        />
+      }
+    />
+  ))
+
   return (
     <div
       className="rp-scope"
@@ -585,7 +700,9 @@ function ReseauAgentPageInner() {
             l'affiche que lorsque la colonne de lecture garde sa largeur à côté
             de lui. */}
         <aside className="rp-rail-start" aria-label={t("reseauAgentPage.railStartLabel")}>
-          <ReseauMenuRail activeTab={shownTab} counts={{ invitations: pendingCount }} onSelectTab={goToTab} />
+          {/* `onCreate` ne sert que la navigation par destinations (P02) : la
+              carte « Créer » du rail ouvre les MÊMES surfaces que ce lieu. */}
+          <ReseauMenuRail activeTab={shownTab} counts={{ invitations: pendingCount }} onSelectTab={goToTab} onCreate={creation.openCreation} />
         </aside>
 
         {/* ─── Colonne centrale : l'identité PUIS le volet ouvert, dans un
@@ -739,6 +856,9 @@ function ReseauAgentPageInner() {
                         ))}
                       </Select>
                     ) : null}
+                    {/* P04 : le point d'entrée de l'Immersion au bureau — la
+                        bascule nommée, Liste par défaut. */}
+                    {immersion !== null && feedId !== null ? <FeedModeToggle state={immersion.mode} onChange={immersion.changeMode} /> : null}
                   </div>
 
                   {showChips ? (
@@ -751,60 +871,41 @@ function ReseauAgentPageInner() {
             </section>
 
             {main === "feed" ? (
-              <>
-                {heading !== null ? (
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 10,
-                      flexWrap: "wrap",
-                    }}
+              immersion !== null && immersion.immersive ? (
+                /* P04 — l'Immersion au bureau : le MÊME lecteur qu'au
+                   téléphone, dans la colonne de lecture dont il prend la
+                   hauteur restante ; la tête du fil en est le premier créneau.
+                   La bascule reste celle des outils du fil, juste au-dessus :
+                   pas de seconde bascule dans la barre du lecteur. */
+                <FeedSurfaceMemoryProvider value={immersion.surfaceMemory}>
+                  <ImmersiveFeedReader
+                    key={feedId ?? "fil"}
+                    label={t("immersiveFeed.label")}
+                    head={
+                      <>
+                        {feedHeading}
+                        {invitationsBanner}
+                        {storiesRow}
+                      </>
+                    }
+                    canLoadMore={canLoadMore}
+                    exhausted={pages.exhausted}
+                    onLoadMore={loadMore}
+                    depth={pages.cursors.length}
+                    restore={immersion.restore}
+                    onRestored={immersion.onRestored}
+                    onAnchor={immersion.recordSlotAnchor}
                   >
-                    <span style={{ fontSize: 13, color: "var(--ink-700)" }}>
-                      {view.kind === "search" ? searchStatusText(view.query, search.data?.items.length ?? 0, search.isLoading, t) : heading}
-                    </span>
-                    {viewNeedsReturn(view) ? (
-                      <Button variant="ghost" size="sm" icon="arrowLeft" onClick={backToFeed}>
-                        {viewReturnLabel(view, t)}
-                      </Button>
-                    ) : null}
-                  </div>
-                ) : null}
+                    {feedPages}
+                  </ImmersiveFeedReader>
+                </FeedSurfaceMemoryProvider>
+              ) : (
+              <FeedSurfaceMemoryProvider value={immersion?.surfaceMemory ?? null}>
+                {feedHeading}
 
-                {/* Une invitation reçue est une action attendue DE MOI : elle ne
-                    dort pas derrière un volet qu'il faut penser à ouvrir. */}
-                {view.kind === "feed" && shouldSurfaceInvitations(pendingCount) ? (
-                  <Alert tone="info" title={invitationsBannerLabel(pendingCount ?? 0, t)}>
-                    <Button variant="secondary" size="sm" icon="users" onClick={() => goToTab("relations")}>
-                      {t("reseauAgentPage.seeRequests")}
-                    </Button>
-                  </Alert>
-                ) : null}
+                {invitationsBanner}
 
-                {/* ── Les STORIES ────────────────────────────────────────────
-                    La MÊME rangée qu'au téléphone, au même endroit relatif : en
-                    tête du fil. Une rangée qui n'existerait qu'au téléphone
-                    ferait disparaître les stories de la moitié des usages. */}
-                {view.kind === "feed" ? (
-                  <>
-                    <StoriesStyles />
-                    <StoriesTray
-                      myHandle={myHandle}
-                      myAvatarUrl={person?.avatar?.url ?? null}
-                      now={now}
-                      onOpen={(handle) => {
-                        markStoriesOpenedFromApp()
-                        const base = routes.stories()
-                        router.push(handle === null ? base : `${base}?${new URLSearchParams({ [STORIES_AUTHOR_PARAM]: handle }).toString()}`)
-                      }}
-                      // Au bureau, créer OUVRE la carte compacte en place —
-                      // naviguer plein écran pour un formulaire était le défaut
-                      // signalé le 2026-08-20.
-                      onCreate={() => creation.openCreation("actu")}
-                    />
-                  </>
-                ) : null}
+                {storiesRow}
 
                 {view.kind === "post" ? (
                   focused.isLoading ? (
@@ -824,43 +925,7 @@ function ReseauAgentPageInner() {
                   )
                 ) : (
                   <>
-                    {/*
-                     * Une CHAÎNE de pages montées : chacune porte son curseur et
-                     * son propre abonnement, donc les hooks restent hors de toute
-                     * boucle conditionnelle et chaque page garde le temps réel.
-                     * Voir `reseau-feed-pages.ts` pour ce qu'on a écarté (limite
-                     * gonflée, défilement infini) et pourquoi.
-                     */}
-                    {pages.cursors.map((cursor, index) => (
-                      <FeedPage
-                        key={feedCursorKey(cursor)}
-                        cursor={cursor}
-                        pageIndex={index}
-                        pageKey={feedCursorKey(cursor)}
-                        nextMountedCursor={pages.cursors[index + 1]}
-                        tag={view.kind === "tag" ? view.tag : undefined}
-                        scope={scope}
-                        now={now}
-                        isFirst={index === 0}
-                        isLast={index === pages.cursors.length - 1}
-                        interleaveAfter={index === 0 ? suggestionsInterleaveIndex : null}
-                        onTag={openTag}
-                        onMention={openMention}
-                        onTail={reportTail}
-                        onBoundaryShift={rebaseAfterPage}
-                        emptyFallback={
-                          <EmptyFeed
-                            text={emptyFeedText(
-                              {
-                                hasConnections: (connections.data ?? []).length > 0,
-                                hasFollows: (follows.data ?? []).length > 0,
-                              },
-                              t,
-                            )}
-                          />
-                        }
-                      />
-                    ))}
+                    {feedPages}
 
                     {shouldShowLoadMore(pages, tailCursor) ? (
                       <div>
@@ -876,9 +941,22 @@ function ReseauAgentPageInner() {
                         </Button>
                       </div>
                     ) : null}
+
+                    {/* P04 : retrouver la carte lue au retour (profondeur rechargée). */}
+                    {immersion !== null && feedId !== null ? (
+                      <FeedListReturn
+                        restore={immersion.restore}
+                        onRestored={immersion.onRestored}
+                        onAnchor={immersion.recordListAnchor}
+                        canLoadMore={canLoadMore}
+                        exhausted={pages.exhausted}
+                        onLoadMore={loadMore}
+                      />
+                    ) : null}
                   </>
                 )}
-              </>
+              </FeedSurfaceMemoryProvider>
+              )
             ) : main === "people" ? (
               <PeoplePanel />
             ) : main === "pages" ? (

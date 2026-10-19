@@ -1,11 +1,13 @@
-// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/ReportContentDialog.tsx @ ad2e7fdc2 — adaptations : motifs et borne de la précision lus dans le domaine du moteur (`CONTENT_REPORT_REASONS`, `CONTENT_REPORT_NOTE_MAX` de `@antsia/social-domain/moderation`, type `ReportReason` = `ContentReportReason`) ; libellés par l'i18n (clés `reseau:reportContentDialog.*`, le motif par sa clé) ; voile et ombre par les jetons (`--ui2-scrim`, `--shadow-xl`) au lieu de couleurs littérales ; titre accordé (« Signaler cette publication » — le socle écrivait « ce publication ») ; un échec de transmission ne laisse plus de promesse rejetée sans lecteur (l’appelant le dit, la boîte reste ouverte).
+// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/ReportContentDialog.tsx @ ad2e7fdc2 — adaptations : motifs et borne de la précision lus dans le domaine du moteur (`CONTENT_REPORT_REASONS`, `CONTENT_REPORT_NOTE_MAX` de `@antsia/social-domain/moderation`, type `ReportReason` = `ContentReportReason`) ; libellés par l'i18n (clés `reseau:reportContentDialog.*`, le motif par sa clé) ; voile et ombre par les jetons (`--ui2-scrim`, `--shadow-xl`) au lieu de couleurs littérales ; titre accordé (« Signaler cette publication » — le socle écrivait « ce publication ») ; un échec de transmission ne laisse plus de promesse rejetée sans lecteur (l’appelant le dit, la boîte reste ouverte) ; P18b (A03, A07, A30) : accessibilité modale par le hook partagé `useModalA11y` (focus initial sur le motif, piège de Tab, Échap qui ferme hors transmission, inertage du reste de la page, focus rendu au déclencheur), dialogue nommé et décrit par son titre et sa phrase (`aria-labelledby`, `aria-describedby`), échec doublé d'une alerte dans le dialogue (`role="alert"`, hors de la vue : le toast reste le retour visible), nom accessible de la précision = son libellé visible ; rendu inchangé.
 "use client"
 
-import { Button, TextArea } from "@antsia/ui"
+import { Button, TextArea, useModalA11y } from "@antsia/ui"
 import { CONTENT_REPORT_NOTE_MAX, CONTENT_REPORT_REASONS, type ContentReportReason } from "@antsia/social-domain/moderation"
-import { useState } from "react"
+import { useEffect, useId, useRef, useState } from "react"
 import { createPortal } from "react-dom"
 import { useTranslation } from "react-i18next"
+
+import { postEngineErrorText } from "./post-overflow"
 
 export type ReportReason = ContentReportReason
 
@@ -26,12 +28,36 @@ export function ReportContentDialog({ kind, onClose, onSubmit }: {
   const [reason, setReason] = useState<ReportReason>("harassment")
   const [note, setNote] = useState("")
   const [pending, setPending] = useState(false)
+  /** Le refus de la transmission, redit DANS le dialogue (le toast peut être hors d'atteinte). */
+  const [failure, setFailure] = useState<string | null>(null)
   const title = kind === "publication" ? t("reportContentDialog.title.publication") : t("reportContentDialog.title.commentaire")
+  const titleId = useId()
+  const descriptionId = useId()
+  const dialogRef = useRef<HTMLDivElement>(null)
+  const reasonRef = useRef<HTMLSelectElement>(null)
+  // Le hook s'installe une fois, au montage : il lit l'état courant par des
+  // références — une transmission en cours ne se ferme pas par Échap.
+  const pendingRef = useRef(false)
+  const onCloseRef = useRef(onClose)
+  useEffect(() => {
+    onCloseRef.current = onClose
+  }, [onClose])
+  // Focus initial sur le motif, piège de Tab, Échap, inertage du reste de la
+  // page et restitution du focus au déclencheur (le bouton « ⋯ » de la carte).
+  useModalA11y({
+    containerRef: dialogRef,
+    initialFocusRef: reasonRef,
+    onClose: () => {
+      if (!pendingRef.current) onCloseRef.current()
+    },
+  })
   return createPortal(
     <div
+      ref={dialogRef}
       role="dialog"
       aria-modal="true"
-      aria-label={title}
+      aria-labelledby={titleId}
+      aria-describedby={descriptionId}
       style={{
         position: "fixed",
         inset: 0,
@@ -45,19 +71,28 @@ export function ReportContentDialog({ kind, onClose, onSubmit }: {
       <form
         onSubmit={(event) => {
           event.preventDefault()
+          if (pendingRef.current) return
+          pendingRef.current = true
           setPending(true)
-          // L'échec est DIT par l'appelant (toast) ; la boîte reste ouverte
-          // pour un nouvel essai — la promesse rejetée est donc lue ici.
+          setFailure(null)
+          // L'échec est DIT par l'appelant (toast) et REDIT ici, dans le
+          // dialogue, pour les aides techniques ; la boîte reste ouverte pour
+          // un nouvel essai — la promesse rejetée est donc lue ici.
           void onSubmit(reason, note)
-            .then(onClose, () => undefined)
-            .finally(() => setPending(false))
+            .then(onClose, (error: unknown) => {
+              setFailure(postEngineErrorText(error, "reseau:postCard.toast.reportFailed", t))
+            })
+            .finally(() => {
+              pendingRef.current = false
+              setPending(false)
+            })
         }}
         style={{
           width: "min(520px, 100%)",
           padding: 24,
           border: "1px solid var(--border)",
           borderRadius: 12,
-          background: "var(--card)",
+          background: "var(--esp-surface-raised, var(--card))",
           color: "var(--foreground)",
           boxShadow: "var(--shadow-xl)",
           display: "grid",
@@ -65,8 +100,9 @@ export function ReportContentDialog({ kind, onClose, onSubmit }: {
         }}
       >
         <div>
-          <h2 style={{ margin: 0, fontSize: 20 }}>{title}</h2>
+          <h2 id={titleId} style={{ margin: 0, fontSize: 20 }}>{title}</h2>
           <p
+            id={descriptionId}
             style={{
               margin: "6px 0 0",
               color: "var(--muted-foreground)",
@@ -79,6 +115,7 @@ export function ReportContentDialog({ kind, onClose, onSubmit }: {
         <label style={{ display: "grid", gap: 6, fontWeight: 600 }}>
           {t("reportContentDialog.reasonLabel")}
           <select
+            ref={reasonRef}
             value={reason}
             onChange={(event) =>
               setReason(event.target.value as ReportReason)
@@ -101,13 +138,18 @@ export function ReportContentDialog({ kind, onClose, onSubmit }: {
         </label>
         <label style={{ display: "grid", gap: 6, fontWeight: 600 }}>
           {t("reportContentDialog.noteLabel")}
+          {/* Nommée par son libellé visible, qui l'enveloppe (A30). */}
           <TextArea
             value={note}
             maxLength={CONTENT_REPORT_NOTE_MAX}
             onChange={(event) => setNote(event.target.value)}
-            aria-label={t("reportContentDialog.noteAriaLabel")}
           />
         </label>
+        {/* Région PERSISTANTE : le refus y est inséré, donc annoncé, même
+            quand le toast de l'appelant reste hors d'atteinte de la modale. */}
+        <p role="alert" className="sr-only">
+          {failure ?? ""}
+        </p>
         <div style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}>
           <Button
             type="button"

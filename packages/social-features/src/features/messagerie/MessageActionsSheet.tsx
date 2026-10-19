@@ -6,8 +6,9 @@
  *
  * Une feuille basse (`Sheet side="bottom"` d'`@antsia/ui/sheet`, le même
  * gabarit que le menu du réseau) : barre d'emojis en haut, actions en dessous. C'est
- * le geste des messageries, et il vaut aussi au clavier — la bulle est un
- * bouton, `Entrée` ouvre la même feuille.
+ * le geste des messageries, et il vaut aussi au clavier — le bouton d'actions
+ * de la bulle (P18b, A02), révélé au focus, ouvre la même feuille ; le tiroir
+ * rend le focus à ce bouton à sa fermeture.
  *
  * ⚠️ La liste des actions vient de `actionsFor` (module PUR, testé), jamais
  * d'une suite de conditions ici : « supprimer pour tout le monde » n'existe

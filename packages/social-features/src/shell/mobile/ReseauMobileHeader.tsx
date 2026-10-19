@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/mobile/ReseauMobileHeader.tsx @ ad2e7fdc2 — adaptations : sans la coque de l'espace agent (`espace-mobile-volets` retiré) — la porte d'iCom mène à la messagerie en pages de l'application (`useRoutes().messages()`), la cloche du moteur montée sans base de l'espace (ses cibles se composent sur `useRoutes()`) ; `profileHref` devient `string | null` (un profil non publié n'a pas d'adresse : la pastille reste, sans lien) ; libellés par l'i18n (`reseau:reseauMobileHeader.*`, nom accessible d'iCom accordé par `count`) ; « iRéseau » devient « réseau » ; rendu, recherche à la demande et focus inchangés.
+// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/mobile/ReseauMobileHeader.tsx @ ad2e7fdc2 — adaptations : sans la coque de l'espace agent (`espace-mobile-volets` retiré) — la porte d'iCom mène à la messagerie en pages de l'application (`useRoutes().messages()`), la cloche du moteur montée sans base de l'espace (ses cibles se composent sur `useRoutes()`) ; `profileHref` devient `string | null` (un profil non publié n'a pas d'adresse : la pastille reste, sans lien) ; libellés par l'i18n (`reseau:reseauMobileHeader.*`, nom accessible d'iCom accordé par `count`) ; « iRéseau » devient « réseau » ; rendu, recherche à la demande et focus inchangés ; P02 (18/10/2026) : sous la navigation par destinations déclarée par l'application, la porte d'iCom et la pastille du profil quittent l'en-tête (Messages et Profil sont des destinations de la barre) — la recherche et la cloche restent.
 "use client"
 
 /**
@@ -34,6 +34,7 @@ import { useTranslation } from "react-i18next"
 import { NotificationBell } from "../../features/notifications/NotificationBell"
 import { Avatar } from "../../features/reseau-personnel/Avatar"
 import { formatUnreadBadge } from "../../features/reseau-personnel/shared"
+import { useReseauDestinationRoutes } from "../reseau-menu-destinations-ui"
 
 export interface ReseauMobileHeaderProps {
   /** Lance la recherche — le parent décide ce que « chercher » veut dire. */
@@ -51,6 +52,9 @@ export interface ReseauMobileHeaderProps {
 export function ReseauMobileHeader({ onSearch, searchQuery, profileHref, avatarUrl, displayName, unreadMessages }: ReseauMobileHeaderProps) {
   const { t } = useTranslation("reseau")
   const routes = useRoutes()
+  /* Navigation par destinations : Messages et Profil sont des places de la
+     barre basse — les répéter ici donnerait deux portes et deux pastilles. */
+  const destinations = useReseauDestinationRoutes() !== null
   /**
    * Le brouillon est LOCAL, semé par la recherche en cours. Remonter chaque
    * frappe au parent relancerait la query à chaque lettre : la recherche se
@@ -159,27 +163,29 @@ export function ReseauMobileHeader({ onSearch, searchQuery, profileHref, avatarU
         )}
         {/* La porte d'iCom. PAS d'`aria-label` sec : le nom accessible se
             compose du `sr-only` — pastille comprise quand elle existe. */}
-        <Link href={routes.messages()} className="rm-tab min-h-11 min-w-11" style={{ flex: "0 0 auto", width: 44 }}>
-          <span className="rm-tab-icon">
-            <Icon name="messageCircle" size={20} />
-            {unreadBadge !== null ? (
-              <span className="rm-tab-badge">
-                <span aria-hidden="true">{unreadBadge}</span>
-              </span>
-            ) : null}
-          </span>
-          <span className="sr-only">
-            {unreadMessages !== undefined && unreadMessages > 0
-              ? t("reseauMobileHeader.icomOpenWithUnread", { count: unreadMessages })
-              : t("reseauMobileHeader.icomOpen")}
-          </span>
-        </Link>
+        {destinations ? null : (
+          <Link href={routes.messages()} className="rm-tab min-h-11 min-w-11" style={{ flex: "0 0 auto", width: 44 }}>
+            <span className="rm-tab-icon">
+              <Icon name="messageCircle" size={20} />
+              {unreadBadge !== null ? (
+                <span className="rm-tab-badge">
+                  <span aria-hidden="true">{unreadBadge}</span>
+                </span>
+              ) : null}
+            </span>
+            <span className="sr-only">
+              {unreadMessages !== undefined && unreadMessages > 0
+                ? t("reseauMobileHeader.icomOpenWithUnread", { count: unreadMessages })
+                : t("reseauMobileHeader.icomOpen")}
+            </span>
+          </Link>
+        )}
         {/* La cloche. Sur la page réseau au téléphone, la coque n'en pose
             aucune autre : sans elle, ce réseau serait le SEUL endroit sans
             accès aux notifications (R-03). Elle est posée ici, à la facture
             des onglets. */}
         <NotificationBell variant="reseau" />
-        {profileHref !== null ? (
+        {destinations ? null : profileHref !== null ? (
           <Link href={profileHref} className="rm-avatar-link" aria-label={t("reseauMobileHeader.profileLink")}>
             {/* `Avatar` porte déjà `aria-hidden` : le nom du lien vient de
                 l'`aria-label` ci-dessus, jamais des initiales. */}

@@ -1,4 +1,4 @@
-/* Dupliqué de socle/packages/ui/src/styles/globals.css (l. 444-908 et 1061-1210) @ ad2e7fdc2 — adaptations : sélecteurs `[data-charte="espace-personnel"], [data-charte="espace-structure"]` → `[data-charte]` (toute charte d'application du moteur hérite de cette base, qu'un fichier de thème surcharge ensuite) ; bloc sombre `.dark [data-charte=…]` → `.dark[data-charte], .dark [data-charte]` (la charte est posée sur <html>, qui porte aussi `.dark`) ; la charte du compte « Poste » (l. 909-1059) et le contrat `.dash-v2` ne sont pas repris (administration).
+/* Dupliqué de socle/packages/ui/src/styles/globals.css (l. 444-908 et 1061-1210) @ ad2e7fdc2 — adaptations : sélecteurs `[data-charte="espace-personnel"], [data-charte="espace-structure"]` → `[data-charte]` (toute charte d'application du moteur hérite de cette base, qu'un fichier de thème surcharge ensuite) ; bloc sombre `.dark [data-charte=…]` → `.dark[data-charte], .dark [data-charte]` (la charte est posée sur <html>, qui porte aussi `.dark`) ; la charte du compte « Poste » (l. 909-1059) et le contrat `.dash-v2` ne sont pas repris (administration) ; jetons ajoutés au contrat par le moteur (lot P01b) : outline de base, taille du corps et ombres, valeurs par défaut identiques au rendu antérieur ; lot P03 : rayon des surfaces du réseau, surface élevée des publications (valeur garantie invalide, repli historique à chaque site) et trait des liens du texte courant, mêmes garanties.
 
    ═════════════════════════════════════════════════════════════════════════
    BASE DES CHARTES DU MOTEUR ANTSIA
@@ -467,6 +467,11 @@
      du contenu défilant et tout élément flottant qui doit se poser au-dessus
      doivent s'accorder dessus — recopiée, la valeur dérive. */
   --esp-reseau-tabbar-inset: 4.5rem;
+  /* P18b (A13, WCAG 2.4.11) : hauteur de l'en-tête COLLANT d'une application,
+     réservée en haut du défilement (`scroll-padding-top`) pour qu'un élément
+     focalisé ne passe pas dessous. 0 par défaut : rien ne change ailleurs ;
+     le thème ANTSIA porte la hauteur de sa barre de membre. */
+  --esp-sticky-header-inset: 0px;
 
   /* ── Sélecteur de comptes ── */
   --esp-segment-on: var(--esp-seg-on);
@@ -547,6 +552,60 @@
   --sp-5: 20px;
   --sp-6: 24px;
   --sp-8: 32px;
+
+  /* ── Couche de base et ombres, portées au contrat des thèmes (lot P01b,
+     18/10/2026) ──
+     Valeurs par défaut identiques au rendu antérieur de chaque consommateur
+     (console, DIASPORALE) : un thème peut désormais les redéclarer. Déclarées
+     dans ce seul bloc clair, sans entrée dans le bloc sombre : `var(--ring)`
+     se résout en sombre sur l'anneau sombre du thème courant. */
+  /* Couleur d'outline de tout élément (`theme.css`, règle universelle de la
+     couche de base) : celle que dessine l'anneau du navigateur quand une
+     commande n'a pas son propre style de focus. Défaut : l'anneau à 50 %,
+     l'ancien utilitaire `outline-ring/50`, avec le même repli plein que la
+     compilation pose pour un navigateur sans `color-mix`. */
+  --outline-ring: color-mix(in oklab, var(--ring) 50%, transparent);
+  /* Taille du texte courant (`theme.css`, `body`). */
+  --body-font-size: 15px;
+  /* Ombres d'ui-v2 (cartes, menus, feuilles) et carte iCom soulevée : MÊMES
+     valeurs que `communication.css`, qui les redéclare après cette feuille et
+     l'emporte donc toujours. Les déclarer ici les fait seulement entrer au
+     contrat ; le test `themes-isolation` garde l'égalité des deux sources (ne
+     jamais modifier l'une sans l'autre). */
+  --shadow-xs: 0 1px 2px rgba(14, 26, 43, 0.05);
+  --shadow-sm: 0 1px 3px rgba(14, 26, 43, 0.08), 0 1px 2px rgba(14, 26, 43, 0.04);
+  --shadow-md: 0 4px 12px rgba(14, 26, 43, 0.08), 0 2px 4px rgba(14, 26, 43, 0.04);
+  --shadow-lg: 0 12px 32px rgba(14, 26, 43, 0.12), 0 4px 12px rgba(14, 26, 43, 0.06);
+  --shadow-xl: 0 20px 40px rgba(14, 26, 43, 0.16), 0 8px 16px rgba(14, 26, 43, 0.08);
+  --icom-float-drag-shadow: 0 18px 54px rgb(14 26 43 / 0.3);
+
+  /* ── Surfaces et liens des publications, portés au contrat des thèmes (lot
+     P03, 18/10/2026) ──
+     Défauts IDENTIQUES au rendu antérieur de chaque consommateur (console,
+     DIASPORALE) : seul un thème qui les redéclare change d'aspect. Déclarés
+     dans ce seul bloc clair, sans entrée dans le bloc sombre. */
+  /* Rayon des surfaces de premier niveau du réseau (cartes du fil, mini-cartes,
+     panneaux de la page réseau) : MÊME valeur que la couche de communication,
+     qui le redéclare après cette feuille et l'emporte donc toujours ; la page
+     réseau du bureau ne le fige plus sur `.rp-scope`. */
+  --rp-surface-radius: 18px;
+  /* Surface ÉLEVÉE des menus, feuilles et dialogues des publications (menu
+     « … », commentaires, signalement, composeur, cartes flottantes, dialogue du
+     kit). `initial` est la valeur garantie invalide : chaque surface retombe
+     sur SA valeur historique, écrite en repli à l'endroit où elle est lue
+     (`var(--esp-surface-raised, <valeur d'avant>)`). Un thème qui la redéclare
+     peint toutes ces surfaces de la même couleur élevée. */
+  --esp-surface-raised: initial;
+  /* CONTOUR des cartes et panneaux posés sur la page (rail, composeur, en-tête
+     du fil, état vide, dock iCom, tuile « Créer une actu », carte d'antsia.ga).
+     `initial` : chaque site garde SON filet historique, écrit en repli là où il
+     est lu (`var(--esp-surface-border, <filet d'avant>)`). Un thème dont la
+     carte se distingue déjà du fond le pose à `transparent` : pas de contour
+     quand la surface n'a pas la couleur de son fond. */
+  --esp-surface-border: initial;
+  /* Trait des liens du TEXTE COURANT (mots-dièse et mentions d'une publication
+     ou d'un commentaire), jamais des liens de navigation : aucun par défaut. */
+  --esp-inline-link-decoration: none;
 }
 
 /* Au téléphone et sur les petites tablettes, les commandes d'ui-v2 rejoignent

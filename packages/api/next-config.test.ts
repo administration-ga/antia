@@ -13,8 +13,12 @@ describe("optional analytics CSP origin", () => {
     expect(optionalAnalyticsOrigin("https://usage.example.test", "")).toBeNull()
     expect(optionalAnalyticsOrigin("https://usage.example.test", `phx_${"a".repeat(24)}`)).toBeNull()
   })
-  it("admet uniquement une origine HTTPS exacte sans credentials ni instructions CSP", () => {
-    expect(optionalAnalyticsOrigin("https://usage.example.test", token)).toBe("https://usage.example.test")
+  it("admet le cloud UE ou un relais explicitement déclaré, jamais un HTTPS arbitraire", () => {
+    expect(optionalAnalyticsOrigin("https://eu.i.posthog.com", token)).toBe("https://eu.i.posthog.com")
+    expect(optionalAnalyticsOrigin("https://usage.example.test", token)).toBeNull()
+    expect(optionalAnalyticsOrigin("https://us.i.posthog.com", token)).toBeNull()
+    expect(optionalAnalyticsOrigin("https://usage.example.test", token, "https://usage.example.test")).toBe("https://usage.example.test")
+    expect(optionalAnalyticsOrigin("https://usage.example.test", token, "https://usage.example.test/path")).toBeNull()
     for (const host of ["http://usage.example.test", "https://name:secret@usage.example.test", "https://usage.example.test/path", "https://usage.example.test?key=1", "https://usage.example.test#fragment", "https://usage.example.test 'unsafe-inline'"]) {
       expect(optionalAnalyticsOrigin(host, token)).toBeNull()
     }

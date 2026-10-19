@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/iappel/IappelJournal.tsx @ ad2e7fdc2 — adaptations : journal du moteur (`calls.history.listCallHistory` du réseau courant, `{ calls, truncated }`) passé tel quel à `groupCallJournal` — le serveur a classé, l'identité du lecteur n'est plus lue (`users.getMe` retiré) ; acquittement par `calls.preferences.markJournalSeen` (sur soi) ; branche poste élaguée (prop `scope`, fonction, renvoi au secrétariat, appel prioritaire, raisons « hors horaires » et « secrétariat indisponible ») ; correspondant nommé par son libellé (`counterpartLabel`, nom neutre traduit) ; libellés traduits (i18n `iappel`), dates dans la langue courante. ; PA6 : préférence de fuseau injectée, calendrier grégorien et caches langue/fuseau.
+// Dupliqué de socle/packages/agent-features/src/features/iappel/IappelJournal.tsx @ ad2e7fdc2 — adaptations : journal du moteur (`calls.history.listCallHistory` du réseau courant, `{ calls, truncated }`) passé tel quel à `groupCallJournal` — le serveur a classé, l'identité du lecteur n'est plus lue (`users.getMe` retiré) ; acquittement par `calls.preferences.markJournalSeen` (sur soi) ; branche poste élaguée (prop `scope`, fonction, renvoi au secrétariat, appel prioritaire, raisons « hors horaires » et « secrétariat indisponible ») ; correspondant nommé par son libellé (`counterpartLabel`, nom neutre traduit) ; libellés traduits (i18n `iappel`), dates dans la langue courante. ; PA6 : préférence de fuseau injectée, calendrier grégorien et caches langue/fuseau. ; CC-5 : une ligne d'appel contextuel se rappelle et s'écrit par sa conversation (`onContextualOpen`), jamais par l'appel personnel.
 "use client"
 
 /**
@@ -53,6 +53,16 @@ export interface IappelJournalProps {
 	onCallBack: (input: { userId: string; name: string; mediaType: "audio" | "video" }) => void
 	/** Ouvrir la conversation écrite avec cette personne. */
 	onWrite?: (userId: string) => void
+	/** P10 : absents hors injection ANTSIA, ces gestes restent fermés. */
+	onCommercialCallBack?: (input: { threadId: NonNullable<JournalEntry["commercialThreadId"]>; counterpartPersonId: string; name: string; mediaType: "audio" | "video" }) => void
+	onCommercialWrite?: (threadId: NonNullable<JournalEntry["commercialThreadId"]>) => void
+	/**
+	 * CC-5 : une ligne d'appel CONTEXTUEL (`contextualThreadId`) se rappelle et s'écrit PAR sa
+	 * conversation — accord et cible y sont relus — jamais par `onCallBack` (appel personnel) ni
+	 * `onWrite`. Absent (application sans conversations contextuelles), ces gestes restent fermés.
+	 */
+	onContextualOpen?: (threadId: NonNullable<JournalEntry["contextualThreadId"]>) => void
+	callPending?: boolean
 }
 
 type JournalFilter = "all" | "missed"
@@ -153,6 +163,10 @@ export function IappelJournal({
 	leadingControls,
 	onCallBack,
 	onWrite,
+	onCommercialCallBack,
+	onCommercialWrite,
+	onContextualOpen,
+	callPending = false,
 }: IappelJournalProps) {
 	const { t, i18n } = useTranslation("iappel")
 	const timeZone = useViewerTimeZone()
@@ -245,7 +259,15 @@ export function IappelJournal({
 								// Le nom choisi ou publié (`counterpartLabel`) ; sans nom, le
 								// libellé neutre — jamais un identifiant.
 								const name = entry.counterpartLabel?.displayName ?? t("iappelJournal.peer")
-								const canReach = entry.counterpartUserId !== null
+								const commercialThreadId = entry.commercialThreadId
+								// CC-5 : une ligne contextuelle ne connaît qu'un geste, ouvrir SA conversation.
+								const contextualThreadId = entry.contextualThreadId
+								const canReach = contextualThreadId !== undefined
+									? onContextualOpen !== undefined
+									: entry.counterpartUserId !== null && (commercialThreadId === undefined || onCommercialCallBack !== undefined)
+								const canWrite = contextualThreadId !== undefined
+									? onContextualOpen !== undefined
+									: commercialThreadId === undefined ? onWrite !== undefined : onCommercialWrite !== undefined
 
 								return (
 									<li key={entry.meetingId} className="icom-relations-row">
@@ -266,7 +288,7 @@ export function IappelJournal({
 												{name}
 											</span>
 											<span className="icom-relations-handle">
-												{presentation.label} · {scopeLineOf(entry, t)}
+												{presentation.label} · {contextualThreadId !== undefined ? t("messagerie:contextualConversation.calls.origin") : commercialThreadId !== undefined && onCommercialCallBack ? t("shops:contact.calls.origin") : scopeLineOf(entry, t)}
 											</span>
 											{entry.note ? (
 												<span style={{ fontSize: 11.5, color: "var(--ink-600)" }}>
@@ -296,16 +318,18 @@ export function IappelJournal({
 											) : null}
 										</span>
 										<span className="icom-relations-actions">
-											{onWrite ? (
+											{canWrite ? (
 												<button
 													type="button"
 													className="icom-relations-action"
 													data-icon="true"
 													style={{ minHeight: 44 }}
-													disabled={!canReach}
-													aria-label={t("iappelJournal.write", { name })}
+													disabled={contextualThreadId === undefined && commercialThreadId === undefined && entry.counterpartUserId === null}
+													aria-label={contextualThreadId !== undefined ? t("messagerie:contextualConversation.calls.writeFromJournal", { name }) : t("iappelJournal.write", { name })}
 													onClick={() => {
-														if (entry.counterpartUserId) onWrite(entry.counterpartUserId)
+														if (contextualThreadId !== undefined) onContextualOpen?.(contextualThreadId)
+														else if (commercialThreadId !== undefined) onCommercialWrite?.(commercialThreadId)
+														else if (entry.counterpartUserId) onWrite?.(entry.counterpartUserId)
 													}}
 												>
 													<MessageSquare aria-hidden="true" size={16} />
@@ -316,10 +340,19 @@ export function IappelJournal({
 												className="icom-relations-action"
 												data-icon="true"
 												style={{ minHeight: 44 }}
-												disabled={!canReach}
-												aria-label={t("iappelJournal.callBack", { name })}
+												disabled={!canReach || callPending}
+												aria-label={contextualThreadId !== undefined ? t("messagerie:contextualConversation.calls.callBackFromJournal", { name }) : t("iappelJournal.callBack", { name })}
 												onClick={() => {
+													// CC-5 : rappeler PAR la conversation (accord et cible relus), jamais `callMember`.
+													if (contextualThreadId !== undefined) {
+														onContextualOpen?.(contextualThreadId)
+														return
+													}
 													if (!entry.counterpartUserId) return
+													if (commercialThreadId !== undefined) {
+														onCommercialCallBack?.({ threadId: commercialThreadId, counterpartPersonId: entry.counterpartUserId, name, mediaType: entry.mediaType })
+														return
+													}
 													onCallBack({
 														userId: entry.counterpartUserId,
 														name,

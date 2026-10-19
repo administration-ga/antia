@@ -29,6 +29,11 @@ export type IdentityEntryProps = {
   /** undefined : chargement ; null : configuration indisponible. */
   configuration: IdentityConfiguration | null | undefined
   renderLocalCode?: (identifier: string) => ReactNode
+  /** Une carte d'accès peut fournir sa propre hiérarchie, sans changer les portes. */
+  presentation?: "default" | "compact"
+  headingLevel?: 1 | 2
+  title?: string
+  lead?: string
 }
 
 type Method = "email" | "sms"
@@ -72,7 +77,7 @@ async function authRequest(run: (options: AuthRequestOptions) => Promise<unknown
 }
 
 /** Porte commune, sans route ni origine propre à une application. */
-export function IdentityEntry({ authClient, callbackURL, onAuthenticated, configuration, renderLocalCode }: IdentityEntryProps) {
+export function IdentityEntry({ authClient, callbackURL, onAuthenticated, configuration, renderLocalCode, presentation = "default", headingLevel = 1, title, lead }: IdentityEntryProps) {
   const { t } = useTranslation("identity")
   const fieldId = useId()
   const [method, setMethod] = useState<Method>("email")
@@ -144,19 +149,24 @@ export function IdentityEntry({ authClient, callbackURL, onAuthenticated, config
   const busy = pending !== null
   const identifierId = `${fieldId}-identifier`
   const codeId = `${fieldId}-code`
+  const compact = presentation === "compact"
+  const Heading = headingLevel === 2 ? "h2" : "h1"
+  const Panel = compact ? "div" : Card
+  const headingLead = destination ? t("codeLead", { identifier: destination.identifier }) : lead ?? t("lead")
+  const identifierLabel = selectedMethod === "email" ? t("emailLabel") : t("phoneLabel")
   return (
-    <section className="flex w-full min-w-0 flex-col gap-6">
+    <section className={`flex w-full min-w-0 flex-col ${compact ? "gap-3" : "gap-6"}`}>
       <header className="flex flex-col gap-2">
-        <h1 className="text-3xl">{destination ? t("codeTitle") : t("title")}</h1>
-        <p className="break-words text-muted-foreground">{destination ? t("codeLead", { identifier: destination.identifier }) : t("lead")}</p>
+        <Heading className={compact ? "text-xl font-semibold" : "text-3xl"}>{destination ? t("codeTitle") : title ?? t("title")}</Heading>
+        {headingLead ? <p className={`break-words text-muted-foreground ${compact ? "text-sm" : ""}`}>{headingLead}</p> : null}
       </header>
       {error ? <p role="alert" className="rounded-lg border border-destructive/40 bg-card px-4 py-3 text-sm text-destructive">{error}</p> : null}
       {notice ? <p role="status" className="rounded-lg bg-muted px-4 py-3 text-sm">{notice}</p> : null}
       {configuration === undefined ? <p role="status" className="text-sm text-muted-foreground">{t("loading")}</p> : null}
       {configuration === null ? <p role="alert" className="text-sm text-muted-foreground">{t("configurationUnavailable")}</p> : null}
       {!destination ? (
-        <Card>
-          <div className="flex flex-col gap-3">
+        <Panel>
+          <div className={`flex flex-col ${compact ? "gap-2" : "gap-3"}`}>
             <Button size="lg" disabled={busy || configuration?.idn !== true} aria-busy={pending === "idn" || undefined} aria-describedby={`${fieldId}-idn-help`} style={{ whiteSpace: "normal" }} onClick={() => void perform("idn", async () => {
               if (!configuration?.idn) return
               const result = await authRequest((options) => authClient.signIn.oauth2({ providerId: "idn", callbackURL, ...options }))
@@ -167,11 +177,11 @@ export function IdentityEntry({ authClient, callbackURL, onAuthenticated, config
               {pending === "idn" ? <LoaderCircle aria-hidden="true" className="size-4 shrink-0 animate-spin" /> : <ShieldCheck aria-hidden="true" className="size-4 shrink-0" />}
               {pending === "idn" ? t("idnConnecting") : t("idn")}
             </Button>
-            <p id={`${fieldId}-idn-help`} className="text-sm text-muted-foreground">{configuration === undefined ? t("loading") : configuration?.idn ? t("idnHelp") : t("idnUnavailable")}</p>
+            <p id={`${fieldId}-idn-help`} className={compact && (configuration?.idn || configuration === undefined) ? "sr-only" : compact ? "text-xs text-muted-foreground" : "text-sm text-muted-foreground"}>{configuration === undefined ? t("loading") : configuration?.idn ? t("idnHelp") : t("idnUnavailable")}</p>
           </div>
-        </Card>
+        </Panel>
       ) : null}
-      <Card>
+      <Panel>
         {destination ? (
           <form onSubmit={onCode} noValidate className="flex flex-col gap-4">
             <Field htmlFor={codeId} label={t("codeLabel")} hint={t("codeHint")} error={codeForm.formState.errors.code?.message}>
@@ -188,15 +198,16 @@ export function IdentityEntry({ authClient, callbackURL, onAuthenticated, config
             </div>
           </form>
         ) : (
-          <form onSubmit={onDestination} noValidate className="flex flex-col gap-4">
-            <p className="text-sm font-medium">{t("lightAccount")}</p>
+          <form onSubmit={onDestination} noValidate className={`flex flex-col ${compact ? "gap-3" : "gap-4"}`}>
+            {compact ? null : <p className="text-sm font-medium">{t("lightAccount")}</p>}
             {configuration?.emailOtp && configuration.smsOtp ? (
-              <div role="group" aria-label={t("methodLabel")} className="flex gap-2">
-                {(["email", "sms"] as const).map((choice) => <Button key={choice} type="button" variant={selectedMethod === choice ? "primary" : "outline"} disabled={busy} aria-pressed={selectedMethod === choice} onClick={() => { setMethod(choice); destinationForm.reset(); setError(null) }}>{choice === "email" ? t("email") : t("sms")}</Button>)}
+              <div role="group" aria-label={t("methodLabel")} className="flex items-center gap-2">
+                {compact ? <p className="mr-auto text-xs text-muted-foreground">{t("lightAccount")}</p> : null}
+                {(["email", "sms"] as const).map((choice) => <Button key={choice} type="button" variant={selectedMethod === choice ? "primary" : "outline"} disabled={busy} aria-pressed={selectedMethod === choice} style={compact ? { minHeight: 44, padding: "8px 12px" } : undefined} onClick={() => { setMethod(choice); destinationForm.reset(); setError(null) }}>{choice === "email" ? t("email") : t("sms")}</Button>)}
               </div>
             ) : null}
-            <Field htmlFor={identifierId} label={selectedMethod === "email" ? t("emailLabel") : t("phoneLabel")} hint={selectedMethod === "sms" ? t("phoneHint") : undefined} error={destinationForm.formState.errors.identifier?.message}>
-              <TextInput id={identifierId} type={selectedMethod === "email" ? "email" : "tel"} inputMode={selectedMethod === "email" ? "email" : "tel"} autoComplete={selectedMethod === "email" ? "email" : "tel"} placeholder={selectedMethod === "email" ? t("emailPlaceholder") : t("phonePlaceholder")} disabled={busy || !available} {...destinationForm.register("identifier")} />
+            <Field htmlFor={identifierId} label={compact ? undefined : identifierLabel} hint={selectedMethod === "sms" ? t("phoneHint") : undefined} error={destinationForm.formState.errors.identifier?.message}>
+              <TextInput id={identifierId} aria-label={compact ? identifierLabel : undefined} type={selectedMethod === "email" ? "email" : "tel"} inputMode={selectedMethod === "email" ? "email" : "tel"} autoComplete={selectedMethod === "email" ? "email" : "tel"} placeholder={compact && selectedMethod === "email" ? identifierLabel : selectedMethod === "email" ? t("emailPlaceholder") : t("phonePlaceholder")} style={compact ? { minHeight: 48, fontSize: 16 } : undefined} disabled={busy || !available} {...destinationForm.register("identifier")} />
             </Field>
             {!available && configuration !== undefined ? <p className="text-sm text-muted-foreground">{t("codeUnavailable")}</p> : null}
             <Button type="submit" size="lg" disabled={busy || !available} aria-busy={pending === "send" || undefined}>
@@ -205,7 +216,7 @@ export function IdentityEntry({ authClient, callbackURL, onAuthenticated, config
             </Button>
           </form>
         )}
-      </Card>
+      </Panel>
     </section>
   )
 }

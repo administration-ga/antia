@@ -1,4 +1,25 @@
 {
+  "icomViews": {
+    "title": "Messages",
+    "navigation": "Vues de la messagerie",
+    "conversations": "Conversations",
+    "calls": "Appels",
+    "contacts": "Contacts",
+    "backToFeed": "Retour au fil",
+    "myProfile": "Mon profil",
+    "chooseConversation": "Choisissez une conversation",
+    "chooseConversationBody": "Retrouvez vos échanges à gauche, ou commencez un nouveau message avec une de vos relations.",
+    "loadedWindow": "Recherche et filtres sur les conversations chargées. Chargez la suite pour les échanges individuels plus anciens. Les groupes sont limités aux 50 premiers renvoyés par le serveur.",
+    "loadedGroupsWindow": "Recherche et filtres sur les conversations chargées. Les groupes sont limités aux 50 premiers renvoyés par le serveur.",
+    "noFilteredConversations": "Aucune conversation correspondant à ce filtre parmi celles déjà chargées.",
+    "unread_one": "{{count}} message non lu",
+    "unread_other": "{{count}} messages non lus"
+  },
+  "conversationFilters": {
+    "all": "Toutes",
+    "unread": "Non lues",
+    "groups": "Groupes"
+  },
   "icomBrickHeader": {
     "collapse": "Rétracter {{title}}",
     "detach": "Détacher iCom en fenêtre",

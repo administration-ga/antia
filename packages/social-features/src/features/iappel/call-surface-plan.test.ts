@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/iappel/call-surface-plan.test.ts @ ad2e7fdc2 — adaptations : cas retiré — le slot de la file du centre d'appels (`kind: "queue"`), absente du moteur ; le slot sans `kind` reste un appel direct.
+// Dupliqué de socle/packages/agent-features/src/features/iappel/call-surface-plan.test.ts @ ad2e7fdc2 — adaptations : cas retiré — le slot de la file du centre d'appels (`kind: "queue"`), absente du moteur ; le slot sans `kind` reste un appel direct ; P05 (18/10/2026) : deux cas — le slot terminé ACTIF montre son écran de fin, un slot terminé non actif reste invisible.
 import { describe, expect, it } from "vitest"
 import { planCallSurface, type SurfaceSlotView } from "./call-surface-plan"
 
@@ -33,6 +33,14 @@ describe("rien à montrer", () => {
 
 	it("un slot terminé ne monte rien", () => {
 		expect(plan({ slots: [slot("x", "ended")] }).presentation).toBe("hidden")
+	})
+
+	it("P05 — le slot terminé qui tient la ligne montre son écran de fin (refus d'admission, fin distante)", () => {
+		expect(plan({ slots: [slot("x", "ended")], activeSlotId: "x" })).toMatchObject({ front: "x", frontIsHeld: false, presentation: "fullscreen" })
+	})
+
+	it("P05 — un slot terminé qui n'est plus l'actif reste invisible ; l'appel vivant garde la ligne", () => {
+		expect(plan({ slots: [slot("x", "ended"), slot("y", "active")], activeSlotId: "y" })).toMatchObject({ front: "y", held: [] })
 	})
 
 	it("un slot sans `kind` est traité comme direct — c'est ce qu'il a toujours été", () => {

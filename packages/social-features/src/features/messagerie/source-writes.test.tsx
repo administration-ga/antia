@@ -206,7 +206,8 @@ describe("conversation — les écritures viennent de la source injectée", () =
 		mountConversation(writes, "draft")
 		const attachment = { storageId: "photo", filename: "photo.jpg", mimeType: "image/jpeg", sizeBytes: 42 }
 		await act(async () => { await composer().onSend({ text: "Premier message", attachments: [attachment] }) })
-		expect(startThread).toHaveBeenCalledWith({ handle: "awa.demo", initialMessage: "Premier message", initialAttachmentFiles: [attachment] })
+		// P05 : le premier message porte aussi sa clé d'intention (`startThreadWithHandle` l'accepte).
+		expect(startThread).toHaveBeenCalledWith({ handle: "awa.demo", initialMessage: "Premier message", initialAttachmentFiles: [attachment], idempotencyKey: expect.any(String) })
 		expect(mocks.registered).not.toContain(getFunctionName(api.modules.messaging.inbox.startThreadWithHandle))
 	})
 
@@ -217,6 +218,8 @@ describe("conversation — les écritures viennent de la source injectée", () =
 		writes.send = { ...writes.send, mutateAsync: send }
 		const { container } = mountConversation(writes)
 		const { result: dock } = renderHook(useDockState)
+		// La frappe passe par le composeur, qui l'écrit au magasin (P05 : le texte y reste jusqu'à l'admission).
+		act(() => composer().onChange("À conserver"))
 		for (let attempt = 0; attempt < 2; attempt += 1) {
 			await act(async () => { await expect(composer().onSend({ text: "À conserver", attachments: [] })).rejects.toBe(refusal) })
 		}

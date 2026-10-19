@@ -1,0 +1,2877 @@
+{
+  "contract": "PRO-COMMERCE-COMMAND-V1",
+  "description": "parseCommerceCommandRequest(rawBody, context) : `context` est la configuration du RÉCEPTEUR (PRO.GA), jamais le corps.",
+  "cases": [
+    {
+      "name": "link.confirm nominal",
+      "context": {
+        "environment": "sandbox",
+        "nowMs": 1792285200000,
+        "source": "antsia"
+      },
+      "body": {
+        "command": "link.confirm",
+        "contract": "PRO-COMMERCE-COMMAND-V1",
+        "environment": "sandbox",
+        "expiresAt": 1792285499000,
+        "issuedAt": 1792285199000,
+        "payload": {
+          "antsiaShopRef": "antsia:shop:p0000000000000000000000001",
+          "codeVerifier": "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk",
+          "consent": {
+            "givenAt": 1792285170000,
+            "purpose": "commerce_link",
+            "textVersion": "2026-10-18"
+          },
+          "linkCode": "Zk3QeR8tYw2uIo5pAs7dFg9hJk1lZx4cVb6nM0qW",
+          "requestedPermissions": [
+            "catalog_drafts",
+            "publish_catalog",
+            "receive_inquiries",
+            "receive_orders"
+          ]
+        },
+        "requestId": "antsia-req-000001",
+        "scope": "commerce.link.confirm",
+        "source": "antsia",
+        "subject": {
+          "authVerifiedAt": 1792285140000,
+          "kind": "seller_operator",
+          "ref": "antsia:sub:s0000000000000000000000001"
+        },
+        "version": 1
+      },
+      "expect": {
+        "ok": true,
+        "command": "link.confirm",
+        "requestId": "antsia-req-000001",
+        "scope": "commerce.link.confirm"
+      },
+      "bodySha256": "ca163742ebb2cbe61768836c650e4287714c6506c19260d2f1f0e75115282139"
+    },
+    {
+      "name": "catalog.draft.save création",
+      "context": {
+        "environment": "sandbox",
+        "nowMs": 1792285200000,
+        "source": "antsia"
+      },
+      "body": {
+        "command": "catalog.draft.save",
+        "contract": "PRO-COMMERCE-COMMAND-V1",
+        "environment": "sandbox",
+        "expiresAt": 1792285499000,
+        "issuedAt": 1792285199000,
+        "payload": {
+          "draft": {
+            "collectionRefs": [
+              "pro.ga:offer_collection:01JA00000000000000000000C1"
+            ],
+            "description": "Pagne tissé, deux yards.",
+            "kind": "product",
+            "price": {
+              "amount": 15000,
+              "currency": "XAF",
+              "mode": "fixed"
+            },
+            "tags": [
+              "pagne"
+            ],
+            "title": "Pagne tissé"
+          },
+          "linkRef": "pro.ga:commerce_link:01JA00000000000000000000K1"
+        },
+        "requestId": "antsia-req-000002",
+        "scope": "commerce.catalog.draft.save",
+        "source": "antsia",
+        "subject": {
+          "authVerifiedAt": 1792285140000,
+          "kind": "seller_operator",
+          "ref": "antsia:sub:s0000000000000000000000001"
+        },
+        "version": 1
+      },
+      "expect": {
+        "ok": true,
+        "command": "catalog.draft.save",
+        "requestId": "antsia-req-000002",
+        "scope": "commerce.catalog.draft.save"
+      },
+      "bodySha256": "7c420fe195029b87d1799c662918031ec997da1733e923d1ffe9088cd0745281"
+    },
+    {
+      "name": "catalog.draft.save mise à jour",
+      "context": {
+        "environment": "sandbox",
+        "nowMs": 1792285200000,
+        "source": "antsia"
+      },
+      "body": {
+        "command": "catalog.draft.save",
+        "contract": "PRO-COMMERCE-COMMAND-V1",
+        "environment": "sandbox",
+        "expiresAt": 1792285499000,
+        "issuedAt": 1792285199000,
+        "payload": {
+          "draft": {
+            "collectionRefs": [
+              "pro.ga:offer_collection:01JA00000000000000000000C1"
+            ],
+            "description": "Pagne tissé, deux yards.",
+            "kind": "product",
+            "price": {
+              "amount": 15000,
+              "currency": "XAF",
+              "mode": "fixed"
+            },
+            "tags": [
+              "pagne"
+            ],
+            "title": "Pagne tissé"
+          },
+          "linkRef": "pro.ga:commerce_link:01JA00000000000000000000K1",
+          "expectedDraftRevision": 4,
+          "offerRef": "pro.ga:offer:01JA00000000000000000000F3"
+        },
+        "requestId": "antsia-req-000003",
+        "scope": "commerce.catalog.draft.save",
+        "source": "antsia",
+        "subject": {
+          "authVerifiedAt": 1792285140000,
+          "kind": "seller_operator",
+          "ref": "antsia:sub:s0000000000000000000000001"
+        },
+        "version": 1
+      },
+      "expect": {
+        "ok": true,
+        "command": "catalog.draft.save",
+        "requestId": "antsia-req-000003",
+        "scope": "commerce.catalog.draft.save"
+      },
+      "bodySha256": "534a931c93f8db5415283e546fc723536687a129f4faa356436bb7875d82c4fa"
+    },
+    {
+      "name": "inquiry.submit demande de devis",
+      "context": {
+        "environment": "sandbox",
+        "nowMs": 1792285200000,
+        "source": "antsia"
+      },
+      "body": {
+        "command": "inquiry.submit",
+        "contract": "PRO-COMMERCE-COMMAND-V1",
+        "environment": "sandbox",
+        "expiresAt": 1792285499000,
+        "issuedAt": 1792285199000,
+        "payload": {
+          "consent": {
+            "givenAt": 1792285170000,
+            "purpose": "commerce_inquiry",
+            "textVersion": "2026-10-18"
+          },
+          "conversationRef": "antsia:conv:v0000000000000000000000001",
+          "desiredDate": "2026-11-02",
+          "displayName": "Awa",
+          "kind": "quote_request",
+          "message": "Bonjour, est-ce possible en taille XL pour le 2 novembre ?",
+          "offerRef": "pro.ga:offer:01JA00000000000000000000F2",
+          "quantity": 2,
+          "shopRef": "pro.ga:structure:01JA00000000000000000000S1",
+          "variantRef": "pro.ga:offer_variant:01JA00000000000000000000V1"
+        },
+        "requestId": "antsia-req-000004",
+        "scope": "commerce.inquiry.submit",
+        "source": "antsia",
+        "subject": {
+          "authVerifiedAt": 1792285140000,
+          "kind": "buyer",
+          "ref": "antsia:sub:b0000000000000000000000001"
+        },
+        "version": 1
+      },
+      "expect": {
+        "ok": true,
+        "command": "inquiry.submit",
+        "requestId": "antsia-req-000004",
+        "scope": "commerce.inquiry.submit"
+      },
+      "bodySha256": "47d78e824f8a67a39d3685ca4a1aebe3d586a7c7c631a339c887a4864f71ca94"
+    },
+    {
+      "name": "quote.accept nominal",
+      "context": {
+        "environment": "sandbox",
+        "nowMs": 1792285200000,
+        "source": "antsia"
+      },
+      "body": {
+        "command": "quote.accept",
+        "contract": "PRO-COMMERCE-COMMAND-V1",
+        "environment": "sandbox",
+        "expiresAt": 1792285499000,
+        "issuedAt": 1792285199000,
+        "payload": {
+          "acceptedTotal": {
+            "amount": 85000,
+            "currency": "XAF"
+          },
+          "consent": {
+            "givenAt": 1792285170000,
+            "purpose": "commerce_quote_acceptance",
+            "textVersion": "2026-10-18"
+          },
+          "quoteRef": "pro.ga:quote:01JA00000000000000000000Q1",
+          "quoteVersion": 2,
+          "shopRef": "pro.ga:structure:01JA00000000000000000000S1"
+        },
+        "requestId": "antsia-req-000005",
+        "scope": "commerce.quote.accept",
+        "source": "antsia",
+        "subject": {
+          "authVerifiedAt": 1792285140000,
+          "kind": "buyer",
+          "ref": "antsia:sub:b0000000000000000000000001"
+        },
+        "version": 1
+      },
+      "expect": {
+        "ok": true,
+        "command": "quote.accept",
+        "requestId": "antsia-req-000005",
+        "scope": "commerce.quote.accept"
+      },
+      "bodySha256": "0f722f25e9e1ed22b447d921aeb581c0579768056602a1870e2f53227cfad4b1"
+    },
+    {
+      "name": "checkout.prepare retrait",
+      "context": {
+        "environment": "sandbox",
+        "nowMs": 1792285200000,
+        "source": "antsia"
+      },
+      "body": {
+        "command": "checkout.prepare",
+        "contract": "PRO-COMMERCE-COMMAND-V1",
+        "environment": "sandbox",
+        "expiresAt": 1792285499000,
+        "issuedAt": 1792285199000,
+        "payload": {
+          "consent": {
+            "givenAt": 1792285170000,
+            "purpose": "commerce_checkout",
+            "textVersion": "2026-10-18"
+          },
+          "fulfillment": {
+            "establishmentRef": "pro.ga:establishment:01JA00000000000000000000E1",
+            "mode": "pickup"
+          },
+          "lines": [
+            {
+              "expectedCatalogRevision": 3,
+              "expectedUnitAmount": {
+                "amount": 25000,
+                "currency": "XAF"
+              },
+              "offerRef": "pro.ga:offer:01JA00000000000000000000F1",
+              "quantity": 1
+            },
+            {
+              "expectedCatalogRevision": 5,
+              "expectedUnitAmount": {
+                "amount": 28000,
+                "currency": "XAF"
+              },
+              "offerRef": "pro.ga:offer:01JA00000000000000000000F2",
+              "quantity": 2,
+              "variantRef": "pro.ga:offer_variant:01JA00000000000000000000V1"
+            }
+          ],
+          "note": "Retrait samedi matin.",
+          "shopRef": "pro.ga:structure:01JA00000000000000000000S1"
+        },
+        "requestId": "antsia-req-000006",
+        "scope": "commerce.checkout.prepare",
+        "source": "antsia",
+        "subject": {
+          "authVerifiedAt": 1792285140000,
+          "kind": "buyer",
+          "ref": "antsia:sub:b0000000000000000000000001"
+        },
+        "version": 1
+      },
+      "expect": {
+        "ok": true,
+        "command": "checkout.prepare",
+        "requestId": "antsia-req-000006",
+        "scope": "commerce.checkout.prepare"
+      },
+      "bodySha256": "8d160a5baa721877897800396f93f0184a1ca7b096d5cc6c61a0913d0d191a5e"
+    },
+    {
+      "name": "checkout.prepare livraison vendeur",
+      "context": {
+        "environment": "sandbox",
+        "nowMs": 1792285200000,
+        "source": "antsia"
+      },
+      "body": {
+        "command": "checkout.prepare",
+        "contract": "PRO-COMMERCE-COMMAND-V1",
+        "environment": "sandbox",
+        "expiresAt": 1792285499000,
+        "issuedAt": 1792285199000,
+        "payload": {
+          "consent": {
+            "givenAt": 1792285170000,
+            "purpose": "commerce_checkout",
+            "textVersion": "2026-10-18"
+          },
+          "fulfillment": {
+            "address": {
+              "country": "GA",
+              "line1": "Quartier fictif, rue 12",
+              "locality": "Libreville"
+            },
+            "instructions": "Prévenir par la messagerie ANTSIA à l'arrivée.",
+            "mode": "seller_delivery"
+          },
+          "lines": [
+            {
+              "expectedCatalogRevision": 3,
+              "expectedUnitAmount": {
+                "amount": 25000,
+                "currency": "XAF"
+              },
+              "offerRef": "pro.ga:offer:01JA00000000000000000000F1",
+              "quantity": 1
+            },
+            {
+              "expectedCatalogRevision": 5,
+              "expectedUnitAmount": {
+                "amount": 28000,
+                "currency": "XAF"
+              },
+              "offerRef": "pro.ga:offer:01JA00000000000000000000F2",
+              "quantity": 2,
+              "variantRef": "pro.ga:offer_variant:01JA00000000000000000000V1"
+            }
+          ],
+          "shopRef": "pro.ga:structure:01JA00000000000000000000S1"
+        },
+        "requestId": "antsia-req-000007",
+        "scope": "commerce.checkout.prepare",
+        "source": "antsia",
+        "subject": {
+          "authVerifiedAt": 1792285140000,
+          "kind": "buyer",
+          "ref": "antsia:sub:b0000000000000000000000001"
+        },
+        "version": 1
+      },
+      "expect": {
+        "ok": true,
+        "command": "checkout.prepare",
+        "requestId": "antsia-req-000007",
+        "scope": "commerce.checkout.prepare"
+      },
+      "bodySha256": "c16a812ebcfa0e5adae78303e5587b4bd3514db5ffae3735f06a04fc65db35d3"
+    },
+    {
+      "name": "payment.start nominal",
+      "context": {
+        "environment": "sandbox",
+        "nowMs": 1792285200000,
+        "source": "antsia"
+      },
+      "body": {
+        "command": "payment.start",
+        "contract": "PRO-COMMERCE-COMMAND-V1",
+        "environment": "sandbox",
+        "expiresAt": 1792285499000,
+        "issuedAt": 1792285199000,
+        "payload": {
+          "checkoutRef": "pro.ga:checkout:01JA00000000000000000000H1",
+          "consent": {
+            "givenAt": 1792285170000,
+            "purpose": "commerce_payment",
+            "textVersion": "2026-10-18"
+          },
+          "expectedTotal": {
+            "amount": 82000,
+            "currency": "XAF"
+          },
+          "shopRef": "pro.ga:structure:01JA00000000000000000000S1"
+        },
+        "requestId": "antsia-req-000008",
+        "scope": "commerce.payment.start",
+        "source": "antsia",
+        "subject": {
+          "authVerifiedAt": 1792285140000,
+          "kind": "buyer",
+          "ref": "antsia:sub:b0000000000000000000000001"
+        },
+        "version": 1
+      },
+      "expect": {
+        "ok": true,
+        "command": "payment.start",
+        "requestId": "antsia-req-000008",
+        "scope": "commerce.payment.start"
+      },
+      "bodySha256": "3562fdd61e3e2a2e42e8e1b0c9b2ad70ccbd4a7d21b3039e45c1963e9b92d12e"
+    },
+    {
+      "name": "order.cancel.request nominal",
+      "context": {
+        "environment": "sandbox",
+        "nowMs": 1792285200000,
+        "source": "antsia"
+      },
+      "body": {
+        "command": "order.cancel.request",
+        "contract": "PRO-COMMERCE-COMMAND-V1",
+        "environment": "sandbox",
+        "expiresAt": 1792285499000,
+        "issuedAt": 1792285199000,
+        "payload": {
+          "expectedOrderRevision": 2,
+          "note": "Commande passée en double.",
+          "orderRef": "pro.ga:order:01JA00000000000000000000R1",
+          "reason": "changed_mind",
+          "shopRef": "pro.ga:structure:01JA00000000000000000000S1"
+        },
+        "requestId": "antsia-req-000009",
+        "scope": "commerce.order.cancel.request",
+        "source": "antsia",
+        "subject": {
+          "authVerifiedAt": 1792285140000,
+          "kind": "buyer",
+          "ref": "antsia:sub:b0000000000000000000000001"
+        },
+        "version": 1
+      },
+      "expect": {
+        "ok": true,
+        "command": "order.cancel.request",
+        "requestId": "antsia-req-000009",
+        "scope": "commerce.order.cancel.request"
+      },
+      "bodySha256": "e66991ed90be4aa18ceb67e39d9c58ebb9b165ab12c3a2d0bf7021a7ecf53aaf"
+    },
+    {
+      "name": "booking.request nominal",
+      "context": {
+        "environment": "sandbox",
+        "nowMs": 1792285200000,
+        "source": "antsia"
+      },
+      "body": {
+        "command": "booking.request",
+        "contract": "PRO-COMMERCE-COMMAND-V1",
+        "environment": "sandbox",
+        "expiresAt": 1792285499000,
+        "issuedAt": 1792285199000,
+        "payload": {
+          "consent": {
+            "givenAt": 1792285170000,
+            "purpose": "commerce_booking",
+            "textVersion": "2026-10-18"
+          },
+          "displayName": "Awa",
+          "note": "Première séance.",
+          "offerRef": "pro.ga:offer:01JA00000000000000000000F4",
+          "resourceRef": "pro.ga:agenda_resource:01JA00000000000000000000M1",
+          "serviceRef": "pro.ga:agenda_service:01JA00000000000000000000D1",
+          "shopRef": "pro.ga:structure:01JA00000000000000000000S1",
+          "slot": {
+            "endAt": 1792461600000,
+            "startAt": 1792458000000,
+            "timeZone": "Africa/Libreville"
+          }
+        },
+        "requestId": "antsia-req-000010",
+        "scope": "commerce.booking.request",
+        "source": "antsia",
+        "subject": {
+          "authVerifiedAt": 1792285140000,
+          "kind": "buyer",
+          "ref": "antsia:sub:b0000000000000000000000001"
+        },
+        "version": 1
+      },
+      "expect": {
+        "ok": true,
+        "command": "booking.request",
+        "requestId": "antsia-req-000010",
+        "scope": "commerce.booking.request"
+      },
+      "bodySha256": "0f733d1d240fa9ce126d6eefb5d5c7bfddd4b95104f89e799cd865b8fcf2e534"
+    },
+    {
+      "name": "application.submit nominal",
+      "context": {
+        "environment": "sandbox",
+        "nowMs": 1792285200000,
+        "source": "antsia"
+      },
+      "body": {
+        "command": "application.submit",
+        "contract": "PRO-COMMERCE-COMMAND-V1",
+        "environment": "sandbox",
+        "expiresAt": 1792285499000,
+        "issuedAt": 1792285199000,
+        "payload": {
+          "attachments": [
+            {
+              "attachmentRef": "antsia:file:f0000000000000000000000001",
+              "byteSize": 182044,
+              "kind": "cv",
+              "mimeType": "application/pdf",
+              "sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+            }
+          ],
+          "civilName": {
+            "firstName": "Jean-Rémy Éloïse",
+            "lastName": "NDONG MBA"
+          },
+          "consent": {
+            "givenAt": 1792285170000,
+            "purpose": "commerce_application",
+            "textVersion": "2026-10-18"
+          },
+          "jobRef": "pro.ga:job_opening:01JA00000000000000000000J1",
+          "motivation": "Dix ans d'expérience en atelier.",
+          "shopRef": "pro.ga:structure:01JA00000000000000000000S1"
+        },
+        "requestId": "antsia-req-000011",
+        "scope": "commerce.application.submit",
+        "source": "antsia",
+        "subject": {
+          "authVerifiedAt": 1792285140000,
+          "kind": "candidate",
+          "ref": "antsia:sub:c0000000000000000000000001"
+        },
+        "version": 1
+      },
+      "expect": {
+        "ok": true,
+        "command": "application.submit",
+        "requestId": "antsia-req-000011",
+        "scope": "commerce.application.submit"
+      },
+      "bodySha256": "3c29a51cf997b0cfe59d7a778afa88925d4d7767e89a8da13b7aa2d35edd76ba"
+    },
+    {
+      "name": "request.status nominal",
+      "context": {
+        "environment": "sandbox",
+        "nowMs": 1792285200000,
+        "source": "antsia"
+      },
+      "body": {
+        "command": "request.status",
+        "contract": "PRO-COMMERCE-COMMAND-V1",
+        "environment": "sandbox",
+        "expiresAt": 1792285499000,
+        "issuedAt": 1792285199000,
+        "payload": {
+          "targetCommand": "checkout.prepare",
+          "targetRequestId": "antsia-req-000006",
+          "targetRequestSha256": "8d160a5baa721877897800396f93f0184a1ca7b096d5cc6c61a0913d0d191a5e"
+        },
+        "requestId": "antsia-req-000012",
+        "scope": "commerce.request.status",
+        "source": "antsia",
+        "subject": {
+          "authVerifiedAt": 1792285140000,
+          "kind": "buyer",
+          "ref": "antsia:sub:b0000000000000000000000001"
+        },
+        "version": 1
+      },
+      "expect": {
+        "ok": true,
+        "command": "request.status",
+        "requestId": "antsia-req-000012",
+        "scope": "commerce.request.status"
+      },
+      "bodySha256": "647135b8c3f851d97d5dd2da0fda3d3f7d4a7c84a643f3810f9a524b374d449c"
+    },
+    {
+      "name": "commande inconnue",
+      "context": {
+        "environment": "sandbox",
+        "nowMs": 1792285200000,
+        "source": "antsia"
+      },
+      "body": {
+        "command": "order.refund",
+        "contract": "PRO-COMMERCE-COMMAND-V1",
+        "environment": "sandbox",
+        "expiresAt": 1792285499000,
+        "issuedAt": 1792285199000,
+        "payload": {
+          "consent": {
+            "givenAt": 1792285170000,
+            "purpose": "commerce_checkout",
+            "textVersion": "2026-10-18"
+          },
+          "fulfillment": {
+            "establishmentRef": "pro.ga:establishment:01JA00000000000000000000E1",
+            "mode": "pickup"
+          },
+          "lines": [
+            {
+              "expectedCatalogRevision": 3,
+              "expectedUnitAmount": {
+                "amount": 25000,
+                "currency": "XAF"
+              },
+              "offerRef": "pro.ga:offer:01JA00000000000000000000F1",
+              "quantity": 1
+            },
+            {
+              "expectedCatalogRevision": 5,
+              "expectedUnitAmount": {
+                "amount": 28000,
+                "currency": "XAF"
+              },
+              "offerRef": "pro.ga:offer:01JA00000000000000000000F2",
+              "quantity": 2,
+              "variantRef": "pro.ga:offer_variant:01JA00000000000000000000V1"
+            }
+          ],
+          "note": "Retrait samedi matin.",
+          "shopRef": "pro.ga:structure:01JA00000000000000000000S1"
+        },
+        "requestId": "antsia-req-000006",
+        "scope": "commerce.checkout.prepare",
+        "source": "antsia",
+        "subject": {
+          "authVerifiedAt": 1792285140000,
+          "kind": "buyer",
+          "ref": "antsia:sub:b0000000000000000000000001"
+        },
+        "version": 1
+      },
+      "expect": {
+        "ok": false,
+        "reason": "unknown_command",
+        "path": "$.command"
+      }
+    },
+    {
+      "name": "commande réservée",
+      "context": {
+        "environment": "sandbox",
+        "nowMs": 1792285200000,
+        "source": "antsia"
+      },
+      "body": {
+        "command": "link.revoke",
+        "contract": "PRO-COMMERCE-COMMAND-V1",
+        "environment": "sandbox",
+        "expiresAt": 1792285499000,
+        "issuedAt": 1792285199000,
+        "payload": {
+          "consent": {
+            "givenAt": 1792285170000,
+            "purpose": "commerce_checkout",
+            "textVersion": "2026-10-18"
+          },
+          "fulfillment": {
+            "establishmentRef": "pro.ga:establishment:01JA00000000000000000000E1",
+            "mode": "pickup"
+          },
+          "lines": [
+            {
+              "expectedCatalogRevision": 3,
+              "expectedUnitAmount": {
+                "amount": 25000,
+                "currency": "XAF"
+              },
+              "offerRef": "pro.ga:offer:01JA00000000000000000000F1",
+              "quantity": 1
+            },
+            {
+              "expectedCatalogRevision": 5,
+              "expectedUnitAmount": {
+                "amount": 28000,
+                "currency": "XAF"
+              },
+              "offerRef": "pro.ga:offer:01JA00000000000000000000F2",
+              "quantity": 2,
+              "variantRef": "pro.ga:offer_variant:01JA00000000000000000000V1"
+            }
+          ],
+          "note": "Retrait samedi matin.",
+          "shopRef": "pro.ga:structure:01JA00000000000000000000S1"
+        },
+        "requestId": "antsia-req-000006",
+        "scope": "commerce.checkout.prepare",
+        "source": "antsia",
+        "subject": {
+          "authVerifiedAt": 1792285140000,
+          "kind": "buyer",
+          "ref": "antsia:sub:b0000000000000000000000001"
+        },
+        "version": 1
+      },
+      "expect": {
+        "ok": false,
+        "reason": "unsupported_command",
+        "path": "$.command"
+      }
+    },
+    {
+      "name": "scope d'une autre commande",
+      "context": {
+        "environment": "sandbox",
+        "nowMs": 1792285200000,
+        "source": "antsia"
+      },
+      "body": {
+        "command": "checkout.prepare",
+        "contract": "PRO-COMMERCE-COMMAND-V1",
+        "environment": "sandbox",
+        "expiresAt": 1792285499000,
+        "issuedAt": 1792285199000,
+        "payload": {
+          "consent": {
+            "givenAt": 1792285170000,
+            "purpose": "commerce_checkout",
+            "textVersion": "2026-10-18"
+          },
+          "fulfillment": {
+            "establishmentRef": "pro.ga:establishment:01JA00000000000000000000E1",
+            "mode": "pickup"
+          },
+          "lines": [
+            {
+              "expectedCatalogRevision": 3,
+              "expectedUnitAmount": {
+                "amount": 25000,
+                "currency": "XAF"
+              },
+              "offerRef": "pro.ga:offer:01JA00000000000000000000F1",
+              "quantity": 1
+            },
+            {
+              "expectedCatalogRevision": 5,
+              "expectedUnitAmount": {
+                "amount": 28000,
+                "currency": "XAF"
+              },
+              "offerRef": "pro.ga:offer:01JA00000000000000000000F2",
+              "quantity": 2,
+              "variantRef": "pro.ga:offer_variant:01JA00000000000000000000V1"
+            }
+          ],
+          "note": "Retrait samedi matin.",
+          "shopRef": "pro.ga:structure:01JA00000000000000000000S1"
+        },
+        "requestId": "antsia-req-000006",
+        "scope": "commerce.payment.start",
+        "source": "antsia",
+        "subject": {
+          "authVerifiedAt": 1792285140000,
+          "kind": "buyer",
+          "ref": "antsia:sub:b0000000000000000000000001"
+        },
+        "version": 1
+      },
+      "expect": {
+        "ok": false,
+        "reason": "scope_mismatch",
+        "path": "$.scope"
+      }
+    },
+    {
+      "name": "hors environnement",
+      "context": {
+        "environment": "sandbox",
+        "nowMs": 1792285200000,
+        "source": "antsia"
+      },
+      "body": {
+        "command": "checkout.prepare",
+        "contract": "PRO-COMMERCE-COMMAND-V1",
+        "environment": "production",
+        "expiresAt": 1792285499000,
+        "issuedAt": 1792285199000,
+        "payload": {
+          "consent": {
+            "givenAt": 1792285170000,
+            "purpose": "commerce_checkout",
+            "textVersion": "2026-10-18"
+          },
+          "fulfillment": {
+            "establishmentRef": "pro.ga:establishment:01JA00000000000000000000E1",
+            "mode": "pickup"
+          },
+          "lines": [
+            {
+              "expectedCatalogRevision": 3,
+              "expectedUnitAmount": {
+                "amount": 25000,
+                "currency": "XAF"
+              },
+              "offerRef": "pro.ga:offer:01JA00000000000000000000F1",
+              "quantity": 1
+            },
+            {
+              "expectedCatalogRevision": 5,
+              "expectedUnitAmount": {
+                "amount": 28000,
+                "currency": "XAF"
+              },
+              "offerRef": "pro.ga:offer:01JA00000000000000000000F2",
+              "quantity": 2,
+              "variantRef": "pro.ga:offer_variant:01JA00000000000000000000V1"
+            }
+          ],
+          "note": "Retrait samedi matin.",
+          "shopRef": "pro.ga:structure:01JA00000000000000000000S1"
+        },
+        "requestId": "antsia-req-000006",
+        "scope": "commerce.checkout.prepare",
+        "source": "antsia",
+        "subject": {
+          "authVerifiedAt": 1792285140000,
+          "kind": "buyer",
+          "ref": "antsia:sub:b0000000000000000000000001"
+        },
+        "version": 1
+      },
+      "expect": {
+        "ok": false,
+        "reason": "environment_mismatch",
+        "path": "$.environment"
+      }
+    },
+    {
+      "name": "autre source",
+      "context": {
+        "environment": "sandbox",
+        "nowMs": 1792285200000,
+        "source": "antsia"
+      },
+      "body": {
+        "command": "checkout.prepare",
+        "contract": "PRO-COMMERCE-COMMAND-V1",
+        "environment": "sandbox",
+        "expiresAt": 1792285499000,
+        "issuedAt": 1792285199000,
+        "payload": {
+          "consent": {
+            "givenAt": 1792285170000,
+            "purpose": "commerce_checkout",
+            "textVersion": "2026-10-18"
+          },
+          "fulfillment": {
+            "establishmentRef": "pro.ga:establishment:01JA00000000000000000000E1",
+            "mode": "pickup"
+          },
+          "lines": [
+            {
+              "expectedCatalogRevision": 3,
+              "expectedUnitAmount": {
+                "amount": 25000,
+                "currency": "XAF"
+              },
+              "offerRef": "pro.ga:offer:01JA00000000000000000000F1",
+              "quantity": 1
+            },
+            {
+              "expectedCatalogRevision": 5,
+              "expectedUnitAmount": {
+                "amount": 28000,
+                "currency": "XAF"
+              },
+              "offerRef": "pro.ga:offer:01JA00000000000000000000F2",
+              "quantity": 2,
+              "variantRef": "pro.ga:offer_variant:01JA00000000000000000000V1"
+            }
+          ],
+          "note": "Retrait samedi matin.",
+          "shopRef": "pro.ga:structure:01JA00000000000000000000S1"
+        },
+        "requestId": "antsia-req-000006",
+        "scope": "commerce.checkout.prepare",
+        "source": "other-source",
+        "subject": {
+          "authVerifiedAt": 1792285140000,
+          "kind": "buyer",
+          "ref": "antsia:sub:b0000000000000000000000001"
+        },
+        "version": 1
+      },
+      "expect": {
+        "ok": false,
+        "reason": "source_mismatch",
+        "path": "$.source"
+      }
+    },
+    {
+      "name": "validité trop longue",
+      "context": {
+        "environment": "sandbox",
+        "nowMs": 1792285200000,
+        "source": "antsia"
+      },
+      "body": {
+        "command": "checkout.prepare",
+        "contract": "PRO-COMMERCE-COMMAND-V1",
+        "environment": "sandbox",
+        "expiresAt": 1792285859000,
+        "issuedAt": 1792285199000,
+        "payload": {
+          "consent": {
+            "givenAt": 1792285170000,
+            "purpose": "commerce_checkout",
+            "textVersion": "2026-10-18"
+          },
+          "fulfillment": {
+            "establishmentRef": "pro.ga:establishment:01JA00000000000000000000E1",
+            "mode": "pickup"
+          },
+          "lines": [
+            {
+              "expectedCatalogRevision": 3,
+              "expectedUnitAmount": {
+                "amount": 25000,
+                "currency": "XAF"
+              },
+              "offerRef": "pro.ga:offer:01JA00000000000000000000F1",
+              "quantity": 1
+            },
+            {
+              "expectedCatalogRevision": 5,
+              "expectedUnitAmount": {
+                "amount": 28000,
+                "currency": "XAF"
+              },
+              "offerRef": "pro.ga:offer:01JA00000000000000000000F2",
+              "quantity": 2,
+              "variantRef": "pro.ga:offer_variant:01JA00000000000000000000V1"
+            }
+          ],
+          "note": "Retrait samedi matin.",
+          "shopRef": "pro.ga:structure:01JA00000000000000000000S1"
+        },
+        "requestId": "antsia-req-000006",
+        "scope": "commerce.checkout.prepare",
+        "source": "antsia",
+        "subject": {
+          "authVerifiedAt": 1792285140000,
+          "kind": "buyer",
+          "ref": "antsia:sub:b0000000000000000000000001"
+        },
+        "version": 1
+      },
+      "expect": {
+        "ok": false,
+        "reason": "invalid_time",
+        "path": "$.expiresAt"
+      }
+    },
+    {
+      "name": "émise dans le futur",
+      "context": {
+        "environment": "sandbox",
+        "nowMs": 1792285200000,
+        "source": "antsia"
+      },
+      "body": {
+        "command": "checkout.prepare",
+        "contract": "PRO-COMMERCE-COMMAND-V1",
+        "environment": "sandbox",
+        "expiresAt": 1792285860000,
+        "issuedAt": 1792285560000,
+        "payload": {
+          "consent": {
+            "givenAt": 1792285170000,
+            "purpose": "commerce_checkout",
+            "textVersion": "2026-10-18"
+          },
+          "fulfillment": {
+            "establishmentRef": "pro.ga:establishment:01JA00000000000000000000E1",
+            "mode": "pickup"
+          },
+          "lines": [
+            {
+              "expectedCatalogRevision": 3,
+              "expectedUnitAmount": {
+                "amount": 25000,
+                "currency": "XAF"
+              },
+              "offerRef": "pro.ga:offer:01JA00000000000000000000F1",
+              "quantity": 1
+            },
+            {
+              "expectedCatalogRevision": 5,
+              "expectedUnitAmount": {
+                "amount": 28000,
+                "currency": "XAF"
+              },
+              "offerRef": "pro.ga:offer:01JA00000000000000000000F2",
+              "quantity": 2,
+              "variantRef": "pro.ga:offer_variant:01JA00000000000000000000V1"
+            }
+          ],
+          "note": "Retrait samedi matin.",
+          "shopRef": "pro.ga:structure:01JA00000000000000000000S1"
+        },
+        "requestId": "antsia-req-000006",
+        "scope": "commerce.checkout.prepare",
+        "source": "antsia",
+        "subject": {
+          "authVerifiedAt": 1792285500000,
+          "kind": "buyer",
+          "ref": "antsia:sub:b0000000000000000000000001"
+        },
+        "version": 1
+      },
+      "expect": {
+        "ok": false,
+        "reason": "invalid_time",
+        "path": "$.issuedAt"
+      }
+    },
+    {
+      "name": "session revérifiée trop tôt",
+      "context": {
+        "environment": "sandbox",
+        "nowMs": 1792285200000,
+        "source": "antsia"
+      },
+      "body": {
+        "command": "checkout.prepare",
+        "contract": "PRO-COMMERCE-COMMAND-V1",
+        "environment": "sandbox",
+        "expiresAt": 1792285499000,
+        "issuedAt": 1792285199000,
+        "payload": {
+          "consent": {
+            "givenAt": 1792285170000,
+            "purpose": "commerce_checkout",
+            "textVersion": "2026-10-18"
+          },
+          "fulfillment": {
+            "establishmentRef": "pro.ga:establishment:01JA00000000000000000000E1",
+            "mode": "pickup"
+          },
+          "lines": [
+            {
+              "expectedCatalogRevision": 3,
+              "expectedUnitAmount": {
+                "amount": 25000,
+                "currency": "XAF"
+              },
+              "offerRef": "pro.ga:offer:01JA00000000000000000000F1",
+              "quantity": 1
+            },
+            {
+              "expectedCatalogRevision": 5,
+              "expectedUnitAmount": {
+                "amount": 28000,
+                "currency": "XAF"
+              },
+              "offerRef": "pro.ga:offer:01JA00000000000000000000F2",
+              "quantity": 2,
+              "variantRef": "pro.ga:offer_variant:01JA00000000000000000000V1"
+            }
+          ],
+          "note": "Retrait samedi matin.",
+          "shopRef": "pro.ga:structure:01JA00000000000000000000S1"
+        },
+        "requestId": "antsia-req-000006",
+        "scope": "commerce.checkout.prepare",
+        "source": "antsia",
+        "subject": {
+          "authVerifiedAt": 1792284839000,
+          "kind": "buyer",
+          "ref": "antsia:sub:b0000000000000000000000001"
+        },
+        "version": 1
+      },
+      "expect": {
+        "ok": false,
+        "reason": "invalid_time",
+        "path": "$.subject.authVerifiedAt"
+      }
+    },
+    {
+      "name": "sujet vendeur pour un achat",
+      "context": {
+        "environment": "sandbox",
+        "nowMs": 1792285200000,
+        "source": "antsia"
+      },
+      "body": {
+        "command": "checkout.prepare",
+        "contract": "PRO-COMMERCE-COMMAND-V1",
+        "environment": "sandbox",
+        "expiresAt": 1792285499000,
+        "issuedAt": 1792285199000,
+        "payload": {
+          "consent": {
+            "givenAt": 1792285170000,
+            "purpose": "commerce_checkout",
+            "textVersion": "2026-10-18"
+          },
+          "fulfillment": {
+            "establishmentRef": "pro.ga:establishment:01JA00000000000000000000E1",
+            "mode": "pickup"
+          },
+          "lines": [
+            {
+              "expectedCatalogRevision": 3,
+              "expectedUnitAmount": {
+                "amount": 25000,
+                "currency": "XAF"
+              },
+              "offerRef": "pro.ga:offer:01JA00000000000000000000F1",
+              "quantity": 1
+            },
+            {
+              "expectedCatalogRevision": 5,
+              "expectedUnitAmount": {
+                "amount": 28000,
+                "currency": "XAF"
+              },
+              "offerRef": "pro.ga:offer:01JA00000000000000000000F2",
+              "quantity": 2,
+              "variantRef": "pro.ga:offer_variant:01JA00000000000000000000V1"
+            }
+          ],
+          "note": "Retrait samedi matin.",
+          "shopRef": "pro.ga:structure:01JA00000000000000000000S1"
+        },
+        "requestId": "antsia-req-000006",
+        "scope": "commerce.checkout.prepare",
+        "source": "antsia",
+        "subject": {
+          "authVerifiedAt": 1792285140000,
+          "kind": "seller_operator",
+          "ref": "antsia:sub:b0000000000000000000000001"
+        },
+        "version": 1
+      },
+      "expect": {
+        "ok": false,
+        "reason": "subject_not_allowed",
+        "path": "$.subject.kind"
+      }
+    },
+    {
+      "name": "sujet sous forme de handle",
+      "context": {
+        "environment": "sandbox",
+        "nowMs": 1792285200000,
+        "source": "antsia"
+      },
+      "body": {
+        "command": "checkout.prepare",
+        "contract": "PRO-COMMERCE-COMMAND-V1",
+        "environment": "sandbox",
+        "expiresAt": 1792285499000,
+        "issuedAt": 1792285199000,
+        "payload": {
+          "consent": {
+            "givenAt": 1792285170000,
+            "purpose": "commerce_checkout",
+            "textVersion": "2026-10-18"
+          },
+          "fulfillment": {
+            "establishmentRef": "pro.ga:establishment:01JA00000000000000000000E1",
+            "mode": "pickup"
+          },
+          "lines": [
+            {
+              "expectedCatalogRevision": 3,
+              "expectedUnitAmount": {
+                "amount": 25000,
+                "currency": "XAF"
+              },
+              "offerRef": "pro.ga:offer:01JA00000000000000000000F1",
+              "quantity": 1
+            },
+            {
+              "expectedCatalogRevision": 5,
+              "expectedUnitAmount": {
+                "amount": 28000,
+                "currency": "XAF"
+              },
+              "offerRef": "pro.ga:offer:01JA00000000000000000000F2",
+              "quantity": 2,
+              "variantRef": "pro.ga:offer_variant:01JA00000000000000000000V1"
+            }
+          ],
+          "note": "Retrait samedi matin.",
+          "shopRef": "pro.ga:structure:01JA00000000000000000000S1"
+        },
+        "requestId": "antsia-req-000006",
+        "scope": "commerce.checkout.prepare",
+        "source": "antsia",
+        "subject": {
+          "authVerifiedAt": 1792285140000,
+          "kind": "buyer",
+          "ref": "antsia:sub:Awa.demo"
+        },
+        "version": 1
+      },
+      "expect": {
+        "ok": false,
+        "reason": "invalid_reference",
+        "path": "$.subject.ref"
+      }
+    },
+    {
+      "name": "tenant glissé dans une ligne",
+      "context": {
+        "environment": "sandbox",
+        "nowMs": 1792285200000,
+        "source": "antsia"
+      },
+      "body": {
+        "command": "checkout.prepare",
+        "contract": "PRO-COMMERCE-COMMAND-V1",
+        "environment": "sandbox",
+        "expiresAt": 1792285499000,
+        "issuedAt": 1792285199000,
+        "payload": {
+          "consent": {
+            "givenAt": 1792285170000,
+            "purpose": "commerce_checkout",
+            "textVersion": "2026-10-18"
+          },
+          "fulfillment": {
+            "establishmentRef": "pro.ga:establishment:01JA00000000000000000000E1",
+            "mode": "pickup"
+          },
+          "lines": [
+            {
+              "expectedCatalogRevision": 3,
+              "expectedUnitAmount": {
+                "amount": 25000,
+                "currency": "XAF"
+              },
+              "offerRef": "pro.ga:offer:01JA00000000000000000000F1",
+              "quantity": 1,
+              "tenantId": "jd7tenant"
+            },
+            {
+              "expectedCatalogRevision": 5,
+              "expectedUnitAmount": {
+                "amount": 28000,
+                "currency": "XAF"
+              },
+              "offerRef": "pro.ga:offer:01JA00000000000000000000F2",
+              "quantity": 2,
+              "variantRef": "pro.ga:offer_variant:01JA00000000000000000000V1"
+            }
+          ],
+          "note": "Retrait samedi matin.",
+          "shopRef": "pro.ga:structure:01JA00000000000000000000S1"
+        },
+        "requestId": "antsia-req-000006",
+        "scope": "commerce.checkout.prepare",
+        "source": "antsia",
+        "subject": {
+          "authVerifiedAt": 1792285140000,
+          "kind": "buyer",
+          "ref": "antsia:sub:b0000000000000000000000001"
+        },
+        "version": 1
+      },
+      "expect": {
+        "ok": false,
+        "reason": "forbidden_field",
+        "path": "$.payload.lines[0].tenantId"
+      }
+    },
+    {
+      "name": "téléphone glissé dans l'adresse",
+      "context": {
+        "environment": "sandbox",
+        "nowMs": 1792285200000,
+        "source": "antsia"
+      },
+      "body": {
+        "command": "checkout.prepare",
+        "contract": "PRO-COMMERCE-COMMAND-V1",
+        "environment": "sandbox",
+        "expiresAt": 1792285499000,
+        "issuedAt": 1792285199000,
+        "payload": {
+          "consent": {
+            "givenAt": 1792285170000,
+            "purpose": "commerce_checkout",
+            "textVersion": "2026-10-18"
+          },
+          "fulfillment": {
+            "address": {
+              "country": "GA",
+              "line1": "Quartier fictif, rue 12",
+              "locality": "Libreville",
+              "phone": "+24100000000"
+            },
+            "instructions": "Prévenir par la messagerie ANTSIA à l'arrivée.",
+            "mode": "seller_delivery"
+          },
+          "lines": [
+            {
+              "expectedCatalogRevision": 3,
+              "expectedUnitAmount": {
+                "amount": 25000,
+                "currency": "XAF"
+              },
+              "offerRef": "pro.ga:offer:01JA00000000000000000000F1",
+              "quantity": 1
+            },
+            {
+              "expectedCatalogRevision": 5,
+              "expectedUnitAmount": {
+                "amount": 28000,
+                "currency": "XAF"
+              },
+              "offerRef": "pro.ga:offer:01JA00000000000000000000F2",
+              "quantity": 2,
+              "variantRef": "pro.ga:offer_variant:01JA00000000000000000000V1"
+            }
+          ],
+          "shopRef": "pro.ga:structure:01JA00000000000000000000S1"
+        },
+        "requestId": "antsia-req-000007",
+        "scope": "commerce.checkout.prepare",
+        "source": "antsia",
+        "subject": {
+          "authVerifiedAt": 1792285140000,
+          "kind": "buyer",
+          "ref": "antsia:sub:b0000000000000000000000001"
+        },
+        "version": 1
+      },
+      "expect": {
+        "ok": false,
+        "reason": "forbidden_field",
+        "path": "$.payload.fulfillment.address.phone"
+      }
+    },
+    {
+      "name": "courriel dans une demande",
+      "context": {
+        "environment": "sandbox",
+        "nowMs": 1792285200000,
+        "source": "antsia"
+      },
+      "body": {
+        "command": "inquiry.submit",
+        "contract": "PRO-COMMERCE-COMMAND-V1",
+        "environment": "sandbox",
+        "expiresAt": 1792285499000,
+        "issuedAt": 1792285199000,
+        "payload": {
+          "consent": {
+            "givenAt": 1792285170000,
+            "purpose": "commerce_inquiry",
+            "textVersion": "2026-10-18"
+          },
+          "conversationRef": "antsia:conv:v0000000000000000000000001",
+          "desiredDate": "2026-11-02",
+          "displayName": "Awa",
+          "kind": "quote_request",
+          "message": "Bonjour, est-ce possible en taille XL pour le 2 novembre ?",
+          "offerRef": "pro.ga:offer:01JA00000000000000000000F2",
+          "quantity": 2,
+          "shopRef": "pro.ga:structure:01JA00000000000000000000S1",
+          "variantRef": "pro.ga:offer_variant:01JA00000000000000000000V1",
+          "email": "awa@exemple.invalid"
+        },
+        "requestId": "antsia-req-000004",
+        "scope": "commerce.inquiry.submit",
+        "source": "antsia",
+        "subject": {
+          "authVerifiedAt": 1792285140000,
+          "kind": "buyer",
+          "ref": "antsia:sub:b0000000000000000000000001"
+        },
+        "version": 1
+      },
+      "expect": {
+        "ok": false,
+        "reason": "forbidden_field",
+        "path": "$.payload.email"
+      }
+    },
+    {
+      "name": "URL dans une demande",
+      "context": {
+        "environment": "sandbox",
+        "nowMs": 1792285200000,
+        "source": "antsia"
+      },
+      "body": {
+        "command": "inquiry.submit",
+        "contract": "PRO-COMMERCE-COMMAND-V1",
+        "environment": "sandbox",
+        "expiresAt": 1792285499000,
+        "issuedAt": 1792285199000,
+        "payload": {
+          "consent": {
+            "givenAt": 1792285170000,
+            "purpose": "commerce_inquiry",
+            "textVersion": "2026-10-18"
+          },
+          "conversationRef": "antsia:conv:v0000000000000000000000001",
+          "desiredDate": "2026-11-02",
+          "displayName": "Awa",
+          "kind": "quote_request",
+          "message": "Bonjour, est-ce possible en taille XL pour le 2 novembre ?",
+          "offerRef": "pro.ga:offer:01JA00000000000000000000F2",
+          "quantity": 2,
+          "shopRef": "pro.ga:structure:01JA00000000000000000000S1",
+          "variantRef": "pro.ga:offer_variant:01JA00000000000000000000V1",
+          "url": "https://exemple.invalid/x"
+        },
+        "requestId": "antsia-req-000004",
+        "scope": "commerce.inquiry.submit",
+        "source": "antsia",
+        "subject": {
+          "authVerifiedAt": 1792285140000,
+          "kind": "buyer",
+          "ref": "antsia:sub:b0000000000000000000000001"
+        },
+        "version": 1
+      },
+      "expect": {
+        "ok": false,
+        "reason": "forbidden_field",
+        "path": "$.payload.url"
+      }
+    },
+    {
+      "name": "réseau dans l'enveloppe",
+      "context": {
+        "environment": "sandbox",
+        "nowMs": 1792285200000,
+        "source": "antsia"
+      },
+      "body": {
+        "command": "checkout.prepare",
+        "contract": "PRO-COMMERCE-COMMAND-V1",
+        "environment": "sandbox",
+        "expiresAt": 1792285499000,
+        "issuedAt": 1792285199000,
+        "payload": {
+          "consent": {
+            "givenAt": 1792285170000,
+            "purpose": "commerce_checkout",
+            "textVersion": "2026-10-18"
+          },
+          "fulfillment": {
+            "establishmentRef": "pro.ga:establishment:01JA00000000000000000000E1",
+            "mode": "pickup"
+          },
+          "lines": [
+            {
+              "expectedCatalogRevision": 3,
+              "expectedUnitAmount": {
+                "amount": 25000,
+                "currency": "XAF"
+              },
+              "offerRef": "pro.ga:offer:01JA00000000000000000000F1",
+              "quantity": 1
+            },
+            {
+              "expectedCatalogRevision": 5,
+              "expectedUnitAmount": {
+                "amount": 28000,
+                "currency": "XAF"
+              },
+              "offerRef": "pro.ga:offer:01JA00000000000000000000F2",
+              "quantity": 2,
+              "variantRef": "pro.ga:offer_variant:01JA00000000000000000000V1"
+            }
+          ],
+          "note": "Retrait samedi matin.",
+          "shopRef": "pro.ga:structure:01JA00000000000000000000S1"
+        },
+        "requestId": "antsia-req-000006",
+        "scope": "commerce.checkout.prepare",
+        "source": "antsia",
+        "subject": {
+          "authVerifiedAt": 1792285140000,
+          "kind": "buyer",
+          "ref": "antsia:sub:b0000000000000000000000001"
+        },
+        "version": 1,
+        "networkId": "jx7network"
+      },
+      "expect": {
+        "ok": false,
+        "reason": "invalid_request",
+        "path": "$.networkId"
+      }
+    },
+    {
+      "name": "réseau dans la charge",
+      "context": {
+        "environment": "sandbox",
+        "nowMs": 1792285200000,
+        "source": "antsia"
+      },
+      "body": {
+        "command": "checkout.prepare",
+        "contract": "PRO-COMMERCE-COMMAND-V1",
+        "environment": "sandbox",
+        "expiresAt": 1792285499000,
+        "issuedAt": 1792285199000,
+        "payload": {
+          "consent": {
+            "givenAt": 1792285170000,
+            "purpose": "commerce_checkout",
+            "textVersion": "2026-10-18"
+          },
+          "fulfillment": {
+            "establishmentRef": "pro.ga:establishment:01JA00000000000000000000E1",
+            "mode": "pickup"
+          },
+          "lines": [
+            {
+              "expectedCatalogRevision": 3,
+              "expectedUnitAmount": {
+                "amount": 25000,
+                "currency": "XAF"
+              },
+              "offerRef": "pro.ga:offer:01JA00000000000000000000F1",
+              "quantity": 1
+            },
+            {
+              "expectedCatalogRevision": 5,
+              "expectedUnitAmount": {
+                "amount": 28000,
+                "currency": "XAF"
+              },
+              "offerRef": "pro.ga:offer:01JA00000000000000000000F2",
+              "quantity": 2,
+              "variantRef": "pro.ga:offer_variant:01JA00000000000000000000V1"
+            }
+          ],
+          "note": "Retrait samedi matin.",
+          "shopRef": "pro.ga:structure:01JA00000000000000000000S1",
+          "networkId": "jx7network"
+        },
+        "requestId": "antsia-req-000006",
+        "scope": "commerce.checkout.prepare",
+        "source": "antsia",
+        "subject": {
+          "authVerifiedAt": 1792285140000,
+          "kind": "buyer",
+          "ref": "antsia:sub:b0000000000000000000000001"
+        },
+        "version": 1
+      },
+      "expect": {
+        "ok": false,
+        "reason": "forbidden_field",
+        "path": "$.payload.networkId"
+      }
+    },
+    {
+      "name": "montant attendu fractionnaire",
+      "context": {
+        "environment": "sandbox",
+        "nowMs": 1792285200000,
+        "source": "antsia"
+      },
+      "body": {
+        "command": "checkout.prepare",
+        "contract": "PRO-COMMERCE-COMMAND-V1",
+        "environment": "sandbox",
+        "expiresAt": 1792285499000,
+        "issuedAt": 1792285199000,
+        "payload": {
+          "consent": {
+            "givenAt": 1792285170000,
+            "purpose": "commerce_checkout",
+            "textVersion": "2026-10-18"
+          },
+          "fulfillment": {
+            "establishmentRef": "pro.ga:establishment:01JA00000000000000000000E1",
+            "mode": "pickup"
+          },
+          "lines": [
+            {
+              "expectedCatalogRevision": 3,
+              "expectedUnitAmount": {
+                "amount": 1500.5,
+                "currency": "XAF"
+              },
+              "offerRef": "pro.ga:offer:01JA00000000000000000000F1",
+              "quantity": 1
+            },
+            {
+              "expectedCatalogRevision": 5,
+              "expectedUnitAmount": {
+                "amount": 28000,
+                "currency": "XAF"
+              },
+              "offerRef": "pro.ga:offer:01JA00000000000000000000F2",
+              "quantity": 2,
+              "variantRef": "pro.ga:offer_variant:01JA00000000000000000000V1"
+            }
+          ],
+          "note": "Retrait samedi matin.",
+          "shopRef": "pro.ga:structure:01JA00000000000000000000S1"
+        },
+        "requestId": "antsia-req-000006",
+        "scope": "commerce.checkout.prepare",
+        "source": "antsia",
+        "subject": {
+          "authVerifiedAt": 1792285140000,
+          "kind": "buyer",
+          "ref": "antsia:sub:b0000000000000000000000001"
+        },
+        "version": 1
+      },
+      "expect": {
+        "ok": false,
+        "reason": "invalid_amount",
+        "path": "$.payload.lines[0].expectedUnitAmount.amount"
+      }
+    },
+    {
+      "name": "devise attendue incohérente",
+      "context": {
+        "environment": "sandbox",
+        "nowMs": 1792285200000,
+        "source": "antsia"
+      },
+      "body": {
+        "command": "checkout.prepare",
+        "contract": "PRO-COMMERCE-COMMAND-V1",
+        "environment": "sandbox",
+        "expiresAt": 1792285499000,
+        "issuedAt": 1792285199000,
+        "payload": {
+          "consent": {
+            "givenAt": 1792285170000,
+            "purpose": "commerce_checkout",
+            "textVersion": "2026-10-18"
+          },
+          "fulfillment": {
+            "establishmentRef": "pro.ga:establishment:01JA00000000000000000000E1",
+            "mode": "pickup"
+          },
+          "lines": [
+            {
+              "expectedCatalogRevision": 3,
+              "expectedUnitAmount": {
+                "amount": 25000,
+                "currency": "EUR"
+              },
+              "offerRef": "pro.ga:offer:01JA00000000000000000000F1",
+              "quantity": 1
+            },
+            {
+              "expectedCatalogRevision": 5,
+              "expectedUnitAmount": {
+                "amount": 28000,
+                "currency": "XAF"
+              },
+              "offerRef": "pro.ga:offer:01JA00000000000000000000F2",
+              "quantity": 2,
+              "variantRef": "pro.ga:offer_variant:01JA00000000000000000000V1"
+            }
+          ],
+          "note": "Retrait samedi matin.",
+          "shopRef": "pro.ga:structure:01JA00000000000000000000S1"
+        },
+        "requestId": "antsia-req-000006",
+        "scope": "commerce.checkout.prepare",
+        "source": "antsia",
+        "subject": {
+          "authVerifiedAt": 1792285140000,
+          "kind": "buyer",
+          "ref": "antsia:sub:b0000000000000000000000001"
+        },
+        "version": 1
+      },
+      "expect": {
+        "ok": false,
+        "reason": "currency_mismatch",
+        "path": "$.payload.lines[0].expectedUnitAmount.currency"
+      }
+    },
+    {
+      "name": "lignes dupliquées",
+      "context": {
+        "environment": "sandbox",
+        "nowMs": 1792285200000,
+        "source": "antsia"
+      },
+      "body": {
+        "command": "checkout.prepare",
+        "contract": "PRO-COMMERCE-COMMAND-V1",
+        "environment": "sandbox",
+        "expiresAt": 1792285499000,
+        "issuedAt": 1792285199000,
+        "payload": {
+          "consent": {
+            "givenAt": 1792285170000,
+            "purpose": "commerce_checkout",
+            "textVersion": "2026-10-18"
+          },
+          "fulfillment": {
+            "establishmentRef": "pro.ga:establishment:01JA00000000000000000000E1",
+            "mode": "pickup"
+          },
+          "lines": [
+            {
+              "expectedCatalogRevision": 3,
+              "expectedUnitAmount": {
+                "amount": 25000,
+                "currency": "XAF"
+              },
+              "offerRef": "pro.ga:offer:01JA00000000000000000000F1",
+              "quantity": 1
+            },
+            {
+              "expectedCatalogRevision": 3,
+              "expectedUnitAmount": {
+                "amount": 25000,
+                "currency": "XAF"
+              },
+              "offerRef": "pro.ga:offer:01JA00000000000000000000F1",
+              "quantity": 1
+            }
+          ],
+          "note": "Retrait samedi matin.",
+          "shopRef": "pro.ga:structure:01JA00000000000000000000S1"
+        },
+        "requestId": "antsia-req-000006",
+        "scope": "commerce.checkout.prepare",
+        "source": "antsia",
+        "subject": {
+          "authVerifiedAt": 1792285140000,
+          "kind": "buyer",
+          "ref": "antsia:sub:b0000000000000000000000001"
+        },
+        "version": 1
+      },
+      "expect": {
+        "ok": false,
+        "reason": "duplicate_entry",
+        "path": "$.payload.lines"
+      }
+    },
+    {
+      "name": "panier vide",
+      "context": {
+        "environment": "sandbox",
+        "nowMs": 1792285200000,
+        "source": "antsia"
+      },
+      "body": {
+        "command": "checkout.prepare",
+        "contract": "PRO-COMMERCE-COMMAND-V1",
+        "environment": "sandbox",
+        "expiresAt": 1792285499000,
+        "issuedAt": 1792285199000,
+        "payload": {
+          "consent": {
+            "givenAt": 1792285170000,
+            "purpose": "commerce_checkout",
+            "textVersion": "2026-10-18"
+          },
+          "fulfillment": {
+            "establishmentRef": "pro.ga:establishment:01JA00000000000000000000E1",
+            "mode": "pickup"
+          },
+          "lines": [],
+          "note": "Retrait samedi matin.",
+          "shopRef": "pro.ga:structure:01JA00000000000000000000S1"
+        },
+        "requestId": "antsia-req-000006",
+        "scope": "commerce.checkout.prepare",
+        "source": "antsia",
+        "subject": {
+          "authVerifiedAt": 1792285140000,
+          "kind": "buyer",
+          "ref": "antsia:sub:b0000000000000000000000001"
+        },
+        "version": 1
+      },
+      "expect": {
+        "ok": false,
+        "reason": "invalid_payload",
+        "path": "$.payload.lines"
+      }
+    },
+    {
+      "name": "quantité nulle",
+      "context": {
+        "environment": "sandbox",
+        "nowMs": 1792285200000,
+        "source": "antsia"
+      },
+      "body": {
+        "command": "checkout.prepare",
+        "contract": "PRO-COMMERCE-COMMAND-V1",
+        "environment": "sandbox",
+        "expiresAt": 1792285499000,
+        "issuedAt": 1792285199000,
+        "payload": {
+          "consent": {
+            "givenAt": 1792285170000,
+            "purpose": "commerce_checkout",
+            "textVersion": "2026-10-18"
+          },
+          "fulfillment": {
+            "establishmentRef": "pro.ga:establishment:01JA00000000000000000000E1",
+            "mode": "pickup"
+          },
+          "lines": [
+            {
+              "expectedCatalogRevision": 3,
+              "expectedUnitAmount": {
+                "amount": 25000,
+                "currency": "XAF"
+              },
+              "offerRef": "pro.ga:offer:01JA00000000000000000000F1",
+              "quantity": 0
+            },
+            {
+              "expectedCatalogRevision": 5,
+              "expectedUnitAmount": {
+                "amount": 28000,
+                "currency": "XAF"
+              },
+              "offerRef": "pro.ga:offer:01JA00000000000000000000F2",
+              "quantity": 2,
+              "variantRef": "pro.ga:offer_variant:01JA00000000000000000000V1"
+            }
+          ],
+          "note": "Retrait samedi matin.",
+          "shopRef": "pro.ga:structure:01JA00000000000000000000S1"
+        },
+        "requestId": "antsia-req-000006",
+        "scope": "commerce.checkout.prepare",
+        "source": "antsia",
+        "subject": {
+          "authVerifiedAt": 1792285140000,
+          "kind": "buyer",
+          "ref": "antsia:sub:b0000000000000000000000001"
+        },
+        "version": 1
+      },
+      "expect": {
+        "ok": false,
+        "reason": "invalid_payload",
+        "path": "$.payload.lines[0].quantity"
+      }
+    },
+    {
+      "name": "révision de catalogue nulle",
+      "context": {
+        "environment": "sandbox",
+        "nowMs": 1792285200000,
+        "source": "antsia"
+      },
+      "body": {
+        "command": "checkout.prepare",
+        "contract": "PRO-COMMERCE-COMMAND-V1",
+        "environment": "sandbox",
+        "expiresAt": 1792285499000,
+        "issuedAt": 1792285199000,
+        "payload": {
+          "consent": {
+            "givenAt": 1792285170000,
+            "purpose": "commerce_checkout",
+            "textVersion": "2026-10-18"
+          },
+          "fulfillment": {
+            "establishmentRef": "pro.ga:establishment:01JA00000000000000000000E1",
+            "mode": "pickup"
+          },
+          "lines": [
+            {
+              "expectedCatalogRevision": 0,
+              "expectedUnitAmount": {
+                "amount": 25000,
+                "currency": "XAF"
+              },
+              "offerRef": "pro.ga:offer:01JA00000000000000000000F1",
+              "quantity": 1
+            },
+            {
+              "expectedCatalogRevision": 5,
+              "expectedUnitAmount": {
+                "amount": 28000,
+                "currency": "XAF"
+              },
+              "offerRef": "pro.ga:offer:01JA00000000000000000000F2",
+              "quantity": 2,
+              "variantRef": "pro.ga:offer_variant:01JA00000000000000000000V1"
+            }
+          ],
+          "note": "Retrait samedi matin.",
+          "shopRef": "pro.ga:structure:01JA00000000000000000000S1"
+        },
+        "requestId": "antsia-req-000006",
+        "scope": "commerce.checkout.prepare",
+        "source": "antsia",
+        "subject": {
+          "authVerifiedAt": 1792285140000,
+          "kind": "buyer",
+          "ref": "antsia:sub:b0000000000000000000000001"
+        },
+        "version": 1
+      },
+      "expect": {
+        "ok": false,
+        "reason": "invalid_revision",
+        "path": "$.payload.lines[0].expectedCatalogRevision"
+      }
+    },
+    {
+      "name": "paiement d'un total nul",
+      "context": {
+        "environment": "sandbox",
+        "nowMs": 1792285200000,
+        "source": "antsia"
+      },
+      "body": {
+        "command": "payment.start",
+        "contract": "PRO-COMMERCE-COMMAND-V1",
+        "environment": "sandbox",
+        "expiresAt": 1792285499000,
+        "issuedAt": 1792285199000,
+        "payload": {
+          "checkoutRef": "pro.ga:checkout:01JA00000000000000000000H1",
+          "consent": {
+            "givenAt": 1792285170000,
+            "purpose": "commerce_payment",
+            "textVersion": "2026-10-18"
+          },
+          "expectedTotal": {
+            "amount": 0,
+            "currency": "XAF"
+          },
+          "shopRef": "pro.ga:structure:01JA00000000000000000000S1"
+        },
+        "requestId": "antsia-req-000008",
+        "scope": "commerce.payment.start",
+        "source": "antsia",
+        "subject": {
+          "authVerifiedAt": 1792285140000,
+          "kind": "buyer",
+          "ref": "antsia:sub:b0000000000000000000000001"
+        },
+        "version": 1
+      },
+      "expect": {
+        "ok": false,
+        "reason": "invalid_amount",
+        "path": "$.payload.expectedTotal.amount"
+      }
+    },
+    {
+      "name": "nom de famille non normalisé",
+      "context": {
+        "environment": "sandbox",
+        "nowMs": 1792285200000,
+        "source": "antsia"
+      },
+      "body": {
+        "command": "application.submit",
+        "contract": "PRO-COMMERCE-COMMAND-V1",
+        "environment": "sandbox",
+        "expiresAt": 1792285499000,
+        "issuedAt": 1792285199000,
+        "payload": {
+          "attachments": [
+            {
+              "attachmentRef": "antsia:file:f0000000000000000000000001",
+              "byteSize": 182044,
+              "kind": "cv",
+              "mimeType": "application/pdf",
+              "sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+            }
+          ],
+          "civilName": {
+            "firstName": "Jean-Rémy Éloïse",
+            "lastName": "Ndong Mba"
+          },
+          "consent": {
+            "givenAt": 1792285170000,
+            "purpose": "commerce_application",
+            "textVersion": "2026-10-18"
+          },
+          "jobRef": "pro.ga:job_opening:01JA00000000000000000000J1",
+          "motivation": "Dix ans d'expérience en atelier.",
+          "shopRef": "pro.ga:structure:01JA00000000000000000000S1"
+        },
+        "requestId": "antsia-req-000011",
+        "scope": "commerce.application.submit",
+        "source": "antsia",
+        "subject": {
+          "authVerifiedAt": 1792285140000,
+          "kind": "candidate",
+          "ref": "antsia:sub:c0000000000000000000000001"
+        },
+        "version": 1
+      },
+      "expect": {
+        "ok": false,
+        "reason": "invalid_name",
+        "path": "$.payload.civilName"
+      }
+    },
+    {
+      "name": "prénom non normalisé",
+      "context": {
+        "environment": "sandbox",
+        "nowMs": 1792285200000,
+        "source": "antsia"
+      },
+      "body": {
+        "command": "application.submit",
+        "contract": "PRO-COMMERCE-COMMAND-V1",
+        "environment": "sandbox",
+        "expiresAt": 1792285499000,
+        "issuedAt": 1792285199000,
+        "payload": {
+          "attachments": [
+            {
+              "attachmentRef": "antsia:file:f0000000000000000000000001",
+              "byteSize": 182044,
+              "kind": "cv",
+              "mimeType": "application/pdf",
+              "sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+            }
+          ],
+          "civilName": {
+            "firstName": "jean-rémy",
+            "lastName": "NDONG MBA"
+          },
+          "consent": {
+            "givenAt": 1792285170000,
+            "purpose": "commerce_application",
+            "textVersion": "2026-10-18"
+          },
+          "jobRef": "pro.ga:job_opening:01JA00000000000000000000J1",
+          "motivation": "Dix ans d'expérience en atelier.",
+          "shopRef": "pro.ga:structure:01JA00000000000000000000S1"
+        },
+        "requestId": "antsia-req-000011",
+        "scope": "commerce.application.submit",
+        "source": "antsia",
+        "subject": {
+          "authVerifiedAt": 1792285140000,
+          "kind": "candidate",
+          "ref": "antsia:sub:c0000000000000000000000001"
+        },
+        "version": 1
+      },
+      "expect": {
+        "ok": false,
+        "reason": "invalid_name",
+        "path": "$.payload.civilName"
+      }
+    },
+    {
+      "name": "pièce non PDF",
+      "context": {
+        "environment": "sandbox",
+        "nowMs": 1792285200000,
+        "source": "antsia"
+      },
+      "body": {
+        "command": "application.submit",
+        "contract": "PRO-COMMERCE-COMMAND-V1",
+        "environment": "sandbox",
+        "expiresAt": 1792285499000,
+        "issuedAt": 1792285199000,
+        "payload": {
+          "attachments": [
+            {
+              "attachmentRef": "antsia:file:f0000000000000000000000001",
+              "byteSize": 182044,
+              "kind": "cv",
+              "mimeType": "application/msword",
+              "sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+            }
+          ],
+          "civilName": {
+            "firstName": "Jean-Rémy Éloïse",
+            "lastName": "NDONG MBA"
+          },
+          "consent": {
+            "givenAt": 1792285170000,
+            "purpose": "commerce_application",
+            "textVersion": "2026-10-18"
+          },
+          "jobRef": "pro.ga:job_opening:01JA00000000000000000000J1",
+          "motivation": "Dix ans d'expérience en atelier.",
+          "shopRef": "pro.ga:structure:01JA00000000000000000000S1"
+        },
+        "requestId": "antsia-req-000011",
+        "scope": "commerce.application.submit",
+        "source": "antsia",
+        "subject": {
+          "authVerifiedAt": 1792285140000,
+          "kind": "candidate",
+          "ref": "antsia:sub:c0000000000000000000000001"
+        },
+        "version": 1
+      },
+      "expect": {
+        "ok": false,
+        "reason": "invalid_payload",
+        "path": "$.payload.attachments[0].mimeType"
+      }
+    },
+    {
+      "name": "créneau passé",
+      "context": {
+        "environment": "sandbox",
+        "nowMs": 1792285200000,
+        "source": "antsia"
+      },
+      "body": {
+        "command": "booking.request",
+        "contract": "PRO-COMMERCE-COMMAND-V1",
+        "environment": "sandbox",
+        "expiresAt": 1792285499000,
+        "issuedAt": 1792285199000,
+        "payload": {
+          "consent": {
+            "givenAt": 1792285170000,
+            "purpose": "commerce_booking",
+            "textVersion": "2026-10-18"
+          },
+          "displayName": "Awa",
+          "note": "Première séance.",
+          "offerRef": "pro.ga:offer:01JA00000000000000000000F4",
+          "resourceRef": "pro.ga:agenda_resource:01JA00000000000000000000M1",
+          "serviceRef": "pro.ga:agenda_service:01JA00000000000000000000D1",
+          "shopRef": "pro.ga:structure:01JA00000000000000000000S1",
+          "slot": {
+            "endAt": 1792288739000,
+            "startAt": 1792285139000,
+            "timeZone": "Africa/Libreville"
+          }
+        },
+        "requestId": "antsia-req-000010",
+        "scope": "commerce.booking.request",
+        "source": "antsia",
+        "subject": {
+          "authVerifiedAt": 1792285140000,
+          "kind": "buyer",
+          "ref": "antsia:sub:b0000000000000000000000001"
+        },
+        "version": 1
+      },
+      "expect": {
+        "ok": false,
+        "reason": "invalid_time",
+        "path": "$.payload.slot.startAt"
+      }
+    },
+    {
+      "name": "créneau de neuf heures",
+      "context": {
+        "environment": "sandbox",
+        "nowMs": 1792285200000,
+        "source": "antsia"
+      },
+      "body": {
+        "command": "booking.request",
+        "contract": "PRO-COMMERCE-COMMAND-V1",
+        "environment": "sandbox",
+        "expiresAt": 1792285499000,
+        "issuedAt": 1792285199000,
+        "payload": {
+          "consent": {
+            "givenAt": 1792285170000,
+            "purpose": "commerce_booking",
+            "textVersion": "2026-10-18"
+          },
+          "displayName": "Awa",
+          "note": "Première séance.",
+          "offerRef": "pro.ga:offer:01JA00000000000000000000F4",
+          "resourceRef": "pro.ga:agenda_resource:01JA00000000000000000000M1",
+          "serviceRef": "pro.ga:agenda_service:01JA00000000000000000000D1",
+          "shopRef": "pro.ga:structure:01JA00000000000000000000S1",
+          "slot": {
+            "endAt": 1792490400000,
+            "startAt": 1792458000000,
+            "timeZone": "Africa/Libreville"
+          }
+        },
+        "requestId": "antsia-req-000010",
+        "scope": "commerce.booking.request",
+        "source": "antsia",
+        "subject": {
+          "authVerifiedAt": 1792285140000,
+          "kind": "buyer",
+          "ref": "antsia:sub:b0000000000000000000000001"
+        },
+        "version": 1
+      },
+      "expect": {
+        "ok": false,
+        "reason": "invalid_time",
+        "path": "$.payload.slot.endAt"
+      }
+    },
+    {
+      "name": "fuseau hors contrat",
+      "context": {
+        "environment": "sandbox",
+        "nowMs": 1792285200000,
+        "source": "antsia"
+      },
+      "body": {
+        "command": "booking.request",
+        "contract": "PRO-COMMERCE-COMMAND-V1",
+        "environment": "sandbox",
+        "expiresAt": 1792285499000,
+        "issuedAt": 1792285199000,
+        "payload": {
+          "consent": {
+            "givenAt": 1792285170000,
+            "purpose": "commerce_booking",
+            "textVersion": "2026-10-18"
+          },
+          "displayName": "Awa",
+          "note": "Première séance.",
+          "offerRef": "pro.ga:offer:01JA00000000000000000000F4",
+          "resourceRef": "pro.ga:agenda_resource:01JA00000000000000000000M1",
+          "serviceRef": "pro.ga:agenda_service:01JA00000000000000000000D1",
+          "shopRef": "pro.ga:structure:01JA00000000000000000000S1",
+          "slot": {
+            "endAt": 1792461600000,
+            "startAt": 1792458000000,
+            "timeZone": "Europe/Paris"
+          }
+        },
+        "requestId": "antsia-req-000010",
+        "scope": "commerce.booking.request",
+        "source": "antsia",
+        "subject": {
+          "authVerifiedAt": 1792285140000,
+          "kind": "buyer",
+          "ref": "antsia:sub:b0000000000000000000000001"
+        },
+        "version": 1
+      },
+      "expect": {
+        "ok": false,
+        "reason": "invalid_payload",
+        "path": "$.payload.slot.timeZone"
+      }
+    },
+    {
+      "name": "mise à jour sans révision attendue",
+      "context": {
+        "environment": "sandbox",
+        "nowMs": 1792285200000,
+        "source": "antsia"
+      },
+      "body": {
+        "command": "catalog.draft.save",
+        "contract": "PRO-COMMERCE-COMMAND-V1",
+        "environment": "sandbox",
+        "expiresAt": 1792285499000,
+        "issuedAt": 1792285199000,
+        "payload": {
+          "draft": {
+            "collectionRefs": [
+              "pro.ga:offer_collection:01JA00000000000000000000C1"
+            ],
+            "description": "Pagne tissé, deux yards.",
+            "kind": "product",
+            "price": {
+              "amount": 15000,
+              "currency": "XAF",
+              "mode": "fixed"
+            },
+            "tags": [
+              "pagne"
+            ],
+            "title": "Pagne tissé"
+          },
+          "linkRef": "pro.ga:commerce_link:01JA00000000000000000000K1",
+          "offerRef": "pro.ga:offer:01JA00000000000000000000F3"
+        },
+        "requestId": "antsia-req-000003",
+        "scope": "commerce.catalog.draft.save",
+        "source": "antsia",
+        "subject": {
+          "authVerifiedAt": 1792285140000,
+          "kind": "seller_operator",
+          "ref": "antsia:sub:s0000000000000000000000001"
+        },
+        "version": 1
+      },
+      "expect": {
+        "ok": false,
+        "reason": "invalid_payload",
+        "path": "$.payload.expectedDraftRevision"
+      }
+    },
+    {
+      "name": "brouillon sur devis chiffré",
+      "context": {
+        "environment": "sandbox",
+        "nowMs": 1792285200000,
+        "source": "antsia"
+      },
+      "body": {
+        "command": "catalog.draft.save",
+        "contract": "PRO-COMMERCE-COMMAND-V1",
+        "environment": "sandbox",
+        "expiresAt": 1792285499000,
+        "issuedAt": 1792285199000,
+        "payload": {
+          "draft": {
+            "collectionRefs": [
+              "pro.ga:offer_collection:01JA00000000000000000000C1"
+            ],
+            "description": "Pagne tissé, deux yards.",
+            "kind": "product",
+            "price": {
+              "amount": 5000,
+              "currency": "XAF",
+              "mode": "quote"
+            },
+            "tags": [
+              "pagne"
+            ],
+            "title": "Pagne tissé"
+          },
+          "linkRef": "pro.ga:commerce_link:01JA00000000000000000000K1"
+        },
+        "requestId": "antsia-req-000002",
+        "scope": "commerce.catalog.draft.save",
+        "source": "antsia",
+        "subject": {
+          "authVerifiedAt": 1792285140000,
+          "kind": "seller_operator",
+          "ref": "antsia:sub:s0000000000000000000000001"
+        },
+        "version": 1
+      },
+      "expect": {
+        "ok": false,
+        "reason": "amount_incoherent",
+        "path": "$.payload.draft.price.amount"
+      }
+    },
+    {
+      "name": "variante sans offre",
+      "context": {
+        "environment": "sandbox",
+        "nowMs": 1792285200000,
+        "source": "antsia"
+      },
+      "body": {
+        "command": "inquiry.submit",
+        "contract": "PRO-COMMERCE-COMMAND-V1",
+        "environment": "sandbox",
+        "expiresAt": 1792285499000,
+        "issuedAt": 1792285199000,
+        "payload": {
+          "consent": {
+            "givenAt": 1792285170000,
+            "purpose": "commerce_inquiry",
+            "textVersion": "2026-10-18"
+          },
+          "conversationRef": "antsia:conv:v0000000000000000000000001",
+          "desiredDate": "2026-11-02",
+          "displayName": "Awa",
+          "kind": "quote_request",
+          "message": "Bonjour, est-ce possible en taille XL pour le 2 novembre ?",
+          "quantity": 2,
+          "shopRef": "pro.ga:structure:01JA00000000000000000000S1",
+          "variantRef": "pro.ga:offer_variant:01JA00000000000000000000V1"
+        },
+        "requestId": "antsia-req-000004",
+        "scope": "commerce.inquiry.submit",
+        "source": "antsia",
+        "subject": {
+          "authVerifiedAt": 1792285140000,
+          "kind": "buyer",
+          "ref": "antsia:sub:b0000000000000000000000001"
+        },
+        "version": 1
+      },
+      "expect": {
+        "ok": false,
+        "reason": "invalid_payload",
+        "path": "$.payload.variantRef"
+      }
+    },
+    {
+      "name": "message vide",
+      "context": {
+        "environment": "sandbox",
+        "nowMs": 1792285200000,
+        "source": "antsia"
+      },
+      "body": {
+        "command": "inquiry.submit",
+        "contract": "PRO-COMMERCE-COMMAND-V1",
+        "environment": "sandbox",
+        "expiresAt": 1792285499000,
+        "issuedAt": 1792285199000,
+        "payload": {
+          "consent": {
+            "givenAt": 1792285170000,
+            "purpose": "commerce_inquiry",
+            "textVersion": "2026-10-18"
+          },
+          "conversationRef": "antsia:conv:v0000000000000000000000001",
+          "desiredDate": "2026-11-02",
+          "displayName": "Awa",
+          "kind": "quote_request",
+          "message": "",
+          "offerRef": "pro.ga:offer:01JA00000000000000000000F2",
+          "quantity": 2,
+          "shopRef": "pro.ga:structure:01JA00000000000000000000S1",
+          "variantRef": "pro.ga:offer_variant:01JA00000000000000000000V1"
+        },
+        "requestId": "antsia-req-000004",
+        "scope": "commerce.inquiry.submit",
+        "source": "antsia",
+        "subject": {
+          "authVerifiedAt": 1792285140000,
+          "kind": "buyer",
+          "ref": "antsia:sub:b0000000000000000000000001"
+        },
+        "version": 1
+      },
+      "expect": {
+        "ok": false,
+        "reason": "invalid_text",
+        "path": "$.payload.message"
+      }
+    },
+    {
+      "name": "consentement d'une autre finalité",
+      "context": {
+        "environment": "sandbox",
+        "nowMs": 1792285200000,
+        "source": "antsia"
+      },
+      "body": {
+        "command": "inquiry.submit",
+        "contract": "PRO-COMMERCE-COMMAND-V1",
+        "environment": "sandbox",
+        "expiresAt": 1792285499000,
+        "issuedAt": 1792285199000,
+        "payload": {
+          "consent": {
+            "givenAt": 1792285170000,
+            "purpose": "commerce_link",
+            "textVersion": "2026-10-18"
+          },
+          "conversationRef": "antsia:conv:v0000000000000000000000001",
+          "desiredDate": "2026-11-02",
+          "displayName": "Awa",
+          "kind": "quote_request",
+          "message": "Bonjour, est-ce possible en taille XL pour le 2 novembre ?",
+          "offerRef": "pro.ga:offer:01JA00000000000000000000F2",
+          "quantity": 2,
+          "shopRef": "pro.ga:structure:01JA00000000000000000000S1",
+          "variantRef": "pro.ga:offer_variant:01JA00000000000000000000V1"
+        },
+        "requestId": "antsia-req-000004",
+        "scope": "commerce.inquiry.submit",
+        "source": "antsia",
+        "subject": {
+          "authVerifiedAt": 1792285140000,
+          "kind": "buyer",
+          "ref": "antsia:sub:b0000000000000000000000001"
+        },
+        "version": 1
+      },
+      "expect": {
+        "ok": false,
+        "reason": "invalid_payload",
+        "path": "$.payload.consent.purpose"
+      }
+    },
+    {
+      "name": "consentement postérieur à la demande",
+      "context": {
+        "environment": "sandbox",
+        "nowMs": 1792285200000,
+        "source": "antsia"
+      },
+      "body": {
+        "command": "inquiry.submit",
+        "contract": "PRO-COMMERCE-COMMAND-V1",
+        "environment": "sandbox",
+        "expiresAt": 1792285499000,
+        "issuedAt": 1792285199000,
+        "payload": {
+          "consent": {
+            "givenAt": 1792285199001,
+            "purpose": "commerce_inquiry",
+            "textVersion": "2026-10-18"
+          },
+          "conversationRef": "antsia:conv:v0000000000000000000000001",
+          "desiredDate": "2026-11-02",
+          "displayName": "Awa",
+          "kind": "quote_request",
+          "message": "Bonjour, est-ce possible en taille XL pour le 2 novembre ?",
+          "offerRef": "pro.ga:offer:01JA00000000000000000000F2",
+          "quantity": 2,
+          "shopRef": "pro.ga:structure:01JA00000000000000000000S1",
+          "variantRef": "pro.ga:offer_variant:01JA00000000000000000000V1"
+        },
+        "requestId": "antsia-req-000004",
+        "scope": "commerce.inquiry.submit",
+        "source": "antsia",
+        "subject": {
+          "authVerifiedAt": 1792285140000,
+          "kind": "buyer",
+          "ref": "antsia:sub:b0000000000000000000000001"
+        },
+        "version": 1
+      },
+      "expect": {
+        "ok": false,
+        "reason": "invalid_time",
+        "path": "$.payload.consent.givenAt"
+      }
+    },
+    {
+      "name": "vérificateur PKCE trop court",
+      "context": {
+        "environment": "sandbox",
+        "nowMs": 1792285200000,
+        "source": "antsia"
+      },
+      "body": {
+        "command": "link.confirm",
+        "contract": "PRO-COMMERCE-COMMAND-V1",
+        "environment": "sandbox",
+        "expiresAt": 1792285499000,
+        "issuedAt": 1792285199000,
+        "payload": {
+          "antsiaShopRef": "antsia:shop:p0000000000000000000000001",
+          "codeVerifier": "short",
+          "consent": {
+            "givenAt": 1792285170000,
+            "purpose": "commerce_link",
+            "textVersion": "2026-10-18"
+          },
+          "linkCode": "Zk3QeR8tYw2uIo5pAs7dFg9hJk1lZx4cVb6nM0qW",
+          "requestedPermissions": [
+            "catalog_drafts",
+            "publish_catalog",
+            "receive_inquiries",
+            "receive_orders"
+          ]
+        },
+        "requestId": "antsia-req-000001",
+        "scope": "commerce.link.confirm",
+        "source": "antsia",
+        "subject": {
+          "authVerifiedAt": 1792285140000,
+          "kind": "seller_operator",
+          "ref": "antsia:sub:s0000000000000000000000001"
+        },
+        "version": 1
+      },
+      "expect": {
+        "ok": false,
+        "reason": "invalid_payload",
+        "path": "$.payload.codeVerifier"
+      }
+    },
+    {
+      "name": "aucune permission demandée",
+      "context": {
+        "environment": "sandbox",
+        "nowMs": 1792285200000,
+        "source": "antsia"
+      },
+      "body": {
+        "command": "link.confirm",
+        "contract": "PRO-COMMERCE-COMMAND-V1",
+        "environment": "sandbox",
+        "expiresAt": 1792285499000,
+        "issuedAt": 1792285199000,
+        "payload": {
+          "antsiaShopRef": "antsia:shop:p0000000000000000000000001",
+          "codeVerifier": "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk",
+          "consent": {
+            "givenAt": 1792285170000,
+            "purpose": "commerce_link",
+            "textVersion": "2026-10-18"
+          },
+          "linkCode": "Zk3QeR8tYw2uIo5pAs7dFg9hJk1lZx4cVb6nM0qW",
+          "requestedPermissions": []
+        },
+        "requestId": "antsia-req-000001",
+        "scope": "commerce.link.confirm",
+        "source": "antsia",
+        "subject": {
+          "authVerifiedAt": 1792285140000,
+          "kind": "seller_operator",
+          "ref": "antsia:sub:s0000000000000000000000001"
+        },
+        "version": 1
+      },
+      "expect": {
+        "ok": false,
+        "reason": "invalid_payload",
+        "path": "$.payload.requestedPermissions"
+      }
+    },
+    {
+      "name": "livraison hors Gabon",
+      "context": {
+        "environment": "sandbox",
+        "nowMs": 1792285200000,
+        "source": "antsia"
+      },
+      "body": {
+        "command": "checkout.prepare",
+        "contract": "PRO-COMMERCE-COMMAND-V1",
+        "environment": "sandbox",
+        "expiresAt": 1792285499000,
+        "issuedAt": 1792285199000,
+        "payload": {
+          "consent": {
+            "givenAt": 1792285170000,
+            "purpose": "commerce_checkout",
+            "textVersion": "2026-10-18"
+          },
+          "fulfillment": {
+            "address": {
+              "country": "FR",
+              "line1": "Quartier fictif, rue 12",
+              "locality": "Libreville"
+            },
+            "instructions": "Prévenir par la messagerie ANTSIA à l'arrivée.",
+            "mode": "seller_delivery"
+          },
+          "lines": [
+            {
+              "expectedCatalogRevision": 3,
+              "expectedUnitAmount": {
+                "amount": 25000,
+                "currency": "XAF"
+              },
+              "offerRef": "pro.ga:offer:01JA00000000000000000000F1",
+              "quantity": 1
+            },
+            {
+              "expectedCatalogRevision": 5,
+              "expectedUnitAmount": {
+                "amount": 28000,
+                "currency": "XAF"
+              },
+              "offerRef": "pro.ga:offer:01JA00000000000000000000F2",
+              "quantity": 2,
+              "variantRef": "pro.ga:offer_variant:01JA00000000000000000000V1"
+            }
+          ],
+          "shopRef": "pro.ga:structure:01JA00000000000000000000S1"
+        },
+        "requestId": "antsia-req-000007",
+        "scope": "commerce.checkout.prepare",
+        "source": "antsia",
+        "subject": {
+          "authVerifiedAt": 1792285140000,
+          "kind": "buyer",
+          "ref": "antsia:sub:b0000000000000000000000001"
+        },
+        "version": 1
+      },
+      "expect": {
+        "ok": false,
+        "reason": "invalid_payload",
+        "path": "$.payload.fulfillment.address.country"
+      }
+    },
+    {
+      "name": "consultation d'une consultation",
+      "context": {
+        "environment": "sandbox",
+        "nowMs": 1792285200000,
+        "source": "antsia"
+      },
+      "body": {
+        "command": "request.status",
+        "contract": "PRO-COMMERCE-COMMAND-V1",
+        "environment": "sandbox",
+        "expiresAt": 1792285499000,
+        "issuedAt": 1792285199000,
+        "payload": {
+          "targetCommand": "request.status",
+          "targetRequestId": "antsia-req-000006",
+          "targetRequestSha256": "8d160a5baa721877897800396f93f0184a1ca7b096d5cc6c61a0913d0d191a5e"
+        },
+        "requestId": "antsia-req-000012",
+        "scope": "commerce.request.status",
+        "source": "antsia",
+        "subject": {
+          "authVerifiedAt": 1792285140000,
+          "kind": "buyer",
+          "ref": "antsia:sub:b0000000000000000000000001"
+        },
+        "version": 1
+      },
+      "expect": {
+        "ok": false,
+        "reason": "invalid_payload",
+        "path": "$.payload.targetCommand"
+      }
+    },
+    {
+      "name": "version de transport 2",
+      "context": {
+        "environment": "sandbox",
+        "nowMs": 1792285200000,
+        "source": "antsia"
+      },
+      "body": {
+        "command": "checkout.prepare",
+        "contract": "PRO-COMMERCE-COMMAND-V1",
+        "environment": "sandbox",
+        "expiresAt": 1792285499000,
+        "issuedAt": 1792285199000,
+        "payload": {
+          "consent": {
+            "givenAt": 1792285170000,
+            "purpose": "commerce_checkout",
+            "textVersion": "2026-10-18"
+          },
+          "fulfillment": {
+            "establishmentRef": "pro.ga:establishment:01JA00000000000000000000E1",
+            "mode": "pickup"
+          },
+          "lines": [
+            {
+              "expectedCatalogRevision": 3,
+              "expectedUnitAmount": {
+                "amount": 25000,
+                "currency": "XAF"
+              },
+              "offerRef": "pro.ga:offer:01JA00000000000000000000F1",
+              "quantity": 1
+            },
+            {
+              "expectedCatalogRevision": 5,
+              "expectedUnitAmount": {
+                "amount": 28000,
+                "currency": "XAF"
+              },
+              "offerRef": "pro.ga:offer:01JA00000000000000000000F2",
+              "quantity": 2,
+              "variantRef": "pro.ga:offer_variant:01JA00000000000000000000V1"
+            }
+          ],
+          "note": "Retrait samedi matin.",
+          "shopRef": "pro.ga:structure:01JA00000000000000000000S1"
+        },
+        "requestId": "antsia-req-000006",
+        "scope": "commerce.checkout.prepare",
+        "source": "antsia",
+        "subject": {
+          "authVerifiedAt": 1792285140000,
+          "kind": "buyer",
+          "ref": "antsia:sub:b0000000000000000000000001"
+        },
+        "version": 2
+      },
+      "expect": {
+        "ok": false,
+        "reason": "invalid_request",
+        "path": "$.version"
+      }
+    },
+    {
+      "name": "sujet absent",
+      "context": {
+        "environment": "sandbox",
+        "nowMs": 1792285200000,
+        "source": "antsia"
+      },
+      "body": {
+        "command": "checkout.prepare",
+        "contract": "PRO-COMMERCE-COMMAND-V1",
+        "environment": "sandbox",
+        "expiresAt": 1792285499000,
+        "issuedAt": 1792285199000,
+        "payload": {
+          "consent": {
+            "givenAt": 1792285170000,
+            "purpose": "commerce_checkout",
+            "textVersion": "2026-10-18"
+          },
+          "fulfillment": {
+            "establishmentRef": "pro.ga:establishment:01JA00000000000000000000E1",
+            "mode": "pickup"
+          },
+          "lines": [
+            {
+              "expectedCatalogRevision": 3,
+              "expectedUnitAmount": {
+                "amount": 25000,
+                "currency": "XAF"
+              },
+              "offerRef": "pro.ga:offer:01JA00000000000000000000F1",
+              "quantity": 1
+            },
+            {
+              "expectedCatalogRevision": 5,
+              "expectedUnitAmount": {
+                "amount": 28000,
+                "currency": "XAF"
+              },
+              "offerRef": "pro.ga:offer:01JA00000000000000000000F2",
+              "quantity": 2,
+              "variantRef": "pro.ga:offer_variant:01JA00000000000000000000V1"
+            }
+          ],
+          "note": "Retrait samedi matin.",
+          "shopRef": "pro.ga:structure:01JA00000000000000000000S1"
+        },
+        "requestId": "antsia-req-000006",
+        "scope": "commerce.checkout.prepare",
+        "source": "antsia",
+        "version": 1
+      },
+      "expect": {
+        "ok": false,
+        "reason": "invalid_request",
+        "path": "$.subject"
+      }
+    },
+    {
+      "name": "corps non canonique",
+      "context": {
+        "environment": "sandbox",
+        "nowMs": 1792285200000,
+        "source": "antsia"
+      },
+      "rawBody": "{\n  \"command\": \"checkout.prepare\",\n  \"contract\": \"PRO-COMMERCE-COMMAND-V1\",\n  \"environment\": \"sandbox\",\n  \"expiresAt\": 1792285499000,\n  \"issuedAt\": 1792285199000,\n  \"payload\": {\n    \"consent\": {\n      \"givenAt\": 1792285170000,\n      \"purpose\": \"commerce_checkout\",\n      \"textVersion\": \"2026-10-18\"\n    },\n    \"fulfillment\": {\n      \"establishmentRef\": \"pro.ga:establishment:01JA00000000000000000000E1\",\n      \"mode\": \"pickup\"\n    },\n    \"lines\": [\n      {\n        \"expectedCatalogRevision\": 3,\n        \"expectedUnitAmount\": {\n          \"amount\": 25000,\n          \"currency\": \"XAF\"\n        },\n        \"offerRef\": \"pro.ga:offer:01JA00000000000000000000F1\",\n        \"quantity\": 1\n      },\n      {\n        \"expectedCatalogRevision\": 5,\n        \"expectedUnitAmount\": {\n          \"amount\": 28000,\n          \"currency\": \"XAF\"\n        },\n        \"offerRef\": \"pro.ga:offer:01JA00000000000000000000F2\",\n        \"quantity\": 2,\n        \"variantRef\": \"pro.ga:offer_variant:01JA00000000000000000000V1\"\n      }\n    ],\n    \"note\": \"Retrait samedi matin.\",\n    \"shopRef\": \"pro.ga:structure:01JA00000000000000000000S1\"\n  },\n  \"requestId\": \"antsia-req-000006\",\n  \"scope\": \"commerce.checkout.prepare\",\n  \"source\": \"antsia\",\n  \"subject\": {\n    \"authVerifiedAt\": 1792285140000,\n    \"kind\": \"buyer\",\n    \"ref\": \"antsia:sub:b0000000000000000000000001\"\n  },\n  \"version\": 1\n}",
+      "expect": {
+        "ok": false,
+        "reason": "not_canonical",
+        "path": "$"
+      }
+    }
+  ]
+}

@@ -32,6 +32,13 @@ export type PublicPost = {
   origin: PublicOrigin
   media: PostMediaDto[]
   shared: PublicSharedPost | null
+  /** P09 : seule une référence existe ; le slot relit l'offre via sa porte publique. */
+  hasCommerceOffer?: boolean
+}
+export type PublicAgentAffiliation = {
+  administrationName: string
+  administrationHandle: string
+  roleLabel: string
 }
 export type PublicProfile = {
   handle: string
@@ -39,6 +46,7 @@ export type PublicProfile = {
   headline: string | null
   avatarUrl: string | null
   badges: Badge[]
+  publicAgent?: PublicAgentAffiliation | null
 }
 export type PublicPage = {
   id: string

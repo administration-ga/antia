@@ -22,7 +22,7 @@ export {
 	icomFloatPlacementStorageKey,
 	useDockState,
 } from "./dock-store"
-export { MessagesRoute } from "./MessagesRoute"
+export { MessagesRoute, IcomListSessionBoundary } from "./MessagesRoute"
 export type { MessagesRouteProps } from "./MessagesRoute"
 export { MessagerieListPage } from "./MessagerieListPage"
 export { MessagerieConversationPage } from "./MessagerieConversationPage"
@@ -57,6 +57,39 @@ export { MessageComposer } from "./MessageComposer"
 export type { UploadedAttachment } from "./MessageComposer"
 export { MessageActionsSheet } from "./MessageActionsSheet"
 export { MessageAttachment } from "./MessageAttachment"
+export { CommercialConversationView } from "./CommercialConversationView"
+export type { CommercialConversationViewProps } from "./CommercialConversationView"
+export { COMMERCIAL_MESSAGING_SOURCE } from "./commercial-messaging-source"
+export type { CommercialThread, CommercialThreadId, CommercialShopId } from "./commercial-messaging-source"
+/**
+ * CC-5 (ADR-0025) — les conversations CONTEXTUELLES (mises en relation ouvertes par un objet) :
+ * source, vue, liste et POINT D'INJECTION de l'application (`useContextualMessages()` →
+ * `MessagesRoute`, prop `contextual`). Aucune n'est un fil personnel ni un fil P10. Sous-chemin
+ * étroit équivalent : `@antsia/social-features/features/messagerie/contextual-entry`.
+ */
+export { ContextualConversationView } from "./ContextualConversationView"
+export type { ContextualConversationViewProps } from "./ContextualConversationView"
+export { ContextualConversationList } from "./ContextualConversationList"
+export type { ContextualConversationListProps } from "./ContextualConversationList"
+export { useContextualMessages } from "./use-contextual-messages"
+export type { ContextualMessagesOptions } from "./use-contextual-messages"
+export { CONTEXTUAL_MESSAGING_SOURCE, CONTEXTUAL_MESSAGES_PAGE, CONTEXTUAL_THREADS_PAGE, contextualCursorsEqual } from "./contextual-messaging-source"
+export type {
+	ContextualAttachment,
+	ContextualMessage,
+	ContextualMessageId,
+	ContextualMessagesPage,
+	ContextualMessagingSource,
+	ContextualMineCursor,
+	ContextualObjectRef,
+	ContextualStartCallResult,
+	ContextualThread,
+	ContextualThreadId,
+	ContextualThreadQuery,
+	ContextualWrites,
+} from "./contextual-messaging-source"
+export * from "./contextual-conversation-model"
+export { CONTEXTUAL_CONVERSATION_FILTER } from "./icom-views"
 export type { MessageAttachmentData } from "./MessageAttachment"
 export { ReplyPreview } from "./ReplyPreview"
 export type { ReplyPreviewData } from "./ReplyPreview"

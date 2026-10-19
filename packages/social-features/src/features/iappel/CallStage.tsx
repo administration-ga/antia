@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/iappel/CallStage.tsx @ ad2e7fdc2 — adaptations : branches retirées — poste (liseré, emblème, fonction, administration, props `scope` et `orgEmblemUrl`), transmission au secrétariat (prop `routedFor`, `routedFromPositionTitle`) ; libellés, états et noms accessibles traduits (i18n `iappel`, pluriel des participants) ; `deriveCallPhase`, `peerDisplayName`, `groupCallSubtitle` et `speakerButtonLabel` reçoivent `t` en dernier paramètre, `peerSubtitle` lu pour la seule portée personnelle ; deux mémos rendus conformes au compilateur React (identité LiveKit locale lue une fois, liste des conviés mémorisée).
+// Dupliqué de socle/packages/agent-features/src/features/iappel/CallStage.tsx @ ad2e7fdc2 — adaptations : branches retirées — poste (liseré, emblème, fonction, administration, props `scope` et `orgEmblemUrl`), transmission au secrétariat (prop `routedFor`, `routedFromPositionTitle`) ; libellés, états et noms accessibles traduits (i18n `iappel`, pluriel des participants) ; `deriveCallPhase`, `peerDisplayName`, `groupCallSubtitle` et `speakerButtonLabel` reçoivent `t` en dernier paramètre, `peerSubtitle` lu pour la seule portée personnelle ; deux mémos rendus conformes au compilateur React (identité LiveKit locale lue une fois, liste des conviés mémorisée) ; P05 (18/10/2026) : prop `establishedAt` — « En communication » et le chrono partent de l'établissement réel des médias, pas du décrochage serveur.
 "use client"
 
 /**
@@ -107,6 +107,12 @@ export interface CallStageProps {
 	myUserId?: string | null
 	/** Un échec de jeton ou de salle empêche l'appel de partir. */
 	hasError?: boolean
+	/**
+	 * P05 — l'instant où les médias passent réellement (`call-establishment`),
+	 * `null` tant qu'ils ne passent pas. Absent : la règle d'origine (décrochage
+	 * serveur) — gardée pour les hôtes qui ne suivent pas l'établissement.
+	 */
+	establishedAt?: number | null
 	/**
 	 * POURQUOI il ne part pas, en une phrase (déjà traduite).
 	 *
@@ -405,6 +411,7 @@ function CallStageView({
 	isHeld = false,
 	myUserId = null,
 	hasError = false,
+	establishedAt,
 	errorMessage = null,
 	micMuted,
 	micBlocked = null,
@@ -442,6 +449,7 @@ function CallStageView({
 			isHeld,
 			hasError,
 			myUserId,
+			...(establishedAt === undefined ? {} : { establishedAt }),
 		},
 		t,
 	)

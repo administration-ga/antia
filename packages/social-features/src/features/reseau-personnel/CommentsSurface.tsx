@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/CommentsSurface.tsx @ ad2e7fdc2 — adaptations : commentaires du moteur avec le réseau courant (`useNetwork().networkId`) — `engagement.engagement.paginateComments` (racines PAGINÉES, « Voir plus de commentaires », aperçu des réponses et leur nombre) au lieu de `listComments` (100 racines, 10 réponses, sans curseur), la suite des réponses par `paginateReplies`, `comment`, `removeComment`, et `editComment` (« Modifier » sur ses propres commentaires) ; une requête paginée LÈVE ses erreurs : l'état d'échec (« Réessayer ») est rendu par une frontière d'erreur dans le cadre du dialogue ; le nombre de conversations ne s'affiche qu'une fois la liste complète (jamais un plancher présenté comme un total) ; nom neutre traduit pour un profil non publié ; identifiants `Id<"posts">` et `Id<"postComments">` ; portail porté par la charte du réseau (`useNetwork().charte`) ; libellés et toasts par l'i18n (clés `reseau:commentsSurface.*`, accords au nombre) ; refus du moteur dit par son code (`postEngineErrorText`) ; voile et ombres par les jetons (`--ui2-scrim`, `--shadow-xl`) au lieu de couleurs littérales ; feuille de style sortie du JSX dans une constante de module (`COMMENTS_SURFACE_CSS`) — un littéral enfant de `<style>` passerait pour une chaîne d'interface — règles inchangées. ; PA6 : dates et jours civils dans le fuseau personnel du lecteur (repli appareil).
+// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/CommentsSurface.tsx @ ad2e7fdc2 — adaptations : commentaires du moteur avec le réseau courant (`useNetwork().networkId`) — `engagement.engagement.paginateComments` (racines PAGINÉES, « Voir plus de commentaires », aperçu des réponses et leur nombre) au lieu de `listComments` (100 racines, 10 réponses, sans curseur), la suite des réponses par `paginateReplies`, `comment`, `removeComment`, et `editComment` (« Modifier » sur ses propres commentaires) ; une requête paginée LÈVE ses erreurs : l'état d'échec (« Réessayer ») est rendu par une frontière d'erreur dans le cadre du dialogue ; le nombre de conversations ne s'affiche qu'une fois la liste complète (jamais un plancher présenté comme un total) ; nom neutre traduit pour un profil non publié ; identifiants `Id<"posts">` et `Id<"postComments">` ; portail porté par la charte du réseau (`useNetwork().charte`) ; libellés et toasts par l'i18n (clés `reseau:commentsSurface.*`, accords au nombre) ; refus du moteur dit par son code (`postEngineErrorText`) ; voile et ombres par les jetons (`--ui2-scrim`, `--shadow-xl`) au lieu de couleurs littérales ; feuille de style sortie du JSX dans une constante de module (`COMMENTS_SURFACE_CSS`) — un littéral enfant de `<style>` passerait pour une chaîne d'interface — règles inchangées. ; PA6 : dates et jours civils dans le fuseau personnel du lecteur (repli appareil). ; P18b (A06, A07) : la liste n'est plus une région vivante ; seuls l'ajout (« Commentaire publié. ») et l'échec s'annoncent, par deux régions persistantes hors de la vue, l'échec étant redit hors du toast.
 "use client"
 
 import { useViewerTimeZone } from "@antsia/api/viewer-preferences"
@@ -28,6 +28,11 @@ type CommentId = Id<"postComments">
 const COMMENTS_PAGE_SIZE = 20
 /** Réponses chargées par page quand on déplie la suite d'une racine. */
 const REPLIES_PAGE_SIZE = 20
+/**
+ * P18b (A06) : une espace insécable ajoutée à une annonce IDENTIQUE à la
+ * précédente — sans elle, la région vivante ne la relirait pas.
+ */
+const REPEAT_MARK = String.fromCharCode(0xa0)
 
 interface CommentsSurfaceProps {
   postId: PostId
@@ -83,7 +88,7 @@ const COMMENTS_SURFACE_CSS = `
           overflow: hidden;
           outline: none;
           border-radius: 18px 18px 0 0;
-          background: var(--ink-0);
+          background: var(--esp-surface-raised, var(--ink-0));
           box-shadow: var(--shadow-xl);
           animation: rp-comments-sheet-in 180ms ease-out both;
         }
@@ -154,6 +159,16 @@ function CommentsSurfaceContent({
   const [listState, setListState] = useState<{ loaded: number; complete: boolean }>({ loaded: 0, complete: false })
   /** Remonter la liste après un échec : une nouvelle frontière, un nouvel abonnement. */
   const [attempt, setAttempt] = useState(0)
+  /**
+   * P18b (A06, A07) : seuls l'AJOUT et l'ÉCHEC s'annoncent, par deux régions
+   * persistantes hors de la vue — la liste entière n'est plus une région
+   * vivante (chaque commentaire reçu, page chargée, retrait relisait de larges
+   * blocs). L'échec, dit aussi par un toast, est redit ici : dans une modale,
+   * la région des toasts peut rester hors d'atteinte des aides techniques.
+   */
+  const [published, setPublished] = useState("")
+  const [failure, setFailure] = useState("")
+  const sayFailure = (text: string) => setFailure((previous) => (previous === text ? `${text}${REPEAT_MARK}` : text))
   const dialogRef = useRef<HTMLElement>(null)
   const titleId = useId()
 
@@ -180,8 +195,12 @@ function CommentsSurfaceContent({
       })
       setBody("")
       setReplyTo(null)
+      const done = t("commentsSurface.published")
+      setPublished((previous) => (previous === done ? `${done}${REPEAT_MARK}` : done))
     } catch (error) {
-      toast.error(postEngineErrorText(error, "reseau:commentsSurface.toast.publishFailed", t))
+      const text = postEngineErrorText(error, "reseau:commentsSurface.toast.publishFailed", t)
+      toast.error(text)
+      sayFailure(text)
     } finally {
       setSending(false)
     }
@@ -199,15 +218,19 @@ function CommentsSurfaceContent({
     onTag,
     onMention,
     onRemove: (commentId) =>
-      void removeComment({ networkId, commentId }).catch((error: unknown) =>
-        toast.error(postEngineErrorText(error, "reseau:commentsSurface.toast.removeFailed", t))
-      ),
+      void removeComment({ networkId, commentId }).catch((error: unknown) => {
+        const text = postEngineErrorText(error, "reseau:commentsSurface.toast.removeFailed", t)
+        toast.error(text)
+        sayFailure(text)
+      }),
     onEdit: async (commentId, nextBody) => {
       try {
         await editComment({ networkId, commentId, body: nextBody })
         return true
       } catch (error) {
-        toast.error(postEngineErrorText(error, "reseau:commentsSurface.toast.editFailed", t))
+        const text = postEngineErrorText(error, "reseau:commentsSurface.toast.editFailed", t)
+        toast.error(text)
+        sayFailure(text)
         return false
       }
     },
@@ -292,9 +315,16 @@ function CommentsSurfaceContent({
           </button>
         </header>
 
+        {/* P18b (A06) : la liste n'est plus une région vivante ; seuls l'ajout
+            et l'échec s'annoncent, par ces deux régions persistantes. */}
+        <p role="status" className="sr-only">
+          {published}
+        </p>
+        <p role="alert" className="sr-only">
+          {failure}
+        </p>
         <div
           className="rp-comments-list"
-          aria-live="polite"
           style={{
             flex: "1 1 auto",
             minHeight: 0,

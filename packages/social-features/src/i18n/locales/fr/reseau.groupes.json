@@ -260,6 +260,20 @@
       "errorMessage": "La liste des invités n'a pas pu être chargée."
     }
   },
+  "associationAgenda": {
+    "organizedBy": "Association : {{name}}",
+    "confirmed": "Inscription confirmée",
+    "waitlisted": "Liste d’attente",
+    "waitlistHint": "Votre demande est en attente : aucune place n’est confirmée.",
+    "cancelled": "Événement annulé",
+    "open": "Consulter l’événement",
+    "pagination": {
+      "loading": "Chargement des événements de votre agenda…",
+      "loaded": "Cette vue porte sur les événements déjà chargés. D’autres peuvent encore suivre.",
+      "loadingMore": "Chargement d’autres événements…",
+      "more": "Charger d’autres événements"
+    }
+  },
   "evenementsRail": {
     "error": "Les évènements sont momentanément indisponibles.",
     "retry": "Réessayer",

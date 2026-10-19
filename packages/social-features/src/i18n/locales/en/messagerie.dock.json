@@ -1,4 +1,25 @@
 {
+  "icomViews": {
+    "title": "Messages",
+    "navigation": "Messaging views",
+    "conversations": "Conversations",
+    "calls": "Calls",
+    "contacts": "Contacts",
+    "backToFeed": "Back to feed",
+    "myProfile": "My profile",
+    "chooseConversation": "Choose a conversation",
+    "chooseConversationBody": "Find your conversations on the left, or start a new message with one of your connections.",
+    "loadedWindow": "Search and filters cover loaded conversations. Load more for older direct conversations. Groups are limited to the first 50 returned by the server.",
+    "loadedGroupsWindow": "Search and filters cover loaded conversations. Groups are limited to the first 50 returned by the server.",
+    "noFilteredConversations": "No matching conversation among those already loaded.",
+    "unread_one": "{{count}} unread message",
+    "unread_other": "{{count}} unread messages"
+  },
+  "conversationFilters": {
+    "all": "All",
+    "unread": "Unread",
+    "groups": "Groups"
+  },
   "icomBrickHeader": {
     "collapse": "Collapse {{title}}",
     "detach": "Detach iCom into a window",

@@ -73,7 +73,7 @@ const ESPACE_FLOATING_CARD_CSS = `
         overflow: hidden;
         border-radius: 18px;
         border: 1px solid var(--border);
-        background: var(--background);
+        background: var(--esp-surface-raised, var(--background));
       }
       /* Plein ecran (telephone) : les memes tranches, directement dans la
          colonne de l'overlay — pas de cadre, la surface EST l'ecran. */

@@ -260,6 +260,20 @@
       "errorMessage": "The guest list could not be loaded."
     }
   },
+  "associationAgenda": {
+    "organizedBy": "Association: {{name}}",
+    "confirmed": "Registration confirmed",
+    "waitlisted": "Waiting list",
+    "waitlistHint": "Your request is waiting: no place is confirmed.",
+    "cancelled": "Event cancelled",
+    "open": "View event",
+    "pagination": {
+      "loading": "Loading your agenda events…",
+      "loaded": "This view shows the events loaded so far. More may still follow.",
+      "loadingMore": "Loading more events…",
+      "more": "Load more events"
+    }
+  },
   "evenementsRail": {
     "error": "Events are temporarily unavailable.",
     "retry": "Retry",

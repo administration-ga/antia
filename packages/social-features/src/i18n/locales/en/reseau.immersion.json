@@ -1,0 +1,36 @@
+{
+  "immersiveFeed": {
+    "label": "Immersive feed, one post per screen",
+    "slotLabel": "Post by {{name}}",
+    "keyboardHint": "Up and down arrows, or Page Up and Page Down: previous or next post. A post taller than the screen scrolls first.",
+    "loading": "Loading posts…",
+    "loadingMore": "Loading more…",
+    "loadMore": "Load more",
+    "end": "You have seen all the available posts in this feed.",
+    "emptyWindow": "No posts in this part of the feed. The next part may contain some.",
+    "incompleteShort": "Incomplete feed",
+    "preparingShort": "Feed being prepared",
+    "newPosts_one": "{{count}} new post",
+    "newPosts_many": "{{count}} new posts",
+    "newPosts_other": "{{count}} new posts",
+    "newPostsShown": "Back to the most recent posts.",
+    "removed": "This post is no longer available. Reading continues with the next one.",
+    "restoring": "The feed was refreshed. Returning to the post you were reading…",
+    "restored": "Back to the post you were reading.",
+    "restoreMissing": "The post you were reading is no longer in this feed."
+  },
+  "feedMode": {
+    "groupLabel": "Feed display",
+    "list": "List",
+    "immersive": "Immersive",
+    "lowHeight": "The screen is too short for the immersive view: the feed stays as a list. The immersive view comes back as soon as the height allows it."
+  },
+  "mediaPlayback": {
+    "play": "Play the video",
+    "sound": "Video sound",
+    "suspended": {
+      "call": "Playback paused during the call.",
+      "hidden": "Playback paused while you were away."
+    }
+  }
+}

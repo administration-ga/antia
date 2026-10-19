@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/ui-v2/src/hooks/use-modal-a11y.ts @ ad2e7fdc2 — adaptations : lever l'inertage détenu par le hook avant de restituer le focus à la fermeture ; en-tête de provenance.
+// Dupliqué de socle/packages/ui-v2/src/hooks/use-modal-a11y.ts @ ad2e7fdc2 — adaptations : lever l'inertage détenu par le hook avant de restituer le focus à la fermeture ; région des toasts marquée `data-toast-region` jamais inertée (P18b) ; en-tête de provenance.
 "use client"
 
 /**
@@ -107,6 +107,10 @@ export function useModalA11y({
         if (child.hasAttribute("inert")) continue
         // Ignorer les portails techniques de Next.js (script, noscript, etc.)
         if (child.tagName === "SCRIPT" || child.tagName === "NOSCRIPT") continue
+        // Région des toasts marquée par l'application (ANTSIA et DIASPORALE,
+        // `data-toast-region`) : une erreur annoncée pendant la modale doit
+        // rester lue par les technologies d'assistance (audit P18a, A07).
+        if (child.hasAttribute("data-toast-region")) continue
         child.setAttribute("inert", "")
         inertedSiblings.push(child)
       }

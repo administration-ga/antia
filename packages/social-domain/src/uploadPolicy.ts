@@ -77,6 +77,8 @@ export const UPLOAD_USAGES = {
   voice: { mimeTypes: [...AUDIO, "audio/aac"], maxBytes: 25 * MO },
   /** Enregistrement d'un direct, rapatrié PAR LE SERVEUR (jamais un dépôt client). */
   live_recording: { mimeTypes: [...VIDEO, ...AUDIO], maxBytes: 4 * 1024 * MO },
+  /** P15 : CV et pièces d'une candidature — PDF seul, 5 Mio (borne COMMAND §6.9), analyse complète exigée. */
+  job_application_document: { mimeTypes: PDF, maxBytes: 5 * MO },
 } as const satisfies Record<string, UploadUsageSpec>
 
 export type UploadUsage = keyof typeof UPLOAD_USAGES

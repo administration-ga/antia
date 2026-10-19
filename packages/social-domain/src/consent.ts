@@ -11,6 +11,7 @@ export const CONSENT_PURPOSES = [
   "consular_attestation",
   "talents",
   "usage_analytics",
+  "administration_reflection",
 ] as const
 export type ConsentPurpose = (typeof CONSENT_PURPOSES)[number]
 
@@ -29,6 +30,7 @@ export const CONSENT_TEXT_VERSIONS: Readonly<Record<ConsentPurpose, string>> = {
   consular_attestation: "2026-10-14",
   talents: "2026-10-14",
   usage_analytics: "2026-10-17",
+  administration_reflection: "2026-10-18",
 }
 
 export type ConsentRecord = { purpose: ConsentPurpose; textVersion: string; revokedAt?: number }

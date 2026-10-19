@@ -1,0 +1,52 @@
+import { beforeEach, describe, expect, it } from "vitest"
+import { __resetListStatesForTests, activateListSession, clearListSession, messagerieListScope, readListState, writeListState } from "./messagerie-list-state"
+
+beforeEach(__resetListStatesForTests)
+
+describe("mémoire volatile du retour dans Messages", () => {
+	it("isole réseau, personne et pose sans changer les préférences de l’autre pose", () => {
+		activateListSession(JSON.stringify(["antsia", "person-a"]))
+		const phone = messagerieListScope("antsia", "person-a", "phone")
+		writeListState(phone, { query: "atelier", filter: "non_lues", scrollTop: 320, view: "contacts" })
+		expect(readListState(phone)).toEqual({ query: "atelier", filter: "non_lues", scrollTop: 320, view: "contacts", loadedThreadCount: 0 })
+		expect(readListState(messagerieListScope("antsia", "person-a", "desktop")).query).toBe("")
+		expect(readListState(messagerieListScope("diaspora", "person-a", "phone")).query).toBe("")
+		expect(readListState(messagerieListScope("antsia", "person-b", "phone")).query).toBe("")
+	})
+	it("conserve le retour sous la même session, puis purge au changement de personne", () => {
+		const ownerA = JSON.stringify(["antsia", "person-a"])
+		const scopeA = messagerieListScope("antsia", "person-a", "phone")
+		activateListSession(ownerA)
+		writeListState(scopeA, { query: "recherche personnelle", scrollTop: 240 })
+		activateListSession(ownerA)
+		expect(readListState(scopeA).scrollTop).toBe(240)
+		activateListSession(JSON.stringify(["antsia", "person-b"]))
+		writeListState(scopeA, { query: "réponse tardive" })
+		activateListSession(ownerA)
+		expect(readListState(scopeA).query).toBe("")
+	})
+	it("la sortie de session refuse les écritures tardives et une ancienne coque ne purge pas la nouvelle", () => {
+		const ownerA = JSON.stringify(["antsia", "person-a"])
+		const ownerB = JSON.stringify(["antsia", "person-b"])
+		const scopeA = messagerieListScope("antsia", "person-a", "phone")
+		const scopeB = messagerieListScope("antsia", "person-b", "phone")
+		activateListSession(ownerA)
+		writeListState(scopeA, { query: "secret local" })
+		clearListSession(ownerA)
+		writeListState(scopeA, { query: "événement tardif" })
+		activateListSession(ownerB)
+		writeListState(scopeB, { query: "nouvelle session" })
+		clearListSession(ownerA)
+		expect(readListState(scopeB).query).toBe("nouvelle session")
+		activateListSession(ownerA)
+		expect(readListState(scopeA).query).toBe("")
+	})
+	it("normalise les positions invalides sans effacer la recherche", () => {
+		activateListSession(JSON.stringify(["antsia", "person-a"]))
+		const scope = messagerieListScope("antsia", "person-a", "desktop")
+		writeListState(scope, { query: "atelier", scrollTop: Number.POSITIVE_INFINITY })
+		expect(readListState(scope).scrollTop).toBe(0)
+		writeListState(scope, { scrollTop: -3 })
+		expect(readListState(scope)).toMatchObject({ query: "atelier", scrollTop: 0 })
+	})
+})

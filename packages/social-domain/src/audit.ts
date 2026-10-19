@@ -30,7 +30,8 @@ export const AUDIT_ACTIONS = [
   "moderation.appeal_file", "moderation.appeal_decide", "moderation.content_review",
   "moderation.sanction_expire", "moderation.transparency_compute",
   "data.erasure_request", "data.erasure_cancel", "data.erasure_complete", "data.export_request",
-  "federation.emitter_set", "federation.replay",
+  "federation.emitter_set", "federation.replay", "federation.media_retry",
+  "federation.agent_consent", "federation.agent_withdraw",
   // Geste de l'auteur : retrait de la diffusion publique, sans retrait du contenu.
   "post.root_withdraw",
   // Garde des fichiers
@@ -46,6 +47,30 @@ export const AUDIT_ACTIONS = [
   "page.signatory_grant",
   "page.signatory_revoke",
   "page.claim_decide",
+  "page.post_edit",
+  "page.post_pin",
+  // Boutiques (P07, `convex/modules/shops/`) : politique de publication des
+  // vitrines d'un réseau, décision sur une demande en file d'admission,
+  // suspension et rétablissement d'une vitrine par l'équipe de la plateforme
+  "shop.policy_set",
+  "shop.storefront_decide",
+  "shop.storefront_status_set",
+  // Catalogue projeté P09 : configuration serveur et consentement de publication.
+  "commercial.policy_set",
+  "commercial.mandate_grant",
+  "commercial.mandate_revoke",
+  "commercial.mandate_accept",
+  "commercial.shop_settings_set",
+  "catalog.policy_set",
+  "checkout.policy_set",
+  "payment.policy_set",
+  "catalog.mapping_set",
+  // Emploi P15 : politique d'un réseau (offres publiques et candidatures), décision opérateur.
+  "job.policy_set",
+  // Services P14 : ouverture des devis, rendez-vous et prestations d'un réseau, décision opérateur.
+  "service.policy_set",
+  // Conversations contextuelles (CC-2b, ADR-0025) : politique d'une nature dans un réseau, décision opérateur motivée.
+  "contextual.policy_set",
   // Tranche `diaspora` (émis par `convex/modules/diaspora/`)
   /** Un parrainage retiré par la MODÉRATION du réseau (le retrait par le parrain n'est pas une décision). */
   "diaspora.sponsorship_revoke",
@@ -57,7 +82,7 @@ export const AUDIT_CAPACITIES = ["platform_admin", "platform_operator", "network
 export type AuditCapacity = (typeof AUDIT_CAPACITIES)[number]
 
 /** Les tables qu'une décision peut viser — une référence, jamais un contenu. */
-export const AUDIT_SUBJECT_TABLES = ["networks", "networkArchiveRequests", "operators", "consoleIncidents", "consoleMetrics", "persons", "fileScans", "contentReports", "posts", "pages", "pageClaims", "reports", "moderationTeams", "sanctions", "appeals", "moderationPolicies", "blockedTerms", "moderationContentStates", "moderationTransparency", "dataErasureJobs", "dataExports", "federationEmitters", "federationDeadLetters"] as const
+export const AUDIT_SUBJECT_TABLES = ["networks", "networkArchiveRequests", "operators", "consoleIncidents", "consoleMetrics", "persons", "fileScans", "contentReports", "posts", "pages", "pageClaims", "reports", "moderationTeams", "sanctions", "appeals", "moderationPolicies", "blockedTerms", "moderationContentStates", "moderationTransparency", "dataErasureJobs", "dataExports", "federationEmitters", "federationDeadLetters", "mirrors", "shops"] as const
 export type AuditSubjectTable = (typeof AUDIT_SUBJECT_TABLES)[number]
 
 export type AuditSubject = { table: AuditSubjectTable; id: string }

@@ -10,6 +10,7 @@ import {
   rebasePagesAfter,
   recordTail,
   shouldShowLoadMore,
+  feedCursorKey,
 } from "./reseau-feed-pages"
 
 const cursor = (publishedAt: number, postId: string) => ({ publishedAt, postId })
@@ -18,6 +19,22 @@ const t = createAppI18n({ locale: "fr", appResources: { fr: {}, en: {} }, defaul
 const tEn = createAppI18n({ locale: "en", appResources: { fr: {}, en: {} }, defaultNS: "reseau" }).getFixedT("en")
 
 describe("chaîne de pages du fil", () => {
+  it("distingue une nouvelle stratégie ou génération à frontière de publication identique", () => {
+    const legacy = cursor(1700, "frontiere")
+    const current = { ...legacy, strategy: "materialized" as const, generation: 1, windowStart: 1000, postCreationTime: 1800 }
+    expect(feedCursorKey(legacy)).toBe("1700:frontiere")
+    expect(feedCursorKey(current)).not.toBe(feedCursorKey(legacy))
+    expect(feedCursorKey({ ...current, generation: 2 })).not.toBe(feedCursorKey(current))
+    const mounted = appendPage(initialFeedPages(), legacy)
+    expect(shouldShowLoadMore(mounted, current)).toBe(true)
+  })
+
+  it("annonce la préparation et la fenêtre historique dans les deux langues", () => {
+    expect(t("feedPages.preparing")).not.toBe("feedPages.preparing")
+    expect(tEn("feedPages.preparing")).not.toBe("feedPages.preparing")
+    expect(t("feedPages.historySince", { date: "18 octobre 2026" })).toContain("18 octobre 2026")
+    expect(tEn("feedPages.historySince", { date: "October 18, 2026" })).toContain("October 18, 2026")
+  })
   it("démarre sur une page unique, sans curseur", () => {
     const state = initialFeedPages()
     expect(state.cursors).toEqual([null])

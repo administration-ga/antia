@@ -29,6 +29,10 @@
   "PAGE_NAME_LENGTH": "A page name has at most {{max}} characters and cannot be empty.",
   "PAGE_SHORT_NAME_TOO_LONG": "A page acronym has at most {{max}} characters.",
   "PAGE_DESCRIPTION_TOO_LONG": "A page description has at most {{max}} characters.",
+  "PAGE_CITY_INVALID": "Enter only a city, on one line, without control characters, a link, an email address or a phone number.",
+  "PAGE_CITY_TOO_LONG": "A page city has at most {{max}} characters.",
+  "PAGE_ASSOCIATION_TYPE_INVALID": "Choose an available type for an association page.",
+  "PAGE_SECTOR_INVALID": "Choose an available sector for a company page.",
   "PAGE_OWNER_KIND_RESERVED": "An institution page is not created from an account: it comes from a traced decision.",
   "PAGE_TRUST_NOT_ALLOWED": "Only an institution page can be “Official”.",
   "PAGE_SIGNATORIES_FULL": "A page has at most {{max}} signatories.",
@@ -163,5 +167,14 @@
   "LIVE_REPLAY_RETRY_AFTER_END": "The conference must have ended to retry its replay.",
   "LIVE_REPLAY_NOTHING_TO_RETRY": "There is no replay to retry for this conference.",
   "LIVE_REPLAY_NOT_STARTED": "No recording was started: there is nothing to recover.",
-  "LIVE_REPLAY_UNAVAILABLE": "This conference has no replay available."
+  "LIVE_REPLAY_UNAVAILABLE": "This conference has no replay available.",
+  "CONTEXT_NOT_OPEN": "This conversation is not open yet: it opens with the request, the acceptance or the shortlisting.",
+  "CONTEXT_CLOSED": "This conversation is closed. Its history remains readable.",
+  "CONTEXT_UNAVAILABLE": "This conversation is unavailable for now. Its history remains readable.",
+  "CONTEXT_WAITING_RESPONDER": "You will be able to write as soon as the other party first replies.",
+  "CONTEXT_ATTACHMENTS_CLOSED": "Attachments are not open at this stage of the conversation.",
+  "CONTEXT_CALLS_CLOSED": "Calls are not open at this stage of the conversation.",
+  "CONTEXT_CALL_CONSENT_REQUIRED": "A call requires both parties' consent in this conversation.",
+  "CONTEXT_IDEMPOTENCY_CONFLICT": "This message was already sent with different content. Please write it again.",
+  "CONTEXT_TEXT_CONTROL": "The message contains unsupported characters."
 }

@@ -9,8 +9,20 @@ export const FEDERATION_PAYLOAD_MAX_ITEMS = 256
 export const FEDERATION_PAYLOAD_MAX_FIELDS = 64
 export const FEDERATION_STRING_MAX_LENGTH = 8192
 export const FEDERATION_CONTRACTS_MAX = 32
-/** Aucun contrat métier n'est branché avant PA9 / PD3 / PD5. */
-export const FEDERATION_IMPLEMENTED_CONTRACTS: readonly string[] = []
+/** PA9A/PA9B/PA9C : pages, publications et agents sous consentement local corrélé. */
+export const RESEAU_PUBLIC_CONTRACT = "RESEAU-PUBLIC-V1"
+export const RESEAU_PUBLIC_EMITTER = "administration-ga"
+/** P08 : preuve de TRANSPORT sandbox, jamais un raccord du catalogue commercial. */
+export const COMMERCE_TRANSPORT_TEST_CONTRACT = "PRO-COMMERCE-TRANSPORT-TEST-V1"
+/** P15 : emplois publics complets (compétences, période), jumeau `commerce-jobs` hors manifeste P06. */
+export const COMMERCE_JOBS_FEDERATION_CONTRACT = "PRO-COMMERCE-JOBS-V1"
+export const FEDERATION_IMPLEMENTED_CONTRACTS: readonly string[] = [RESEAU_PUBLIC_CONTRACT, COMMERCE_TRANSPORT_TEST_CONTRACT, "PRO-COMMERCE-PUBLIC-V1", COMMERCE_JOBS_FEDERATION_CONTRACT]
+export const FEDERATION_IMPLEMENTED_EVENTS = {
+  [RESEAU_PUBLIC_CONTRACT]: ["page.upserted", "post.published", "post.removed", "person.optin", "person.optout"],
+  [COMMERCE_TRANSPORT_TEST_CONTRACT]: ["transport.probe"],
+  "PRO-COMMERCE-PUBLIC-V1": ["shop.published", "shop.updated", "shop.withdrawn", "offer.published", "offer.updated", "offer.withdrawn", "offer.availabilityChanged", "job.published", "job.closed"],
+  [COMMERCE_JOBS_FEDERATION_CONTRACT]: ["job.published", "job.closed"],
+} as const
 
 export type FederationJson = null | boolean | number | string | FederationJson[] | { [key: string]: FederationJson }
 export type FederationEnvelope = { eventId: string; contract: string; version: 1; objectRef: string; payload: FederationJson }
@@ -56,6 +68,7 @@ export function parseFederationEnvelope(rawBody: string): FederationEnvelopeResu
   const keys = Object.keys(row)
   if (keys.length !== 5 || !["eventId", "contract", "version", "objectRef", "payload"].every((key) => Object.prototype.hasOwnProperty.call(row, key))) return { ok: false, reason: "invalid_envelope" }
   if (typeof row.eventId !== "string" || !validFederationReference(row.eventId) || typeof row.objectRef !== "string" || !validFederationReference(row.objectRef) || typeof row.contract !== "string" || !validFederationContract(row.contract) || row.version !== 1) return { ok: false, reason: "invalid_envelope" }
+  const personal = row.contract === RESEAU_PUBLIC_CONTRACT && row.payload !== null && typeof row.payload === "object" && !Array.isArray(row.payload) && ["person.optin", "person.optout"].includes((row.payload as Record<string, unknown>).type as string)
   const stack: { value: unknown; depth: number }[] = [{ value: row.payload, depth: 0 }]
   let nodes = 0
   while (stack.length > 0) {
@@ -77,7 +90,7 @@ export function parseFederationEnvelope(rawBody: string): FederationEnvelopeResu
     if (fields.length > FEDERATION_PAYLOAD_MAX_FIELDS) return { ok: false, reason: "payload_too_complex" }
     for (const [key, child] of fields) {
       if (key.length === 0 || key.length > 100) return { ok: false, reason: "invalid_envelope" }
-      if (FORBIDDEN_FIELDS.has(key)) return { ok: false, reason: "forbidden_payload_field" }
+      if (FORBIDDEN_FIELDS.has(key) || (key === "idnSub" && (!personal || depth !== 0))) return { ok: false, reason: "forbidden_payload_field" }
       stack.push({ value: child, depth: depth + 1 })
     }
   }

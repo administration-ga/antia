@@ -45,7 +45,7 @@
  * inutilisable. UNE SEULE région `aria-live` pour toute la carte.
  */
 
-import { useNetwork } from "@antsia/api/network"
+import { useNetwork, useRoutes } from "@antsia/api/network"
 import { usePathname, useRouter, useSearchParams } from "@antsia/api/routing"
 import {
 	Camera,
@@ -92,6 +92,8 @@ import {
 import { IcomActusPanel } from "./IcomActusPanel"
 import { IcomAppelJournal } from "./IcomAppelJournal"
 import { IcomRelationsPanel } from "./IcomRelationsPanel"
+import { ICOM_VIEWS } from "./icom-views"
+import { messagerieListScope } from "./messagerie-list-state"
 import {
 	readIcomDesktopEntry,
 	withoutIcomDesktopEntry,
@@ -160,7 +162,8 @@ const DOCK_NAV: MessagerieNav = Object.freeze({
 
 export function MessagerieDock() {
 	const { t } = useTranslation("messagerie")
-	const { charte, storagePrefix } = useNetwork()
+	const { charte, storagePrefix, networkId, personId, navigation } = useNetwork()
+	const messagesBase = useRoutes().messages()
 	// ⚠️ `null` au rendu serveur ET au premier passage client : on ne rend RIEN
 	// tant que la largeur n'est pas connue. Rendre la carte « par défaut »
 	// ferait clignoter un bloc de 420 px de haut sur tous les téléphones.
@@ -168,6 +171,8 @@ export function MessagerieDock() {
 	const dock = useDockState()
 	const router = useRouter()
 	const pathname = usePathname()
+	const destinations = navigation === "destinations"
+	const messagesDestination = destinations && (pathname === messagesBase || pathname.startsWith(`${messagesBase}/`))
 	const searchParams = useSearchParams()
 	const routeSearch = searchParams.toString()
 	const [tab, setTab] = useState<IcomDockTabId>(ICOM_DOCK_TAB_DEFAULT)
@@ -195,7 +200,7 @@ export function MessagerieDock() {
 	 * recréer de grande vue à colonnes.
 	 */
 	useEffect(() => {
-		if (isMobile !== false) return
+		if (isMobile !== false || destinations) return
 		const entry = readIcomDesktopEntry(routeSearch)
 		if (entry === null) return
 
@@ -222,7 +227,7 @@ export function MessagerieDock() {
 		router.replace(withoutIcomDesktopEntry(pathname, routeSearch), {
 			scroll: false,
 		})
-	}, [isMobile, pathname, routeSearch, router])
+	}, [isMobile, pathname, routeSearch, router, destinations])
 	/* Le repli est toujours la porte d'entrée iChat. On efface donc une
 	   sélection secondaire dès que la surface se rétracte ; les brouillons,
 	   eux, restent dans le store et ne sont jamais perdus. */
@@ -305,14 +310,14 @@ export function MessagerieDock() {
 	hostPoseRef.current = hostPose
 	const callMode = useCallHostMode(ICOM_AGENT_CALL_HOST_ID)
 	useEffect(() => {
-		if (callHostElement === null || isMobile !== false) return
+		if (callHostElement === null || isMobile !== false || messagesDestination) return
 		return registerCallHost({
 			id: ICOM_AGENT_CALL_HOST_ID,
 			scopes: ICOM_AGENT_CALL_SCOPES,
 			pose: hostPoseRef.current,
 			element: callHostElement,
 		})
-	}, [callHostElement, isMobile])
+	}, [callHostElement, isMobile, messagesDestination])
 	useEffect(() => {
 		updateCallHostPose(ICOM_AGENT_CALL_HOST_ID, hostPose)
 	}, [hostPose])
@@ -326,7 +331,7 @@ export function MessagerieDock() {
 		if (coverStarts(was, callMode)) dockStore.setOpen(true)
 	}, [callMode])
 
-	if (isMobile !== false) return null
+	if (isMobile !== false || messagesDestination) return null
 
 	// ⚠️ Le chiffre de la carte est celui du SERVEUR (IC-06), pas la somme des
 	// `unreadCount` rendus : la fenêtre des fils ci-dessus sert la
@@ -455,6 +460,8 @@ export function MessagerieDock() {
 					unread={totalUnread}
 					activeKey={activeKey(dock)}
 					showDockControls={false}
+					destinationMode={destinations}
+					stateScope={destinations ? messagerieListScope(String(networkId), String(personId), "dock") : undefined}
 				/>
 			) : dock.view.kind === "compose" ? (
 				<MessagerieComposeView
@@ -499,7 +506,7 @@ export function MessagerieDock() {
 					role="tablist"
 					aria-label={t("messagerieDock.title")}
 				>
-					{ICOM_DOCK_TABS.map((item) => {
+					{ICOM_DOCK_TABS.filter((item) => !destinations || item.id !== "actus").map((item) => {
 						const Icon = TAB_ICONS[item.id]
 						return (
 							<button
@@ -520,7 +527,7 @@ export function MessagerieDock() {
 								<span aria-hidden="true" className="icom-tab-icon">
 									<Icon size={17} />
 								</span>
-								{t(item.labelKey)}
+								{t(destinations ? ICOM_VIEWS.find((view) => view.brique === item.id)?.labelKey ?? item.labelKey : item.labelKey)}
 							</button>
 						)
 					})}

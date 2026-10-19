@@ -75,6 +75,25 @@ describe("IdentityEntry — portes et disponibilité", () => {
     expect(screen.getByLabelText("Email address")).toBeVisible()
   })
 
+  it("la présentation compacte conserve les portes, les libellés accessibles et la vérification OTP", async () => {
+    const { authClient, onAuthenticated, container } = mount({ presentation: "compact", headingLevel: 2, title: "Connexion", lead: "" })
+    expect(screen.getByRole("heading", { name: "Connexion", level: 2 })).toBeVisible()
+    expect(container.querySelector('[data-slot="card"]')).toBeNull()
+    expect(screen.getAllByRole("button")[0]).toHaveTextContent("Continuer avec mon identité IDN")
+    expect(screen.getByLabelText("Adresse e-mail")).toBeVisible()
+    await enterEmail()
+    fireEvent.change(screen.getByLabelText("Code à six chiffres"), { target: { value: "123456" } })
+    fireEvent.click(screen.getByRole("button", { name: "Me connecter" }))
+    await waitFor(() => expect(onAuthenticated).toHaveBeenCalledOnce())
+    expect(authClient.signIn.emailOtp).toHaveBeenCalledWith(expect.objectContaining({ email: "awa@example.ga", otp: "123456" }))
+  })
+
+  it("la présentation compacte explique aussi une porte IDN désactivée", () => {
+    mount({ presentation: "compact", configuration: { ...configuration, idn: false } })
+    expect(screen.getByRole("button", { name: "Continuer avec mon identité IDN" })).toBeDisabled()
+    expect(screen.getByText(/IDN n’est pas encore disponible/)).toBeVisible()
+  })
+
   it("le refus OAuth est rendu sur la porte, sans authentifier", async () => {
     const authClient = client()
     authClient.signIn.oauth2.mockResolvedValueOnce({ data: null, error: { status: 503 } } as unknown as Awaited<ReturnType<typeof authClient.signIn.oauth2>>)

@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/mobile/ReseauMobileShell.tsx @ ad2e7fdc2 — adaptations : déplacé dans la coque (`shell/mobile/`) avec la barre, la commande « Créer » et la feuille de styles qu'il monte ; commentaires rapportés au moteur (la personne, et non « l'agent ») ; props, charpente et ordre des frères inchangés.
+// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/mobile/ReseauMobileShell.tsx @ ad2e7fdc2 — adaptations : déplacé dans la coque (`shell/mobile/`) avec la barre, la commande « Créer » et la feuille de styles qu'il monte ; commentaires rapportés au moteur (la personne, et non « l'agent ») ; props, charpente et ordre des frères inchangés ; P02 (18/10/2026) : sous la navigation par destinations déclarée par l'application, « Créer » vit DANS la barre (la commande flottante n'est pas montée) et la barre reçoit le geste de création et l'identifiant publié.
 "use client"
 
 /**
@@ -30,6 +30,7 @@ import { ReseauMobileStyles } from "./mobile-styles"
 import { ReseauMobileCreateButton } from "./ReseauMobileCreateButton"
 import { ReseauMobileTabBar } from "./ReseauMobileTabBar"
 import type { CreationKind } from "../../features/reseau-personnel/creation-controller"
+import { useReseauDestinationRoutes } from "../reseau-menu-destinations-ui"
 import type { ReseauMobileTabId } from "./reseau-mobile-tabs"
 
 export interface ReseauMobileShellProps {
@@ -64,6 +65,9 @@ export function ReseauMobileShell({
   onCreate,
   myHandle = null,
 }: ReseauMobileShellProps) {
+  /* Navigation par destinations (déclarée par l'application) : « Créer » est
+     une place de la barre, la commande flottante ferait doublon. */
+  const destinations = useReseauDestinationRoutes() !== null
   return (
     <div className="rm-shell">
       <ReseauMobileStyles />
@@ -74,11 +78,11 @@ export function ReseauMobileShell({
       {/* FRÈRE du scroller : la commande se cache d'elle-même sur les vues
           immersives (même `shouldShowTabBar` que la barre, jamais une seconde
           définition de « plein écran »). */}
-      {onCreate ? (
+      {onCreate && !destinations ? (
         <ReseauMobileCreateButton onSelect={onCreate} handle={myHandle} />
       ) : null}
       {showTabBar ? (
-        <ReseauMobileTabBar active={active} badges={badges} />
+        <ReseauMobileTabBar active={active} badges={badges} onCreate={onCreate} handle={myHandle} />
       ) : null}
     </div>
   )

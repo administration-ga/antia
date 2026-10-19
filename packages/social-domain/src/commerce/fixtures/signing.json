@@ -1,0 +1,78 @@
+{
+  "description": "Chaînes à signer, sans clé : profil PUBLIC (FEDERATION-INBOX-V1) et profil COMMAND (construction pro-ga-machine-hmac/v1, étiquette propre).",
+  "public": [
+    {
+      "environment": "sandbox",
+      "timestampSeconds": "1792285200",
+      "rawBody": "{\"contract\":\"PRO-COMMERCE-PUBLIC-V1\"}",
+      "expect": "sandbox\n1792285200\n{\"contract\":\"PRO-COMMERCE-PUBLIC-V1\"}"
+    }
+  ],
+  "command": [
+    {
+      "name": "nominal",
+      "input": {
+        "bodySha256": "8d160a5baa721877897800396f93f0184a1ca7b096d5cc6c61a0913d0d191a5e",
+        "environment": "sandbox",
+        "issuedAtMs": 1792285200000,
+        "keyId": "antsia-sandbox-commerce-k1",
+        "nonce": "n0nce-0123456789abcdefghij",
+        "operation": "checkout.prepare",
+        "source": "antsia"
+      },
+      "expect": "31:pro-ga-commerce-command-hmac/v1|26:antsia-sandbox-commerce-k1|13:1792285200000|26:n0nce-0123456789abcdefghij|6:antsia|7:sandbox|15:pro.ga.commerce|25:commerce.checkout.prepare|64:8d160a5baa721877897800396f93f0184a1ca7b096d5cc6c61a0913d0d191a5e"
+    },
+    {
+      "name": "nonce trop court",
+      "input": {
+        "bodySha256": "8d160a5baa721877897800396f93f0184a1ca7b096d5cc6c61a0913d0d191a5e",
+        "environment": "sandbox",
+        "issuedAtMs": 1792285200000,
+        "keyId": "antsia-sandbox-commerce-k1",
+        "nonce": "n0nce",
+        "operation": "checkout.prepare",
+        "source": "antsia"
+      },
+      "expect": null
+    },
+    {
+      "name": "empreinte invalide",
+      "input": {
+        "bodySha256": "XYZ",
+        "environment": "sandbox",
+        "issuedAtMs": 1792285200000,
+        "keyId": "antsia-sandbox-commerce-k1",
+        "nonce": "n0nce-0123456789abcdefghij",
+        "operation": "checkout.prepare",
+        "source": "antsia"
+      },
+      "expect": null
+    },
+    {
+      "name": "opération inconnue",
+      "input": {
+        "bodySha256": "8d160a5baa721877897800396f93f0184a1ca7b096d5cc6c61a0913d0d191a5e",
+        "environment": "sandbox",
+        "issuedAtMs": 1792285200000,
+        "keyId": "antsia-sandbox-commerce-k1",
+        "nonce": "n0nce-0123456789abcdefghij",
+        "operation": "order.refund",
+        "source": "antsia"
+      },
+      "expect": null
+    },
+    {
+      "name": "environnement de développement",
+      "input": {
+        "bodySha256": "8d160a5baa721877897800396f93f0184a1ca7b096d5cc6c61a0913d0d191a5e",
+        "environment": "dev",
+        "issuedAtMs": 1792285200000,
+        "keyId": "antsia-sandbox-commerce-k1",
+        "nonce": "n0nce-0123456789abcdefghij",
+        "operation": "checkout.prepare",
+        "source": "antsia"
+      },
+      "expect": null
+    }
+  ]
+}

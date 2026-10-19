@@ -13,8 +13,9 @@ const state = vi.hoisted(() => ({
   isLoading: false,
   isError: false,
   refetch: vi.fn(async () => undefined),
+  prepare: vi.fn(),
 }))
-vi.mock("@antsia/api/hooks", () => ({ useAuthenticatedConvexQuery: () => state }))
+vi.mock("@antsia/api/hooks", () => ({ useAuthenticatedConvexQuery: () => state, useConvexMutationQuery: () => ({ mutate: state.prepare }) }))
 vi.mock("./PostCard", () => ({ PostCard: ({ post }: { post: { body: string } }) => <p>{post.body}</p> }))
 vi.mock("./PagesSuggestionsRail", () => ({ PagesSuggestionsRail: () => null }))
 vi.mock("./SuggestionsPanel", () => ({ SuggestionsPanel: () => null }))
@@ -24,13 +25,48 @@ import { FeedPage } from "./FeedPages"
 function mount(first = true) {
   const onTail = vi.fn()
   const onBoundaryShift = vi.fn()
-  renderWithEngine(<FeedPage cursor={null} pageIndex={first ? 0 : 1} pageKey="page" nextMountedCursor={undefined} scope="recents" now={0} isFirst={first} isLast interleaveAfter={null} onTag={vi.fn()} onMention={vi.fn()} onTail={onTail} onBoundaryShift={onBoundaryShift} emptyFallback={<p>Fil vide</p>} />)
-  return { onTail, onBoundaryShift }
+  const element = () => <FeedPage cursor={null} pageIndex={first ? 0 : 1} pageKey="page" nextMountedCursor={undefined} scope="recents" now={0} isFirst={first} isLast interleaveAfter={null} onTag={vi.fn()} onMention={vi.fn()} onTail={onTail} onBoundaryShift={onBoundaryShift} emptyFallback={<p>Fil vide</p>} />
+  const view = renderWithEngine(element())
+  return { onTail, onBoundaryShift, rerender: () => view.rerender(element()) }
 }
 
 beforeEach(() => { vi.clearAllMocks(); state.data = undefined; state.isLoading = false; state.isError = false })
 
 describe("FeedPage — vérité des états", () => {
+  it("prépare une seule fois la première page admise et annonce la préparation", () => {
+    state.data = { items: [], nextCursor: null, lacunar: true, preparing: true }
+    mount()
+    expect(state.prepare).toHaveBeenCalledOnce()
+    expect(screen.getByText(/Votre fil se prépare/)).toBeTruthy()
+    expect(screen.queryByText("Fil vide")).toBeNull()
+  })
+
+  it("une continuation n'amorce pas une nouvelle préparation", () => {
+    state.data = { items: [], nextCursor: null, lacunar: true, preparing: true }
+    mount(false)
+    expect(state.prepare).not.toHaveBeenCalled()
+    expect(screen.queryByText(/Votre fil se prépare/)).toBeNull()
+  })
+
+  it("réveille une version manquante une seule fois et réarme après une erreur d'accès", () => {
+    state.data = { items: [], nextCursor: null, lacunar: true, preparing: true, preparationKey: "a".repeat(64) }
+    const view = mount()
+    view.rerender()
+    expect(state.prepare).toHaveBeenCalledTimes(1)
+    state.data = { ...state.data, preparationKey: "b".repeat(64) }
+    view.rerender()
+    expect(state.prepare).toHaveBeenCalledTimes(2)
+    state.isError = true; view.rerender()
+    state.isError = false; view.rerender()
+    expect(state.prepare).toHaveBeenCalledTimes(3)
+  })
+
+  it("date la limite historique sur la première page", () => {
+    state.data = { items: [], nextCursor: null, lacunar: true, materializedSince: Date.UTC(2026, 8, 18) }
+    mount()
+    expect(screen.getByText(/Ce fil présente les publications depuis le/)).toBeTruthy()
+  })
+
   it("une erreur masque même une ancienne page et permet de réessayer", () => {
     state.isError = true
     state.data = { items: [{ body: "Ancien contenu" } as Feed["items"][number]], nextCursor: null, lacunar: false }

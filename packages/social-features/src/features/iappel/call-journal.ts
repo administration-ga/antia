@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/iappel/call-journal.ts @ ad2e7fdc2 — adaptations : ligne d'historique = le DTO du moteur (`calls.history.listCallHistory`, type tiré de l'API) au lieu de la ligne `meetings` reconvertie champ à champ ; le CLASSEMENT (qui a composé, refus automatique, manqué, ticket de groupe) est fait par le serveur avec la règle pure du domaine (`categorizeCall` de `@antsia/social-domain/callJournal`) — l'écran le relit et revérifie seulement qu'un « refus automatique » porte bien une raison de réglage (`isAutoDeclineReason`) ; environnement back-office (`callerEnvironment`, `callSideOf` à trois termes) retiré ; branche poste élaguée (portée, fonction, administration, renvoi au secrétariat, appel prioritaire ADR-0217) ; correspondant nommé par le contrat `counterpartLabel` (appelant d'un appel de groupe compris) ; `groupCallJournal` sans identité de lecteur (le serveur dit `createdByMe`).
+// Dupliqué de socle/packages/agent-features/src/features/iappel/call-journal.ts @ ad2e7fdc2 — adaptations : ligne d'historique = le DTO du moteur (`calls.history.listCallHistory`, type tiré de l'API) au lieu de la ligne `meetings` reconvertie champ à champ ; le CLASSEMENT (qui a composé, refus automatique, manqué, ticket de groupe) est fait par le serveur avec la règle pure du domaine (`categorizeCall` de `@antsia/social-domain/callJournal`) — l'écran le relit et revérifie seulement qu'un « refus automatique » porte bien une raison de réglage (`isAutoDeclineReason`) ; environnement back-office (`callerEnvironment`, `callSideOf` à trois termes) retiré ; branche poste élaguée (portée, fonction, administration, renvoi au secrétariat, appel prioritaire ADR-0217) ; correspondant nommé par le contrat `counterpartLabel` (appelant d'un appel de groupe compris) ; `groupCallJournal` sans identité de lecteur (le serveur dit `createdByMe`) ; CC-5 : origine contextuelle conservée (`contextualThreadId`), rappel par la conversation.
 /**
  * call-journal — le JOURNAL des appels (écran « iAppel » : appels récents et
  * appels manqués).
@@ -54,6 +54,13 @@ export type CallHistoryRow = FunctionReturnType<
 export interface JournalEntry {
 	/** L'appel (`Id<"calls">`) — le nom du champ est celui du socle. */
 	meetingId: string
+	/** Origine commerciale conservée ; jamais un destinataire de fil personnel. */
+	commercialThreadId?: CallHistoryRow["commercialThreadId"]
+	/**
+	 * CC-4/CC-5 : la conversation CONTEXTUELLE d'où part l'appel — on la rappelle PAR elle (accord et
+	 * cible relus), jamais par l'appel personnel (`callMember`) ni par un fil personnel.
+	 */
+	contextualThreadId?: CallHistoryRow["contextualThreadId"]
 	category: CallJournalCategory
 	reason: string | null
 	/** `direct` ou `group` : un appel de groupe se lit par son appelant. */
@@ -118,6 +125,8 @@ export function journalEntryOf(row: CallHistoryRow): JournalEntry {
 	const counterpart = counterpartOf(row)
 	return {
 		meetingId: String(row.callId),
+		...(row.commercialThreadId === undefined ? {} : { commercialThreadId: row.commercialThreadId }),
+		...(row.contextualThreadId === undefined ? {} : { contextualThreadId: row.contextualThreadId }),
 		category,
 		reason,
 		kind: row.kind,

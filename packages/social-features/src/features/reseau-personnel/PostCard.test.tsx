@@ -1,10 +1,10 @@
 // @vitest-environment jsdom
 // Écrit pour le moteur (lot F2) : `PostCard` n'avait pas de test au socle — carte d'une personne, carte d'une page (identité de la page, signataire nommé), nom neutre d'un auteur sans profil publié.
-import { fireEvent, screen, waitFor, within } from "@testing-library/react"
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react"
 import { ViewerPreferencesProvider } from "@antsia/api/viewer-preferences"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
-import { renderWithEngine, TEST_NETWORK_ID, TEST_PERSON_ID } from "../../tests/engine-wrapper"
+import { EngineTestWrapper, renderWithEngine, TEST_NETWORK_ID, TEST_PERSON_ID, TEST_ROUTES } from "../../tests/engine-wrapper"
 
 const mocks = vi.hoisted(() => ({
   calls: [] as { ref: string; args: unknown }[],
@@ -65,6 +65,29 @@ beforeEach(() => {
 afterEach(() => vi.restoreAllMocks())
 
 describe("PostCard (vérification)", () => {
+  it.each([
+    { label: "audience relations", patch: { audience: "connections" as const } },
+    { label: "citation indisponible", patch: { share: { available: false as const } } },
+  ])("$label : garde le lien copiable sans proposer de citation", async ({ patch }) => {
+    render(
+      <EngineTestWrapper routes={{ ...TEST_ROUTES, post: (id) => `/fil?post=${encodeURIComponent(id)}` }}>
+        <PostCard post={{ ...base, ...patch, shareCount: 2 }} now={1_700_000_060_000} />
+      </EngineTestWrapper>,
+    )
+    const trigger = screen.getByRole("button", { name: "Partager · 2" })
+    expect(trigger).toHaveTextContent("Partager")
+    trigger.focus()
+    fireEvent.click(trigger)
+    const dialog = await screen.findByRole("dialog", { name: "Partager la publication de Awa" })
+    expect(within(dialog).getByRole("textbox", { name: "Lien de la publication" })).toHaveValue(new URL("/fil?post=posts_1", window.location.origin).href)
+    expect(within(dialog).getByRole("button", { name: "Copier le lien" })).toBeInTheDocument()
+    expect(within(dialog).queryByRole("button", { name: "Partager dans mon fil" })).toBeNull()
+    expect(mocks.calls).toEqual([])
+    fireEvent.keyDown(document, { key: "Escape" })
+    expect(screen.queryByRole("dialog")).toBeNull()
+    expect(trigger).toHaveFocus()
+  })
+
   it("le propriétaire retire la diffusion sans supprimer sa publication, après confirmation", async () => {
     const confirm = vi.spyOn(window, "confirm").mockReturnValue(false)
     const { rerender } = renderWithEngine(<PostCard post={{ ...base, isMine: true, visibility: "root" }} now={1_700_000_060_000} />)
@@ -92,7 +115,7 @@ describe("PostCard (vérification)", () => {
     expect(screen.getByRole("link", { name: "@awa.demo" })).toHaveAttribute("href", "/profil/awa.demo")
     expect(screen.getByRole("link", { name: "#numerique" })).toHaveAttribute("href", "/fil?tag=numerique")
     expect(screen.getByRole("button", { name: "Commenter · 3" })).toBeTruthy()
-    expect(screen.getByRole("button", { name: "Relayer" })).toBeTruthy()
+    expect(screen.getByRole("button", { name: "Partager" })).toHaveTextContent("Partager")
 
     fireEvent.click(screen.getByRole("button", { name: /^J'aime · 2 réactions\./ }))
     await waitFor(() => expect(mocks.calls).toContainEqual({ ref: "toggleReaction", args: { networkId: TEST_NETWORK_ID, postId: "posts_1", kind: "like" } }))
@@ -145,6 +168,8 @@ describe("PostCard (vérification)", () => {
     expect(screen.getAllByText("Membre du réseau").length).toBeGreaterThan(0)
     expect(screen.queryByRole("link", { name: "Membre du réseau" })).toBeNull()
     expect(screen.getByText("Publication indisponible.")).toBeTruthy()
+    // Sans adresse membre injectée ni original disponible, aucun dialogue vide.
+    expect(screen.queryByRole("button", { name: "Partager" })).toBeNull()
   })
 
   it("attribue le réseau d'origine sans inventer de lien vers une application non servie", () => {

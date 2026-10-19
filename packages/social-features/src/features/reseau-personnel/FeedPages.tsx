@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/FeedPages.tsx @ ad2e7fdc2 — adaptations : fil `posts.posts.myFeed` du moteur avec le réseau courant (`useNetwork().networkId`), portées du domaine (sans « mon_administration ») ; cartes rendues avec la projection du moteur (clé `_id`) ; le rail des pages à suivre est celui que le lot des pages réécrit sur le moteur (`./PagesSuggestionsRail`, mêmes nom et props qu'au socle) ; état vide du kit d'espace de `@antsia/ui/espace-kit` ; commentaires rapportés à la page réseau (« personnes » au lieu d'« agents »).
+// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/FeedPages.tsx @ ad2e7fdc2 — adaptations : fil `posts.posts.myFeed` du moteur avec le réseau courant (`useNetwork().networkId`), portées du domaine (sans « mon_administration ») ; cartes rendues avec la projection du moteur (clé `_id`) ; le rail des pages à suivre est celui que le lot des pages réécrit sur le moteur (`./PagesSuggestionsRail`, mêmes nom et props qu'au socle) ; état vide du kit d'espace de `@antsia/ui/espace-kit` ; commentaires rapportés à la page réseau (« personnes » au lieu d'« agents ») ; P04 (18/10/2026) : sous le lecteur immersif (`ImmersiveFeedReader`), la MÊME page — même requête, même curseur — rend chaque publication dans un créneau, déclare son état au lecteur (chargement, erreur, lacune, préparation, nouvelles publications retenues en tête) et se tait sur l'entrelacement des suggestions ; hors lecteur, quand l'application déclare le fil immersif, chaque carte reçoit une enveloppe d'ancre de retour (`display: contents`) ; sans cette déclaration, rendu historique à l'identique.
 "use client"
 
 /**
@@ -15,13 +15,22 @@
  */
 
 import { api } from "@antsia/api/engine"
-import { useAuthenticatedConvexQuery } from "@antsia/api/hooks"
+import { useAuthenticatedConvexQuery, useConvexMutationQuery } from "@antsia/api/hooks"
 import { useNetwork } from "@antsia/api/network"
 import { SkeletonCard } from "@antsia/ui"
 import { EspaceEmptyState } from "@antsia/ui/espace-kit"
-import { Fragment, useEffect, type ReactNode } from "react"
+import { Fragment, useEffect, useMemo, useRef, type ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 import { ReseauQueryError } from "../../shell/ReseauQueryError"
+import { FeedPostMemoryScope } from "../feed-immersion/feed-post-memory"
+import {
+  ImmersiveFeedSlot,
+  ImmersiveStatusSlot,
+  useImmersiveFeedReader,
+  useImmersiveFrozenHead,
+  useImmersivePageReport,
+  type ImmersivePageReport,
+} from "../feed-immersion/ImmersiveFeedReader"
 import { PostCard } from "./PostCard"
 import { PagesSuggestionsRail } from "./PagesSuggestionsRail"
 import { SuggestionsPanel } from "./SuggestionsPanel"
@@ -80,8 +89,8 @@ export function FeedPage({
   onBoundaryShift: (pageIndex: number, cursor: ReseauFeedCursor | null) => void
   emptyFallback: ReactNode
 }) {
-  const { t } = useTranslation("reseau")
-  const { networkId } = useNetwork()
+  const { t, i18n } = useTranslation("reseau")
+  const { networkId, feedPresentation } = useNetwork()
   const page = useAuthenticatedConvexQuery(
     api.modules.posts.posts.myFeed,
     {
@@ -98,6 +107,52 @@ export function FeedPage({
 
   const items = page.data?.items ?? []
   const nextCursor = page.data?.nextCursor ?? null
+
+  /*
+   * P04 — sous le lecteur immersif, la MÊME page (même requête, même curseur,
+   * même temps réel) rend des créneaux et déclare son état au lecteur. La
+   * première page retient en tête les publications arrivées pendant la
+   * lecture : elles ne s'insèrent pas sous la publication lue, une commande du
+   * lecteur les montre. Hors lecteur, rien de tout cela ne s'applique.
+   */
+  const reader = useImmersiveFeedReader()
+  const pageItems = page.data?.items
+  const headIds = useMemo(
+    () => (reader !== null && isFirst && pageItems !== undefined ? pageItems.map((post): string => post._id) : null),
+    [reader, isFirst, pageItems],
+  )
+  const hiddenHead = useImmersiveFrozenHead(headIds)
+  const shownItems = hiddenHead > 0 ? items.slice(hiddenHead) : items
+  const lacunarPage = page.data?.lacunar === true
+  const preparingPage = isFirst && page.data?.preparing === true
+  const materializedSince = isFirst ? (page.data?.materializedSince ?? null) : null
+  const pageStatus: ImmersivePageReport["status"] = page.isError ? "error" : page.data === undefined ? "loading" : "ready"
+  const shownCount = pageStatus === "ready" ? shownItems.length : 0
+  const report = useMemo<ImmersivePageReport | null>(
+    () =>
+      reader === null
+        ? null
+        : { pageKey, isFirst, isLast, status: pageStatus, count: shownCount, lacunar: lacunarPage, preparing: preparingPage, materializedSince, newCount: hiddenHead },
+    [reader, pageKey, isFirst, isLast, pageStatus, shownCount, lacunarPage, preparingPage, materializedSince, hiddenHead],
+  )
+  useImmersivePageReport(report)
+
+  const { mutate: prepareMyFeed } = useConvexMutationQuery(api.modules.posts.feedMaterialization.prepareMyFeed)
+  const preparedNetwork = useRef<{ networkId: string; key: string } | null>(null)
+  const canPrepare = page.data !== undefined && !page.isError
+  const preparationKey = page.data?.preparationKey ?? (page.data?.preparing ? "preparing" : "mounted")
+  useEffect(() => {
+    // Une fois par clé de version/génération manquante ; une erreur d'accès désarme le verrou.
+    if (page.isError) { preparedNetwork.current = null; return }
+    if (!isFirst || !canPrepare) return
+    const previous = preparedNetwork.current
+    if (previous?.networkId === networkId) {
+      if (preparationKey === "mounted") { preparedNetwork.current = { networkId, key: preparationKey }; return }
+      if (previous.key === preparationKey) return
+    }
+    preparedNetwork.current = { networkId, key: preparationKey }
+    prepareMyFeed({ networkId })
+  }, [isFirst, canPrepare, preparationKey, networkId, prepareMyFeed, page.isError])
 
   /**
    * La DERNIÈRE page publie son curseur au parent — elle seule peut en avoir
@@ -128,6 +183,44 @@ export function FeedPage({
     pageKey,
   ])
 
+  if (reader !== null) {
+    // Le lecteur immersif : un créneau par publication, à la hauteur de la
+    // scène ; les états de la page (lacune, préparation, historique) vivent
+    // dans la barre et la fin du lecteur, jamais masqués.
+    if (page.isError) {
+      return (
+        <ImmersiveStatusSlot id={`${pageKey}:error`}>
+          <ReseauQueryError title={t("feedPages.errorTitle")} message={t("feedPages.errorMessage")} onRetry={() => { void page.refetch() }} />
+        </ImmersiveStatusSlot>
+      )
+    }
+    if (page.data === undefined) {
+      return (
+        <ImmersiveStatusSlot id={`${pageKey}:loading`} busy>
+          <SkeletonCard />
+          <p className="sr-only">{t("immersiveFeed.loading")}</p>
+        </ImmersiveStatusSlot>
+      )
+    }
+    if (shownItems.length === 0) {
+      return isFirst && !page.data.lacunar && nextCursor === null ? <ImmersiveStatusSlot id={`${pageKey}:empty`}>{emptyFallback}</ImmersiveStatusSlot> : null
+    }
+    return (
+      <>
+        {shownItems.map((post) => (
+          <ImmersiveFeedSlot
+            key={post._id}
+            postId={post._id}
+            group={pageKey}
+            label={t("immersiveFeed.slotLabel", { name: post.page?.name ?? post.author.displayName ?? t("postCard.unknownAuthor") })}
+          >
+            <PostCard post={post} now={now} onTag={onTag} onMention={onMention} />
+          </ImmersiveFeedSlot>
+        ))}
+      </>
+    )
+  }
+
   if (page.isLoading) {
     return (
       <>
@@ -142,16 +235,31 @@ export function FeedPage({
   }
 
   const lacuna = page.data?.lacunar ? <p role="status" className="rounded-xl border border-border bg-muted p-3 text-sm text-muted-foreground">{t("feedPages.incomplete")}</p> : null
-  if (items.length === 0) return <>{lacuna}{isFirst && !page.data?.lacunar && nextCursor === null ? emptyFallback : null}</>
+  const preparation = isFirst && page.data?.preparing ? <p role="status" className="text-sm text-muted-foreground">{t("feedPages.preparing")}</p> : null
+  const history = isFirst && page.data?.materializedSince !== undefined ? <p className="text-sm text-muted-foreground">{t("feedPages.historySince", { date: new Intl.DateTimeFormat(i18n.resolvedLanguage ?? i18n.language, { dateStyle: "medium" }).format(page.data.materializedSince) })}</p> : null
+  if (items.length === 0) return <>{preparation}{history}{lacuna}{isFirst && !page.data?.lacunar && nextCursor === null ? emptyFallback : null}</>
 
   const interleaveIndex = interleaveAfter ? interleaveAfter(items.length) : null
 
   return (
     <>
+      {preparation}
+      {history}
       {lacuna}
       {items.map((post, index) => (
         <Fragment key={post._id}>
-          <PostCard post={post} now={now} onTag={onTag} onMention={onMention} />
+          {/* P04 : l'enveloppe d'ancre (`display: contents`, aucune boîte) permet
+              le retour à cette carte et la mémoire de sa galerie — seulement
+              quand l'application déclare le fil immersif. */}
+          {feedPresentation === "immersive" ? (
+            <div className="contents" data-feed-anchor={post._id}>
+              <FeedPostMemoryScope postId={post._id}>
+                <PostCard post={post} now={now} onTag={onTag} onMention={onMention} />
+              </FeedPostMemoryScope>
+            </div>
+          ) : (
+            <PostCard post={post} now={now} onTag={onTag} onMention={onMention} />
+          )}
           {/* La découverte se consomme AU FIL du défilement sur mobile : deux
               modules distincts, personnes réciproques puis pages unilatérales.
               Le bureau masque cette pile car son rail droit porte les mêmes

@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/PostMedia.tsx @ ad2e7fdc2 — adaptations : type `PostMediaDto` du contrat `@antsia/social-contracts/media` ; un média RETENU par la garde des fichiers (`url` nulle, `withheld` : analyse en cours ou bloqué) garde sa place et dit pourquoi (textes du code, espace `errors`) au lieu d'un lien mort — image, vidéo et carrousel ; libellés et annonces par l'i18n (clés `reseau:postMedia.*`) ; surface plein écran de `@antsia/ui/overlay` (charte de l'application) ; cadre, carrousel et gestes inchangés ; feuille de style sortie du JSX dans une constante de module (`POST_MEDIA_CSS`) — un littéral enfant de `<style>` passerait pour une chaîne d'interface — règles inchangées.
+// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/PostMedia.tsx @ ad2e7fdc2 — adaptations : type `PostMediaDto` du contrat `@antsia/social-contracts/media` ; un média RETENU par la garde des fichiers (`url` nulle, `withheld` : analyse en cours ou bloqué) garde sa place et dit pourquoi (textes du code, espace `errors`) au lieu d'un lien mort — image, vidéo et carrousel ; libellés et annonces par l'i18n (clés `reseau:postMedia.*`) ; surface plein écran de `@antsia/ui/overlay` (charte de l'application) ; cadre, carrousel et gestes inchangés ; feuille de style sortie du JSX dans une constante de module (`POST_MEDIA_CSS`) — un littéral enfant de `<style>` passerait pour une chaîne d'interface — règles inchangées ; P03 (étude social-commerce) : présentation « media » déclarée par l'application (`presentation`, sinon `useOptionalNetwork().postPresentation`), rendue par `PostMediaPresentation` — ratio réel borné, galerie et visionneuse —, la présentation historique restant le défaut, à l'identique.
 "use client"
 
 /**
@@ -28,6 +28,7 @@
  * de l'auteur le précède, la barre de réactions le suit toujours.
  */
 
+import { useOptionalNetwork, type EnginePostPresentation } from "@antsia/api/network"
 import type { MediaWithheld, PostMediaDto } from "@antsia/social-contracts/media"
 import { ImmersiveOverlay } from "@antsia/ui/overlay"
 import { ChevronLeft, ChevronRight, Maximize2, X } from "lucide-react"
@@ -43,6 +44,7 @@ import {
   carouselIndexFromScroll,
   clampCarouselIndex,
 } from "./post-media-carousel"
+import { PostMediaPresentation } from "./PostMediaPresentation"
 
 /**
  * LE format du fil — un seul cadre pour tout média seul, image comme vidéo
@@ -67,12 +69,22 @@ function withheldKey(withheld: MediaWithheld | null): string {
 export function PostMedia({
   media,
   gutter = 0,
+  presentation,
 }: {
   media: readonly PostMediaDto[]
   /** Le rembourrage lateral de la carte hote, que le media TRAVERSE. */
   gutter?: number
+  /**
+   * La présentation voulue. Absente : celle que l'application déclare
+   * (`NetworkProvider postPresentation`), « classic » hors de tout réseau.
+   * Une surface hors réseau (la carte publique servie sans compte) la passe
+   * explicitement.
+   */
+  presentation?: EnginePostPresentation
 }) {
   const { t } = useTranslation("reseau")
+  const network = useOptionalNetwork()
+  const mode: EnginePostPresentation = presentation ?? (network?.postPresentation === "media" ? "media" : "classic")
   if (media.length === 0) return null
 
   // Le debord, ecrit une fois : marges negatives et largeur rendue, plus le
@@ -92,6 +104,10 @@ export function PostMedia({
           borderRadius: 0,
         }
       : null
+
+  // Présentation « media » (opt-in de l'application) : son propre rendu. Tout
+  // ce qui suit reste la présentation historique, intouchée.
+  if (mode === "media") return <PostMediaPresentation media={media} bleed={bleed} />
 
   const video = media.find((item) => item.kind === "video")
   if (video) {

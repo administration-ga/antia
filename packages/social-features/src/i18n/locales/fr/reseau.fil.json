@@ -12,7 +12,9 @@
   "feedPages": {
     "errorTitle": "Fil indisponible",
     "errorMessage": "Les publications n’ont pas pu être chargées.",
-    "incomplete": "Ce fil est incomplet. Certaines publications peuvent ne pas être affichées."
+    "incomplete": "Ce fil est incomplet. Certaines publications peuvent ne pas être affichées.",
+    "preparing": "Votre fil se prépare. Certaines publications peuvent manquer pendant cette préparation.",
+    "historySince": "Ce fil présente les publications depuis le {{date}}."
   },
   "reseauFeedPages": {
     "loadMore": {
@@ -160,7 +162,12 @@
     "triggerWithCount_other": "{{label}} · {{formatted}} réactions. Appui long ou flèche pour choisir une réaction.",
     "title": "Réagir",
     "palette": "Choisir une réaction",
-    "optionWithCount": "{{label}} · {{formatted}}"
+    "more": "Afficher le choix des réactions",
+    "optionWithCount": "{{label}} · {{formatted}}",
+    "toggle": "{{label}}",
+    "toggleWithCount_one": "{{label}} · {{formatted}} réaction",
+    "toggleWithCount_many": "{{label}} · {{formatted}} réactions",
+    "toggleWithCount_other": "{{label}} · {{formatted}} réactions"
   },
   "postMedia": {
     "videoLabel": "Vidéo de la publication",
@@ -169,6 +176,8 @@
     "carouselLabel": "Photos de la publication, {{total}} images",
     "slideRole": "diapositive",
     "expand": "Afficher l'image {{position}} sur {{total}} en plein écran",
+    "expandSingle": "Afficher l'image en plein écran",
+    "fullscreenSingle": "Image en plein écran",
     "fullscreenLabel": "{{announcement}} en plein écran",
     "closeFullscreen": "Fermer le plein écran",
     "previous": "Image précédente",
@@ -179,6 +188,11 @@
     "mediaUnavailable": "Média indisponible"
   },
   "postCard": {
+    "actionsLabel": "Actions sur la publication",
+    "caption": {
+      "more": "Lire la suite",
+      "less": "Réduire"
+    },
     "toast": {
       "editFailed": "Modification impossible.",
       "reported": "Signalement transmis. La publication est masquée de votre fil.",
@@ -197,8 +211,8 @@
     "cancel": "Annuler",
     "comment": "Commenter",
     "commentWithCount": "Commenter · {{formatted}}",
-    "share": "Relayer",
-    "shareWithCount": "Relayer · {{formatted}}",
+    "share": "Partager",
+    "shareWithCount": "Partager · {{formatted}}",
     "shareUnavailable": "Publication indisponible.",
     "publication": {
       "withdraw": "Retirer de la lecture publique",
@@ -211,6 +225,13 @@
   },
   "sharePostDialog": {
     "title": "Partager la publication de {{name}}",
+    "close": "Fermer",
+    "linkLabel": "Lien de la publication",
+    "linkHint": "Les destinataires doivent avoir accès à cette publication pour la consulter.",
+    "copyLink": "Copier le lien",
+    "copied": "Lien copié.",
+    "copyFailed": "La copie automatique a échoué. Le lien est sélectionné : copiez-le manuellement.",
+    "quote": "Partager dans mon fil",
     "wordLabel": "Ajouter un mot (facultatif)",
     "wordPlaceholder": "Pourquoi vous la partagez…",
     "audienceLabel": "Qui voit votre partage",
@@ -260,6 +281,7 @@
     "save": "Enregistrer",
     "remove": "Retirer",
     "report": "Signaler",
+    "published": "Commentaire publié.",
     "toast": {
       "publishFailed": "Le commentaire n'a pas pu être publié.",
       "removeFailed": "Le retrait n'a pas pu être enregistré.",

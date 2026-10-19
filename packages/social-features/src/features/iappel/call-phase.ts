@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/iappel/call-phase.ts @ ad2e7fdc2 — adaptations : branche poste élaguée (horaires de poste `outside_hours`, secrétariat `secretariat_unavailable`, trace du renvoi `routed*` et `routedCallNotice`, sujet « Le poste … ») ; phrase composée par le serveur (`serverMessage`) retirée — le moteur rend des codes, l'écran compose ; libellés et phrases traduits par i18n (`t` ajouté en dernier paramètre de `deriveCallPhase`, `endLabel`, `describeCallEnd` ; clés `iappel:callPhase.…`).
+// Dupliqué de socle/packages/agent-features/src/features/iappel/call-phase.ts @ ad2e7fdc2 — adaptations : branche poste élaguée (horaires de poste `outside_hours`, secrétariat `secretariat_unavailable`, trace du renvoi `routed*` et `routedCallNotice`, sujet « Le poste … ») ; phrase composée par le serveur (`serverMessage`) retirée — le moteur rend des codes, l'écran compose ; libellés et phrases traduits par i18n (`t` ajouté en dernier paramètre de `deriveCallPhase`, `endLabel`, `describeCallEnd` ; clés `iappel:callPhase.…`) ; P05 (18/10/2026) : entrée optionnelle `establishedAt` — fournie, « En communication » et le chrono partent de l'établissement RÉEL des médias (salle connectée + autre participant), et l'appel sortant ne dit « Sonnerie… » que lorsque le serveur l'a mis à sonner (avant : « Appel en préparation… ») ; absente, comportement d'origine inchangé.
 /**
  * call-phase — DANS QUEL ÉTAT est l'appel, et QUE DIT-ON quand il se termine.
  *
@@ -96,6 +96,17 @@ export interface CallPhaseInput {
 	 * Absente (pas encore connue) : `peerHoldsCall` retombe sur `isHeld`.
 	 */
 	myUserId?: string | null
+	/**
+	 * P05 — l'instant où les médias ont été RÉELLEMENT établis sur cet appareil
+	 * (`call-establishment.ts` : salle connectée + un autre participant), ou
+	 * `null` s'ils ne le sont pas encore.
+	 *
+	 * ⚠️ `undefined` (champ absent) et `null` ne disent pas la même chose :
+	 * absent, l'appelant ne suit pas l'établissement et la règle d'origine
+	 * s'applique (décrochage serveur) ; `null`, il le suit et l'appel n'est PAS
+	 * encore établi — « Connexion… », sans chrono.
+	 */
+	establishedAt?: number | null
 }
 
 export interface CallPhaseResult {
@@ -201,6 +212,15 @@ export function peerHoldsCall(input: {
 export function deriveCallPhase(input: CallPhaseInput, t: TFunction): CallPhaseResult {
 	const endKind = callEndKindV2(input.meeting)
 	const answeredAt = input.meeting?.answeredAt ?? input.answeredAtLocal ?? null
+	/**
+	 * P05 — l'appelant SUIT-il l'établissement réel ? (`establishedAt` fourni,
+	 * même `null`). Alors la durée part de lui, jamais du décrochage serveur :
+	 * entre l'acceptation et l'arrivée des médias, il peut s'écouler plusieurs
+	 * secondes pendant lesquelles personne ne s'entend.
+	 */
+	const tracksEstablishment = input.establishedAt !== undefined
+	const establishedAt = input.establishedAt ?? null
+	const elapsedFrom = tracksEstablishment ? establishedAt : answeredAt
 
 	if (endKind !== null) {
 		return {
@@ -226,14 +246,14 @@ export function deriveCallPhase(input: CallPhaseInput, t: TFunction): CallPhaseR
 			// Le chrono NE S'ARRÊTE PAS pendant une reconnexion : l'appel dure,
 			// c'est le réseau qui hoquette. Le remettre à zéro donnerait
 			// l'impression d'un nouvel appel.
-			timerStart: answeredAt,
+			timerStart: elapsedFrom,
 			label: t("iappel:callPhase.phase.reconnecting"),
 			endKind: null,
 		}
 	}
 
 	if (input.isHeld === true) {
-		return { phase: "held", timerStart: answeredAt, label: t("iappel:callPhase.phase.held"), endKind: null }
+		return { phase: "held", timerStart: elapsedFrom, label: t("iappel:callPhase.phase.held"), endKind: null }
 	}
 
 	// ⚠️ APRÈS ma propre attente, et c'est délibéré : au moment où je reprends,
@@ -250,13 +270,36 @@ export function deriveCallPhase(input: CallPhaseInput, t: TFunction): CallPhaseR
 			phase: "peer_held",
 			// Le chrono NE S'ARRÊTE PAS : l'appel dure, même suspendu — c'est
 			// cette durée-là qui ira au journal.
-			timerStart: answeredAt,
+			timerStart: elapsedFrom,
 			label: t("iappel:callPhase.phase.peerHeld"),
 			endKind: null,
 		}
 	}
 
 	const callStatus = input.meeting?.callStatus
+
+	if (tracksEstablishment) {
+		// « Connecté » seulement quand les médias passent — jamais sur la seule
+		// foi d'un statut serveur qui précède l'arrivée du correspondant.
+		if (establishedAt !== null && input.connection === "connected") {
+			return {
+				phase: "active",
+				timerStart: establishedAt,
+				label: t("iappel:callPhase.phase.active"),
+				endKind: null,
+			}
+		}
+		if (input.direction === "outgoing" && callStatus === "ringing") {
+			return { phase: "ringing", timerStart: null, label: t("iappel:callPhase.phase.ringing"), endKind: null }
+		}
+		// Composé mais pas encore mis à sonner (`initiating`, ou document pas
+		// encore lu) : le téléphone d'en face ne sonne PAS encore — dire
+		// « Sonnerie… » serait un statut fabriqué.
+		if (input.direction === "outgoing" && (callStatus === undefined || callStatus === "initiating")) {
+			return { phase: "connecting", timerStart: null, label: t("iappel:callPhase.phase.preparing"), endKind: null }
+		}
+		return { phase: "connecting", timerStart: null, label: t("iappel:callPhase.phase.connecting"), endKind: null }
+	}
 	const connected = callStatus === "connected" || input.hasRemote
 	if (connected && input.connection === "connected") {
 		return {

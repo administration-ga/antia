@@ -45,6 +45,8 @@ export const FILE_SCAN_SOURCES = [
   "album",
   "voice",
   "live",
+  /** P15 : pièces personnelles d'une candidature, sans réseau ni nom de fichier dans la garde. */
+  "job_application",
   "generated",
 ] as const
 

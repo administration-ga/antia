@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/PostCard.tsx @ 25398f565 — adaptations : la carte est la PROJECTION du moteur (`PostCardPost` = `FunctionReturnType<typeof api.modules.posts.posts.getPost>`, rendue telle quelle par le fil, la recherche, les murs, les groupes et les pages : `_id`, `isMine`, `author.personId`, `page`, réactions `counts`) au lieu du DTO du socle (`postId`, `authorUserId`, `authorKind`, `signedBy`, `page.orgId`) ; identité d'auteur par `PostIdentityLines` (nom, badges CALCULÉS par le serveur — ni fonction ni administration) et `author-link` (lien, forme de pastille, signature) avec les adresses INJECTÉES (`useRoutes()` : profil d'une personne, `page(handle)` d'une page) ; une publication de PAGE parle sous l'identité de la page (nom, logo, badge de confiance), son auteur n'en est que le signataire ; nom neutre traduit pour un profil non publié ; annonce du direct branchée sur sa projection vivante et la route de conférence injectée ; gestes du moteur avec le réseau courant (`engagement.engagement.toggleReaction`, `posts.posts.{edit, remove, pinOnMyWall}`, `pages.pages.removePagePost` pour une publication de page, `moderation.moderation.{reportPost, reportComment}`) ; l'épinglage personnel n'est pas offert sur une publication de page ; libellés, toasts et noms accessibles par l'i18n (clés `reseau:postCard.*`) ; refus du moteur dit par son code (`postEngineErrorText`) ; partage cité avec la page de l'original quand c'est une page qui parle, ses mots-dièse et mentions suivant les gestionnaires de la carte. ; PA6 : dates de publication et citation dans la préférence du lecteur, origine réseau attribuée sans lien, carte de l’évènement annoncé avec dates/statut/réponse réellement projetés et sans droits inventés.
+// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/PostCard.tsx @ 25398f565 — adaptations : la carte est la PROJECTION du moteur (`PostCardPost` = `FunctionReturnType<typeof api.modules.posts.posts.getPost>`, rendue telle quelle par le fil, la recherche, les murs, les groupes et les pages : `_id`, `isMine`, `author.personId`, `page`, réactions `counts`) au lieu du DTO du socle (`postId`, `authorUserId`, `authorKind`, `signedBy`, `page.orgId`) ; identité d'auteur par `PostIdentityLines` (nom, badges CALCULÉS par le serveur — ni fonction ni administration) et `author-link` (lien, forme de pastille, signature) avec les adresses INJECTÉES (`useRoutes()` : profil d'une personne, `page(handle)` d'une page) ; une publication de PAGE parle sous l'identité de la page (nom, logo, badge de confiance), son auteur n'en est que le signataire ; nom neutre traduit pour un profil non publié ; annonce du direct branchée sur sa projection vivante et la route de conférence injectée ; gestes du moteur avec le réseau courant (`engagement.engagement.toggleReaction`, `posts.posts.{edit, remove, pinOnMyWall}`, `pages.pages.removePagePost` pour une publication de page, `moderation.moderation.{reportPost, reportComment}`) ; l'épinglage personnel n'est pas offert sur une publication de page ; libellés, toasts et noms accessibles par l'i18n (clés `reseau:postCard.*`) ; refus du moteur dit par son code (`postEngineErrorText`) ; partage cité avec la page de l'original quand c'est une page qui parle, ses mots-dièse et mentions suivant les gestionnaires de la carte. ; PA6 : dates de publication et citation dans la préférence du lecteur, origine réseau attribuée sans lien, carte de l’évènement annoncé avec dates/statut/réponse réellement projetés et sans droits inventés ; P03 (étude social-commerce du 18/10/2026) : présentation « media » déclarée par l'application (`useNetwork().postPresentation`) — auteur → média (photo, galerie, vidéo, citation, direct, évènement) → actions (réagir avec choix explicite, commenter, partager et copier le lien, enregistrer) → légende bornée « Lire la suite » → offre liée facultative (`offer`, emplacement typé vide jusqu'au lot P09) ; texte seul à hauteur naturelle ; la présentation historique reste le défaut, à l'identique.
 "use client"
 
 /**
@@ -17,7 +17,7 @@
 
 import { api } from "@antsia/api/engine"
 import type { Id } from "@antsia/api/engine"
-import { useNetwork, useRoutes } from "@antsia/api/network"
+import { useNetwork, useRoutes, type EnginePostPresentation } from "@antsia/api/network"
 import { Link } from "@antsia/api/routing"
 import { useViewerTimeZone } from "@antsia/api/viewer-preferences"
 import type { Badge } from "@antsia/social-domain/badges"
@@ -26,8 +26,8 @@ import { LEGACY_ROOT_NETWORK_SLUG, ROOT_NETWORK_SLUG } from "@antsia/social-doma
 import { Button, Card, TextArea } from "@antsia/ui"
 import { useMutation } from "convex/react"
 import type { FunctionReturnType } from "convex/server"
-import { GlobeLock, MessageCircle, Share2 } from "lucide-react"
-import { useEffect, useRef, useState } from "react"
+import { Bookmark, BookmarkCheck, GlobeLock, MessageCircle, Share2 } from "lucide-react"
+import { useEffect, useRef, useState, type ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 
@@ -45,6 +45,7 @@ import {
 } from "./author-link"
 import { CommentsSurface } from "./CommentsSurface"
 import { formatEventRange, myResponseLabel } from "./evenements-list"
+import { PostCardCaption } from "./PostCardCaption"
 import { PostMedia } from "./PostMedia"
 import { PostOverflowMenu } from "./PostOverflowMenu"
 import { postEngineErrorText } from "./post-overflow"
@@ -89,22 +90,54 @@ interface CardIdentity {
   badges: readonly Badge[]
 }
 
+/**
+ * L'emplacement de l'OFFRE LIÉE à une publication — dernière zone de la carte
+ * (04 §2 : « une carte compacte avec titre, prix correctement qualifié,
+ * vendeur et Voir l'offre »). VIDE jusqu'au lot P09 : aucun appelant ne le
+ * remplit aujourd'hui, et sans lui la carte ne rend RIEN de plus — ni espace
+ * réservé, ni donnée de démonstration.
+ *
+ * La carte ne connaît ni prix, ni vendeur, ni disponibilité : P09 construira
+ * la carte d'offre compacte sur la projection publique du contrat
+ * PRO-COMMERCE-PUBLIC-V1 (catalogue PRO.GA reflété) et la passera ici, avec le
+ * nom accessible de la zone. Une offre retirée ou non publiée ne se passe pas.
+ */
+export interface PostOfferSlot {
+  /** Nom accessible de la zone, déjà traduit (« Offre liée : … »). */
+  label: string
+  /** La carte d'offre compacte, rendue par l'appelant. */
+  content: ReactNode
+}
+
 interface PostCardProps {
   post: PostCardPost
   /** Rendu de l'horodatage : passé en prop pour rester déterministe. */
   now: number
   onTag?: (tag: string) => void
   onMention?: (handle: string) => void
+  /** L'offre liée, facultative (lot P09) : absente, rien n'est rendu. */
+  offer?: PostOfferSlot
 }
 
-export function PostCard({ post, now, onTag, onMention }: PostCardProps) {
+export function PostCard(props: PostCardProps) {
+  const { networkId, personId } = useNetwork()
+  // Une carte réutilisée pour une autre publication ou un autre lecteur ne
+  // garde ni éditeur, ni dialogue, ni média ouvert du contexte précédent.
+  return <PostCardContent key={`${networkId}:${personId}:${props.post._id}`} {...props} />
+}
+
+function PostCardContent({ post, now, onTag, onMention, offer }: PostCardProps) {
   const { t, i18n } = useTranslation("reseau")
-  const { networkId, personId, slug } = useNetwork()
+  const { networkId, personId, slug, postPresentation, PostOfferRenderer } = useNetwork()
+  // La présentation que l'application déclare : « media » sur opt-in, sinon
+  // la carte historique (aucune application ne change sans le demander).
+  const presentation = postPresentation === "media" ? "media" : "classic"
   const routes = useRoutes()
   const timeZone = useViewerTimeZone()
   const [showComments, setShowComments] = useState(false)
   const [sharing, setSharing] = useState(false)
   const [pendingReaction, setPendingReaction] = useState(false)
+  const reactionLock = useRef(false)
   const [editing, setEditing] = useState(false)
   const [editedBody, setEditedBody] = useState(post.body)
   const [withdrawing, setWithdrawing] = useState(false)
@@ -128,6 +161,11 @@ export function PostCard({ post, now, onTag, onMention }: PostCardProps) {
   const pinPost = useMutation(api.modules.posts.posts.pinOnMyWall)
   const reportPost = useMutation(api.modules.moderation.moderation.reportPost)
   const reportComment = useMutation(api.modules.moderation.moderation.reportComment)
+  // Enregistrer depuis la rangée d'actions (présentation « media ») : le MÊME
+  // geste que l'entrée du menu « … » (`marks.marks.toggleMark`, réseau courant).
+  const toggleMark = useMutation(api.modules.marks.marks.toggleMark)
+  const [saving, setSaving] = useState(false)
+  const saveLock = useRef(false)
 
   const submitReport = async (reason: ReportReason, note: string) => {
     if (!reportTarget) return
@@ -209,6 +247,8 @@ export function PostCard({ post, now, onTag, onMention }: PostCardProps) {
   }
 
   const handleReaction = async (kind: ReactionKind) => {
+    if (reactionLock.current) return
+    reactionLock.current = true
     setPendingReaction(true)
     try {
       await toggleReaction({ networkId, postId: post._id, kind })
@@ -216,9 +256,34 @@ export function PostCard({ post, now, onTag, onMention }: PostCardProps) {
       // Le serveur relit l'autorisation à chaque acte : une connexion rompue
       // entre l'affichage et le clic referme la publication. Le dire, plutôt
       // que de laisser un bouton muet.
-      toast.error(postEngineErrorText(error, "reseau:postCard.toast.reactionFailed", t))
+      if (live.current) toast.error(postEngineErrorText(error, "reseau:postCard.toast.reactionFailed", t))
     } finally {
-      setPendingReaction(false)
+      reactionLock.current = false
+      if (live.current) setPendingReaction(false)
+    }
+  }
+
+  /**
+   * Bascule l'enregistrement. L'état affiché reste celui du SERVEUR
+   * (`post.viewer.bookmarked`, relu par la projection) : aucun état optimiste.
+   * Un seul envoi à la fois ; la réponse d'une autre carte (réseau, personne ou
+   * publication changés entre-temps) ne s'annonce pas sur celle-ci.
+   */
+  const toggleSaved = async () => {
+    if (saveLock.current) return
+    saveLock.current = true
+    setSaving(true)
+    const submittedContext = context
+    try {
+      const result = await toggleMark({ networkId, postId: post._id, kind: "bookmark" })
+      if (live.current && latestContext.current === submittedContext)
+        toast.success(result.marked ? t("postOverflowMenu.toast.bookmarked") : t("postOverflowMenu.toast.unbookmarked"))
+    } catch (error) {
+      if (live.current && latestContext.current === submittedContext)
+        toast.error(postEngineErrorText(error, "reseau:postOverflowMenu.toast.failed", t))
+    } finally {
+      saveLock.current = false
+      if (live.current) setSaving(false)
     }
   }
 
@@ -226,21 +291,18 @@ export function PostCard({ post, now, onTag, onMention }: PostCardProps) {
     post.commentCount > 0
       ? t("postCard.commentWithCount", { formatted: formatCount(post.commentCount) })
       : t("postCard.comment")
+  const canQuote = post.audience === "public" && post.share?.available !== false
   const shareLabel =
     post.shareCount > 0
       ? t("postCard.shareWithCount", { formatted: formatCount(post.shareCount) })
       : t("postCard.share")
 
-  return (
-    <Card padded={false} style={POST_SURFACE_STYLE}>
-      <article
-        style={{
-          padding: `14px ${POST_CARD_GUTTER}px`,
-          display: "flex",
-          flexDirection: "column",
-          gap: 10,
-        }}
-      >
+  /*
+   * Les MORCEAUX de la carte, partagés par les deux présentations : chacun est
+   * le même élément, seul l'ordre change (historique : corps → médias →
+   * actions ; « media » : médias → actions → légende → offre).
+   */
+  const header = (
         <header style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <Avatar
             displayName={identity.name}
@@ -358,7 +420,10 @@ export function PostCard({ post, now, onTag, onMention }: PostCardProps) {
             /* Modifier et Épingler vivent dans ce menu depuis le 2026-08-21
                (décision utilisateur) : ils occupaient une rangée de boutons
                texte sous l'en-tête de chaque carte de l'auteur. */
-            onEdit={() => setEditing(true)}
+            onEdit={() => {
+              setEditedBody(post.body)
+              setEditing(true)
+            }}
             onPin={() =>
               void pinPost({ networkId, postId: post._id })
                 .then(() => toast.success(t("postCard.toast.pinned")))
@@ -368,13 +433,14 @@ export function PostCard({ post, now, onTag, onMention }: PostCardProps) {
             }
           />
         </header>
+  )
 
-        {isOwn && post.visibility === "root" && post.audience === "public" ? <>
+  const withdrawBlock = isOwn && post.visibility === "root" && post.audience === "public" ? <>
           {slug !== ROOT_NETWORK_SLUG && slug !== LEGACY_ROOT_NETWORK_SLUG ? <p className="text-xs text-muted-foreground">{t("postCard.publication.availableOnRoot", { brand: BRAND_NAME })}</p> : null}
           <Button type="button" variant="ghost" disabled={withdrawing} aria-busy={withdrawing || undefined} className="self-start" style={{ minHeight: 44, whiteSpace: "normal" }} onClick={() => void withdrawPublic()}><GlobeLock aria-hidden="true" size={16} />{t(withdrawing ? "postCard.publication.withdrawing" : "postCard.publication.withdraw")}</Button>
-        </> : null}
+        </> : null
 
-        {editing ? (
+  const editor = (
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             <TextArea
               value={editedBody}
@@ -409,22 +475,11 @@ export function PostCard({ post, now, onTag, onMention }: PostCardProps) {
               </Button>
             </div>
           </div>
-        ) : post.body.length > 0 ? (
-          <RichText body={post.body} onTag={onTag} onMention={onMention} />
-        ) : null}
+  )
 
-        {/* Bord à bord : le média traverse la gouttière de la carte
-            (arbitrage du 2026-08-20). La MÊME constante sert au rembourrage
-            ci-dessus et au débord ci-dessous — deux valeurs séparées se
-            décaleraient au premier ajustement, et le média dépasserait la
-            carte ou laisserait une lisière. */}
-        {post.media.length > 0 ? (
-          <PostMedia media={post.media} gutter={POST_CARD_GUTTER} />
-        ) : null}
+  const liveBlock = post.live ? <Link href={routes.conference(post.live.sessionId)} className="mt-3 flex min-h-11 items-center justify-between gap-3 rounded-xl border border-border bg-muted p-4"><span>{post.live.title}</span><span>{t(`direct:status.${post.live.status}`)}</span></Link> : null
 
-        {post.live ? <Link href={routes.conference(post.live.sessionId)} className="mt-3 flex min-h-11 items-center justify-between gap-3 rounded-xl border border-border bg-muted p-4"><span>{post.live.title}</span><span>{t(`direct:status.${post.live.status}`)}</span></Link> : null}
-
-        {post.event !== null ? (
+  const eventBlock = post.event !== null ? (
           <section aria-label={t("post.event.label")} className="grid gap-2 rounded-xl border border-border bg-muted p-4">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <span className="text-xs font-semibold text-muted-foreground">{t("post.event.label")}</span>
@@ -441,34 +496,12 @@ export function PostCard({ post, now, onTag, onMention }: PostCardProps) {
               </p>
             ) : null}
           </section>
-        ) : null}
+  ) : null
 
-        {post.share ? (
-          <SharedPostCard share={post.share} now={now} onTag={onTag} onMention={onMention} />
-        ) : null}
-
-        {/* Sans filet ni séparateur (2026-08-21) : la rangée se tient par son
-            seul espacement — la carte a perdu ses bordures, un trait ici la
-            recouperait en deux. */}
-        <div
-          style={{
-            display: "flex",
-            flexWrap: "wrap",
-            gap: 4,
-            alignItems: "center",
-            paddingTop: 2,
-          }}
-        >
-          <PostReactionControl
-            reactions={post.reactions}
-            pending={pendingReaction}
-            onReact={handleReaction}
-          />
-
-          {/* « Commenter » est une ICÔNE depuis le 2026-08-21 (décision
-              utilisateur : icônes d'abord) — l'arbitrage du 2026-08-20 qui le
-              gardait textuel est levé. Le NOM vit dans aria-label + title,
-              le compteur reste visible. */}
+  // « Commenter » est une ICÔNE depuis le 2026-08-21 (décision utilisateur :
+  // icônes d'abord) — l'arbitrage du 2026-08-20 qui le gardait textuel est
+  // levé. Le NOM vit dans aria-label + title, le compteur reste visible.
+  const commentButton = (
           <button
             type="button"
             onClick={() => setShowComments(true)}
@@ -501,13 +534,16 @@ export function PostCard({ post, now, onTag, onMention }: PostCardProps) {
               </span>
             ) : null}
           </button>
+  )
 
-          {/* Seul le PUBLIC se partage : proposer le bouton sur une publication
-              réservée offrirait un geste que le serveur refusera. */}
-          {post.audience === "public" ? (
+  // Copier une adresse ne change pas l'audience ; seule la citation dans le
+  // fil reste réservée à une publication publique disponible.
+  const shareButton = routes.post || canQuote ? (
             <button
               type="button"
               onClick={() => setSharing(true)}
+              aria-expanded={sharing}
+              aria-haspopup="dialog"
               aria-label={shareLabel}
               title={t("postCard.share")}
               style={{
@@ -529,16 +565,17 @@ export function PostCard({ post, now, onTag, onMention }: PostCardProps) {
               }}
             >
               <Share2 aria-hidden="true" size={17} strokeWidth={2.2} />
+              {t("postCard.share")}
               {post.shareCount > 0 ? (
                 <span style={{ fontVariantNumeric: "tabular-nums" }}>
-                  {formatCount(post.shareCount)}
+                  · {formatCount(post.shareCount)}
                 </span>
               ) : null}
             </button>
-          ) : null}
-        </div>
-      </article>
+  ) : null
 
+  const overlays = (
+    <>
       {showComments ? (
         <CommentsSurface
           postId={post._id}
@@ -554,9 +591,11 @@ export function PostCard({ post, now, onTag, onMention }: PostCardProps) {
 
       {sharing ? (
         <SharePostDialog
+          key={context}
           postId={post._id}
           authorName={identity.name}
           excerpt={post.body}
+          canQuote={canQuote}
           onClose={() => setSharing(false)}
         />
       ) : null}
@@ -567,6 +606,183 @@ export function PostCard({ post, now, onTag, onMention }: PostCardProps) {
           onSubmit={submitReport}
         />
       ) : null}
+    </>
+  )
+
+  if (presentation === "media") {
+    /*
+     * PRÉSENTATION « MEDIA » (opt-in de l'application, lot P03) :
+     * auteur → média → actions → légende → offre facultative.
+     *
+     * Le « média » est ce que la publication MONTRE : ses photos ou sa vidéo,
+     * le direct ou l'évènement qu'elle annonce, la publication qu'elle cite.
+     * Sans rien de tout cela, c'est un TEXTE SEUL : le texte est alors la
+     * publication, à sa place de média, complet et à hauteur naturelle — aucun
+     * aperçu coupé, aucune hauteur imposée. Sinon le corps devient la légende,
+     * bornée avec « Lire la suite ».
+     */
+    const textOnly = post.media.length === 0 && post.share === null && post.event === null && !post.live
+    const body = editing ? editor : post.body.length > 0 ? (
+      textOnly
+        ? <RichText body={post.body} onTag={onTag} onMention={onMention} />
+        : <PostCardCaption body={post.body} onTag={onTag} onMention={onMention} />
+    ) : null
+    const saved = post.viewer.bookmarked
+    return (
+      <Card padded={false} style={POST_SURFACE_STYLE}>
+        <article
+          data-post-presentation="media"
+          style={{
+            padding: `14px ${POST_CARD_GUTTER}px`,
+            display: "flex",
+            flexDirection: "column",
+            gap: 10,
+          }}
+        >
+          {header}
+
+          {textOnly ? body : (
+            <>
+              {/* Bord à bord, comme la présentation historique : la MÊME
+                  gouttière sert au rembourrage et au débord du média. */}
+              {post.media.length > 0 ? (
+                <PostMedia media={post.media} gutter={POST_CARD_GUTTER} presentation="media" />
+              ) : null}
+              {liveBlock}
+              {eventBlock}
+              {post.share ? (
+                <SharedPostCard share={post.share} now={now} onTag={onTag} onMention={onMention} presentation="media" />
+              ) : null}
+            </>
+          )}
+
+          {/* Les actions, nommées en groupe : réagir (le choix des quatre
+              réactions s'ouvre aussi d'un simple toucher), commenter,
+              partager ou copier le lien, enregistrer. */}
+          <div
+            role="group"
+            aria-label={t("postCard.actionsLabel")}
+            style={{ display: "flex", flexWrap: "wrap", gap: 4, alignItems: "center" }}
+          >
+            <PostReactionControl
+              reactions={post.reactions}
+              pending={pendingReaction}
+              onReact={handleReaction}
+              choiceButton
+            />
+            {commentButton}
+            {shareButton}
+            {/* Le même enregistrement que le menu « … », à portée de pouce :
+                bouton à bascule, état lu sur le serveur, forme de l'icône ET
+                couleur (jamais la couleur seule). */}
+            <button
+              type="button"
+              aria-pressed={saved}
+              aria-busy={saving || undefined}
+              aria-label={t(saved ? "postOverflow.bookmark.removeLabel" : "postOverflow.bookmark.addLabel")}
+              title={t(saved ? "postOverflow.bookmark.removeLabel" : "postOverflow.bookmark.addLabel")}
+              disabled={saving}
+              onClick={() => void toggleSaved()}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                minHeight: 44,
+                minWidth: 44,
+                marginInlineStart: "auto",
+                padding: "7px 10px",
+                borderRadius: 9,
+                cursor: saving ? "progress" : "pointer",
+                background: saved ? "var(--primary-50)" : "transparent",
+                color: saved ? "var(--primary-600)" : "var(--ink-500)",
+                border: "none",
+              }}
+            >
+              {saved ? (
+                <BookmarkCheck aria-hidden="true" size={18} strokeWidth={2.2} />
+              ) : (
+                <Bookmark aria-hidden="true" size={18} strokeWidth={2.2} />
+              )}
+            </button>
+          </div>
+
+          {textOnly ? null : body}
+
+          {withdrawBlock}
+
+          {/* L'offre liée (lot P09) : rien sans donnée, ni place réservée. */}
+          {offer ? (
+            <section aria-label={offer.label} data-post-offer="">
+              {offer.content}
+            </section>
+          ) : post.hasCommerceOffer && PostOfferRenderer ? <PostOfferRenderer networkId={networkId} postId={post._id} /> : null}
+        </article>
+
+        {overlays}
+      </Card>
+    )
+  }
+
+  return (
+    <Card padded={false} style={POST_SURFACE_STYLE}>
+      <article
+        style={{
+          padding: `14px ${POST_CARD_GUTTER}px`,
+          display: "flex",
+          flexDirection: "column",
+          gap: 10,
+        }}
+      >
+        {header}
+
+        {withdrawBlock}
+
+        {editing ? editor : post.body.length > 0 ? (
+          <RichText body={post.body} onTag={onTag} onMention={onMention} />
+        ) : null}
+
+        {/* Bord à bord : le média traverse la gouttière de la carte
+            (arbitrage du 2026-08-20). La MÊME constante sert au rembourrage
+            ci-dessus et au débord ci-dessous — deux valeurs séparées se
+            décaleraient au premier ajustement, et le média dépasserait la
+            carte ou laisserait une lisière. */}
+        {post.media.length > 0 ? (
+          <PostMedia media={post.media} gutter={POST_CARD_GUTTER} presentation="classic" />
+        ) : null}
+
+        {liveBlock}
+
+        {eventBlock}
+
+        {post.share ? (
+          <SharedPostCard share={post.share} now={now} onTag={onTag} onMention={onMention} presentation="classic" />
+        ) : null}
+
+        {/* Sans filet ni séparateur (2026-08-21) : la rangée se tient par son
+            seul espacement — la carte a perdu ses bordures, un trait ici la
+            recouperait en deux. */}
+        <div
+          style={{
+            display: "flex",
+            flexWrap: "wrap",
+            gap: 4,
+            alignItems: "center",
+            paddingTop: 2,
+          }}
+        >
+          <PostReactionControl
+            reactions={post.reactions}
+            pending={pendingReaction}
+            onReact={handleReaction}
+          />
+
+          {commentButton}
+
+          {shareButton}
+        </div>
+      </article>
+
+      {overlays}
     </Card>
   )
 }
@@ -586,11 +802,13 @@ function SharedPostCard({
   now,
   onTag,
   onMention,
+  presentation,
 }: {
   share: SharedPost
   now: number
   onTag?: (tag: string) => void
   onMention?: (handle: string) => void
+  presentation: EnginePostPresentation
 }) {
   const { t } = useTranslation("reseau")
   const timeZone = useViewerTimeZone()
@@ -661,7 +879,7 @@ function SharedPostCard({
         </p>
       </div>
       {share.body.length > 0 ? <RichText body={share.body} onTag={onTag} onMention={onMention} /> : null}
-      {share.media.length > 0 ? <PostMedia media={share.media} /> : null}
+      {share.media.length > 0 ? <PostMedia media={share.media} presentation={presentation} /> : null}
     </div>
   )
 }

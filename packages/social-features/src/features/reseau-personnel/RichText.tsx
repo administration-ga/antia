@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/RichText.tsx @ ad2e7fdc2 — adaptations : découpage lu dans le domaine du moteur (`splitBodyRich` de `@antsia/social-domain/richText`) ; sans gestionnaire, une mention ou un mot-dièse n'est plus un simple mot mais un LIEN vers l'adresse INJECTÉE (`useRoutes()` : le profil par `personHref`, le fil filtré par `reseauAgentTagHref` sur la page réseau) — les gestionnaires `onTag` / `onMention` gardent la priorité ; aucune autre différence de rendu.
+// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/RichText.tsx @ ad2e7fdc2 — adaptations : découpage lu dans le domaine du moteur (`splitBodyRich` de `@antsia/social-domain/richText`) ; sans gestionnaire, une mention ou un mot-dièse n'est plus un simple mot mais un LIEN vers l'adresse INJECTÉE (`useRoutes()` : le profil par `personHref`, le fil filtré par `reseauAgentTagHref` sur la page réseau) — les gestionnaires `onTag` / `onMention` gardent la priorité ; P03 (étude social-commerce) : segments déjà découpés acceptés (`segments`, aperçu borné d'une légende) et contenu de fin dans le paragraphe (`trailing`, « Lire la suite »), soulignement des liens du texte courant porté par le jeton `--esp-inline-link-decoration` (aucun par défaut, souligné par le thème ANTSIA, WCAG 1.4.1) ; aucune autre différence de rendu.
 "use client"
 
 /**
@@ -22,18 +22,33 @@
 
 import { Link } from "@antsia/api/routing"
 import { useRoutes } from "@antsia/api/network"
-import { splitBodyRich } from "@antsia/social-domain/richText"
-import { Fragment } from "react"
+import { splitBodyRich, type PostBodySegment } from "@antsia/social-domain/richText"
+import { Fragment, type ReactNode } from "react"
 
 import { personHref } from "./author-link"
 import { reseauAgentTagHref } from "../../shell/reseau-agent-nav"
 
 interface RichTextProps {
   body: string
+  /**
+   * Segments DÉJÀ découpés (aperçu borné d'une légende, `post-card-caption.ts`)
+   * — rendus tels quels, jamais redécoupés : un aperçu ne peut pas fabriquer un
+   * jeton que le corps complet ne contient pas. Absents : `splitBodyRich(body)`.
+   */
+  segments?: readonly PostBodySegment[]
   onTag?: (tag: string) => void
   onMention?: (handle: string) => void
+  /** Contenu posé à la FIN du paragraphe (l'ellipse et « Lire la suite »). */
+  trailing?: ReactNode
 }
 
+/**
+ * Le soulignement des liens du TEXTE COURANT (mots-dièse, mentions) vient de
+ * la charte : `--esp-inline-link-decoration` vaut `none` dans la base (rendu
+ * inchangé ailleurs) et `underline` dans le thème ANTSIA — la couleur seule ne
+ * distingue pas un lien d'un mot (WCAG 1.4.1). Les liens de NAVIGATION ne
+ * lisent pas ce jeton. Le décalage ne s'applique qu'à un trait présent.
+ */
 const LINK_STYLE = {
   background: "none",
   border: "none",
@@ -43,12 +58,13 @@ const LINK_STYLE = {
   color: "var(--primary-600)",
   fontWeight: 600,
   cursor: "pointer",
-  textDecoration: "none",
+  textDecorationLine: "var(--esp-inline-link-decoration, none)",
+  textUnderlineOffset: "0.16em",
 } as const
 
-export function RichText({ body, onTag, onMention }: RichTextProps) {
+export function RichText({ body, segments: given, onTag, onMention, trailing }: RichTextProps) {
   const routes = useRoutes()
-  const segments = splitBodyRich(body)
+  const segments = given ?? splitBodyRich(body)
 
   return (
     <p
@@ -95,6 +111,7 @@ export function RichText({ body, onTag, onMention }: RichTextProps) {
           </button>
         )
       })}
+      {trailing}
     </p>
   )
 }

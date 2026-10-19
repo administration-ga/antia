@@ -5,7 +5,7 @@
  * EvenementsPanel — l'agenda en panne n'est pas un agenda vide (R-08) :
  *
  *  1. panne sans données : bandeau + Réessayer, jamais `emptyAgendaText` ;
- *  2. panne après données : les évènements restent affichés sous le bandeau ;
+ *  2. panne après données : les anciennes lignes ne restent pas visibles ;
  *  3. le squelette n'apparaît qu'en vraie attente.
  *
  * …et l'ANNONCE se compose avant de partir (R-16) :
@@ -25,8 +25,10 @@ import { ViewerPreferencesProvider } from "@antsia/api/viewer-preferences"
 import { toast } from "sonner"
 
 import { createAppI18n } from "../../i18n"
-import { memoryRouter, renderWithEngine, TEST_NETWORK_ID, TEST_ROUTES } from "../../tests/engine-wrapper"
+import { EngineTestWrapper, memoryRouter, renderWithEngine, TEST_NETWORK_ID, TEST_ROUTES } from "../../tests/engine-wrapper"
 import { emptyAgendaText, type EvenementListItem } from "./evenements-list"
+import type { AssociationAgendaItem } from "./association-agenda"
+import type { AgendaPaginationValue } from "./AgendaPagination"
 
 type PaginatedMock = {
   results: unknown[]
@@ -44,7 +46,7 @@ const mocks = vi.hoisted(() => ({
     fetchStatus: "idle" as "idle" | "fetching" | "paused",
     refetch: vi.fn(),
   },
-  agendaArgs: [] as unknown[],
+  agendaProps: [] as number[],
   searchHits: [] as unknown[],
   paginated: {} as Record<string, PaginatedMock>,
   announce: vi.fn(),
@@ -59,7 +61,6 @@ vi.mock("@antsia/api/engine", () => ({
     modules: {
       events: {
         events: {
-          myAgenda: "myAgenda",
           respond: "respond",
           cancel: "cancel",
           announce: "announce",
@@ -74,11 +75,7 @@ vi.mock("@antsia/api/engine", () => ({
 }))
 
 vi.mock("@antsia/api/hooks", () => ({
-  useAuthenticatedConvexQuery: (query: string, args: unknown) => {
-    if (query === "myAgenda") {
-      mocks.agendaArgs.push(args)
-      return mocks.agenda
-    }
+  useAuthenticatedConvexQuery: (_query: string, args: unknown) => {
     // La recherche du sélecteur de relations (`useRelationSearch`).
     return {
       data: args === "skip" ? undefined : mocks.searchHits,
@@ -91,6 +88,25 @@ vi.mock("@antsia/api/hooks", () => ({
   },
   useAuthenticatedPaginatedQuery: (query: string) => mocks.paginated[query] ?? { results: [], status: "Exhausted", loadMore: vi.fn(), isLoading: false },
 }))
+
+// Le panneau conserve ici ses scénarios d'actes personnels. Les chaînes natives
+// réelles sont montées séparément dans AgendaPagination.test.tsx.
+vi.mock("./AgendaPagination", async () => {
+  const { useTranslation } = await vi.importActual<typeof import("react-i18next")>("react-i18next")
+  return { AgendaPagination: ({ now, children }: { now: number; children: (value: AgendaPaginationValue) => ReactNode }) => {
+    const { t } = useTranslation("reseau")
+    mocks.agendaProps.push(now)
+    const input = mocks.agenda.data as { items: EvenementListItem[]; associationItems?: AssociationAgendaItem[]; truncated: boolean } | undefined
+    const pending = mocks.agenda.isPending || mocks.agenda.isFetching
+    const canLoadMore = !mocks.agenda.isError && !pending && input?.truncated === true
+    return children({
+      data: mocks.agenda.isError || pending || !input ? undefined : { items: input.items, associationItems: input.associationItems ?? [], truncated: false },
+      isPending: pending, isFetching: pending, isLoading: pending, isError: mocks.agenda.isError,
+      refetch: mocks.agenda.refetch, canLoadMore, loadingMore: false,
+      controls: canLoadMore ? <div><p>{t("associationAgenda.pagination.loaded")}</p><button>{t("associationAgenda.pagination.more")}</button></div> : null,
+    })
+  } }
+})
 vi.mock("convex/react", () => ({
   useMutation: (reference: string) => {
     if (reference === "announce") return mocks.announce
@@ -196,6 +212,10 @@ function agenda(items: EvenementListItem[], truncated = false) {
   return { items, truncated }
 }
 
+function associationAgendaEvent(): AssociationAgendaItem {
+  return { kind: "association", eventId: "event-association" as Id<"events">, pageId: "page-association" as Id<"pages">, title: "Rencontre associative privée", description: null, location: "Salle", startAt: NOW + 86_400_000, endAt: NOW + 90_000_000, timeZone: "Europe/Paris", status: "scheduled", cancelledAt: null, version: 1, organizer: { name: "Association de recette", handle: "association-recette" }, registration: "waitlisted" }
+}
+
 beforeEach(() => {
   mocks.agenda.data = undefined
   mocks.agenda.isPending = false
@@ -203,7 +223,7 @@ beforeEach(() => {
   mocks.agenda.isError = false
   mocks.agenda.fetchStatus = "idle"
   mocks.agenda.refetch.mockReset()
-  mocks.agendaArgs = []
+  mocks.agendaProps = []
   mocks.searchHits = []
   mocks.paginated = {}
   mocks.announce.mockReset().mockResolvedValue(undefined)
@@ -230,12 +250,12 @@ describe("EvenementsPanel — panne honnête (R-08)", () => {
     expect(mocks.agenda.refetch).toHaveBeenCalledTimes(1)
   })
 
-  it("une panne après données CONSERVE les évènements sous le bandeau", () => {
+  it("une panne après données ferme les anciennes lignes sous le bandeau", () => {
     mocks.agenda.data = agenda([event("e1", "Revue des archives")])
     mocks.agenda.isError = true
     renderWithEngine(<EvenementsPanel now={NOW} />)
 
-    expect(screen.getByText("Revue des archives")).toBeTruthy()
+    expect(screen.queryByText("Revue des archives")).toBeNull()
     expect(screen.getByRole("alert").textContent).toContain("Agenda indisponible")
     expect(screen.queryByText(emptyAgendaText(t))).toBeNull()
   })
@@ -256,16 +276,25 @@ describe("EvenementsPanel — panne honnête (R-08)", () => {
     expect(screen.queryByRole("alert")).toBeNull()
   })
 
-  it("lit l'agenda du réseau courant, à l'instant donné", () => {
+  it("transmet l'instant au conteneur de pagination dédié", () => {
     mocks.agenda.data = agenda([])
     renderWithEngine(<EvenementsPanel now={NOW} />)
-    expect(mocks.agendaArgs).toContainEqual({ networkId: TEST_NETWORK_ID, now: NOW })
+    expect(mocks.agendaProps).toContain(NOW)
   })
 
-  it("l'agenda BORNÉ par le serveur dit sa lacune", () => {
+  it("dit que les résultats chargés peuvent être suivis d'autres événements", () => {
     mocks.agenda.data = agenda([event("e1", "Revue des archives")], true)
     renderWithEngine(<EvenementsPanel now={NOW} />)
-    expect(screen.getByText("Votre agenda est long : seuls les évènements les plus proches sont affichés.")).toBeTruthy()
+    expect(screen.getByText(t("associationAgenda.pagination.loaded"))).toBeTruthy()
+    expect(screen.getByRole("button", { name: t("associationAgenda.pagination.more") })).toBeTruthy()
+  })
+
+  it("ne prononce pas l'état vide tant qu'une page filtrée possède une suite", () => {
+    mocks.agenda.data = agenda([], true)
+    renderWithEngine(<EvenementsPanel now={NOW} />)
+    expect(screen.queryByText(emptyAgendaText(t))).toBeNull()
+    expect(screen.queryByTestId("skeleton")).toBeNull()
+    expect(screen.getByRole("button", { name: t("associationAgenda.pagination.more") })).toBeTruthy()
   })
 })
 
@@ -406,6 +435,35 @@ describe("créer un évènement — l'hôte, ou le volet lui-même", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Créer un évènement" }))
     expect(screen.getByRole("form", { name: "Créer un évènement" })).toBeTruthy()
+    expect(mocks.create).not.toHaveBeenCalled()
+  })
+
+  it("garde le brouillon ouvert pendant le chargement des pages suivantes", () => {
+    mocks.agenda.data = agenda([event("e1", "Revue des archives")], true)
+    const view = renderWithEngine(<EvenementsPanel now={NOW} />)
+    fireEvent.click(screen.getByRole("button", { name: "Créer un évènement" }))
+    fireEvent.change(screen.getByLabelText("Titre"), { target: { value: "Brouillon à conserver" } })
+    fireEvent.change(screen.getByLabelText("Lieu (optionnel)"), { target: { value: "Salle B" } })
+    mocks.agenda.isFetching = true
+    view.rerender(<EvenementsPanel now={NOW} />)
+    expect(screen.getAllByTestId("skeleton").length).toBeGreaterThan(0)
+    expect((screen.getByLabelText("Titre") as HTMLInputElement).value).toBe("Brouillon à conserver")
+    expect((screen.getByLabelText("Lieu (optionnel)") as HTMLInputElement).value).toBe("Salle B")
+    mocks.agenda.isFetching = false
+    view.rerender(<EvenementsPanel now={NOW} />)
+    expect((screen.getByLabelText("Titre") as HTMLInputElement).value).toBe("Brouillon à conserver")
+    expect(mocks.create).not.toHaveBeenCalled()
+  })
+
+  it("un changement de lecteur ferme la composition et ne transmet pas son brouillon", () => {
+    mocks.agenda.data = agenda([])
+    const view = renderWithEngine(<EngineTestWrapper personId={"reader-a" as Id<"persons">}><EvenementsPanel now={NOW} /></EngineTestWrapper>)
+    fireEvent.click(screen.getByRole("button", { name: "Créer un évènement" }))
+    fireEvent.change(screen.getByLabelText("Titre"), { target: { value: "Brouillon privé du premier lecteur" } })
+    view.rerender(<EngineTestWrapper personId={"reader-b" as Id<"persons">}><EvenementsPanel now={NOW} /></EngineTestWrapper>)
+    expect(screen.queryByRole("form", { name: "Créer un évènement" })).toBeNull()
+    fireEvent.click(screen.getByRole("button", { name: "Créer un évènement" }))
+    expect((screen.getByLabelText("Titre") as HTMLInputElement).value).toBe("")
     expect(mocks.create).not.toHaveBeenCalled()
   })
 
@@ -567,5 +625,28 @@ describe("répondre et annuler — le réseau courant, toujours", () => {
     expect(mocks.cancel).not.toHaveBeenCalled()
     fireEvent.click(screen.getByRole("button", { name: "Confirmer l'annulation" }))
     await waitFor(() => expect(mocks.cancel).toHaveBeenCalledWith({ networkId: TEST_NETWORK_ID, eventId: "e1" }))
+  })
+})
+
+describe("agenda associatif — lecture sans actes personnels", () => {
+  it("rend l'attente et le lien de page sans réponse, liste d'invités ni annulation personnelle", () => {
+    mocks.agenda.data = { items: [], associationItems: [associationAgendaEvent()], truncated: false }
+    renderWithEngine(<EvenementsPanel now={NOW} canWrite={false} />)
+    expect(screen.getByText("Rencontre associative privée")).toBeTruthy()
+    expect(screen.getByText(t("associationAgenda.waitlisted"))).toBeTruthy()
+    expect(screen.getByRole("link", { name: t("associationAgenda.open") }).getAttribute("href")).toContain("association-recette")
+    for (const label of ["Je participe", "Créer un évènement", "Voir les invités", "Annuler l'évènement"]) expect(screen.queryByRole("button", { name: label })).toBeNull()
+    expect(mocks.respond).not.toHaveBeenCalled()
+    expect(mocks.cancel).not.toHaveBeenCalled()
+  })
+
+  it("retire les données associatives mises en cache lors d'une erreur de lecture", () => {
+    mocks.agenda.data = { items: [], associationItems: [associationAgendaEvent()], truncated: false }
+    const view = renderWithEngine(<EvenementsPanel now={NOW} canWrite={false} />)
+    expect(screen.getByText("Rencontre associative privée")).toBeTruthy()
+    mocks.agenda.isError = true
+    view.rerender(<EvenementsPanel now={NOW} canWrite={false} />)
+    expect(screen.queryByText("Rencontre associative privée")).toBeNull()
+    expect(screen.queryByText("Association de recette")).toBeNull()
   })
 })

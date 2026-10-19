@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/components/call-center/CallRoomMount.tsx @ ad2e7fdc2 — adaptations : pont iAsted retiré (`IAstedLiveKitBridge`, aucune commande vocale dans le moteur) ; import de la feuille `@livekit/components-styles` sorti du composant (l'application importe la feuille) ; appel `Id<"calls">` ; message d'échec de connexion traduit (i18n `iappel`), messages de périphériques composés par `media-errors` et `media-watchdog` avec `t` en dernier paramètre (plan de sortie audio aussi, `planSpeakerControl`) ; commentaires recadrés sur la couche d'appel du moteur (centre d'appels retiré).
+// Dupliqué de socle/packages/agent-features/src/components/call-center/CallRoomMount.tsx @ ad2e7fdc2 — adaptations : pont iAsted retiré (`IAstedLiveKitBridge`, aucune commande vocale dans le moteur) ; import de la feuille `@livekit/components-styles` sorti du composant (l'application importe la feuille) ; appel `Id<"calls">` ; message d'échec de connexion traduit (i18n `iappel`), messages de périphériques composés par `media-errors` et `media-watchdog` avec `t` en dernier paramètre (plan de sortie audio aussi, `planSpeakerControl`) ; commentaires recadrés sur la couche d'appel du moteur (centre d'appels retiré) ; P05 (18/10/2026) : le pool ne monte AUCUNE salle pour un appel terminé (la fin distante démonte la salle : micro et caméra libérés pendant l'écran de fin, jeton tardif sans effet) et un témoin consigne l'établissement réel des médias (`call-establishment.ts`).
 "use client";
 
 import {
@@ -6,6 +6,7 @@ import {
   RoomAudioRenderer,
   useConnectionState,
   useLocalParticipant,
+  useRemoteParticipants,
   useRoomContext,
 } from "@livekit/components-react";
 import {
@@ -33,6 +34,12 @@ import {
   describeMicBlockedInCall,
 } from "./media-errors";
 import { shouldPublishMedia } from "./call-media-live";
+import {
+  forgetCallEstablishments,
+  isMediaEstablished,
+  markCallEstablished,
+  observeCallConnection,
+} from "./call-establishment";
 import {
   detectAudioPlatform,
   planSpeakerControl,
@@ -137,17 +144,23 @@ export function CallRoomMount({
    * 2026-09-13. Les valeurs vivantes passent par une référence ; les rappels,
    * eux, ne changent jamais.
    */
-  const latest = useRef({ onConnected, onError, onDisconnected, wantsVideo, isActive, meetingId: slot.meetingId, t });
-  latest.current = { onConnected, onError, onDisconnected, wantsVideo, isActive, meetingId: slot.meetingId, t };
+  const latest = useRef({ onConnected, onError, onDisconnected, wantsVideo, isActive, meetingId: slot.meetingId, token: slot.token, t });
+  latest.current = { onConnected, onError, onDisconnected, wantsVideo, isActive, meetingId: slot.meetingId, token: slot.token, t };
+  const isCurrentRoom = useCallback(() => {
+    const current = callStore.getSlots().find((candidate) => candidate.meetingId === latest.current.meetingId);
+    return current !== undefined && current.status !== "ended" && current.token === latest.current.token;
+  }, []);
   const handleConnected = useCallback(() => {
+    if (!isCurrentRoom()) return;
     hasConnectedRef.current = true;
     latest.current.onConnected?.(latest.current.meetingId);
-  }, []);
+  }, [isCurrentRoom]);
   const handleDisconnected = useCallback(() => {
-    if (!hasConnectedRef.current) return;
+    if (!hasConnectedRef.current || !isCurrentRoom()) return;
     latest.current.onDisconnected(latest.current.meetingId);
-  }, []);
+  }, [isCurrentRoom]);
   const handleError = useCallback((err: Error) => {
+    if (!isCurrentRoom()) return;
     // Deux pannes sans rapport arrivent par ce même canal : un refus de
     // périphérique, et un échec de connexion. Les confondre envoyait
     // l'usager chercher la panne là où elle n'est pas — « vérifiez votre
@@ -172,7 +185,7 @@ export function CallRoomMount({
     if (!hasConnectedRef.current) {
       toast.error(latest.current.t("callRoomMount.connectionFailed"));
     }
-  }, []);
+  }, [isCurrentRoom]);
 
   /**
    * LE PÉRIPHÉRIQUE QUI N'A PAS DÉMARRÉ — nommé, cette fois.
@@ -190,7 +203,7 @@ export function CallRoomMount({
     (failure?: MediaDeviceFailure, kind?: MediaDeviceKind) => {
       // L'intention du magasin est celle de l'ACTIF : ne jamais la modifier
       // pour un slot parqué, qui ne publie d'ailleurs rien.
-      if (!latest.current.isActive) return;
+      if (!isCurrentRoom() || !latest.current.isActive || callStore.getActiveSlotId() !== latest.current.meetingId) return;
       if (kind === "audioinput") {
         const reason = describeMicBlockedInCall(failure, latest.current.t);
         callStore.setMicBlocked(reason);
@@ -203,7 +216,7 @@ export function CallRoomMount({
         toast.error(describeCameraFailure(failure, latest.current.t), { id: CAMERA_FAILURE_TOAST_ID });
       }
     },
-    [],
+    [isCurrentRoom],
   );
 
   if (!slot.token || !slot.wsUrl) return null;
@@ -239,6 +252,7 @@ export function CallRoomMount({
       className="sr-only"
     >
       <RoomRegistrar meetingId={slot.meetingId} />
+      <EstablishmentWatcher meetingId={slot.meetingId} token={slot.token} />
       <MediaIntentController live={live} />
       {/* La SORTIE audio est une intention du magasin, appliquée ici : chaque
           `Room` porte son propre `options.audioOutput`, et une reconnexion la
@@ -253,6 +267,35 @@ export function CallRoomMount({
       <RoomAudioRenderer muted={!live} />
     </LiveKitRoom>
   );
+}
+
+/**
+ * EstablishmentWatcher — consigne l'établissement observé de la salle
+ * (P05) : la salle de cet appareil est connectée ET un autre participant y est
+ * entré. C'est de là que partent « En communication » et le chrono — jamais
+ * du décrochage serveur, qui précède l'arrivée du correspondant. Cela ne
+ * prouve pas l'audibilité ni la publication de ses pistes.
+ *
+ * Une seule fois par appel (`markCallEstablished` ignore les suivantes) : une
+ * reconnexion ne remet pas la durée à zéro.
+ */
+function EstablishmentWatcher({ meetingId, token }: { meetingId: Id<"calls">; token: string }) {
+  const connectionState = useConnectionState();
+  const remoteParticipants = useRemoteParticipants();
+  const established = isMediaEstablished({
+    connected: connectionState === ConnectionState.Connected,
+    remoteParticipants: remoteParticipants.length,
+  });
+  useEffect(() => {
+    const current = callStore.getSlots().find((candidate) => candidate.meetingId === meetingId);
+    if (!current || current.status === "ended" || current.token !== token) return;
+    const connection = connectionState === ConnectionState.Connected ? "connected"
+      : connectionState === ConnectionState.Reconnecting ? "reconnecting"
+      : connectionState === ConnectionState.Disconnected ? "disconnected" : "connecting";
+    observeCallConnection(meetingId, connection);
+    if (established) markCallEstablished(meetingId as string);
+  }, [established, meetingId, connectionState, token]);
+  return null;
 }
 
 /**
@@ -463,10 +506,23 @@ export function CallRoomPool({
   onConnected?: (meetingId: Id<"calls">) => void;
   onError?: (meetingId: Id<"calls">, error: Error) => void;
 }) {
+  /* Les établissements d'appels sortis de la ligne s'oublient : la mémoire ne
+     garde que ce que la surface peut encore afficher. */
+  const presentKey = slots.map((slot) => slot.meetingId as string).join("|");
+  useEffect(() => {
+    forgetCallEstablishments(new Set(presentKey.length === 0 ? [] : presentKey.split("|")));
+  }, [presentKey]);
+
   return (
     <div className="pointer-events-none fixed h-0 w-0 overflow-hidden">
       {slots.map((slot) => {
         if (!slot.token || !slot.wsUrl) return null;
+        // ⚠️ P05 — un appel TERMINÉ n'a plus de salle : la démonter est ce
+        // qui ARRÊTE les pistes (`disconnect` libère micro et caméra). La
+        // garder montée pendant l'écran de fin laissait le micro ouvert — le
+        // témoin d'enregistrement du navigateur restait allumé après la fin.
+        // Un jeton arrivé après la fin ne remonte rien non plus.
+        if (slot.status === "ended") return null;
         return (
           <CallRoomMount
             key={slot.meetingId as string}

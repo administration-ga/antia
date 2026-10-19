@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/shell/global-call-surface-host.tsx @ ad2e7fdc2 — adaptations : branche v2 seule (disjoncteur `FEATURES.iappelV2` et les quatre hôtes de la branche v1 — alerte, pilule, salle et fenêtre sortante — retirés) ; retirés aussi : poste (carte iCom de poste, `useIcomPosteHosted`, appel de poste `callUser`, renvoi au secrétariat), organisation (`useOptionalOrg`), invitations de réunion iRéunion (`useActiveMeetingConnection`, `joinMeeting`, ticket de réunion), fermeture vocale d'iAsted ; fonctions du moteur sur le réseau courant (`calls.lifecycle.getCall` et `setCallRinging`, `calls.groupCalls.listParticipants`, `calls.direct.callMember` pour le rappel) ; ma personne lue dans `useNetwork()` (plus de `users.getMe`) ; conviés d'un appel de groupe nommés par leur libellé (`counterpartLabel`) ; adresse d'écriture composée sur la base de messagerie injectée (`useRoutes().messages()`) ; la création de conférence (`ConferenceLaunchHost`, lot `live`) n'est pas montée : la ligne T3 informe sans proposer ; libellés traduits (i18n `iappel`), modules purs appelés avec `t` en dernier paramètre.
+// Dupliqué de socle/packages/agent-features/src/shell/global-call-surface-host.tsx @ ad2e7fdc2 — adaptations : branche v2 seule (disjoncteur `FEATURES.iappelV2` et les quatre hôtes de la branche v1 — alerte, pilule, salle et fenêtre sortante — retirés) ; retirés aussi : poste (carte iCom de poste, `useIcomPosteHosted`, appel de poste `callUser`, renvoi au secrétariat), organisation (`useOptionalOrg`), invitations de réunion iRéunion (`useActiveMeetingConnection`, `joinMeeting`, ticket de réunion), fermeture vocale d'iAsted ; fonctions du moteur sur le réseau courant (`calls.lifecycle.getCall` et `setCallRinging`, `calls.groupCalls.listParticipants`, `calls.direct.callMember` pour le rappel) ; ma personne lue dans `useNetwork()` (plus de `users.getMe`) ; conviés d'un appel de groupe nommés par leur libellé (`counterpartLabel`) ; adresse d'écriture composée sur la base de messagerie injectée (`useRoutes().messages()`) ; la création de conférence (`ConferenceLaunchHost`, lot `live`) n'est pas montée : la ligne T3 informe sans proposer ; libellés traduits (i18n `iappel`), modules purs appelés avec `t` en dernier paramètre ; P05 (18/10/2026) : phase et chrono depuis l'établissement RÉEL des médias (`useCallEstablishedAt`), fin distante consignée sur le slot (`markSlotEnded` : écran de fin, salle démontée, pistes libérées), une salle qui se ferme après la fin ne raccroche ni ne referme rien, et le démontage de la couche (déconnexion, session perdue, sortie du gabarit des membres) raccroche puis purge chaque appel — aucune reprise par une session suivante. ; P18b (A05) : l'appel qui sonne s'annonce par une région polie persistante (`useCallAnnouncer`, exemptée de l'inertage des modales) ; au téléphone, la carte d'appel entrant est une modale portalisée (`IncomingCallLayer` : dialogue nommé, focus sur « Répondre », Échap sans effet), y compris au-dessus de l'écran de fin. ; CC-5 : un appel de conversation contextuelle (`contextualThreadId`) n'offre ni ajout de participant ni rappel personnel ; sa fin renvoie à la conversation (`callEndActions`).
 "use client"
 
 /**
@@ -28,6 +28,7 @@
 import { api } from "@antsia/api/engine"
 import type { Id } from "@antsia/api/engine"
 import { useAuthenticatedConvexQuery, useConvexMutationQuery } from "@antsia/api/hooks"
+import { callEndActions } from "../../features/iappel/call-end-actions"
 import { useNetwork, useRoutes } from "@antsia/api/network"
 import { useRouter } from "@antsia/api/routing"
 import { callCapacityOf } from "@antsia/social-contracts/groupCapacity"
@@ -46,13 +47,17 @@ import { CallWaitingChip } from "../../features/iappel/CallWaitingChip"
 import { HeldCallChips } from "../../features/iappel/HeldCallChips"
 import { IncomingCallBanner } from "../../features/iappel/IncomingCallBanner"
 import { IncomingCallCard } from "../../features/iappel/IncomingCallCard"
+import { IncomingCallLayer } from "../../features/iappel/IncomingCallLayer"
+import { incomingGroupBannerLabel } from "../../features/iappel/incoming-group"
+import { useCallAnnouncer } from "../../features/iappel/use-call-announcer"
 import { VoicemailRecorder } from "../../features/iappel/VoicemailRecorder"
 import { callErrorMessage, livekitRoomErrorMessage } from "../../features/iappel/call-errors"
+import { forgetCallEstablishments, useCallEstablishedAt, useObservedCallConnection } from "../../features/iappel/call-establishment"
 import { hostModeFor, resolveCallHosting } from "../../features/iappel/call-host"
 import { publishCallHosting, publishCallRinging, useCallHostFor } from "../../features/iappel/call-host-store"
 import { deriveEffectiveCallKind, planSlotReconciliation } from "../../features/iappel/call-kind-reconcile"
 import { peerDisplayName } from "../../features/iappel/call-peer"
-import { deriveCallPhase, refusalEndKind } from "../../features/iappel/call-phase"
+import { callEndKindV2, deriveCallPhase, refusalEndKind } from "../../features/iappel/call-phase"
 import { planCallSurface } from "../../features/iappel/call-surface-plan"
 import type { CallParticipantView } from "../../features/iappel/call-types"
 import { composeGroupCallTitle, shortGroupLabel } from "../../features/iappel/group-stage"
@@ -62,8 +67,6 @@ import { useCallLineSync } from "../../features/iappel/use-call-line-sync"
 import { useCallSlotConnector } from "../../features/iappel/use-call-slot-connector"
 import { useIappelActions } from "../../features/iappel/use-iappel-actions"
 import { useIncomingCalls } from "../../features/iappel/use-incoming-calls"
-import { draftKey } from "../../features/messagerie/messagerie-dock"
-import { conversationHref } from "../../features/messagerie/messagerie-routes"
 import { installAudioUnlock } from "../../lib/livekit/audio-unlock"
 import { LIVEKIT_DIRECT_CALL_ROOM_OPTIONS } from "../../lib/livekit/room-options"
 import { useBusyTone } from "../../lib/livekit/use-busy-tone"
@@ -72,6 +75,21 @@ import { useRingback } from "../../lib/livekit/use-ringback"
 import { callStore, useCallStore } from "../../stores/call-store"
 import { ESCAPE_PRIORITY } from "../floating-surface/escape-stack"
 import { useEscapeLayer } from "../floating-surface/use-escape-layer"
+
+/** Les appels parqués restent observés : une fin distante libère aussi leur salle. */
+function BackgroundCallLifecycle({ networkId, meetingId }: { networkId: Id<"networks">; meetingId: Id<"calls"> }) {
+	const { data } = useAuthenticatedConvexQuery(api.modules.calls.lifecycle.getCall, { networkId, callId: meetingId })
+	useEffect(() => {
+		if (data === undefined) return
+		const endKind = data === null ? "error" : callEndKindV2(data)
+		if (endKind === null) return
+		const slot = callStore.getSlots().find((current) => current.meetingId === meetingId)
+		if (!slot || slot.status === "ended") return
+		callStore.markSlotEnded(meetingId, endKind)
+		callStore.removeSlot(meetingId)
+	}, [data, meetingId])
+	return null
+}
 
 export function GlobalCallSurfaceHost() {
 	const { t } = useTranslation("iappel")
@@ -93,6 +111,29 @@ export function GlobalCallSurfaceHost() {
 	useEffect(() => installAudioUnlock(), [])
 
 	const incoming = useIncomingCalls({ isMobile: isMobile === true })
+
+	/**
+	 * P18b (A05) — l'appel qui sonne S'ANNONCE, sur toutes les poses, par la
+	 * région persistante de l'hôte : qui appelle, et le groupe pour un appel de
+	 * groupe — ce que la bannière et la carte montrent, rien de plus. Un appel
+	 * en attente (pendant une communication) s'annonce aussi.
+	 */
+	const ringing = incoming.primary
+	const ringingName = ringing === null ? null : peerDisplayName(ringing.caller, undefined, t)
+	const callAnnouncement =
+		ringing === null || ringingName === null
+			? null
+			: ringing.kind === "group"
+				? t("incomingCallBanner.groupLabel", {
+						name: ringingName,
+						group: incomingGroupBannerLabel(ringing.group, t),
+					})
+				: ringing.mediaType === "video"
+					? t("globalCallSurfaceHost.announceIncomingVideo", { name: ringingName })
+					: t("globalCallSurfaceHost.announceIncoming", { name: ringingName })
+	useCallAnnouncer(callAnnouncement)
+	/** Le nom du dialogue de l'appel entrant au téléphone : la même phrase. */
+	const incomingLayerLabel = callAnnouncement ?? t("globalCallSurfaceHost.incomingRegion")
 
 	type IncomingRinging = NonNullable<typeof incoming.primary>
 	const answerIncoming = useCallback(
@@ -145,6 +186,14 @@ export function GlobalCallSurfaceHost() {
 		() => slots.find((s) => (s.meetingId as string) === plan.front) ?? null,
 		[slots, plan.front],
 	)
+	/**
+	 * P05 — l'instant où les médias de l'appel de tête passent RÉELLEMENT
+	 * (consigné par le pool de salles). La pilule et l'écran d'appel en partent
+	 * tous les deux. La présence d'un participant n'est pas une preuve de piste
+	 * publiée ni de voix audible ; cette recette reste distincte.
+	 */
+	const establishedAt = useCallEstablishedAt((frontSlot?.meetingId as string | undefined) ?? null)
+	const observedConnection = useObservedCallConnection((frontSlot?.meetingId as string | undefined) ?? null)
 
 	/**
 	 * OÙ l'appel se dessine (IC-01/IC-02/IC-06) : dans la carte iCom qui
@@ -317,6 +366,48 @@ export function GlobalCallSurfaceHost() {
 	const { mutateAsync: callMember } = useConvexMutationQuery(
 		api.modules.calls.direct.callMember,
 	)
+	const { mutateAsync: leaveCall } = useConvexMutationQuery(
+		api.modules.calls.lifecycle.leave,
+	)
+	const leaveRef = useRef(leaveCall)
+	leaveRef.current = leaveCall
+	const lifetime = useRef({ active: false, generation: 0, owner: "" })
+	/**
+	 * P05 — LA DÉCONNEXION FERME DÉFINITIVEMENT. Quand la couche d'appel se
+	 * démonte (sortie de session, session perdue, page hors du gabarit des
+	 * membres), ses salles se ferment avec elle : un appel ne peut plus
+	 * continuer. On le dit au serveur (raccrochage silencieux, sans toast : la
+	 * session peut déjà être révoquée) puis on vide la ligne — une session
+	 * suivante, dans le même onglet, ne retrouve ni slot, ni fenêtre sortante,
+	 * ni jeton à réutiliser.
+	 *
+	 * React peut rejouer installation/nettoyage en StrictMode. La purge attend
+	 * une microtâche : une réinstallation du MÊME propriétaire l'annule. Les
+	 * salles se démontent immédiatement ; les callbacks périmés sont filtrés.
+	 */
+	useEffect(() => {
+		const owner = `${networkId}:${personId}`
+		lifetime.current = { active: true, generation: lifetime.current.generation + 1, owner }
+		const ownerLeave = leaveRef.current
+		return () => {
+			lifetime.current.active = false
+			const closingSlots = callStore.getSlots()
+			const outgoing = callStore.getOutgoingCallWindow()
+			queueMicrotask(() => {
+				if (lifetime.current.active && lifetime.current.owner === owner) return
+				for (const slot of closingSlots) {
+					// Une nouvelle couche ne doit pas perdre ses propres écritures.
+					if (callStore.getSlots().find((current) => current.meetingId === slot.meetingId) !== slot) continue
+					callStore.removeSlot(slot.meetingId)
+					if (slot.status !== "ended") {
+						void ownerLeave({ networkId, callId: slot.meetingId, intentional: true }).catch(() => undefined)
+					}
+				}
+				if (callStore.getOutgoingCallWindow() === outgoing) callStore.closeOutgoingCall()
+				forgetCallEstablishments(new Set(callStore.getSlots().map((slot) => slot.meetingId as string)))
+			})
+		}
+	}, [networkId, personId])
 	const ringingMarked = useRef(new Set<string>())
 	/** L'appel pour lequel on est en train d'enregistrer un message vocal. */
 	const [voicemailFor, setVoicemailFor] = useState<Id<"calls"> | null>(null)
@@ -324,6 +415,7 @@ export function GlobalCallSurfaceHost() {
 	const [addOpen, setAddOpen] = useState(false)
 	/** L'ancien slot reste visible jusqu'à ce que le serveur ait créé le nouveau. */
 	const [retryingMeetingId, setRetryingMeetingId] = useState<string | null>(null)
+	const retryPending = useRef(false)
 
 	// Le panneau d'ajout suit SON appel : changer d'appel de tête (bascule,
 	// fin) le referme — le laisser ouvert ajouterait à un autre appel.
@@ -403,6 +495,11 @@ export function GlobalCallSurfaceHost() {
 
 	const onDisconnected = useCallback(
 		(meetingId: Id<"calls">) => {
+			// P05 — une salle qui se ferme APRÈS la fin (fin distante consignée,
+			// raccroché, couche démontée) n'est pas un événement nouveau : elle ne
+			// raccroche rien une seconde fois et ne referme pas l'écran de fin.
+			const slot = callStore.getSlots().find((s) => s.meetingId === meetingId)
+			if (!lifetime.current.active || slot === undefined || slot.status === "ended") return
 			void actions.hangUp(meetingId)
 		},
 		[actions],
@@ -412,15 +509,39 @@ export function GlobalCallSurfaceHost() {
 		{
 			direction: frontSlot?.direction ?? "outgoing",
 			meeting: meeting ?? null,
-			connection: frontSlot?.token ? "connected" : "connecting",
+			connection: observedConnection,
 			hasRemote: false,
 			isHeld: frontSlot?.status === "held",
 			hasError: Boolean(frontSlot?.connectError ?? frontSlot?.roomError),
 			answeredAtLocal: frontSlot?.answeredAt ?? null,
 			myUserId,
+			establishedAt,
 		},
 		t,
 	)
+
+	/**
+	 * P05 — LA FIN DISTANTE se consigne sur le slot. Le correspondant a
+	 * raccroché, refusé, l'appel a expiré : le serveur le dit (`getCall`), et
+	 * le slot passe `ended`. C'est ce qui démonte sa salle (pistes libérées,
+	 * micro éteint pendant l'écran de fin) et qui fige l'appel : aucun
+	 * événement tardif — jeton, statut, fermeture de salle — ne le ressuscite.
+	 *
+	 * Si un autre appel reprend la ligne (`markSlotEnded` promeut le
+	 * survivant), cet appel-ci n'a plus d'écran où se montrer : il quitte la
+	 * ligne aussitôt.
+	 */
+	// `null` est un refus vivant du serveur (appel disparu ou hors de portée),
+	// `undefined` seulement un chargement. Ne pas garder les médias après refus.
+	const frontEndKind = call === null ? "error" : phase.endKind
+	const frontMeetingId = frontSlot?.meetingId ?? null
+	const frontStatus = frontSlot?.status ?? null
+	const declineNote = meeting?.declineNote ?? null
+	useEffect(() => {
+		if (frontMeetingId === null || frontStatus === "ended" || frontEndKind === null) return
+		callStore.markSlotEnded(frontMeetingId, frontEndKind, frontEndKind === "declined" ? declineNote : null)
+		if (callStore.getActiveSlotId() !== frontMeetingId) callStore.removeSlot(frontMeetingId)
+	}, [frontMeetingId, frontStatus, frontEndKind, declineNote])
 
 	/**
 	 * LES DEUX TONALITÉS de l'appelant. `deriveCallPhase` ne rend « ringing »
@@ -481,23 +602,28 @@ export function GlobalCallSurfaceHost() {
 	 * et rebranche le geste (`useLaunchConference`).
 	 */
 	const pool = (
-		<CallRoomPool
-			slots={slots}
-			activeSlotId={activeSlotId}
-			options={LIVEKIT_DIRECT_CALL_ROOM_OPTIONS}
-			onDisconnected={onDisconnected}
-			onError={(meetingId, error) =>
-				callStore.setSlotError(meetingId, {
-					// `error.message` était rangé tel quel — donc en anglais, et
-					// « Permission denied » pour un micro bloqué. Ce champ finit
-					// sous les yeux de l'usager (`errorMessage` de `CallStage`) :
-					// il doit porter une phrase, pas un code.
-					roomError:
-						describeCallMediaError(error, { video: cameraEnabled }, t) ??
-						livekitRoomErrorMessage(error, t),
-				})
-			}
-		/>
+		<>
+			<CallRoomPool
+				slots={slots}
+				activeSlotId={activeSlotId}
+				options={LIVEKIT_DIRECT_CALL_ROOM_OPTIONS}
+				onDisconnected={onDisconnected}
+				onError={(meetingId, error) =>
+					callStore.setSlotError(meetingId, {
+						// `error.message` était rangé tel quel — donc en anglais, et
+						// « Permission denied » pour un micro bloqué. Ce champ finit
+						// sous les yeux de l'usager (`errorMessage` de `CallStage`) :
+						// il doit porter une phrase, pas un code.
+						roomError:
+							describeCallMediaError(error, { video: cameraEnabled }, t) ??
+							livekitRoomErrorMessage(error, t),
+					})
+				}
+			/>
+			{slots.filter((slot) => slot.status !== "ended" && slot.meetingId !== frontSlot?.meetingId).map((slot) => (
+				<BackgroundCallLifecycle key={slot.meetingId} networkId={networkId} meetingId={slot.meetingId} />
+			))}
+		</>
 	)
 
 	// L'appel entrant mis en avant, quand je ne suis pas déjà en ligne : au
@@ -601,7 +727,9 @@ export function GlobalCallSurfaceHost() {
 						ringingHosted.element,
 					)
 				) : incomingSurface !== null && isMobile ? (
-					<div className="iappel-layer fixed inset-0">{incomingSurface}</div>
+					/* P18b (A05) : au téléphone, la carte est une MODALE — portail,
+					   dialogue nommé, focus sur « Répondre », Échap sans effet. */
+					<IncomingCallLayer label={incomingLayerLabel}>{incomingSurface}</IncomingCallLayer>
 				) : (
 					incomingSurface
 				)}
@@ -685,7 +813,7 @@ export function GlobalCallSurfaceHost() {
 			    PROJECTION serveur des conviés et en tire lui-même les places
 			    (IC-03/IC-04, `projectCallSeats`) ; le serveur reste l'arbitre du
 			    plafond et du périmètre. */}
-			{addOpen && !ended && (
+			{addOpen && !ended && meeting != null && !meeting.commercialThreadId && !meeting.contextualThreadId && (
 				<AddToCallPanel
 					meetingId={frontSlot.meetingId}
 					callKind={effectiveCallKind}
@@ -710,15 +838,13 @@ export function GlobalCallSurfaceHost() {
 		</>
 	)
 
-	const retryAvailable =
-		effectiveCallKind !== "group" && frontSlot.peer?.userId !== undefined
-	const writeHref =
-		effectiveCallKind !== "group" && frontSlot.peer?.handle
-			? conversationHref(draftKey(frontSlot.peer.handle), routes.messages())
-			: null
+	const { retryAvailable, writeHref } = callEndActions({ meeting, kind: effectiveCallKind, peer: frontSlot.peer, routes })
 
 	const retryCall = async () => {
-		if (!retryAvailable || !frontSlot.peer?.userId) return
+		if (!retryAvailable || !frontSlot.peer?.userId || retryPending.current || !lifetime.current.active) return
+		retryPending.current = true
+		const generation = lifetime.current.generation
+		const stillCurrent = () => lifetime.current.active && lifetime.current.generation === generation
 		const oldMeetingId = frontSlot.meetingId
 		const mediaType = frontSlot.mediaType ?? "audio"
 		const scope = frontSlot.scope ?? "personnel"
@@ -731,6 +857,12 @@ export function GlobalCallSurfaceHost() {
 				target: { personId: peerUserId },
 				mediaType,
 			})
+			if (!stillCurrent()) {
+				// Le serveur a pu admettre l'appel pendant la sortie : le quitter
+				// sans remonter de slot ni demander de jeton sur la session suivante.
+				if (placed.admitted) void leaveCall({ networkId, callId: placed.callId, intentional: true }).catch(() => undefined)
+				return
+			}
 
 			callStore.removeSlot(oldMeetingId)
 			if (placed.admitted === false) {
@@ -754,9 +886,10 @@ export function GlobalCallSurfaceHost() {
 				callee: peer,
 			})
 		} catch (err) {
-			toast.error(callErrorMessage(err, t), { duration: 8000 })
+			if (stillCurrent()) toast.error(callErrorMessage(err, t), { duration: 8000 })
 		} finally {
-			setRetryingMeetingId(null)
+			retryPending.current = false
+			if (stillCurrent()) setRetryingMeetingId(null)
 		}
 	}
 
@@ -801,6 +934,9 @@ export function GlobalCallSurfaceHost() {
 			myUserId={myUserId}
 			hasError={Boolean(frontSlot.connectError ?? frontSlot.roomError)}
 			errorMessage={frontSlot.connectError ?? frontSlot.roomError ?? null}
+			/* P05 — l'établissement réel : « En communication » et le chrono en
+			   partent, sur l'écran comme dans la pilule. */
+			establishedAt={establishedAt}
 			micMuted={micMuted}
 			micBlocked={micBlocked}
 			cameraEnabled={cameraEnabled}
@@ -810,7 +946,8 @@ export function GlobalCallSurfaceHost() {
 			onMinimize={actions.minimize}
 			onHold={() => void actions.hold(frontSlot.meetingId)}
 			onResume={() => void actions.resume(frontSlot.meetingId)}
-			onAddParticipant={() => setAddOpen(true)}
+			// P10 et CC-5 : un appel de conversation commerciale ou contextuelle reste un tête-à-tête.
+			onAddParticipant={meeting != null && !meeting.commercialThreadId && !meeting.contextualThreadId ? () => setAddOpen(true) : null}
 			/* ── Appel de GROUPE ──────────────────────────────────────────────
 			   Le titre vient de l'appel ou des conviés, à défaut du magasin
 			   (posé au lancement, donc affiché IMMÉDIATEMENT) ; l'effectif et les
@@ -875,8 +1012,13 @@ export function GlobalCallSurfaceHost() {
 			</CallSurface>
 			{/* ⚠️ Plus de garde `!isMobile`. Au téléphone, l'écran de fin occupe
 			    tout le champ : masquer l'entrant y rendait l'appel qui sonne
-			    totalement invisible. */}
-			{incomingSurface}
+			    totalement invisible. P18b (A05) : il y passe par la même couche
+			    modale, portalisée AU-DESSUS de l'écran de fin. */}
+			{incomingSurface !== null && isMobile && ringingHosted === null ? (
+				<IncomingCallLayer label={incomingLayerLabel}>{incomingSurface}</IncomingCallLayer>
+			) : (
+				incomingSurface
+			)}
 		</>
 	)
 }

@@ -197,7 +197,7 @@ export function PostComposerSheet({ open, onClose }: PostComposerSheetProps) {
               maxHeight: "min(760px, 92dvh)",
               borderRadius: 18,
               border: "1px solid var(--border)",
-              background: "var(--background)",
+              background: "var(--esp-surface-raised, var(--background))",
               overflow: "hidden",
             }}
           >

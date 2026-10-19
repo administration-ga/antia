@@ -76,5 +76,17 @@
   "reseauMobileCreateButton": {
     "create": "Créer",
     "formats": "Formats"
+  },
+  "reseauDestinations": {
+    "navLabel": "Navigation principale",
+    "fil": "Fil",
+    "decouvrir": "Découvrir",
+    "creer": "Créer",
+    "messages": "Messages",
+    "profil": "Profil",
+    "messagesUnread_one": "{{count}} conversation non lue",
+    "messagesUnread_many": "{{count}} conversations non lues",
+    "messagesUnread_other": "{{count}} conversations non lues",
+    "voletsTitle": "Dans le réseau"
   }
 }

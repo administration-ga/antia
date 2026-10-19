@@ -1,0 +1,128 @@
+{
+  "description": "Forme normale des noms civils (copie du normaliseur ANTSIA civilName.ts) ; jamais appliquée aux organisations.",
+  "normalize": [
+    {
+      "firstName": "jean-rémy éloïse",
+      "lastName": "ndong mba",
+      "expect": {
+        "firstName": "Jean-Rémy Éloïse",
+        "lastName": "NDONG MBA"
+      }
+    },
+    {
+      "firstName": "  marie   claire ",
+      "lastName": "nzé-obiang",
+      "expect": {
+        "firstName": "Marie Claire",
+        "lastName": "NZÉ-OBIANG"
+      }
+    },
+    {
+      "firstName": "anne d'arc",
+      "lastName": "o'neill",
+      "expect": {
+        "firstName": "Anne D'Arc",
+        "lastName": "O'NEILL"
+      }
+    },
+    {
+      "firstName": "ÉLODIE",
+      "lastName": "mba",
+      "expect": {
+        "firstName": "Élodie",
+        "lastName": "MBA"
+      }
+    },
+    {
+      "firstName": "jean–paul",
+      "lastName": "ella",
+      "expect": {
+        "firstName": "Jean–Paul",
+        "lastName": "ELLA"
+      }
+    },
+    {
+      "firstName": "marie josé",
+      "lastName": "ondo essono",
+      "expect": {
+        "firstName": "Marie José",
+        "lastName": "ONDO ESSONO"
+      }
+    }
+  ],
+  "validate": [
+    {
+      "civilName": {
+        "firstName": "Jean-Rémy Éloïse",
+        "lastName": "NDONG MBA"
+      },
+      "expect": {
+        "ok": true
+      }
+    },
+    {
+      "civilName": {
+        "firstName": "Jean-Rémy",
+        "lastName": "NDONG-MBA"
+      },
+      "expect": {
+        "ok": true
+      }
+    },
+    {
+      "civilName": {
+        "firstName": "jean",
+        "lastName": "NDONG"
+      },
+      "expect": {
+        "ok": false,
+        "reason": "invalid_name",
+        "path": "$"
+      }
+    },
+    {
+      "civilName": {
+        "firstName": "Jean",
+        "lastName": "Ndong"
+      },
+      "expect": {
+        "ok": false,
+        "reason": "invalid_name",
+        "path": "$"
+      }
+    },
+    {
+      "civilName": {
+        "firstName": "Jean  Paul",
+        "lastName": "NDONG"
+      },
+      "expect": {
+        "ok": false,
+        "reason": "invalid_name",
+        "path": "$"
+      }
+    },
+    {
+      "civilName": {
+        "firstName": " Jean",
+        "lastName": "NDONG"
+      },
+      "expect": {
+        "ok": false,
+        "reason": "invalid_text",
+        "path": "$.firstName"
+      }
+    },
+    {
+      "civilName": {
+        "firstName": "Élodie",
+        "lastName": "MBA"
+      },
+      "expect": {
+        "ok": false,
+        "reason": "invalid_text",
+        "path": "$.firstName"
+      }
+    }
+  ]
+}

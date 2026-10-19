@@ -43,7 +43,7 @@ export function readEnvFile(file) {
  *   d'environnement à recopier par application.
  * - En production, les valeurs arrivent par les ARG du Dockerfile (catalogue).
  *
- * @param {{ appDir: string, engineRoot?: string, transpilePackages?: string[], usageAnalytics?: { host?: string, projectToken?: string } }} options
+ * @param {{ appDir: string, engineRoot?: string, transpilePackages?: string[], usageAnalytics?: { host?: string, projectToken?: string, euRelayOrigin?: string } }} options
  * @returns {import("next").NextConfig}
  */
 export function createEngineNextConfig(options) {
@@ -59,7 +59,7 @@ export function createEngineNextConfig(options) {
   const livekitUrl = process.env.LIVEKIT_WS_URL ?? local.LIVEKIT_WS_URL ?? ""
   const analyticsKey = options.usageAnalytics?.projectToken ?? ""
   const analyticsHost = options.usageAnalytics?.host ?? ""
-  const analyticsOrigin = optionalAnalyticsOrigin(analyticsHost, analyticsKey)
+  const analyticsOrigin = optionalAnalyticsOrigin(analyticsHost, analyticsKey, options.usageAnalytics?.euRelayOrigin)
 
   return {
     output: "standalone",
@@ -92,13 +92,17 @@ export function createEngineNextConfig(options) {
 /** Configuration facultative : aucune origine ajoutée sans clé publique admise.
  * @param {string} host
  * @param {string} projectToken
+ * @param {string | undefined} [euRelayOrigin]
  * @returns {string | null}
  */
-export function optionalAnalyticsOrigin(host, projectToken) {
+export function optionalAnalyticsOrigin(host, projectToken, euRelayOrigin) {
   if (!/^phc_[A-Za-z0-9]{20,128}$/.test(projectToken) || /^phc_(?:placeholder|replace|example|your|insert|change|todo|test)/i.test(projectToken) || !host || host.trim() !== host || /\s/.test(host)) return null
   try {
     const url = new URL(host)
     if (url.protocol !== "https:" || url.username || url.password || url.search || url.hash || url.pathname !== "/") return null
+    // La CSP et le transport imposent la même admission UE. Un relais est
+    // une déclaration explicite du propriétaire, pas une preuve de résidence.
+    if (url.origin !== "https://eu.i.posthog.com" && euRelayOrigin !== url.origin) return null
     return url.origin
   } catch { return null }
 }

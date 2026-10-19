@@ -1,17 +1,20 @@
 // Dupliqué de plateforme/espace/espace_administration_ga/src/integrations/posthog/provider.tsx @ 25398f565 — adaptations : patron de provider facultatif et validation de configuration conservés ; projection fermée d'écrans publics consentie, transport HTTP natif borné et révocable ; SDK, identification, autocapture, DOM, erreurs, persistance et replay entièrement retirés.
 "use client"
 
-import { useEffect, useRef, type ReactNode } from "react"
+import { useCallback, useEffect, useRef, type ReactNode } from "react"
 
 import {
   createUsagePayload,
+  createUsageFunnelPayload,
   isUsageLocale,
   isUsageNetwork,
   isUsageScreen,
+  isUsageFunnelStep,
   resolvePostHogConfiguration,
   type PostHogConfiguration,
   type UsageLocale,
   type UsageScreen,
+  type UsageFunnelStep,
 } from "./posthog"
 
 const CAPTURES_PER_MINUTE = 10
@@ -39,11 +42,12 @@ export function PostHogProvider({ configuration, consented, screen, networkSlug,
   const stateRef = useRef<CaptureState>({ distinctId: null, lastView: null, attempts: [], lastClock: 0 })
   const endpoint = configuration?.endpoint
   const projectToken = configuration?.projectToken
+  const euRelayOrigin = configuration?.euRelayOrigin
 
   useEffect(() => {
     // Tous les accès au registre se font dans l'effet, jamais pendant le rendu.
     const state = stateRef.current
-    const config = resolvePostHogConfiguration({ endpoint, projectToken })
+    const config = resolvePostHogConfiguration({ endpoint, projectToken, euRelayOrigin })
     // Un nouvel accord ne relie pas les deux périodes de consentement. Le
     // budget reste conservé : retirer l'accord ne libère aucune tentative.
     if (consented !== true) state.distinctId = null
@@ -100,7 +104,67 @@ export function PostHogProvider({ configuration, consented, screen, networkSlug,
       controller?.abort()
       window.clearTimeout(timeout)
     }
-  }, [endpoint, projectToken, consented, screen, networkSlug, locale])
+  }, [endpoint, projectToken, euRelayOrigin, consented, screen, networkSlug, locale])
 
   return <>{children}</>
+}
+
+type FunnelScope = { config: PostHogConfiguration; networkSlug: string; locale: UsageLocale }
+type ActiveRequest = { controller: AbortController; timeout: number }
+
+/** Parcours du montage courant seulement : aucune association entre visites ou périodes d'accord. */
+export function useUsageFunnel({ configuration, consented, networkSlug, locale }: Pick<PostHogProviderProps, "configuration" | "consented" | "networkSlug" | "locale">) {
+  const scopeRef = useRef<FunnelScope | null>(null)
+  const requestsRef = useRef(new Set<ActiveRequest>())
+  const stateRef = useRef({ distinctId: null as string | null, seen: new Set<UsageFunnelStep>(), attempts: [] as number[], lastClock: 0 })
+  const endpoint = configuration?.endpoint, projectToken = configuration?.projectToken, euRelayOrigin = configuration?.euRelayOrigin
+
+  useEffect(() => {
+    const config = resolvePostHogConfiguration({ endpoint, projectToken, euRelayOrigin })
+    scopeRef.current = consented === true && config && isUsageNetwork(networkSlug) && isUsageLocale(locale) ? { config, networkSlug, locale } : null
+    if (!scopeRef.current) {
+      stateRef.current.distinctId = null
+      stateRef.current.seen.clear()
+    }
+    return () => {
+      scopeRef.current = null
+      for (const request of requestsRef.current) {
+        request.controller.abort()
+        window.clearTimeout(request.timeout)
+      }
+      requestsRef.current.clear()
+    }
+  }, [endpoint, projectToken, euRelayOrigin, consented, networkSlug, locale])
+
+  return useCallback((step: UsageFunnelStep) => {
+    const scope = scopeRef.current
+    if (!scope || !isUsageFunnelStep(step)) return
+    // Une révocation ou une sortie avant la microtask ne laisse partir aucun événement.
+    void Promise.resolve().then(() => {
+      if (scopeRef.current !== scope) return
+      const state = stateRef.current
+      if (state.seen.has(step)) return
+      const now = Math.max(Date.now(), state.lastClock)
+      const attempts = state.attempts.filter(at => now - at < WINDOW_MS)
+      if (attempts.length >= CAPTURES_PER_MINUTE) return
+      if (state.distinctId === null) {
+        try { state.distinctId = window.crypto.randomUUID() } catch { return }
+      }
+      const payload = createUsageFunnelPayload({ projectToken: scope.config.projectToken, distinctId: state.distinctId, step, networkSlug: scope.networkSlug, locale: scope.locale })
+      if (!payload) return
+      const controller = new AbortController()
+      const request = { controller, timeout: window.setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS) }
+      requestsRef.current.add(request)
+      state.seen.add(step)
+      state.lastClock = now
+      state.attempts = [...attempts, now]
+      const finish = () => { window.clearTimeout(request.timeout); requestsRef.current.delete(request) }
+      try {
+        void fetch(scope.config.endpoint, {
+          method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload),
+          credentials: "omit", referrerPolicy: "no-referrer", redirect: "error", signal: controller.signal,
+        }).catch(() => undefined).finally(finish)
+      } catch { finish() }
+    })
+  }, [])
 }

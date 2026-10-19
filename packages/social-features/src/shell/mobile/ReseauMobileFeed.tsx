@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/mobile/ReseauMobileFeed.tsx @ ad2e7fdc2 — adaptations : déplacé dans la coque (`shell/mobile/`) ; ma fiche lue sur la personne du moteur (`displayName`, portrait servi par la garde `avatar.url`, identifiant seulement PUBLIÉ) ; adresses par la table des routes injectée — lecteur des statuts sur `useRoutes().stories()` (paramètre `auteur`), geste du bandeau de profil vers `useRoutes().settings?.()` (retiré tant que l'application ne sert pas de réglages) — plus aucune route de l'espace en dur ; « Créer une actu » ouvre le composeur EN PLACE par la coquille (`onCreateStory`, la feuille qu'elle monte déjà) au lieu d'une page de composition ; surfaces `reseau` du plateau retirées (le moteur n'en connaît pas) ; chips de portée et leur note par leurs CLÉS i18n ; textes par l'i18n (`reseau:reseauMobileFeed.*`, et `t` passé en dernier aux modules purs : `invitationsBannerLabel`, `viewReturnLabel`, `searchStatusText`, `emptyFeedText`, `loadMoreAnnouncement`) ; résultats de recherche clés sur l'identifiant du moteur (`_id`) ; « agent » devient « personne » ; rendu et ordre inchangés.
+// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/mobile/ReseauMobileFeed.tsx @ ad2e7fdc2 — adaptations : déplacé dans la coque (`shell/mobile/`) ; ma fiche lue sur la personne du moteur (`displayName`, portrait servi par la garde `avatar.url`, identifiant seulement PUBLIÉ) ; adresses par la table des routes injectée — lecteur des statuts sur `useRoutes().stories()` (paramètre `auteur`), geste du bandeau de profil vers `useRoutes().settings?.()` (retiré tant que l'application ne sert pas de réglages) — plus aucune route de l'espace en dur ; « Créer une actu » ouvre le composeur EN PLACE par la coquille (`onCreateStory`, la feuille qu'elle monte déjà) au lieu d'une page de composition ; surfaces `reseau` du plateau retirées (le moteur n'en connaît pas) ; chips de portée et leur note par leurs CLÉS i18n ; textes par l'i18n (`reseau:reseauMobileFeed.*`, et `t` passé en dernier aux modules purs : `invitationsBannerLabel`, `viewReturnLabel`, `searchStatusText`, `emptyFeedText`, `loadMoreAnnouncement`) ; résultats de recherche clés sur l'identifiant du moteur (`_id`) ; « agent » devient « personne » ; rendu et ordre inchangés ; P04 (18/10/2026) : quand l'application déclare le fil immersif (`NetworkProvider feedPresentation`), le fil et ses mots-clés s'affichent par défaut dans le lecteur immersif (`ImmersiveFeedReader`, même chaîne de pages, mêmes curseurs) avec la tête du fil en premier créneau et la bascule Liste/Immersion dans sa barre ; en liste, la bascule précède le fil et la position se retrouve au retour (`FeedListReturn`) ; sans déclaration, rendu historique à l'identique.
 "use client"
 
 /**
@@ -23,6 +23,12 @@
  * pied rend ce pied inatteignable (WCAG 2.4.5 et 3.2.5). Le bouton « Voir plus
  * de publications » reste le seul chemin.
  *
+ * P04 : en IMMERSION, le lecteur n'a pas de pied à atteindre — sa fin est un
+ * créneau qui porte « Charger la suite ». Il charge au plus trois pages de
+ * lui-même en approchant de la fin (borné, annoncé, sous la lecture : rien ne
+ * se déplace), la commande restant toujours offerte. La liste garde la règle
+ * ci-dessus.
+ *
  * ⚠️ Les deux bandeaux du haut sont ceux du bureau, repris tels quels : une
  * invitation reçue est une action attendue DE MOI, elle ne dort pas derrière un
  * volet qu'il faut penser à ouvrir ; et sans profil publié on n'est ni
@@ -31,8 +37,14 @@
 
 import { useRoutes } from "@antsia/api/network"
 import { Alert, Button, SkeletonCard } from "@antsia/ui"
+import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
 
+import { FeedListReturn } from "../../features/feed-immersion/FeedListReturn"
+import { FeedModeToggle } from "../../features/feed-immersion/FeedModeToggle"
+import { FeedSurfaceMemoryProvider } from "../../features/feed-immersion/feed-post-memory"
+import { ImmersiveFeedReader } from "../../features/feed-immersion/ImmersiveFeedReader"
+import { useFeedImmersion } from "../../features/feed-immersion/use-feed-immersion"
 import { Avatar } from "../../features/reseau-personnel/Avatar"
 import { EmptyFeed, FeedPage } from "../../features/reseau-personnel/FeedPages"
 import { FEED_SCOPE_CHIPS, feedScopeById } from "../../features/reseau-personnel/feed-scopes"
@@ -113,7 +125,24 @@ export function ReseauMobileFeed({
   // Le geste du bandeau de profil : les réglages, s'ils sont servis.
   const settingsHref = routes.settings?.() ?? null
 
-  return (
+  /*
+   * P04 — le fil IMMERSIF, quand l'application le déclare : le fil et ses
+   * mots-clés seulement (une recherche ou une publication ouverte restent en
+   * liste). L'identifiant du fil (portée, mot-clé) porte la mémoire de retour
+   * de l'onglet ; aucune adresse n'y entre. `null` sans déclaration : rien ne
+   * change ci-dessous.
+   */
+  const feedId = view.kind === "feed" ? `fil:${scope}` : view.kind === "tag" ? `fil:${scope}:tag:${view.tag}` : null
+  const immersion = useFeedImmersion({ feedId, depth: pages.cursors.length })
+  const canLoadMore = shouldShowLoadMore(pages, tailCursor)
+  const loadMore = useCallback(() => {
+    setPages((current) => appendPage(current, tailCursor))
+  }, [setPages, tailCursor])
+
+  /* La TÊTE du fil — bandeaux, composeur, actus, portées, vue en cours. En
+     liste, elle précède les pages ; en immersion, elle est le premier créneau
+     du lecteur et défile avec lui. */
+  const head = (
     <>
       {/* Sans profil publié, on n'est ni trouvable ni connectable, et ses
           publications s'affichent sous un nom neutre. Le bureau le dit dans
@@ -220,6 +249,81 @@ export function ReseauMobileFeed({
           ) : null}
         </div>
       ) : null}
+    </>
+  )
+
+  /* La CHAÎNE de pages montées : chacune porte son curseur et son propre
+     abonnement, donc les hooks restent hors de toute boucle conditionnelle et
+     chaque page garde le temps réel. LA MÊME en liste et en immersion. */
+  const feedPages = pages.cursors.map((cursor, index) => (
+    <FeedPage
+      key={feedCursorKey(cursor)}
+      cursor={cursor}
+      pageIndex={index}
+      pageKey={feedCursorKey(cursor)}
+      nextMountedCursor={pages.cursors[index + 1]}
+      tag={view.kind === "tag" ? view.tag : undefined}
+      scope={scope}
+      now={now}
+      isFirst={index === 0}
+      isLast={index === pages.cursors.length - 1}
+      interleaveAfter={index === 0 ? suggestionsInterleaveIndex : null}
+      onTag={openTag}
+      onMention={openMention}
+      onTail={state.reportTail}
+      onBoundaryShift={state.rebaseAfterPage}
+      emptyFallback={
+        <EmptyFeed
+          text={emptyFeedText(
+            {
+              hasConnections: (connections.data ?? []).length > 0,
+              hasFollows: (follows.data ?? []).length > 0,
+            },
+            t,
+          )}
+        />
+      }
+    />
+  ))
+
+  if (immersion !== null && immersion.immersive) {
+    return (
+      <FeedSurfaceMemoryProvider value={immersion.surfaceMemory}>
+        {/* Une publication par hauteur disponible ; la bascule reste dans la
+            barre du lecteur, la tête du fil en est le premier créneau. */}
+        <ImmersiveFeedReader
+          key={feedId ?? "fil"}
+          label={t("immersiveFeed.label")}
+          head={head}
+          toggle={<FeedModeToggle state={immersion.mode} onChange={immersion.changeMode} />}
+          canLoadMore={canLoadMore}
+          exhausted={pages.exhausted}
+          onLoadMore={loadMore}
+          depth={pages.cursors.length}
+          restore={immersion.restore}
+          onRestored={immersion.onRestored}
+          onAnchor={immersion.recordSlotAnchor}
+        >
+          {feedPages}
+        </ImmersiveFeedReader>
+        <p role="status" aria-live="polite" className="sr-only">
+          {announcement}
+        </p>
+      </FeedSurfaceMemoryProvider>
+    )
+  }
+
+  return (
+    <FeedSurfaceMemoryProvider value={immersion?.surfaceMemory ?? null}>
+      {/* La bascule Liste/Immersion : toujours visible et nommée, sur le fil
+          et ses mots-clés (P04) — absente sans déclaration de l'application. */}
+      {immersion !== null && feedId !== null ? (
+        <div className="fil-mode-row">
+          <FeedModeToggle state={immersion.mode} onChange={immersion.changeMode} />
+        </div>
+      ) : null}
+
+      {head}
 
       {view.kind === "post" ? (
         focused.isLoading ? (
@@ -239,39 +343,7 @@ export function ReseauMobileFeed({
         )
       ) : (
         <>
-          {/* La CHAÎNE de pages montées : chacune porte son curseur et son
-              propre abonnement, donc les hooks restent hors de toute boucle
-              conditionnelle et chaque page garde le temps réel. */}
-          {pages.cursors.map((cursor, index) => (
-            <FeedPage
-              key={feedCursorKey(cursor)}
-              cursor={cursor}
-              pageIndex={index}
-              pageKey={feedCursorKey(cursor)}
-              nextMountedCursor={pages.cursors[index + 1]}
-              tag={view.kind === "tag" ? view.tag : undefined}
-              scope={scope}
-              now={now}
-              isFirst={index === 0}
-              isLast={index === pages.cursors.length - 1}
-              interleaveAfter={index === 0 ? suggestionsInterleaveIndex : null}
-              onTag={openTag}
-              onMention={openMention}
-              onTail={state.reportTail}
-              onBoundaryShift={state.rebaseAfterPage}
-              emptyFallback={
-                <EmptyFeed
-                  text={emptyFeedText(
-                    {
-                      hasConnections: (connections.data ?? []).length > 0,
-                      hasFollows: (follows.data ?? []).length > 0,
-                    },
-                    t,
-                  )}
-                />
-              }
-            />
-          ))}
+          {feedPages}
 
           {shouldShowLoadMore(pages, tailCursor) ? (
             <div>
@@ -287,6 +359,18 @@ export function ReseauMobileFeed({
               </Button>
             </div>
           ) : null}
+
+          {/* P04 : retrouver la carte lue au retour (profondeur rechargée). */}
+          {immersion !== null && feedId !== null ? (
+            <FeedListReturn
+              restore={immersion.restore}
+              onRestored={immersion.onRestored}
+              onAnchor={immersion.recordListAnchor}
+              canLoadMore={canLoadMore}
+              exhausted={pages.exhausted}
+              onLoadMore={loadMore}
+            />
+          ) : null}
         </>
       )}
 
@@ -295,6 +379,6 @@ export function ReseauMobileFeed({
       <p role="status" aria-live="polite" className="sr-only">
         {announcement}
       </p>
-    </>
+    </FeedSurfaceMemoryProvider>
   )
 }

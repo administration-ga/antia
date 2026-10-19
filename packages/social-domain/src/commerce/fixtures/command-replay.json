@@ -1,0 +1,246 @@
+{
+  "contract": "PRO-COMMERCE-COMMAND-V1",
+  "description": "Décisions pures d'idempotence (PRO.GA), de reprise après délai (ANTSIA) et de nouvelle tentative de paiement.",
+  "replay": [
+    {
+      "name": "première exécution",
+      "existing": null,
+      "incoming": {
+        "expiresAt": 1792285201000,
+        "requestSha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "nowMs": 1792285200000,
+      "expect": {
+        "action": "execute"
+      }
+    },
+    {
+      "name": "demande expirée jamais vue",
+      "existing": null,
+      "incoming": {
+        "expiresAt": 1792285199999,
+        "requestSha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "nowMs": 1792285200000,
+      "expect": {
+        "action": "expired"
+      }
+    },
+    {
+      "name": "même clé, mêmes octets, terminée",
+      "existing": {
+        "requestSha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "responseBody": "{\"command\":\"checkout.prepare\",\"contract\":\"PRO-COMMERCE-COMMAND-V1\",\"outcome\":\"accepted\",\"requestId\":\"antsia-req-000006\",\"requestSha256\":\"8d160a5baa721877897800396f93f0184a1ca7b096d5cc6c61a0913d0d191a5e\",\"respondedAt\":1792285200000,\"result\":{\"checkoutRef\":\"pro.ga:checkout:01JA00000000000000000000H1\",\"expiresAt\":1792286100000,\"fees\":[],\"lines\":[{\"catalogRevision\":3,\"label\":\"Robe Nyota\",\"lineAmount\":{\"amount\":25000,\"currency\":\"XAF\"},\"offerRef\":\"pro.ga:offer:01JA00000000000000000000F1\",\"quantity\":1,\"unitAmount\":{\"amount\":25000,\"currency\":\"XAF\"}},{\"catalogRevision\":5,\"label\":\"Robe Ewaka — M / Bleu\",\"lineAmount\":{\"amount\":56000,\"currency\":\"XAF\"},\"offerRef\":\"pro.ga:offer:01JA00000000000000000000F2\",\"quantity\":2,\"unitAmount\":{\"amount\":28000,\"currency\":\"XAF\"},\"variantRef\":\"pro.ga:offer_variant:01JA00000000000000000000V1\"}],\"state\":\"held\",\"total\":{\"amount\":81000,\"currency\":\"XAF\"}},\"version\":1}",
+        "state": "completed"
+      },
+      "incoming": {
+        "expiresAt": 1792285201000,
+        "requestSha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "nowMs": 1792285200000,
+      "expect": {
+        "action": "replay",
+        "responseBody": "{\"command\":\"checkout.prepare\",\"contract\":\"PRO-COMMERCE-COMMAND-V1\",\"outcome\":\"accepted\",\"requestId\":\"antsia-req-000006\",\"requestSha256\":\"8d160a5baa721877897800396f93f0184a1ca7b096d5cc6c61a0913d0d191a5e\",\"respondedAt\":1792285200000,\"result\":{\"checkoutRef\":\"pro.ga:checkout:01JA00000000000000000000H1\",\"expiresAt\":1792286100000,\"fees\":[],\"lines\":[{\"catalogRevision\":3,\"label\":\"Robe Nyota\",\"lineAmount\":{\"amount\":25000,\"currency\":\"XAF\"},\"offerRef\":\"pro.ga:offer:01JA00000000000000000000F1\",\"quantity\":1,\"unitAmount\":{\"amount\":25000,\"currency\":\"XAF\"}},{\"catalogRevision\":5,\"label\":\"Robe Ewaka — M / Bleu\",\"lineAmount\":{\"amount\":56000,\"currency\":\"XAF\"},\"offerRef\":\"pro.ga:offer:01JA00000000000000000000F2\",\"quantity\":2,\"unitAmount\":{\"amount\":28000,\"currency\":\"XAF\"},\"variantRef\":\"pro.ga:offer_variant:01JA00000000000000000000V1\"}],\"state\":\"held\",\"total\":{\"amount\":81000,\"currency\":\"XAF\"}},\"version\":1}"
+      }
+    },
+    {
+      "name": "même clé, autres octets",
+      "existing": {
+        "requestSha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "responseBody": "{\"command\":\"checkout.prepare\",\"contract\":\"PRO-COMMERCE-COMMAND-V1\",\"outcome\":\"accepted\",\"requestId\":\"antsia-req-000006\",\"requestSha256\":\"8d160a5baa721877897800396f93f0184a1ca7b096d5cc6c61a0913d0d191a5e\",\"respondedAt\":1792285200000,\"result\":{\"checkoutRef\":\"pro.ga:checkout:01JA00000000000000000000H1\",\"expiresAt\":1792286100000,\"fees\":[],\"lines\":[{\"catalogRevision\":3,\"label\":\"Robe Nyota\",\"lineAmount\":{\"amount\":25000,\"currency\":\"XAF\"},\"offerRef\":\"pro.ga:offer:01JA00000000000000000000F1\",\"quantity\":1,\"unitAmount\":{\"amount\":25000,\"currency\":\"XAF\"}},{\"catalogRevision\":5,\"label\":\"Robe Ewaka — M / Bleu\",\"lineAmount\":{\"amount\":56000,\"currency\":\"XAF\"},\"offerRef\":\"pro.ga:offer:01JA00000000000000000000F2\",\"quantity\":2,\"unitAmount\":{\"amount\":28000,\"currency\":\"XAF\"},\"variantRef\":\"pro.ga:offer_variant:01JA00000000000000000000V1\"}],\"state\":\"held\",\"total\":{\"amount\":81000,\"currency\":\"XAF\"}},\"version\":1}",
+        "state": "completed"
+      },
+      "incoming": {
+        "expiresAt": 1792285201000,
+        "requestSha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+      },
+      "nowMs": 1792285200000,
+      "expect": {
+        "action": "conflict"
+      }
+    },
+    {
+      "name": "même clé, mêmes octets, en cours",
+      "existing": {
+        "requestSha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "state": "in_progress"
+      },
+      "incoming": {
+        "expiresAt": 1792285201000,
+        "requestSha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "nowMs": 1792285200000,
+      "expect": {
+        "action": "in_progress"
+      }
+    },
+    {
+      "name": "même clé, autres octets, en cours",
+      "existing": {
+        "requestSha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "state": "in_progress"
+      },
+      "incoming": {
+        "expiresAt": 1792285201000,
+        "requestSha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+      },
+      "nowMs": 1792285200000,
+      "expect": {
+        "action": "conflict"
+      }
+    },
+    {
+      "name": "rejeu d'une demande terminée puis expirée",
+      "existing": {
+        "requestSha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "responseBody": "{\"command\":\"checkout.prepare\",\"contract\":\"PRO-COMMERCE-COMMAND-V1\",\"outcome\":\"accepted\",\"requestId\":\"antsia-req-000006\",\"requestSha256\":\"8d160a5baa721877897800396f93f0184a1ca7b096d5cc6c61a0913d0d191a5e\",\"respondedAt\":1792285200000,\"result\":{\"checkoutRef\":\"pro.ga:checkout:01JA00000000000000000000H1\",\"expiresAt\":1792286100000,\"fees\":[],\"lines\":[{\"catalogRevision\":3,\"label\":\"Robe Nyota\",\"lineAmount\":{\"amount\":25000,\"currency\":\"XAF\"},\"offerRef\":\"pro.ga:offer:01JA00000000000000000000F1\",\"quantity\":1,\"unitAmount\":{\"amount\":25000,\"currency\":\"XAF\"}},{\"catalogRevision\":5,\"label\":\"Robe Ewaka — M / Bleu\",\"lineAmount\":{\"amount\":56000,\"currency\":\"XAF\"},\"offerRef\":\"pro.ga:offer:01JA00000000000000000000F2\",\"quantity\":2,\"unitAmount\":{\"amount\":28000,\"currency\":\"XAF\"},\"variantRef\":\"pro.ga:offer_variant:01JA00000000000000000000V1\"}],\"state\":\"held\",\"total\":{\"amount\":81000,\"currency\":\"XAF\"}},\"version\":1}",
+        "state": "completed"
+      },
+      "incoming": {
+        "expiresAt": 1792285199999,
+        "requestSha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "nowMs": 1792285200000,
+      "expect": {
+        "action": "replay",
+        "responseBody": "{\"command\":\"checkout.prepare\",\"contract\":\"PRO-COMMERCE-COMMAND-V1\",\"outcome\":\"accepted\",\"requestId\":\"antsia-req-000006\",\"requestSha256\":\"8d160a5baa721877897800396f93f0184a1ca7b096d5cc6c61a0913d0d191a5e\",\"respondedAt\":1792285200000,\"result\":{\"checkoutRef\":\"pro.ga:checkout:01JA00000000000000000000H1\",\"expiresAt\":1792286100000,\"fees\":[],\"lines\":[{\"catalogRevision\":3,\"label\":\"Robe Nyota\",\"lineAmount\":{\"amount\":25000,\"currency\":\"XAF\"},\"offerRef\":\"pro.ga:offer:01JA00000000000000000000F1\",\"quantity\":1,\"unitAmount\":{\"amount\":25000,\"currency\":\"XAF\"}},{\"catalogRevision\":5,\"label\":\"Robe Ewaka — M / Bleu\",\"lineAmount\":{\"amount\":56000,\"currency\":\"XAF\"},\"offerRef\":\"pro.ga:offer:01JA00000000000000000000F2\",\"quantity\":2,\"unitAmount\":{\"amount\":28000,\"currency\":\"XAF\"},\"variantRef\":\"pro.ga:offer_variant:01JA00000000000000000000V1\"}],\"state\":\"held\",\"total\":{\"amount\":81000,\"currency\":\"XAF\"}},\"version\":1}"
+      }
+    }
+  ],
+  "timeout": [
+    {
+      "name": "terminée",
+      "status": "completed",
+      "targetExpiresAt": 1792285199000,
+      "nowMs": 1792285200000,
+      "expect": "use_recorded"
+    },
+    {
+      "name": "en cours",
+      "status": "in_progress",
+      "targetExpiresAt": 1792285201000,
+      "nowMs": 1792285200000,
+      "expect": "wait"
+    },
+    {
+      "name": "inconnue encore exécutable",
+      "status": "unknown",
+      "targetExpiresAt": 1792285201000,
+      "nowMs": 1792285200000,
+      "expect": "resend_same_bytes"
+    },
+    {
+      "name": "inconnue à la limite de tolérance",
+      "status": "unknown",
+      "targetExpiresAt": 1792284900000,
+      "nowMs": 1792285200000,
+      "expect": "resend_same_bytes"
+    },
+    {
+      "name": "inconnue et définitivement expirée",
+      "status": "unknown",
+      "targetExpiresAt": 1792284899999,
+      "nowMs": 1792285200000,
+      "expect": "safe_to_restart"
+    }
+  ],
+  "newPayment": [
+    {
+      "name": "aucune tentative",
+      "previous": null,
+      "expect": true
+    },
+    {
+      "name": "tentative en attente",
+      "previous": {
+        "kind": "payment",
+        "state": "pending"
+      },
+      "expect": false
+    },
+    {
+      "name": "action requise",
+      "previous": {
+        "kind": "payment",
+        "state": "requires_action"
+      },
+      "expect": false
+    },
+    {
+      "name": "en traitement",
+      "previous": {
+        "kind": "payment",
+        "state": "processing"
+      },
+      "expect": false
+    },
+    {
+      "name": "déjà réussie",
+      "previous": {
+        "kind": "payment",
+        "state": "succeeded"
+      },
+      "expect": false
+    },
+    {
+      "name": "échouée",
+      "previous": {
+        "kind": "payment",
+        "state": "failed"
+      },
+      "expect": true
+    },
+    {
+      "name": "annulée",
+      "previous": {
+        "kind": "payment",
+        "state": "cancelled"
+      },
+      "expect": true
+    },
+    {
+      "name": "délai : renvoyer les mêmes octets",
+      "previous": {
+        "kind": "timeout",
+        "guidance": "resend_same_bytes"
+      },
+      "expect": false
+    },
+    {
+      "name": "délai : attendre",
+      "previous": {
+        "kind": "timeout",
+        "guidance": "wait"
+      },
+      "expect": false
+    },
+    {
+      "name": "délai : redémarrage sûr",
+      "previous": {
+        "kind": "timeout",
+        "guidance": "safe_to_restart"
+      },
+      "expect": true
+    }
+  ],
+  "idempotentWrite": [
+    {
+      "name": "première écriture",
+      "existing": null,
+      "incoming": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "expect": "first"
+    },
+    {
+      "name": "même empreinte",
+      "existing": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "incoming": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "expect": "replay"
+    },
+    {
+      "name": "autre empreinte",
+      "existing": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "incoming": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "expect": "conflict"
+    }
+  ]
+}

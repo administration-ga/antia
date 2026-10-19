@@ -114,6 +114,10 @@
   "messageBubble": {
     "actions": "Actions sur le message",
     "actionsWithText": "Actions sur le message : {{text}}",
+    "actionsFrom": "Actions sur le message de {{name}}",
+    "actionsMine": "Actions sur votre message",
+    "speaker": "Message de {{name}} :",
+    "speakerMine": "Votre message :",
     "forwarded": "Transféré",
     "pinned": "Message épinglé",
     "edited": "(modifié)",
@@ -122,6 +126,7 @@
     "sent": "Envoyé"
   },
   "messageComposer": {
+    "sendAlreadyPending": "Un envoi est déjà en cours dans cette conversation.",
     "uploadFailed": "Le téléversement a échoué.",
     "editFailed": "La modification n'a pas pu être enregistrée.",
     "reselectOne": "« {{name}} » est à resélectionner : le fichier n'est plus en mémoire.",
@@ -141,6 +146,12 @@
     "saveEdit": "Enregistrer la modification",
     "sending": "Envoi en cours",
     "send": "Envoyer"
+  },
+  "outboxMessages": {
+    "sending": "Envoi en cours",
+    "attachments_one": "{{count}} pièce jointe",
+    "attachments_many": "{{count}} pièces jointes",
+    "attachments_other": "{{count}} pièces jointes"
   },
   "messagerieConversationView": {
     "systemEvent": "Évènement de la conversation",
@@ -165,6 +176,9 @@
     "placeholderGroup": "Écrire au groupe…",
     "placeholderDirect": "Écrire un message…",
     "composerLabelGroup": "Message au groupe {{name}}",
-    "composerLabelDirect": "Message à {{name}}"
+    "composerLabelDirect": "Message à {{name}}",
+    "arrival": "Nouveau message de {{name}}",
+    "arrivalWithText": "Nouveau message de {{name}} : {{text}}",
+    "arrivalWithAttachment": "Nouveau message de {{name}}, avec une pièce jointe"
   }
 }

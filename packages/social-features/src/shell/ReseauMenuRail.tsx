@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/ReseauMenuRail.tsx @ ad2e7fdc2 — adaptations : déplacé dans la coque (`shell/`) ; branché sur le moteur — ma fiche par `people.persons.getMyPerson` (sans réseau ; identité montrée seulement si le profil est publié, portrait servi par la garde des fichiers), mes groupes par `thematicGroups.thematicGroups.myGroups`, mes pages suivies par la première page de `pages.pages.paginateMyPageFollows` (pages GÉNÉRIQUES du moteur, au lieu des pages d'organisation), réseau courant par `useNetwork()` ; adresses par la table des routes INJECTÉE (`useRoutes()` : volets sur `home()`, mon profil sur `profile(handle)`, fiche d'une page sur `page(handle)`, réglages sur `settings?.()`) — `personal-nav` et ses URL de l'espace retirés, une destination absente RETIRE son entrée (et « Voir plus » disparaît quand il n'a plus rien à déplier) ; volets SERVIS seuls (`menuItemsFor(counts, home)`) ; libellés par l'i18n (`reseau:reseauMenuRail.*`, libellé du volet par sa clé, pastille par `menuBadgeLabel(item, t)`) ; « iRéseau » devient « réseau » ; liens par `Link` de `@antsia/api/routing`, d'UNE seule pièce (un lien à la facture du bouton fantôme au lieu d'un bouton DANS un lien : deux arrêts de tabulation pour un geste) ; rendu, ordre et styles inchangés.
+// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/ReseauMenuRail.tsx @ ad2e7fdc2 — adaptations : déplacé dans la coque (`shell/`) ; branché sur le moteur — ma fiche par `people.persons.getMyPerson` (sans réseau ; identité montrée seulement si le profil est publié, portrait servi par la garde des fichiers), mes groupes par `thematicGroups.thematicGroups.myGroups`, mes pages suivies par la première page de `pages.pages.paginateMyPageFollows` (pages GÉNÉRIQUES du moteur, au lieu des pages d'organisation), réseau courant par `useNetwork()` ; adresses par la table des routes INJECTÉE (`useRoutes()` : volets sur `home()`, mon profil sur `profile(handle)`, fiche d'une page sur `page(handle)`, réglages sur `settings?.()`) — `personal-nav` et ses URL de l'espace retirés, une destination absente RETIRE son entrée (et « Voir plus » disparaît quand il n'a plus rien à déplier) ; volets SERVIS seuls (`menuItemsFor(counts, home)`) ; libellés par l'i18n (`reseau:reseauMenuRail.*`, libellé du volet par sa clé, pastille par `menuBadgeLabel(item, t)`) ; « iRéseau » devient « réseau » ; liens par `Link` de `@antsia/api/routing`, d'UNE seule pièce (un lien à la facture du bouton fantôme au lieu d'un bouton DANS un lien : deux arrêts de tabulation pour un geste) ; rendu, ordre et styles inchangés ; P02 (18/10/2026) : monté aussi HORS de la page réseau (`activeTab` nul, volets rendus en liens quand aucun `onSelectTab` n'est fourni) et, sous la navigation par destinations déclarée par l'application, coiffé des cinq destinations Fil · Découvrir · Créer · Messages · Profil (« Créer » ouvre la carte de choix partagée) — le volet Fil et « Voir plus » cèdent alors leur place aux destinations Fil et Profil.
 "use client"
 
 /**
@@ -22,16 +22,33 @@
 import { api } from "@antsia/api/engine"
 import { useAuthenticatedConvexQuery, useAuthenticatedPaginatedQuery } from "@antsia/api/hooks"
 import { useNetwork, useRoutes } from "@antsia/api/network"
-import { Link } from "@antsia/api/routing"
+import { Link, usePathname, useSearchParams } from "@antsia/api/routing"
 import { Badge, Button, Card, Icon } from "@antsia/ui"
-import { useState } from "react"
+import { type CSSProperties, type ReactNode, useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 
+import type { CreationKind } from "../features/reseau-personnel/creation-controller"
 import { Avatar } from "../features/reseau-personnel/Avatar"
+import { formatUnreadBadge } from "../features/reseau-personnel/shared"
 import { AppearanceControl } from "./appearance"
 import { RESEAU_SURFACE_STYLE } from "./design-styles"
+import { CreationChoiceCard, useChoiceTrigger } from "./mobile/ReseauMobileCreateButton"
 import type { ReseauAgentTabId } from "./reseau-agent-nav"
 import { menuBadgeLabel, menuItemsFor, SHORTCUTS_MAX, shortcutsFor, type ReseauMenuCounts } from "./reseau-menu"
+import {
+	activeReseauDestination,
+	ariaCurrentFor,
+	reseauCreationChoices,
+	reseauDestinations,
+	type ReseauDestinationMatch,
+	type ReseauDestinationRoutes,
+} from "./reseau-menu-destinations"
+import {
+	isPlainLeftClick,
+	RESEAU_DESTINATION_ICONS,
+	useMessagesUnreadTotal,
+	useReseauDestinationRoutes,
+} from "./reseau-menu-destinations-ui"
 
 const ITEM_STYLE = {
 	width: "100%",
@@ -68,21 +85,67 @@ const LINK_ITEM_STYLE = {
 	whiteSpace: "nowrap" as const,
 }
 
+/**
+ * Un volet rendu en LIEN, sélectionné : la facture du bouton `secondary` des
+ * volets de la page réseau, pour qu'un lien et un bouton actifs se lisent de
+ * la même façon.
+ */
+const SELECTED_LINK_ITEM_STYLE: CSSProperties = {
+	...LINK_ITEM_STYLE,
+	background: "var(--ink-0)",
+	color: "var(--primary-500)",
+	border: "1px solid var(--primary-500)",
+}
+
+/** Le titre d'un groupe d'entrées du rail (« Vos raccourcis », « Dans le réseau »). */
+const SECTION_TITLE_STYLE: CSSProperties = {
+	margin: "0 0 8px",
+	fontSize: 10.5,
+	fontWeight: 700,
+	letterSpacing: "0.08em",
+	textTransform: "uppercase",
+	color: "var(--muted-foreground)",
+	paddingInline: 10,
+}
+
 export function ReseauMenuRail({
 	activeTab,
 	counts,
 	onSelectTab,
+	onCreate,
+	current,
 }: {
-	activeTab: ReseauAgentTabId
+	/** Le volet ouvert sur la page réseau ; `null` sur une autre page de membre. */
+	activeTab: ReseauAgentTabId | null
 	counts?: ReseauMenuCounts
-	/** Ouvre un volet. Le rail ne connaît pas le routeur : il le demande. */
-	onSelectTab: (tab: ReseauAgentTabId) => void
+	/**
+	 * Ouvre un volet. Le rail ne connaît pas le routeur : il le demande. Absent
+	 * (le rail monté HORS de la page réseau), chaque volet est un LIEN vers son
+	 * adresse — il s'ouvre dans un onglet, et les gardes de sortie d'une page le
+	 * voient comme toute navigation.
+	 */
+	onSelectTab?: (tab: ReseauAgentTabId) => void
+	/**
+	 * Navigation par destinations seulement : le format à SURFACE choisi dans
+	 * « Créer » (publication, actu, conférence) — l'hôte l'ouvre en place.
+	 */
+	onCreate?: (kind: CreationKind) => void
+	/**
+	 * Navigation par destinations seulement : la destination courante quand
+	 * l'application la connaît mieux que la coque — `undefined` la laisse
+	 * déduire de l'adresse, `null` n'en allume aucune.
+	 */
+	current?: ReseauDestinationMatch | null
 }) {
 	const { t } = useTranslation("reseau")
 	const { networkId } = useNetwork()
 	const routes = useRoutes()
 	const home = routes.home()
 	const [expanded, setExpanded] = useState(false)
+	/* La navigation par destinations, si l'APPLICATION l'a déclarée : le rail
+	   se coiffe alors des cinq destinations, et ce qu'elles portent déjà (le
+	   volet Fil, les destinations de compte) quitte la liste des volets. */
+	const destinationRoutes = useReseauDestinationRoutes()
 	// Ma fiche (sur moi-même : sans réseau).
 	const myPerson = useAuthenticatedConvexQuery(api.modules.people.persons.getMyPerson, {})
 	// Les raccourcis n'en montrent que SHORTCUTS_MAX : une page suffit.
@@ -93,7 +156,7 @@ export function ReseauMenuRail({
 	)
 	const myGroups = useAuthenticatedConvexQuery(api.modules.thematicGroups.thematicGroups.myGroups, { networkId })
 
-	const items = menuItemsFor(counts ?? {}, home)
+	const items = menuItemsFor(counts ?? {}, home).filter((item) => destinationRoutes === null || item.id !== "fil")
 	const shortcuts = shortcutsFor(
 		pageFollows.results.map((page) => ({
 			pageId: page.pageId,
@@ -116,32 +179,48 @@ export function ReseauMenuRail({
 	const displayName = person?.displayName ?? handle ?? ""
 	const settingsHref = routes.settings?.() ?? null
 
+	/* L'identité mène au profil — c'est le geste qu'on cherche en premier dans
+	   un menu de réseau social. Sous la navigation par destinations, elle coiffe
+	   les destinations plutôt que les volets. */
+	const identity: ReactNode =
+		profileHref !== null ? (
+			<Link
+				href={profileHref}
+				style={{
+					display: "flex",
+					alignItems: "center",
+					gap: 10,
+					minHeight: 44,
+					padding: "6px 10px",
+					borderRadius: 8,
+					textDecoration: "none",
+					color: "inherit",
+				}}
+			>
+				<Avatar displayName={displayName} avatarUrl={person?.avatar?.url ?? null} size={32} />
+				<span style={{ display: "grid", gap: 1, minWidth: 0 }}>
+					<span style={{ fontSize: 13.5, fontWeight: 700 }}>{displayName}</span>
+					<span style={{ fontSize: 11.5, color: "var(--muted-foreground)" }}>@{handle}</span>
+				</span>
+			</Link>
+		) : null
+
 	return (
 		<Card padded={false} style={RESEAU_SURFACE_STYLE}>
+			{destinationRoutes !== null ? (
+				<RailDestinations
+					routes={destinationRoutes}
+					identity={identity}
+					handle={handle}
+					onSelectTab={onSelectTab}
+					onCreate={onCreate}
+					current={current}
+				/>
+			) : null}
 			<nav aria-label={t("reseauMenuRail.navLabel")} style={{ padding: 12 }}>
-				{/* L'identité mène au profil — c'est le geste qu'on cherche en
-				    premier dans un menu de réseau social. */}
-				{profileHref !== null ? (
-					<Link
-						href={profileHref}
-						style={{
-							display: "flex",
-							alignItems: "center",
-							gap: 10,
-							minHeight: 44,
-							padding: "6px 10px",
-							borderRadius: 8,
-							textDecoration: "none",
-							color: "inherit",
-						}}
-					>
-						<Avatar displayName={displayName} avatarUrl={person?.avatar?.url ?? null} size={32} />
-						<span style={{ display: "grid", gap: 1, minWidth: 0 }}>
-							<span style={{ fontSize: 13.5, fontWeight: 700 }}>{displayName}</span>
-							<span style={{ fontSize: 11.5, color: "var(--muted-foreground)" }}>@{handle}</span>
-						</span>
-					</Link>
-				) : null}
+				{/* Les volets sous les destinations : un titre les sépare, pour
+				    qu'une liste continue ne se lise pas comme un seul niveau. */}
+				{destinationRoutes === null ? identity : <h2 style={SECTION_TITLE_STYLE}>{t("reseauDestinations.voletsTitle")}</h2>}
 
 				<ul
 					style={{
@@ -155,27 +234,45 @@ export function ReseauMenuRail({
 					{items.map((item) => {
 						const selected = item.id === activeTab
 						const badgeLabel = menuBadgeLabel(item, t)
+						const content = (
+							<>
+								<Icon name={item.icon} size={18} aria-hidden />
+								<span style={{ flex: 1, fontSize: 13.5, fontWeight: 600 }}>{t(item.labelKey)}</span>
+								{item.badge !== null ? (
+									<Badge tone="primary" size="sm">
+										{/* Le chiffre est masqué au lecteur d'écran : la phrase
+										    qui suit dit 3 QUOI, ce qu'un « 3 » nu ne dit pas. */}
+										<span aria-hidden="true">{item.badge > 99 ? "99+" : item.badge}</span>
+									</Badge>
+								) : null}
+								{badgeLabel !== null ? <span className="sr-only">{badgeLabel}</span> : null}
+							</>
+						)
 						return (
 							<li key={item.id}>
-								<Button
-									variant={selected ? "secondary" : "ghost"}
-									// `aria-current` et non `aria-selected` : ce sont des liens
-									// de navigation, pas les onglets d'un `tablist`.
-									aria-current={selected ? "page" : undefined}
-									onClick={() => onSelectTab(item.id)}
-									style={ITEM_STYLE}
-								>
-									<Icon name={item.icon} size={18} aria-hidden />
-									<span style={{ flex: 1, fontSize: 13.5, fontWeight: 600 }}>{t(item.labelKey)}</span>
-									{item.badge !== null ? (
-										<Badge tone="primary" size="sm">
-											{/* Le chiffre est masqué au lecteur d'écran : la phrase
-											    qui suit dit 3 QUOI, ce qu'un « 3 » nu ne dit pas. */}
-											<span aria-hidden="true">{item.badge > 99 ? "99+" : item.badge}</span>
-										</Badge>
-									) : null}
-									{badgeLabel !== null ? <span className="sr-only">{badgeLabel}</span> : null}
-								</Button>
+								{onSelectTab !== undefined ? (
+									<Button
+										variant={selected ? "secondary" : "ghost"}
+										// `aria-current` et non `aria-selected` : ce sont des liens
+										// de navigation, pas les onglets d'un `tablist`.
+										aria-current={selected ? "page" : undefined}
+										onClick={() => onSelectTab(item.id)}
+										style={ITEM_STYLE}
+									>
+										{content}
+									</Button>
+								) : (
+									/* Hors de la page réseau : l'adresse du volet, d'une seule
+									   pièce (un lien, pas un bouton qui pousserait l'adresse). */
+									<Link
+										href={item.href}
+										aria-current={selected ? "page" : undefined}
+										style={selected ? SELECTED_LINK_ITEM_STYLE : LINK_ITEM_STYLE}
+										className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+									>
+										{content}
+									</Link>
+								)}
 							</li>
 						)
 					})}
@@ -185,8 +282,9 @@ export function ReseauMenuRail({
 				    Elles ne sont pas des volets — les mêler à la liste ci-dessus
 				    laisserait croire qu'on reste dans le réseau. Une destination
 				    que l'application ne sert pas n'a pas d'entrée, et sans entrée
-				    il n'y a rien à déplier. */}
-				{profileHref !== null || settingsHref !== null ? (
+				    il n'y a rien à déplier. Sous la navigation par destinations,
+				    c'est la destination Profil qui les porte : pas de doublon. */}
+				{destinationRoutes === null && (profileHref !== null || settingsHref !== null) ? (
 					<>
 						<Button variant="ghost" onClick={() => setExpanded((open) => !open)} aria-expanded={expanded} style={ITEM_STYLE}>
 							<Icon name={expanded ? "chevronUp" : "chevronDown"} size={18} aria-hidden />
@@ -262,5 +360,122 @@ export function ReseauMenuRail({
 				<AppearanceControl />
 			</nav>
 		</Card>
+	)
+}
+
+/**
+ * Les CINQ destinations au bureau (navigation par destinations, P02) — les
+ * mêmes, dans le même ordre, que la barre basse du téléphone : seule la
+ * facture change (une liste du rail, jamais une barre de téléphone posée sur
+ * un écran large).
+ *
+ * ⚠️ Un `<nav>` À PART, nommé : les destinations et les volets sont deux
+ * niveaux, chacun avec SON élément courant (`aria-current="page"` sur la
+ * destination qu'on regarde, `"true"` sur celle dont la page relève).
+ *
+ * Sur la page réseau (le rail y reçoit `onSelectTab`), Fil garde son adresse
+ * mais un clic ORDINAIRE y prend le geste du lieu :
+ *  · « Fil » passe par `onSelectTab("fil")` — revenir au fil y lève la
+ *    recherche, le mot-clic et la pagination, comme le volet Fil ; un lien nu
+ *    rendrait l'adresse `…/fil` sur des résultats restés à l'écran ;
+ * Messages reste un lien vers sa page liste/détail (P05), y compris depuis
+ * le fil. Le mode compact reste une commande propre à la carte iCom.
+ */
+function RailDestinations({
+	routes,
+	identity,
+	handle,
+	onSelectTab,
+	onCreate,
+	current,
+}: {
+	routes: ReseauDestinationRoutes
+	identity: ReactNode
+	handle: string | null
+	onSelectTab?: (tab: ReseauAgentTabId) => void
+	onCreate?: (kind: CreationKind) => void
+	current?: ReseauDestinationMatch | null
+}) {
+	const { t } = useTranslation("reseau")
+	const { liveAvailable } = useNetwork()
+	const pathname = usePathname()
+	const searchParams = useSearchParams()
+	const { open, setOpen, triggerRef } = useChoiceTrigger<HTMLButtonElement>()
+	/* La pastille de Messages : MÊME composition que la barre d'iCom (IC-06). */
+	const unread = useMessagesUnreadTotal()
+	const unreadBadge = formatUnreadBadge(unread)
+
+	/* Une navigation referme le choix : il masquerait la page demandée. */
+	useEffect(() => {
+		setOpen(false)
+	}, [pathname, setOpen])
+
+	const match = current !== undefined ? current : activeReseauDestination({ pathname, search: searchParams }, routes, handle)
+	const choices = reseauCreationChoices({ handle, liveAvailable }, routes).filter((choice) => onCreate !== undefined || choice.href !== null)
+
+	return (
+		<nav aria-label={t("reseauDestinations.navLabel")} style={{ padding: "12px 12px 0" }}>
+			{identity}
+			<ul style={{ listStyle: "none", margin: "8px 0 0", padding: 0, display: "grid", gap: 2 }}>
+				{reseauDestinations(routes).map((destination) => {
+					const DestinationIcon = RESEAU_DESTINATION_ICONS[destination.id]
+					const ariaCurrent = ariaCurrentFor(match, destination.id)
+					const badge = destination.id === "messages" ? unreadBadge : null
+					const content = (
+						<>
+							<DestinationIcon aria-hidden="true" size={18} />
+							<span style={{ flex: 1, fontSize: 13.5, fontWeight: 600 }}>{t(destination.labelKey)}</span>
+							{badge !== null ? (
+								<Badge tone="primary" size="sm">
+									<span aria-hidden="true">{badge}</span>
+								</Badge>
+							) : null}
+							{/* Un espace ENTRE le libellé et la phrase du nom accessible. */}
+							{badge !== null ? (
+								<>
+									{" "}
+									<span className="sr-only">{t("reseauDestinations.messagesUnread", { count: unread })}</span>
+								</>
+							) : null}
+						</>
+					)
+					return (
+						<li key={destination.id}>
+							{destination.href === null ? (
+								<Button
+									ref={triggerRef}
+									variant="ghost"
+									aria-haspopup="dialog"
+									aria-expanded={open}
+									onClick={() => setOpen(true)}
+									style={ITEM_STYLE}
+								>
+									{content}
+								</Button>
+							) : (
+								<Link
+									href={destination.href}
+									aria-current={ariaCurrent}
+									style={ariaCurrent !== undefined ? SELECTED_LINK_ITEM_STYLE : LINK_ITEM_STYLE}
+									className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+									onClick={
+										onSelectTab === undefined || destination.id !== "fil"
+											? undefined
+											: (event) => {
+													if (!isPlainLeftClick(event)) return
+													event.preventDefault()
+													onSelectTab("fil")
+												}
+									}
+								>
+									{content}
+								</Link>
+							)}
+						</li>
+					)
+				})}
+			</ul>
+			<CreationChoiceCard open={open} onClose={() => setOpen(false)} choices={choices} onPick={(kind) => onCreate?.(kind)} />
+		</nav>
 	)
 }

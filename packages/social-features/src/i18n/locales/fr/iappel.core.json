@@ -51,7 +51,8 @@
       "peerHeld": "Mis en attente",
       "active": "En communication",
       "ringing": "Sonnerie…",
-      "connecting": "Connexion…"
+      "connecting": "Connexion…",
+      "preparing": "Appel en préparation…"
     },
     "end": {
       "missed": "Pas de réponse",

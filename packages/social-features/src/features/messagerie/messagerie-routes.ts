@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/messagerie/messagerie-routes.ts @ ad2e7fdc2 — adaptations : la base de la messagerie n'est plus une constante (`MESSAGES_URL` retirée) mais un paramètre `base`, en DERNIER argument (`useRoutes().messages()` de l'application), de `conversationHref`, `composeHref`, `composeGroupeHref`, `isConversationRoute` et `conversationKeyFromPath` ; la borne de profondeur se compte depuis les segments de la base (base + genre + identifiant) ; barre finale de la base tolérée ; adresse du hub administratif retirée (`hubChatHref`, `HUB_CHAT_PARAM`) ; renvois au chrome de l'espace agent (`personal-chrome.ts`, iAsted) retirés de la doc.
+// Dupliqué de socle/packages/agent-features/src/features/messagerie/messagerie-routes.ts @ ad2e7fdc2 — adaptations : la base de la messagerie n'est plus une constante (`MESSAGES_URL` retirée) mais un paramètre `base`, en DERNIER argument (`useRoutes().messages()` de l'application), de `conversationHref`, `composeHref`, `composeGroupeHref`, `isConversationRoute` et `conversationKeyFromPath` ; la borne de profondeur se compte depuis les segments de la base (base + genre + identifiant) ; barre finale de la base tolérée ; adresse du hub administratif retirée (`hubChatHref`, `HUB_CHAT_PARAM`) ; renvois au chrome de l'espace agent (`personal-chrome.ts`, iAsted) retirés de la doc ; CC-5 : segment injecté `mise-en-relation` (`CONTEXTUAL_ROUTE_KIND`, hors de `CONVERSATION_ROUTE_KINDS`, accepté par `parseConversationRoute(…, contextual)`) et `contextualThreadIdFromPath`.
 /**
  * messagerie-routes — la traduction entre une CLÉ de conversation et une URL.
  *
@@ -41,10 +41,18 @@
  * données.
  */
 
-import { chatKey, draftKey, groupeKey, parseKey, type ConversationKey } from "./messagerie-dock"
+import { chatKey, commercialKey, contextualConversationKey, draftKey, groupeKey, parseCommercialKey, parseContextualConversationKey, parseKey, type ConversationKey } from "./messagerie-dock"
 
 /** Le genre tel qu'il s'écrit DANS L'URL. Distinct des genres de clé. */
-export type ConversationRouteKind = "chat" | "groupe" | "a"
+export type ConversationRouteKind = "chat" | "groupe" | "a" | "commerce" | "mise-en-relation"
+
+/**
+ * CC-5 (ADR-0025) : le segment d'une conversation CONTEXTUELLE (`<base>/mise-en-relation/<fil>`).
+ * Comme `commerce`, il n'entre PAS dans `CONVERSATION_ROUTE_KINDS` : seule une application qui
+ * injecte sa source contextuelle (`MessagesRoute`, prop `contextual`) l'accepte — sa coquille de
+ * route lit cette constante.
+ */
+export const CONTEXTUAL_ROUTE_KIND = "mise-en-relation" as const
 
 /** Les trois genres d'URL, pour valider un segment inconnu sans le deviner. */
 export const CONVERSATION_ROUTE_KINDS: readonly ConversationRouteKind[] =
@@ -70,6 +78,10 @@ function racine(base: string): string {
  * pire, aboutit sur une autre page.
  */
 export function conversationHref(key: ConversationKey, base: string): string | null {
+	const commercialId = parseCommercialKey(key)
+	if (commercialId !== null) return `${racine(base)}/commerce/${encodeURIComponent(commercialId)}`
+	const contextualId = parseContextualConversationKey(key)
+	if (contextualId !== null) return `${racine(base)}/${CONTEXTUAL_ROUTE_KIND}/${encodeURIComponent(contextualId)}`
 	const parsed = parseKey(key)
 	if (parsed === null) return null
 	const liste = racine(base)
@@ -95,9 +107,13 @@ export function conversationHref(key: ConversationKey, base: string): string | n
 export function parseConversationRoute(
 	kind: string | null | undefined,
 	id: string | null | undefined,
+	commercial = false,
+	contextual = false,
 ): ConversationKey | null {
 	if (typeof kind !== "string" || typeof id !== "string") return null
 	if (id.length === 0) return null
+	if (kind === "commerce") return commercial ? commercialKey(id) : null
+	if (kind === CONTEXTUAL_ROUTE_KIND) return contextual ? contextualConversationKey(id) : null
 	switch (kind) {
 		case "chat":
 			return chatKey(id)
@@ -186,6 +202,24 @@ export function conversationKeyFromPath(
 		return null
 	}
 	return parseConversationRoute(conversation.kind, id)
+}
+
+/**
+ * CC-5 : le fil CONTEXTUEL qu'un chemin complet désigne (`<base>/mise-en-relation/<fil>`), ou
+ * `null` — la liste injectée s'en sert pour marquer la conversation ouverte (`aria-current`).
+ * Lecture seule d'une adresse : n'ouvre aucun droit, le serveur relit tout à l'ouverture.
+ */
+export function contextualThreadIdFromPath(
+	pathname: string | null | undefined,
+	base: string,
+): string | null {
+	const conversation = segmentsDeConversation(pathname, base)
+	if (conversation === null || conversation.kind !== CONTEXTUAL_ROUTE_KIND || conversation.id.length === 0) return null
+	try {
+		return decodeURIComponent(conversation.id)
+	} catch {
+		return null
+	}
 }
 
 /**

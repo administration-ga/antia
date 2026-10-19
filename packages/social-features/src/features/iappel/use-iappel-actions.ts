@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/iappel/use-iappel-actions.ts @ ad2e7fdc2 — adaptations : gestes du moteur (`calls.lifecycle.leave` / `declineCall`, `calls.groupCalls.decline` ; fonctions de réseau : `networkId` de `useNetwork()`, appel désigné par `callId`) ; file du centre d'appels retirée (`useCallCenter`, `hangupQueueCall`, `slot.kind === "queue"`) ; environnement back-office retiré (`callEnvironmentArgs`) ; identifiants `Id<"calls">` (noms des paramètres `meetingId` gardés) ; toasts traduits (espace de noms `iappel`, clés `useIappelActions.…`).
+// Dupliqué de socle/packages/agent-features/src/features/iappel/use-iappel-actions.ts @ ad2e7fdc2 — adaptations : gestes du moteur (`calls.lifecycle.leave` / `declineCall`, `calls.groupCalls.decline` ; fonctions de réseau : `networkId` de `useNetwork()`, appel désigné par `callId`) ; file du centre d'appels retirée (`useCallCenter`, `hangupQueueCall`, `slot.kind === "queue"`) ; environnement back-office retiré (`callEnvironmentArgs`) ; identifiants `Id<"calls">` (noms des paramètres `meetingId` gardés) ; toasts traduits (espace de noms `iappel`, clés `useIappelActions.…`) ; P05 (18/10/2026) : décrocher est IDEMPOTENT — un appel déjà décroché (double appui, seconde surface) n'est ni remis en connexion ni remis à zéro.
 "use client"
 
 /**
@@ -70,6 +70,19 @@ export function useIappelActions(): IappelActions {
 	)
 
 	const answer = useCallback<IappelActions["answer"]>((input) => {
+		// P05 — DOUBLE ACCEPTATION : décrocher un appel DÉJÀ décroché (double
+		// appui, carte et bannière, retour d'une notification) ne le remet pas
+		// en « Connexion… » et ne réécrit pas l'instant du décrochage. On se
+		// contente de le ramener au premier plan.
+		const existing = callStore.getSlots().find((slot) => slot.meetingId === input.meetingId)
+		// Une ancienne carte/bannière peut encore recevoir un clic au rendu où
+		// la fin vient d'arriver. Elle ne peut rouvrir ce slot terminal.
+		if (existing?.status === "ended") return
+		if (existing !== undefined && existing.status !== "incoming") {
+			callStore.setActiveSlot(input.meetingId)
+			callStore.setMinimized(false)
+			return
+		}
 		// Le slot naît ici ; `useCallSlotConnector` lui trouvera sa salle.
 		callStore.acceptIncoming(input)
 	}, [])

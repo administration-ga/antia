@@ -1,0 +1,26 @@
+{
+  "contracts": {
+    "PRO-COMMERCE-COMMAND-V1": "1",
+    "PRO-COMMERCE-PUBLIC-V1": "1"
+  },
+  "description": "Empreintes SHA-256 des octets partagés à l'identique par ANTSIA (packages/social-domain/src/commerce) et PRO.GA (packages/pro-domain/src/commerce). Toute modification se fait dans les deux dépôts, ce manifeste compris.",
+  "files": {
+    "command.ts": "cdac9a64aa3fc23ac37d0ed57edee02af803ed7641ae0160ad9774e0c035debe",
+    "conformance.ts": "b0417c01dcd4e3e72ccbbc5ce6504f3e79453e0fa11432bc5de0357264df6be6",
+    "fixtures/command-replay.json": "dace73c61146548347d403c73633439b7c2a256b54531c61a733aeec2b8b197f",
+    "fixtures/command-requests.json": "8475f0f7a89befe112ec96f80d7dc2e850e9c7f84a1312efbcdaa199823542df",
+    "fixtures/command-responses.json": "5b20a86a25ae2b0398cfe3e00c6a3925f16eea6dc80d1fd2dad61778588c5517",
+    "fixtures/lifecycle.json": "5ace1ea9bb7a6940778a5a6ed79c3bdb735f6f9bfd0604d4b5f98529047587a6",
+    "fixtures/names.json": "9cbfacf516cadd6d60f38aafb7588e62c9a93df9e0a555e6b24b69486fbb94c2",
+    "fixtures/public-events.json": "ffecc918b639396b6b0b69d4156085f8a0e0e50922f9a88906561180c67002a2",
+    "fixtures/public-revisions.json": "cf14707426c7be14f99f1ec9c2b7b1333e154324f7d56b1c2b0562164771e40c",
+    "fixtures/references.json": "f7f3b2ce81b184304523abf41807db8a7944f4dcc3f06bee8bba746487d076ac",
+    "fixtures/signing.json": "0b45b9cfac5c649f67d2be0eded1d0f9435b269f69e7a6654f7585ec18861b82",
+    "fixtures/views.json": "a621541e76c552ab7db428d81b212a963815c19f7b24006a7796e8bdaed8cb1d",
+    "index.ts": "cb997093d2e5b2b7a1c4e0a47b4a5b7850945d6bab5a018fe1b812beb7333eab",
+    "lifecycle.ts": "0671b32de806ca16486d28787d608beacb8de3dfe369a75b6b0e900efd235725",
+    "primitives.ts": "fcc5560bd6ff34b06640d6c2ecef858de2ec3f41c1085c96bcb2d45df496d30c",
+    "projection.ts": "773b0c92a09dd5c7ed2c4a93dbd82b64f7f6c89971a8b1e113ef13df4c32e9b3"
+  },
+  "manifestRevision": 1
+}

@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/messagerie/messagerie-styles.tsx @ ad2e7fdc2 — adaptations : fenêtre détachée au format téléphone UNIQUE du moteur, 440 × 956 (largeur suivant la hauteur disponible — formule de la fenêtre d'appel flottante —, hauteur dérivée ; l'iCom flottant du socle était en 390 × 844) ; plus aucune couleur littérale : ombre de déplacement et contraste obligé du code QR par jetons (`--icom-float-drag-shadow`, `--qr-code-surface`, `--qr-code-ink`) ; règles du sur-titre de fonction des fils de poste (`.msg-row-eyebrow`) retirées avec la branche poste ; feuille portée par la constante exportée `MESSAGERIE_STYLES_CSS` (le gabarit n'est plus un texte enfant du JSX) ; doc : cliquet de couleur du moteur, pile z sans iAsted.
+// Dupliqué de socle/packages/agent-features/src/features/messagerie/messagerie-styles.tsx @ ad2e7fdc2 — adaptations : fenêtre détachée au format téléphone UNIQUE du moteur, 440 × 956 (largeur suivant la hauteur disponible — formule de la fenêtre d'appel flottante —, hauteur dérivée ; l'iCom flottant du socle était en 390 × 844) ; plus aucune couleur littérale : ombre de déplacement et contraste obligé du code QR par jetons (`--icom-float-drag-shadow`, `--qr-code-surface`, `--qr-code-ink`) ; règles du sur-titre de fonction des fils de poste (`.msg-row-eyebrow`) retirées avec la branche poste ; feuille portée par la constante exportée `MESSAGERIE_STYLES_CSS` (le gabarit n'est plus un texte enfant du JSX) ; doc : cliquet de couleur du moteur, pile z sans iAsted. ; contour des surfaces posées sur la page lu dans --esp-surface-border, filet d'origine en repli (aucun contour quand le thème distingue déjà la carte du fond).
 "use client"
 
 /**
@@ -280,7 +280,7 @@ export const MESSAGERIE_STYLES_CSS = `
           display: flex;
           flex-direction: column;
           width: 100%;
-          border: 1px solid var(--ink-200);
+          border: 1px solid var(--esp-surface-border, var(--ink-200));
           border-radius: var(--rp-surface-radius, 14px);
           /* La surface de carte unifiée de l'espace (globals.css) : le dock
              est une carte du rail comme les autres — en dur sur --ink-0, il
@@ -794,8 +794,10 @@ export const MESSAGERIE_STYLES_CSS = `
           font-size: 15px;
           border-radius: 16px;
         }
-        /* Le bouton qui PORTE la bulle : un bouton, parce qu'un appui long y
-           ouvre la feuille d'actions, et qu'un div ne recoit pas le clavier. */
+        /* Le bloc qui PORTE la bulle. Ce n'est plus un bouton (P18b, A02) : un
+           bouton ne peut contenir ni lien, ni lecteur, ni citation. Les memes
+           declarations gardent la meme boite ; le clavier passe par le bouton
+           d'actions distinct (.msg-actions-btn). */
         .msg-bubble-btn {
           display: block;
           max-width: 100%;
@@ -813,6 +815,76 @@ export const MESSAGERIE_STYLES_CSS = `
           outline-offset: 2px;
           border-radius: 14px;
         }
+        /* Le bouton d'actions d'une bulle (P18b, A02) : hors de la vue au repos
+           — la souris et le doigt passent par la bulle (clic, appui long, menu
+           contextuel) —, il apparait au focus clavier, a cote de la bulle, du
+           cote oppose a son auteur. Aucun pixel ne change sans focus. */
+        .msg-actions-btn {
+          position: absolute;
+          top: 50%;
+          width: 1px;
+          height: 1px;
+          margin: -1px;
+          padding: 0;
+          overflow: hidden;
+          clip: rect(0 0 0 0);
+          clip-path: inset(50%);
+          white-space: nowrap;
+          border: 0;
+          background: transparent;
+          color: var(--ink-900);
+          cursor: pointer;
+        }
+        .msg-actions-btn:focus-visible {
+          width: 28px;
+          height: 28px;
+          margin: 0;
+          overflow: visible;
+          clip: auto;
+          clip-path: none;
+          transform: translateY(-50%);
+          display: grid;
+          place-items: center;
+          border-radius: 999px;
+          background: var(--ink-100);
+          outline: 2px solid var(--primary-fill);
+          outline-offset: 2px;
+        }
+        .msg-line[data-mine="true"] .msg-actions-btn { right: calc(100% + 4px); }
+        .msg-line[data-mine="false"] .msg-actions-btn { left: calc(100% + 4px); }
+
+        /* Les gestes du canal commercial (P18b, A15) : Accepter, Refuser,
+           Bloquer, Fermer, Signaler, Retirer, appels, pages. La classe n'etait
+           definie nulle part : boutons natifs d'une ligne, hors charte. Un
+           bouton secondaire de la charte : 44 px au moins (03 §3), contour de
+           controle, anneau de focus, survol et desactive lisibles, clair et
+           sombre par les jetons. */
+        .msg-tool-btn {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: 6px;
+          min-height: 44px;
+          min-width: 44px;
+          padding: 8px 14px;
+          border: 1px solid var(--input);
+          border-radius: 10px;
+          background: var(--card);
+          color: var(--card-foreground);
+          font: inherit;
+          font-size: 14px;
+          font-weight: 600;
+          line-height: 1.25;
+          text-align: center;
+          overflow-wrap: anywhere;
+          cursor: pointer;
+        }
+        .msg-tool-btn:hover:not(:disabled) { background: var(--muted); }
+        .msg-tool-btn:focus-visible {
+          outline: 2px solid var(--ring);
+          outline-offset: 2px;
+        }
+        .msg-tool-btn:disabled { opacity: .6; cursor: not-allowed; }
 
         .msg-time {
           margin-top: 2px;
@@ -1299,6 +1371,45 @@ export const MESSAGERIE_STYLES_CSS = `
           flex-direction: column;
           flex: 0 0 auto;
         }
+
+        /* P05 : destination Messages. Toutes les règles restent sous son hôte. */
+        .icom-messages-page {
+          display: flex;
+          flex-direction: column;
+          min-width: 0;
+          height: 100%;
+          background: var(--background);
+          color: var(--foreground);
+        }
+        .icom-page-heading {
+          display: flex;
+          flex: 0 0 auto;
+          align-items: center;
+          justify-content: space-between;
+          gap: 12px;
+          min-height: 64px;
+          padding: 8px 20px;
+          border-bottom: 1px solid var(--border);
+        }
+        .icom-page-heading h1 { margin: 0; font-size: 22px; font-weight: 700; }
+        .icom-page-heading-links { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+        .icom-page-heading a { display: flex; align-items: center; min-height: 44px; color: var(--primary); }
+        .icom-page-columns { display: grid; grid-template-columns: minmax(300px, 35%) minmax(0, 1fr); flex: 1 1 auto; min-height: 0; }
+        .icom-page-list { display: flex; flex-direction: column; min-width: 0; min-height: 0; border-right: 1px solid var(--border); }
+        .icom-page-navigation { display: flex; gap: 4px; flex: 0 0 auto; padding: 8px; border-bottom: 1px solid var(--border); }
+        .icom-page-navigation a { display: flex; flex: 1; align-items: center; justify-content: center; min-height: 44px; padding: 4px 8px; border-radius: var(--radius-lg); font-size: 14px; color: var(--muted-foreground); }
+        .icom-page-navigation a[aria-current="page"] { background: var(--accent); color: var(--accent-foreground); font-weight: 700; }
+        .icom-page-navigation a:focus-visible, .icom-page-heading a:focus-visible { outline: 2px solid var(--ring); outline-offset: -2px; }
+        .icom-messages-page .msg-panel[data-variant="page"][data-open="true"] { flex: 1 1 auto; min-height: 0; height: auto; padding-top: 0; }
+        .icom-messages-page .msg-body { min-height: 0; overflow-y: auto; }
+        .icom-messages-page .icom-page-detail { min-width: 0; }
+        .icom-page-empty { display: flex; flex: 1; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 24px; text-align: center; color: var(--muted-foreground); }
+        .icom-page-empty h2, .icom-page-empty p { margin: 0; max-width: 36rem; }
+        .msg-list-scope { margin: 0; flex: 0 0 auto; padding: 8px 14px; color: var(--muted-foreground); font-size: 12px; line-height: 1.45; }
+        .icom-messages-page[data-mobile="true"] { height: calc(100% - 96px - env(safe-area-inset-bottom, 0px)); }
+        .icom-messages-page[data-mobile="true"] .icom-page-columns { display: flex; flex-direction: column; }
+        .icom-messages-page[data-mobile="true"] .icom-page-list { flex: 1; border-right: 0; }
+        .icom-messages-page[data-mobile="true"] .icom-page-navigation { display: none; }
 
         @media (prefers-reduced-motion: reduce) {
           .icom-float { transition: none; }

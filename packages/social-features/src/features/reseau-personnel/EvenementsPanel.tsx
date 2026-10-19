@@ -1,6 +1,8 @@
 // Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/EvenementsPanel.tsx @ ad2e7fdc2 — adaptations : mon agenda dans le réseau courant (`events.events.myAgenda` → `{ items, truncated }`, `respond`, `cancel` avec `networkId` par `useNetwork()`), la lacune de l'agenda borné se dit ; jour civil et dates dans le fuseau du NAVIGATEUR et la langue courante (plus de fuseau ni de langue imposés) ; organisateur nommé par le contrat `counterpartLabel` (nom neutre quand le profil n'est pas publié) ; refus du moteur lus par code (`eventActionErrorText`) ; état vide par `reseauEmptyState("agenda", home, t)` ; toutes les chaînes par l'i18n (espace `reseau`, clés `evenementsPanel.*` et `evenementsList.*`) ; COMPOSITION AJOUTÉE (iAgenda, qui la portait au socle, n'existe pas dans le moteur) : carte de création sur place (`events.events.create`, fuseau du navigateur fixé à la création, clé d'idempotence tirée à l'ouverture), ouverte par le bouton « Créer un évènement » quand aucun hôte ne fournit `onCreateEvent`, ou par l'INTENTION portée par l'adresse (`?nouveau=evenement&retour=…`, `agenda-create-intent`, consommée une fois puis retirée de l'URL, retour rendu après la création) ; l'organisateur invite ses relations depuis la carte (`events.events.invite` par le sélecteur de relations, récapitulatif sans mensonge poli) ; la liste des invités et de leurs réponses se déplie (`events.events.paginateEventParticipants`, paginée) ; primitives de `@antsia/ui`, kit d'espace de `@antsia/ui/espace-kit` (phrases de la pagination par `useEspacePaginationLabels`). ; PA6 : dates et jours civils dans le fuseau personnel du lecteur (repli appareil).
 "use client"
 
+// DG-023 : le panneau remplace myAgenda par AgendaPagination (quatre flux natifs),
+// sous une portée réseau/lecteur ; le rail et l'ancien lecteur restent compatibles.
 /**
  * Volet « Évènements » — mon agenda personnel dans le réseau.
  *
@@ -25,13 +27,13 @@
  * invités et ne se reprend pas. Le bouton passe par un second état explicite.
  *
  * Une panne de l'agenda n'est pas un agenda vide (R-08) : `ReseauQueryError`
- * + Réessayer, les évènements déjà tenus restent affichés, et le squelette
- * n'apparaît qu'en vraie attente (`query-state`).
+ * + Réessayer. Les quatre chaînes natives sont relues ensemble ; une erreur
+ * ou une relecture ferme les lignes jusqu'à la prochaine réponse autorisée.
  */
 
 import { useViewerTimeZone } from "@antsia/api/viewer-preferences"
 import { api, type Id } from "@antsia/api/engine"
-import { useAuthenticatedConvexQuery, useAuthenticatedPaginatedQuery } from "@antsia/api/hooks"
+import { useAuthenticatedPaginatedQuery } from "@antsia/api/hooks"
 import { useNetwork, useRoutes } from "@antsia/api/network"
 import { usePathname, useRouter, useSearchParams } from "@antsia/api/routing"
 import { Badge, Button, Card, Field, SkeletonCard, TextArea, TextInput } from "@antsia/ui"
@@ -47,7 +49,10 @@ import { ReseauPaginatedErrorBoundary } from "../../shell/ReseauPaginatedErrorBo
 import { ReseauQueryError } from "../../shell/ReseauQueryError"
 import { useEspacePaginationLabels } from "../../shell/use-espace-pagination-labels"
 import { agendaCreateConsumedHref, parseAgendaCreateIntent } from "./agenda-create-intent"
+import { AgendaPagination, type AgendaPaginationValue } from "./AgendaPagination"
 import { AnnounceEventDialog } from "./AnnounceEventDialog"
+import { AssociationAgendaCard } from "./AssociationAgendaCard"
+import { groupAgendaEvents } from "./association-agenda"
 import { Avatar } from "./Avatar"
 import { reseauEmptyState } from "./empty-states"
 import {
@@ -63,7 +68,6 @@ import {
   eventInviteReportLabel,
   eventPersonName,
   formatEventRange,
-  groupEvents,
   isEndAfterStart,
   isPastEvent,
   localDateTimeMs,
@@ -101,10 +105,7 @@ const MUTED_TEXT_STYLE = {
   color: "var(--muted-foreground)",
 } as const
 
-export function EvenementsPanel({
-  now,
-  onCreateEvent,
-}: {
+interface EvenementsPanelProps {
   /** L'instant de référence — paramètre, jamais `Date.now()` dans le rendu :
    *  c'est ce qui garde le classement des sections testable et stable. */
   now: number
@@ -113,7 +114,18 @@ export function EvenementsPanel({
    * réseau du moteur), le bouton ouvre la carte de composition sur place.
    */
   onCreateEvent?: () => void
-}) {
+  /** Les hôtes en lecture seule ne proposent aucun geste personnel d'écriture. */
+  canWrite?: boolean
+}
+
+export function EvenementsPanel(props: EvenementsPanelProps) {
+  const { networkId, personId } = useNetwork()
+  if (!personId) return null
+  // Le changement de lecteur réinitialise aussi les formulaires et les annonces.
+  return <AgendaPagination key={`${networkId}:${personId}`} now={props.now}>{(agenda) => <EvenementsPanelContent {...props} agenda={agenda} />}</AgendaPagination>
+}
+
+function EvenementsPanelContent({ now, onCreateEvent, canWrite = true, agenda }: EvenementsPanelProps & { readonly agenda: AgendaPaginationValue }) {
   const { t, i18n } = useTranslation("reseau")
   const { networkId } = useNetwork()
   const home = useRoutes().home()
@@ -124,7 +136,6 @@ export function EvenementsPanel({
   const locale = i18n.language
   const paginationLabels = useEspacePaginationLabels()
 
-  const agenda = useAuthenticatedConvexQuery(api.modules.events.events.myAgenda, { networkId, now })
   const respond = useMutation(api.modules.events.events.respond)
   const cancel = useMutation(api.modules.events.events.cancel)
   const [busy, setBusy] = useState<string | null>(null)
@@ -161,6 +172,7 @@ export function EvenementsPanel({
    * une demande neuve.
    */
   useEffect(() => {
+    if (!canWrite) return
     const params = new URLSearchParams(search)
     const intent = parseAgendaCreateIntent(params, home)
     if (intent.create === null) {
@@ -172,22 +184,17 @@ export function EvenementsPanel({
     returnToRef.current = intent.returnTo
     setComposing(true)
     router.replace(agendaCreateConsumedHref(pathname, params), { scroll: false })
-  }, [search, home, pathname, router])
+  }, [search, home, pathname, router, canWrite])
 
-  if (montreSquelette(etatDeQuery(agenda, agenda.data?.items.length ?? 0))) {
-    return (
-      <div style={{ display: "grid", gap: 12 }}>
-        <SkeletonCard />
-        <SkeletonCard />
-      </div>
-    )
-  }
-
-  const events = agenda.data?.items ?? []
-  const agendaEtat = etatDeQuery(agenda, events.length)
-  const grouped = groupEvents(events, now, timeZone)
+  const events = agenda.isError || agenda.isLoading ? [] : agenda.data?.items ?? []
+  // Un cache de données collectives ne survit pas à une erreur ou une relecture.
+  const associationEvents = agenda.isError || agenda.isLoading ? [] : agenda.data?.associationItems ?? []
+  const total = events.length + associationEvents.length
+  const agendaEtat = etatDeQuery(agenda, total)
+  const grouped = groupAgendaEvents(events, associationEvents, now, timeZone)
 
   const handleRespond = async (participationId: Id<"eventParticipants">, response: "accepted" | "declined") => {
+    if (!canWrite) return
     setBusy(participationId)
     try {
       await respond({ networkId, participationId, response })
@@ -203,6 +210,7 @@ export function EvenementsPanel({
   }
 
   const handleCancel = async (eventId: Id<"events">) => {
+    if (!canWrite) return
     setBusy(eventId)
     try {
       await cancel({ networkId, eventId })
@@ -223,15 +231,14 @@ export function EvenementsPanel({
     if (retour !== null && retour !== agendaCreateConsumedHref(pathname, new URLSearchParams(search))) router.push(retour)
   }
 
-  const total = events.length
   /** L'évènement dont la boîte d'annonce est ouverte — relu dans la liste
    *  VIVANTE : s'il disparaît (annulé ailleurs), la boîte se ferme d'elle-même
    *  plutôt que d'annoncer un évènement qui n'est plus là. */
-  const announceTarget = events.find((event) => event.eventId === announcing)
+  const announceTarget = canWrite ? events.find((event) => event.eventId === announcing) : undefined
 
   return (
     <div style={{ display: "grid", gap: 16 }}>
-      {composing ? (
+      {canWrite && composing ? (
         <CreateEventCard
           timeZone={timeZone}
           onCreated={handleCreated}
@@ -240,18 +247,20 @@ export function EvenementsPanel({
             returnToRef.current = null
           }}
         />
-      ) : (
+      ) : canWrite ? (
         <div style={{ display: "flex", justifyContent: "flex-end" }}>
           <Button variant="secondary" icon="plus" onClick={onCreateEvent ?? (() => setComposing(true))}>
             {t("evenementsPanel.create")}
           </Button>
         </div>
-      )}
+      ) : null}
 
-      {/* La panne se dit ; ce qu'on tenait reste affiché dessous. */}
+      {/* Un refus ferme les anciennes lignes jusqu'à Réessayer. */}
       {agenda.isError ? <ReseauQueryError title={t("evenementsPanel.errorTitle")} message={t("evenementsPanel.errorMessage")} onRetry={() => void agenda.refetch()} /> : null}
 
-      {montreEtatVide(agendaEtat, total) ? (
+      {montreSquelette(agendaEtat) ? (
+        <div style={{ display: "grid", gap: 12 }}><SkeletonCard /><SkeletonCard /></div>
+      ) : montreEtatVide(agendaEtat, total) && !agenda.canLoadMore ? (
         <EspaceEmptyState compact text={reseauEmptyState("agenda", home, t).text} />
       ) : !montreElements(agendaEtat, total) ? null : (
         EVENT_SECTIONS.map((section) => {
@@ -275,13 +284,17 @@ export function EvenementsPanel({
                 {title}
               </h2>
               <div style={{ display: "grid", gap: 10 }}>
-                {visible.map((event) => (
+                {visible.map((row) => {
+                  if (row.kind === "association") return <AssociationAgendaCard key={`association:${row.event.eventId}`} event={row.event} locale={locale} timeZone={timeZone} />
+                  const event = row.event
+                  return (
                   <EventCard
                     key={event.eventId}
                     event={event}
                     now={now}
                     timeZone={timeZone}
                     locale={locale}
+                    canWrite={canWrite}
                     busy={busy === event.eventId || busy === event.myParticipation?.participationId}
                     confirming={confirming === event.eventId}
                     onAskCancel={() => setConfirming(event.eventId)}
@@ -293,7 +306,8 @@ export function EvenementsPanel({
                       if (participationId !== undefined) void handleRespond(participationId, response)
                     }}
                   />
-                ))}
+                  )
+                })}
               </div>
               <EspacePagination
                 page={safePage}
@@ -308,8 +322,7 @@ export function EvenementsPanel({
         })
       )}
 
-      {/* L'agenda est BORNÉ par le serveur : la lacune se dit, elle ne se devine pas. */}
-      {agenda.data?.truncated ? <p style={MUTED_TEXT_STYLE}>{t("evenementsPanel.truncated")}</p> : null}
+      {agenda.controls}
 
       {/* La composition de l'annonce — une boîte à la fois, montée seulement
           quand un évènement l'attend : elle porte un portail et un piège de
@@ -324,6 +337,7 @@ function EventCard({
   now,
   timeZone,
   locale,
+  canWrite,
   busy,
   confirming,
   onAskCancel,
@@ -336,6 +350,7 @@ function EventCard({
   now: number
   timeZone: string
   locale: string
+  canWrite: boolean
   busy: boolean
   confirming: boolean
   onAskCancel: () => void
@@ -386,7 +401,7 @@ function EventCard({
         ) : null}
 
         <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-          {canRespond(event, now, timeZone) && event.myParticipation !== null ? (
+          {canWrite && canRespond(event, now, timeZone) && event.myParticipation !== null ? (
             <>
               <Button size="sm" variant="secondary" disabled={busy} onClick={() => onRespond("accepted")}>
                 {t("evenementsPanel.card.accept")}
@@ -397,7 +412,7 @@ function EventCard({
             </>
           ) : null}
 
-          {event.isOrganizer && !cancelled ? (
+          {canWrite && event.isOrganizer && !cancelled ? (
             <>
               <Button size="sm" variant="ghost" disabled={busy} onClick={onAnnounce}>
                 {t("evenementsPanel.card.announce")}
@@ -436,7 +451,7 @@ function EventCard({
         </div>
 
         {/* Inviter — l'acte de l'organisateur, tant que l'évènement tient et n'est pas révolu. */}
-        {event.isOrganizer && !cancelled && !isPastEvent(event, now, timeZone) ? <EventInviteCard eventId={event.eventId} title={event.title} /> : null}
+        {canWrite && event.isOrganizer && !cancelled && !isPastEvent(event, now, timeZone) ? <EventInviteCard eventId={event.eventId} title={event.title} /> : null}
 
         {showParticipants && event.participantCount > 0 ? (
           <ReseauPaginatedErrorBoundary

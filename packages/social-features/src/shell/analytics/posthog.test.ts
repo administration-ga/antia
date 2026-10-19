@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest"
 
-import { createUsagePayload, isUsageLocale, isUsageNetwork, isUsageScreen, resolvePostHogConfiguration, USAGE_SCREENS } from "./posthog"
+import { createUsagePayload, createUsageFunnelPayload, isUsageLocale, isUsageNetwork, isUsageScreen, resolvePostHogConfiguration, USAGE_SCREENS, USAGE_FUNNEL_STEPS } from "./posthog"
 
-const configuration = { endpoint: "https://analytics.example.test/i/v0/e/", projectToken: "phc_0123456789abcdef0123456789abcdef" }
+const configuration = { endpoint: "https://eu.i.posthog.com/i/v0/e/", projectToken: "phc_0123456789abcdef0123456789abcdef" }
 const view = {
   projectToken: configuration.projectToken,
   distinctId: "01234567-89ab-4cde-8fab-0123456789ab",
@@ -12,9 +12,20 @@ const view = {
 }
 
 describe("Configuration facultative de mesure", () => {
-  it("accepte seulement l'adresse HTTPS absolue et le jeton public de projet", () => {
+  it("accepte le cloud UE exact et le jeton public de projet", () => {
     expect(resolvePostHogConfiguration(configuration)).toEqual(configuration)
     expect(resolvePostHogConfiguration({ ...configuration, personalApiKey: "ignored" })).toEqual(configuration)
+  })
+
+  it("ferme les autres origines sauf relais UE déclaré explicitement et exactement", () => {
+    for (const endpoint of ["https://us.i.posthog.com/i/v0/e/", "https://analytics.example.test/i/v0/e/", "https://eu.i.posthog.com.evil.test/i/v0/e/", "https://eu.i.posthog.com:8443/i/v0/e/", "https://eu.i.posthog.com/other"]) {
+      expect(resolvePostHogConfiguration({ ...configuration, endpoint })).toBeNull()
+    }
+    const relay = { ...configuration, endpoint: "https://analytics.example.test/i/v0/e/", euRelayOrigin: "https://analytics.example.test" }
+    expect(resolvePostHogConfiguration(relay)).toEqual(relay)
+    for (const euRelayOrigin of ["https://other.example.test", "https://analytics.example.test/", "http://analytics.example.test", "https://user@analytics.example.test", "https://analytics.example.test?private=1", true]) {
+      expect(resolvePostHogConfiguration({ ...relay, euRelayOrigin })).toBeNull()
+    }
   })
 
   it("refuse HTTP, chemins relatifs, credentials, paramètres et fragments", () => {
@@ -34,6 +45,18 @@ describe("Configuration facultative de mesure", () => {
     for (const invalid of [null, undefined, [], configuration.projectToken, { endpoint: 3 }, {}]) {
       expect(resolvePostHogConfiguration(invalid)).toBeNull()
     }
+  })
+})
+
+describe("Funnel d'accueil fermé et sans rétention entre visites", () => {
+  it("projette seulement les quatre étapes métier autorisées", () => {
+    for (const step of USAGE_FUNNEL_STEPS) {
+      const payload = createUsageFunnelPayload({ ...view, step, personId: "private-person", content: "private-body", duration: 123, handle: "private-handle" })
+      expect(payload).toEqual({ token: configuration.projectToken, event: "onboarding_step", properties: { distinct_id: view.distinctId, step, network: "antsia", locale: "fr", $process_person_profile: false, $geoip_disable: true } })
+      expect(JSON.stringify(payload)).not.toMatch(/private|content|duration|handle|screen/)
+    }
+    for (const step of ["sign_in_failed", "/entrer", "private-person", null, 1]) expect(createUsageFunnelPayload({ ...view, step })).toBeNull()
+    expect(createUsageFunnelPayload({ ...view, step: "entry_started", distinctId: "persistent-person" })).toBeNull()
   })
 })
 

@@ -29,6 +29,10 @@
   "PAGE_NAME_LENGTH": "Le nom d'une page compte au plus {{max}} caractères et ne peut pas être vide.",
   "PAGE_SHORT_NAME_TOO_LONG": "Le sigle d'une page compte au plus {{max}} caractères.",
   "PAGE_DESCRIPTION_TOO_LONG": "La description d'une page compte au plus {{max}} caractères.",
+  "PAGE_CITY_INVALID": "Indiquez uniquement une ville, sur une seule ligne, sans caractères de contrôle, lien, adresse e-mail ni numéro de téléphone.",
+  "PAGE_CITY_TOO_LONG": "La ville d'une page compte au plus {{max}} caractères.",
+  "PAGE_ASSOCIATION_TYPE_INVALID": "Choisissez un type proposé pour une page d'association.",
+  "PAGE_SECTOR_INVALID": "Choisissez un secteur proposé pour une page d'entreprise.",
   "PAGE_OWNER_KIND_RESERVED": "Une page d'institution ne se crée pas depuis un compte : elle naît d'une décision tracée.",
   "PAGE_TRUST_NOT_ALLOWED": "Seule une page d'institution peut être « Officiel ».",
   "PAGE_SIGNATORIES_FULL": "Une page compte au plus {{max}} signataires.",
@@ -163,5 +167,14 @@
   "LIVE_REPLAY_RETRY_AFTER_END": "La conférence doit être terminée pour relancer sa rediffusion.",
   "LIVE_REPLAY_NOTHING_TO_RETRY": "Il n'y a pas de rediffusion à relancer pour cette conférence.",
   "LIVE_REPLAY_NOT_STARTED": "Aucun enregistrement n'a été démarré : il n'y a rien à récupérer.",
-  "LIVE_REPLAY_UNAVAILABLE": "Cette conférence n'a pas de rediffusion disponible."
+  "LIVE_REPLAY_UNAVAILABLE": "Cette conférence n'a pas de rediffusion disponible.",
+  "CONTEXT_NOT_OPEN": "Cette conversation n'est pas encore ouverte : elle s'ouvre avec la demande, l'acceptation ou la présélection.",
+  "CONTEXT_CLOSED": "Cette conversation est fermée. Son historique reste lisible.",
+  "CONTEXT_UNAVAILABLE": "Cette conversation est indisponible pour le moment. Son historique reste lisible.",
+  "CONTEXT_WAITING_RESPONDER": "Vous pourrez écrire dès la première réponse de l'autre partie.",
+  "CONTEXT_ATTACHMENTS_CLOSED": "Les pièces jointes ne sont pas ouvertes à ce stade de la conversation.",
+  "CONTEXT_CALLS_CLOSED": "Les appels ne sont pas ouverts à ce stade de la conversation.",
+  "CONTEXT_CALL_CONSENT_REQUIRED": "Un appel exige l'accord des deux parties dans cette conversation.",
+  "CONTEXT_IDEMPOTENCY_CONFLICT": "Ce message a déjà été envoyé avec un autre contenu. Rédigez-le à nouveau.",
+  "CONTEXT_TEXT_CONTROL": "Le message contient des caractères non pris en charge."
 }

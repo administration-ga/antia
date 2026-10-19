@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/messagerie/MessagerieConversationView.tsx @ ad2e7fdc2 — adaptations : iDocument retiré (dialogues « Joindre depuis » et « Enregistrer dans », `idocument.importSettings`, coffre `vaultOrgId`, `canSaveToVault`, pièces du coffre) ; espace de poste retiré (`useOptionalOrg`, `scopeCommunication`, fonction au-dessus du titre `postEyebrow`, `poste.positionTitle`, `orgName`, phrase « échanges de poste… », renvoi au secrétariat) ; fonctions du moteur, réseau courant passé à chacune (`useNetwork().networkId`) : 1:1 sur `messaging.{messages,typing,pins,reactions}.*`, groupe sur `groups.{threads,messages,typing}.*`, brouillon sur `messaging.inbox.startThreadWithHandle`, destinataire sur `people.profile.getPublicProfile`, appel 1:1 par la source (`useStartCall` : la personne ET son identifiant public, refus à code normalisé, sans renvoi de secrétariat), appel de groupe sur `calls.groupCalls.startFromThread` (personnes choisies par `personIds`), transfert par les références typées `messaging.forward.*` ; plafond d'appel CONSTANT (`GROUP_CALL_MAX_PARTICIPANTS`, aucun compte exempté : `threadCallCapacity` retirée) ; membres du groupe lus à la demande (`groups.threads.paginateGroupMembers`, la fiche ne les porte plus) ; « écrit… » interrogé avec un instant arrondi rafraîchi par pas (`listTyping`/`listGroupTyping` prennent `now`) ; DTO du moteur (personnes nommées par `counterpartLabel`, pièces retenues par la garde des fichiers, `isMine`) et MON identifiant lu au réseau (`useNetwork().personId`) ; droit d'épingle de groupe par la règle du domaine (`isGroupThreadManager`) ; libellés traduits (espace de noms `messagerie`, clés `messagerieConversationView.*`), refus par code (`messageErreurLisible(err, t)`), dates par la langue courante ; PA6 : écritures 1:1/groupe, dépôts, épingles et transferts délégués à `source.useMessageWrites()` (arguments sans réseau ; la source injecte le réseau courant), appels et lectures conservés ; correctif (16/10, constat de DIASPORALE) : un brouillon vers une personne avec qui un fil existe déjà ouvre CE fil et son historique (`useOpenExistingThreadForDraft`, `messaging.inbox.findThreadWithHandle`) au lieu d'une conversation vide.
+// Dupliqué de socle/packages/agent-features/src/features/messagerie/MessagerieConversationView.tsx @ ad2e7fdc2 — adaptations : iDocument retiré (dialogues « Joindre depuis » et « Enregistrer dans », `idocument.importSettings`, coffre `vaultOrgId`, `canSaveToVault`, pièces du coffre) ; espace de poste retiré (`useOptionalOrg`, `scopeCommunication`, fonction au-dessus du titre `postEyebrow`, `poste.positionTitle`, `orgName`, phrase « échanges de poste… », renvoi au secrétariat) ; fonctions du moteur, réseau courant passé à chacune (`useNetwork().networkId`) : 1:1 sur `messaging.{messages,typing,pins,reactions}.*`, groupe sur `groups.{threads,messages,typing}.*`, brouillon sur `messaging.inbox.startThreadWithHandle`, destinataire sur `people.profile.getPublicProfile`, appel 1:1 par la source (`useStartCall` : la personne ET son identifiant public, refus à code normalisé, sans renvoi de secrétariat), appel de groupe sur `calls.groupCalls.startFromThread` (personnes choisies par `personIds`), transfert par les références typées `messaging.forward.*` ; plafond d'appel CONSTANT (`GROUP_CALL_MAX_PARTICIPANTS`, aucun compte exempté : `threadCallCapacity` retirée) ; membres du groupe lus à la demande (`groups.threads.paginateGroupMembers`, la fiche ne les porte plus) ; « écrit… » interrogé avec un instant arrondi rafraîchi par pas (`listTyping`/`listGroupTyping` prennent `now`) ; DTO du moteur (personnes nommées par `counterpartLabel`, pièces retenues par la garde des fichiers, `isMine`) et MON identifiant lu au réseau (`useNetwork().personId`) ; droit d'épingle de groupe par la règle du domaine (`isGroupThreadManager`) ; libellés traduits (espace de noms `messagerie`, clés `messagerieConversationView.*`), refus par code (`messageErreurLisible(err, t)`), dates par la langue courante ; PA6 : écritures 1:1/groupe, dépôts, épingles et transferts délégués à `source.useMessageWrites()` (arguments sans réseau ; la source injecte le réseau courant), appels et lectures conservés ; correctif (16/10, constat de DIASPORALE) : un brouillon vers une personne avec qui un fil existe déjà ouvre CE fil et son historique (`useOpenExistingThreadForDraft`, `messaging.inbox.findThreadWithHandle`) au lieu d'une conversation vide. ; P18b (A04) : arrivées annoncées par une région polie persistante (`conversation-arrivals.ts`, ni ouverture, ni historique, ni mes messages ; texte seulement quand le fil suit le bas, sinon le décompte de la pastille) et fil exposé en région nommée par le titre de la conversation.
 "use client"
 
 import { useViewerTimeZone } from "@antsia/api/viewer-preferences"
@@ -32,8 +32,8 @@ import { useViewerTimeZone } from "@antsia/api/viewer-preferences"
  * ⚠️ Le PREMIER message d'un brouillon ne vide le composeur qu'APRÈS le retour
  * du serveur. Un refus (profil dépublié, blocage) emporterait sinon le texte
  * sans que rien ne l'ait envoyé. Sur un fil existant, à l'inverse, on vide
- * d'abord : la publication est optimiste et l'échec se dit dans la ligne
- * d'erreur.
+	 * le texte reste aussi disponible jusqu'à l'admission : une intention
+	 * locale montre l'aller-retour et un refus conserve texte, citation et pièces.
  *
  * ⚠️ Aucune surface flottante en `position: fixed` ici : la carte vit sous
  * `.rp-scope` (`container-type: inline-size`, donc `contain: layout`), où tout
@@ -70,7 +70,6 @@ import {
 } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
-import { useIdempotencyKey } from "../../lib/chat/use-idempotency-key"
 import { useCallStore } from "../../stores/call-store"
 import { refusalEndKind } from "../iappel/call-phase"
 import type { CallPeerIdentity } from "../iappel/call-types"
@@ -82,6 +81,7 @@ import { useConferenceLaunchAvailable, useLaunchConference } from "../iappel/use
 import { Avatar } from "../reseau-personnel/Avatar"
 import { ConversationHeader } from "./ConversationHeader"
 import { GroupeAvatar } from "./GroupeAvatar"
+import { arrivalAnnouncement } from "./conversation-arrivals"
 import {
 	croissanceDuFil,
 	initialScrollState,
@@ -125,6 +125,10 @@ import {
 } from "./messagerie-views"
 import { NewMessagesPill } from "./NewMessagesPill"
 import type { ReplyPreviewData } from "./ReplyPreview"
+import { OutboxMessages } from "./OutboxMessages"
+import { outboxStore, useOutbox } from "./messagerie-outbox"
+import { useConversationSend } from "./use-conversation-send"
+import { AbandonedMessageSend } from "./messagerie-send-intent"
 
 /** Une pièce jointe telle que le moteur la sert (`AttachmentDto`). */
 type PieceDuMoteur = FunctionReturnType<
@@ -143,6 +147,11 @@ type Ecrivant = FunctionReturnType<
  */
 const GROUP_MESSAGES_PAGE = 50
 const DIRECT_MESSAGES_PAGE = 50
+/**
+ * P18b (A04) : une espace insécable ajoutée à une annonce IDENTIQUE à la
+ * précédente — sans elle, la région vivante ne la relirait pas.
+ */
+const REPEAT_MARK = String.fromCharCode(0xa0)
 /** Une page de membres — le plafond de page du serveur (`groups.threads`). */
 const GROUP_MEMBERS_PAGE = 50
 
@@ -220,7 +229,15 @@ export interface MessagerieConversationViewProps {
 	source?: MessagerieSource
 }
 
-export function MessagerieConversationView({
+export function MessagerieConversationView(props: MessagerieConversationViewProps) {
+	const { networkId, personId } = useNetwork()
+	const { isAuthenticated } = useConvexAuth()
+	// Changer de lecteur, de conversation ou perdre la session invalide les
+	// promesses du composeur précédent, avant tout effet sur les brouillons.
+	return <ConversationContent key={`${networkId}:${personId}:${props.conversationKey}:${isAuthenticated}`} {...props} />
+}
+
+function ConversationContent({
 	conversationKey,
 	variant,
 	nav,
@@ -241,7 +258,10 @@ export function MessagerieConversationView({
 	 * le serveur marque mes messages, mais savoir qui je suis sans attendre le
 	 * premier d'entre eux évite qu'un fil s'affiche une seconde tout à gauche.
 	 */
-	const { networkId, personId: moi } = useNetwork()
+	const { networkId, personId: moi, navigation } = useNetwork()
+	const sendOwner = JSON.stringify([networkId, moi, source.espace])
+	const latestDraft = useRef(draft)
+	latestDraft.current = draft
 	// Présence du correspondant 1:1 — même pastille que la liste des relations.
 	const { presenceOf: presenceOfConnection } = useConnectionsPresence()
 	const parsed = parseKey(conversationKey)
@@ -249,7 +269,10 @@ export function MessagerieConversationView({
 	const chatId = parsed?.kind === "chat" ? parsed.chatId : null
 	const handle = parsed?.kind === "draft" ? parsed.handle : null
 	// Un brouillon vers une personne avec qui un fil existe déjà ouvre CE fil (son historique).
-	useOpenExistingThreadForDraft(handle, variant)
+	const [draftSendStarted, setDraftSendStarted] = useState(false)
+	// Dès le premier envoi, l'admission prend la main : une query réactive
+	// ne doit pas promouvoir le brouillon avant le nettoyage des pièces.
+	useOpenExistingThreadForDraft(draftSendStarted ? null : handle, variant)
 	const threadId = parsed?.kind === "groupe" ? parsed.threadId : null
 	const filId = chatId as Id<"personalThreads"> | null
 	const groupeId = threadId as Id<"groupThreads"> | null
@@ -289,7 +312,6 @@ export function MessagerieConversationView({
 		initialText: string
 	} | null>(null)
 	const [scroll, setScroll] = useState(initialScrollState)
-	const { getKey, rotate } = useIdempotencyKey()
 
 	// La hauteur VISIBLE (clavier compris) n'est publiée par personne sur une
 	// page ordinaire — `ImmersiveOverlay` le fait pour les surfaces qu'il porte,
@@ -346,6 +368,8 @@ export function MessagerieConversationView({
 		handle === null ? "skip" : { networkId, handle },
 	)
 	const { isAuthenticated } = useConvexAuth()
+	const sending = useConversationSend(sendOwner, conversationKey, isAuthenticated)
+	const outbox = useOutbox(sendOwner, conversationKey)
 	const directPagination = usePaginatedQuery(
 		api.modules.messaging.messages.paginateMessages,
 		filId === null || !isAuthenticated || filHorsReseau
@@ -655,6 +679,10 @@ export function MessagerieConversationView({
 	 * correspondant n'est pas connu (groupe, fil pas encore chargé).
 	 */
 	const selfId = String(moi)
+	const visibleOutbox = outbox.filter((entry) => entry.messageId === null || !bulles.some((message) => message.id === entry.messageId))
+	useEffect(() => {
+		outboxStore.acknowledge(sendOwner, conversationKey, bulles.map((message) => message.id))
+	}, [outbox, bulles, sendOwner, conversationKey])
 
 	const rows = useMemo(
 		() =>
@@ -765,110 +793,73 @@ export function MessagerieConversationView({
 	}, [bulles, selfId, correspondantId])
 
 	// ── Envoi ─────────────────────────────────────────────────────────────
+	const promotionAfterSend = useRef<{ handle: string; threadId: string } | null>(null)
+	const terminerEnvoi = useCallback(() => {
+		const promotion = promotionAfterSend.current
+		if (promotion === null || !sending.isCurrent()) return
+		promotionAfterSend.current = null
+		// Les pièces admises ont quitté le brouillon AVANT sa promotion : les
+		// déplacer puis démonter le composeur les aurait laissées prêtes au renvoi.
+		outboxStore.moveConversation(sendOwner, conversationKey, `chat:${promotion.threadId}`)
+		dockStore.promoteDraft(promotion.handle, promotion.threadId)
+		if (variant === "page") nav.openConversation(`chat:${promotion.threadId}`)
+	}, [sending.isCurrent, sendOwner, conversationKey, variant, nav])
 	const envoyer = useCallback(
-		async (payload: {
-			text: string
-			attachments: UploadedAttachment[]
-		}): Promise<void> => {
+		async (payload: { text: string; attachments: UploadedAttachment[] }): Promise<void> => {
+			if (!sending.isCurrent()) throw new AbandonedMessageSend()
+			promotionAfterSend.current = null
+			if (handle !== null) setDraftSendStarted(true)
 			setErreur(null)
-			const pieces =
-				payload.attachments.length > 0
-					? payload.attachments.map((a) => ({
-							storageId: a.storageId as Id<"_storage">,
-							filename: a.filename,
-							mimeType: a.mimeType,
-							sizeBytes: a.sizeBytes,
-							...(a.durationMs === undefined ? {} : { durationMs: a.durationMs }),
-						}))
-					: undefined
+			const pieces = payload.attachments.length > 0
+				? payload.attachments.map((a) => ({
+					storageId: a.storageId as Id<"_storage">,
+					filename: a.filename,
+					mimeType: a.mimeType,
+					sizeBytes: a.sizeBytes,
+					...(a.durationMs === undefined ? {} : { durationMs: a.durationMs }),
+				}))
+				: undefined
 			const citation = reply?.messageId ?? undefined
-
-			if (groupeId !== null) {
-				dockStore.setDraftText(conversationKey, "")
-				setReply(null)
-				try {
-					await sendGroup.mutateAsync({
+			try {
+				const admitted = await sending.perform({ text: payload.text, attachments: payload.attachments, replyTo: citation ?? null }, async (key): Promise<{ messageId: string; threadId?: string; conversation?: string }> => {
+					if (groupeId !== null) return await sendGroup.mutateAsync({
 						threadId: groupeId,
 						content: payload.text,
 						...(pieces === undefined ? {} : { attachmentFiles: pieces }),
-						...(citation === undefined
-							? {}
-							: { replyToMessageId: citation as Id<"groupMessages"> }),
-						idempotencyKey: getKey(),
+						...(citation === undefined ? {} : { replyToMessageId: citation as Id<"groupMessages"> }),
+						idempotencyKey: key,
 					})
-					rotate()
-					void clearGroupTyping.mutateAsync({ threadId: groupeId })
-				} catch (err) {
-					// Le texte REVIENT dans le composeur : un refus ne mange pas la frappe.
-					dockStore.setDraftText(conversationKey, payload.text)
-					setErreur(messageErreurLisible(err, t))
-					throw err
-				}
-				return
-			}
-
-			if (filId !== null) {
-				dockStore.setDraftText(conversationKey, "")
-				setReply(null)
-				try {
-					await send.mutateAsync({
+					if (filId !== null) return await send.mutateAsync({
 						threadId: filId,
 						content: payload.text,
 						...(pieces === undefined ? {} : { attachmentFiles: pieces }),
-						...(citation === undefined
-							? {}
-							: { replyToMessageId: citation as Id<"personalMessages"> }),
-						idempotencyKey: getKey(),
+						...(citation === undefined ? {} : { replyToMessageId: citation as Id<"personalMessages"> }),
+						idempotencyKey: key,
 					})
-					rotate()
-					void clearTyping.mutateAsync({ threadId: filId })
-				} catch (err) {
-					dockStore.setDraftText(conversationKey, payload.text)
-					setErreur(messageErreurLisible(err, t))
-					throw err
-				}
-				return
-			}
-
-			if (handle === null) return
-			// ⚠️ On ne vide qu'APRÈS : un refus (profil dépublié, blocage)
-			// emporterait sinon le texte avec lui, sans que rien ne l'ait envoyé.
-			try {
-				const { threadId: neuf } = await startThread.mutateAsync({
-					handle,
-					initialMessage: payload.text,
-					...(pieces === undefined ? {} : { initialAttachmentFiles: pieces }),
+					if (handle === null) throw new AbandonedMessageSend()
+					const result = await startThread.mutateAsync({
+						handle,
+						initialMessage: payload.text,
+						...(pieces === undefined ? {} : { initialAttachmentFiles: pieces }),
+						idempotencyKey: key,
+					})
+					return { ...result, conversation: `chat:${String(result.threadId)}` }
 				})
-				dockStore.setDraftText(conversationKey, "")
-				dockStore.promoteDraft(handle, String(neuf))
-				rotate()
-				// Sur la page, le brouillon a sa propre adresse : il faut ALLER sur
-				// celle du fil, sinon on reste sur une adresse qui ne désigne plus rien.
-				if (variant === "page") nav.openConversation(`chat:${String(neuf)}`)
-			} catch (err) {
-				// ⚠️ Jamais le `message` brut de l'erreur : il porte la trace du
-				// serveur en développement. Le code, traduit.
-				setErreur(messageErreurLisible(err, t))
-				throw err
+				// Le texte reste disponible pendant l'aller-retour et après refus.
+				// Une frappe plus récente n'est jamais effacée par cette admission.
+				if (latestDraft.current.trim() === payload.text) dockStore.setDraftText(conversationKey, "")
+				setReply((current) => current?.messageId === citation ? null : current)
+				if (groupeId !== null) void clearGroupTyping.mutateAsync({ threadId: groupeId }).catch(() => undefined)
+				else if (filId !== null) void clearTyping.mutateAsync({ threadId: filId }).catch(() => undefined)
+				else if (handle !== null && admitted.threadId !== undefined) {
+					promotionAfterSend.current = { handle, threadId: admitted.threadId }
+				}
+			} catch (error) {
+				if (sending.isCurrent() && !(error instanceof AbandonedMessageSend)) setErreur(messageErreurLisible(error, t))
+				throw error
 			}
 		},
-		[
-			groupeId,
-			filId,
-			handle,
-			conversationKey,
-			reply,
-			send,
-			sendGroup,
-			startThread,
-			getKey,
-			rotate,
-			clearTyping,
-			clearGroupTyping,
-			variant,
-			nav,
-			t,
-		],
+		[groupeId, filId, handle, conversationKey, reply, send, sendGroup, startThread, sending.perform, sending.isCurrent, clearTyping, clearGroupTyping, t],
 	)
 
 	const signalerLaFrappe = useCallback(() => {
@@ -1387,6 +1378,30 @@ export function MessagerieConversationView({
 	const chargement = (estGroupe || filId !== null) && !donneesRecues
 
 	/**
+	 * P18b (A04) — les ARRIVÉES s'annoncent, et elles seules. Une région polie
+	 * PERSISTANTE (montée avec le fil) reçoit « Nouveau message de X : … » quand
+	 * le fil suit le bas (le message est à l'écran), sinon le décompte de la
+	 * pastille. Le premier état reçu pose le repère sans rien annoncer :
+	 * ni l'ouverture d'une conversation, ni l'historique chargé, ni mes propres
+	 * messages ne parlent. La saisie en cours reste muette (`aria-hidden`).
+	 */
+	const arrivalBaselineRef = useRef<{ lastId: string | null } | null>(null)
+	const [arrivalText, setArrivalText] = useState("")
+	useEffect(() => {
+		if (chargement) return
+		const previous = arrivalBaselineRef.current
+		arrivalBaselineRef.current = { lastId: bulles.at(-1)?.id ?? null }
+		const annonce = arrivalAnnouncement(
+			{ previous, messages: bulles, selfId, pinned: scroll.pinned, unseen: scroll.unseen },
+			t,
+		)
+		if (annonce === null) return
+		// Une annonce identique à la précédente ne serait pas relue : une espace
+		// insécable (`REPEAT_MARK`) la distingue sans rien changer à ce qui est dit.
+		setArrivalText((precedente) => (precedente === annonce ? `${annonce}${REPEAT_MARK}` : annonce))
+	}, [chargement, bulles, selfId, scroll.pinned, scroll.unseen, t])
+
+	/**
 	 * Le panneau d'informations REMPLACE la conversation, en-tête compris.
 	 *
 	 * Il porte son propre retour (« Revenir à la conversation ») : garder
@@ -1625,6 +1640,10 @@ export function MessagerieConversationView({
 						<div
 							className="msg-body"
 							ref={bodyRef}
+							// P18b (A04) : une région NOMMÉE par le titre de la
+							// conversation — `aria-labelledby` sur un div sans rôle
+							// n'était pas exposé.
+							role="region"
 							aria-labelledby={titleId}
 							onScroll={(event) => {
 								const node = event.currentTarget
@@ -1727,9 +1746,15 @@ export function MessagerieConversationView({
 									)}
 								</div>
 							)}
+							{navigation === "destinations" ? <OutboxMessages entries={visibleOutbox} /> : null}
 						</div>
 
 						<NewMessagesPill count={scroll.unseen} onJump={sauterEnBas} />
+						{/* P18b (A04) : la région polie des arrivées, persistante
+						    tant que le fil est ouvert, hors de la vue. */}
+						<p className="sr-only" role="status">
+							{arrivalText}
+						</p>
 					</div>
 
 					{erreur !== null ? (
@@ -1753,6 +1778,8 @@ export function MessagerieConversationView({
 					) : null}
 
 					<MessageComposer
+						contextKey={`${sendOwner}:${conversationKey}`}
+						isContextCurrent={sending.isCurrent}
 						value={draft}
 						onChange={(text) => dockStore.setDraftText(conversationKey, text)}
 						placeholder={
@@ -1772,6 +1799,7 @@ export function MessagerieConversationView({
 						onSubmitEdit={enregistrerModification}
 						mediaDraft={mediaDraft}
 						onSend={envoyer}
+						onSent={terminerEnvoi}
 						generateUploadUrl={async () =>
 							estGroupe
 								? await uploadUrlGroupe.mutateAsync({})

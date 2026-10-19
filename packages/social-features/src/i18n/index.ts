@@ -22,6 +22,7 @@ import frSocial from "./locales/fr/social.json"
 import enMessagerieConversation from "./locales/en/messagerie.conversation.json"
 import enMessagerieDock from "./locales/en/messagerie.dock.json"
 import enMessagerieGroupes from "./locales/en/messagerie.groupes.json"
+import enMessagerieContexte from "./locales/en/messagerie.contexte.json"
 import enIappelCore from "./locales/en/iappel.core.json"
 import enIappelSurfaces from "./locales/en/iappel.surfaces.json"
 import enIappelStores from "./locales/en/iappel.stores.json"
@@ -33,12 +34,14 @@ import enReseauGroupes from "./locales/en/reseau.groupes.json"
 import enReseauProfil from "./locales/en/reseau.profil.json"
 import enReseauCoque from "./locales/en/reseau.coque.json"
 import enReseauPages from "./locales/en/reseau.pages.json"
+import enReseauImmersion from "./locales/en/reseau.immersion.json"
 import enNotifications from "./locales/en/notifications.json"
 import enAlbums from "./locales/en/albums.json"
 import enShell from "./locales/en/shell.json"
 import frMessagerieConversation from "./locales/fr/messagerie.conversation.json"
 import frMessagerieDock from "./locales/fr/messagerie.dock.json"
 import frMessagerieGroupes from "./locales/fr/messagerie.groupes.json"
+import frMessagerieContexte from "./locales/fr/messagerie.contexte.json"
 import frIappelCore from "./locales/fr/iappel.core.json"
 import frIappelSurfaces from "./locales/fr/iappel.surfaces.json"
 import frIappelStores from "./locales/fr/iappel.stores.json"
@@ -50,6 +53,7 @@ import frReseauGroupes from "./locales/fr/reseau.groupes.json"
 import frReseauProfil from "./locales/fr/reseau.profil.json"
 import frReseauCoque from "./locales/fr/reseau.coque.json"
 import frReseauPages from "./locales/fr/reseau.pages.json"
+import frReseauImmersion from "./locales/fr/reseau.immersion.json"
 import frNotifications from "./locales/fr/notifications.json"
 import frAlbums from "./locales/fr/albums.json"
 import frShell from "./locales/fr/shell.json"
@@ -76,10 +80,10 @@ export const engineResources = {
     social: frSocial,
     direct: frDirect,
     identity: frIdentity,
-    messagerie: { ...frMessagerieConversation, ...frMessagerieDock, ...frMessagerieGroupes },
+    messagerie: { ...frMessagerieConversation, ...frMessagerieDock, ...frMessagerieGroupes, ...frMessagerieContexte },
     iappel: { ...frIappelCore, ...frIappelSurfaces, ...frIappelStores },
     stories: frStories,
-    reseau: { ...frReseau, ...frReseauFil, ...frReseauRelations, ...frReseauGroupes, ...frReseauProfil, ...frReseauCoque, ...frReseauPages },
+    reseau: { ...frReseau, ...frReseauFil, ...frReseauRelations, ...frReseauGroupes, ...frReseauProfil, ...frReseauCoque, ...frReseauPages, ...frReseauImmersion },
     notifications: frNotifications,
     albums: frAlbums,
     shell: frShell,
@@ -89,10 +93,10 @@ export const engineResources = {
     social: enSocial,
     direct: enDirect,
     identity: enIdentity,
-    messagerie: { ...enMessagerieConversation, ...enMessagerieDock, ...enMessagerieGroupes },
+    messagerie: { ...enMessagerieConversation, ...enMessagerieDock, ...enMessagerieGroupes, ...enMessagerieContexte },
     iappel: { ...enIappelCore, ...enIappelSurfaces, ...enIappelStores },
     stories: enStories,
-    reseau: { ...enReseau, ...enReseauFil, ...enReseauRelations, ...enReseauGroupes, ...enReseauProfil, ...enReseauCoque, ...enReseauPages },
+    reseau: { ...enReseau, ...enReseauFil, ...enReseauRelations, ...enReseauGroupes, ...enReseauProfil, ...enReseauCoque, ...enReseauPages, ...enReseauImmersion },
     notifications: enNotifications,
     albums: enAlbums,
     shell: enShell,

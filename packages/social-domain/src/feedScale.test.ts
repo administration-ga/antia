@@ -10,9 +10,30 @@ import {
   isLacunarFeedWindow,
   mergeFeedWindows,
   PERSONAL_FEED_AUTHORS_MAX,
+  shouldMaterializeFeed,
+  materializedCursorMatches,
+  MATERIALIZED_FEED_HISTORY_MS,
 } from "./feedScale"
 
 describe("curseur et mesure du fil", () => {
+  it("déclenche la matérialisation au-delà de 200 sources, de 50 pages ou d'une lecture tronquée", () => {
+    expect(shouldMaterializeFeed({ personSources: 200, pageSources: 0, truncated: false })).toBe(false)
+    expect(shouldMaterializeFeed({ personSources: 200, pageSources: 1, truncated: false })).toBe(true)
+    expect(shouldMaterializeFeed({ personSources: 1, pageSources: 51, truncated: false })).toBe(true)
+    expect(shouldMaterializeFeed({ personSources: 1, pageSources: 0, truncated: true })).toBe(true)
+    expect(MATERIALIZED_FEED_HISTORY_MS).toBe(30 * 86_400_000)
+  })
+
+  it("ferme les continuations incomplètes ou d'une autre génération sans convertir un curseur ancien", () => {
+    const state = { generation: 3, windowStart: 10, status: "ready" }
+    const cursor = { publishedAt: 20, postId: "post", postCreationTime: 25, strategy: "materialized" as const, generation: 3, windowStart: 10 }
+    expect(materializedCursorMatches(cursor, state)).toBe(true)
+    expect(materializedCursorMatches(cursor, { ...state, status: "building" })).toBe(false)
+    expect(materializedCursorMatches(cursor, { ...state, generation: 4 })).toBe(false)
+    expect(materializedCursorMatches({ publishedAt: 20, postId: "post" }, state)).toBe(false)
+    expect(materializedCursorMatches({ ...cursor, windowStart: 11 }, state)).toBe(false)
+    expect(materializedCursorMatches({ ...cursor, postCreationTime: undefined }, state)).toBe(false)
+  })
   it("ordonne les ex æquo et conserve seulement les lignes derrière le curseur", () => {
     // Les identifiants contredisent volontairement l'ordre de création :
     // l'index Convex tranche par `_creationTime`, pas par `_id`.

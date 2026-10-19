@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 
-import { equalFederationSignature, FEDERATION_IMPLEMENTED_CONTRACTS, federationEnvironment, federationSigningText, freshFederationTimestamp, parseFederationEnvelope, validFederationContract, validFederationEmitter, validFederationKeyEnvName } from "./federationProtocol"
+import { COMMERCE_JOBS_FEDERATION_CONTRACT, COMMERCE_TRANSPORT_TEST_CONTRACT, equalFederationSignature, FEDERATION_IMPLEMENTED_CONTRACTS, FEDERATION_IMPLEMENTED_EVENTS, federationEnvironment, federationSigningText, freshFederationTimestamp, parseFederationEnvelope, validFederationContract, validFederationEmitter, validFederationKeyEnvName } from "./federationProtocol"
 
 const base = { eventId: "event-001", contract: "RESEAU-PUBLIC-V1", version: 1, objectRef: "page:administration-test", payload: { title: "Mission publique", values: [true, null, 2] } }
 const raw = (value: unknown) => JSON.stringify(value)
@@ -8,7 +8,17 @@ const raw = (value: unknown) => JSON.stringify(value)
 describe("FEDERATION-INBOX-V1 — frontière pure et fermée", () => {
   it("accepte l'enveloppe minimale sans présumer un contrat métier branché", () => {
     expect(parseFederationEnvelope(raw(base))).toEqual({ ok: true, envelope: base })
-    expect(FEDERATION_IMPLEMENTED_CONTRACTS).toEqual([])
+    expect(FEDERATION_IMPLEMENTED_CONTRACTS).toContain("RESEAU-PUBLIC-V1")
+  })
+  it("déclare la recette, le catalogue P09 et les emplois P15 (PUBLIC §5.6 normalisé, JOBS-V1 complet)", () => {
+    expect(FEDERATION_IMPLEMENTED_CONTRACTS).toContain(COMMERCE_TRANSPORT_TEST_CONTRACT)
+    expect(FEDERATION_IMPLEMENTED_EVENTS[COMMERCE_TRANSPORT_TEST_CONTRACT]).toEqual(["transport.probe"])
+    expect(FEDERATION_IMPLEMENTED_CONTRACTS).toContain("PRO-COMMERCE-PUBLIC-V1")
+    expect(FEDERATION_IMPLEMENTED_EVENTS["PRO-COMMERCE-PUBLIC-V1"]).toContain("offer.updated")
+    expect(FEDERATION_IMPLEMENTED_EVENTS["PRO-COMMERCE-PUBLIC-V1"]).toContain("job.published")
+    expect(FEDERATION_IMPLEMENTED_CONTRACTS).toContain(COMMERCE_JOBS_FEDERATION_CONTRACT)
+    expect(FEDERATION_IMPLEMENTED_EVENTS[COMMERCE_JOBS_FEDERATION_CONTRACT]).toEqual(["job.published", "job.closed"])
+    expect(validFederationContract(COMMERCE_JOBS_FEDERATION_CONTRACT)).toBe(true)
   })
   it.each(["", "dev", "local", "Production", undefined, null])("ne transforme jamais %s en production", (value) => {
     expect(federationEnvironment(value)).toBeNull()

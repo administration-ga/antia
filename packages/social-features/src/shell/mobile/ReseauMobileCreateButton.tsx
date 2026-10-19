@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/mobile/ReseauMobileCreateButton.tsx @ ad2e7fdc2 — adaptations : déplacé dans la coque (`shell/mobile/`) ; vues immersives jugées sur la table des routes INJECTÉE (`shouldShowTabBar(pathname, useRoutes())`) au lieu des chemins de l'espace ; carte de choix par la coque légère (`shell/floating-card/EspaceFloatingCard`) et décalage bas par `shell/floating-surface/use-surface-insets` ; formats lus dans le catalogue du moteur (`creationEntries`, libellé et description par leurs CLÉS i18n `labelKey` et `descriptionKey`) ; textes par l'i18n (`reseau:reseauMobileCreateButton.*`) ; fond des choix au survol par le jeton de la charte (`--esp-neutral-hover`) sans repli de couleur littérale ; rendu, focus rendu au déclencheur et pose « choix » inchangés.
+// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/mobile/ReseauMobileCreateButton.tsx @ ad2e7fdc2 — adaptations : déplacé dans la coque (`shell/mobile/`) ; vues immersives jugées sur la table des routes INJECTÉE (`shouldShowTabBar(pathname, useRoutes())`) au lieu des chemins de l'espace ; carte de choix par la coque légère (`shell/floating-card/EspaceFloatingCard`) et décalage bas par `shell/floating-surface/use-surface-insets` ; formats lus dans le catalogue du moteur (`creationEntries`, libellé et description par leurs CLÉS i18n `labelKey` et `descriptionKey`) ; textes par l'i18n (`reseau:reseauMobileCreateButton.*`) ; fond des choix au survol par le jeton de la charte (`--esp-neutral-hover`) sans repli de couleur littérale ; rendu, focus rendu au déclencheur et pose « choix » inchangés ; P02 (18/10/2026) : la carte de choix (`CreationChoiceCard`) et le retour du focus (`useChoiceTrigger`) sortis en exports partagés avec la navigation par destinations — un format qui NAVIGUE y est rendu en lien —, la commande flottante inchangée (tous ses choix restent des boutons).
 "use client"
 
 /**
@@ -28,16 +28,114 @@
  */
 
 import { useRoutes } from "@antsia/api/network"
-import { usePathname } from "@antsia/api/routing"
+import { Link, usePathname } from "@antsia/api/routing"
 import { Icon } from "@antsia/ui"
 import { Plus } from "lucide-react"
-import { useEffect, useRef, useState } from "react"
+import { type ReactNode, type RefObject, useEffect, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
 
 import { creationEntries, type CreationKind } from "../../features/reseau-personnel/creation-controller"
 import { EspaceFloatingCard } from "../floating-card/EspaceFloatingCard"
 import { useSurfaceInsets } from "../floating-surface/use-surface-insets"
+import type { ReseauCreationChoice } from "../reseau-menu-destinations"
 import { shouldShowTabBar } from "./reseau-mobile-tabs"
+
+/** La facture d'un choix — bouton ou lien, la même cible de 44 px. */
+const CHOICE_CLASS =
+  "flex min-h-11 w-full items-center gap-2.5 rounded-[var(--esp-r-chrome,var(--radius))] px-2.5 py-2 text-left transition-colors hover:bg-[var(--esp-neutral-hover)] focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+
+/**
+ * L'état d'une carte de choix ouverte par un déclencheur, et le focus RENDU à
+ * ce déclencheur quand elle se referme.
+ *
+ * Le focus doit revenir APRÈS le démontage de la carte : `useModalA11y`
+ * restitue le focus dans sa fonction de nettoyage, qui s'exécute avant cet
+ * effet. Le poser dans le `onClose` le ferait donc écraser une milliseconde
+ * plus tard.
+ */
+export function useChoiceTrigger<T extends HTMLElement>(): {
+  open: boolean
+  setOpen: (open: boolean) => void
+  triggerRef: RefObject<T | null>
+} {
+  const [open, setOpen] = useState(false)
+  const triggerRef = useRef<T>(null)
+  const wasOpen = useRef(false)
+  useEffect(() => {
+    if (wasOpen.current && !open) triggerRef.current?.focus()
+    wasOpen.current = open
+  }, [open])
+  return { open, setOpen, triggerRef }
+}
+
+/**
+ * La carte « Créer » : les formats offerts, en CARTE au téléphone comme au
+ * bureau (`kind="choice"` — une liste n'ouvre aucun clavier).
+ *
+ * Un format à SURFACE (publication, actu, conférence) est un bouton qui
+ * remonte son genre (`onPick`) ; un format qui NAVIGUE (évènement, album)
+ * porte son adresse (`href`) et se rend en LIEN — s'ouvre dans un onglet, et
+ * les gardes de sortie d'une page le voient comme toute navigation.
+ */
+export function CreationChoiceCard({
+  open,
+  onClose,
+  choices,
+  onPick,
+}: {
+  open: boolean
+  onClose: () => void
+  choices: readonly ReseauCreationChoice[]
+  onPick: (kind: CreationKind) => void
+}) {
+  const { t } = useTranslation("reseau")
+  return (
+    <EspaceFloatingCard
+      open={open}
+      onClose={onClose}
+      title={t("reseauMobileCreateButton.create")}
+      // Une liste de formats n'ouvre aucun clavier : elle reste une CARTE
+      // au téléphone. Le plein écran en ferait une page.
+      kind="choice"
+    >
+      <div role="group" aria-label={t("reseauMobileCreateButton.formats")} className="grid gap-1">
+        {choices.map(({ entry, href }) => {
+          const inner: ReactNode = (
+            <>
+              <span
+                aria-hidden="true"
+                className="flex size-8 shrink-0 items-center justify-center rounded-full bg-[var(--esp-neutral-hover)] text-muted-foreground"
+              >
+                <Icon name={entry.icon} size={16} />
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="block truncate text-[13px] font-bold text-foreground">{t(entry.labelKey)}</span>
+                <span className="block text-[11.5px] leading-snug text-muted-foreground">{t(entry.descriptionKey)}</span>
+              </span>
+            </>
+          )
+          return href !== null ? (
+            <Link key={entry.kind} href={href} onClick={onClose} className={CHOICE_CLASS}>
+              {inner}
+            </Link>
+          ) : (
+            <button
+              key={entry.kind}
+              type="button"
+              onClick={() => {
+                onClose()
+                onPick(entry.kind)
+              }}
+              className={CHOICE_CLASS}
+            >
+              {inner}
+            </button>
+          )
+        })}
+      </div>
+    </EspaceFloatingCard>
+  )
+}
 
 export interface ReseauMobileCreateButtonProps {
   /** Le format choisi. L'hôte décide ce qu'il ouvre (ou vers où il navigue). */
@@ -55,21 +153,9 @@ export function ReseauMobileCreateButton({ onSelect, handle = null }: ReseauMobi
   const routes = useRoutes()
   const pathname = usePathname()
   const visible = shouldShowTabBar(pathname, routes)
-  const [open, setOpen] = useState(false)
-  const fabRef = useRef<HTMLButtonElement>(null)
-  const wasOpen = useRef(false)
+  /* Le focus REVIENT au déclencheur à la fermeture (`useChoiceTrigger`). */
+  const { open, setOpen, triggerRef: fabRef } = useChoiceTrigger<HTMLButtonElement>()
   const insets = useSurfaceInsets(visible)
-
-  /*
-   * Le focus REVIENT au déclencheur à la fermeture — et il doit revenir
-   * APRÈS le démontage de la carte : `useModalA11y` restitue le focus dans sa
-   * fonction de nettoyage, qui s'exécute avant cet effet. Le poser dans le
-   * `onClose` le ferait donc écraser une milliseconde plus tard.
-   */
-  useEffect(() => {
-    if (wasOpen.current && !open) fabRef.current?.focus()
-    wasOpen.current = open
-  }, [open])
 
   // Une vue immersive (une actu, une conversation, une conférence) occupe
   // l'écran entier : ses propres commandes y suffisent. Même définition de
@@ -98,39 +184,14 @@ export function ReseauMobileCreateButton({ onSelect, handle = null }: ReseauMobi
         {t("reseauMobileCreateButton.create")}
       </button>
 
-      <EspaceFloatingCard
+      {/* La commande historique : TOUS ses choix restent des boutons, et
+          l'hôte décide (`onSelect`) d'ouvrir une surface ou de naviguer. */}
+      <CreationChoiceCard
         open={open}
         onClose={() => setOpen(false)}
-        title={t("reseauMobileCreateButton.create")}
-        // Une liste de formats n'ouvre aucun clavier : elle reste une CARTE
-        // au téléphone. Le plein écran en ferait une page.
-        kind="choice"
-      >
-        <div role="group" aria-label={t("reseauMobileCreateButton.formats")} className="grid gap-1">
-          {entries.map((entry) => (
-            <button
-              key={entry.kind}
-              type="button"
-              onClick={() => {
-                setOpen(false)
-                onSelect(entry.kind)
-              }}
-              className="flex min-h-11 w-full items-center gap-2.5 rounded-[var(--esp-r-chrome,var(--radius))] px-2.5 py-2 text-left transition-colors hover:bg-[var(--esp-neutral-hover)] focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
-            >
-              <span
-                aria-hidden="true"
-                className="flex size-8 shrink-0 items-center justify-center rounded-full bg-[var(--esp-neutral-hover)] text-muted-foreground"
-              >
-                <Icon name={entry.icon} size={16} />
-              </span>
-              <span className="min-w-0 flex-1">
-                <span className="block truncate text-[13px] font-bold text-foreground">{t(entry.labelKey)}</span>
-                <span className="block text-[11.5px] leading-snug text-muted-foreground">{t(entry.descriptionKey)}</span>
-              </span>
-            </button>
-          ))}
-        </div>
-      </EspaceFloatingCard>
+        choices={entries.map((entry) => ({ entry, href: null }))}
+        onPick={onSelect}
+      />
     </>
   )
 }

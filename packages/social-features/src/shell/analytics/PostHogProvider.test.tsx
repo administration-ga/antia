@@ -3,10 +3,10 @@ import { act, cleanup, render, screen } from "@testing-library/react"
 import { StrictMode, useEffect, type ReactNode } from "react"
 import { afterEach, beforeEach, describe, expect, it, vi, type MockInstance } from "vitest"
 
-import { PostHogProvider, type PostHogProviderProps } from "./PostHogProvider"
+import { PostHogProvider, useUsageFunnel, type PostHogProviderProps } from "./PostHogProvider"
 import { USAGE_SCREENS, type UsagePayload, type UsageScreen, type UsageLocale } from "./posthog"
 
-const configuration = { endpoint: "https://analytics.example.test/i/v0/e/", projectToken: "phc_0123456789abcdef0123456789abcdef" }
+const configuration = { endpoint: "https://eu.i.posthog.com/i/v0/e/", projectToken: "phc_0123456789abcdef0123456789abcdef" }
 const FIRST_UUID = "01234567-89ab-4cde-8fab-0123456789ab"
 const SECOND_UUID = "11234567-89ab-4cde-8fab-0123456789ab"
 const fetchMock = vi.fn<typeof fetch>()
@@ -36,6 +36,16 @@ function payloadAt(index = 0): UsagePayload {
   return JSON.parse(body) as UsagePayload
 }
 
+function FunnelFixture({ consented, configured = true }: { consented: boolean; configured?: boolean }) {
+  const capture = useUsageFunnel({ configuration: configured ? configuration : null, consented, networkSlug: "antsia", locale: "fr" })
+  useEffect(() => { capture("entry_started") }, [capture, consented, configured])
+  return <>
+    <button onClick={() => capture("profile_completed")}>Profil</button>
+    <button onClick={() => capture("membership_joined")}>Adhésion</button>
+    <button onClick={() => capture("entry_completed")}>Entrée</button>
+  </>
+}
+
 beforeEach(() => {
   vi.useFakeTimers()
   vi.setSystemTime(new Date("2026-10-17T09:00:00Z"))
@@ -50,6 +60,59 @@ afterEach(() => {
   vi.useRealTimers()
   vi.restoreAllMocks()
   vi.unstubAllGlobals()
+})
+
+describe("Funnel d'accueil — accord déjà acquis", () => {
+  it("ne mesure rien avant accord et conserve un UUID mémoire entre les étapes autorisées", async () => {
+    const storage = vi.spyOn(Storage.prototype, "setItem")
+    const view = render(<FunnelFixture consented={false} />)
+    await flushCapture()
+    act(() => screen.getByRole("button", { name: "Profil" }).click())
+    await flushCapture()
+    expect(fetchMock).not.toHaveBeenCalled()
+    expect(randomUuid).not.toHaveBeenCalled()
+    view.rerender(<FunnelFixture consented />)
+    await flushCapture()
+    for (const name of ["Profil", "Adhésion", "Entrée"]) {
+      act(() => screen.getByRole("button", { name }).click())
+      await flushCapture()
+    }
+    expect(fetchMock).toHaveBeenCalledTimes(4)
+    const payloads = fetchMock.mock.calls.map((_, index) => JSON.parse(String(requestAt(index).options.body)) as { event: string; properties: { distinct_id: string; step: string } })
+    expect(payloads.map(payload => payload.event)).toEqual(Array(4).fill("onboarding_step"))
+    expect(payloads.map(payload => payload.properties.step)).toEqual(["entry_started", "profile_completed", "membership_joined", "entry_completed"])
+    expect(new Set(payloads.map(payload => payload.properties.distinct_id))).toEqual(new Set([FIRST_UUID]))
+    expect(storage).not.toHaveBeenCalled()
+    act(() => screen.getByRole("button", { name: "Profil" }).click())
+    await flushCapture()
+    expect(fetchMock).toHaveBeenCalledTimes(4)
+  })
+
+  it("annule le retrait, ignore une étape tardive et renouvelle l'UUID après nouvel accord", async () => {
+    randomUuid.mockReturnValueOnce(FIRST_UUID).mockReturnValueOnce(SECOND_UUID)
+    const view = render(<FunnelFixture consented />)
+    await flushCapture()
+    const signal = requestAt().options.signal
+    view.rerender(<FunnelFixture consented={false} />)
+    act(() => screen.getByRole("button", { name: "Profil" }).click())
+    await flushCapture()
+    expect(signal?.aborted).toBe(true)
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+    view.rerender(<FunnelFixture consented />)
+    await flushCapture()
+    expect(fetchMock).toHaveBeenCalledTimes(2)
+    expect(JSON.parse(String(requestAt(1).options.body)).properties.distinct_id).toBe(SECOND_UUID)
+  })
+
+  it("reste fermé sans configuration et ne double pas la première étape sous StrictMode", async () => {
+    const view = render(<FunnelFixture consented configured={false} />)
+    await flushCapture()
+    expect(fetchMock).not.toHaveBeenCalled()
+    view.unmount()
+    render(<StrictMode><FunnelFixture consented /></StrictMode>)
+    await flushCapture()
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+  })
 })
 
 describe("PostHogProvider — transport facultatif", () => {
@@ -181,7 +244,7 @@ describe("PostHogProvider — transport facultatif", () => {
     await flushCapture()
     expect(requestAt(1).options.signal?.aborted).toBe(true)
     expect(payloadAt(2).properties.network).toBe("diasporale")
-    view.rerender(provider({ configuration: { ...configuration, endpoint: "https://other.example.test/i/v0/e/" } }))
+    view.rerender(provider({ configuration: { ...configuration, endpoint: "https://other.example.test/i/v0/e/", euRelayOrigin: "https://other.example.test" } }))
     await flushCapture()
     expect(requestAt(2).options.signal?.aborted).toBe(true)
     expect(requestAt(3).target).toBe("https://other.example.test/i/v0/e/")
@@ -212,7 +275,7 @@ describe("PostHogProvider — transport facultatif", () => {
     expect(fetchMock).toHaveBeenCalledTimes(10)
     view.rerender(provider({ networkSlug: "diasporale" }))
     await flushCapture()
-    view.rerender(provider({ configuration: { ...configuration, endpoint: "https://other.example.test/i/v0/e/" } }))
+    view.rerender(provider({ configuration: { ...configuration, endpoint: "https://other.example.test/i/v0/e/", euRelayOrigin: "https://other.example.test" } }))
     await flushCapture()
     view.rerender(provider({ consented: false }))
     await flushCapture()

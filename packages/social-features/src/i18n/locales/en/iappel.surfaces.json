@@ -161,7 +161,9 @@
   "globalCallSurfaceHost": {
     "answerSecondary": "{{name}} · answer",
     "incomingRegion": "Incoming call",
-    "groupFallbackTitle": "Group call"
+    "groupFallbackTitle": "Group call",
+    "announceIncoming": "Incoming call from {{name}}",
+    "announceIncomingVideo": "Incoming video call from {{name}}"
   },
   "addToCallPanel": {
     "alreadyIn": "This person is already in the call.",

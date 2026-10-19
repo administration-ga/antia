@@ -1,5 +1,5 @@
 /** Règles pures PA5 : bornes, sanctions et jugement de relecture sans contenu conservé. */
-export const MODERATION_SURFACES = ["post", "comment", "groupMessage", "event", "page", "person", "live", "story", "album"] as const
+export const MODERATION_SURFACES = ["post", "comment", "groupMessage", "event", "page", "person", "live", "story", "album", "serviceReview", "serviceReviewReply", "commerceOffer", "commercialMessage", "contextualMessage", "commerceJob", "diasporaAidQuestion", "diasporaAidAnswer", "diasporaAidMission", "diasporaMentorProfile", "diasporaMentoringRequest", "diasporaKitResource", "diasporaJobOffer", "diasporaTalentProfile", "diasporaJobApplication"] as const
 export type ModerationSurface = (typeof MODERATION_SURFACES)[number]
 export const SANCTION_KINDS = ["warning", "removal", "mute", "suspension", "exclusion"] as const
 export type SanctionKind = (typeof SANCTION_KINDS)[number]

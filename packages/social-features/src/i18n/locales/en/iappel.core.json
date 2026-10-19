@@ -51,7 +51,8 @@
       "peerHeld": "Put on hold",
       "active": "In call",
       "ringing": "Ringing…",
-      "connecting": "Connecting…"
+      "connecting": "Connecting…",
+      "preparing": "Setting up the call…"
     },
     "end": {
       "missed": "No answer",

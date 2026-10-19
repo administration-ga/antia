@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/messagerie/IcomAppelJournal.test.tsx @ ad2e7fdc2 — adaptations : fonctions du moteur moquées (`calls.direct.callMember`, `calls.history.listCallHistory`, `calls.preferences.markJournalSeen`) et ligne de journal au DTO du moteur (correspondant nommé par `counterpartLabel`) ; rendu dans l'enveloppe du moteur (`renderWithEngine` : i18n français, réseau de test) ; le refus « d'affiliation » du socle (règle administrative absente du moteur) devient un refus à CODE du moteur, dit par sa phrase traduite ; cas neufs : l'appel admis ouvre la fenêtre sortante, l'appel refusé l'écran de fin, tous deux sur l'appel (`callId`) et la personne visée.
+// Dupliqué de socle/packages/agent-features/src/features/messagerie/IcomAppelJournal.test.tsx @ ad2e7fdc2 — adaptations : fonctions du moteur moquées (`calls.direct.callMember`, `calls.history.listCallHistory`, `calls.preferences.markJournalSeen`) et ligne de journal au DTO du moteur (correspondant nommé par `counterpartLabel`) ; rendu dans l'enveloppe du moteur (`renderWithEngine` : i18n français, réseau de test) ; le refus « d'affiliation » du socle (règle administrative absente du moteur) devient un refus à CODE du moteur, dit par sa phrase traduite ; cas neufs : l'appel admis ouvre la fenêtre sortante, l'appel refusé l'écran de fin, tous deux sur l'appel (`callId`) et la personne visée ; P10/CC : `convex/react` doublé aussi de `useConvexAuth` (porte d'envoi liée à la session) et `useConvex` (lecture du fil commercial), porte `commercialMessaging` déclarée, réponse de `callMember` complète (`calleePersonId`, contrat du serveur).
 // @vitest-environment jsdom
 
 import { act, cleanup, fireEvent, screen } from "@testing-library/react"
@@ -8,6 +8,7 @@ import { renderWithEngine, TEST_NETWORK_ID } from "../../tests/engine-wrapper"
 
 const mocks = vi.hoisted(() => ({
   call: vi.fn(),
+  commercialCall: vi.fn(),
   markJournalSeen: vi.fn(),
   toastError: vi.fn(),
   openOutgoingCall: vi.fn(),
@@ -23,11 +24,17 @@ vi.mock("@antsia/api/engine", () => ({
         history: { listCallHistory: "history" },
         preferences: { markJournalSeen: "seen" },
       },
+      commercialMessaging: {
+        calls: { startCall: "commercialCall" },
+        threads: { getThread: "getThread" },
+      },
     },
   },
 }))
 vi.mock("convex/react", () => ({
-  useMutation: (name: string) => name === "call" ? mocks.call : mocks.markJournalSeen,
+  useConvexAuth: () => ({ isAuthenticated: true, isLoading: false }),
+  useConvex: () => ({ query: vi.fn() }),
+  useMutation: (name: string) => name === "call" ? mocks.call : name === "commercialCall" ? mocks.commercialCall : mocks.markJournalSeen,
 }))
 vi.mock("@antsia/api/hooks", () => ({
   useAuthenticatedConvexQuery: () => ({
@@ -104,7 +111,7 @@ describe("IcomAppelJournal — refus du serveur", () => {
 describe("IcomAppelJournal — rappeler ouvre l'écran qui convient", () => {
   it("un appel admis ouvre la fenêtre sortante, sur l'appel et la personne visée", async () => {
     mocks.mediaType = "video"
-    mocks.call.mockResolvedValue({ admitted: true, callId: "calls_42", roomName: "call-1", mediaType: "video" })
+    mocks.call.mockResolvedValue({ admitted: true, callId: "calls_42", calleePersonId: "recipient", roomName: "call-1", mediaType: "video" })
     const button = rappeler()
 
     await act(async () => { fireEvent.click(button) })
@@ -123,7 +130,7 @@ describe("IcomAppelJournal — rappeler ouvre l'écran qui convient", () => {
 
   it("un appel refusé à l'admission ouvre l'écran de fin, avec sa raison et la messagerie vocale", async () => {
     mocks.mediaType = "audio"
-    mocks.call.mockResolvedValue({ admitted: false, callId: "calls_7", reason: "dnd", voicemailOffered: true })
+    mocks.call.mockResolvedValue({ admitted: false, callId: "calls_7", calleePersonId: "recipient", reason: "dnd", voicemailOffered: true })
     const button = rappeler()
 
     await act(async () => { fireEvent.click(button) })

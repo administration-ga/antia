@@ -1,0 +1,59 @@
+{
+  "description": "Référence de transport `pro.ga:<type>:<id>` ⟷ référence métier `pro.ga/<type>/<id>`.",
+  "fromBusiness": [
+    {
+      "input": "pro.ga/offer/01JA00000000000000000000F1",
+      "expect": "pro.ga:offer:01JA00000000000000000000F1"
+    },
+    {
+      "input": "pro.ga/offer_variant/01JA00000000000000000000V1",
+      "expect": "pro.ga:offer_variant:01JA00000000000000000000V1"
+    },
+    {
+      "input": "pro.ga/commerce_link/01JA00000000000000000000K1",
+      "expect": "pro.ga:commerce_link:01JA00000000000000000000K1"
+    },
+    {
+      "input": "pro.ga/user/01JA00000000000000000000W0",
+      "expect": null
+    },
+    {
+      "input": "pro.ga/offer/01ja00000000000000000000f1",
+      "expect": null
+    },
+    {
+      "input": "pro.ga/offer/01JA0000000000000000000IL1",
+      "expect": null
+    },
+    {
+      "input": "pro.ga/offer/01JA00000",
+      "expect": null
+    },
+    {
+      "input": "pro.ga/offer/000000000000000000000000000000000",
+      "expect": null
+    },
+    {
+      "input": "pro.ga:offer:01JA00000000000000000000F1",
+      "expect": null
+    }
+  ],
+  "toBusiness": [
+    {
+      "input": "pro.ga:offer:01JA00000000000000000000F1",
+      "expect": "pro.ga/offer/01JA00000000000000000000F1"
+    },
+    {
+      "input": "pro.ga:job_opening:01JA00000000000000000000J1",
+      "expect": "pro.ga/job_opening/01JA00000000000000000000J1"
+    },
+    {
+      "input": "pro.ga:unknown_kind:01JA00000000000000000000F1",
+      "expect": null
+    },
+    {
+      "input": "pro.ga/offer/01JA00000000000000000000F1",
+      "expect": null
+    }
+  ]
+}

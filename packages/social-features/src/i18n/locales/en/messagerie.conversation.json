@@ -114,6 +114,10 @@
   "messageBubble": {
     "actions": "Message actions",
     "actionsWithText": "Message actions: {{text}}",
+    "actionsFrom": "Actions on the message from {{name}}",
+    "actionsMine": "Actions on your message",
+    "speaker": "Message from {{name}}:",
+    "speakerMine": "Your message:",
     "forwarded": "Forwarded",
     "pinned": "Pinned message",
     "edited": "(edited)",
@@ -122,6 +126,7 @@
     "sent": "Sent"
   },
   "messageComposer": {
+    "sendAlreadyPending": "A message is already being sent in this conversation.",
     "uploadFailed": "The upload failed.",
     "editFailed": "The edit could not be saved.",
     "reselectOne": "“{{name}}” must be selected again: the file is no longer in memory.",
@@ -141,6 +146,12 @@
     "saveEdit": "Save the edit",
     "sending": "Sending",
     "send": "Send"
+  },
+  "outboxMessages": {
+    "sending": "Sending",
+    "attachments_one": "{{count}} attachment",
+    "attachments_many": "{{count}} attachments",
+    "attachments_other": "{{count}} attachments"
   },
   "messagerieConversationView": {
     "systemEvent": "Conversation event",
@@ -165,6 +176,9 @@
     "placeholderGroup": "Write to the group…",
     "placeholderDirect": "Write a message…",
     "composerLabelGroup": "Message to the group {{name}}",
-    "composerLabelDirect": "Message to {{name}}"
+    "composerLabelDirect": "Message to {{name}}",
+    "arrival": "New message from {{name}}",
+    "arrivalWithText": "New message from {{name}}: {{text}}",
+    "arrivalWithAttachment": "New message from {{name}}, with an attachment"
   }
 }

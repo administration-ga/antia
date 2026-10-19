@@ -83,6 +83,24 @@ export * from "./reseau-feed-pages"
 export { useReseauFeedState } from "./useReseauFeedState"
 export type { ReseauFeedCursor, ReseauFeedState, FeedTail } from "./useReseauFeedState"
 export { EmptyFeed, FeedPage } from "./FeedPages"
+// Le fil immersif et le mode Liste (P04) : ce qu'une surface d'application
+// monte autour d'une source de publications qui n'est pas `FeedPage` (le fil
+// national), et la mémoire de retour de l'onglet.
+export {
+  FeedListReturn,
+  FeedModeToggle,
+  FeedPostMemoryScope,
+  FeedReturnSessionBoundary,
+  FeedSurfaceMemoryProvider,
+  ImmersiveFeedReader,
+  ImmersiveFeedSlot,
+  ImmersiveStatusSlot,
+  useFeedImmersion,
+  useFeedMode,
+  useImmersiveFrozenHead,
+  useImmersivePageReport,
+} from "../feed-immersion"
+export type { FeedImmersion, FeedModeState, FeedRestoreTarget, ImmersivePageReport } from "../feed-immersion"
 export { PostCard } from "./PostCard"
 export { PostComposer } from "./PostComposer"
 export { PostMedia } from "./PostMedia"
