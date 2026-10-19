@@ -39,10 +39,13 @@
     "inviteAlreadyHandled": "Invitation déjà traitée.",
     "inviteCancelled": "Invitation annulée.",
     "unknownActor": "Membre du réseau",
+    "viewDecisions": "Voir les décisions",
     "sentence": {
+      "associationEventReminder": "Rappel : un événement auquel vous êtes inscrit approche.",
       "membershipChanged": "Votre adhésion au réseau a changé.",
       "badgeChanged": "Vos badges ont changé.",
       "moderationDecision": "Une décision de modération vous concerne. Consultez vos décisions et recours.",
+      "moderationDecisionPage": "Une décision de modération concerne la page {{page}}. Consultez ses décisions et recours.",
       "pagePost": "Une page que vous suivez a publié.",
       "pagePostNamed": "{{page}} a publié.",
       "albumPublished": "{{actor}} a publié un album.",
@@ -54,7 +57,28 @@
       "sponsorshipWithdrawnSystem": "Votre parrainage a été retiré.",
       "attestationVerified": "Votre inscription consulaire est confirmée : votre compte est vérifié.",
       "attestationNotConfirmed": "Nous n'avons pas pu confirmer votre inscription consulaire.",
-      "other": "Nouvelle activité dans le réseau."
+      "other": "Nouvelle activité dans le réseau.",
+      "commercialContact": "Une conversation commerciale a une nouvelle activité.",
+      "commercialContactActor": "Nouvelle activité dans votre conversation commerciale avec {{actor}}.",
+      "contextualMessage": "{{actor}} vous a écrit dans une mise en relation.",
+      "contextualMessageSystem": "Nouveau message dans une mise en relation.",
+      "contextualClosed": "{{actor}} a clos une mise en relation.",
+      "contextualClosedSystem": "Une mise en relation a été close.",
+      "commerce": {
+        "quoteReceived": "Un devis vous attend pour votre demande de service.",
+        "quoteRevised": "Un devis révisé vous attend pour votre demande de service.",
+        "bookingConfirmed": "Votre rendez-vous est confirmé par le professionnel.",
+        "bookingDeclined": "Le professionnel n'a pas retenu votre demande de rendez-vous.",
+        "bookingRescheduled": "Le professionnel a déplacé votre rendez-vous.",
+        "bookingCancelled": "Le professionnel a annulé votre rendez-vous.",
+        "orderAccepted": "Votre commande de prestation est acceptée par le professionnel.",
+        "orderDeclined": "Votre commande de prestation est refusée ou annulée par le professionnel.",
+        "quoteAccepted": "Un client a accepté un devis de votre boutique.",
+        "bookingHeld": "Un client a retenu un créneau de rendez-vous auprès de votre boutique.",
+        "bookingClientChanged": "Un client a modifié son rendez-vous avec votre boutique.",
+        "bookingClientCancelled": "Un client a annulé son rendez-vous avec votre boutique.",
+        "applicationUpdated": "L'état de votre candidature a changé."
+      }
     },
     "fileScan": {
       "released": "Ce fichier a depuis été libéré.",

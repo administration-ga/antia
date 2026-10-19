@@ -1,5 +1,5 @@
 /** PA5 — file sans contenu, budget réservé une seule fois, baux et reprises bornées. */
-import { DELIVERY_LEASE_MS, DELIVERY_MAX_ATTEMPTS, MAX_PUSH_SUBSCRIPTIONS, notificationCategory, notificationWeekStart, type NeutralNotificationPayload, WEEK_MS } from "@antsia/social-domain/notificationDelivery"
+import { DELIVERY_LEASE_MS, DELIVERY_MAX_ATTEMPTS, MAX_PUSH_SUBSCRIPTIONS, notificationWeekStart, type NeutralNotificationPayload, WEEK_MS } from "@antsia/social-domain/notificationDelivery"
 import { v } from "convex/values"
 import { internal } from "../../_generated/api"
 import type { Doc, Id } from "../../_generated/dataModel"
@@ -7,7 +7,7 @@ import { internalMutation, internalQuery, type MutationCtx, type QueryCtx } from
 import { isActiveMember } from "../../lib/access"
 import { applicationNotificationUrl, notificationApplication, notificationApplications } from "./configuration"
 import { subscriptionIsLive } from "./sessionBinding"
-import { incomingCallAllowed, notificationConsent, notificationStillVisible, pushAllowed } from "./policy"
+import { incomingCallAllowed, notificationConsent, notificationRowCategory, notificationStillVisible, pushAllowed } from "./policy"
 import { deliveryPreferences } from "./preferences"
 import { deliveryStateValidator } from "./tables"
 
@@ -37,7 +37,7 @@ export async function enqueueNotificationPush(ctx: WriteCtx, notificationId: Id<
   if (weekStart === null) return 0
   const now = Date.now()
   for (const subscription of subscriptions) {
-    const jobId = await ctx.db.insert("notificationDeliveryJobs", { networkId: row.networkId, recipientPersonId: row.recipientPersonId, notificationId, channel: "push", subscriptionId: subscription._id, applicationId: subscription.applicationId, category: notificationCategory(row.kind), dedupKey: `notification:${notificationId}:${subscription._id}`, weekStart, state: "queued", attempts: 0, nextAttemptAt: now, createdAt: now, updatedAt: now })
+    const jobId = await ctx.db.insert("notificationDeliveryJobs", { networkId: row.networkId, recipientPersonId: row.recipientPersonId, notificationId, channel: "push", subscriptionId: subscription._id, applicationId: subscription.applicationId, category: notificationRowCategory(row.kind), dedupKey: `notification:${notificationId}:${subscription._id}`, weekStart, state: "queued", attempts: 0, nextAttemptAt: now, createdAt: now, updatedAt: now })
     if (ctx.scheduler) await ctx.scheduler.runAfter(0, internal.modules.notifications.push.deliver, { jobId })
   }
   return subscriptions.length
@@ -71,7 +71,7 @@ export async function digestCount(ctx: Pick<QueryCtx, "db">, networkId: Id<"netw
   // compte ces avis récents retenus, pas un total exhaustif du réseau.
   const rows = await ctx.db.query("notifications").withIndex("by_network_recipient_readAt_createdAt", (q) => q.eq("networkId", networkId).eq("recipientPersonId", personId).eq("readAt", undefined).gte("createdAt", now - WEEK_MS)).order("desc").take(5)
   let count = 0
-  for (const row of rows) if (prefs.digestCategories[notificationCategory(row.kind)] && await notificationStillVisible(ctx, row)) count += 1
+  for (const row of rows) if (prefs.digestCategories[notificationRowCategory(row.kind)] && await notificationStillVisible(ctx, row)) count += 1
   return count
 }
 

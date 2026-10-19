@@ -24,6 +24,8 @@ import type { ConnectionInviteState } from "@antsia/social-domain/connectionStat
 import type { FileScanStatus } from "@antsia/social-domain/filePolicy"
 import { isServableStatus } from "@antsia/social-domain/filePolicy"
 import type { NotificationKind, NotificationSubject, NotificationSubjectKind } from "@antsia/social-domain/notifications"
+import { type CommerceNotificationKind, isCommerceNotificationKind } from "@antsia/social-domain/commerceNotifications"
+import type { NotificationOpenTarget } from "@antsia/social-domain/notificationOpenTarget"
 import type { TFunction } from "i18next"
 
 import { RESEAU_AGENT_POST_PARAM, reseauAgentGroupeHref, reseauAgentHref } from "../../shell/reseau-agent-nav"
@@ -37,6 +39,7 @@ export type { ConnectionInviteState } from "@antsia/social-domain/connectionStat
 /** Les natures de cible qu'une notification peut désigner. */
 export type NotificationTargetKind =
 	| "post"
+	| "commercialThread"
 	| "groupThread"
 	| "group"
 	| "event"
@@ -48,6 +51,12 @@ export type NotificationTargetKind =
 	| "calls"
 	/** Une conférence en direct — ou sa rediffusion : la SESSION, relue avec sa garde. */
 	| "direct"
+	/** P14B : une demande de service de la personne (devis, rendez-vous, prestation). */
+	| "serviceRequest"
+	/** P14B : la fiche d'une candidature de la personne. */
+	| "jobApplication"
+	/** P14B : des décisions de modération — celles d'une page représentée, ou les siennes. */
+	| "decisions"
 
 export interface NotificationTargetRef {
 	kind: NotificationTargetKind
@@ -64,14 +73,21 @@ export interface NotificationTargetRef {
  * passe tel quel (la table du moteur porte ces quatre entrées, et d'autres).
  */
 export interface NotificationRoutes {
+  associationEvent?: (handle: string, eventId: string) => string
 	/** La page réseau : l'accueil, le fil et ses volets. */
 	home: () => string
 	/** La base de la messagerie (iCom en pages). */
 	messages: () => string
+  commercialConversation?: (threadId: string) => string
 	/** Le profil d'une personne, par son identifiant public. */
 	profile: (handle: string) => string
 	/** La page d'une conférence en direct (et de sa rediffusion), par sa session. */
 	conference: (sessionId: string) => string
+	/** P14B : destinations typées servies par l'application (absentes : aucune cible). */
+	serviceRequest?: (requestRowId: string) => string
+	jobApplication?: (applicationId: string) => string
+	pageModerationDecisions?: (pageId: string) => string
+	personalDecisions?: () => string
 }
 
 /**
@@ -80,6 +96,7 @@ export interface NotificationRoutes {
  * module se teste en `node` sans charger l'API.
  */
 export interface NotificationTargetInput {
+  associationEvent?: { eventId: string; pageHandle: string } | null
 	/** Une chaîne et non le genre du domaine : un serveur en avance peut servir un genre inconnu d'ici. */
 	kind: string
 	/** Ce que la notification DÉSIGNE (`{ kind, id }`), ou `null`. */
@@ -96,6 +113,11 @@ export interface NotificationTargetInput {
 	 * `undefined` vaut `null` — aucun état connu, la ligne relira au clic.
 	 */
 	inviteState?: ConnectionInviteState | null
+	/**
+	 * P14B : la destination TYPÉE relue par le serveur (avis commerce, décision de
+	 * modération) — elle l'emporte sur le sujet commun ; `undefined`/`null` : le sujet.
+	 */
+	target?: NotificationOpenTarget | null
 }
 
 /**
@@ -126,6 +148,8 @@ const INVITE_CANCELLED = "notifications:notificationTargets.inviteCancelled"
 const UNKNOWN_ACTOR = "notifications:notificationTargets.unknownActor"
 /** La phrase d'un genre que ce client ne connaît pas encore. */
 const OTHER_SENTENCE = "notifications:notificationTargets.sentence.other"
+/** P14B : le geste vers des décisions de modération (d'une page représentée, ou les siennes). */
+const DECISIONS_LABEL = "notifications:notificationTargets.viewDecisions"
 
 /**
  * Les genres RELATIONNELS qui mènent à une PERSONNE : le profil de l'acteur.
@@ -161,12 +185,70 @@ function unknownSubject(kind: never): null {
 	return null
 }
 
+/** Une nature de destination typée que ce client ne connaît pas : aucune cible inventée (switch exhaustif). */
+function unknownTarget(target: never): null {
+	void target
+	return null
+}
+
+/**
+ * P14B — la cible d'une destination TYPÉE relue par le serveur (avis commerce,
+ * décision de modération), composée sur les adresses INJECTÉES ; `null` quand
+ * l'application ne sert pas cette nature (la mise en relation DIASPORALE se
+ * route dans son application, jamais ici).
+ */
+function typedTarget(target: NotificationOpenTarget, routes: NotificationRoutes, t: TFunction): NotificationTargetRef | null {
+	switch (target.kind) {
+		case "serviceRequest": {
+			const id = clean(target.requestRowId)
+			const href = id === null ? null : routes.serviceRequest?.(id) ?? null
+			return id === null || href === null ? null : { kind: "serviceRequest", id, href, label: t(OPEN_LABEL) }
+		}
+		case "commercialThread": {
+			const id = clean(target.threadId)
+			const href = id === null ? null : routes.commercialConversation?.(id) ?? null
+			return id === null || href === null ? null : { kind: "commercialThread", id, href, label: t(OPEN_LABEL) }
+		}
+		case "jobApplication": {
+			const id = clean(target.applicationId)
+			const href = id === null ? null : routes.jobApplication?.(id) ?? null
+			return id === null || href === null ? null : { kind: "jobApplication", id, href, label: t(OPEN_LABEL) }
+		}
+		case "pageModerationDecisions": {
+			const id = clean(target.pageId)
+			const href = id === null ? null : routes.pageModerationDecisions?.(id) ?? null
+			return id === null || href === null ? null : { kind: "decisions", id, href, label: t(DECISIONS_LABEL) }
+		}
+		case "personalDecisions": {
+			const href = routes.personalDecisions?.() ?? null
+			return href === null ? null : { kind: "decisions", id: "personal", href, label: t(DECISIONS_LABEL) }
+		}
+		case "diasporaServiceNotice":
+		case "diasporaCommunityNotice":
+			return null
+		// CC-2b (ADR-0025) : la conversation contextuelle se route dans l'application de sa nature
+		// (DIASPORALE en V1) ; aucune adresse ici, la ligne garde « Marquer lu ».
+		case "contextualThread":
+			return null
+		default:
+			return unknownTarget(target)
+	}
+}
+
 /**
  * La cible d'une notification — `null` quand il n'y en a AUCUNE (sujet absent
  * ou sans page, acteur sans `@handle`). La ligne se contente alors de
  * « Marquer lu », jamais d'un lien inventé.
  */
 export function notificationTarget(item: NotificationTargetInput, routes: NotificationRoutes, t: TFunction): NotificationTargetRef | null {
+	// P14B : une destination TYPÉE relue par le serveur l'emporte sur le sujet commun.
+	if (item.target) return typedTarget(item.target, routes, t)
+  // Aucun repli vers l'agenda personnel pour un événement collectif de page.
+  if (item.kind === "association_event_reminder") {
+    const event = item.associationEvent
+    return event && routes.associationEvent && item.subject?.kind === "event" && item.subject.id === event.eventId
+      ? { kind: "event", id: event.eventId, href: routes.associationEvent(event.pageHandle, event.eventId), label: t(OPEN_LABEL) } : null
+  }
 	const subject = item.subject ?? null
 
 	// Les genres RELATIONNELS n'ont pas de sujet « ouvrable » : l'un porte une
@@ -189,6 +271,10 @@ export function notificationTarget(item: NotificationTargetInput, routes: Notifi
 	switch (kind) {
 		case "post":
 			return { kind: "post", id, href: withQuery(routes.home(), `${RESEAU_AGENT_POST_PARAM}=${encodeURIComponent(id)}`), label: t(OPEN_LABEL) }
+		case "commercialThread": {
+      const href = routes.commercialConversation?.(id) ?? null
+      return href === null ? null : { kind: "commercialThread", id, href, label: t(OPEN_LABEL) }
+    }
 		case "groupThread": {
 			const href = conversationHref(groupeKey(id), routes.messages())
 			return href === null ? null : { kind: "groupThread", id, href, label: t(OPEN_LABEL) }
@@ -219,6 +305,9 @@ export function notificationTarget(item: NotificationTargetInput, routes: Notifi
 		case "report":
 			// Une connexion ne s'ouvre pas hors de son genre (traité plus haut) ;
 			// un fichier retenu n'a pas de page ici (la modération a sa console).
+			return null
+		case "contextualThread":
+			// CC-2b : sans destination typée relue, aucune adresse inventée (l'application de la nature route le fil).
 			return null
 		default:
 			return unknownSubject(kind)
@@ -257,8 +346,12 @@ export function targetCallback(kind: NotificationTargetKind, targets: Notificati
 			return targets.onOpenConnection
 		case "profile":
 			return targets.onOpenProfile
+		case "commercialThread":
 		case "album":
 		case "calls":
+		case "serviceRequest":
+		case "jobApplication":
+		case "decisions":
 			return undefined
 	}
 }
@@ -283,6 +376,7 @@ export function notificationRowAction(item: NotificationTargetInput, routes: Not
 	if (target.kind === "connection") {
 		return { mode: "connection", connectionId: target.id }
 	}
+	if (item.kind === "association_event_reminder") return { mode: "link", kind: target.kind, href: target.href, label: target.label }
 	if (targetCallback(target.kind, targets) !== undefined) {
 		return { mode: "callback", kind: target.kind, id: target.id, label: target.label }
 	}
@@ -355,6 +449,13 @@ type EngineOnlyKind = Exclude<NotificationKind, NotificationSentenceKind>
  * parrain lui-même, ou par la modération, qui ne se désigne pas.
  */
 const ENGINE_ONLY_SENTENCES: Readonly<Record<EngineOnlyKind, { actor: string | null; system: string | null }>> = Object.freeze({
+  // P10 : l'acteur est nommé quand la cloche le projette (profil public, déjà visible dans le fil) ;
+  // jamais le contenu, la boutique ni l'offre. Sans acteur : la phrase du système.
+  commercial_contact: {
+    actor: "notifications:notificationTargets.sentence.commercialContactActor",
+    system: "notifications:notificationTargets.sentence.commercialContact",
+  },
+  association_event_reminder: { actor: null, system: "notifications:notificationTargets.sentence.associationEventReminder" },
 		membership_changed: { actor: null, system: "notifications:notificationTargets.sentence.membershipChanged" },
 		badge_changed: { actor: null, system: "notifications:notificationTargets.sentence.badgeChanged" },
 		moderation_decision: { actor: null, system: "notifications:notificationTargets.sentence.moderationDecision" },
@@ -373,6 +474,37 @@ const ENGINE_ONLY_SENTENCES: Readonly<Record<EngineOnlyKind, { actor: string | n
 	},
 	attestation_verified: { actor: null, system: "notifications:notificationTargets.sentence.attestationVerified" },
 	attestation_not_confirmed: { actor: null, system: "notifications:notificationTargets.sentence.attestationNotConfirmed" },
+	// CC-2b (ADR-0025) : conversation contextuelle. En voix de personne, l'acteur est nommé ; en voix de
+	// page, l'avis n'a pas d'acteur (la page parle, le signataire n'est jamais montré) : phrase du système.
+	contextual_message: {
+		actor: "notifications:notificationTargets.sentence.contextualMessage",
+		system: "notifications:notificationTargets.sentence.contextualMessageSystem",
+	},
+	contextual_closed: {
+		actor: "notifications:notificationTargets.sentence.contextualClosed",
+		system: "notifications:notificationTargets.sentence.contextualClosedSystem",
+	},
+})
+
+/**
+ * P14B — avis COMMERCE (services P14, candidatures P15), hors du domaine commun :
+ * une phrase du SYSTÈME par genre, sans acteur, contenu, montant ni nom de
+ * boutique. Un genre commerce ajouté sans phrase ici ne compile pas.
+ */
+const COMMERCE_SENTENCES: Readonly<Record<CommerceNotificationKind, string>> = Object.freeze({
+	commerce_service_quote_received: "notifications:notificationTargets.sentence.commerce.quoteReceived",
+	commerce_service_quote_revised: "notifications:notificationTargets.sentence.commerce.quoteRevised",
+	commerce_service_booking_confirmed: "notifications:notificationTargets.sentence.commerce.bookingConfirmed",
+	commerce_service_booking_declined: "notifications:notificationTargets.sentence.commerce.bookingDeclined",
+	commerce_service_booking_rescheduled: "notifications:notificationTargets.sentence.commerce.bookingRescheduled",
+	commerce_service_booking_cancelled: "notifications:notificationTargets.sentence.commerce.bookingCancelled",
+	commerce_service_order_accepted: "notifications:notificationTargets.sentence.commerce.orderAccepted",
+	commerce_service_order_declined: "notifications:notificationTargets.sentence.commerce.orderDeclined",
+	commerce_service_quote_accepted: "notifications:notificationTargets.sentence.commerce.quoteAccepted",
+	commerce_service_booking_held: "notifications:notificationTargets.sentence.commerce.bookingHeld",
+	commerce_service_booking_client_changed: "notifications:notificationTargets.sentence.commerce.bookingClientChanged",
+	commerce_service_booking_client_cancelled: "notifications:notificationTargets.sentence.commerce.bookingClientCancelled",
+	commerce_job_application_updated: "notifications:notificationTargets.sentence.commerce.applicationUpdated",
 })
 
 function isSentenceKind(kind: string): kind is NotificationSentenceKind {
@@ -408,6 +540,13 @@ export function notificationRowSentence(item: NotificationSentenceInput, t: TFun
 		const pageName = clean(item.page?.name)
 		if (pageName !== null) return t("notifications:notificationTargets.sentence.pagePostNamed", { page: pageName })
 	}
+	// P14B : décision visant une page que le lecteur représente (carte publique relue par le serveur) — ni motif, ni contenu.
+	if (item.kind === "moderation_decision") {
+		const pageName = clean(item.page?.name)
+		if (pageName !== null) return t("notifications:notificationTargets.sentence.moderationDecisionPage", { page: pageName })
+	}
+	// P14B : avis du système, jamais un nom ni un contenu.
+	if (isCommerceNotificationKind(item.kind)) return t(COMMERCE_SENTENCES[item.kind])
 	const actorName = clean(item.actor?.displayName) ?? t(UNKNOWN_ACTOR)
 	if (isSentenceKind(item.kind)) return notificationSentence(item.kind, actorName, t)
 	if (isEngineOnlyKind(item.kind)) {

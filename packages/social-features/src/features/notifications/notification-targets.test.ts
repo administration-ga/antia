@@ -5,6 +5,7 @@ import type {
 	NotificationSubjectKind,
 } from "@antsia/social-domain/notifications"
 import { NOTIFICATION_KINDS } from "@antsia/social-domain/notifications"
+import { COMMERCE_NOTIFICATION_KINDS } from "@antsia/social-domain/commerceNotifications"
 import { describe, expect, it, vi } from "vitest"
 
 import { createAppI18n } from "../../i18n"
@@ -51,6 +52,18 @@ function subject(kind: NotificationSubjectKind, id: string): NotificationSubject
 }
 
 describe("notificationTarget — une adresse par nature de sujet", () => {
+	it("garde le rappel associatif sur sa route injectée, sans agenda ni callback personnels", () => {
+		const notice = item({ kind: "association_event_reminder", subject: subject("event", "ev-asso"), associationEvent: { eventId: "ev-asso", pageHandle: "association-demo" } })
+		expect(notificationTarget(notice, ROUTES, t)).toBeNull()
+		const routes = { ...ROUTES, associationEvent: (handle: string, eventId: string) => `/pages/${encodeURIComponent(handle)}/evenements/${encodeURIComponent(eventId)}` }
+		expect(notificationRowAction(notice, routes, { onOpenPersonalEvent: vi.fn() }, t)).toEqual({ mode: "link", kind: "event", href: "/pages/association-demo/evenements/ev-asso", label: "Ouvrir" })
+		expect(notificationTarget({ ...notice, subject: subject("event", "autre") }, routes, t)).toBeNull()
+	})
+	it("phrase le rappel sans acteur ni contenu en français et en anglais", () => {
+		const notice = { kind: "association_event_reminder", actor: { displayName: "Personne sans rapport" } }
+		expect(notificationRowSentence(notice, t)).toBe("Rappel : un événement auquel vous êtes inscrit approche.")
+		expect(notificationRowSentence(notice, tEn)).toBe("Reminder: an event you registered for is approaching.")
+	})
 	it("ouvre une publication sur la page réseau, par son paramètre de vue", () => {
 		expect(notificationTarget(item({ subject: subject("post", "post-1") }), ROUTES, t)).toEqual({
 			kind: "post",
@@ -451,7 +464,7 @@ describe("connectionInviteOutcome — relire avant d'agir", () => {
 
 describe("notificationRowSentence — ce que dit la ligne, pour TOUS les genres du moteur", () => {
 	const OTHER = "Nouvelle activité dans le réseau."
-	const SYSTEM_KINDS: readonly NotificationKind[] = ["membership_changed", "badge_changed", "moderation_decision", "page_post", "file_withheld", "attestation_verified", "attestation_not_confirmed"]
+	const SYSTEM_KINDS: readonly NotificationKind[] = ["membership_changed", "badge_changed", "moderation_decision", "page_post", "file_withheld", "attestation_verified", "attestation_not_confirmed", "association_event_reminder"]
 
 	it("chaque genre du domaine a sa phrase — jamais une clé brute, jamais la phrase générique", () => {
 		for (const kind of NOTIFICATION_KINDS) {
@@ -493,6 +506,19 @@ describe("notificationRowSentence — ce que dit la ligne, pour TOUS les genres 
 			"Awa a retiré son parrainage.",
 		)
 		expect(notificationRowSentence({ kind: "sponsorship_withdrawn", actor: null }, t)).toBe("Votre parrainage a été retiré.")
+	})
+
+	it("P10 : un contact commercial nomme l'acteur projeté par la cloche, sans contenu ni boutique ; sans acteur, la phrase du système", () => {
+		expect(notificationRowSentence({ kind: "commercial_contact", actor: { displayName: "Awa" } }, t)).toBe(
+			"Nouvelle activité dans votre conversation commerciale avec Awa.",
+		)
+		expect(notificationRowSentence({ kind: "commercial_contact", actor: { displayName: "Awa" } }, tEn)).toBe(
+			"New activity in your commercial conversation with Awa.",
+		)
+		expect(notificationRowSentence({ kind: "commercial_contact", actor: { displayName: null } }, t)).toBe(
+			"Nouvelle activité dans votre conversation commerciale avec Membre du réseau.",
+		)
+		expect(notificationRowSentence({ kind: "commercial_contact", actor: null }, t)).toBe("Une conversation commerciale a une nouvelle activité.")
 	})
 
 	it("nomme par le libellé neutre un acteur au profil non publié, ou absent d'un genre qui en attend un", () => {
@@ -547,5 +573,70 @@ describe("notificationRowNote — ce qu'est DEVENU le sujet", () => {
 		for (const status of ["suspicious", "infected", "error", null, undefined] as const) {
 			expect(notificationRowNote({ kind: "file_withheld", fileScanStatus: status }, none, t)).toBeNull()
 		}
+	})
+})
+
+/** P14B (écrit, non exécuté) : destinations TYPÉES relues par le serveur et phrases des avis commerce. */
+describe("P14B — destinations typées et avis commerce", () => {
+	const TYPED: NotificationRoutes = {
+		...ROUTES,
+		commercialConversation: (threadId) => `/messages/commerce/${threadId}`,
+		serviceRequest: (requestRowId) => `/mes-demandes/${requestRowId}`,
+		jobApplication: (applicationId) => `/mes-candidatures/${applicationId}`,
+		pageModerationDecisions: (pageId) => `/mes-donnees#decisions-page-${pageId}`,
+		personalDecisions: () => "/mes-donnees",
+	}
+
+	it("la destination typée l'emporte sur le sujet commun et se compose sur les adresses injectées", () => {
+		expect(notificationTarget(item({ kind: "commerce_service_booking_confirmed", target: { kind: "serviceRequest", requestRowId: "demande-1" } }), TYPED, t))
+			.toEqual({ kind: "serviceRequest", id: "demande-1", href: "/mes-demandes/demande-1", label: "Ouvrir" })
+		expect(notificationTarget(item({ kind: "commerce_job_application_updated", target: { kind: "jobApplication", applicationId: "cand-1" } }), TYPED, t))
+			.toEqual({ kind: "jobApplication", id: "cand-1", href: "/mes-candidatures/cand-1", label: "Ouvrir" })
+		expect(notificationTarget(item({ kind: "commerce_service_quote_accepted", target: { kind: "commercialThread", threadId: "fil-1" } }), TYPED, t))
+			.toEqual({ kind: "commercialThread", id: "fil-1", href: "/messages/commerce/fil-1", label: "Ouvrir" })
+		expect(notificationTarget(item({ kind: "moderation_decision", subject: subject("report", "r1"), target: { kind: "pageModerationDecisions", pageId: "page-1", pageHandle: "page-demo" } }), TYPED, t))
+			.toEqual({ kind: "decisions", id: "page-1", href: "/mes-donnees#decisions-page-page-1", label: "Voir les décisions" })
+		expect(notificationTarget(item({ kind: "moderation_decision", subject: subject("report", "r1"), target: { kind: "personalDecisions" } }), TYPED, t))
+			.toEqual({ kind: "decisions", id: "personal", href: "/mes-donnees", label: "Voir les décisions" })
+	})
+
+	it("une application qui ne sert pas la nature n'invente aucune adresse ; la mise en relation DIASPORALE ne se route pas ici", () => {
+		expect(notificationTarget(item({ kind: "commerce_service_booking_confirmed", target: { kind: "serviceRequest", requestRowId: "demande-1" } }), ROUTES, t)).toBeNull()
+		expect(notificationTarget(item({ kind: "moderation_decision", subject: subject("report", "r1"), target: { kind: "personalDecisions" } }), ROUTES, t)).toBeNull()
+		expect(notificationTarget(item({ kind: "service_request_received", target: { kind: "diasporaServiceNotice", audience: "provider", subjectKind: "serviceRequest", subjectId: "sr-1", requestId: "sr-1", pageHandle: "salon-demo" } }), TYPED, t)).toBeNull()
+		// Sans destination typée (`null`), la cible du sujet commun reste la règle ; une décision sans destination n'a pas de lien.
+		expect(notificationTarget(item({ subject: subject("post", "post-1"), target: null }), TYPED, t)?.href).toBe(`${HOME}?post=post-1`)
+		expect(notificationTarget(item({ kind: "moderation_decision", subject: subject("report", "r1"), target: null }), TYPED, t)).toBeNull()
+		// Identifiant vide : aucune adresse.
+		expect(notificationTarget(item({ kind: "commerce_job_application_updated", target: { kind: "jobApplication", applicationId: "  " } }), TYPED, t)).toBeNull()
+	})
+
+	it("une destination typée sort toujours en lien (aucun rappel d'hôte), et ne propose pas « Marquer lu »", () => {
+		const targets = { onOpenPost: vi.fn(), onOpenProfile: vi.fn() }
+		expect(notificationRowAction(item({ kind: "commerce_service_booking_held", target: { kind: "serviceRequest", requestRowId: "demande-1" } }), TYPED, targets, t))
+			.toEqual({ mode: "link", kind: "serviceRequest", href: "/mes-demandes/demande-1", label: "Ouvrir" })
+		expect(notificationRowAction(item({ kind: "commerce_service_booking_held", target: null }), TYPED, targets, t)).toEqual({ mode: "none" })
+		for (const kind of ["serviceRequest", "jobApplication", "decisions"] as const) expect(targetCallback(kind, targets)).toBeUndefined()
+	})
+
+	it("chaque genre commerce a sa phrase du système : ni acteur, ni clé brute, ni phrase générique", () => {
+		for (const kind of COMMERCE_NOTIFICATION_KINDS) {
+			const sentence = notificationRowSentence({ kind, actor: { displayName: "Awa" } }, t)
+			expect(sentence, kind).not.toMatch(/^(notifications|reseau):/)
+			expect(sentence, kind).not.toBe("Nouvelle activité dans le réseau.")
+			expect(sentence, kind).not.toContain("Awa")
+			expect(notificationRowSentence({ kind, actor: null }, tEn), kind).not.toBe("New activity in the network.")
+		}
+		expect(notificationRowSentence({ kind: "commerce_service_quote_received", actor: null }, t)).toBe("Un devis vous attend pour votre demande de service.")
+		expect(notificationRowSentence({ kind: "commerce_job_application_updated", actor: null }, tEn)).toBe("Your job application status has changed.")
+	})
+
+	it("une décision visant une page représentée nomme la page (carte publique), jamais le motif ; sans carte, la phrase personnelle", () => {
+		expect(notificationRowSentence({ kind: "moderation_decision", actor: null, page: { name: "Cabinet de recette" } }, t))
+			.toBe("Une décision de modération concerne la page Cabinet de recette. Consultez ses décisions et recours.")
+		expect(notificationRowSentence({ kind: "moderation_decision", actor: null, page: null }, t))
+			.toBe("Une décision de modération vous concerne. Consultez vos décisions et recours.")
+		expect(notificationRowSentence({ kind: "moderation_decision", actor: null, page: { name: "  " } }, tEn))
+			.toBe("A moderation decision concerns you. View your decisions and appeals.")
 	})
 })

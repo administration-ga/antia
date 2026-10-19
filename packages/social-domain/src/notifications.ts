@@ -23,6 +23,14 @@ export const NOTIFICATION_KINDS = [
   "new_follower",
   /** Conversation de groupe : le sujet est le FIL, jamais un message. */
   "group_message",
+  "commercial_contact",
+  /**
+   * Conversation contextuelle (CC-1, ADR-0025) : un nouveau message. Le sujet est le FIL ;
+   * en voix de page, aucun acteur (la page parle, le signataire n'est jamais montré au demandeur).
+   */
+  "contextual_message",
+  /** Conversation contextuelle : un côté a clos le fil (D12). Les transitions de l'objet gardent leurs propres avis. */
+  "contextual_closed",
   "group_added",
   /** Un direct a COMMENCÉ (jamais à la programmation). */
   "live_started",
@@ -31,6 +39,8 @@ export const NOTIFICATION_KINDS = [
   "live_replay_published",
   "thematic_group_invite",
   "event_invite",
+  /** Rappel personnel d'un événement de page, sans contenu dans la notification. */
+  "association_event_reminder",
   /** Une page que je suis a publié : le sujet est la PUBLICATION, sans acteur (c'est la page qui parle). */
   "page_post",
   /** Une personne que je suis a publié un album (première publication seulement) : le sujet est l'ALBUM. */
@@ -77,7 +87,7 @@ export type NotificationResolution = (typeof NOTIFICATION_RESOLUTIONS)[number]
  * `live_invite`, `live_antenna_invite` et `live_replay_published` — relue avec
  * sa garde à l'ouverture (la page de conférence sert le direct ou sa rediffusion).
  */
-export const NOTIFICATION_SUBJECT_KINDS = ["post", "connection", "fileScan", "thematicGroup", "groupThread", "event", "album", "call", "voicemail", "liveSession", "report"] as const
+export const NOTIFICATION_SUBJECT_KINDS = ["post", "connection", "fileScan", "thematicGroup", "groupThread", "commercialThread", "contextualThread", "event", "album", "call", "voicemail", "liveSession", "report"] as const
 
 export type NotificationSubjectKind = (typeof NOTIFICATION_SUBJECT_KINDS)[number]
 

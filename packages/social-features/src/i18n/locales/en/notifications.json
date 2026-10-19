@@ -39,10 +39,13 @@
     "inviteAlreadyHandled": "Invitation already handled.",
     "inviteCancelled": "Invitation cancelled.",
     "unknownActor": "Network member",
+    "viewDecisions": "View decisions",
     "sentence": {
+      "associationEventReminder": "Reminder: an event you registered for is approaching.",
       "membershipChanged": "Your network membership has changed.",
       "badgeChanged": "Your badges have changed.",
       "moderationDecision": "A moderation decision concerns you. View your decisions and appeals.",
+      "moderationDecisionPage": "A moderation decision concerns the page {{page}}. View its decisions and appeals.",
       "pagePost": "A page you follow published a post.",
       "pagePostNamed": "{{page}} posted.",
       "albumPublished": "{{actor}} published an album.",
@@ -54,7 +57,28 @@
       "sponsorshipWithdrawnSystem": "Your sponsorship was withdrawn.",
       "attestationVerified": "Your consular registration is confirmed: your account is verified.",
       "attestationNotConfirmed": "We could not confirm your consular registration.",
-      "other": "New activity in the network."
+      "other": "New activity in the network.",
+      "commercialContact": "A commercial conversation has new activity.",
+      "commercialContactActor": "New activity in your commercial conversation with {{actor}}.",
+      "contextualMessage": "{{actor}} sent you a message in a request conversation.",
+      "contextualMessageSystem": "New message in a request conversation.",
+      "contextualClosed": "{{actor}} closed a request conversation.",
+      "contextualClosedSystem": "A request conversation was closed.",
+      "commerce": {
+        "quoteReceived": "A quote is waiting for your service request.",
+        "quoteRevised": "A revised quote is waiting for your service request.",
+        "bookingConfirmed": "Your appointment is confirmed by the professional.",
+        "bookingDeclined": "The professional did not accept your appointment request.",
+        "bookingRescheduled": "The professional moved your appointment.",
+        "bookingCancelled": "The professional cancelled your appointment.",
+        "orderAccepted": "Your service order is accepted by the professional.",
+        "orderDeclined": "Your service order was declined or cancelled by the professional.",
+        "quoteAccepted": "A customer accepted a quote from your shop.",
+        "bookingHeld": "A customer booked an appointment slot with your shop.",
+        "bookingClientChanged": "A customer changed their appointment with your shop.",
+        "bookingClientCancelled": "A customer cancelled their appointment with your shop.",
+        "applicationUpdated": "Your job application status has changed."
+      }
     },
     "fileScan": {
       "released": "This file has since been released.",
