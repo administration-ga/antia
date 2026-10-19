@@ -11,5 +11,5 @@ export { FeedReturnSessionBoundary } from "../features/feed-immersion/FeedReturn
 export { usePresenceHeartbeat } from "./presence/use-presence-heartbeat"
 export { MyPresenceRow } from "./account/my-presence-row"
 
-export { AppearanceProvider, AppearanceControl, useOptionalAppearance } from "./appearance"
+export { AppearanceProvider, AppearanceControl, AppearanceToggle, useOptionalAppearance } from "./appearance"
 export { PostHogProvider, resolvePostHogConfiguration } from "./analytics"
