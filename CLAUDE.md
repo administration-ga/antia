@@ -105,6 +105,24 @@ d'effacement dérivé du schéma est vérifiée par `convex/modules/people/erasu
 
 ## Pièges déjà payés
 
+- **PA10 / état de livraison (18/10/2026)** : sources du fil matérialisé et de
+  l'observabilité raccordées, **sans codegen, tests, typages, lint, build ni recette**
+  à la demande du propriétaire. Aucun commit/publication. Passation :
+  `docs/06_RAPPORT_LANCEMENT.md` ; exploitation/charge/restauration : `docs/20`.
+  Ne jamais présenter les preuves historiques PA3–PA8 comme une validation PA9/PA10.
+- **PA10 / fil** : seules des références vivent dans `feedEntries`, par réseau de
+  lecture/lecteur/portée. Rattrapage et fan-out par étapes CAS, fenêtre30j ; le
+  curseur matérialisé porte les dates du POST, la stratégie, génération et fenêtre.
+  Une génération partielle ne bascule pas ; les paires et gardes se relisent
+  toujours. Les groupes et portées récentes gardent leur lecture propre.
+- **PA10 / données et exploitation** : les tables du fil s'effacent par index
+  lecteur/post et parents suivis par `dataErasureTargets` ; aucun export du contenu
+  étranger par une référence. Le passage orphelin supprime uniquement un blob
+  sans admission ni réservation depuis plus de24h, après protection des stages
+  historiques (`orphans.run`, pas de purge directe). La santé technique observe un stock borné de
+  jobs ; elle ne couvre pas les erreurs synchrones. PostHog reste consenti/UE,
+  identité mémoire seulement, donc aucune rétention multivisite annoncée.
+
 - **PA5 / export et effacement** : une référence personnelle ou une mention ne donne pas
   la propriété du document. L'export passe par `exportableRecord` et ses projections,
   jamais par une ligne étrangère brute. Les vérifications Better Auth sont parcourues

@@ -23,12 +23,24 @@ Deux objets dans un dépôt :
 d'identité unique du programme. Licence : voir `LICENSE` et `NOTICE` (AGPL-3.0, héritée du socle
 dont le code est dupliqué — à confirmer par le propriétaire).
 
-## État (15 octobre 2026)
+## État (18 octobre 2026)
 
-PA0 (scaffold), PA1 (owner map de duplication, `docs/02`) et PA2 (fondations multi-réseaux,
-domaine pur) sont clos ; une **tranche verticale testable** tourne sur antsia.ga : entrer par code
-à usage unique, choisir son nom et son identifiant, rejoindre le réseau `antsia`, publier, lire le
-fil, réagir. DIASPORALE est câblé comme application externe (installation unique ici).
+La refonte commerciale P10–P12 ajoute le contact avec PRO.GA, les préparations de commandes
+et le suivi privé des paiements. La retenue ANTSIA et la part vendeur sont paramétrables,
+avec fonds en attente de réception et preuve de reversement distincte. **P12 reste partiel :
+aucun connecteur, paiement ou reversement réel activé.** Génération et vérifications sont
+différées ; [rapport P12](docs/etudes/2026-10-18-social-commerce/rapports/P12_PAIEMENT.md)
+et [rapport P10](docs/21_CONTACT_COMMERCIAL_PRO_GA.md).
+
+Les lots PA0 à PA8 disposent de rapports de réalisation et de preuves locales datées. PA9
+(fédération administrative) et PA10 (échelle/préparation au lancement) sont implémentés dans
+les sources partagées ; leur configuration, génération et vérification restent ouvertes.
+PA10 ajoute le fil personnel matérialisé, la distribution et le rattrapage par lots, les
+retraits sous garde vivante, la rétention, les accès indexés d'effacement du fil, la purge
+des téléversements abandonnés et le suivi opérationnel dans la console.
+**Les vérifications sont différées à la demande du propriétaire : aucune charge, restauration,
+recette ni publication n'a été exécutée pour ces nouveaux lots.** DIASPORALE est une application
+externe du même moteur (installation unique ici).
 L'avancement prompt par prompt est tenu dans l'encart « État » de
 [`docs/01_PLAN_IMPLEMENTATION_PROMPTS_ANTSIA.md`](docs/01_PLAN_IMPLEMENTATION_PROMPTS_ANTSIA.md).
 
@@ -37,6 +49,8 @@ L'avancement prompt par prompt est tenu dans l'encart « État » de
 | [`docs/00_CAHIER_DES_CHARGES_ANTSIA.md`](docs/00_CAHIER_DES_CHARGES_ANTSIA.md) | cahier des charges du moteur (partie A) et du réseau public (partie B) : exigences `EXF-AN` / `EXT-AN`, lots A0–A6, parcours R1–R10, arbitrages A1–A10 |
 | [`docs/01_PLAN_IMPLEMENTATION_PROMPTS_ANTSIA.md`](docs/01_PLAN_IMPLEMENTATION_PROMPTS_ANTSIA.md) | onze prompts PA0 → PA10 et leur état ; **DIASPORALE PD0 → PD6 s'exécute entre PA7 et PA8** |
 | [`docs/adr/`](docs/adr/) | décisions d'architecture du moteur |
+| [`docs/06_RAPPORT_LANCEMENT.md`](docs/06_RAPPORT_LANCEMENT.md) | état des sources, preuves historiques, vérifications différées, risques et passation PA10 |
+| [`docs/20_EXPLOITATION_ECHELLE_ET_RESTAURATION_PA10.md`](docs/20_EXPLOITATION_ECHELLE_ET_RESTAURATION_PA10.md) | procédures de charge, restauration sur cible jetable et observabilité ; aucune exécutée |
 | `../../../Documentation/RESEAUX_SOCIAUX/` | plan de pilotage « réseaux dans le réseau » et annexes A–D |
 | `../DIASPORALE/docs/00_CAHIER_DES_CHARGES_DIASPORALE.md` | le premier réseau servi par le moteur |
 

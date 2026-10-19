@@ -15,6 +15,13 @@ dependances:
 
 # ANTSIA — Cahier des charges fonctionnel et technique
 
+> **État au 18/10/2026 — PA10.** Fil personnel matérialisé, distribution/rattrapage bornés,
+> rétention, purge des dépôts non admis et observabilité complétés dans les sources.
+> La préparation au lancement est consignée dans `docs/06_RAPPORT_LANCEMENT.md`.
+> À la demande du propriétaire, contrôles, charge, restauration et audits sont différés.
+> PA9 reste ouvert pour configuration/PR/recette croisée ; aucun lancement ni publication
+> n'est déclaré par cet encart. Le cahier et ses critères de sortie restent inchangés.
+
 > **Nom confirmé.** Le propriétaire a confirmé explicitement **ANTSIA** le 16/10/2026.
 > Le domaine cible est `antsia.ga` ; son attribution et sa configuration restent à la charge
 > du propriétaire. Ce renommage local ne vaut pas renommage d’un dépôt ni d’un domaine externe
