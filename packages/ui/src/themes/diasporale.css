@@ -38,6 +38,12 @@
  * Version 3.3 (17/10/2026, correction du propriétaire sur le fil clair) :
  * inversion des surfaces claires — fond papier, cartes sable. Les rôles du
  * moteur et d'iCom suivent la même hiérarchie ; le sombre reste inchangé.
+ * Thèmes au choix (19/10/2026, demande du propriétaire) : cette charte est le thème
+ * « Sable », celui par défaut. Le membre peut lui préférer « Gaboma »
+ * (`diasporale-gaboma.css`, `data-charte="diasporale-gaboma"`) : la même structure,
+ * recopiée jeton pour jeton, sur les couleurs du réseau ANTSIA. Toute modification
+ * d'un rôle ou d'une mesure ici se reporte là-bas : le cliquet
+ * `engine-theme-contrast.test.ts` de DIASPORALE compare les deux structures.
  */
 
 [data-charte="diasporale"] {
@@ -317,6 +323,13 @@
   --esp-banner: linear-gradient(135deg, var(--esp-blue-700) 0%, var(--esp-blue-800) 100%);
   --esp-on-banner: var(--esp-neutral-0);
   --esp-on-banner-muted: var(--esp-blue-100);
+
+  /* L'aperçu du thème (Réglages > Langue et apparence) : la sarcelle (sixième famille
+     des avatars), le sable doré (l'ambre du sombre) et le bleu Gabon — lisibles sur le
+     papier comme sur la nuit, dans les deux modes. */
+  --esp-theme-swatch-1: #238090;
+  --esp-theme-swatch-2: #d7ad63;
+  --esp-theme-swatch-3: #0167a8;
 }
 
 .dark[data-charte="diasporale"],
