@@ -14,6 +14,23 @@ export function parseOriginList(raw: string | undefined): string[] {
   }))]
 }
 
+export type ApplicationKey = keyof typeof catalog.applications
+
+/**
+ * L'application du catalogue servie à cette origine : son adresse publique, ou son
+ * port local quand les outils de développement sont ouverts. `null` sinon.
+ */
+export function applicationOfOrigin(origin: string | null | undefined, env: Env = process.env): ApplicationKey | null {
+  const [normalized] = parseOriginList(origin ?? "")
+  if (!normalized) return null
+  const local = devToolsAllowed(env)
+  for (const [key, app] of Object.entries(catalog.applications) as [ApplicationKey, (typeof catalog.applications)[ApplicationKey]][]) {
+    if (parseOriginList(app.site_url).includes(normalized)) return key
+    if (local && [`http://localhost:${app.dev_port}`, `http://127.0.0.1:${app.dev_port}`].includes(normalized)) return key
+  }
+  return null
+}
+
 export function trustedOrigins(env: Env = process.env): string[] {
   const origins = [...parseOriginList(env.SITE_URL), ...parseOriginList(env.TRUSTED_ORIGINS)]
   for (const app of Object.values(catalog.applications)) {

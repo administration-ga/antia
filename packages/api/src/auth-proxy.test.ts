@@ -32,6 +32,26 @@ describe("proxy Better Auth du moteur", () => {
     expect(await response.json()).toEqual({ ok: true })
   })
 
+  it("relaie tels quels l'origine et la langue de la requête : le moteur en tire la marque et la langue du code", async () => {
+    const fetchImpl = vi.fn(async (_url: string | URL | Request, init?: RequestInit) => {
+      const headers = init?.headers as Record<string, string>
+      expect(headers.origin).toBe("http://localhost:3031")
+      expect(headers["accept-language"]).toBe("en")
+      expect(headers.cookie).toBe("diasporale-langue=en")
+      return new Response('{"success":true}', { status: 200, headers: { "content-type": "application/json" } })
+    })
+    const response = await proxyToConvex(
+      request("/api/auth/email-otp/send-verification-otp", {
+        method: "POST",
+        headers: { "content-type": "application/json", origin: "http://localhost:3031", "accept-language": "en", cookie: "diasporale-langue=en" },
+        body: '{"email":"ada@example.test","type":"sign-in"}',
+      }),
+      { convexSiteUrl: SITE, isDev: true, fetchImpl: fetchImpl as unknown as typeof fetch },
+    )
+    expect(fetchImpl).toHaveBeenCalledOnce()
+    expect(response.status).toBe(200)
+  })
+
   it("réécrit les cookies en développement seulement", async () => {
     const upstream = () => {
       const headers = new Headers()
