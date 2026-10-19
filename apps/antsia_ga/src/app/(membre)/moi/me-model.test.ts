@@ -17,6 +17,7 @@ describe("Profil — ce que la destination regroupe (P02)", () => {
       ["payments", routes.paymentList()],
       ["serviceRequests", routes.serviceRequests()],
       ["applications", routes.myApplications()],
+      ["settings", routes.settings()],
       ["feedPreferences", routes.feedPreferences()],
       ["moderation", routes.moderation()],
       ["personalData", routes.personalControls()],
@@ -33,7 +34,7 @@ describe("Profil — ce que la destination regroupe (P02)", () => {
     for (const handle of [null, "", "   "]) {
       const entries = meEntries(handle)
       expect(entries.map((entry) => entry.id)).not.toContain("profile")
-      expect(entries).toHaveLength(12)
+      expect(entries).toHaveLength(13)
       expect(entries.find((entry) => entry.id === "shop")?.href).toBe(routes.myShops())
     }
   })

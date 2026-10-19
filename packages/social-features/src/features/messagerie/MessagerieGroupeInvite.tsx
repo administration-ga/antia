@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/messagerie/MessagerieGroupeInvite.tsx @ ad2e7fdc2 — adaptations : aperçu et entrée par `groups.invites.previewGroupInvite` et `joinGroupViaInviteLink` du moteur (réseau courant : un jeton d'un autre réseau se lit comme un jeton inconnu) ; refus traduit (`messageErreurLisible(err, t)`) ; textes traduits (i18n `messagerie`, clés `messagerieGroupeInvite.…`) ; « identité iRéseau » devient « identité sur le réseau » ; feuille de style sortie du JSX dans une constante de module (`MSG_GROUPE_INVITE_CSS`) — un littéral enfant de `<style>` passerait pour une chaîne d'interface — règles inchangées.
+// Dupliqué de socle/packages/agent-features/src/features/messagerie/MessagerieGroupeInvite.tsx @ ad2e7fdc2 — adaptations : aperçu et entrée par `groups.invites.previewGroupInvite` et `joinGroupViaInviteLink` du moteur (réseau courant : un jeton d'un autre réseau se lit comme un jeton inconnu) ; refus traduit (`messageErreurLisible(err, t)`) ; textes traduits (i18n `messagerie`, clés `messagerieGroupeInvite.…`) ; « identité iRéseau » devient « identité sur le réseau » ; feuille de style sortie du JSX dans une constante de module (`MSG_GROUPE_INVITE_CSS`) — un littéral enfant de `<style>` passerait pour une chaîne d'interface — règles inchangées, sauf Rejoindre aux couleurs des relations (`data-role="social"`, `--role-social-*`, aplat d'identité en repli ; ADR-0027).
 "use client"
 
 import { api } from "@antsia/api/engine"
@@ -115,6 +115,8 @@ export function MessagerieGroupeInviteView({
 						<button
 							type="button"
 							className="msg-group-invite-primary"
+							// Rejoindre : couleur des relations ; « Ouvrir » garde l'aplat d'identité (ADR-0027).
+							data-role={preview.alreadyMember ? undefined : "social"}
 							disabled={joining}
 							onClick={onAction}
 						>
@@ -306,6 +308,11 @@ const MSG_GROUPE_INVITE_CSS = `
 				border: 1px solid var(--primary-700);
 				background: var(--primary-fill);
 				color: var(--on-fill);
+			}
+			.msg-group-invite-primary[data-role="social"] {
+				border-color: var(--role-social-fill, var(--primary-700));
+				background: var(--role-social-fill, var(--primary-fill));
+				color: var(--role-social-on, var(--on-fill));
 			}
 			.msg-group-invite-primary:disabled { cursor: wait; opacity: .65; }
 			.msg-group-invite-secondary {

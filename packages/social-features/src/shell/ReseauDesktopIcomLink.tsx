@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/ReseauDesktopIcomLink.tsx @ ad2e7fdc2 — adaptations : déplacé dans la coque (`shell/`) ; décomptes par la source personnelle d'iCom du moteur (`SOURCE_AGENT.useUnreadTotals`, réseau courant) ; nom accessible et mot visible par l'i18n (`desktopIcomLabel(unread, t)` : `t` en DERNIER paramètre, clés qualifiées `reseau:reseauDesktopIcomLink.*`, pluriel par `count`) ; « Réseau personnel » et « iRéseau » deviennent « réseau » ; rendu, détachement du dock et pastille inchangés ; P02 (18/10/2026) : sous la navigation par destinations déclarée par l'application, la porte s'efface — la destination Messages du rail porte le même geste (détacher iCom en place) et la même pastille.
+// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/ReseauDesktopIcomLink.tsx @ ad2e7fdc2 — adaptations : déplacé dans la coque (`shell/`) ; décomptes par la source personnelle d'iCom du moteur (`SOURCE_AGENT.useUnreadTotals`, réseau courant) ; nom accessible et mot visible par l'i18n (`desktopIcomLabel(unread, t)` : `t` en DERNIER paramètre, clés qualifiées `reseau:reseauDesktopIcomLink.*`, pluriel par `count`) ; « Réseau personnel » et « iRéseau » deviennent « réseau » ; rendu, détachement du dock et pastille inchangés ; P02 (18/10/2026) : sous la navigation par destinations déclarée par l'application, la porte s'efface — la destination Messages du rail porte le même geste (détacher iCom en place) et la même pastille. Système épuré (ADR-0027) : pastille de décompte aux couleurs des réactions (`--role-react-*`), danger en repli.
 "use client"
 
 /**
@@ -88,8 +88,9 @@ export function ReseauDesktopIcomLink() {
             justifyContent: "center",
             borderRadius: 999,
             paddingInline: 4,
-            background: "var(--danger-fill)",
-            color: "var(--on-fill)",
+            // Décompte aux couleurs des réactions (ADR-0027), danger en repli.
+            background: "var(--role-react-fill, var(--danger-fill))",
+            color: "var(--role-react-on, var(--on-fill))",
             fontSize: 9,
             fontWeight: 700,
           }}

@@ -54,6 +54,7 @@
     "profileHint": "Ce que les membres voient de vous : publications, albums et relations.",
     "storiesHint": "Vos actus et celles de votre réseau, en plein écran.",
     "feedPreferencesHint": "Les publications masquées et les auteurs mis en sourdine, à réafficher quand vous voulez.",
+    "settingsHint": "Affichage, thème, motif de fond, langue et fuseau horaire.",
     "moderationHint": "Les files de modération, pour les équipes habilitées.",
     "personalDataHint": "Export, effacement, décisions qui vous concernent et notifications. Ouvert même en cas de suspension."
   },
@@ -228,8 +229,16 @@
     "pageDecisionsEmpty": "Aucune décision ne vise cette page.",
     "pageDecisionsUnavailable": "Les décisions de cette page ne sont pas accessibles pour le moment."
   },
+  "settings": {
+    "title": "Paramètres",
+    "lead": "Réglez l’affichage d’{{brand}}, sa langue et votre fuseau horaire.",
+    "displayTitle": "Affichage",
+    "displayLead": "Votre thème est enregistré sur votre compte et vous suit sur vos autres appareils. L’apparence et le motif de fond restent propres à cet appareil.",
+    "moreTitle": "Autres réglages"
+  },
   "preferences": {
     "title": "Vos préférences",
+    "languageTitle": "Langue et fuseau horaire",
     "lead": "Choisissez votre langue et le fuseau utilisé pour les dates et les heures dans tous vos réseaux.",
     "localeLabel": "Langue de l’interface",
     "localeHint": "La langue choisie s’applique après l’enregistrement.",

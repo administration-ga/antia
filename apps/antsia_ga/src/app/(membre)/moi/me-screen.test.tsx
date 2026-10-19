@@ -27,7 +27,15 @@ describe("Profil — l'écran rend chaque entrée du modèle, l'apparence et la 
     expect(html).toContain("<h1")
     expect(html).toContain("me.title")
     for (const key of ["me.activityTitle", "me.preferencesTitle", "me.accountTitle"]) expect(html).toContain(key)
-    expect(hrefsOf(html)).toEqual(meEntries("awa.ndong").map((entry) => entry.href))
+    // Le raccourci « Paramètres » de l'en-tête, puis chaque entrée du modèle.
+    expect(hrefsOf(html)).toEqual([routes.settings(), ...meEntries("awa.ndong").map((entry) => entry.href)])
+  })
+
+  it("met les paramètres (affichage, thème, langue) à portée dès l'en-tête", () => {
+    const html = renderToStaticMarkup(<MemberMeScreen />)
+    const header = html.slice(html.indexOf("<header"), html.indexOf("</header>"))
+    expect(hrefsOf(header)).toEqual([routes.settings()])
+    expect(header).toContain("settings.title")
   })
 
   it("garde l'apparence et la déconnexion par la porte partagée", () => {
@@ -40,7 +48,7 @@ describe("Profil — l'écran rend chaque entrée du modèle, l'apparence et la 
     state.person = { published: true, handle: undefined, displayName: "Awa Ndong" }
     const html = renderToStaticMarkup(<MemberMeScreen />)
     expect(html).not.toContain("@")
-    expect(hrefsOf(html)).toEqual(meEntries(null).map((entry) => entry.href))
+    expect(hrefsOf(html)).toEqual([routes.settings(), ...meEntries(null).map((entry) => entry.href)])
   })
 
   // P15 — écrit, non exécuté : l'entrée « Mes candidatures » est rendue depuis Profil.

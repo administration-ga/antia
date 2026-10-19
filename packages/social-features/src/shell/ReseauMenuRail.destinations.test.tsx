@@ -128,6 +128,16 @@ describe("ReseauMenuRail — navigation par destinations (P02)", () => {
     expect(within(volets()).queryByRole("link", { name: /Awa Ndong/ })).toBeNull()
   })
 
+  it("garde une entrée « Paramètres » au pied du rail, vers les réglages de l'application, courante sur leur page", () => {
+    const view = render(rail(<ReseauMenuRail activeTab="fil" onSelectTab={vi.fn()} onCreate={vi.fn()} />))
+    const settings = within(volets()).getByRole("link", { name: "Paramètres" })
+    expect(settings).toHaveAttribute("href", "/reglages-test")
+    expect(settings).not.toHaveAttribute("aria-current")
+    view.unmount()
+    render(rail(<ReseauMenuRail activeTab={null} />, { pathname: "/reglages-test" }))
+    expect(within(volets()).getByRole("link", { name: "Paramètres" })).toHaveAttribute("aria-current", "page")
+  })
+
   it("sur la page réseau, « Fil » reste un lien mais un clic ordinaire repasse par le volet (recherche et pagination levées)", () => {
     const onSelectTab = vi.fn()
     render(rail(<ReseauMenuRail activeTab="fil" onSelectTab={onSelectTab} onCreate={vi.fn()} />))

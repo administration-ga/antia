@@ -54,6 +54,7 @@
     "profileHint": "What members see of you: posts, albums and connections.",
     "storiesHint": "Your stories and your network's, full screen.",
     "feedPreferencesHint": "Hidden posts and muted authors, to show again whenever you want.",
+    "settingsHint": "Display, theme, background pattern, language and time zone.",
     "moderationHint": "Moderation queues, for authorised teams.",
     "personalDataHint": "Export, erasure, decisions about you and notifications. Open even during a suspension."
   },
@@ -228,8 +229,16 @@
     "pageDecisionsEmpty": "No decision concerns this page.",
     "pageDecisionsUnavailable": "This page’s decisions are not available right now."
   },
+  "settings": {
+    "title": "Settings",
+    "lead": "Set how {{brand}} looks, its language and your time zone.",
+    "displayTitle": "Display",
+    "displayLead": "Your theme is saved to your account and follows you to your other devices. Appearance and background pattern stay specific to this device.",
+    "moreTitle": "More settings"
+  },
   "preferences": {
     "title": "Your preferences",
+    "languageTitle": "Language and time zone",
     "lead": "Choose your language and the time zone used for dates and times across your networks.",
     "localeLabel": "Interface language",
     "localeHint": "Your chosen language applies after saving.",

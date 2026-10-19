@@ -186,6 +186,29 @@ describe("les sept thèmes d'antsia.ga (ADR-0027)", () => {
     for (const [path, expression, count] of SITES) expect(read(path).split(expression).length - 1, path).toBe(count)
   })
 
+  it("les états actifs du bureau (rail, Liste/Immersion, filtres et onglets d'iCom) lisent la pastille tonale, leur facture d'origine en repli", () => {
+    const ACTIVE_SITES: readonly (readonly [string, string, number])[] = [
+      ["../../../social-features/src/shell/ReseauMenuRail.tsx", 'background: "var(--esp-tab-active-bg, var(--ink-0))"', 1],
+      ["../../../social-features/src/shell/ReseauMenuRail.tsx", 'border: "1px solid var(--esp-chip-border, var(--primary-500))"', 1],
+      ["../../../social-features/src/features/feed-immersion/immersive-styles.tsx", "background: var(--esp-tab-active-bg, var(--primary));", 1],
+      ["../../../social-features/src/features/feed-immersion/immersive-styles.tsx", "background: var(--esp-chip-bg, var(--card));", 1],
+      ["../../../social-features/src/features/messagerie/messagerie-styles.tsx", "background: var(--esp-tab-active-bg, var(--primary-100));", 2],
+      ["../../../social-features/src/features/messagerie/messagerie-styles.tsx", "background: var(--esp-chip-bg, var(--ink-0));", 1],
+      ["../../../social-features/src/shell/ReseauAgentPage.tsx", 'background: "var(--esp-header-icon-bg, var(--ink-0))"', 1],
+    ]
+    for (const [path, expression, count] of ACTIVE_SITES) expect(read(path).split(expression).length - 1, `${path} : ${expression}`).toBe(count)
+  })
+
+  it("les pastilles de décompte et les réactions de message lisent les couleurs des réactions, leur facture d'origine en repli", () => {
+    const REACT_SITES: readonly (readonly [string, string, number])[] = [
+      ["../../../social-features/src/shell/ReseauMenuRail.tsx", 'background: "var(--role-react-fill, var(--primary-50))"', 1],
+      ["../../../social-features/src/shell/ReseauDesktopIcomLink.tsx", 'background: "var(--role-react-fill, var(--danger-fill))"', 1],
+      ["../../../social-features/src/features/messagerie/messagerie-styles.tsx", "background: var(--role-react-soft, var(--primary-50));", 2],
+      ["../../../social-features/src/features/messagerie/messagerie-styles.tsx", "background: var(--role-react-fill, var(--danger-fill));", 1],
+    ]
+    for (const [path, expression, count] of REACT_SITES) expect(read(path).split(expression).length - 1, `${path} : ${expression}`).toBe(count)
+  })
+
   it("le contrat de la base laisse DIASPORALE intact : chaque jeton du système épuré est à `initial`", () => {
     const base = new TokenCascade(BASE_SHEETS)
     const tokens = [...Object.keys(ANGLES).filter((token) => token !== "--rp-surface-radius"), "--primary-fill-on", "--esp-theme-swatch-1",

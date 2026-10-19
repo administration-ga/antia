@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/SuggestionsPanel.tsx @ ad2e7fdc2 — adaptations : catalogue du moteur (`suggestions.suggestions.paginate` et `dismiss`, réseau courant par `useNetwork()`), demande par `graph.connections.requestConnection({ handle })` ; adresses par la table de routes injectée (`useRoutes()` : profil, page réseau pour « Voir tout ») ; refus de POLITIQUE du moteur (`policyRefused` : réseau gouverné qui sert ses propres suggestions) : le rail s'efface au lieu d'afficher une panne ; textes par l'i18n (espace `reseau`, clés `suggestionsPanel.*`) et refus du moteur dits par leur code ; « Agents à découvrir » devient « Personnes à découvrir », opposition personne / administration de la doc retirée (une page n'est plus une administration) ; règles du module sorties du JSX dans une constante (`DISCOVERY_CONTROLS_CSS`), inchangées ; primitives de `@antsia/ui`, surfaces de la coque.
+// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/SuggestionsPanel.tsx @ ad2e7fdc2 — adaptations : catalogue du moteur (`suggestions.suggestions.paginate` et `dismiss`, réseau courant par `useNetwork()`), demande par `graph.connections.requestConnection({ handle })` ; adresses par la table de routes injectée (`useRoutes()` : profil, page réseau pour « Voir tout ») ; refus de POLITIQUE du moteur (`policyRefused` : réseau gouverné qui sert ses propres suggestions) : le rail s'efface au lieu d'afficher une panne ; textes par l'i18n (espace `reseau`, clés `suggestionsPanel.*`) et refus du moteur dits par leur code ; « Agents à découvrir » devient « Personnes à découvrir », opposition personne / administration de la doc retirée (une page n'est plus une administration) ; règles du module sorties du JSX dans une constante (`DISCOVERY_CONTROLS_CSS`), inchangées ; primitives de `@antsia/ui`, surfaces de la coque ; couleurs par fonction (ADR-0027) : « Se connecter » en variante `social` tant que la demande est possible, neutre une fois envoyée ou reçue.
 "use client"
 
 /**
@@ -49,13 +49,19 @@ import { relationActionDisabled, relationActionLabel, type DiscoveryPresentation
 const RAIL_SUGGESTIONS_SHOWN = 5
 const RAIL_SUGGESTIONS_SCAN = 24
 
-const PILL_BUTTON_STYLE = {
+/** La géométrie de la pilule, sans couleur : la variante `social` garde la sienne (ADR-0027). */
+const PILL_SHAPE_STYLE = {
   ...RESEAU_PILL_ACTION_STYLE,
   padding: "6px 10px",
   minHeight: 44,
   fontSize: 11.5,
   fontWeight: 700,
-  color: "var(--primary-600)",
+} as const
+
+/** Une demande déjà envoyée ou reçue : le bouton redevient neutre (ADR-0027). */
+const PILL_SETTLED_STYLE = {
+  ...PILL_SHAPE_STYLE,
+  color: "var(--muted-foreground)",
 } as const
 
 const SEE_ALL_STYLE = {
@@ -301,10 +307,11 @@ export function SuggestionsPanel({ presentation = "rail" }: { presentation?: Dis
                 <Button
                   size="sm"
                   icon="userPlus"
-                  variant="ghost"
+                  // Se connecter : couleur des relations tant que la demande est possible (ADR-0027).
+                  variant={person.relationState === "none" ? "social" : "ghost"}
                   disabled={relationActionDisabled(person.relationState, isBusy)}
                   onClick={() => void handleConnect(person.handle)}
-                  style={PILL_BUTTON_STYLE}
+                  style={person.relationState === "none" ? PILL_SHAPE_STYLE : PILL_SETTLED_STYLE}
                 >
                   {relationActionLabel(person.relationState, isBusy, t)}
                 </Button>

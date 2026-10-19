@@ -146,9 +146,11 @@ export const FEED_IMMERSION_CSS = `
         align-items: center;
         gap: 4px;
         padding: 3px;
-        border: 1px solid var(--border);
+        /* Système épuré (ADR-0027) : fond de puce sans filet dans les thèmes qui
+           le déclarent ; ailleurs, la carte et son filet. */
+        border: 1px solid var(--esp-chip-border, var(--border));
         border-radius: 999px;
-        background: var(--card);
+        background: var(--esp-chip-bg, var(--card));
       }
       .fil-mode-option {
         display: inline-flex;
@@ -167,8 +169,9 @@ export const FEED_IMMERSION_CSS = `
         cursor: pointer;
       }
       .fil-mode-option[aria-pressed="true"] {
-        background: var(--primary);
-        color: var(--primary-foreground);
+        /* Mode choisi : pastille tonale (ADR-0027), l'aplat d'identité en repli. */
+        background: var(--esp-tab-active-bg, var(--primary));
+        color: var(--esp-tab-active-fg, var(--primary-foreground));
       }
       .fil-mode-option[aria-disabled="true"] {
         cursor: not-allowed;

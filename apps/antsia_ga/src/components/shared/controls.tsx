@@ -9,6 +9,21 @@ import { type ButtonHTMLAttributes, forwardRef, type InputHTMLAttributes, type R
  * couleur littérale). Les surfaces dupliquées du socle (PA6) apporteront leurs
  * propres composants ; ceux-ci restent volontairement sobres.
  */
+/** La facture d'un bouton, aussi pour un LIEN qui mène à une page (une destination reste un lien). */
+export function buttonClassName(variant: "primary" | "ghost" | "outline" = "primary", className?: string): string {
+  return cn(
+    // Système épuré (ADR-0027) : pilule, et contour seulement à couleur égale.
+    "inline-flex min-h-11 items-center justify-center gap-2 rounded-[var(--ui2-button-radius,var(--radius-lg))] px-4 text-sm font-medium transition-colors",
+    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+    "disabled:cursor-not-allowed disabled:opacity-60",
+    variant === "primary" && "bg-[var(--primary-fill)] text-[color:var(--primary-fill-on,var(--primary-foreground))] hover:bg-[var(--primary-fill-hover)]",
+    // Le neutre (Annuler, Plus tard) : gris, sans filet dans les thèmes ANTSIA.
+    variant === "outline" && "border border-[color:var(--ui2-button-outline-border,var(--border))] bg-[var(--ui2-button-outline-bg,var(--card))] text-foreground hover:brightness-[0.97]",
+    variant === "ghost" && "text-foreground hover:bg-muted",
+    className,
+  )
+}
+
 export function Button({
   variant = "primary",
   pending = false,
@@ -21,17 +36,7 @@ export function Button({
       {...props}
       disabled={props.disabled || pending}
       aria-busy={pending || undefined}
-      className={cn(
-        // Système épuré (ADR-0027) : pilule, et contour seulement à couleur égale.
-        "inline-flex min-h-11 items-center justify-center gap-2 rounded-[var(--ui2-button-radius,var(--radius-lg))] px-4 text-sm font-medium transition-colors",
-        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
-        "disabled:cursor-not-allowed disabled:opacity-60",
-        variant === "primary" && "bg-[var(--primary-fill)] text-[color:var(--primary-fill-on,var(--primary-foreground))] hover:bg-[var(--primary-fill-hover)]",
-        // Le neutre (Annuler, Plus tard) : gris, sans filet dans les thèmes ANTSIA.
-        variant === "outline" && "border border-[color:var(--ui2-button-outline-border,var(--border))] bg-[var(--ui2-button-outline-bg,var(--card))] text-foreground hover:brightness-[0.97]",
-        variant === "ghost" && "text-foreground hover:bg-muted",
-        className,
-      )}
+      className={buttonClassName(variant, className)}
     >
       {pending ? <LoaderCircle aria-hidden="true" className="size-4 animate-spin motion-reduce:animate-none" /> : null}
       {children}
