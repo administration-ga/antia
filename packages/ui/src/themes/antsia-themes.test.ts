@@ -226,6 +226,62 @@ describe("les sept thèmes d'antsia.ga (ADR-0027)", () => {
     for (const [path, expression, count] of MESSAGE_SITES) expect(read(path).split(expression).length - 1, `${path} : ${expression}`).toBe(count)
   })
 
+  it("la bannière d'appel entrant, posée sur une carte, garde des ronds lisibles : aplat des messages dans antsia.ga, encre de la carte en repli", () => {
+    // Correctif du 19/10/2026 : le rond neutre de la scène sombre (encre claire à 12 %) était blanc
+    // sur blanc sur la carte claire de la bannière, partout où `--role-message-fill` est à `initial`.
+    const css = read("../styles/communication.css").replace(/\/\*[\s\S]*?\*\//g, "")
+    const body = (selector: string) => {
+      const start = css.indexOf(`\n  ${selector} {\n`)
+      if (start < 0) throw new Error(`communication.css : règle ${selector} absente`)
+      const open = css.indexOf("{", start) + 1
+      return css.slice(open, css.indexOf("}", open))
+    }
+    const declaration = (selector: string, property: string) => {
+      const value = new RegExp(`\\n\\s*${property}:\\s*([^;]+);`).exec(body(selector))?.[1]
+      if (!value) throw new Error(`${selector} : ${property} absent`)
+      return value.trim()
+    }
+    const NEUTRAL = ".iappel-banner .iappel-ctl:not([data-tone])"
+    const MESSAGE = '.iappel-banner .iappel-ctl[data-tone="message"]'
+    // Seuls le neutre et les messages sont visés : Décrocher et Raccrocher gardent leurs aplats.
+    const banner = [...css.matchAll(/\.iappel-banner \.iappel-ctl[^{,]*/g)].map((match) => match[0].trim())
+    expect(banner.sort()).toEqual([NEUTRAL, `${NEUTRAL}:hover`, MESSAGE, `${MESSAGE}:hover`].sort())
+    // La scène sombre garde son rond d'origine.
+    expect(declaration(".iappel-ctl", "background")).toBe("color-mix(in srgb, var(--esp-immersive-on-ink) 12%, transparent)")
+    expect(declaration(".iappel-ctl", "color")).toBe("var(--esp-immersive-on-ink)")
+
+    const sheet = (charte: string) => [...BASE_SHEETS, { name: `${charte}.css`, css: read(`./${charte}.css`) }]
+    const antsia = ANTSIA_THEME_IDS.map(antsiaCharteFor)
+    for (const charte of ["diasporale", "diasporale-gaboma", "admin-antsia", ...antsia]) {
+      const cascade = new TokenCascade(sheet(charte))
+      for (const dark of [false, true]) {
+        for (const nested of [false, true]) {
+          const node: ChartedNode = { charte, dark, nested }
+          const label = `${charte} ${dark ? "sombre" : "clair"}${nested ? " (portail)" : ""}`
+          const paint = (value: string) => {
+            const resolved = cascade.resolveValue(node, value)
+            const parsed = resolved === undefined ? undefined : parseColor(resolved)
+            if (!parsed) throw new Error(`${label} : ${value} ne se résout pas en couleur`)
+            return parsed
+          }
+          const card = paint("var(--card)")
+          const messageFill = cascade.resolve(node, "--role-message-fill")
+          // antsia.ga déclare l'aplat des messages ; DIASPORALE et la console le laissent à `initial`.
+          expect(messageFill === undefined, label).toBe(!antsia.includes(charte))
+          if (messageFill !== undefined) expect(cascade.resolveValue(node, declaration(MESSAGE, "background")), label).toBe(messageFill)
+          for (const selector of [NEUTRAL, MESSAGE]) {
+            const icon = paint(declaration(selector, "color"))
+            for (const state of [selector, `${selector}:hover`]) {
+              // Icône d'un bouton sans libellé visible : 4,5:1 visé (WCAG 1.4.11 en exige 3).
+              const ratio = contrastRatio(icon, paint(declaration(state, "background")), card)
+              expect(ratio, `${label} : ${state}`).toBeGreaterThanOrEqual(4.5)
+            }
+          }
+        }
+      }
+    }
+  })
+
   it("participer (évènement, direct, candidature) prend la couleur de la participation, l'aplat d'identité en repli", () => {
     // Décision du propriétaire du 19/10/2026 : Je participe, Rejoindre la salle, Demander la parole,
     // Candidater et Envoyer ma candidature en variante `commerce` (Acheter, Participer).

@@ -69,7 +69,13 @@ Nous allons :
      pour qu'une page serveur (catalogue public) puisse habiller un lien en bouton.
 
    Chaque site garde en repli son rendu d'origine, survol compris : DIASPORALE et la console ne
-   changent pas.
+   changent pas. Une seule exception, un correctif d'accessibilité (19/10/2026) : la bannière
+   d'appel entrant au bureau (`.iappel-banner`) est posée sur une carte, et le rond neutre de la
+   scène sombre (encre claire, icône claire) y était blanc sur blanc en mode clair. Dans la
+   bannière, ce rond et le repli de « Refuser avec un message » prennent l'encre de la carte
+   (`--card-foreground` à 12 %, 18 % au survol) : l'icône dépasse 9:1 dans toutes les chartes,
+   au lieu de 1:1 environ en clair. antsia.ga garde l'aplat des messages ; la scène, Décrocher et
+   Raccrocher ne changent pas.
 
    Participer se dit à la couleur du commerce (`--role-commerce-*`, variante `commerce`), sur
    décision du propriétaire du 19/10/2026 : « Je participe » (évènements), « Rejoindre la salle »
