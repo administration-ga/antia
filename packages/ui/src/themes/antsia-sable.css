@@ -71,6 +71,13 @@
   --role-commerce-fill: #d7ad63;
   --role-commerce-on: #25211e;
   --role-commerce-ink: #7a5a22;
+  /* Valider et Supprimer, chacun ses trois couleurs comme dans les chartes : aplat, texte sur l'aplat, encre en texte. */
+  --role-success-fill: #14743a;
+  --role-success-on: #ffffff;
+  --role-success-ink: #0f5f2f;
+  --role-danger-fill: #b3261e;
+  --role-danger-on: #ffffff;
+  --role-danger-ink: #b3261e;
   --role-message-soft: #cddbe1; /* fond tonal du bouton Écrire */
   --role-react-soft: #ede6d8; /* fond de l'action réagie */
   --primary-fill: #0167a8; /* aplat d'identité : bouton Publier, Créer, interrupteur */
@@ -89,7 +96,7 @@
   --esp-inline-link-decoration: underline;
   --esp-sticky-header-inset: 4rem; /* barre de membre collante (P18b, A13) */
   --body-font-size: 16px;
-  --font-sans: "Inter", system-ui, sans-serif;
+  --font-sans: "Inter Variable", "Inter", system-ui, sans-serif; /* Inter embarquée (`styles.css`) */
   --font-display: var(--font-familjen-grotesk, "Familjen Grotesk Variable"), "Inter", system-ui, sans-serif;
 
   /* Ombres teintées de l'encre du thème. */
@@ -116,11 +123,11 @@
   --success-50: #334133;
   --success-100: #394e3c;
   --success-500: #6ebe85;
-  --success-600: #7fcf95;
+  --success-600: #6ebe85;
   --danger-50: #4a3733;
   --danger-100: #59403c;
   --danger-500: #e18c85;
-  --danger-600: #f39d95;
+  --danger-600: #f39d95; /* badge de danger : l'encre des chartes (#e18c85) n'y tient que 4,4:1 sur --danger-50 */
   --danger-700: #f7bab5;
 
   /* ── Rôles du thème sombre ── */
@@ -146,6 +153,13 @@
   --role-commerce-fill: #d7ad63;
   --role-commerce-on: #151311;
   --role-commerce-ink: #d7ad63;
+  /* Valider et Supprimer, chacun ses trois couleurs comme dans les chartes : aplat, texte sur l'aplat, encre en texte. */
+  --role-success-fill: #6ebe85;
+  --role-success-on: #151311;
+  --role-success-ink: #6ebe85;
+  --role-danger-fill: #e18c85;
+  --role-danger-on: #151311;
+  --role-danger-ink: #e18c85;
   --role-message-soft: #2c363d; /* fond tonal du bouton Écrire */
   --role-react-soft: #3d3529; /* fond de l'action réagie */
   --primary-fill: #5ba5e5; /* aplat d'identité : bouton Publier, Créer, interrupteur */
@@ -207,16 +221,16 @@
   --outline-ring: var(--ring);
 
   /* ── Succès et danger : icône + texte, jamais la couleur seule ── */
-  --success: var(--success-500);
+  --success: var(--role-success-ink); /* encre en texte, distincte de l'aplat (chartes) */
   --success-light: var(--success-50);
-  --success-fill: var(--success-500);
+  --success-fill: var(--role-success-fill);
   --success-fill-hover: var(--success-600);
   --esp-green-strong: var(--success-500);
   --status-archived: var(--success-500);
   --status-archived-bg: var(--success-50);
-  --destructive: var(--danger-500);
+  --destructive: var(--role-danger-ink); /* encre en texte, distincte de l'aplat (chartes) */
   --destructive-light: var(--danger-50);
-  --danger-fill: var(--danger-500);
+  --danger-fill: var(--role-danger-fill);
   --danger-fill-hover: var(--danger-600);
   --status-error: var(--danger-500);
   --status-error-bg: var(--danger-50);

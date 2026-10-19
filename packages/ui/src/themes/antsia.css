@@ -41,7 +41,7 @@
   --primary-800: #1a3b68;
   --success-50: #deebe6;
   --success-100: #c6dfd5;
-  --success-500: #007a4a;
+  --success-500: #00804e;
   --success-600: #006b42;
   --danger-50: #f2e0e3;
   --danger-100: #eec9cf;
@@ -68,10 +68,17 @@
   --role-message-ink: #2a5fa8;
   --role-react-fill: #f4bb44;
   --role-react-on: #1f1400;
-  --role-react-ink: #ad7e00;
+  --role-react-ink: #af7f00;
   --role-commerce-fill: #f4bb44;
   --role-commerce-on: #1f1400;
   --role-commerce-ink: #8a6400;
+  /* Valider et Supprimer, chacun ses trois couleurs comme dans les chartes : aplat, texte sur l'aplat, encre en texte. */
+  --role-success-fill: #00804e;
+  --role-success-on: #ffffff;
+  --role-success-ink: #006b42;
+  --role-danger-fill: #c8102e;
+  --role-danger-on: #ffffff;
+  --role-danger-ink: #b50e29;
   --role-message-soft: #d9e1ed; /* fond tonal du bouton Écrire */
   --role-react-soft: #f7efde; /* fond de l'action réagie */
   --primary-fill: #2f67b5; /* aplat d'identité : bouton Publier, Créer, interrupteur */
@@ -90,7 +97,7 @@
   --esp-inline-link-decoration: underline;
   --esp-sticky-header-inset: 4rem; /* barre de membre collante (P18b, A13) */
   --body-font-size: 16px;
-  --font-sans: "Inter", system-ui, sans-serif;
+  --font-sans: "Inter Variable", "Inter", system-ui, sans-serif; /* Inter embarquée (`styles.css`) */
   --font-display: var(--font-familjen-grotesk, "Familjen Grotesk Variable"), "Inter", system-ui, sans-serif;
 
   /* Ombres teintées de l'encre du thème. */
@@ -147,6 +154,13 @@
   --role-commerce-fill: #f4bb44;
   --role-commerce-on: #1f1400;
   --role-commerce-ink: #f4bb44;
+  /* Valider et Supprimer, chacun ses trois couleurs comme dans les chartes : aplat, texte sur l'aplat, encre en texte. */
+  --role-success-fill: #2fcb86;
+  --role-success-on: #03210f;
+  --role-success-ink: #4ad898;
+  --role-danger-fill: #ff6b7a;
+  --role-danger-on: #2a0509;
+  --role-danger-ink: #ff8592;
   --role-message-soft: #222935; /* fond tonal du bouton Écrire */
   --role-react-soft: #332b1b; /* fond de l'action réagie */
   --primary-fill: #6fa2f0; /* aplat d'identité : bouton Publier, Créer, interrupteur */
@@ -208,16 +222,16 @@
   --outline-ring: var(--ring);
 
   /* ── Succès et danger : icône + texte, jamais la couleur seule ── */
-  --success: var(--success-500);
+  --success: var(--role-success-ink); /* encre en texte, distincte de l'aplat (chartes) */
   --success-light: var(--success-50);
-  --success-fill: var(--success-500);
+  --success-fill: var(--role-success-fill);
   --success-fill-hover: var(--success-600);
   --esp-green-strong: var(--success-500);
   --status-archived: var(--success-500);
   --status-archived-bg: var(--success-50);
-  --destructive: var(--danger-500);
+  --destructive: var(--role-danger-ink); /* encre en texte, distincte de l'aplat (chartes) */
   --destructive-light: var(--danger-50);
-  --danger-fill: var(--danger-500);
+  --danger-fill: var(--role-danger-fill);
   --danger-fill-hover: var(--danger-600);
   --status-error: var(--danger-500);
   --status-error-bg: var(--danger-50);

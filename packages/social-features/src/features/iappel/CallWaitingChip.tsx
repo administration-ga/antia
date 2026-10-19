@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/iappel/CallWaitingChip.tsx @ ad2e7fdc2 — adaptations : branche « poste » élaguée (titre de poste : l'appel est toujours personnel) ; libellés et noms accessibles traduits (i18n `iappel`) ; `peerDisplayName` et `scopeBadgeLabel` reçoivent `t` en dernier paramètre.
+// Dupliqué de socle/packages/agent-features/src/features/iappel/CallWaitingChip.tsx @ ad2e7fdc2 — adaptations : branche « poste » élaguée (titre de poste : l'appel est toujours personnel) ; libellés et noms accessibles traduits (i18n `iappel`) ; `peerDisplayName` et `scopeBadgeLabel` reçoivent `t` en dernier paramètre ; rond Refuser à l'aplat et au texte de Supprimer (`--role-danger-*`, ADR-0027), facture d'origine en repli.
 "use client"
 
 /**
@@ -50,7 +50,7 @@ export function CallWaitingChip({ call, onAccept, onDecline }: CallWaitingChipPr
 				onClick={onDecline}
 				aria-label={t("callWaitingChip.decline", { name })}
 				className="inline-flex h-9 w-9 items-center justify-center rounded-full"
-				style={{ background: "var(--destructive)", color: "var(--destructive-foreground)" }}
+				style={{ background: "var(--role-danger-fill, var(--destructive))", color: "var(--role-danger-on, var(--destructive-foreground))" }}
 			>
 				<PhoneOff aria-hidden="true" className="h-4 w-4" />
 			</button>

@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/iappel/CallMinimizedPill.tsx @ ad2e7fdc2 — adaptations : libellés et noms accessibles traduits (i18n `iappel`) ; clé de placement préfixée par le réseau (`storagePrefix`, un état par réseau).
+// Dupliqué de socle/packages/agent-features/src/features/iappel/CallMinimizedPill.tsx @ ad2e7fdc2 — adaptations : libellés et noms accessibles traduits (i18n `iappel`) ; clé de placement préfixée par le réseau (`storagePrefix`, un état par réseau) ; ronds Reprendre et Raccrocher à l'aplat et au texte de Valider et de Supprimer (`--role-success-*`, `--role-danger-*`, ADR-0027), facture d'origine en repli.
 "use client"
 
 /**
@@ -129,7 +129,7 @@ export function CallMinimizedPill({
 				<span
 					aria-hidden="true"
 					className="call-pulse-ping relative h-2 w-2 shrink-0 rounded-full"
-					style={{ background: "var(--success)", color: "var(--success)" }}
+					style={{ background: "var(--role-success-fill, var(--success))", color: "var(--role-success-fill, var(--success))" }}
 				/>
 				<span className="flex min-w-0 flex-col leading-tight">
 					<span className="truncate text-[13px] font-semibold">{name}</span>
@@ -188,8 +188,8 @@ export function CallMinimizedPill({
 				aria-label={t("callMinimizedPill.hangUp")}
 				className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full"
 				style={{
-					background: "var(--destructive)",
-					color: "var(--destructive-foreground)",
+					background: "var(--role-danger-fill, var(--destructive))",
+					color: "var(--role-danger-on, var(--destructive-foreground))",
 				}}
 			>
 				<PhoneOff aria-hidden="true" className="h-4 w-4" />

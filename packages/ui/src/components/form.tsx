@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/ui-v2/src/components/form.tsx @ ad2e7fdc2 — adaptations : ombre du curseur de l'interrupteur (noir à 20 %) → jeton `--shadow-knob` (aucune couleur hors des jetons).
+// Dupliqué de socle/packages/ui-v2/src/components/form.tsx @ ad2e7fdc2 — adaptations : ombre du curseur de l'interrupteur (noir à 20 %) → jeton `--shadow-knob` (aucune couleur hors des jetons) ; texte d'erreur et astérisque à l'encre de danger `--role-danger-ink` quand le thème la déclare (ADR-0027), `--danger-500` en repli.
 "use client"
 
 import {
@@ -77,7 +77,7 @@ export const Field = ({ label, hint, error, required, children, htmlFor }: Field
           }}
         >
           {label}
-          {required && <span style={{ color: "var(--danger-500)", marginLeft: 4 }}>*</span>}
+          {required && <span style={{ color: "var(--role-danger-ink, var(--danger-500))", marginLeft: 4 }}>*</span>}
         </label>
       )}
       {enfant}
@@ -91,7 +91,7 @@ export const Field = ({ label, hint, error, required, children, htmlFor }: Field
           id={errorId}
           style={{
             fontSize: 12,
-            color: "var(--danger-500)",
+            color: "var(--role-danger-ink, var(--danger-500))",
             display: "flex",
             gap: 4,
             alignItems: "center",

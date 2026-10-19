@@ -1,4 +1,4 @@
-/* Dupliqué de socle/packages/ui/src/styles/globals.css (l. 444-908 et 1061-1210) @ ad2e7fdc2 — adaptations : sélecteurs `[data-charte="espace-personnel"], [data-charte="espace-structure"]` → `[data-charte]` (toute charte d'application du moteur hérite de cette base, qu'un fichier de thème surcharge ensuite) ; bloc sombre `.dark [data-charte=…]` → `.dark[data-charte], .dark [data-charte]` (la charte est posée sur <html>, qui porte aussi `.dark`) ; la charte du compte « Poste » (l. 909-1059) et le contrat `.dash-v2` ne sont pas repris (administration) ; jetons ajoutés au contrat par le moteur (lot P01b) : outline de base, taille du corps et ombres, valeurs par défaut identiques au rendu antérieur ; lot P03 : rayon des surfaces du réseau, surface élevée des publications (valeur garantie invalide, repli historique à chaque site) et trait des liens du texte courant, mêmes garanties.
+/* Dupliqué de socle/packages/ui/src/styles/globals.css (l. 444-908 et 1061-1210) @ ad2e7fdc2 — adaptations : sélecteurs `[data-charte="espace-personnel"], [data-charte="espace-structure"]` → `[data-charte]` (toute charte d'application du moteur hérite de cette base, qu'un fichier de thème surcharge ensuite) ; bloc sombre `.dark [data-charte=…]` → `.dark[data-charte], .dark [data-charte]` (la charte est posée sur <html>, qui porte aussi `.dark`) ; la charte du compte « Poste » (l. 909-1059) et le contrat `.dash-v2` ne sont pas repris (administration) ; jetons ajoutés au contrat par le moteur (lot P01b) : outline de base, taille du corps et ombres, valeurs par défaut identiques au rendu antérieur ; lot P03 : rayon des surfaces du réseau, surface élevée des publications (valeur garantie invalide, repli historique à chaque site) et trait des liens du texte courant, mêmes garanties ; ADR-0027 (19/10/2026) : couleurs par fonction (dont Valider et Supprimer, `--role-success-*` et `--role-danger-*`) et système épuré, tous à `initial`, repli historique à chaque site.
 
    ═════════════════════════════════════════════════════════════════════════
    BASE DES CHARTES DU MOTEUR ANTSIA
@@ -618,8 +618,7 @@
      `var(--ui2-button-radius, 6px)`…). Seuls les thèmes qui les redéclarent
      (antsia-*.css) changent d'aspect ; DIASPORALE et la console ne bougent pas. */
   /* Texte posé sur l'aplat d'identité (`--primary-fill`). Une identité claire
-     (turquoise, mandarine) y porte un texte foncé, alors que succès et danger
-     gardent `--on-fill`. Repli : `--on-fill`. */
+     (turquoise, mandarine) y porte un texte foncé. Repli : `--on-fill`. */
   --primary-fill-on: initial;
   /* Une couleur par fonction : aplat (`-fill`), texte sur l'aplat (`-on`) et
      encre en texte ou en icône sur une carte (`-ink`). Relations (Suivre),
@@ -643,6 +642,18 @@
   --role-commerce-fill: initial;
   --role-commerce-on: initial;
   --role-commerce-ink: initial;
+  /* Valider (Accepter, Décrocher, Reprendre) et Supprimer (Supprimer, Raccrocher,
+     pastille « En direct »), retours visuels communs à tous les thèmes : aplat,
+     texte sur l'aplat et encre en texte, chacun le sien. Un thème qui les
+     déclare y fait lire son succès (`--success`) et son danger (`--destructive`)
+     en ENCRE. Replis : `--success-fill` ou `--success`, `--danger-fill` ou
+     `--destructive`, et leur texte d'origine (`--on-fill`, `--destructive-foreground`). */
+  --role-success-fill: initial;
+  --role-success-on: initial;
+  --role-success-ink: initial;
+  --role-danger-fill: initial;
+  --role-danger-on: initial;
+  --role-danger-ink: initial;
   /* Les trois couleurs d'un thème, pour son aperçu dans Préférences > Thème. */
   --esp-theme-swatch-1: initial;
   --esp-theme-swatch-2: initial;
