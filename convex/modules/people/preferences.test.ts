@@ -113,3 +113,91 @@ describe("préférences de ma personne", () => {
     expect((await t.run((ctx) => ctx.db.get(person.personId)))?.locale).toBe("fr")
   })
 })
+
+describe("thème de ma personne", () => {
+  it("enregistre le thème seul, sans écrire de langue ni de fuseau que la personne n'a pas choisis", async () => {
+    const t = testConvex({ automaticSessions: false })
+    const person = await personFixture(t)
+    expect(await person.as.mutation(api.modules.people.preferences.setMyPreferences, { theme: "foret" })).toBeNull()
+    const row = await t.run((ctx) => ctx.db.get(person.personId))
+    expect(row?.theme).toBe("foret")
+    expect(row?.locale).toBeUndefined()
+    expect(row?.timeZone).toBeUndefined()
+    expect(await t.run((ctx) => ctx.db.query("consents").take(2))).toEqual([])
+  })
+
+  it("la langue et le fuseau enregistrés ensuite laissent le thème intact, et inversement", async () => {
+    const t = testConvex({ automaticSessions: false })
+    const person = await personFixture(t)
+    await person.as.mutation(api.modules.people.preferences.setMyPreferences, { theme: "lagon" })
+    await person.as.mutation(api.modules.people.preferences.setMyPreferences, { locale: "en", timeZone: "Africa/Libreville" })
+    expect(await t.run((ctx) => ctx.db.get(person.personId))).toMatchObject({ theme: "lagon", locale: "en", timeZone: "Africa/Libreville" })
+    await person.as.mutation(api.modules.people.preferences.setMyPreferences, { theme: "antsia" })
+    expect(await t.run((ctx) => ctx.db.get(person.personId))).toMatchObject({ theme: "antsia", locale: "en", timeZone: "Africa/Libreville" })
+  })
+
+  it("le thème du compte revient avec ma fiche, et seulement quand il a été choisi", async () => {
+    const t = testConvex({ automaticSessions: false })
+    const person = await personFixture(t)
+    expect(await person.as.query(api.modules.people.persons.getMyPerson, {})).not.toHaveProperty("theme")
+    await person.as.mutation(api.modules.people.preferences.setMyPreferences, { theme: "mandarine" })
+    expect(await person.as.query(api.modules.people.persons.getMyPerson, {})).toMatchObject({ theme: "mandarine" })
+  })
+
+  it.each(["rose", "Foret", "antsia-foret", "", null, 3])("le validateur refuse un thème hors du contrat : %j", async (theme) => {
+    const t = testConvex({ automaticSessions: false })
+    const person = await personFixture(t)
+    const before = await t.run((ctx) => ctx.db.get(person.personId))
+    await expect(person.as.mutation(api.modules.people.preferences.setMyPreferences, { theme } as never)).rejects.toThrow()
+    expect(await t.run((ctx) => ctx.db.get(person.personId))).toEqual(before)
+  })
+
+  it("un appel sans aucune préférence est refusé", async () => {
+    const t = testConvex({ automaticSessions: false })
+    const person = await personFixture(t)
+    const before = await t.run((ctx) => ctx.db.get(person.personId))
+    await expect(person.as.mutation(api.modules.people.preferences.setMyPreferences, {})).rejects.toMatchObject({ data: { code: "invalidArgument", field: "preferences" } })
+    expect(await t.run((ctx) => ctx.db.get(person.personId))).toEqual(before)
+  })
+
+  it("un appel anonyme ou une session révoquée n'enregistre aucun thème", async () => {
+    const t = testConvex({ automaticSessions: false })
+    await expect(t.mutation(api.modules.people.preferences.setMyPreferences, { theme: "indigo" })).rejects.toMatchObject({ data: { code: "unauthenticated" } })
+    const person = await personFixture(t)
+    await t.mutation(components.betterAuth.adapter.deleteOne, { input: { model: "session", where: [{ field: "_id", value: person.sessionId }] } })
+    await expect(person.as.mutation(api.modules.people.preferences.setMyPreferences, { theme: "indigo" })).rejects.toMatchObject({ data: { code: "unauthenticated" } })
+    expect((await t.run((ctx) => ctx.db.get(person.personId)))?.theme).toBeUndefined()
+  })
+
+  it("le même thème préserve l'horodatage sans réécriture", async () => {
+    vi.useFakeTimers({ toFake: ["Date"] })
+    const t = testConvex({ automaticSessions: false })
+    const person = await personFixture(t)
+    await person.as.mutation(api.modules.people.preferences.setMyPreferences, { theme: "encre" })
+    const before = await t.run((ctx) => ctx.db.get(person.personId))
+    vi.setSystemTime(Date.now() + 1000)
+    await person.as.mutation(api.modules.people.preferences.setMyPreferences, { theme: "encre" })
+    expect(await t.run((ctx) => ctx.db.get(person.personId))).toEqual(before)
+  })
+
+  it("le thème a son propre budget : le parcourir n'épuise pas celui de la langue et du fuseau", async () => {
+    const t = testConvex({ automaticSessions: false })
+    const person = await personFixture(t)
+    const themes = ["atlantique", "indigo", "hibiscus", "encre"] as const
+    for (let count = 0; count < 20; count++) await person.as.mutation(api.modules.people.preferences.setMyPreferences, { theme: themes[count % themes.length] })
+    await expect(person.as.mutation(api.modules.people.preferences.setMyPreferences, { theme: "foret" })).rejects.toMatchObject({ data: { code: "rateLimited" } })
+    expect((await t.run((ctx) => ctx.db.get(person.personId)))?.theme).toBe("encre")
+    await person.as.mutation(api.modules.people.preferences.setMyPreferences, { locale: "en", timeZone: "UTC" })
+    expect((await t.run((ctx) => ctx.db.get(person.personId)))?.locale).toBe("en")
+  })
+
+  it("le budget de la langue et du fuseau épuisé n'empêche pas de choisir un thème", async () => {
+    const t = testConvex({ automaticSessions: false })
+    const person = await personFixture(t)
+    for (let count = 0; count < 10; count++) await person.as.mutation(api.modules.people.preferences.setMyPreferences, { locale: "fr", timeZone: "UTC" })
+    await expect(person.as.mutation(api.modules.people.preferences.setMyPreferences, { locale: "en", timeZone: "UTC", theme: "lagon" })).rejects.toMatchObject({ data: { code: "rateLimited" } })
+    expect((await t.run((ctx) => ctx.db.get(person.personId)))?.theme).toBeUndefined()
+    await person.as.mutation(api.modules.people.preferences.setMyPreferences, { theme: "lagon" })
+    expect((await t.run((ctx) => ctx.db.get(person.personId)))?.theme).toBe("lagon")
+  })
+})

@@ -136,6 +136,13 @@ describe("signOutEverywhere — état moteur et aucune purge étrangère", () =>
     expect([...store.map.keys()]).toEqual(["antsia:antsia:appearance", "antsia:diasporale:appearance"])
     expect(result.purged).toEqual(["antsia:antsia:appearance:draft", "antsia:antsia:post-drafts:v1:p1"])
   })
+  it("conserve le thème de l'appareil, repli hors session, sans élargir la règle à ses voisines", async () => {
+    const store = storage({ "antsia:antsia:theme": "foret", "antsia:diasporale:theme": "lagon", "antsia:antsia:theme:draft": "private", "antsia:antsia:themes": "private", "antsia:antsia:sub:theme": "private" })
+    const { authClient } = client()
+    const result = await signOutEverywhere(authClient, { storages: [store] })
+    expect([...store.map.keys()]).toEqual(["antsia:antsia:theme", "antsia:diasporale:theme"])
+    expect(result.purged).toEqual(["antsia:antsia:theme:draft", "antsia:antsia:themes", "antsia:antsia:sub:theme"])
+  })
   it("purge les deux noms du moteur et les deux clés auth dans les deux storages", async () => {
     const local = storage({ "antsia:antsia:ringtone-muted": "1", "antia:antia:ringtone-muted": "1", "better-auth_cookie": "secret", theme: "dark", i18nextLng: "fr", "diasporale:demonstration:v1": "demo", "other-product:profile": "other" })
     const session = storage({ "antsia:diasporale:messagerie-dock:v6": "private", "antia:diasporale:post-drafts:v1:p1": "private", "better-auth_session_data": "private", "better-auth_cookie_extra": "other", "citizen-reduce-motion": "1" })

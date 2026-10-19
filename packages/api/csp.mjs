@@ -10,8 +10,17 @@
  *
  * ⚠️ Palier PA0 : `script-src` tolère encore `'unsafe-inline'` (scripts
  * d'hydratation de Next). La CSP à jeton (nonce par requête, EXT-AN-02) arrive
- * avec la mise en ligne publique (PA8/PA10).
+ * avec la mise en ligne publique (PA8/PA10). Un seul script en ligne appartient
+ * aux applications : l'amorçage de l'apparence (ADR-0026), qui reçoit déjà le
+ * nonce de `CSP_NONCE_HEADER` quand la requête en porte un.
  */
+
+/**
+ * En-tête de REQUÊTE qui portera le nonce de la CSP à jeton : le proxy qui le tire
+ * par requête le pose (avec la politique), la mise en page le relit pour les
+ * scripts en ligne de l'application. Absent aujourd'hui : rien n'est changé.
+ */
+export const CSP_NONCE_HEADER = "x-nonce"
 
 /**
  * Origines HTTP et WebSocket d'un déploiement Convex, déduites de son URL.

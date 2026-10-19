@@ -9,6 +9,7 @@ import { PERSONAL_POST_AUDIENCES, PERSONAL_POST_STATUSES, PERSONAL_REACH_AUDIENC
 import { FACET_FIELD_KINDS, FACET_VISIBILITIES } from "@antsia/social-domain/facets"
 import { ACTIVE_MEMBERSHIP_STATUSES, MEMBERSHIP_ROLES, MEMBERSHIP_STATUSES, VERIFICATION_SOURCES } from "@antsia/social-domain/membership"
 import { CONTENT_VISIBILITIES, MEMBERSHIP_POLICIES, NETWORK_KINDS, NETWORK_SLICES, NETWORK_STATUSES } from "@antsia/social-domain/network"
+import { MEMBER_THEME_IDS } from "@antsia/social-contracts/appearance"
 import { type Validator, v, type VLiteral, type VUnion } from "convex/values"
 
 /** `v.union(v.literal(a), v.literal(b), …)` à partir d'une liste `as const` (un littéral au moins). */
@@ -56,6 +57,8 @@ export const consentPurposeValidator = literals(CONSENT_PURPOSES)
 export const consentOriginValidator = literals(CONSENT_ORIGINS)
 
 export const localeValidator = v.union(v.literal("fr"), v.literal("en"))
+/** Thème enregistré sur le compte : la liste du contrat commun à l'interface (`@antsia/social-contracts/appearance`). */
+export const memberThemeValidator = literals(MEMBER_THEME_IDS)
 
 // Publications et engagement (miroirs EXACTS des listes du domaine pur)
 export const postAudienceValidator = literals(PERSONAL_POST_AUDIENCES)

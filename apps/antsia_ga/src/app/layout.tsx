@@ -1,6 +1,9 @@
+import { CSP_NONCE_HEADER } from "@antsia/api/csp"
 import type { Metadata, Viewport } from "next"
+import { headers } from "next/headers"
 import type { ReactNode } from "react"
 
+import { AppearanceBootScript } from "@/components/appearance-boot-script"
 import { Providers } from "@/components/providers"
 import { getAppT } from "@/i18n/server"
 import { configuredMetadataOrigin, getPublicLocale } from "@/lib/server-session"
@@ -28,8 +31,13 @@ export const viewport: Viewport = {
 
 export default async function RootLayout({ children }: { children: ReactNode }) {
   const { locale, t } = getAppT(await getPublicLocale())
+  const nonce = (await headers()).get(CSP_NONCE_HEADER) ?? undefined
   return (
     <html lang={locale} data-charte="antsia" suppressHydrationWarning>
+      <head>
+        {/* Thème et mode sombre de l'appareil posés avant le premier affichage (ADR-0026). */}
+        <AppearanceBootScript nonce={nonce} />
+      </head>
       <body className="min-h-dvh">
         <a
           href="#contenu"
