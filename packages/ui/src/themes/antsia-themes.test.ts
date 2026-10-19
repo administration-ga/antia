@@ -103,6 +103,8 @@ const TEXT_PAIRS: readonly (readonly [string, string])[] = [
   ["--role-success-on", "--role-success-fill"], ["--role-success-ink", "--card"], ["--role-success-ink", "--background"], ["--role-success-ink", "--popover"],
   ["--role-danger-on", "--role-danger-fill"], ["--role-danger-ink", "--card"], ["--role-danger-ink", "--background"], ["--role-danger-ink", "--popover"],
   ["--role-danger-ink", "--ink-0"],
+  // Aplat d'identité aux sites qui peignaient l'encre en fond (« Nouvelles publications », « Appeler »…).
+  ["--primary-fill-on", "--esp-identity-fill"], ["--primary-fill-on", "--esp-identity-fill-hover"],
 ]
 
 /** Non textuel (≥ 3:1, WCAG 1.4.11) : champs, anneaux, icônes de réaction. */
@@ -219,6 +221,9 @@ describe("les sept thèmes d'antsia.ga (ADR-0027)", () => {
       ["../../../social-features/src/features/messagerie/messagerie-styles.tsx", "background: var(--esp-tab-active-bg, var(--primary-100));", 2],
       ["../../../social-features/src/features/messagerie/messagerie-styles.tsx", "background: var(--esp-chip-bg, var(--ink-0));", 1],
       ["../../../social-features/src/shell/ReseauAgentPage.tsx", 'background: "var(--esp-header-icon-bg, var(--ink-0))"', 1],
+      // Onglet courant de la page iCom et ligne choisie du lanceur d'appel (19/10/2026).
+      ["../../../social-features/src/features/messagerie/messagerie-styles.tsx", "background: var(--esp-tab-active-bg, var(--accent)); color: var(--esp-tab-active-fg, var(--accent-foreground));", 1],
+      ["../styles/communication.css", "background: var(--esp-tab-active-bg, var(--accent)); color: var(--esp-tab-active-fg, var(--accent-foreground));", 1],
     ]
     for (const [path, expression, count] of ACTIVE_SITES) expect(read(path).split(expression).length - 1, `${path} : ${expression}`).toBe(count)
   })
@@ -342,6 +347,43 @@ describe("les sept thèmes d'antsia.ga (ADR-0027)", () => {
     }
   })
 
+  it("aplats d'identité : les sites qui peignaient l'encre en fond lisent l'aplat et son texte, l'encre d'origine en repli", () => {
+    const IDENTITY_SITES: readonly (readonly [string, string, number])[] = [
+      ["../../../social-features/src/features/feed-immersion/immersive-styles.tsx", "background: var(--esp-identity-fill, var(--primary));", 1],
+      ["../../../social-features/src/features/feed-immersion/immersive-styles.tsx", "color: var(--primary-fill-on, var(--primary-foreground));", 1],
+      ["../styles/communication.css", "background: var(--esp-identity-fill, var(--primary));", 2],
+      ["../styles/communication.css", "color: var(--primary-fill-on, var(--primary-foreground));", 2],
+      ["../../../social-features/src/features/messagerie/messagerie-styles.tsx", "background: var(--esp-identity-fill, var(--primary-600));", 1],
+      ["../../../social-features/src/features/messagerie/messagerie-styles.tsx", "background: var(--esp-identity-fill-hover, var(--primary-700));", 1],
+      // Bouton d'enregistrement vocal : aplat de danger, texte de Supprimer.
+      ["../../../social-features/src/features/messagerie/messagerie-styles.tsx", "color: var(--role-danger-on, var(--on-fill));", 1],
+      // Interrupteur : le curseur prend le texte de l'aplat quand il est posé dessus.
+      ["../components/form.tsx", 'background: checked ? "var(--primary-fill-on, var(--on-fill))" : "var(--on-fill)"', 1],
+      // Case cochée : la coche prend le texte de l'aplat.
+      ["../components/form.tsx", 'style={{ color: "var(--primary-fill-on, var(--on-fill))" }}', 1],
+    ]
+    for (const [path, expression, count] of IDENTITY_SITES) expect(read(path).split(expression).length - 1, `${path} : ${expression}`).toBe(count)
+  })
+
+  it("aucun aplat d'identité ne porte le texte commun `--on-fill` : le texte de l'aplat (`--primary-fill-on`), repli `--on-fill`", () => {
+    // Le texte commun est blanc en clair : illisible sur la mandarine, le rose corail ou le turquoise.
+    const roots = [new URL("../../../", import.meta.url), new URL("../../../../apps/", import.meta.url)]
+    const offenders: string[] = []
+    const walk = (dir: URL) => {
+      for (const entry of readdirSync(dir, { withFileTypes: true })) {
+        if (entry.name === "node_modules" || entry.name.startsWith(".")) continue
+        const url = new URL(entry.name + (entry.isDirectory() ? "/" : ""), dir)
+        if (entry.isDirectory()) walk(url)
+        else if (/\.(tsx?|css)$/.test(entry.name) && !/\.test\.tsx?$/.test(entry.name)) {
+          const text = readFileSync(url, "utf8")
+          if (/background:\s*"?var\(--primary-fill\)"?[;,]?\s*\n\s*color:\s*"?var\(--on-fill\)/.test(text)) offenders.push(url.pathname.split("/ECOSYSTEMES/ANTSIA/")[1] ?? url.pathname)
+        }
+      }
+    }
+    for (const root of roots) walk(root)
+    expect(offenders).toEqual([])
+  })
+
   it("le contrat de la base laisse DIASPORALE intact : chaque jeton du système épuré est à `initial`", () => {
     const base = new TokenCascade(BASE_SHEETS)
     const tokens = [...Object.keys(ANGLES).filter((token) => token !== "--rp-surface-radius"), "--primary-fill-on", "--esp-theme-swatch-1",
@@ -349,6 +391,7 @@ describe("les sept thèmes d'antsia.ga (ADR-0027)", () => {
       "--esp-chip-bg", "--esp-chip-border", "--esp-header-icon-bg", "--esp-story-ring-fill", "--esp-fab-shadow", "--esp-tab-active-bg", "--esp-tab-active-fg",
       ...["social", "message", "react", "commerce"].flatMap((role) => [`--role-${role}-fill`, `--role-${role}-on`, `--role-${role}-ink`]),
       ...["success", "danger"].flatMap((role) => [`--role-${role}-fill`, `--role-${role}-on`, `--role-${role}-ink`]),
+      "--esp-identity-fill", "--esp-identity-fill-hover",
       "--role-message-soft", "--role-react-soft", "--role-react-label"]
     for (const dark of [false, true]) {
       for (const token of tokens) expect(base.resolve({ charte: "diasporale", dark, nested: false }, token), token).toBeUndefined()

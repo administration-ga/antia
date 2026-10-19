@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/messagerie/MessagerieGroupeCompose.tsx @ ad2e7fdc2 — adaptations : relations éligibles par `groups.invites.listMyConnectionsForGroup` (réseau courant, personnes du moteur) ; création par `groups.threads.createGroup` (photo déclarée avec son type, `avatarMimeType`) ; photo déposée par `groups.threads.generateGroupAvatarUploadUrl` au lieu de `reseauPersonnel.media.generateUploadUrl` ; refus d'une photo par `refusPhotoDeGroupe` (plus de remplacement de texte dans le refus de photo de profil) ; refus serveur traduit (`messageErreurLisible(err, t)`) et raison de sélection traduite (`validerSelection(selection, t)`) ; liste des relations mémorisée (avertissement de dépendances) ; textes traduits (i18n `messagerie`, clés `messagerieGroupeCompose.…`) ; « agents » devient « personnes du réseau » ; feuille de style sortie du JSX dans une constante de module (`MSG_GROUPE_COMPOSE_CSS`) — un littéral enfant de `<style>` passerait pour une chaîne d'interface — règles inchangées.
+// Dupliqué de socle/packages/agent-features/src/features/messagerie/MessagerieGroupeCompose.tsx @ ad2e7fdc2 — adaptations : relations éligibles par `groups.invites.listMyConnectionsForGroup` (réseau courant, personnes du moteur) ; création par `groups.threads.createGroup` (photo déclarée avec son type, `avatarMimeType`) ; photo déposée par `groups.threads.generateGroupAvatarUploadUrl` au lieu de `reseauPersonnel.media.generateUploadUrl` ; refus d'une photo par `refusPhotoDeGroupe` (plus de remplacement de texte dans le refus de photo de profil) ; refus serveur traduit (`messageErreurLisible(err, t)`) et raison de sélection traduite (`validerSelection(selection, t)`) ; liste des relations mémorisée (avertissement de dépendances) ; textes traduits (i18n `messagerie`, clés `messagerieGroupeCompose.…`) ; « agents » devient « personnes du réseau » ; feuille de style sortie du JSX dans une constante de module (`MSG_GROUPE_COMPOSE_CSS`) — un littéral enfant de `<style>` passerait pour une chaîne d'interface — règles inchangées ; aplats d'identité et leur texte selon les chartes (`--esp-identity-fill`, `--primary-fill-on`, pastille tonale des états actifs ; ADR-0027), facture d'origine en repli.
 "use client"
 
 /**
@@ -104,7 +104,7 @@ const MSG_GROUPE_COMPOSE_CSS = `
         .msg-grp-pick[aria-pressed="true"] .msg-grp-check {
           border-color: var(--primary-fill);
           background: var(--primary-fill);
-          color: var(--on-fill);
+          color: var(--primary-fill-on, var(--on-fill));
         }
 		.msg-grp-head-copy {
 		  display: flex;
@@ -200,7 +200,7 @@ const MSG_GROUPE_COMPOSE_CSS = `
 		  border: none;
           border-radius: 11px;
           background: var(--primary-fill);
-          color: var(--on-fill);
+          color: var(--primary-fill-on, var(--on-fill));
           font: inherit;
           font-size: 13px;
 		  font-weight: 650;
@@ -262,7 +262,7 @@ const MSG_GROUPE_COMPOSE_CSS = `
 		  border: 2px solid var(--ink-0);
 		  border-radius: 999px;
 		  background: var(--primary-fill);
-		  color: var(--on-fill);
+		  color: var(--primary-fill-on, var(--on-fill));
 		}
 		.msg-grp-photo-remove {
 		  display: inline-flex;

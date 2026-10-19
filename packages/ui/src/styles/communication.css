@@ -1,4 +1,4 @@
-/* Dupliqué de socle/packages/ui/src/styles/globals.css (l. 1914-2125 classes `.esp-*` des surfaces immersives, des barres basses et des stories ; l. 2544-4095 couche d'appel `.call-*`, `.av-ring`, `.iappel-*`, carte Conférence) @ ad2e7fdc2 — adaptations : feuille DÉDIÉE à la couche de communication du moteur (iCom, iAppel, stories), importée par `styles.css` après la charte ; jetons qu'elle lit et que la charte de base ne déclare pas (`--esp-immersive-ink`, `--esp-immersive-on-ink`, ombres `--shadow-*`, `--destructive-foreground`, rayon des surfaces du réseau, ombre de la carte iCom déplacée, encre et fond du code QR) déclarés ici, en tête, valeurs du socle ; bannière `.esp-banner` gardée (repli de couverture du profil, de la mini-carte et des albums, lot F2) ; barre de défilement fine `.citizen-scrollbar` ajoutée (socle `dashboard-v2.css` l. 990-1003, hors de `.dash-v2`, teinte du rôle `--foreground`) ; carte de l'espace structure et filet tricolore retirés (coque de l'espace agent, non reprise) ; règles du lanceur de poste conservées (le sélecteur d'invités de la messagerie emploie ses classes) ; le reste tel quel ; couleurs par fonction (ADR-0027) : « Écrire » et « Message » de la couche d'appel (`.iappel-ctl[data-tone="message"]`, `.iappel-soft-action[data-role="message"]`) à l'aplat des messages (`--role-message-*`), facture neutre d'origine en repli, survol compris ; bannière d'appel entrant au bureau (`.iappel-banner`, posée sur `--card`) : son rond neutre et ce repli à l'encre de la carte (`--card-foreground` à 12 %, 18 % au survol), le rond de la scène y étant blanc sur blanc en clair ; pastille « En direct », Décrocher et Raccrocher à l'aplat et au texte de Valider et de Supprimer (`--role-success-*`, `--role-danger-*`), facture d'origine en repli.
+/* Dupliqué de socle/packages/ui/src/styles/globals.css (l. 1914-2125 classes `.esp-*` des surfaces immersives, des barres basses et des stories ; l. 2544-4095 couche d'appel `.call-*`, `.av-ring`, `.iappel-*`, carte Conférence) @ ad2e7fdc2 — adaptations : feuille DÉDIÉE à la couche de communication du moteur (iCom, iAppel, stories), importée par `styles.css` après la charte ; jetons qu'elle lit et que la charte de base ne déclare pas (`--esp-immersive-ink`, `--esp-immersive-on-ink`, ombres `--shadow-*`, `--destructive-foreground`, rayon des surfaces du réseau, ombre de la carte iCom déplacée, encre et fond du code QR) déclarés ici, en tête, valeurs du socle ; bannière `.esp-banner` gardée (repli de couverture du profil, de la mini-carte et des albums, lot F2) ; barre de défilement fine `.citizen-scrollbar` ajoutée (socle `dashboard-v2.css` l. 990-1003, hors de `.dash-v2`, teinte du rôle `--foreground`) ; carte de l'espace structure et filet tricolore retirés (coque de l'espace agent, non reprise) ; règles du lanceur de poste conservées (le sélecteur d'invités de la messagerie emploie ses classes) ; le reste tel quel ; couleurs par fonction (ADR-0027) : « Écrire » et « Message » de la couche d'appel (`.iappel-ctl[data-tone="message"]`, `.iappel-soft-action[data-role="message"]`) à l'aplat des messages (`--role-message-*`), facture neutre d'origine en repli, survol compris ; bannière d'appel entrant au bureau (`.iappel-banner`, posée sur `--card`) : son rond neutre et ce repli à l'encre de la carte (`--card-foreground` à 12 %, 18 % au survol), le rond de la scène y étant blanc sur blanc en clair ; pastille « En direct », Décrocher et Raccrocher à l'aplat et au texte de Valider et de Supprimer (`--role-success-*`, `--role-danger-*`), facture d'origine en repli ; aplats d'identité et leur texte selon les chartes (`--esp-identity-fill`, `--primary-fill-on`, pastille tonale des états actifs ; ADR-0027), facture d'origine en repli.
 
    ═════════════════════════════════════════════════════════════════════════
    COUCHE DE COMMUNICATION — iCom, iAppel, stories
@@ -1483,7 +1483,7 @@ body,
     touch-action: manipulation;
   }
   .iappel-launcher-row:hover { background: var(--muted); }
-  .iappel-launcher-row[data-selected="true"] { background: var(--accent); color: var(--accent-foreground); }
+  .iappel-launcher-row[data-selected="true"] { background: var(--esp-tab-active-bg, var(--accent)); color: var(--esp-tab-active-fg, var(--accent-foreground)); }
   .iappel-launcher-check {
     display: grid;
     place-items: center;
@@ -1494,9 +1494,9 @@ body,
     border: 1px solid var(--border);
   }
   .iappel-launcher-row[data-selected="true"] .iappel-launcher-check {
-    background: var(--primary);
-    color: var(--primary-foreground);
-    border-color: var(--primary);
+    background: var(--esp-identity-fill, var(--primary));
+    color: var(--primary-fill-on, var(--primary-foreground));
+    border-color: var(--esp-identity-fill, var(--primary));
   }
   .iappel-launcher-person { display: flex; flex-direction: column; min-width: 0; }
   .iappel-launcher-name {
@@ -1569,8 +1569,8 @@ body,
     min-height: 32px;
     padding: 0 10px;
     border-radius: 8px;
-    background: var(--primary);
-    color: var(--primary-foreground);
+    background: var(--esp-identity-fill, var(--primary));
+    color: var(--primary-fill-on, var(--primary-foreground));
     font-size: 12.5px;
     font-weight: 600;
     touch-action: manipulation;

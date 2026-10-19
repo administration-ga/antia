@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/ui-v2/src/components/form.tsx @ ad2e7fdc2 — adaptations : ombre du curseur de l'interrupteur (noir à 20 %) → jeton `--shadow-knob` (aucune couleur hors des jetons) ; texte d'erreur et astérisque à l'encre de danger `--role-danger-ink` quand le thème la déclare (ADR-0027), `--danger-500` en repli.
+// Dupliqué de socle/packages/ui-v2/src/components/form.tsx @ ad2e7fdc2 — adaptations : ombre du curseur de l'interrupteur (noir à 20 %) → jeton `--shadow-knob` (aucune couleur hors des jetons) ; texte d'erreur et astérisque à l'encre de danger `--role-danger-ink` quand le thème la déclare (ADR-0027), `--danger-500` en repli ; aplats d'identité et leur texte selon les chartes (`--esp-identity-fill`, `--primary-fill-on`, pastille tonale des états actifs ; ADR-0027), facture d'origine en repli.
 "use client"
 
 import {
@@ -229,7 +229,7 @@ export const Checkbox = ({ checked, onChange, label, id, style }: CheckboxProps)
         transition: "border-color .1s, background .1s",
       }}
     >
-      {checked && <Icon name="check" size={12} stroke={3} style={{ color: "var(--on-fill)" }} />}
+      {checked && <Icon name="check" size={12} stroke={3} style={{ color: "var(--primary-fill-on, var(--on-fill))" }} />}
     </span>
     <input
       type="checkbox"
@@ -337,7 +337,7 @@ export const Toggle = ({ checked, onChange, label }: ToggleProps) => (
           width: 16,
           height: 16,
           borderRadius: "50%",
-          background: "var(--on-fill)",
+          background: checked ? "var(--primary-fill-on, var(--on-fill))" : "var(--on-fill)",
           transition: "left .15s",
           boxShadow: "var(--shadow-knob)",
         }}

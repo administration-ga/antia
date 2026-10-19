@@ -139,6 +139,17 @@ Nous allons :
      le seuil de neutralité des fonds passe de 0,06 à 0,07.
    - **Gardés par décision du propriétaire** : cibles de 44 px, contour des champs (§3) et motif de
      fond commun aux thèmes (§6).
+   - **Aplats d'identité et leur texte** (même soir, second lot) : une douzaine de sites peignaient
+     l'aplat d'identité avec le texte commun `--on-fill`, blanc en clair (1,9:1 sur le turquoise
+     de Lagon, 2,6:1 sur la mandarine de Soleil) : bulles de mes messages, puces de portée du fil,
+     bouton principal et pagination du kit, case cochée, interrupteur, groupes de la messagerie,
+     stories. Ils lisent `--primary-fill-on` (repli `--on-fill`) ; le bouton d'enregistrement
+     vocal, sur l'aplat de danger, `--role-danger-on`. Quatre sites peignaient l'ENCRE en fond
+     plein (« Nouvelles publications », « Appeler » et case cochée du lanceur d'appel, photo d'un
+     groupe) : ils lisent `--esp-identity-fill` (`initial` dans la base, `--primary-fill` dans
+     les thèmes ANTSIA), l'encre d'origine en repli. L'onglet courant de la page iCom et la ligne
+     choisie du lanceur passent en pastille tonale (§3). Un test refuse désormais le texte commun
+     sur l'aplat d'identité.
 
 ## Conséquences
 

@@ -67,10 +67,10 @@ export const FEED_IMMERSION_CSS = `
         gap: 6px;
         min-height: 44px;
         padding: 0 14px;
-        border: 1px solid var(--primary);
+        border: 1px solid var(--esp-identity-fill, var(--primary));
         border-radius: 999px;
-        background: var(--primary);
-        color: var(--primary-foreground);
+        background: var(--esp-identity-fill, var(--primary));
+        color: var(--primary-fill-on, var(--primary-foreground));
         font: inherit;
         font-size: 13px;
         font-weight: 700;

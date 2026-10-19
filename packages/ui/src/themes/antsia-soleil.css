@@ -197,6 +197,8 @@
 
   /* ── Identité : encre en texte, aplat dans les blocs clair et sombre ── */
   --primary: var(--primary-500);
+  --esp-identity-fill: var(--primary-fill); /* aplat d'identité aux sites qui peignaient l'encre en fond */
+  --esp-identity-fill-hover: var(--primary-fill-hover);
   --primary-foreground: var(--on-fill);
   --primary-light: var(--primary-100);
   --accent: var(--primary-500);
