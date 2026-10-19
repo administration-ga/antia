@@ -22,11 +22,13 @@ export function Button({
       disabled={props.disabled || pending}
       aria-busy={pending || undefined}
       className={cn(
-        "inline-flex min-h-11 items-center justify-center gap-2 rounded-lg px-4 text-sm font-medium transition-colors",
+        // Système épuré (ADR-0027) : pilule, et contour seulement à couleur égale.
+        "inline-flex min-h-11 items-center justify-center gap-2 rounded-[var(--ui2-button-radius,var(--radius-lg))] px-4 text-sm font-medium transition-colors",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
         "disabled:cursor-not-allowed disabled:opacity-60",
-        variant === "primary" && "bg-primary text-primary-foreground hover:bg-primary/90",
-        variant === "outline" && "border border-border bg-card text-card-foreground hover:bg-muted",
+        variant === "primary" && "bg-[var(--primary-fill)] text-[color:var(--primary-fill-on,var(--primary-foreground))] hover:bg-[var(--primary-fill-hover)]",
+        // Le neutre (Annuler, Plus tard) : gris, sans filet dans les thèmes ANTSIA.
+        variant === "outline" && "border border-[color:var(--ui2-button-outline-border,var(--border))] bg-[var(--ui2-button-outline-bg,var(--card))] text-foreground hover:brightness-[0.97]",
         variant === "ghost" && "text-foreground hover:bg-muted",
         className,
       )}
@@ -37,8 +39,9 @@ export function Button({
   )
 }
 
+// Les champs gardent leur filet `--input` (WCAG 1.4.11, P18b) ; leur angle est celui des champs.
 const fieldClass =
-  "w-full rounded-lg border border-input bg-background px-3 py-2 text-base text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring aria-[invalid=true]:border-destructive"
+  "w-full rounded-[var(--esp-field-radius,var(--radius-lg))] border border-input bg-background px-3 py-2 text-base text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring aria-[invalid=true]:border-destructive"
 
 export const TextInput = forwardRef<HTMLInputElement, InputHTMLAttributes<HTMLInputElement>>(function TextInput({ className, ...props }, ref) {
   return <input ref={ref} {...props} className={cn(fieldClass, "min-h-11", className)} />
@@ -70,7 +73,7 @@ export function Field(props: { id: string; label: string; hint?: string; error?:
 }
 
 export function Card({ className, children }: { className?: string; children: ReactNode }) {
-  return <section className={cn("rounded-2xl border border-[color:var(--esp-surface-border,var(--border))] bg-card p-5 text-card-foreground shadow-sm sm:p-6", className)}>{children}</section>
+  return <section className={cn("rounded-[var(--ui2-card-radius,1rem)] border border-[color:var(--esp-surface-border,var(--border))] bg-card p-5 text-card-foreground shadow-sm sm:p-6", className)}>{children}</section>
 }
 
 export function CenteredStatus({ label }: { label: string }) {

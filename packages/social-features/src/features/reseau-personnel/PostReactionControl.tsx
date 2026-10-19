@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/PostReactionControl.tsx @ ad2e7fdc2 — adaptations : réactions au format du moteur (`counts` : un décompte par genre, au lieu de la liste `byKind`) ; libellés par l'i18n (nom des réactions par leur clé de `shared.ts`, textes `reseau:postReactionControl.*`, « réaction » accordé au nombre) ; ombre de la palette par le jeton `--shadow-lg` au lieu d'une couleur littérale ; gestes (appui long, clavier, palette) inchangés ; feuille de style sortie du JSX dans une constante de module (`REACTION_CONTROL_CSS`) — un littéral enfant de `<style>` passerait pour une chaîne d'interface — règles inchangées ; P03 (étude social-commerce) : bouton explicite facultatif `choiceButton` qui ouvre la palette d'un simple toucher (aucun appui long obligatoire), focus rendu à son déclencheur ; P18b (A10, A11) : avec le bouton explicite (présentation « media »), la palette ne s'ouvre plus au survol ni au focus mais par un geste explicite (bouton, Entrée, Espace, flèches du bouton, appui long), le déclencheur redevient une simple bascule (`aria-pressed`, sans `aria-haspopup`, libellé `postReactionControl.toggle*`) et l'état « réagi » se dit aussi par l'icône PLEINE ; partout : Échap ferme la palette où que soit le focus, et ses quatre choix ne font qu'un arrêt de tabulation (tabindex itinérant).
+// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/PostReactionControl.tsx @ ad2e7fdc2 — adaptations : réactions au format du moteur (`counts` : un décompte par genre, au lieu de la liste `byKind`) ; libellés par l'i18n (nom des réactions par leur clé de `shared.ts`, textes `reseau:postReactionControl.*`, « réaction » accordé au nombre) ; ombre de la palette par le jeton `--shadow-lg` au lieu d'une couleur littérale ; gestes (appui long, clavier, palette) inchangés ; feuille de style sortie du JSX dans une constante de module (`REACTION_CONTROL_CSS`) — un littéral enfant de `<style>` passerait pour une chaîne d'interface — règles inchangées ; P03 (étude social-commerce) : bouton explicite facultatif `choiceButton` qui ouvre la palette d'un simple toucher (aucun appui long obligatoire), focus rendu à son déclencheur ; P18b (A10, A11) : avec le bouton explicite (présentation « media »), la palette ne s'ouvre plus au survol ni au focus mais par un geste explicite (bouton, Entrée, Espace, flèches du bouton, appui long), le déclencheur redevient une simple bascule (`aria-pressed`, sans `aria-haspopup`, libellé `postReactionControl.toggle*`) et l'état « réagi » se dit aussi par l'icône PLEINE ; partout : Échap ferme la palette où que soit le focus, et ses quatre choix ne font qu'un arrêt de tabulation (tabindex itinérant) ; couleur des réactions (ADR-0027) : fond teinté, libellé et icône de l'action réagie lus dans `--role-react-*`, rayon `--ui2-button-radius`, valeurs d'origine en repli.
 "use client"
 
 import {
@@ -367,11 +367,12 @@ export function PostReactionControl({
           minHeight: 44,
           padding: "8px 11px",
           border: "none",
-          borderRadius: 10,
+          borderRadius: "var(--ui2-button-radius, 10px)",
+          // Couleur des réactions (ADR-0027) : fond teinté et libellé lisible ; l'icône prend l'encre.
           background:
-            reactions.mine !== null ? "var(--primary-50)" : "transparent",
+            reactions.mine !== null ? "var(--role-react-soft, var(--primary-50))" : "transparent",
           color:
-            reactions.mine !== null ? "var(--primary-600)" : "var(--ink-600)",
+            reactions.mine !== null ? "var(--role-react-label, var(--primary-600))" : "var(--ink-600)",
           fontFamily: "inherit",
           fontSize: 13,
           fontWeight: 700,
@@ -388,6 +389,7 @@ export function PostReactionControl({
           // A10 : réagi = icône PLEINE (la teinte seule ne suffit pas, WCAG 1.4.1).
           fill={filledWhenReacted && reactions.mine !== null ? "currentColor" : "none"}
           data-reacted={reactions.mine !== null ? "true" : "false"}
+          style={reactions.mine !== null ? { color: "var(--role-react-ink, currentColor)" } : undefined}
         />
         <span>{reactions.mine ? selectedLabel : likeLabel}</span>
         {reactions.total > 0 ? (
@@ -513,11 +515,11 @@ export function PostReactionControl({
                   gap: 2,
                   background:
                     reactions.mine === option.kind
-                      ? "var(--primary-50)"
+                      ? "var(--role-react-soft, var(--primary-50))"
                       : "transparent",
                   color:
                     reactions.mine === option.kind
-                      ? "var(--primary-600)"
+                      ? "var(--role-react-label, var(--primary-600))"
                       : "var(--ink-700)",
                   cursor: pending ? "progress" : "pointer",
                   fontFamily: "inherit",
@@ -525,7 +527,12 @@ export function PostReactionControl({
                   fontWeight: 700,
                 }}
               >
-                <ReactionIcon aria-hidden="true" size={19} strokeWidth={2.2} />
+                <ReactionIcon
+                  aria-hidden="true"
+                  size={19}
+                  strokeWidth={2.2}
+                  style={reactions.mine === option.kind ? { color: "var(--role-react-ink, currentColor)" } : undefined}
+                />
                 <span aria-hidden="true">{label}</span>
               </button>
             )

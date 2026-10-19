@@ -4,12 +4,15 @@
 - **Date** : 2026-10-19
 - **Portée** : Préférences > Thème d'antsia.ga (sept thèmes et la charte d'origine, livrés le
   19/10/2026) et mode sombre ; complète ADR-0010 (préférences de présentation) sans le modifier.
-- **État d'exécution** : code dans les sources, non commis. Tests verts : parité de l'amorçage et
-  du fournisseur (300 cas), hydratation sans réécriture, synchronisation compte ↔ appareil,
-  sélecteur, mise en page, préférences Convex, purge de sortie. Observé dans le navigateur
-  (serveur de développement) : avant toute hydratation, la page servie s'affiche déjà dans le
-  thème et le mode choisis. Le retour du thème sur un second navigateur attend une poussée du
-  backend local (bloquée le 19/10 par un import inachevé d'une autre tranche).
+- **Remplacé en partie** : la liste des thèmes (§4, `MEMBER_THEME_IDS`) par l'ADR-0027 (six thèmes,
+  Gaboma par défaut) ; le mécanisme reste en vigueur.
+- **État d'exécution** : code commis le 19/10/2026 (`209a797`, `dbaf707`). Tests verts : parité de
+  l'amorçage et du fournisseur (300 cas), hydratation sans réécriture, synchronisation compte ↔
+  appareil, sélecteur, mise en page, préférences Convex, purge de sortie. Observé dans le
+  navigateur (serveur de développement) : avant toute hydratation, la page servie s'affiche déjà
+  dans le thème et le mode choisis. Retour du thème du compte observé le 19/10, après la poussée
+  du backend local : sur un appareil sans thème mémorisé, la page revient dans le thème du compte
+  et le remet en cache.
 
 ## Contexte
 

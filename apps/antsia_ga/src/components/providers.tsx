@@ -74,7 +74,7 @@ export function SessionProviders({ children }: { children: ReactNode }) {
 export function Providers({ locale, children }: { locale: Locale; children: ReactNode }) {
   return (
     <I18nProvider locale={locale} appResources={appResources} defaultNS={APP_NAMESPACE} defaultVariables={{ brand: BRAND_NAME }}>
-      <AppearanceProvider storagePrefix={APPEARANCE.storagePrefix} themes={APPEARANCE.themes}>
+      <AppearanceProvider storagePrefix={APPEARANCE.storagePrefix} themes={APPEARANCE.themes} motifs={APPEARANCE.motifs}>
         <UsagePermissionProvider>{children}</UsagePermissionProvider>
         <EngineToaster />
       </AppearanceProvider>

@@ -137,14 +137,14 @@ export function PersonalControls() {
   useEffect(() => { if (auth.isUnauthenticated) router.replace(routes.signIn()) }, [auth.isUnauthenticated, router])
   if (!auth.isAuthenticated || !person) return <CenteredStatus label={t("session.checking")} />
   const active = root && memberships?.some((membership) => membership.networkId === root._id && ["en_attente", "declaree", "verifiee"].includes(membership.status))
-  return <div className="min-h-dvh bg-background text-foreground">
+  return <div className="esp-page-motif min-h-dvh bg-background text-foreground">
     <header className="border-b border-border"><nav className="mx-auto flex max-w-5xl items-center justify-between gap-3 px-4 py-3" aria-label={t("nav.label")}>
       <Link href={routes.feed()} className="font-semibold">{BRAND_NAME}</Link><Button variant="ghost" pending={leaving} onClick={async () => { setLeaving(true); await signOutAndRedirect() }}><LogOut aria-hidden="true" className="size-4" />{t("nav.signOut")}</Button>
     </nav></header>
     <main id="contenu" tabIndex={-1} className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-4 py-8 focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring">
       <header><ShieldCheck aria-hidden="true" className="mb-3 size-6 text-primary" /><h1 className="text-3xl">{t("personal.title")}</h1><p className="mt-3 text-muted-foreground">{t("personal.lead")}</p><Link className="mt-4 inline-flex min-h-11 items-center text-sm underline" href={routes.feed()}>{t("personal.home")}</Link></header>
-      <PreferencesControls /><PublicAgentControls key={person._id} /><AnalyticsControls /><PersonalCommerceControls key={person._id} personId={person._id} /><DataRights /><Decisions />
-      {root && active ? <PageModerationDecisions key={person._id} networkId={root._id} /> : null}
+      <PreferencesControls /><PublicAgentControls key={`${person._id}:agent`} /><AnalyticsControls /><PersonalCommerceControls key={`${person._id}:commerce`} personId={person._id} /><DataRights /><Decisions />
+      {root && active ? <PageModerationDecisions key={`${person._id}:pages`} networkId={root._id} /> : null}
       {root && memberships?.some((membership) => membership.networkId === root._id) ? <NotificationControls networkId={root._id} canActivate={Boolean(active)} /> : null}
     </main>
   </div>

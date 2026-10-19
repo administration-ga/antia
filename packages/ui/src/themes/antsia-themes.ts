@@ -1,16 +1,18 @@
 /**
  * Les chartes qu'un membre d'antsia.ga choisit dans ses réglages (Préférences >
- * Thème) : la charte d'origine (`antsia.css`, premier élément, choix par défaut)
- * puis sept thèmes, chacun dans `antsia-<thème>.css`. Chaque thème garde une seule
- * couleur d'identité et des fonds neutres ; `antsia-themes.test.ts` vérifie que
- * cette liste et les fichiers du dossier coïncident.
+ * Thème, ADR-0027) : Gaboma, la charte du réseau (`antsia.css`, premier élément,
+ * choix par défaut), puis six thèmes, chacun dans `antsia-<thème>.css` — dont Sable,
+ * la charte de DIASPORALE portée dans le réseau (19/10/2026). Chaque
+ * thème a trois couleurs, chacune avec ses fonctions, sur des fonds neutres ;
+ * `antsia-themes.test.ts` vérifie que cette liste et les fichiers du dossier
+ * coïncident.
  */
-export const ANTSIA_THEME_IDS = ["antsia", "atlantique", "indigo", "hibiscus", "encre", "foret", "lagon", "mandarine"] as const
+export const ANTSIA_THEME_IDS = ["gaboma", "soleil", "foret", "corail", "lagon", "electrique", "sable"] as const
 export type AntsiaThemeId = (typeof ANTSIA_THEME_IDS)[number]
 
-/** La valeur de `data-charte` d'un thème : `antsia` pour la charte d'origine, `antsia-<thème>` sinon. */
+/** La valeur de `data-charte` d'un thème : `antsia` pour Gaboma, la charte du réseau ; `antsia-<thème>` sinon. */
 export function antsiaCharteFor(id: AntsiaThemeId): string {
-  return id === "antsia" ? "antsia" : `antsia-${id}`
+  return id === "gaboma" ? "antsia" : `antsia-${id}`
 }
 
 /** Les thèmes au format attendu par le fournisseur d'apparence du moteur. */

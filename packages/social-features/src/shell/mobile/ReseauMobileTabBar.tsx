@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/mobile/ReseauMobileTabBar.tsx @ ad2e7fdc2 — adaptations : sans la coque de l'espace agent (`espace-mobile-volets`, `espace-mobile-volets-row`, `personal-nav` retirés) — le bouton fixe « Menu » OUVRE le menu principal du réseau (`ReseauMobileMenuSheet`, feuille du bas) au lieu de remplacer les sous-menus par les volets de l'espace ; seuil mobile par `MOBILE_ONLY_CLASS` (`@antsia/ui/overlay`) ; adresses des volets composées sur la base injectée (`reseauTabHref(id, useRoutes().home())`) ; volets SERVIS seuls (`isServedReseauTab` : « Conférences » attend le module `live`) ; libellés par l'i18n (`reseau:reseauMobileTabBar.*`, libellé court du volet par sa clé) ; « iRéseau » devient « réseau » ; mêmes props (`active`, `badges`), mêmes repères (`data-mobile-nav`, `data-reseau-mobile-nav`) et mêmes classes de géométrie (`.esp-reseau-tabbar`, `.rm-*`) ; P02 (18/10/2026) : quand l'APPLICATION déclare la navigation par destinations (`useNetwork().navigation`), la barre rend les cinq destinations Fil · Découvrir · Créer · Messages · Profil (même ancrage, même encoche, mêmes repères) — sinon la barre historique, inchangée.
+// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/mobile/ReseauMobileTabBar.tsx @ ad2e7fdc2 — adaptations : sans la coque de l'espace agent (`espace-mobile-volets`, `espace-mobile-volets-row`, `personal-nav` retirés) — le bouton fixe « Menu » OUVRE le menu principal du réseau (`ReseauMobileMenuSheet`, feuille du bas) au lieu de remplacer les sous-menus par les volets de l'espace ; seuil mobile par `MOBILE_ONLY_CLASS` (`@antsia/ui/overlay`) ; adresses des volets composées sur la base injectée (`reseauTabHref(id, useRoutes().home())`) ; volets SERVIS seuls (`isServedReseauTab` : « Conférences » attend le module `live`) ; libellés par l'i18n (`reseau:reseauMobileTabBar.*`, libellé court du volet par sa clé) ; « iRéseau » devient « réseau » ; mêmes props (`active`, `badges`), mêmes repères (`data-mobile-nav`, `data-reseau-mobile-nav`) et mêmes classes de géométrie (`.esp-reseau-tabbar`, `.rm-*`) ; P02 (18/10/2026) : quand l'APPLICATION déclare la navigation par destinations (`useNetwork().navigation`), la barre rend les cinq destinations Fil · Découvrir · Créer · Messages · Profil (même ancrage, même encoche, mêmes repères) — sinon la barre historique, inchangée ; système épuré (ADR-0027) : onglet actif en pastille tonale (`--esp-tab-active-*`), pastille de décompte aux couleurs des réactions (`--role-react-*`), « Créer » en carré arrondi plein de 48 px à l'ombre colorée, simple « + », libellé en `sr-only` (`--esp-fab-*`), valeurs d'origine en repli.
 "use client"
 
 /**
@@ -38,6 +38,7 @@ import { Link, usePathname, useSearchParams } from "@antsia/api/routing"
 import { Icon, type IconName } from "@antsia/ui"
 import { cn } from "@antsia/ui/lib/cn"
 import { MOBILE_ONLY_CLASS } from "@antsia/ui/overlay"
+import { Plus } from "lucide-react"
 import { type ReactNode, useEffect, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
 
@@ -139,7 +140,11 @@ function DestinationsTabBar({ routes, onCreate, handle = null, current }: Reseau
       <div className="esp-reseau-tabbar border backdrop-blur-md">
         <ul className="m-0 flex h-16 list-none items-stretch gap-0.5 p-1">
           {reseauDestinations(routes).map((destination) => {
-            const DestinationIcon = RESEAU_DESTINATION_ICONS[destination.id]
+            // « Créer » (sans adresse) est l'action principale de la barre : un carré
+            // arrondi plein de 48 px, à l'ombre de sa couleur, marqué d'un simple « + »
+            // et sans libellé visible — le libellé reste son nom accessible (ADR-0027).
+            const isCreate = destination.href === null
+            const DestinationIcon = isCreate ? Plus : RESEAU_DESTINATION_ICONS[destination.id]
             const ariaCurrent = ariaCurrentFor(match, destination.id)
             const badge = destination.id === "messages" ? unreadBadge : null
             /* PAS d'`aria-label` sur la cible : il remplacerait le contenu,
@@ -149,18 +154,22 @@ function DestinationsTabBar({ routes, onCreate, handle = null, current }: Reseau
               <>
                 <span
                   className={cn(
-                    "relative flex size-7 items-center justify-center rounded-[10px]",
-                    ariaCurrent !== undefined && "bg-accent text-accent-foreground",
+                    "relative flex items-center justify-center",
+                    isCreate
+                      ? "size-12 rounded-[var(--esp-fab-radius,10px)] bg-[var(--primary-fill)] text-[color:var(--primary-fill-on,var(--on-fill))] shadow-[var(--esp-fab-shadow,none)]"
+                      : "size-7 rounded-[var(--esp-chip-radius,10px)]",
+                    // Onglet actif : pastille tonale du thème (ADR-0027), accent plein en repli.
+                    ariaCurrent !== undefined && "bg-[var(--esp-tab-active-bg,var(--accent))] text-[color:var(--esp-tab-active-fg,var(--accent-foreground))]",
                   )}
                 >
-                  <DestinationIcon aria-hidden="true" className="size-5" />
+                  <DestinationIcon aria-hidden="true" className={isCreate ? "size-[22px]" : "size-5"} strokeWidth={isCreate ? 2.4 : undefined} />
                   {badge !== null ? (
-                    <span className="absolute -top-1.5 -right-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 font-mono text-[9px] font-bold tabular-nums text-primary-foreground">
+                    <span className="absolute -top-1.5 -right-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-[var(--role-react-fill,var(--primary))] px-1 font-mono text-[9px] font-bold tabular-nums text-[color:var(--role-react-on,var(--primary-foreground))]">
                       <span aria-hidden="true">{badge}</span>
                     </span>
                   ) : null}
                 </span>
-                <span className="max-w-full truncate text-[10px] font-semibold">{t(destination.labelKey)}</span>
+                <span className={isCreate ? "sr-only" : "max-w-full truncate text-[10px] font-semibold"}>{t(destination.labelKey)}</span>
                 {/* Un espace ENTRE le libellé et la phrase : le nom accessible se
                     lit « Messages 3 conversations non lues », jamais « Messages3… ». */}
                 {badge !== null ? (

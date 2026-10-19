@@ -17,10 +17,12 @@ import {
 } from "../tests/css-token-cascade"
 
 /**
- * Charte ANTSIA « encre, ivoire et prune » (lot P01) telle que antsia.ga la
- * sert : `styles.css` (theme.css, charte.css, communication.css) puis
- * `themes/antsia.css`, cascade rejouée avec ses spécificités réelles, sur
- * <html> et sur un portail qui redéclare `data-charte`.
+ * Charte du réseau ANTSIA « Gaboma » (ADR-0027 ; remplace la palette encre,
+ * ivoire et prune du lot P01) telle que antsia.ga la sert : `styles.css`
+ * (theme.css, charte.css, communication.css) puis `themes/antsia.css`, cascade
+ * rejouée avec ses spécificités réelles, sur <html> et sur un portail qui
+ * redéclare `data-charte`. Gaboma est le thème par défaut : vert, jaune
+ * (safran) et bleu du drapeau, chacun avec ses fonctions.
  *
  * Ce sont des contrastes CALCULÉS sur les jetons résolus (luminance relative
  * sRGB, WCAG 2.2) : ils ne remplacent pas la mesure du rendu dans le
@@ -58,20 +60,24 @@ const ratio = (mode: Mode, foreground: string, background: string) =>
   contrastRatio(color(mode, foreground), color(mode, background), color(mode, "--background"))
 const luminance = (mode: Mode, token: string) => relativeLuminance(color(mode, token))
 
-/** 03 §2 : chaque rôle de la palette et les jetons de chaque famille qui le portent. */
+/** ADR-0027 : chaque rôle de Gaboma et les jetons de chaque famille qui le portent. */
 const PALETTE: readonly { role: string; clair: string; sombre: string; tokens: readonly string[] }[] = [
-  { role: "fond page", clair: "#ffffff", sombre: "#141419", tokens: ["--background", "--background-dashboard", "--ink-100"] },
-  { role: "surface carte", clair: "#f7f6f2", sombre: "#202026", tokens: ["--card", "--esp-surface-card", "--secondary", "--ink-0", "--sidebar"] },
-  { role: "surface élevée", clair: "#ffffff", sombre: "#2a2a33", tokens: ["--popover", "--ink-50", "--esp-surface-raised"] },
-  { role: "texte principal", clair: "#1f2024", sombre: "#f7f6f2", tokens: ["--foreground", "--card-foreground", "--popover-foreground", "--sidebar-foreground", "--ink-900", "--ink-800", "--ink-700"] },
-  { role: "texte secondaire", clair: "#62636b", sombre: "#b9b7c0", tokens: ["--muted-foreground", "--secondary-foreground", "--sidebar-muted", "--ink-600", "--ink-500", "--ink-400"] },
-  { role: "action et lien", clair: "#8b2f73", sombre: "#edadd8", tokens: ["--primary", "--primary-fill", "--primary-500", "--accent", "--sidebar-primary", "--info-500", "--status-active"] },
-  { role: "texte sur action", clair: "#ffffff", sombre: "#24101f", tokens: ["--primary-foreground", "--on-fill", "--accent-foreground", "--sidebar-primary-foreground"] },
-  { role: "séparateur", clair: "#dedce2", sombre: "#3c3a44", tokens: ["--border", "--ink-200", "--sidebar-border", "--esp-mobilebar-border"] },
-  { role: "contour de contrôle", clair: "#7b7780", sombre: "#8f8998", tokens: ["--input", "--ink-300"] },
-  { role: "focus", clair: "#8b2f73", sombre: "#edadd8", tokens: ["--ring", "--sidebar-ring", "--outline-ring"] },
-  { role: "succès", clair: "#14704a", sombre: "#83d5ab", tokens: ["--success", "--success-fill", "--success-500", "--esp-green-strong", "--status-archived"] },
-  { role: "danger", clair: "#b4233f", sombre: "#ffacb9", tokens: ["--destructive", "--danger-fill", "--danger-500", "--status-error"] },
+  { role: "fond page", clair: "#ffffff", sombre: "#000000", tokens: ["--background", "--background-dashboard", "--ink-100"] },
+  { role: "surface carte", clair: "#f7f7f7", sombre: "#141414", tokens: ["--card", "--esp-surface-card", "--secondary", "--ink-0", "--sidebar"] },
+  { role: "surface élevée", clair: "#ffffff", sombre: "#1e1e1e", tokens: ["--popover", "--ink-50", "--esp-surface-raised"] },
+  { role: "texte principal", clair: "#0a0a0a", sombre: "#f5f5f5", tokens: ["--foreground", "--card-foreground", "--popover-foreground", "--sidebar-foreground", "--ink-900", "--ink-800", "--ink-700"] },
+  { role: "texte secondaire", clair: "#616161", sombre: "#a1a1a1", tokens: ["--muted-foreground", "--secondary-foreground", "--sidebar-muted", "--ink-600", "--ink-500", "--ink-400"] },
+  { role: "encre d'action et lien (bleu)", clair: "#2a5fa8", sombre: "#86b2f4", tokens: ["--primary", "--primary-500", "--accent", "--sidebar-primary", "--info-500", "--status-active"] },
+  { role: "aplat d'action : Publier, Écrire (bleu)", clair: "#2f67b5", sombre: "#6fa2f0", tokens: ["--primary-fill", "--role-message-fill"] },
+  { role: "texte sur l'aplat d'action", clair: "#ffffff", sombre: "#06142e", tokens: ["--primary-fill-on", "--role-message-on"] },
+  { role: "texte sur l'encre, le succès et le danger", clair: "#ffffff", sombre: "#03210f", tokens: ["--primary-foreground", "--on-fill", "--accent-foreground", "--sidebar-primary-foreground"] },
+  { role: "relations : Suivre (vert)", clair: "#007e4d", sombre: "#2fcb86", tokens: ["--role-social-fill"] },
+  { role: "réactions et commerce : J'aime, Participer (safran)", clair: "#f4bb44", sombre: "#f4bb44", tokens: ["--role-react-fill", "--role-commerce-fill"] },
+  { role: "séparateur", clair: "#e6e6e6", sombre: "#262626", tokens: ["--border", "--ink-200", "--sidebar-border"] },
+  { role: "contour de contrôle", clair: "#878787", sombre: "#707070", tokens: ["--input", "--ink-300"] },
+  { role: "focus", clair: "#2a5fa8", sombre: "#86b2f4", tokens: ["--ring", "--sidebar-ring", "--outline-ring"] },
+  { role: "succès", clair: "#007a4a", sombre: "#2fcb86", tokens: ["--success", "--success-fill", "--success-500", "--esp-green-strong", "--status-archived"] },
+  { role: "danger", clair: "#c8102e", sombre: "#ff6b7a", tokens: ["--destructive", "--danger-fill", "--danger-500", "--status-error"] },
 ]
 
 /** Texte (≥ 4,5:1) : [premier plan, fond, où l'écran les associe]. */
@@ -90,8 +96,8 @@ const TEXT_PAIRS: readonly (readonly [string, string, string])[] = [
   ["--primary", "--popover", "lien dans un menu"],
   ["--primary", "--muted", "lien dans un encart"],
   ["--primary-foreground", "--primary", "bouton plein (shadcn)"],
-  ["--on-fill", "--primary-fill", "bouton plein (ui-v2), bulle envoyée"],
-  ["--on-fill", "--primary-fill-hover", "bouton plein survolé"],
+  ["--primary-fill-on", "--primary-fill", "bouton plein (ui-v2), bulle envoyée"],
+  ["--primary-fill-on", "--primary-fill-hover", "bouton plein survolé"],
   ["--accent-foreground", "--accent", "onglet actif, rangée choisie"],
   ["--on-fill", "--primary-600", "aplat d'accent d'iCom"],
   ["--on-fill", "--danger-fill", "bouton de danger, enregistrement"],
@@ -143,6 +149,16 @@ const TEXT_PAIRS: readonly (readonly [string, string, string])[] = [
   ["--ink-700", "--status-semi-bg", "badge partiel"],
   ["--ink-600", "--status-inactive-bg", "badge inactif"],
   ["--muted-foreground", "--esp-neutral-chip", "bouton de la cloche"],
+  // Couleurs par fonction (ADR-0027).
+  ["--role-social-on", "--role-social-fill", "bouton Suivre"],
+  ["--role-social-ink", "--card", "coche « Vérifié » et lien de relation dans une carte"],
+  ["--role-message-ink", "--role-message-soft", "bouton Écrire (tonal)"],
+  ["--role-react-on", "--role-react-fill", "bouton J'aime, pastille de non-lus"],
+  ["--role-react-label", "--role-react-soft", "libellé de l'action réagie"],
+  ["--role-commerce-on", "--role-commerce-fill", "bouton Participer, Acheter"],
+  ["--role-commerce-ink", "--card", "lien « Voir la boutique » dans une carte"],
+  ["--ui2-button-secondary-fg", "--ui2-button-secondary-bg", "bouton secondaire tonal"],
+  ["--ink-800", "--ui2-button-outline-bg", "bouton neutre gris (Annuler)"],
 ]
 
 /** Non textuel (≥ 3:1, WCAG 1.4.11) : contours de contrôle, anneaux de focus, pastilles. */
@@ -168,6 +184,8 @@ const NON_TEXT_PAIRS: readonly (readonly [string, string, string])[] = [
   ["--primary-400", "--background", "anneau du carrousel sur le fond"],
   ["--primary-fill", "--card", "limite d'un bouton plein"],
   ["--warning", "--card", "pastille d'attente (ambre de la base)"],
+  ["--role-react-ink", "--card", "cœur d'une publication aimée"],
+  ["--role-react-ink", "--background", "cœur sur le fond"],
 ]
 
 /** Rôles du bloc sombre de la base qu'ANTSIA garde tels quels, à dessein. */
@@ -179,31 +197,12 @@ const INHERITED_IN_DARK = new Set([
   "--chart-2", "--chart-3", "--chart-4", "--chart-5",
   "--esp-tone-blue", "--esp-tone-blue-bg", "--esp-tone-amber", "--esp-tone-amber-bg",
   "--esp-tone-rose", "--esp-tone-rose-bg", "--esp-tone-green", "--esp-tone-green-bg",
-  // Valeurs de la base posées sur les primitives réaccordées (carte et filet charbon).
-  "--esp-mobilebar-bg", "--esp-mobilebar-shadow", "--esp-shadow-card", "--border-light",
+  // Valeurs de la base posées sur les primitives réaccordées (le fond de la barre
+  // flottante est désormais propre au thème, ADR-0027).
+  "--esp-mobilebar-shadow", "--esp-shadow-card", "--border-light",
   // Sélecteur de comptes de l'espace agent : absent du réseau.
   "--esp-segment-on", "--esp-segment-on-fg",
 ])
-
-/**
- * Seuls ces jetons peuvent encore porter un bleu : primitives de la base que
- * plus aucun rôle d'ANTSIA ne lit, tons et séries catégoriels, et la palette
- * des avatars (identique dans tous les thèmes : elle identifie une personne).
- */
-const BLUE_ALLOWED = /^--(esp-blue.*|esp-on-blue|esp-night-accent-.*|accent-blue|chart-2|esp-tone-blue.*|esp-ava-\d)$/
-
-/** Teinte franchement bleue (HSL) : les neutres froids de l'encre restent sous 0,3 de saturation. */
-function isBlue(rgba: Rgba): boolean {
-  const max = Math.max(rgba.r, rgba.g, rgba.b)
-  const min = Math.min(rgba.r, rgba.g, rgba.b)
-  const delta = max - min
-  const lightness = (max + min) / 2
-  if (rgba.a === 0 || delta === 0 || lightness <= 0.03 || lightness >= 0.98) return false
-  const saturation = delta / (1 - Math.abs(2 * lightness - 1))
-  const sector = max === rgba.r ? ((rgba.g - rgba.b) / delta + 6) % 6 : max === rgba.g ? (rgba.b - rgba.r) / delta + 2 : (rgba.r - rgba.g) / delta + 4
-  const hue = sector * 60
-  return saturation >= 0.3 && hue >= 185 && hue <= 255
-}
 
 const themeRules = parseRules({ name: "antsia.css", css: THEME })
 const LIGHT_ONLY = ['[data-charte="antsia"]']
@@ -229,7 +228,7 @@ describe("charte ANTSIA servie par le moteur — cascade base + thème", () => {
 
   for (const mode of MODES) {
     describe(`thème ${mode}`, () => {
-      it.each(PALETTE)("$role : la palette 03 §2 portée par chaque famille, sur <html> et dans un portail", (entry) => {
+      it.each(PALETTE)("$role : la palette Gaboma (ADR-0027) portée par chaque famille, sur <html> et dans un portail", (entry) => {
         for (const token of entry.tokens) {
           for (const nested of [false, true]) {
             expect(toHex(color(mode, token, nested)), `${token}${nested ? " (portail)" : ""}`).toBe(entry[mode])
@@ -262,21 +261,20 @@ describe("charte ANTSIA servie par le moteur — cascade base + thème", () => {
         expect(cascade.resolveAll(node(mode, true))).toEqual(cascade.resolveAll(node(mode)))
       })
 
-      it("plus aucun bleu : la dominante d'action est la prune, partout hors tons catégoriels", () => {
-        // Toute couleur d'une valeur, y compris dans une ombre ou un dégradé.
-        const blueTokens = (resolved: Map<string, string>) =>
-          [...resolved].filter(([token, raw]) => !BLUE_ALLOWED.test(token) && colorsIn(raw).some(isBlue))
-        // Test du test : sans le thème, la base est bleue (action, focus, sélection, voile, ombres).
-        const base = new TokenCascade(SHEETS.slice(0, 3))
-        const baseBlue = blueTokens(base.resolveAll({ charte: "antsia", dark: mode === "sombre", nested: false })).map(([token]) => token)
-        expect(baseBlue).toEqual(expect.arrayContaining(["--primary", "--ring", "--primary-fill", "--accent", "--ui2-scrim", "--icom-float-drag-shadow"]))
-        if (mode === "clair") expect(baseBlue).toEqual(expect.arrayContaining(["--shadow-xs", "--shadow-xl"]))
-        expect(blueTokens(cascade.resolveAll(node(mode)))).toEqual([])
+      it("le drapeau par fonction : bleu pour publier, vert pour suivre, safran pour réagir et participer", () => {
+        for (const nested of [false, true]) {
+          expect(toHex(color(mode, "--primary-fill", nested))).toBe(mode === "clair" ? "#2f67b5" : "#6fa2f0")
+          expect(toHex(color(mode, "--role-social-fill", nested))).toBe(mode === "clair" ? "#007e4d" : "#2fcb86")
+          expect(toHex(color(mode, "--role-react-fill", nested))).toBe("#f4bb44")
+          expect(toHex(color(mode, "--role-commerce-fill", nested))).toBe("#f4bb44")
+        }
+        // Les trois couleurs de l'aperçu, dans l'ordre du drapeau : vert, jaune, bleu.
+        expect(["--esp-theme-swatch-1", "--esp-theme-swatch-2", "--esp-theme-swatch-3"].map((token) => toHex(color(mode, token)))).toEqual(["#007e4d", "#f4bb44", "#2f67b5"])
       })
     })
   }
 
-  it("clair : fond blanc, cartes beige d'un cran, creux ivoire sous la carte, menus blancs", () => {
+  it("clair : fond blanc, cartes gris très clair d'un cran, creux sous la carte, menus blancs", () => {
     expect(luminance("clair", "--background")).toBeGreaterThan(luminance("clair", "--card"))
     expect(ratio("clair", "--card", "--background")).toBeGreaterThanOrEqual(1.05)
     expect(ratio("clair", "--card", "--background")).toBeLessThanOrEqual(1.15)
@@ -312,9 +310,9 @@ describe("charte ANTSIA servie par le moteur — cascade base + thème", () => {
     expect(value("clair", "--esp-r-chrome")).toBe("999px")
   })
 
-  it("cartes du fil (lot P03, D1) : le rayon des surfaces du réseau suit les cartes, 12 px dans les deux thèmes", () => {
+  it("cartes du fil (ADR-0027, après le lot P03) : 24 px dans les deux thèmes, un angle propre aux cartes", () => {
     for (const mode of MODES) {
-      for (const nested of [false, true]) expect(value(mode, "--rp-surface-radius", nested), mode).toBe("12px")
+      for (const nested of [false, true]) expect(value(mode, "--rp-surface-radius", nested), mode).toBe("24px")
     }
   })
 

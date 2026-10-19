@@ -8,10 +8,10 @@ import { useTranslation } from "react-i18next"
 import { useThemeChoice } from "./personal-theme"
 
 /**
- * Préférences > Thème : la charte d'origine et les sept thèmes d'antsia.ga.
+ * Préférences > Thème : les six thèmes d'antsia.ga, Gaboma par défaut (ADR-0027).
  * Chaque option est peinte dans SON thème (`data-charte` sur l'option) : le
- * membre voit le fond, la carte, le texte et la couleur d'action avant de
- * choisir. Le choix est immédiat, sans bouton d'enregistrement : en session, il
+ * membre voit le fond, la carte, le texte et les trois couleurs du thème avant
+ * de choisir. Le choix est immédiat, sans bouton d'enregistrement : en session, il
  * s'enregistre sur le compte (`PersonalTheme`) ; sinon il reste sur l'appareil.
  * Aucun contour (surfaces de couleurs différentes) : le choix se lit au
  * crochet et au nom dans la couleur d'action ; l'anneau n'apparaît qu'au focus.
@@ -52,7 +52,12 @@ export function ThemePicker() {
                   <span className="h-1.5 w-3/4 rounded-full bg-foreground" />
                   <span className="h-1.5 w-1/2 rounded-full bg-muted-foreground" />
                 </span>
-                <span className="h-5 w-8 shrink-0 rounded-full bg-primary" />
+                {/* Les trois couleurs du thème (ADR-0027), lues dans SA charte. */}
+                <span className="flex shrink-0 items-center gap-1">
+                  <span className="size-4 rounded-full bg-[var(--esp-theme-swatch-1,var(--primary-fill))]" />
+                  <span className="size-4 rounded-full bg-[var(--esp-theme-swatch-2,var(--primary-fill))]" />
+                  <span className="size-4 rounded-full bg-[var(--esp-theme-swatch-3,var(--primary-fill))]" />
+                </span>
               </span>
               <span className="flex items-center justify-between gap-1">
                 <span className={`truncate text-sm font-semibold ${checked ? "text-primary" : ""}`}>{t(`preferences.theme.options.${entry.id}.name`)}</span>

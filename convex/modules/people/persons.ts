@@ -4,6 +4,7 @@
  * (invariant 7). Les badges ne sont pas stockés : ils sont calculés ici, à
  * chaque lecture, à partir des liens d'identité (invariant 5).
  */
+import { memberThemeOf } from "@antsia/social-contracts/appearance"
 import { computePersonBadges, hasStrongIdentity } from "@antsia/social-domain/badges"
 import { isConsentInForce, type ConsentPurpose } from "@antsia/social-domain/consent"
 import { v } from "convex/values"
@@ -97,7 +98,9 @@ export const getMyPerson = query({
       private: person.privateAt !== undefined,
       ...(person.locale ? { locale: person.locale } : {}),
       ...(person.timeZone ? { timeZone: person.timeZone } : {}),
-      ...(person.theme ? { theme: person.theme } : {}),
+      // Un ancien identifiant (ADR-0027) n'est pas un thème courant : rien n'est rendu, et
+      // l'interface applique le thème par défaut.
+      ...(memberThemeOf(person.theme) ? { theme: memberThemeOf(person.theme) } : {}),
       badges: await badgesOf(ctx, person._id),
       consentsInForce: purposes,
       avatar: await profileImage(ctx, person.avatarStorageId),

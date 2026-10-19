@@ -1,121 +1,168 @@
 /*
- * Thème « Lagon » du réseau ANTSIA (`data-charte="antsia-lagon"`) : sarcelle, fond gris très clair, noir bleuté en sombre.
- * Un des sept thèmes que le membre choisit dans ses réglages (Préférences > Thème).
+ * Thème « Lagon » du réseau ANTSIA (`data-charte="antsia-lagon"`) : turquoise, corail et jaune de Naples, fond greige et anthracite.
+ * Un des six thèmes que le membre choisit dans Préférences > Thème (ADR-0027, 19/10/2026).
  *
- * D'après votre référence Lagon et le cyan de TikTok : une sarcelle pour l'action, sur un gris très clair et des cartes blanches ; noir bleuté en sombre.
+ * Le turquoise publie, suit et écrit ; le corail est réservé aux réactions et aux notifications ; le jaune fait participer et acheter.
  *
- * Règle commune aux sept thèmes : UNE couleur d'identité (action principale, lien,
- * focus, onglet actif, sélection), des boutons secondaires gris neutres, et des
- * retours visuels en petites touches (succès, danger, pastilles de non-lus). Fond
- * clair blanc, gris très clair ou beige clair ; fond sombre noir ou gris sombre.
+ * Trois couleurs par thème, chacune avec ses fonctions (jetons `--role-*`), plus le succès et le
+ * danger, retours visuels communs. `--primary` reste une ENCRE lisible en texte ; l'aplat du bouton
+ * est `--primary-fill`, avec son propre texte `--primary-fill-on`. Fond neutre de la troisième série
+ * (« Greige » : Greige · anthracite), sans motif : les motifs sont un réglage du membre.
  *
- * Même structure que antsia.css (cliquet `theme-contract`) : bloc clair, bloc
- * sombre, puis le bloc commun recopié de antsia.css. Contrastes recalculés à
- * travers la cascade complète par `antsia-themes.test.ts`. Géométrie, polices
- * et ombres identiques à antsia.css.
+ * Système épuré : un angle par élément (pilule, badge 6, puce 10, page 12, champ 14, média 16,
+ * Créer 18, carte 24, barre d'onglets 28), contour seulement à couleur égale, barre flottante.
+ * Généré par le script de la série 3 ; contrastes recalculés à travers la cascade complète par
+ * `antsia-themes.test.ts`. Même structure que les autres thèmes (cliquet `theme-contract`).
  */
 
 [data-charte="antsia-lagon"] {
   /* ── 1. Primitives du contrat, réaccordées au thème ── */
-  --esp-neutral-900: #1c1e21; /* texte principal clair */
-  --esp-neutral-600: #5e6166; /* texte secondaire clair */
-  --esp-neutral-rule: #dadde1; /* séparateur décoratif */
-  --esp-neutral-field: #7f838a; /* contour de contrôle clair */
-  --esp-night-bg: #0c1014;
-  --esp-night-card: #191e24;
-  --esp-night-chip: #262b32;
-  --esp-night-border: #3a414a;
-  --esp-night-input: #8f98a3;
-  --esp-night-soft: #a9b1bb;
+  --esp-neutral-900: #1a1a18; /* texte principal clair */
+  --esp-neutral-600: #5c5a54; /* texte secondaire clair */
+  --esp-neutral-rule: #dcdad3; /* séparateur décoratif */
+  --esp-neutral-field: #817f77; /* contour de contrôle clair, ≥ 3:1 sur la carte et le creux */
+  --esp-night-bg: #1a1a1a;
+  --esp-night-card: #242424;
+  --esp-night-chip: #2e2e2e;
+  --esp-night-border: #363636;
+  --esp-night-input: #7c7c7c;
+  --esp-night-soft: #a8a8a8;
 
-  /* ── 2. Identité, succès, danger — thème clair ── */
-  --primary-50: #e1eeed;
-  --primary-100: #cee2e1;
-  --primary-200: #b0d1cf;
-  --primary-300: #3e8e8b;
-  --primary-400: #217d79;
-  --primary-500: #086e6a;
-  --primary-600: #07615d;
-  --primary-700: #065451;
-  --primary-800: #054442;
-  --success-50: #e8f2eb;
-  --success-100: #d0e4d7;
-  --success-500: #167a35;
-  --success-600: #116329;
-  --danger-50: #fae7ea;
-  --danger-100: #f4cfd5;
-  --danger-500: #c8102e;
-  --danger-600: #a80d27;
-  --danger-700: #870a1f;
+  /* ── 2. Identité (encre), succès, danger — thème clair ── */
+  --primary-50: #dee9e7;
+  --primary-100: #cbdedc;
+  --primary-200: #aececb;
+  --primary-300: #428f8b;
+  --primary-400: #257d79;
+  --primary-500: #0d6f6a;
+  --primary-600: #0b625d;
+  --primary-700: #0a5451;
+  --primary-800: #084542;
+  --success-50: #e4ede7;
+  --success-100: #cee0d6;
+  --success-500: #1c7149;
+  --success-600: #17633f;
+  --danger-50: #f5e6e4;
+  --danger-100: #f0d2d0;
+  --danger-500: #bb2d2d;
+  --danger-600: #b82b2b;
+  --danger-700: #932222;
 
   /* ── 3. Rôles du thème clair ── */
-  --background: #f0f2f5;
+  --background: #edece8;
   --foreground: var(--esp-neutral-900);
-  --card: #ffffff;
+  --card: #fafaf8;
   --popover: #ffffff;
-  --muted: #e4e6eb; /* bouton secondaire, creux, survol */
+  --muted: #e4e2dd; /* creux : bouton neutre, puce, champ, survol */
   --muted-foreground: var(--esp-neutral-600);
   --border: var(--esp-neutral-rule);
   --input: var(--esp-neutral-field);
-  --on-fill: #ffffff; /* texte blanc sur l'action, le succès et le danger */
+  --on-fill: #ffffff; /* texte blanc sur l'accent, le succès et le danger */
   --esp-banner: linear-gradient(135deg, var(--primary-700) 0%, var(--primary-500) 100%);
+  --role-social-fill: #4ecdc4;
+  --role-social-on: #0b2d2a;
+  --role-social-ink: #0d6f6a;
+  --role-message-fill: #4ecdc4;
+  --role-message-on: #0b2d2a;
+  --role-message-ink: #0d6f6a;
+  --role-react-fill: #ff6b6b;
+  --role-react-on: #2b0505;
+  --role-react-ink: #e04848;
+  --role-commerce-fill: #ffe66d;
+  --role-commerce-on: #1b1600;
+  --role-commerce-ink: #736300;
+  --role-message-soft: #e0f3f0; /* fond tonal du bouton Écrire */
+  --role-react-soft: #fbe6e4; /* fond de l'action réagie */
+  --primary-fill: #4ecdc4; /* aplat d'identité : bouton Publier, Créer, interrupteur */
+  --primary-fill-hover: #63d3cb;
+  --primary-fill-on: #0b2d2a; /* texte posé sur l'aplat d'identité */
+  --ui2-button-secondary-bg: #e0f3f0; /* bouton secondaire tonal, sans filet */
+  --ui2-button-secondary-fg: #0d6f6a;
+  --esp-mobilebar-bg: rgb(250 250 248 / 0.9); /* barre flottante, translucide au-dessus du fil */
+  --esp-fab-shadow: 0 10px 20px -8px rgb(78 205 196 / 0.55);
+  --esp-tab-active-bg: #def3f0; /* onglet actif : pastille tonale */
+  --esp-tab-active-fg: #0d6f6a;
 
-  /* Géométrie et typographie de antsia.css. */
+  /* Géométrie et typographie, valables dans les deux thèmes. */
   --radius-xl: 12px;
-  --rp-surface-radius: 12px;
+  --rp-surface-radius: 24px; /* cartes du fil et surfaces de premier niveau */
   --esp-inline-link-decoration: underline;
+  --esp-sticky-header-inset: 4rem; /* barre de membre collante (P18b, A13) */
   --body-font-size: 16px;
   --font-sans: "Inter", system-ui, sans-serif;
   --font-display: var(--font-familjen-grotesk, "Familjen Grotesk Variable"), "Inter", system-ui, sans-serif;
 
-  /* Ombres teintées de l'encre du thème, géométries et opacités de antsia.css. */
-  --shadow-xs: 0 1px 2px rgb(28 30 33 / 0.05);
-  --shadow-sm: 0 1px 3px rgb(28 30 33 / 0.08), 0 1px 2px rgb(28 30 33 / 0.04);
-  --shadow-md: 0 4px 12px rgb(28 30 33 / 0.08), 0 2px 4px rgb(28 30 33 / 0.04);
-  --shadow-lg: 0 12px 32px rgb(28 30 33 / 0.12), 0 4px 12px rgb(28 30 33 / 0.06);
-  --shadow-xl: 0 20px 40px rgb(28 30 33 / 0.16), 0 8px 16px rgb(28 30 33 / 0.08);
-  --icom-float-drag-shadow: 0 18px 54px rgb(28 30 33 / 0.3);
+  /* Ombres teintées de l'encre du thème. */
+  --shadow-xs: 0 1px 2px rgb(26 26 24 / 0.05);
+  --shadow-sm: 0 1px 3px rgb(26 26 24 / 0.08), 0 1px 2px rgb(26 26 24 / 0.04);
+  --shadow-md: 0 4px 12px rgb(26 26 24 / 0.08), 0 2px 4px rgb(26 26 24 / 0.04);
+  --shadow-lg: 0 12px 32px rgb(26 26 24 / 0.12), 0 4px 12px rgb(26 26 24 / 0.06);
+  --shadow-xl: 0 20px 40px rgb(26 26 24 / 0.16), 0 8px 16px rgb(26 26 24 / 0.08);
+  --icom-float-drag-shadow: 0 18px 54px rgb(26 26 24 / 0.3);
 }
 
 .dark[data-charte="antsia-lagon"],
 .dark [data-charte="antsia-lagon"] {
-  /* ── Identité, succès, danger — thème sombre ── */
-  --primary-50: #254547;
-  --primary-100: #295354;
-  --primary-200: #2e6464;
-  --primary-300: #42a7a1;
-  --primary-400: #49bcb4;
-  --primary-500: #4ecdc4;
-  --primary-600: #6ed6cf;
-  --primary-700: #8aded8;
-  --primary-800: #a7e6e2;
-  --success-50: #234032;
-  --success-100: #274d38;
-  --success-500: #4cc76a;
-  --success-600: #7ad692;
-  --danger-50: #473137;
-  --danger-100: #59383f;
-  --danger-500: #ff7b85;
-  --danger-600: #ff9ba2;
-  --danger-700: #ffbdc2;
+  /* ── Identité (encre), succès, danger — thème sombre ── */
+  --primary-50: #354d4c;
+  --primary-100: #3b5c5a;
+  --primary-200: #426f6c;
+  --primary-300: #5fb7b0;
+  --primary-400: #68cdc6;
+  --primary-500: #6fe0d8;
+  --primary-600: #89e6df;
+  --primary-700: #a0ebe5;
+  --primary-800: #b7f0ec;
+  --success-50: #30473c;
+  --success-100: #355545;
+  --success-500: #5fd39a;
+  --success-600: #6fdca6;
+  --danger-50: #503534;
+  --danger-100: #613c3a;
+  --danger-500: #ff7b72;
+  --danger-600: #ff8f87;
+  --danger-700: #ffb1ab;
 
   /* ── Rôles du thème sombre ── */
   --background: var(--esp-night-bg);
-  --foreground: #f8f9f9;
+  --foreground: #ececec;
   --card: var(--esp-night-card);
   --popover: var(--esp-night-chip);
-  --muted: #2b3138; /* se lève au-dessus de la carte */
+  --muted: var(--esp-night-chip); /* se lève au-dessus de la carte */
   --muted-foreground: var(--esp-night-soft);
   --border: var(--esp-night-border);
   --input: var(--esp-night-input);
-  --on-fill: #05221f; /* encre sombre sur les aplats éclaircis */
+  --on-fill: #062614; /* encre sombre sur les aplats éclaircis */
   --esp-banner: linear-gradient(135deg, var(--primary-100) 0%, var(--primary-50) 100%);
+  --role-social-fill: #4ecdc4;
+  --role-social-on: #0b2d2a;
+  --role-social-ink: #7fe6df;
+  --role-message-fill: #4ecdc4;
+  --role-message-on: #0b2d2a;
+  --role-message-ink: #7fe6df;
+  --role-react-fill: #ff6b6b;
+  --role-react-on: #2b0505;
+  --role-react-ink: #ff8585;
+  --role-commerce-fill: #ffe66d;
+  --role-commerce-on: #1b1600;
+  --role-commerce-ink: #ffe66d;
+  --role-message-soft: #2a3d3c; /* fond tonal du bouton Écrire */
+  --role-react-soft: #432e2e; /* fond de l'action réagie */
+  --primary-fill: #4ecdc4; /* aplat d'identité : bouton Publier, Créer, interrupteur */
+  --primary-fill-hover: #63d3cb;
+  --primary-fill-on: #0b2d2a; /* texte posé sur l'aplat d'identité */
+  --ui2-button-secondary-bg: #2a3d3c; /* bouton secondaire tonal, sans filet */
+  --ui2-button-secondary-fg: #6fe0d8;
+  --esp-mobilebar-bg: rgb(36 36 36 / 0.9); /* barre flottante, translucide au-dessus du fil */
+  --esp-fab-shadow: 0 10px 20px -8px rgb(78 205 196 / 0.45);
+  --esp-tab-active-bg: #2b3f3e; /* onglet actif : pastille tonale */
+  --esp-tab-active-fg: #6fe0d8;
 }
 
 [data-charte="antsia-lagon"],
 .dark[data-charte="antsia-lagon"],
 .dark [data-charte="antsia-lagon"] {
-  /* Bloc commun : les mêmes renvois que antsia.css (rôles dérivés, échelles ui-v2, statuts). */
+  /* ── Surfaces : la même paire fond/carte partout ── */
   --background-dashboard: var(--background);
   --card-foreground: var(--foreground);
   --popover-foreground: var(--foreground);
@@ -123,20 +170,20 @@
   --secondary-foreground: var(--muted-foreground);
   --esp-surface-card: var(--card);
   --esp-surface-raised: var(--popover);
-  --esp-surface-border: transparent;
+  --esp-surface-border: transparent; /* la carte se distingue du fond : aucun contour */
   --esp-neutral-chip: var(--muted);
   --esp-neutral-hover: var(--muted);
-  --esp-mobilebar-border: var(--border);
+  --esp-mobilebar-border: transparent;
   --sidebar: var(--card);
   --sidebar-foreground: var(--foreground);
   --sidebar-border: var(--border);
   --sidebar-muted: var(--muted-foreground);
-  --ui2-scrim: rgb(28 30 33 / 0.55);
+  --ui2-scrim: rgb(26 26 24 / 0.55);
+
+  /* ── Identité : encre en texte, aplat dans les blocs clair et sombre ── */
   --primary: var(--primary-500);
   --primary-foreground: var(--on-fill);
   --primary-light: var(--primary-100);
-  --primary-fill: var(--primary-500);
-  --primary-fill-hover: var(--primary-600);
   --accent: var(--primary-500);
   --accent-foreground: var(--on-fill);
   --accent-purple: var(--primary-500);
@@ -157,6 +204,8 @@
   --sidebar-ring: var(--ring);
   --shadow-focus: 0 0 0 2px var(--background), 0 0 0 4px var(--ring);
   --outline-ring: var(--ring);
+
+  /* ── Succès et danger : icône + texte, jamais la couleur seule ── */
   --success: var(--success-500);
   --success-light: var(--success-50);
   --success-fill: var(--success-500);
@@ -174,6 +223,8 @@
   --status-semi-bg: var(--muted);
   --status-inactive: var(--input);
   --status-inactive-bg: var(--muted);
+
+  /* ── Échelle d'encre d'ui-v2, attribuée rôle par rôle ── */
   --ink-900: var(--foreground);
   --ink-800: var(--foreground);
   --ink-700: var(--foreground);
@@ -186,4 +237,26 @@
   --ink-100: var(--background);
   --ink-50: var(--popover);
   --ink-0: var(--card);
+
+  /* ── Système épuré : un angle par élément, contour seulement à couleur égale ── */
+  --ui2-button-radius: 999px; /* boutons d'action en pilule */
+  --ui2-badge-radius: 6px;
+  --ui2-card-radius: 24px; /* cartes d'ui-v2, comme les surfaces du réseau */
+  --esp-chip-radius: 10px;
+  --esp-avatar-page-radius: 12px; /* les pages en carré arrondi, les personnes en rond */
+  --esp-field-radius: 14px;
+  --esp-media-radius: 16px; /* un média dans une carte : plus petit que la carte */
+  --esp-fab-radius: 18px;
+  --esp-mobilebar-radius: 28px;
+  --ui2-button-outline-bg: var(--muted); /* bouton neutre (Annuler) : gris, sans filet */
+  --ui2-button-outline-border: transparent;
+  --ui2-button-secondary-border: transparent;
+  --esp-chip-bg: var(--muted);
+  --esp-chip-border: transparent;
+  --esp-header-icon-bg: var(--muted); /* icônes de l'en-tête dans des ronds gris */
+  --esp-header-icon-radius: 999px;
+  --role-react-label: var(--foreground); /* libellé de l'action réagie : encre de texte */
+  --esp-theme-swatch-1: #4ecdc4; /* Turquoise */
+  --esp-theme-swatch-2: #ff6b6b; /* Bittersweet */
+  --esp-theme-swatch-3: #ffe66d; /* Jaune de Naples */
 }

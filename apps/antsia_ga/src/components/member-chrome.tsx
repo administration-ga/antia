@@ -109,7 +109,7 @@ export function MemberPage({ children }: { children: ReactNode }) {
   const destinations = useNetwork().navigation === "destinations"
   if (destinations) return <DestinationsMemberPage>{children}</DestinationsMemberPage>
   return (
-    <div className="min-h-dvh bg-background">
+    <div className="esp-page-motif min-h-dvh bg-background">
       <MemberTopBar />
       <main id="contenu" tabIndex={-1} className="focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring mx-auto w-full max-w-7xl px-4 py-6 sm:px-5">
         {children}
@@ -149,7 +149,7 @@ function DestinationsMemberPage({ children }: { children: ReactNode }) {
   const withNavigation = !isLiveSessionPath(pathname)
 
   return (
-    <div className="min-h-dvh bg-background">
+    <div className="esp-page-motif min-h-dvh bg-background">
       <MemberTopBar />
       <div className={cn("mx-auto w-full max-w-7xl px-4 sm:px-5", withNavigation && "min-[960px]:grid min-[960px]:grid-cols-[minmax(200px,248px)_minmax(0,1fr)] min-[960px]:gap-6")}>
         {withNavigation ? (

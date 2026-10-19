@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/Avatar.tsx @ ad2e7fdc2 — adaptations : primitives de `@antsia/ui` ; commentaires du contour carré (une PAGE du moteur, plus une administration) et du repli d'initiales (nom publié de `persons`) ; code inchangé.
+// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/Avatar.tsx @ ad2e7fdc2 — adaptations : primitives de `@antsia/ui` ; commentaires du contour carré (une PAGE du moteur, plus une administration) et du repli d'initiales (nom publié de `persons`) ; code inchangé ; angle des pages lu dans `--esp-avatar-page-radius` (ADR-0027), `--radius-lg` en repli.
 "use client"
 
 /**
@@ -59,7 +59,8 @@ export function Avatar({
         flexShrink: 0,
         // Le rayon de la tuile est un JETON, jamais une valeur : la charte
         // scopée de l'espace le remappe avec le reste.
-        borderRadius: shape === "square" ? "var(--radius-lg)" : size / 2,
+        // Les pages en carré arrondi, les personnes en rond (ADR-0027).
+        borderRadius: shape === "square" ? "var(--esp-avatar-page-radius, var(--radius-lg))" : size / 2,
         overflow: "hidden",
         background: showImage ? "var(--ink-100)" : "var(--primary-50)",
         color: "var(--primary-600)",

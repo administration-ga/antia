@@ -3,6 +3,8 @@
 - **Statut** : Proposé — implémentation demandée par le propriétaire le 18/10/2026 (« Implémente ») ;
   la palette et l'immersion par défaut sur téléphone ne seront « acceptées » qu'après recette.
 - **Date** : 2026-10-18
+- **Remplacé en partie** : §1 (palette encre, ivoire et prune) par l'ADR-0027 (19/10/2026) : six
+  thèmes à trois couleurs, Gaboma par défaut.
 - **Portée** : lots P01–P05 de l'étude `docs/etudes/2026-10-18-social-commerce/` ; complète ADR-0010
   (préférences de présentation) et ADR-0012 (projections publiques), sans les modifier.
 

@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/ui-v2/src/components/badge.tsx @ ad2e7fdc2 — adaptations : aucune (copie textuelle) ; en-tête de provenance.
+// Dupliqué de socle/packages/ui-v2/src/components/badge.tsx @ ad2e7fdc2 — adaptations : en-tête de provenance ; rayon lu dans `--ui2-badge-radius` (6 px dans les thèmes ANTSIA, ADR-0027), 999 px en repli.
 import type { CSSProperties, ReactNode } from "react"
 import { Icon, type IconName } from "./icon"
 import type { Tone } from "../types"
@@ -66,7 +66,7 @@ export const Badge = ({
         background: t.bg,
         color: t.fg,
         ...sz,
-        borderRadius: 999,
+        borderRadius: "var(--ui2-badge-radius, 999px)",
         fontWeight: 600,
         letterSpacing: "0.01em",
         ...style,
