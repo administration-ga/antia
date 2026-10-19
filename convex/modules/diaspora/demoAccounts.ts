@@ -4,7 +4,7 @@
  * Sur le modèle de `convex/modules/platform/demoAccounts.ts` (comptes de
  * démonstration de la racine), pour le réseau `diasporale`. Le catalogue vient
  * du domaine (`DIASPORALE_DEMO_ACTOR_SPECS`) : un acteur par statut de membre,
- * par nature de page et par rôle, sur une adresse réservée
+ * par nature de page, par rôle et par accès restreint, sur une adresse réservée
  * (`<acteur>@demo.diasporale.test`, domaine `.test` jamais routable).
  *
  * La connexion passe par le VRAI parcours OTP (code lu par `devTools.latestOtp`),
@@ -22,14 +22,27 @@
  * - la page (association, entreprise, média, communauté, institution), sa
  *   confiance et sa présentation, la personne en étant l'administratrice ;
  * - l'ouverture des pays de la démonstration, si personne n'en a encore décidé ;
- * - EN DERNIER, la suspension de l'acteur « suspendu » : une sanction n'est
- *   jamais dérivée, et une adhésion suspendue ne se rejoint plus.
+ * - le blocage d'un acteur par un autre (« bloque » par « verifie »), par le vrai
+ *   mécanisme du moteur (`graph/connections.blockPair`, le corps de
+ *   `blockPerson`), dès que les deux comptes existent ;
+ * - EN DERNIER, les sanctions, qui ne sont jamais dérivées : la suspension de
+ *   l'acteur « suspendu » dans DIASPORALE seulement (une adhésion suspendue ne se
+ *   rejoint plus), et celle de « suspendu-racine » à la RACINE, par le chemin de
+ *   la console (`people/memberships.suspendRootMembership`, celui de
+ *   `suspendEverywhere`) : elle vaut partout, sans toucher au statut propre de
+ *   son adhésion DIASPORALE.
+ *
+ * L'utilisateur extérieur au réseau (« exterieur ») n'a pas d'adhésion
+ * DIASPORALE : l'application ne rejoue que l'accueil d'ANTSIA (consentement,
+ * profil publié), l'équipement l'admet à la racine par la vraie règle
+ * d'admission et n'écrit rien dans DIASPORALE.
  *
  * Idempotent : rappelé, il ne recrée rien. Double garde : `devToolsAllowed`
  * (variable `ANTSIA_DEV_TOOLS` ET backend local). Ailleurs, le catalogue est
  * vide et la mutation refuse : aucune production ne peut s'en servir.
  */
-import { CONSENT_TEXT_VERSIONS, isConsentInForce } from "@antsia/social-domain/consent"
+import { CONSENT_TEXT_VERSIONS, isConsentInForce, missingConsentsToJoin } from "@antsia/social-domain/consent"
+import { entryStatusFor } from "@antsia/social-domain/membership"
 import { assertPageHandle, assertPageName, assertTrustAllowedForOwner, pageTrustRank } from "@antsia/social-domain/pages"
 import { normalizePageAssociationType, normalizePageCity, normalizePageSector } from "@antsia/social-domain/pagePresentation"
 import {
@@ -48,18 +61,22 @@ import { v } from "convex/values"
 import { components } from "../../_generated/api"
 import type { Doc, Id } from "../../_generated/dataModel"
 import { type MutationCtx, query } from "../../_generated/server"
-import { getMembership } from "../../lib/access"
+import { getMembership, getRootNetwork, isActiveMember } from "../../lib/access"
 import { devToolsAllowed } from "../../lib/devTools"
 import { checked, fail } from "../../lib/errors"
 import { personMutation } from "../../lib/functions"
 import { literals, membershipRoleValidator, membershipStatusValidator } from "../../lib/validators"
+import { blockPair } from "../graph/connections"
+import { ownBlockIntent } from "../graph/graph"
 import { moderateContentWrite } from "../moderation/policy"
 import { assertPageHandleFree, isPageOnRoot, pageSearchText } from "../pages/access"
-import { setMembershipStatus } from "../people/admission"
+import { admitToNetwork, setMembershipStatus } from "../people/admission"
 import { syncIdentityForPerson } from "../people/identity"
-import { liveIdentityLinks } from "../people/persons"
+import { suspendRootMembership } from "../people/memberships"
+import { hasStrongIdentityFor, liveIdentityLinks } from "../people/persons"
+import { refreshReaderContexts } from "../posts/feedMaterialization"
 import { sha256Hex } from "./attestation"
-import { activeSponsorshipOf, applyDerivedStatus, isDiasporaNetwork, membershipGrounds } from "./facts"
+import { activeSponsorshipOf, applyDerivedStatus, effectiveStatusIn, isDiasporaNetwork, membershipGrounds } from "./facts"
 import { hubRow } from "./hubs"
 
 export const demoActorValidator = literals(DIASPORALE_DEMO_ACTORS)
@@ -325,18 +342,85 @@ async function ensureDemoPage(
 }
 
 /**
+ * Le blocage d'un acteur par un autre, par le vrai mécanisme du moteur
+ * (`blockPair`, le corps de `blockPerson`) et avec ses gardes : le bloqueur membre
+ * actif du réseau, la cible vivante. Une intention déjà posée n'est pas rejouée.
+ */
+async function ensureDemoBlock(ctx: MutationCtx, network: Doc<"networks">, blocker: Doc<"persons">, target: Doc<"persons">): Promise<void> {
+  if (blocker._id === target._id || target.deletionRequestedAt !== undefined || target.erasedAt !== undefined) return
+  if (!(await isActiveMember(ctx, network._id, blocker._id))) return
+  if (await ownBlockIntent(ctx, blocker._id, target._id)) return
+  await blockPair(ctx, { networkId: network._id, blockerPersonId: blocker._id, targetPersonId: target._id })
+}
+
+/**
+ * Les blocages de la démonstration autour de l'acteur : celui qu'il subit, si son
+ * bloqueur est déjà équipé, et ceux qu'il pose, envers ses bloqués déjà équipés.
+ * L'ordre d'équipement n'y change rien, comme pour le parrainage.
+ */
+async function ensureDemoBlocks(ctx: MutationCtx, network: Doc<"networks">, actor: DiasporaleDemoActor, person: Doc<"persons">): Promise<void> {
+  const blockedBy = DIASPORALE_DEMO_ACTOR_SPECS[actor].blockedBy
+  if (blockedBy !== null) {
+    const blocker = await personOfActor(ctx, blockedBy)
+    if (blocker) await ensureDemoBlock(ctx, network, blocker, person)
+  }
+  for (const blocked of DIASPORALE_DEMO_ACTORS) {
+    if (DIASPORALE_DEMO_ACTOR_SPECS[blocked].blockedBy !== actor) continue
+    const target = await personOfActor(ctx, blocked)
+    if (target) await ensureDemoBlock(ctx, network, person, target)
+  }
+}
+
+/**
+ * La suspension de la RACINE, par le chemin de la console (`suspendRootMembership`,
+ * partagé avec `suspendEverywhere`) : elle vaut partout, DIASPORALE compris, et
+ * l'adhésion DIASPORALE garde son statut propre. Déjà suspendue : rien.
+ */
+async function ensureRootSuspension(ctx: MutationCtx, personId: Id<"persons">): Promise<void> {
+  const root = await getRootNetwork(ctx)
+  const membership = root ? await getMembership(ctx, root._id, personId) : null
+  if (!membership) return fail("notFound")
+  if (membership.status !== "suspendue") await suspendRootMembership(ctx, membership)
+}
+
+/**
+ * L'utilisateur extérieur au réseau : son compte ANTSIA seulement. Il exige
+ * l'accueil d'ANTSIA rejoué par l'application (profil publié, consentement au
+ * profil social), puis l'admet à la RACINE par la vraie règle d'admission, comme
+ * les comptes de démonstration de la racine (`platform/demoAccounts`). Rien ne
+ * s'écrit dans DIASPORALE : ni adhésion, ni fait, ni pays.
+ */
+async function admitOutsiderToRoot(ctx: MutationCtx, person: Doc<"persons">): Promise<void> {
+  if (!person.handle || !person.displayName || person.publishedAt === undefined) return fail("profileRequired")
+  // borné : un consentement par finalité et par réseau.
+  const consents = await ctx.db.query("consents").withIndex("by_person_and_purpose", (q) => q.eq("personId", person._id)).take(100)
+  if (missingConsentsToJoin(consents).length > 0) return fail("consentRequired")
+  const root = await getRootNetwork(ctx)
+  if (!root) return fail("notFound")
+  const membership = await getMembership(ctx, root._id, person._id)
+  if (membership && membership.status !== "partie") return
+  const evidence = { strongIdentity: await hasStrongIdentityFor(ctx, person._id), externalVerification: false, sponsored: false }
+  const entry = entryStatusFor(root.membershipPolicy, evidence)
+  if (entry === null) return fail("policyRefused")
+  await admitToNetwork(ctx, { personId: person._id, network: root, root, entry, evidence })
+  await refreshReaderContexts(ctx, root._id, person._id)
+}
+
+/**
  * @selfScoped Développement local seulement : équipe le compte de la SESSION en
  * l'acteur demandé, si son adresse vérifiée est celle de cet acteur. Exige
- * l'adhésion faite par le vrai accueil (`joinDiasporale`) ; idempotente — un
- * second appel ne recrée rien. Rend le statut obtenu, le rôle, et la page de
+ * l'adhésion faite par le vrai accueil (`joinDiasporale`), sauf pour
+ * l'utilisateur extérieur au réseau, qui n'en a pas ; idempotente — un second
+ * appel ne recrée rien. Rend le statut EFFECTIF dans DIASPORALE (une suspension
+ * de la racine vaut partout) et le rôle, `null` sans adhésion, puis la page de
  * l'acteur (avec `pageCreated` : les gestes de la page ne se jouent qu'une fois).
  */
 export const equipMyDemoAccount = personMutation({
   args: { actor: demoActorValidator },
   returns: v.object({
     actor: demoActorValidator,
-    status: membershipStatusValidator,
-    role: membershipRoleValidator,
+    status: v.union(membershipStatusValidator, v.null()),
+    role: v.union(membershipRoleValidator, v.null()),
     pageId: v.union(v.id("pages"), v.null()),
     pageCreated: v.boolean(),
   }),
@@ -349,6 +433,14 @@ export const equipMyDemoAccount = personMutation({
     if (spec.profile === null) return fail("policyRefused")
     const network = await diasporaleNetwork(ctx)
     if (!network) return fail("notFound")
+
+    // L'extérieur au réseau : son compte ANTSIA seulement ; son adhésion DIASPORALE, s'il en a pris une, reste la sienne.
+    if (spec.outsider) {
+      await admitOutsiderToRoot(ctx, person)
+      const { membership, status } = await effectiveStatusIn(ctx, network, person._id)
+      return { actor, status: membership ? status : null, role: membership?.role ?? null, pageId: null, pageCreated: false }
+    }
+
     const joined = await getMembership(ctx, network._id, person._id)
     if (!joined || joined.status === "partie") return fail("notFound")
     const now = Date.now()
@@ -381,6 +473,7 @@ export const equipMyDemoAccount = personMutation({
     if (membership.role !== spec.role) await ctx.db.patch(membership._id, { role: spec.role })
     if (spec.moderationTeam) await ensureModerationTeam(ctx, network, person, now)
     const page = spec.page ? await ensureDemoPage(ctx, network, person, spec.country, spec.page, now) : null
+    await ensureDemoBlocks(ctx, network, actor, person)
 
     // En dernier : une sanction n'est jamais dérivée, et une adhésion suspendue ne se rejoint plus.
     membership = await getMembership(ctx, network._id, person._id)
@@ -389,8 +482,10 @@ export const equipMyDemoAccount = personMutation({
       const before = membership.status === "declaree" || membership.status === "verifiee" || membership.status === "en_attente" ? membership.status : undefined
       await setMembershipStatus(ctx, membership, "suspendue", before !== undefined ? { statusBeforeSuspension: before } : {})
     }
-    const final = await getMembership(ctx, network._id, person._id)
-    if (!final) return fail("notFound")
-    return { actor, status: final.status, role: final.role, pageId: page?.pageId ?? null, pageCreated: page?.created ?? false }
+    if (spec.grounds.suspendedAtRoot) await ensureRootSuspension(ctx, person._id)
+    // Le statut que lit l'application : une suspension de la racine vaut partout.
+    const final = await effectiveStatusIn(ctx, network, person._id)
+    if (!final.membership || final.status === null) return fail("notFound")
+    return { actor, status: final.status, role: final.membership.role, pageId: page?.pageId ?? null, pageCreated: page?.created ?? false }
   },
 })

@@ -200,44 +200,62 @@ export const blockPerson = networkMutation({
     if (targetPersonId === ctx.person._id) return fail("invalidArgument", { field: "targetPersonId" })
     const target = await ctx.db.get(targetPersonId)
     if (!target || target.deletionRequestedAt !== undefined || target.erasedAt !== undefined) return notFound()
-    const now = Date.now()
-    const pair = await pairBlockState(ctx, ctx.person._id, targetPersonId)
-    if (pair.overflow) return fail("conflict")
-    const rows = pair.rows
-    const wasBlocked = pair.blocked
-    if (!pair.firstIntent) {
-      await ctx.db.insert("personBlocks", { networkId: ctx.networkId, blockerPersonId: ctx.person._id, targetPersonId, createdAt: now, updatedAt: now })
-    }
-    for (const row of rows) {
-      // Un blocage déjà posé par l'autre reste le sien : la paire est fermée de toute façon.
-      if (row.status === "blocked") continue
-      await ctx.db.patch(row._id, { status: "blocked", blockedByPersonId: ctx.person._id, updatedAt: now })
-    }
-    if (!rows.some((row) => row.networkId === ctx.networkId)) {
-      const { low, high } = canonicalPair(ctx.person._id, targetPersonId)
-      await ctx.db.insert("connections", {
-        networkId: ctx.networkId,
-        personIdLow: low,
-        personIdHigh: high,
-        requestedByPersonId: ctx.person._id,
-        recipientPersonId: targetPersonId,
-        status: "blocked",
-        blockedByPersonId: ctx.person._id,
-        requestedAt: now,
-        updatedAt: now,
-      })
-    }
-    // La paire SE FERME : la pastille de messagerie de chaque côté perd les non-lus du fil (D38).
-    if (!wasBlocked) {
-      await scheduleReaderRefresh(ctx, ctx.person._id)
-      await scheduleReaderRefresh(ctx, targetPersonId)
-      await onPairBlockChanged(ctx, ctx.person._id, targetPersonId, true)
-      await onPairBlockChangedInGroups(ctx, ctx.person._id, targetPersonId)
-      await ctx.scheduler.runAfter(0, internal.modules.live.revocation.revokeConnectionDirects, { firstPersonId: ctx.person._id, secondPersonId: targetPersonId })
-    }
+    await blockPair(ctx, { networkId: ctx.networkId, blockerPersonId: ctx.person._id, targetPersonId })
     return null
   },
 })
+
+/**
+ * Le blocage lui-même, une fois la garde passée (adhésion du bloqueur, débit,
+ * cible vivante) : l'intention de son auteur, toutes les lignes de la paire (tous
+ * réseaux), la ligne de ce réseau au besoin, puis — si la paire était ouverte —
+ * sa fermeture (fils, pastilles, conversations de groupe, directs). Rejoué sur
+ * une paire déjà bloquée par son auteur, il n'écrit rien. Partagé par
+ * `blockPerson` et par les comptes de démonstration de DIASPORALE
+ * (`diaspora/demoAccounts`, développement local), qui posent le blocage d'un
+ * acteur par un autre.
+ */
+export async function blockPair(
+  ctx: MutationCtx,
+  args: { networkId: Id<"networks">; blockerPersonId: Id<"persons">; targetPersonId: Id<"persons"> },
+): Promise<void> {
+  const { networkId, blockerPersonId, targetPersonId } = args
+  const now = Date.now()
+  const pair = await pairBlockState(ctx, blockerPersonId, targetPersonId)
+  if (pair.overflow) return fail("conflict")
+  const rows = pair.rows
+  const wasBlocked = pair.blocked
+  if (!pair.firstIntent) {
+    await ctx.db.insert("personBlocks", { networkId, blockerPersonId, targetPersonId, createdAt: now, updatedAt: now })
+  }
+  for (const row of rows) {
+    // Un blocage déjà posé par l'autre reste le sien : la paire est fermée de toute façon.
+    if (row.status === "blocked") continue
+    await ctx.db.patch(row._id, { status: "blocked", blockedByPersonId: blockerPersonId, updatedAt: now })
+  }
+  if (!rows.some((row) => row.networkId === networkId)) {
+    const { low, high } = canonicalPair(blockerPersonId, targetPersonId)
+    await ctx.db.insert("connections", {
+      networkId,
+      personIdLow: low,
+      personIdHigh: high,
+      requestedByPersonId: blockerPersonId,
+      recipientPersonId: targetPersonId,
+      status: "blocked",
+      blockedByPersonId: blockerPersonId,
+      requestedAt: now,
+      updatedAt: now,
+    })
+  }
+  // La paire SE FERME : la pastille de messagerie de chaque côté perd les non-lus du fil (D38).
+  if (!wasBlocked) {
+    await scheduleReaderRefresh(ctx, blockerPersonId)
+    await scheduleReaderRefresh(ctx, targetPersonId)
+    await onPairBlockChanged(ctx, blockerPersonId, targetPersonId, true)
+    await onPairBlockChangedInGroups(ctx, blockerPersonId, targetPersonId)
+    await ctx.scheduler.runAfter(0, internal.modules.live.revocation.revokeConnectionDirects, { firstPersonId: blockerPersonId, secondPersonId: targetPersonId })
+  }
+}
 
 /**
  * Lever MES blocages envers une personne (tous réseaux). Débloquer ne rétablit

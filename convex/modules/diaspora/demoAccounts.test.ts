@@ -61,12 +61,12 @@ afterEach(() => {
   vi.unstubAllEnvs()
 })
 
-/** Le moteur semé comme en développement local : fondations, puis le réseau diasporale (la France ouverte). */
+/** Le moteur semé comme en développement local : fondations (la racine), puis le réseau diasporale (la France ouverte). */
 async function fixture() {
   const t = testConvex({ automaticSessions: false })
-  await t.mutation(internal.seeds.foundations.run, { confirmNonProduction: SEED_CONFIRMATION })
+  const foundations = await t.mutation(internal.seeds.foundations.run, { confirmNonProduction: SEED_CONFIRMATION })
   const seeded = await t.mutation(internal.modules.diaspora.seed.run, { confirmNonProduction: SEED_CONFIRMATION })
-  return { t, diasporale: seeded.network }
+  return { t, diasporale: seeded.network, root: foundations.root }
 }
 
 /** Une vraie session Better Auth sur cette adresse, et sa personne. */
@@ -177,6 +177,25 @@ async function teamMembersOf(t: T, teamId: Id<"moderationTeams">) {
   return await t.run(async (ctx) => await ctx.db.query("moderationTeamMembers").withIndex("by_team_person", (q) => q.eq("teamId", teamId)).take(10))
 }
 
+async function rootMembershipOf(t: T, root: Id<"networks">, personId: Id<"persons">) {
+  return await t.run(async (ctx) => await ctx.db.query("networkMemberships").withIndex("by_network_and_person", (q) => q.eq("networkId", root).eq("personId", personId)).unique())
+}
+
+/** Les intentions de blocage posées contre une personne (celles qu'écrit `blockPerson`). */
+async function blocksAgainst(t: T, personId: Id<"persons">) {
+  return await t.run(async (ctx) => await ctx.db.query("personBlocks").withIndex("by_target_createdAt", (q) => q.eq("targetPersonId", personId)).take(10))
+}
+
+/** Les lignes de relation fermées par une personne, tous réseaux. */
+async function blockedRowsBy(t: T, personId: Id<"persons">) {
+  return await t.run(async (ctx) => await ctx.db.query("connections").withIndex("by_blocker_status_updatedAt", (q) => q.eq("blockedByPersonId", personId).eq("status", "blocked")).take(10))
+}
+
+/** Une lecture de membre ordinaire, jugée par la garde du moteur (adhésion, statut, suspension racine) : `null` si elle passe. */
+async function readsNetwork(as: As, networkId: Id<"networks">) {
+  return await code(as.query(api.modules.graph.blocks.paginateMine, { networkId, source: "intents", paginationOpts: { cursor: null, numItems: 5 } }))
+}
+
 /** Ce que l'équipement écrit, relu d'un coup : un refus doit le laisser exactement ainsi. */
 async function footprintOf(t: T, diasporale: Id<"networks">, personId: Id<"persons">) {
   const membership = await membershipOf(t, diasporale, personId)
@@ -212,7 +231,7 @@ describe("comptes de démonstration DIASPORALE — garde de développement", () 
 
     // Contrôle : la garde seule refusait. Ouverte, le même appel de la même session aboutit.
     openDevTools()
-    expect(await t.query(api.modules.diaspora.demoAccounts.catalogue, {})).toHaveLength(17)
+    expect(await t.query(api.modules.diaspora.demoAccounts.catalogue, {})).toHaveLength(20)
     expect(await equip(institution.as, "institution")).toMatchObject({ status: "verifiee", pageCreated: true })
     expect(await footprintOf(t, diasporale, institution.personId)).toMatchObject({ status: "verifiee", idn: true, attestation: true, pages: 1 })
   })
@@ -228,15 +247,15 @@ describe("comptes de démonstration DIASPORALE — garde de développement", () 
 
     // Contrôle : la même variable sur un backend local ouvre bien la garde.
     vi.stubEnv("CONVEX_CLOUD_URL", "http://127.0.0.1:3210")
-    expect(await t.query(api.modules.diaspora.demoAccounts.catalogue, {})).toHaveLength(17)
+    expect(await t.query(api.modules.diaspora.demoAccounts.catalogue, {})).toHaveLength(20)
     expect(await equip(institution.as, "institution")).toMatchObject({ status: "verifiee" })
   })
 
-  it("le catalogue nomme les dix-sept acteurs dans l'ordre du domaine, sur le domaine réservé", async () => {
+  it("le catalogue nomme les vingt acteurs dans l'ordre du domaine, sur le domaine réservé", async () => {
     openDevTools()
     const { t } = await fixture()
     const entries = await t.query(api.modules.diaspora.demoAccounts.catalogue, {})
-    expect(entries).toHaveLength(17)
+    expect(entries).toHaveLength(20)
     expect(entries.map((entry) => entry.actor)).toEqual([...DIASPORALE_DEMO_ACTORS])
     expect(entries).toEqual(DIASPORALE_DEMO_ACTORS.map((actor) => ({ actor, email: `${actor}@${DEMO_EMAIL_DOMAIN}` })))
   })
@@ -658,6 +677,228 @@ describe("comptes de démonstration DIASPORALE — suspension", () => {
     expect(second).toMatchObject({ status: "suspendue" })
     expect(await membershipOf(t, diasporale, personId)).toMatchObject({ status: "suspendue", statusBeforeSuspension: "verifiee" })
   })
+
+  it("suspendu : la sanction reste dans DIASPORALE, la racine reste ouverte", async () => {
+    openDevTools()
+    const { t, diasporale, root } = await fixture()
+    const { as, personId } = await joinedActor(t, diasporale, "suspendu")
+    await equip(as, "suspendu")
+    expect(await readsNetwork(as, diasporale)).toBe("membershipSuspended")
+    // La racine n'est pas touchée : la même personne y lit toujours.
+    expect(await rootMembershipOf(t, root, personId)).toMatchObject({ status: "verifiee" })
+    expect(await readsNetwork(as, root)).toBeNull()
+  })
+})
+
+describe("comptes de démonstration DIASPORALE — suspension à la racine", () => {
+  it("suspendu-racine : la racine suspendue en dernier, par le chemin de la console ; la suspension vaut partout", async () => {
+    openDevTools()
+    const { t, diasporale, root } = await fixture()
+    const { as, personId } = await joinedActor(t, diasporale, "suspendu-racine")
+    // Contrôle : entrée par le vrai accueil, la personne lit DIASPORALE et la racine.
+    expect(await readsNetwork(as, diasporale)).toBeNull()
+    expect(await readsNetwork(as, root)).toBeNull()
+
+    expect(await equip(as, "suspendu-racine")).toEqual({ actor: "suspendu-racine", status: "suspendue", role: "member", pageId: null, pageCreated: false })
+    expect(DIASPORALE_DEMO_ACTOR_SPECS["suspendu-racine"].expectedStatus).toBe("suspendue")
+    // La racine porte la suspension, sans échéance, et le statut à rendre à sa levée.
+    const rootMembership = present(await rootMembershipOf(t, root, personId), "adhésion racine")
+    expect(rootMembership).toMatchObject({ status: "suspendue", statusBeforeSuspension: "verifiee" })
+    expect(rootMembership.suspendedUntil).toBeUndefined()
+    // L'adhésion DIASPORALE garde son statut propre : c'est la racine qui ferme, partout.
+    const own = await membershipOf(t, diasporale, personId)
+    expect(own.status).toBe("verifiee")
+    expect(own.statusBeforeSuspension).toBeUndefined()
+    expect(await as.query(api.modules.diaspora.membership.myMembership, { networkId: diasporale })).toMatchObject({ status: "suspendue", root: { status: "suspendue" } })
+    expect(await readsNetwork(as, diasporale)).toBe("membershipSuspended")
+    expect(await readsNetwork(as, root)).toBe("membershipSuspended")
+  })
+
+  it("rejouer l'équipement ne lève rien et ne réécrit pas la suspension", async () => {
+    openDevTools()
+    const { t, diasporale, root } = await fixture()
+    const { as, personId } = await joinedActor(t, diasporale, "suspendu-racine")
+    const first = await equip(as, "suspendu-racine")
+    const suspended = present(await rootMembershipOf(t, root, personId), "adhésion racine")
+    expect(await equip(as, "suspendu-racine")).toEqual(first)
+    expect(await rootMembershipOf(t, root, personId)).toMatchObject({ status: "suspendue", statusBeforeSuspension: "verifiee", statusChangedAt: suspended.statusChangedAt })
+    expect((await membershipOf(t, diasporale, personId)).status).toBe("verifiee")
+  })
+})
+
+describe("comptes de démonstration DIASPORALE — membre bloqué", () => {
+  it("bloque : bloqué par « verifie » par le vrai blocage personnel, son statut intact ; vu des deux côtés", async () => {
+    openDevTools()
+    const { t, diasporale } = await fixture()
+    const blocker = await joinedActor(t, diasporale, "verifie")
+    await equip(blocker.as, "verifie")
+    const blocked = await joinedActor(t, diasporale, "bloque")
+    expect(DIASPORALE_DEMO_ACTOR_SPECS.bloque.blockedBy).toBe("verifie")
+    // Contrôle : avant l'équipement, rien ne les sépare.
+    expect(await blocked.as.query(api.modules.graph.connections.connectionWith, { networkId: diasporale, otherPersonId: blocker.personId })).toEqual({ state: "none" })
+    expect(await blocksAgainst(t, blocked.personId)).toEqual([])
+
+    expect(await equip(blocked.as, "bloque")).toEqual({ actor: "bloque", status: "verifiee", role: "member", pageId: null, pageCreated: false })
+    // L'intention de son auteur et la ligne de la paire dans le réseau, comme `blockPerson` les écrit.
+    const intents = await blocksAgainst(t, blocked.personId)
+    expect(intents).toHaveLength(1)
+    expect(intents[0]).toMatchObject({ networkId: diasporale, blockerPersonId: blocker.personId, targetPersonId: blocked.personId })
+    const rows = await blockedRowsBy(t, blocker.personId)
+    expect(rows).toHaveLength(1)
+    expect(rows[0]).toMatchObject({ networkId: diasporale, status: "blocked", blockedByPersonId: blocker.personId })
+    // Un blocage protège, il ne sanctionne pas : le statut du bloqué reste le sien.
+    expect(await membershipOf(t, diasporale, blocked.personId)).toMatchObject({ status: "verifiee" })
+    // Le bloqueur le voit dans ses protections ; le bloqué ne voit rien (refus indistinct).
+    expect(await blocker.as.query(api.modules.graph.connections.connectionWith, { networkId: diasporale, otherPersonId: blocked.personId })).toMatchObject({ state: "blocked_by_me" })
+    expect(await blocked.as.query(api.modules.graph.connections.connectionWith, { networkId: diasporale, otherPersonId: blocker.personId })).toEqual({ state: "none" })
+    const mine = await blocker.as.query(api.modules.graph.blocks.paginateMine, { networkId: diasporale, source: "intents", paginationOpts: { cursor: null, numItems: 5 } })
+    expect(mine.page.map((entry) => entry.targetPersonId)).toEqual([blocked.personId])
+    // Une demande de relation du bloqué rend la réponse d'une demande envoyée, sans rien écrire (D12).
+    expect(await blocked.as.mutation(api.modules.graph.connections.requestConnection, { networkId: diasporale, targetPersonId: blocker.personId })).toEqual({ status: "requested" })
+    expect(await t.run(async (ctx) => await ctx.db.query("connections").withIndex("by_network_low_status", (q) => q.eq("networkId", diasporale)).take(10))).toHaveLength(1)
+  })
+
+  it("le bloqué équipé avant son bloqueur : le blocage se pose dès que le bloqueur est équipé", async () => {
+    openDevTools()
+    const { t, diasporale } = await fixture()
+    const blocked = await joinedActor(t, diasporale, "bloque")
+    expect(await equip(blocked.as, "bloque")).toMatchObject({ status: "verifiee" })
+    expect(await blocksAgainst(t, blocked.personId)).toEqual([])
+    const blocker = await joinedActor(t, diasporale, "verifie")
+    expect(await equip(blocker.as, "verifie")).toMatchObject({ status: "verifiee" })
+    expect((await blocksAgainst(t, blocked.personId)).map((row) => row.blockerPersonId)).toEqual([blocker.personId])
+    expect(await blocker.as.query(api.modules.graph.connections.connectionWith, { networkId: diasporale, otherPersonId: blocked.personId })).toMatchObject({ state: "blocked_by_me" })
+  })
+
+  it("rejouer l'équipement de l'un ou de l'autre ne double pas le blocage", async () => {
+    openDevTools()
+    const { t, diasporale } = await fixture()
+    const blocker = await joinedActor(t, diasporale, "verifie")
+    await equip(blocker.as, "verifie")
+    const blocked = await joinedActor(t, diasporale, "bloque")
+    await equip(blocked.as, "bloque")
+    await equip(blocked.as, "bloque")
+    await equip(blocker.as, "verifie")
+    expect(await blocksAgainst(t, blocked.personId)).toHaveLength(1)
+    expect(await blockedRowsBy(t, blocker.personId)).toHaveLength(1)
+  })
+
+  it("une autre personne qui porte l'identifiant du bloqueur ne bloque jamais ; contrôle : sur l'adresse réservée, si", async () => {
+    openDevTools()
+    const { t, diasporale } = await fixture()
+    // Elle a pris « demo.verifie » sur une adresse ordinaire.
+    const homonym = await joinedAs(t, diasporale, { email: "homonyme@example.test", handle: "demo.verifie", displayName: "Homonyme RECETTE", country: "FR" })
+    const blocked = await joinedActor(t, diasporale, "bloque")
+    await equip(blocked.as, "bloque")
+    expect(await blocksAgainst(t, blocked.personId)).toEqual([])
+    // Contrôle : la même personne, sur l'adresse réservée vérifiée de l'acteur, est bien le bloqueur.
+    await t.mutation(components.betterAuth.adapter.updateOne, {
+      input: { model: "user", where: [{ field: "_id", value: homonym.authUserId }], update: { email: diasporaleDemoEmailOf("verifie"), emailVerified: true } },
+    })
+    await equip(blocked.as, "bloque")
+    expect((await blocksAgainst(t, blocked.personId)).map((row) => row.blockerPersonId)).toEqual([homonym.personId])
+  })
+
+  it("un bloqueur sorti du réseau ne bloque pas ; contrôle : revenu, il bloque", async () => {
+    openDevTools()
+    const { t, diasporale } = await fixture()
+    const blocker = await joinedActor(t, diasporale, "verifie")
+    await equip(blocker.as, "verifie")
+    await blocker.as.mutation(api.modules.diaspora.membership.leaveDiasporale, { networkId: diasporale })
+    const blocked = await joinedActor(t, diasporale, "bloque")
+    await equip(blocked.as, "bloque")
+    expect(await blocksAgainst(t, blocked.personId)).toEqual([])
+    // Contrôle : de retour dans le réseau, le même bloqueur pose le blocage au prochain équipement.
+    await blocker.as.mutation(api.modules.diaspora.membership.joinDiasporale, { networkId: diasporale, facet: { countryOfResidence: "FR" }, directoryVisibility: "hidden" })
+    await equip(blocked.as, "bloque")
+    expect((await blocksAgainst(t, blocked.personId)).map((row) => row.blockerPersonId)).toEqual([blocker.personId])
+  })
+
+  it("une cible dont l'effacement est demandé n'est pas bloquée ; contrôle : demande retirée, elle l'est", async () => {
+    openDevTools()
+    const { t, diasporale } = await fixture()
+    const blocked = await joinedActor(t, diasporale, "bloque")
+    await equip(blocked.as, "bloque")
+    await t.run(async (ctx) => {
+      await ctx.db.patch(blocked.personId, { deletionRequestedAt: Date.now() })
+    })
+    const blocker = await joinedActor(t, diasporale, "verifie")
+    await equip(blocker.as, "verifie")
+    expect(await blocksAgainst(t, blocked.personId)).toEqual([])
+    // Contrôle : la demande retirée, le prochain équipement du bloqueur pose le blocage.
+    await t.run(async (ctx) => {
+      await ctx.db.patch(blocked.personId, { deletionRequestedAt: undefined })
+    })
+    await equip(blocker.as, "verifie")
+    expect((await blocksAgainst(t, blocked.personId)).map((row) => row.blockerPersonId)).toEqual([blocker.personId])
+  })
+})
+
+describe("comptes de démonstration DIASPORALE — extérieur au réseau", () => {
+  it("exterieur : équipé sans adhésion — admis à la racine par la vraie règle, rien dans DIASPORALE", async () => {
+    openDevTools()
+    const { t, diasporale, root } = await fixture()
+    // L'accueil d'ANTSIA seulement (consentement, profil publié), comme l'application le rejoue : jamais joinDiasporale.
+    const outsider = await welcomedActor(t, "exterieur")
+    expect(DIASPORALE_DEMO_ACTOR_SPECS.exterieur).toMatchObject({ outsider: true, expectedStatus: null })
+    expect(await equip(outsider.as, "exterieur")).toEqual({ actor: "exterieur", status: null, role: null, pageId: null, pageCreated: false })
+    // Un compte ANTSIA : membre déclaré de la racine (politique ouverte, sans identité forte), qui y lit.
+    expect(await rootMembershipOf(t, root, outsider.personId)).toMatchObject({ status: "declaree", role: "member" })
+    expect(await readsNetwork(outsider.as, root)).toBeNull()
+    // Aucune adhésion DIASPORALE : le réseau fermé lui reste fermé, d'un refus indistinct.
+    expect(await t.run(async (ctx) => await ctx.db.query("networkMemberships").withIndex("by_network_and_person", (q) => q.eq("networkId", diasporale).eq("personId", outsider.personId)).unique())).toBeNull()
+    expect(await outsider.as.query(api.modules.diaspora.membership.myMembership, { networkId: diasporale })).toBeNull()
+    expect(await readsNetwork(outsider.as, diasporale)).toBe("notFound")
+    // Rien d'autre n'est posé : ni fait fictif, ni pays ouvert.
+    expect(await linkOf(t, outsider.personId, "idn")).toBeNull()
+    expect(await linkOf(t, outsider.personId, "consular_attestation")).toBeNull()
+    expect((await networkOf(t, diasporale)).openCountries).toEqual(["FR"])
+  })
+
+  it("exige l'accueil d'ANTSIA : profil publié puis consentement ; sans eux, aucune adhésion", async () => {
+    openDevTools()
+    const { t, root } = await fixture()
+    const user = await signedIn(t, diasporaleDemoEmailOf("exterieur"))
+    expect(await code(equip(user.as, "exterieur"))).toBe("profileRequired")
+    // Le profil publié, mais pas le consentement au profil social.
+    await user.as.mutation(api.modules.people.profile.publishMyProfile, { handle: "demo.exterieur", displayName: "Brice MOUNDOUNGA" })
+    expect(await code(equip(user.as, "exterieur"))).toBe("consentRequired")
+    expect(await rootMembershipOf(t, root, user.personId)).toBeNull()
+    // Contrôle : le consentement donné, le même compte est admis à la racine.
+    await user.as.mutation(api.modules.people.consents.recordConsent, { purpose: "social_profile", origin: "onboarding" })
+    expect(await equip(user.as, "exterieur")).toMatchObject({ status: null, role: null })
+    expect(await rootMembershipOf(t, root, user.personId)).toMatchObject({ status: "declaree" })
+  })
+
+  it("passe les mêmes gardes : outils fermés ou adresse d'un autre acteur ; contrôle : ouverts, sur son adresse, admis", async () => {
+    closeDevTools()
+    const { t, root } = await fixture()
+    const outsider = await welcomedActor(t, "exterieur")
+    expect(await code(equip(outsider.as, "exterieur"))).toBe("policyRefused")
+    openDevTools()
+    // Un compte léger qui se dit extérieur : l'adresse fait foi, jamais l'argument.
+    const light = await welcomedActor(t, "leger")
+    expect(await code(equip(light.as, "exterieur"))).toBe("policyRefused")
+    expect(await rootMembershipOf(t, root, outsider.personId)).toBeNull()
+    expect(await rootMembershipOf(t, root, light.personId)).toBeNull()
+    // Contrôle : outils ouverts, l'acteur de l'adresse réservée est admis.
+    expect(await equip(outsider.as, "exterieur")).toMatchObject({ status: null })
+    expect(await rootMembershipOf(t, root, outsider.personId)).toMatchObject({ status: "declaree" })
+  })
+
+  it("rejouer ne crée rien ; une adhésion prise de lui-même reste la sienne, sans rien d'autre", async () => {
+    openDevTools()
+    const { t, diasporale, root } = await fixture()
+    const outsider = await welcomedActor(t, "exterieur")
+    await equip(outsider.as, "exterieur")
+    expect(await equip(outsider.as, "exterieur")).toEqual({ actor: "exterieur", status: null, role: null, pageId: null, pageCreated: false })
+    const memberships = await t.run(async (ctx) => await ctx.db.query("networkMemberships").withIndex("by_person_and_status", (q) => q.eq("personId", outsider.personId)).take(10))
+    expect(memberships.map((row) => row.networkId)).toEqual([root])
+    // Entré de lui-même dans DIASPORALE : l'équipement rend son statut et n'y pose rien.
+    await outsider.as.mutation(api.modules.diaspora.membership.joinDiasporale, { networkId: diasporale, facet: { countryOfResidence: "FR" }, directoryVisibility: "hidden" })
+    expect(await equip(outsider.as, "exterieur")).toEqual({ actor: "exterieur", status: "en_attente", role: "member", pageId: null, pageCreated: false })
+    expect(await footprintOf(t, diasporale, outsider.personId)).toEqual(UNTOUCHED)
+  })
 })
 
 describe("comptes de démonstration DIASPORALE — pays ouverts", () => {
@@ -717,29 +958,43 @@ describe("comptes de démonstration DIASPORALE — pays ouverts", () => {
 })
 
 describe("comptes de démonstration DIASPORALE — le catalogue entier", () => {
-  it("chaque acteur équipé obtient le statut, le rôle et la page de sa fiche, dans l'ordre du panneau", async () => {
+  it("chaque acteur équipé obtient le statut, le rôle, la page et les accès de sa fiche, dans l'ordre du panneau", async () => {
     openDevTools()
-    const { t, diasporale } = await fixture()
-    const members = new Map<DiasporaleDemoActor, Awaited<ReturnType<typeof joinedActor>>>()
+    const { t, diasporale, root } = await fixture()
+    const members = new Map<DiasporaleDemoActor, Awaited<ReturnType<typeof welcomedActor>>>()
     const results = new Map<DiasporaleDemoActor, Awaited<ReturnType<typeof equip>>>()
     for (const actor of DIASPORALE_DEMO_ACTORS) {
-      if (DIASPORALE_DEMO_ACTOR_SPECS[actor].profile === null) continue
-      const member = await joinedActor(t, diasporale, actor)
+      const spec = DIASPORALE_DEMO_ACTOR_SPECS[actor]
+      if (spec.profile === null) continue
+      // L'extérieur ne rejoue que l'accueil d'ANTSIA ; tous les autres entrent dans le réseau.
+      const member = spec.outsider ? await welcomedActor(t, actor) : await joinedActor(t, diasporale, actor)
       members.set(actor, member)
       results.set(actor, await equip(member.as, actor))
     }
-    expect([...members.keys()]).toHaveLength(16)
+    expect([...members.keys()]).toHaveLength(19)
 
     for (const [actor, member] of members) {
       const spec = DIASPORALE_DEMO_ACTOR_SPECS[actor]
-      const stored = await membershipOf(t, diasporale, member.personId)
-      expect(stored.status, `statut de ${actor}`).toBe(spec.expectedStatus)
-      expect(stored.role, `rôle de ${actor}`).toBe(spec.role)
       const result = results.get(actor)
-      // Le rendu de l'équipement est le stocké, sauf pour le filleul : il précède son parrain dans l'ordre du panneau,
-      // il est rendu « en attente » puis complété par l'équipement du parrain (d'où la relecture du stocké ci-dessus).
+      const seen = await member.as.query(api.modules.diaspora.membership.myMembership, { networkId: diasporale })
+      const rootMembership = present(await rootMembershipOf(t, root, member.personId), `racine de ${actor}`)
+      // Seule la suspension de la racine suspend la racine.
+      expect(rootMembership.status === "suspendue", `racine de ${actor}`).toBe(spec.grounds.suspendedAtRoot)
+      if (spec.outsider) {
+        expect(result, `rendu de ${actor}`).toEqual({ actor, status: null, role: null, pageId: null, pageCreated: false })
+        expect(seen, `adhésion de ${actor}`).toBeNull()
+        expect(rootMembership.status, `racine de ${actor}`).toBe("declaree")
+        continue
+      }
+      // Le statut que lit l'application est celui de la fiche ; celui de l'adhésion aussi, sauf quand la racine suspend.
+      expect(seen?.status, `statut lu par ${actor}`).toBe(spec.expectedStatus)
+      const stored = await membershipOf(t, diasporale, member.personId)
+      expect(stored.status, `statut de ${actor}`).toBe(spec.grounds.suspendedAtRoot ? "verifiee" : spec.expectedStatus)
+      expect(stored.role, `rôle de ${actor}`).toBe(spec.role)
+      // Le rendu de l'équipement est le statut lu, sauf pour le filleul : il précède son parrain dans l'ordre du panneau,
+      // il est rendu « en attente » puis complété par l'équipement du parrain (d'où la relecture ci-dessus).
       if (spec.grounds.sponsored) expect(result?.status, `rendu de ${actor}`).toBe("en_attente")
-      else expect(result?.status, `rendu de ${actor}`).toBe(stored.status)
+      else expect(result?.status, `rendu de ${actor}`).toBe(spec.expectedStatus)
       expect(result?.pageCreated, `page créée pour ${actor}`).toBe(spec.page !== null)
       if (spec.page) {
         const page = present(await pageOf(t, spec.page.handle), `page de ${actor}`)
@@ -767,5 +1022,11 @@ describe("comptes de démonstration DIASPORALE — le catalogue entier", () => {
     const sponsorships = await sponsorshipsOf(t, diasporale)
     expect(sponsorships).toHaveLength(1)
     expect(sponsorships[0]).toMatchObject({ sponsorPersonId: members.get("verifie")?.personId, sponsoredPersonId: members.get("parraine")?.personId })
+    // Un seul blocage : le bloqué de la fiche, par son bloqueur, qui ne bloque personne d'autre.
+    const blocker = present(members.get("verifie"), "bloqueur")
+    const blocked = present(members.get("bloque"), "bloqué")
+    expect((await blocksAgainst(t, blocked.personId)).map((row) => row.blockerPersonId)).toEqual([blocker.personId])
+    const placed = await t.run(async (ctx) => await ctx.db.query("personBlocks").withIndex("by_blocker_createdAt", (q) => q.eq("blockerPersonId", blocker.personId)).take(5))
+    expect(placed.map((row) => row.targetPersonId)).toEqual([blocked.personId])
   })
 })
