@@ -4,6 +4,7 @@
  * client l'atteint sans embarquer le backend.
  */
 import { PAGE_CLAIM_DECISIONS, PAGE_CLAIM_STATUSES, PAGE_POST_AUDIENCES, PAGE_ROLES, PAGE_STATUSES } from "@antsia/social-domain/pages"
+import { PAGE_ASSOCIATION_TYPES, PAGE_COMPANY_SECTORS } from "@antsia/social-domain/pagePresentation"
 import { type Infer, v } from "convex/values"
 
 import { badgeValidator, literals, pageOwnerKindValidator } from "../../lib/validators"
@@ -23,6 +24,10 @@ export const pageClaimDecisionValidator = literals(PAGE_CLAIM_DECISIONS)
 
 /** Le communiqué (`public`) ou la note aux abonnés (`followers`). */
 export const pagePostAudienceValidator = literals(PAGE_POST_AUDIENCES)
+
+/** Précisions d'identité facultatives, dérivées du domaine pur. */
+export const pageAssociationTypeValidator = literals(PAGE_ASSOCIATION_TYPES)
+export const pageSectorValidator = literals(PAGE_COMPANY_SECTORS)
 
 /**
  * La CARTE d'une page — l'en-tête d'une publication, une ligne d'annuaire, un

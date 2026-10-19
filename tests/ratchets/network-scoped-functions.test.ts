@@ -30,11 +30,15 @@ export const SOCIAL_MODULE_DIRECTORIES: readonly string[] = [
   "convex/modules/marks",
   "convex/modules/moderation",
   "convex/modules/messaging",
+  "convex/modules/commercialMessaging",
+  // CC-2b (ADR-0025) : conversations contextuelles, ouvertes et fermées par un objet déjà accepté.
+  "convex/modules/contextualMessaging",
   "convex/modules/groups",
   "convex/modules/events",
   "convex/modules/stories",
   "convex/modules/suggestions",
   "convex/modules/pages",
+  "convex/modules/shops",
   "convex/modules/albums",
   "convex/modules/calls",
   "convex/modules/live",
@@ -45,10 +49,11 @@ export const SOCIAL_MODULE_DIRECTORIES: readonly string[] = [
  * Modules du moteur qui ne sont PAS sociaux (aucun contenu, aucune adhésion) :
  * `files` est l'infrastructure de garde des fichiers — ses lectures publiques
  * sont bornées une à une (réseau, déposant, modérateur, opérateur).
- * `federation` est le transport système : aucune lecture de contenu social,
- * émetteurs/receipts/DLQ réservés aux opérateurs ; inbox HMAC avec réseau issu
- * du registre serveur et admission AST contrôlée par rate-limited-writes.
- * Les futurs handlers de contrats devront garder leur audience propre.
+ * `federation` garde le transport système : émetteurs/receipts/DLQ réservés
+ * aux opérateurs, inbox HMAC avec réseau issu du registre serveur et admission
+ * AST contrôlée par rate-limited-writes. PA9C ajoute agents.ts exclusivement
+ * personQuery/personMutation @selfScoped ; les handlers vérifient le grant,
+ * l'identité, les réseaux/source et les pages avant tout effet social.
  */
 export const NON_SOCIAL_MODULE_DIRECTORIES: readonly string[] = ["convex/modules/platform", "convex/modules/files", "convex/modules/federation"]
 

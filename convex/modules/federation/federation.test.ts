@@ -46,11 +46,11 @@ async function fixture() {
   const t = testConvex()
   const { root, testClosed } = await t.mutation(internal.seeds.foundations.run, { confirmNonProduction: SEED_CONFIRMATION })
   const actor = await admin(t)
-  const emitterId = await actor.as.mutation(api.modules.federation.emitters.configure, { networkId: root, slug: "socle-test", environment: "sandbox", enabled: true, keyEnvName: KEY_NAME, allowedContracts: ["RESEAU-PUBLIC-V1"], reason: CONFIG_REASON })
+  const emitterId = await actor.as.mutation(api.modules.federation.emitters.configure, { networkId: root, slug: "socle-test", environment: "sandbox", enabled: true, keyEnvName: KEY_NAME, allowedContracts: ["UNWIRED-TRANSPORT-V1"], reason: CONFIG_REASON })
   return { t, root, testClosed, actor, emitterId }
 }
 
-function body(eventId = "event-001", payload: unknown = { title: "Information publique fictive" }, contract = "RESEAU-PUBLIC-V1") {
+function body(eventId = "event-001", payload: unknown = { title: "Information publique fictive" }, contract = "UNWIRED-TRANSPORT-V1") {
   return JSON.stringify({ eventId, contract, version: 1, objectRef: "page:test-public", payload })
 }
 async function signedHeaders(rawBody: string, overrides: Record<string, string> = {}) {
@@ -74,7 +74,7 @@ describe("PA5 — inbox signée réelle, registre fermé et rejeu audité", () =
     const f = await fixture(), before = await rows(f.t)
     const response = await post(f.t)
     expect(response.status).toBe(202)
-    expect(await response.json()).toEqual({ outcome: "accepted", status: "dead_letter" })
+    expect(await response.json()).toMatchObject({ outcome: "accepted", status: "dead_letter", eventId: "event-001", applicationStatus: "rejected" })
     const after = await rows(f.t)
     expect(after.receipts).toHaveLength(1)
     expect(after.receipts[0]?.networkId).toBe(f.root)
@@ -83,7 +83,7 @@ describe("PA5 — inbox signée réelle, registre fermé et rejeu audité", () =
     expect(after.people).toHaveLength(before.people.length)
     expect(after.memberships).toHaveLength(before.memberships.length)
     expect(after.mirrors).toEqual([])
-    expect(FEDERATION_IMPLEMENTED_CONTRACTS).toEqual([])
+    expect(FEDERATION_IMPLEMENTED_CONTRACTS).not.toContain("UNWIRED-TRANSPORT-V1")
     expect(JSON.stringify(await f.t.run(async (ctx) => ctx.db.get(f.emitterId)))).not.toContain(key)
   })
 

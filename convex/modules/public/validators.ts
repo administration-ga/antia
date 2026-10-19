@@ -20,10 +20,12 @@ export const publicPostValidator = v.object({
   tags: v.array(v.string()), province: v.union(literals(PROVINCE_SLUGS), v.null()),
   author: publicAuthorValidator, origin: publicOriginValidator, media: v.array(postMediaDtoValidator),
   shared: v.union(publicSharedPostValidator, v.null()),
+  hasCommerceOffer: v.optional(v.boolean()),
 })
 export const publicProfileValidator = v.object({
   handle: v.string(), displayName: v.string(), headline: v.union(v.string(), v.null()),
   avatarUrl: v.union(v.string(), v.null()), badges: v.array(badgeValidator),
+  publicAgent: v.optional(v.union(v.object({ administrationName: v.string(), administrationHandle: v.string(), roleLabel: v.string() }), v.null())),
 })
 export const publicPageValidator = v.object({
   id: v.string(), handle: v.string(), name: v.string(), shortName: v.union(v.string(), v.null()),

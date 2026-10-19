@@ -21,7 +21,7 @@ import { enforceRateLimit } from "../../lib/rateLimit"
 import { guardUploadUrl } from "../../lib/uploadPolicy"
 import { attachmentFileValidator, verifyDeclaredAttachments } from "./attachmentStorage"
 import { enrichMessagePage, type MessageDto, requireSameThreadReply, requireThread } from "./participation"
-import { adjustPersonalUnreadTotal, appendPersonalMessage, findIdempotentReplay, isHiddenFor, isUnreadFor, otherParticipant, previewColumns } from "./threads"
+import { adjustPersonalUnreadTotal, appendPersonalMessage, assertMessageIdempotencyKey, findIdempotentReplay, isHiddenFor, isUnreadFor, otherParticipant, previewColumns } from "./threads"
 
 /** Marquage par lots bornés, poursuivi par continuation interne. */
 const MARK_READ_BATCH = 100
@@ -79,8 +79,12 @@ export const sendMessage = networkMutation({
     await enforceRateLimit(ctx, "message.send", ctx.person._id)
     const { thread } = await requireThread(ctx, ctx.networkId, args.threadId, ctx.person._id)
     if (thread.status !== "active") return failRule("THREAD_ARCHIVED")
+    assertMessageIdempotencyKey(args.idempotencyKey)
     const replay = await findIdempotentReplay(ctx, thread._id, args.idempotencyKey)
-    if (replay) return { messageId: replay._id, deduplicated: true }
+    if (replay) {
+      if (replay.senderPersonId !== ctx.person._id) return notFound()
+      return { messageId: replay._id, deduplicated: true }
+    }
     const content = checked(() => assertMessageContent(args.content, (args.attachmentFiles?.length ?? 0) > 0))
     const replyToMessageId = await requireSameThreadReply(ctx, thread._id, args.replyToMessageId)
     const attachmentFiles = await verifyDeclaredAttachments(ctx, args.attachmentFiles, { actorPersonId: ctx.person._id, networkId: ctx.networkId, source: "message" })

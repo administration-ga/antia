@@ -8,6 +8,7 @@ import { networkQuery } from "../../lib/functions"
 import { literals } from "../../lib/validators"
 import { readerMarks } from "../marks/marks"
 import { canSeePostDoc } from "../posts/access"
+import { hasNativePostAuthor } from "../posts/nativeAuthor"
 import { enrichment, feedItemValidator, readerOf, toFeedItem, type FeedItem } from "../posts/posts"
 
 /** National contient uniquement l'audience publique, native ou explicitement venue d'un enfant. */
@@ -29,6 +30,7 @@ export const rootFeed = networkQuery({
       const hidden = await ctx.db.query("postMarks").withIndex("by_network_person_kind_post", (q) => q.eq("networkId", ctx.networkId).eq("personId", ctx.person._id).eq("kind", "hidden").eq("postId", post._id)).unique()
       if (hidden) continue
       if (post.pageId === undefined) {
+        if (!hasNativePostAuthor(post)) continue
         const muted = await ctx.db.query("mutes").withIndex("by_network_person_muted", (q) => q.eq("networkId", ctx.networkId).eq("personId", ctx.person._id).eq("mutedPersonId", post.authorPersonId)).unique()
         if (muted) continue
       }

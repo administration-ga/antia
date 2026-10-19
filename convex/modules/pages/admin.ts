@@ -27,6 +27,7 @@ import { operatorMutation, operatorQuery } from "../../lib/functions"
 import { requirePlatformAdmin } from "../../lib/operatorIdentity"
 import { enforceRateLimit } from "../../lib/rateLimit"
 import { contentVisibilityValidator, pageTrustValidator } from "../../lib/validators"
+import { assertNativePageManagement } from "../federation/mirrorAccess"
 import { hasStrongIdentityFor } from "../people/persons"
 import { appendAudit, operatorCapacity } from "../platform/audit"
 import { assertPageHandleFree, isPageOnRoot, pageSearchText, signatoryRowOf } from "./access"
@@ -79,7 +80,10 @@ export const createInstitutionPage = operatorMutation({
         .query("pages")
         .withIndex("by_network_importRef", (q) => q.eq("networkId", network._id).eq("importRef", args.importRef))
         .unique()
-      if (existing) return { pageId: existing._id, handle: existing.handle, created: false }
+      if (existing) {
+        await assertNativePageManagement(ctx, existing._id)
+        return { pageId: existing._id, handle: existing.handle, created: false }
+      }
     }
     const name = checked(() => assertPageName(args.name))
     const handle = checked(() => assertPageHandle(args.handle ?? name))
@@ -134,6 +138,7 @@ export const setPageTrust = operatorMutation({
     const motive = checked(() => assertDecisionReason(args.reason, 10))
     const page = await ctx.db.get(args.pageId)
     if (!page) return notFound()
+    await assertNativePageManagement(ctx, page._id)
     checked(() => assertTrustAllowedForOwner(page.ownerKind, args.trust))
     if (page.trust === args.trust) return { changed: false }
     const now = Date.now()
@@ -197,6 +202,7 @@ export const setPageHandle = operatorMutation({
     const motive = checked(() => assertDecisionReason(args.reason, 10))
     const page = await ctx.db.get(args.pageId)
     if (!page) return notFound()
+    await assertNativePageManagement(ctx, page._id)
     const handle = checked(() => assertPageHandle(args.handle))
     if (handle === page.handle) return { handle }
     await assertPageHandleFree(ctx, handle, page._id)
@@ -232,6 +238,7 @@ export const grantPageAdmin = operatorMutation({
     const page = await ctx.db.get(args.pageId)
     const person = await ctx.db.get(args.personId)
     if (!page || page.status !== "active" || !person) return notFound()
+    await assertNativePageManagement(ctx, page._id)
     if (page.trust === "official" && !(await hasStrongIdentityFor(ctx, person._id))) return failRule("PAGE_SIGNATORY_IDENTITY_REQUIRED")
     const existing = await signatoryRowOf(ctx, page._id, person._id)
     if (existing?.role === "admin") return { invited: existing.acceptedAt === undefined }

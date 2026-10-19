@@ -22,9 +22,11 @@ import type { Doc } from "../../_generated/dataModel"
 import { checked, fail, failRule, notFound } from "../../lib/errors"
 import { networkMutation, networkQuery } from "../../lib/functions"
 import { enforceRateLimit } from "../../lib/rateLimit"
+import { assertNativePageManagement } from "../federation/mirrorAccess"
 import { findPublishedPersonByHandle, miniProfileCache } from "../people/miniProfile"
 import { hasStrongIdentityFor } from "../people/persons"
 import { appendAudit } from "../platform/audit"
+import { refreshReaderContexts } from "../posts/feedMaterialization"
 import { countLiveAdmins, pageCardOf, requireManagedPage, signatoryRowOf, signatoryRowsOf } from "./access"
 import { pageCardValidator, pageRoleValidator } from "./validators"
 
@@ -178,10 +180,12 @@ export const respondToPageInvitation = networkMutation({
       await ctx.db.delete(row._id)
       return { role: null }
     }
+    await assertNativePageManagement(ctx, page._id)
     // L'identité forte se relit à l'acceptation : elle a pu tomber depuis l'invitation.
     if (page.trust === "official" && !(await hasStrongIdentityFor(ctx, ctx.person._id))) return failRule("PAGE_SIGNATORY_IDENTITY_REQUIRED")
     const now = Date.now()
     await ctx.db.patch(row._id, { acceptedAt: now, updatedAt: now })
+    await refreshReaderContexts(ctx, row.networkId, ctx.person._id)
     return { role: row.role }
   },
 })

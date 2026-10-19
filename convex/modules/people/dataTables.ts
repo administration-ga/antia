@@ -12,7 +12,8 @@ export const dataTables = {
     identitySubjects: v.array(v.string()), contacts: v.array(v.string()),
   }).index("by_person", ["personId"]).index("by_phase_due", ["phase", "dueAt"]).index("by_updated", ["updatedAt"]).index("by_phase_updated", ["phase", "updatedAt"]),
   dataErasureTargets: defineTable({ jobId: v.id("dataErasureJobs"), table: v.string(), targetId: v.string() })
-    .index("by_job_target", ["jobId", "targetId"]).index("by_job", ["jobId"]),
+    .index("by_job_target", ["jobId", "targetId"]).index("by_job", ["jobId"])
+    .index("by_job_table_target", ["jobId", "table", "targetId"]),
   dataExports: defineTable({ personId: v.id("persons"), requestedAt: v.number(), expiresAt: v.number() })
     .index("by_person", ["personId"]).index("by_expiry", ["expiresAt"]),
   /** Trace minimale de fin : aucune référence à la personne, au compte ou aux contenus. */

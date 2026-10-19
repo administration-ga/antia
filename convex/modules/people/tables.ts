@@ -23,6 +23,7 @@ import {
   localeValidator,
   membershipRoleValidator,
   membershipStatusValidator,
+  memberThemeValidator,
   verificationSourceValidator,
 } from "../../lib/validators"
 
@@ -46,6 +47,8 @@ export const peopleTables = {
     privateAt: v.optional(v.number()),
     locale: v.optional(localeValidator),
     timeZone: v.optional(v.string()),
+    /** Thème choisi en session (Préférences > Thème) ; absent tant que la personne n'en a choisi aucun. */
+    theme: v.optional(memberThemeValidator),
     deletionRequestedAt: v.optional(v.number()),
     /** Marque anonyme commune aux références conservées après effacement. */
     erasedAt: v.optional(v.number()),
@@ -58,7 +61,7 @@ export const peopleTables = {
   identityLinks: defineTable({
     personId: v.id("persons"),
     provider: identityProviderValidator,
-    /** `idn` : sub ; `local` : empreinte de l'adresse ou du numéro ; `administration` : sub IDN confirmé ; attestation : empreinte. */
+    /** `idn` : sub ; `local` : empreinte de canal ; `administration` : empreinte IDN cloisonnée par émetteur/environnement ; attestation : empreinte. */
     subject: v.string(),
     loa: v.optional(v.number()),
     nationality: v.optional(v.string()),

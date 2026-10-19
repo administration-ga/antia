@@ -29,8 +29,10 @@ import {
   networkKindValidator,
 } from "../../lib/validators"
 import { appendAudit, operatorCapacity } from "../platform/audit"
+import { revokeAdministrationForPerson } from "../federation/agentLifecycle"
 import { admitToNetwork, setMembershipStatus, writeNetworkFacet } from "./admission"
 import { hasStrongIdentityFor } from "./persons"
+import { refreshReaderContexts, scheduleReaderRefresh } from "../posts/feedMaterialization"
 
 const facetInputValidator = v.object({
   values: v.record(v.string(), facetValueValidator),
@@ -73,6 +75,7 @@ export const joinNetwork = personMutation({
 
     const admitted = await admitToNetwork(ctx, { personId: ctx.person._id, network, root, entry, evidence })
     await writeNetworkFacet(ctx, network, ctx.person._id, facet)
+    await refreshReaderContexts(ctx, network._id, ctx.person._id)
     return admitted
   },
 })
@@ -90,6 +93,9 @@ export const leaveNetwork = personMutation({
     if (!network) return notFound()
     const membership = await getMembership(ctx, network._id, ctx.person._id)
     if (!membership) return notFound()
+    if (network.kind === "root" || (network.slug === "administration" && network.membershipPolicy === "mirror")) {
+      await revokeAdministrationForPerson(ctx, ctx.person._id)
+    }
     if (nextMembershipStatus(membership.status, { kind: "leave" }) === null) {
       return membership.status === "suspendue" ? fail("membershipSuspended") : fail("conflict")
     }
@@ -152,6 +158,7 @@ export const liftSuspension = operatorMutation({
     if (!membership || membership.status !== "suspendue") return notFound()
     const restoreTo = membership.statusBeforeSuspension ?? "declaree"
     await setMembershipStatus(ctx, membership, restoreTo, { statusBeforeSuspension: undefined, suspendedUntil: undefined })
+    await scheduleReaderRefresh(ctx, personId)
     await appendAudit(ctx, {
       action: "membership.lift_suspension",
       capacity: operatorCapacity(ctx.operator),

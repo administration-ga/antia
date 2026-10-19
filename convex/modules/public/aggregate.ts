@@ -5,6 +5,7 @@ import { v } from "convex/values"
 import { internal } from "../../_generated/api"
 import { internalMutation } from "../../_generated/server"
 import { getRootNetwork } from "../../lib/access"
+import { hasNativePostAuthor } from "../posts/nativeAuthor"
 import { publicPageEligible, publicPostEligible } from "./access"
 import { publicStageValidator } from "./tables"
 
@@ -53,6 +54,8 @@ export const step = internalMutation({
       for (const post of page.page) {
         examined += 1
         if (!await publicPostEligible(ctx, context, post)) continue
+        const authorId = post.pageId ?? (hasNativePostAuthor(post) ? post.authorPersonId : undefined)
+        if (authorId === undefined) continue
         publishedPosts += 1
         for (const tag of new Set(post.tags ?? [])) {
           let measured = tags.find((entry) => entry.tag === tag)
@@ -64,7 +67,7 @@ export const step = internalMutation({
           measured.posts += 1
           const authors = authorsInBatch.get(tag) ?? new Set<string>()
           // Ces identifiants vivent seulement dans la mutation, jamais dans la ligne ni le prochain job.
-          authors.add(post.pageId ?? post.authorPersonId)
+          authors.add(authorId)
           authorsInBatch.set(tag, authors)
         }
       }

@@ -27,6 +27,7 @@ import { enforceRateLimit } from "../../lib/rateLimit"
 import { counterpartOf } from "../messaging/participation"
 import { miniProfileCache } from "../people/miniProfile"
 import { isLiveMemberOfThreadCall, isPresent, participationOf, participationsOf, requireCallParticipant } from "./access"
+import { conversationFieldsOfCall } from "./conversation"
 
 /** Au plus vingt appels examinés par source : personne n'a vingt téléphones qui sonnent. */
 const MAX_RINGING = 20
@@ -45,6 +46,9 @@ export type RingingCallDto = {
   group: { memberCount: number; invitees: Array<{ personId: Id<"persons">; label: CounterpartLabel }> } | null
   /** Le fil d'où part l'appel, quand j'en suis membre vivant — l'écran y lit son titre. */
   threadId: Id<"groupThreads"> | null
+  commercialThreadId?: Id<"commercialThreads">
+  /** CC-4 : la conversation contextuelle d'où part l'appel — l'écran la nomme et y renvoie (jamais vers l'appel personnel). */
+  contextualThreadId?: Id<"contextualThreads">
 }
 
 /** Ce qui sonne chez moi, maintenant, dans ce réseau — le plus ancien d'abord (c'est lui qu'on est sur le point de manquer). */
@@ -65,6 +69,7 @@ export const listRinging = networkQuery({
     for (const call of addressed) {
       // Un appel de groupe ne passe JAMAIS par ce canal (un tête-à-tête promu sonne par son ticket).
       if (call.kind !== "direct" || !isRingingCallStatus(call.callStatus) || call.createdByPersonId === me) continue
+      if ((await isLiveMemberOfThreadCall(ctx, call, me)) === false) continue
       const mine = await participationOf(ctx, call._id, me)
       // Déjà décroché, ou déjà sorti.
       if (!mine || mine.joinedAt !== undefined || mine.leftAt !== undefined) continue
@@ -76,6 +81,7 @@ export const listRinging = networkQuery({
         ringingSince: call.startedAt,
         group: null,
         threadId: null,
+        ...conversationFieldsOfCall(call),
       })
     }
 

@@ -11,13 +11,19 @@ import { internalQuery } from "../../_generated/server"
 import { requireMembership } from "../../lib/access"
 import { counterpartOf } from "../messaging/participation"
 import { isLiveMemberOfThreadCall, participationOf } from "./access"
+import { conversationFieldsOfCall } from "./conversation"
 import { callMediaTypeValidator } from "./validators"
 
+/**
+ * CC-4 : le contexte de conversation de l'appel (P10 ou contextuel) voyage avec l'autorisation —
+ * l'action le relit après le réveil du serveur multimédia et émet alors un jeton court (sélecteur
+ * `conversation.ts`). Le droit, lui, est relu ici à chaque émission (`isLiveMemberOfThreadCall`).
+ */
 export const authorizeToken = internalQuery({
   args: { networkId: v.id("networks"), callId: v.id("calls") },
   returns: v.union(
     v.null(),
-    v.object({ roomName: v.string(), mediaType: callMediaTypeValidator, personId: v.id("persons"), displayName: v.union(v.string(), v.null()) }),
+    v.object({ roomName: v.string(), mediaType: callMediaTypeValidator, personId: v.id("persons"), displayName: v.union(v.string(), v.null()), commercialThreadId: v.optional(v.id("commercialThreads")), contextualThreadId: v.optional(v.id("contextualThreads")) }),
   ),
   handler: async (ctx, args) => {
     const { person } = await requireMembership(ctx, args.networkId, "declaree")
@@ -27,6 +33,6 @@ export const authorizeToken = internalQuery({
     if (!row || row.leftAt !== undefined) return null
     if ((await isLiveMemberOfThreadCall(ctx, call, person._id)) === false) return null
     const label = await counterpartOf(ctx, person._id)
-    return { roomName: call.roomName, mediaType: call.mediaType, personId: person._id, displayName: label.displayName }
+    return { roomName: call.roomName, mediaType: call.mediaType, personId: person._id, displayName: label.displayName, ...conversationFieldsOfCall(call) }
   },
 })

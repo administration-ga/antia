@@ -13,11 +13,13 @@
  *    créée ici est `community`, et seule une décision tracée la change.
  */
 import { pageTrustRank, assertMemberCreatableOwnerKind, assertPageHandle, assertPageName, normalizePageDescription, normalizePageShortName, PAGE_SIGNATORIES_MAX } from "@antsia/social-domain/pages"
-import { assertCountryCode, assertPostContent, assertPostMedia, assertPostReach, REACH_REQUIRING_COUNTRY } from "@antsia/social-domain/content"
+import { normalizePageAssociationType, normalizePageCity, normalizePageSector } from "@antsia/social-domain/pagePresentation"
+import { addedMentionedIds, assertCountryCode, assertPostContent, assertPostMedia, assertPostReach, REACH_REQUIRING_COUNTRY } from "@antsia/social-domain/content"
 import { cursorForFeedPost } from "@antsia/social-domain/feedScale"
 import { effectiveVisibility } from "@antsia/social-domain/network"
 import { PROVINCE_SLUGS } from "@antsia/social-domain/provinces"
-import { foldSearchQuery } from "@antsia/social-domain/searchText"
+import { extractHashtags } from "@antsia/social-domain/richText"
+import { buildSearchableText, foldSearchQuery } from "@antsia/social-domain/searchText"
 import { paginationOptsValidator, type PaginationResult } from "convex/server"
 import { type Infer, v } from "convex/values"
 
@@ -32,10 +34,14 @@ import { contentVisibilityValidator, literals, pageOwnerKindValidator } from "..
 import { servableUrl } from "../files/storageGuard"
 import { declaredMediaValidator, verifyDeclaredMedia } from "../media/media"
 import { enqueueFanout } from "../notifications/fanout"
+import { appendAudit } from "../platform/audit"
+import { resolveMentionedPersonIds } from "../people/miniProfile"
 import { canSeePostDoc, type ReaderContext } from "../posts/access"
 import { markPostRemoved } from "../posts/contentRemoval"
 import { countPageFollowers, countPagePosts, recordPageFollower, unrecordPageFollower } from "../posts/counters"
-import { writePost } from "../posts/postWrite"
+import { hasNativePostAuthor, requireNativePostAuthor } from "../posts/nativeAuthor"
+import { notifyMentions, writePost } from "../posts/postWrite"
+import { refreshReaderContexts } from "../posts/feedMaterialization"
 import {
   clampLimit,
   cursorCreationTimeOf,
@@ -62,13 +68,17 @@ import {
   requireReadablePageByHandle,
 } from "./access"
 import { followedPageIds, isFollowingPage, pageFollowOf } from "./follows"
-import { pageCardValidator, pagePostAudienceValidator, pageRoleValidator } from "./validators"
+import { pagePresentationFields, pagePresentationOf } from "./presentation"
+import { pageAssociationTypeValidator, pageCardValidator, pagePostAudienceValidator, pageRoleValidator, pageSectorValidator } from "./validators"
 
 type ReadCtx = Pick<QueryCtx, "db" | "storage">
 
 /** Annuaire sans curseur (le rail « Pages à suivre ») : ce qu'il montre sans qu'on ait rien cherché. */
 const DISCOVER_LIMIT_DEFAULT = 20
 const DISCOVER_LIMIT_MAX = 25
+/** Une catégorie rare ne déclenche jamais le parcours complet de l'annuaire. */
+const DISCOVER_CATEGORY_ROWS_MAX = 200
+const DISCOVER_CATEGORY_BYTES_MAX = 1_048_576
 /** En deçà, une recherche n'en est pas une : l'annuaire retombe sur son ordre (confiance, récence). */
 export const DISCOVER_QUERY_MIN_LENGTH = 2
 /** Pages des listes paginées, plafond dur. */
@@ -83,6 +93,7 @@ const clampPage = (opts: { numItems: number; cursor: string | null }) => ({ ...o
 /** La fiche d'une page, pour un lecteur donné. */
 const pageDtoValidator = v.object({
   ...pageCardValidator.fields,
+  ...pagePresentationFields,
   description: v.union(v.string(), v.null()),
   bannerUrl: v.union(v.string(), v.null()),
   /** La règle de la page : `root`, ses communiqués sont lus aussi depuis la racine. */
@@ -100,6 +111,7 @@ const pageDtoValidator = v.object({
 /** Une ligne d'ANNUAIRE — la découverte, « mes pages suivies » : une seule projection. */
 const pageSummaryValidator = v.object({
   ...pageCardValidator.fields,
+  ...pagePresentationFields,
   description: v.union(v.string(), v.null()),
   followerCount: v.number(),
   following: v.boolean(),
@@ -108,7 +120,7 @@ const pageSummaryValidator = v.object({
 type PageSummary = Infer<typeof pageSummaryValidator>
 
 async function toPageSummary(ctx: ReadCtx & Pick<QueryCtx, "runQuery">, page: Doc<"pages">, following: boolean): Promise<PageSummary> {
-  return { ...(await pageCardOf(ctx, page)), description: page.description ?? null, followerCount: await countPageFollowers(ctx, page._id), following }
+  return { ...(await pageCardOf(ctx, page)), ...pagePresentationOf(page), description: page.description ?? null, followerCount: await countPageFollowers(ctx, page._id), following }
 }
 
 const readerOf = (ctx: { person: Doc<"persons">; network: Doc<"networks"> }): ReaderContext => ({ personId: ctx.person._id, network: ctx.network })
@@ -134,6 +146,9 @@ export const createPage = networkMutation({
     shortName: v.optional(v.string()),
     description: v.optional(v.string()),
     country: v.optional(v.string()),
+    city: v.optional(v.string()),
+    associationType: v.optional(pageAssociationTypeValidator),
+    sector: v.optional(pageSectorValidator),
     visibility: v.optional(contentVisibilityValidator),
   },
   returns: v.object({ pageId: v.id("pages"), handle: v.string() }),
@@ -145,6 +160,9 @@ export const createPage = networkMutation({
     const shortName = checked(() => normalizePageShortName(args.shortName))
     const description = checked(() => normalizePageDescription(args.description))
     const country = args.country === undefined ? undefined : checked(() => assertCountryCode(args.country ?? ""))
+    const city = checked(() => normalizePageCity(args.city))
+    const associationType = checked(() => normalizePageAssociationType(args.ownerKind, args.associationType))
+    const sector = checked(() => normalizePageSector(args.ownerKind, args.sector))
     await assertPageHandleFree(ctx, handle)
     const visibility = ctx.network.kind === "root" ? "network" : (args.visibility ?? "network")
     const now = Date.now()
@@ -158,6 +176,9 @@ export const createPage = networkMutation({
       trust: "community",
       trustRank: pageTrustRank("community"),
       ...(country !== undefined ? { country } : {}),
+      ...(city !== undefined ? { city } : {}),
+      ...(associationType !== undefined ? { associationType } : {}),
+      ...(sector !== undefined ? { sector } : {}),
       visibility,
       onRoot: isPageOnRoot(ctx.network, visibility),
       status: "active",
@@ -166,7 +187,7 @@ export const createPage = networkMutation({
       createdAt: now,
       updatedAt: now,
     })
-    await moderateContentWrite(ctx, { networkId: ctx.networkId, ownerPersonId: ctx.person._id, kind: "page", id: pageId, text: `${name} ${description ?? ""}` })
+    await moderateContentWrite(ctx, { networkId: ctx.networkId, ownerPersonId: ctx.person._id, kind: "page", id: pageId, text: `${name} ${description ?? ""} ${city ?? ""} ${associationType ?? ""} ${sector ?? ""}` })
     await ctx.db.insert("pageSignatories", { networkId: ctx.networkId, pageId, personId: ctx.person._id, role: "admin", acceptedAt: now, createdAt: now, updatedAt: now })
     return { pageId, handle }
   },
@@ -191,7 +212,7 @@ export const getPage = networkQuery({
       isFollowingPage(ctx, page._id, ctx.person._id),
       liveSignatoryRole(ctx, page, ctx.person._id),
     ])
-    return { ...card, description: page.description ?? null, bannerUrl, visibility: page.visibility, followerCount, postCount, createdAt: page.createdAt, viewer: { following, role } }
+    return { ...card, ...pagePresentationOf(page), description: page.description ?? null, bannerUrl, visibility: page.visibility, followerCount, postCount, createdAt: page.createdAt, viewer: { following, role } }
   },
 })
 
@@ -210,6 +231,7 @@ export const follow = networkMutation({
       const now = Date.now()
       const followId = await ctx.db.insert("pageFollows", { networkId: page.networkId, pageId: page._id, personId: ctx.person._id, createdAt: now })
       await recordPageFollower(ctx, { _id: followId, pageId: page._id, createdAt: now })
+      await refreshReaderContexts(ctx, page.networkId, ctx.person._id)
     }
     return { pageId: page._id, following: true as const }
   },
@@ -226,6 +248,7 @@ export const unfollow = networkMutation({
     if (existing) {
       await ctx.db.delete(existing._id)
       await unrecordPageFollower(ctx, existing)
+      await refreshReaderContexts(ctx, existing.networkId, ctx.person._id)
       // Sortir du cercle d'une page coupe aussi une connexion DÉJÀ ouverte à ses directs
       // réservés aux abonnés (la lecture et les jetons neufs sont refusés tout de suite ;
       // sans cette coupure, la salle tiendrait jusqu'à l'expiration du jeton).
@@ -287,33 +310,67 @@ export const myPages = networkQuery({
 // Découvrir
 // ═══════════════════════════════════════════════════════════════
 
-type DiscoveryFilter = { term: string | null; country: string | undefined }
+type DiscoveryFilter = {
+  term: string | null
+  country: string | undefined
+  ownerKind: Infer<typeof pageOwnerKindValidator> | undefined
+  associationType: Infer<typeof pageAssociationTypeValidator> | undefined
+  sector: Infer<typeof pageSectorValidator> | undefined
+}
 
-function discoveryFilterOf(args: { query?: string; country?: string }): DiscoveryFilter {
+function discoveryFilterOf(args: {
+  query?: string
+  country?: string
+  ownerKind?: Infer<typeof pageOwnerKindValidator>
+  associationType?: Infer<typeof pageAssociationTypeValidator>
+  sector?: Infer<typeof pageSectorValidator>
+}): DiscoveryFilter {
   const term = (args.query ?? "").trim()
+  if (args.associationType !== undefined && args.sector !== undefined) return failRule("PAGE_ASSOCIATION_TYPE_INVALID")
+  const ownerKind = args.ownerKind ?? (args.associationType !== undefined ? "association" : args.sector !== undefined ? "company" : undefined)
   return {
     term: term.length >= DISCOVER_QUERY_MIN_LENGTH ? foldSearchQuery(term) : null,
     country: args.country === undefined ? undefined : checked(() => assertCountryCode(args.country ?? "")),
+    ownerKind,
+    associationType: checked(() => normalizePageAssociationType(ownerKind ?? "association", args.associationType)),
+    sector: checked(() => normalizePageSector(ownerKind ?? "company", args.sector)),
+  }
+}
+
+function categoryDiscoveryPage(opts: Infer<typeof paginationOptsValidator>) {
+  const readBudget = (requested: number | undefined, maximum: number) => requested === undefined || !Number.isFinite(requested)
+    ? maximum
+    : Math.min(Math.max(Math.trunc(requested), 1), maximum)
+  return {
+    ...clampPage(opts),
+    maximumRowsRead: readBudget(opts.maximumRowsRead, DISCOVER_CATEGORY_ROWS_MAX),
+    maximumBytesRead: readBudget(opts.maximumBytesRead, DISCOVER_CATEGORY_BYTES_MAX),
   }
 }
 
 /**
  * La requête de l'annuaire lu d'ici : la recherche (repliée sans accents) OU
  * l'ordre de l'annuaire — confiance, puis récence —, pages actives seulement,
- * d'un pays si demandé. À la racine : ses pages et celles qui y sont.
+ * d'un pays, d'une nature et d'une catégorie si demandés. À la racine : ses pages
+ * et celles qui y sont. Tous les filtres précèdent la fenêtre de lecture.
  */
 function discoveryQuery(ctx: Pick<QueryCtx, "db">, network: Doc<"networks">, filter: DiscoveryFilter) {
-  const { term, country } = filter
+  const { term, country, ownerKind, associationType, sector } = filter
   const isRoot = network.kind === "root"
   if (term !== null) {
-    return ctx.db.query("pages").withSearchIndex("search_name_v1", (q) => {
+    const rows = ctx.db.query("pages").withSearchIndex("search_name_v1", (q) => {
       const base = q.search("searchText", term).eq("status", "active")
       const scoped = isRoot ? base.eq("onRoot", true) : base.eq("networkId", network._id)
       return country === undefined ? scoped : scoped.eq("country", country)
     })
+    return ownerKind === undefined && associationType === undefined && sector === undefined ? rows : rows.filter((q) => q.and(
+      ownerKind === undefined ? true : q.eq(q.field("ownerKind"), ownerKind),
+      associationType === undefined ? true : q.eq(q.field("associationType"), associationType),
+      sector === undefined ? true : q.eq(q.field("sector"), sector),
+    ))
   }
   if (isRoot) {
-    return country === undefined
+    const rows = country === undefined
       ? ctx.db
           .query("pages")
           .withIndex("by_root_status_trustRank_createdAt", (q) => q.eq("onRoot", true).eq("status", "active"))
@@ -322,8 +379,13 @@ function discoveryQuery(ctx: Pick<QueryCtx, "db">, network: Doc<"networks">, fil
           .query("pages")
           .withIndex("by_root_status_country_trustRank_createdAt", (q) => q.eq("onRoot", true).eq("status", "active").eq("country", country))
           .order("desc")
+    return ownerKind === undefined && associationType === undefined && sector === undefined ? rows : rows.filter((q) => q.and(
+      ownerKind === undefined ? true : q.eq(q.field("ownerKind"), ownerKind),
+      associationType === undefined ? true : q.eq(q.field("associationType"), associationType),
+      sector === undefined ? true : q.eq(q.field("sector"), sector),
+    ))
   }
-  return country === undefined
+  const rows = country === undefined
     ? ctx.db
         .query("pages")
         .withIndex("by_network_status_trustRank_createdAt", (q) => q.eq("networkId", network._id).eq("status", "active"))
@@ -332,6 +394,11 @@ function discoveryQuery(ctx: Pick<QueryCtx, "db">, network: Doc<"networks">, fil
         .query("pages")
         .withIndex("by_network_status_country_trustRank_createdAt", (q) => q.eq("networkId", network._id).eq("status", "active").eq("country", country))
         .order("desc")
+  return ownerKind === undefined && associationType === undefined && sector === undefined ? rows : rows.filter((q) => q.and(
+    ownerKind === undefined ? true : q.eq(q.field("ownerKind"), ownerKind),
+    associationType === undefined ? true : q.eq(q.field("associationType"), associationType),
+    sector === undefined ? true : q.eq(q.field("sector"), sector),
+  ))
 }
 
 /** Marque les pages que je suis — l'ensemble lu une fois, relu par paire s'il est tronqué. */
@@ -340,13 +407,17 @@ async function followingFlags(ctx: Pick<QueryCtx, "db">, reader: ReaderContext) 
   return async (pageId: Id<"pages">) => followed.ids.has(pageId) || (followed.truncated && (await isFollowingPage(ctx, pageId, reader.personId)))
 }
 
-/** L'annuaire BORNÉ (le rail « Pages à suivre ») : au plus 25, sans curseur. */
+/** L'annuaire BORNÉ (le rail « Pages à suivre ») : au plus 25, sans curseur ; une catégorie peut donner un rail partiel. */
 export const discover = networkQuery({
-  args: { query: v.optional(v.string()), country: v.optional(v.string()), limit: v.optional(v.number()) },
+  args: { query: v.optional(v.string()), country: v.optional(v.string()), ownerKind: v.optional(pageOwnerKindValidator), associationType: v.optional(pageAssociationTypeValidator), sector: v.optional(pageSectorValidator), limit: v.optional(v.number()) },
   returns: v.array(pageSummaryValidator),
   handler: async (ctx, args) => {
     const limit = Math.min(Math.max(Math.trunc(args.limit ?? DISCOVER_LIMIT_DEFAULT), 1), DISCOVER_LIMIT_MAX)
-    const rows = await discoveryQuery(ctx, ctx.network, discoveryFilterOf(args)).take(limit)
+    const filter = discoveryFilterOf(args)
+    const query = discoveryQuery(ctx, ctx.network, filter)
+    const rows = filter.associationType !== undefined || filter.sector !== undefined
+      ? (await query.paginate(categoryDiscoveryPage({ numItems: limit, cursor: null }))).page.slice(0, limit)
+      : await query.take(limit)
     const isFollowed = await followingFlags(ctx, readerOf(ctx))
     const out: PageSummary[] = []
     for (const page of rows) if (await canReadModeratedContent(ctx, "page", page._id, ctx.person._id)) out.push(await toPageSummary(ctx, page, await isFollowed(page._id)))
@@ -360,9 +431,13 @@ export const discover = networkQuery({
  * native ; `isDone` dit la fin, pas une page vide.
  */
 export const paginateDiscover = networkQuery({
-  args: { query: v.optional(v.string()), country: v.optional(v.string()), paginationOpts: paginationOptsValidator },
+  args: { query: v.optional(v.string()), country: v.optional(v.string()), ownerKind: v.optional(pageOwnerKindValidator), associationType: v.optional(pageAssociationTypeValidator), sector: v.optional(pageSectorValidator), paginationOpts: paginationOptsValidator },
   handler: async (ctx, args): Promise<PaginationResult<PageSummary>> => {
-    const result = await discoveryQuery(ctx, ctx.network, discoveryFilterOf(args)).paginate(clampPage(args.paginationOpts))
+    const filter = discoveryFilterOf(args)
+    const options = filter.associationType !== undefined || filter.sector !== undefined
+      ? categoryDiscoveryPage(args.paginationOpts)
+      : clampPage(args.paginationOpts)
+    const result = await discoveryQuery(ctx, ctx.network, filter).paginate(options)
     const isFollowed = await followingFlags(ctx, readerOf(ctx))
     const page: PageSummary[] = []
     for (const row of result.page) if (await canReadModeratedContent(ctx, "page", row._id, ctx.person._id)) page.push(await toPageSummary(ctx, row, await isFollowed(row._id)))
@@ -446,6 +521,60 @@ export const publishAsPage = networkMutation({
 })
 
 /**
+ * Modifier le texte d'une publication NATIVE de la page — tout signataire
+ * vivant peut agir, indépendamment du déposant historique. La révision lue
+ * par le composeur est exigée avant toute écriture ; rejouer le corps déjà
+ * enregistré ne réécrit rien et ne sonne personne une seconde fois.
+ * Audience, médias, portée et identité de la page restent ceux de l'origine.
+ */
+export const editPagePost = networkMutation({
+  minStatus: "declaree",
+  args: {
+    pageId: v.id("pages"),
+    postId: v.id("posts"),
+    body: v.string(),
+    expectedBody: v.string(),
+    expectedEditedAt: v.union(v.number(), v.null()),
+  },
+  returns: v.object({ changed: v.boolean(), editedAt: v.union(v.number(), v.null()) }),
+  handler: async (ctx, args) => {
+    await enforceRateLimit(ctx, "post.edit", ctx.person._id)
+    const { page, role } = await requireManagedPage(ctx, { networkId: ctx.networkId, personId: ctx.person._id }, args.pageId, "signatory")
+    const stored = await ctx.db.get(args.postId)
+    if (!stored || stored.networkId !== ctx.networkId || stored.pageId !== page._id || stored.federationSource !== undefined) return notFound()
+    const post = requireNativePostAuthor(stored)
+    if (post.status !== "published" || !(await canSeePostDoc(ctx, readerOf(ctx), post))) return notFound()
+    const body = checked(() => assertPostContent({ body: args.body, mediaCount: post.media?.length ?? 0, isShare: post.sharedPostId !== undefined }))
+    if (body === post.body) return { changed: false, editedAt: post.editedAt ?? null }
+    if (post.body !== args.expectedBody || (post.editedAt ?? null) !== args.expectedEditedAt) return fail("conflict")
+
+    const now = Date.now()
+    const tags = extractHashtags(body)
+    const mentioned = (await resolveMentionedPersonIds(ctx, post.networkId, body)).filter((id) => id !== post.authorPersonId)
+    await ctx.db.patch(post._id, {
+      body,
+      tags: tags.length > 0 ? tags : undefined,
+      searchText: buildSearchableText(body, tags.join(" ")),
+      mentionedPersonIds: mentioned.length > 0 ? mentioned : undefined,
+      editedAt: now,
+      updatedAt: now,
+    })
+    const admitted = await moderateContentWrite(ctx, { networkId: post.networkId, ownerPersonId: ctx.person._id, kind: "post", id: post._id, text: body })
+    if (admitted) await notifyMentions(ctx, post, addedMentionedIds(post.mentionedPersonIds, mentioned))
+    await appendAudit(ctx, {
+      action: "page.post_edit",
+      capacity: role === "admin" ? "page_admin" : "member",
+      actorPersonId: ctx.person._id,
+      networkId: page.networkId,
+      subject: { table: "posts", id: post._id },
+      details: { pageId: page._id, role, editedAt: now },
+      at: now,
+    })
+    return { changed: true, editedAt: now }
+  },
+})
+
+/**
  * Retirer une publication de page — TOUT signataire vivant (pas seulement celui
  * qui l'a signée : le propos est celui de la page). Idempotent, mais pour une
  * autorité encore légitime seulement : le rejeu n'est pas un droit acquis.
@@ -457,7 +586,8 @@ export const removePagePost = networkMutation({
   handler: async (ctx, args) => {
     await enforceRateLimit(ctx, "post.remove", ctx.person._id)
     const post = await ctx.db.get(args.postId)
-    if (!post || post.pageId === undefined) return notFound()
+    // Une galerie collective se retire par sa porte événementielle, avec les droits du parent.
+    if (!post || post.pageId === undefined || post.pageEventGalleryId !== undefined) return notFound()
     await requireManagedPage(ctx, { networkId: ctx.networkId, personId: ctx.person._id }, post.pageId, "signatory")
     await markPostRemoved(ctx, post, Date.now())
     return { removed: true as const }
@@ -467,6 +597,127 @@ export const removePagePost = networkMutation({
 // ═══════════════════════════════════════════════════════════════
 // Le mur d'une page
 // ═══════════════════════════════════════════════════════════════
+
+/** Une cible d'annonce native et lisible, résolue par identifiant sans parcourir le mur. */
+async function readablePagePin(ctx: Pick<QueryCtx, "db">, reader: ReaderContext, page: Doc<"pages">, postId: Id<"posts">): Promise<Doc<"posts"> | null> {
+  const post = await ctx.db.get(postId)
+  if (!post || post.pageId !== page._id || post.networkId !== page.networkId || post.status !== "published" || !hasNativePostAuthor(post)) return null
+  if (!(await canReadModeratedContent(ctx, "post", post._id))) return null
+  return (await canSeePostDoc(ctx, reader, post)) ? post : null
+}
+
+/** L'annonce épinglée, soumise aux mêmes gardes et à la même projection que le mur. */
+export const pagePinnedPost = networkQuery({
+  args: { handle: v.string(), expectedPersonId: v.id("persons") },
+  returns: v.union(feedItemValidator, v.null()),
+  handler: async (ctx, args) => {
+    if (args.expectedPersonId !== ctx.person._id) return notFound()
+    const page = await readablePageByHandle(ctx, ctx.network, args.handle, ctx.person._id)
+    if (!page || page.pinnedPostId === undefined) return null
+    const reader = readerOf(ctx)
+    const post = await readablePagePin(ctx, reader, page, page.pinnedPostId)
+    if (!post) return null
+    const reason = await pageViewingReason(ctx, reader, page._id)
+    return await toFeedItem(ctx, post, reader, reason, enrichment(ctx))
+  },
+})
+
+/**
+ * Choisir ou retirer l'annonce de la page, sans modifier la publication.
+ * Une référence devenue illisible vaut une absence, pour le lecteur comme
+ * pour la comparaison ; le mandat et la cible sont relus même au rejeu.
+ */
+export const setPagePinnedPost = networkMutation({
+  minStatus: "declaree",
+  args: {
+    pageId: v.id("pages"),
+    postId: v.union(v.id("posts"), v.null()),
+    expectedPinnedPostId: v.union(v.id("posts"), v.null()),
+  },
+  returns: v.object({ changed: v.boolean() }),
+  handler: async (ctx, args) => {
+    await enforceRateLimit(ctx, "page.publish", ctx.person._id)
+    const { page, role } = await requireManagedPage(ctx, { networkId: ctx.networkId, personId: ctx.person._id }, args.pageId, "signatory")
+    const reader = readerOf(ctx)
+    if (args.postId !== null && !(await readablePagePin(ctx, reader, page, args.postId))) return notFound()
+    const previousPost = page.pinnedPostId === undefined ? null : await readablePagePin(ctx, reader, page, page.pinnedPostId)
+    const previousPostId = previousPost?._id ?? null
+    if (previousPostId === args.postId) return { changed: false }
+    if (previousPostId !== args.expectedPinnedPostId) return fail("conflict")
+
+    const now = Date.now()
+    await ctx.db.patch(page._id, { pinnedPostId: args.postId ?? undefined, updatedAt: now })
+    await appendAudit(ctx, {
+      action: "page.post_pin",
+      capacity: role === "admin" ? "page_admin" : "member",
+      actorPersonId: ctx.person._id,
+      networkId: page.networkId,
+      subject: { table: "pages", id: page._id },
+      details: { role, postId: args.postId, previousPostId },
+      at: now,
+    })
+    return { changed: true }
+  },
+})
+
+const pageMediaKindValidator = v.union(v.literal("all"), v.literal("image"), v.literal("video"))
+type PageMediaKind = Infer<typeof pageMediaKindValidator>
+
+/**
+ * Le mur et les médias utilisent la même découpe bornée. Le filtre média est
+ * appliqué AVANT de remplir la fenêtre visible ; il ne change jamais le mur
+ * historique lorsqu'il est absent. Une fenêtre vide peut avoir une suite.
+ */
+async function readPagePosts(
+  ctx: QueryCtx,
+  reader: ReaderContext,
+  page: Doc<"pages">,
+  args: { cursor?: Infer<typeof cursorValidator>; limit?: number; mediaKind?: PageMediaKind },
+): Promise<{ items: FeedItem[]; nextCursor: Infer<typeof cursorValidator> | null }> {
+  const limit = clampLimit(args.limit)
+  const [reason, cursorCreationTime] = await Promise.all([pageViewingReason(ctx, reader, page._id), cursorCreationTimeOf(ctx, args.cursor)])
+
+  const visible: Doc<"posts">[] = []
+  let lastExamined: Doc<"posts"> | null = null
+  let exhausted = false
+  let windowCursor = args.cursor
+  let windowCursorCreationTime = cursorCreationTime
+  for (let pass = 0; pass < WALL_WINDOWS_MAX; pass += 1) {
+    const window = await feedWindow(pageReader(ctx, reader.network, page._id), FEED_AUTHOR_SCAN, windowCursor, windowCursorCreationTime)
+    for (const post of window.rows) {
+      lastExamined = post
+      if (args.mediaKind !== undefined) {
+        if (post.pageId !== page._id || post.networkId !== page.networkId || post.status !== "published" || post.sharedPostId !== undefined) continue
+        // Même priorité que la projection média : un reflet en attente garde
+        // sa place, sans jamais dévoiler une URL retenue par la délivrance.
+        const media = post.federationMedia?.items ?? post.media ?? []
+        if (!media.some((item) => args.mediaKind === "all" || item.kind === args.mediaKind)) continue
+        // La galerie ne montre aucun contenu en attente, même à son auteur.
+        if (!(await canReadModeratedContent(ctx, "post", post._id))) continue
+      }
+      if (!(await canSeePostDoc(ctx, reader, post))) continue
+      visible.push(post)
+      if (visible.length >= limit) break
+    }
+    if (visible.length >= limit) break
+    if (!window.wasFull) {
+      exhausted = true
+      break
+    }
+    const frontier = window.rows[window.rows.length - 1]
+    if (frontier === undefined) {
+      exhausted = true
+      break
+    }
+    windowCursor = cursorForFeedPost(frontier)
+    windowCursorCreationTime = frontier._creationTime
+  }
+
+  const enrich = enrichment(ctx)
+  const items: FeedItem[] = []
+  for (const post of visible) items.push(await toFeedItem(ctx, post, reader, reason, enrich))
+  return { items, nextCursor: exhausted || lastExamined === null ? null : cursorForFeedPost(lastExamined) }
+}
 
 /**
  * Le MUR d'une page — ses publications lisibles d'ici, telles que JE peux les
@@ -482,39 +733,24 @@ export const pagePosts = networkQuery({
     const reader = readerOf(ctx)
     const page = await readablePageByHandle(ctx, ctx.network, args.handle, ctx.person._id)
     if (!page) return { items: [], nextCursor: null }
-    const limit = clampLimit(args.limit)
-    const [reason, cursorCreationTime] = await Promise.all([pageViewingReason(ctx, reader, page._id), cursorCreationTimeOf(ctx, args.cursor)])
+    return await readPagePosts(ctx, reader, page, args)
+  },
+})
 
-    const visible: Doc<"posts">[] = []
-    let lastExamined: Doc<"posts"> | null = null
-    let exhausted = false
-    let windowCursor = args.cursor
-    let windowCursorCreationTime = cursorCreationTime
-    for (let pass = 0; pass < WALL_WINDOWS_MAX; pass += 1) {
-      const window = await feedWindow(pageReader(ctx, ctx.network, page._id), FEED_AUTHOR_SCAN, windowCursor, windowCursorCreationTime)
-      for (const post of window.rows) {
-        lastExamined = post
-        if (!(await canSeePostDoc(ctx, reader, post))) continue
-        visible.push(post)
-        if (visible.length >= limit) break
-      }
-      if (visible.length >= limit) break
-      if (!window.wasFull) {
-        exhausted = true
-        break
-      }
-      const frontier = window.rows[window.rows.length - 1]
-      if (frontier === undefined) {
-        exhausted = true
-        break
-      }
-      windowCursor = cursorForFeedPost(frontier)
-      windowCursorCreationTime = frontier._creationTime
-    }
-
-    const enrich = enrichment(ctx)
-    const items: FeedItem[] = []
-    for (const post of visible) items.push(await toFeedItem(ctx, post, reader, reason, enrich))
-    return { items, nextCursor: exhausted || lastExamined === null ? null : cursorForFeedPost(lastExamined) }
+/** Les photos et vidéos propres à une page, filtrées avant pagination et re-gardées à chaque lecture. */
+export const pageMediaPosts = networkQuery({
+  args: {
+    handle: v.string(),
+    expectedPersonId: v.id("persons"),
+    kind: pageMediaKindValidator,
+    cursor: v.optional(cursorValidator),
+    limit: v.optional(v.number()),
+  },
+  returns: v.object({ items: v.array(feedItemValidator), nextCursor: v.union(cursorValidator, v.null()) }),
+  handler: async (ctx, args) => {
+    if (args.expectedPersonId !== ctx.person._id) return notFound()
+    const page = await readablePageByHandle(ctx, ctx.network, args.handle, ctx.person._id)
+    if (!page) return { items: [], nextCursor: null }
+    return await readPagePosts(ctx, readerOf(ctx), page, { ...args, mediaKind: args.kind })
   },
 })

@@ -25,6 +25,7 @@ import { assertVisiblePost, type ReaderContext } from "../posts/access"
 import { markCommentRemoved } from "../posts/contentRemoval"
 import { applyReactionDelta, countReplies, recordComment } from "../posts/counters"
 import { notifyAboutPost } from "../posts/postNotify"
+import { hasNativePostAuthor } from "../posts/nativeAuthor"
 
 /** Réponses montrées sous une racine dans la page des commentaires ; la suite se pagine. */
 const REPLIES_PREVIEW = 3
@@ -66,7 +67,7 @@ export const toggleReaction = networkMutation({
       await ctx.db.insert("postReactions", { networkId: ctx.networkId, postId, personId: ctx.person._id, kind, createdAt: Date.now() })
     }
     await applyReactionDelta(ctx, postId, ctx.person._id, kind, 1)
-    await notifyAboutPost(ctx, post, { recipientPersonId: post.authorPersonId, actorPersonId: ctx.person._id, kind: "post_reaction" })
+    if (hasNativePostAuthor(post)) await notifyAboutPost(ctx, post, { recipientPersonId: post.authorPersonId, actorPersonId: ctx.person._id, kind: "post_reaction" })
     return { mine: kind }
   },
 })
@@ -125,7 +126,7 @@ export const comment = networkMutation({
     await recordComment(ctx, { _id: commentId, postId: post._id, ...(parentCommentId !== undefined ? { parentCommentId } : {}), createdAt: now })
 
     // L'auteur de la publication, la personne à qui l'on répond, les personnes citées : chacun s'il peut ouvrir la publication.
-    await notifyAboutPost(ctx, post, { recipientPersonId: post.authorPersonId, actorPersonId: ctx.person._id, kind: "post_comment" })
+    if (hasNativePostAuthor(post)) await notifyAboutPost(ctx, post, { recipientPersonId: post.authorPersonId, actorPersonId: ctx.person._id, kind: "post_comment" })
     if (answeredPersonId !== undefined && answeredPersonId !== post.authorPersonId) {
       await notifyAboutPost(ctx, post, { recipientPersonId: answeredPersonId, actorPersonId: ctx.person._id, kind: "post_comment" })
     }
@@ -151,7 +152,7 @@ export const removeComment = networkMutation({
     if (!comment) return notFound()
     // La garde de visibilité d'abord : on ne raisonne pas sur un commentaire porté par une publication invisible.
     const post = await assertVisiblePost(ctx, readerOf(ctx), comment.postId)
-    if (comment.authorPersonId !== ctx.person._id && post.authorPersonId !== ctx.person._id) return notFound()
+    if (comment.authorPersonId !== ctx.person._id && (!hasNativePostAuthor(post) || post.authorPersonId !== ctx.person._id)) return notFound()
     await markCommentRemoved(ctx, comment, Date.now())
     return { removed: true as const }
   },

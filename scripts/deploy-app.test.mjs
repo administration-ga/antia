@@ -22,7 +22,7 @@ describe("catalogue réel du moteur", () => {
     const substitutions = plan.build[plan.build.indexOf("--substitutions") + 1]
     expect(substitutions).toContain("_NEXT_PUBLIC_CONVEX_URL=u")
     expect(substitutions).toContain("_NEXT_PUBLIC_DIASPORALE_DATA_SOURCE=,")
-    expect(substitutions.split(",").filter((entry) => entry.startsWith("_NEXT_PUBLIC_")).length).toBe(8)
+    expect(substitutions.split(",").filter((entry) => entry.startsWith("_NEXT_PUBLIC_")).length).toBe(9)
   })
 
   test("la mesure facultative absente reste vide, sans imposer sa configuration ni inscrire un marqueur", () => {
@@ -30,6 +30,7 @@ describe("catalogue réel du moteur", () => {
     const plan = buildPlan(catalog, "antsia_ga", {})
     expect(plan.dockerLocal).toContain("NEXT_PUBLIC_POSTHOG_KEY=")
     expect(plan.dockerLocal).toContain("NEXT_PUBLIC_POSTHOG_HOST=")
+    expect(plan.dockerLocal).toContain("NEXT_PUBLIC_POSTHOG_EU_RELAY_ORIGIN=")
     expect(plan.build.join(" ")).toContain("_NEXT_PUBLIC_POSTHOG_KEY=,_NEXT_PUBLIC_POSTHOG_HOST=")
     expect(requiredBuildArgs(plan.app)).toEqual(["NEXT_PUBLIC_CONVEX_URL", "NEXT_PUBLIC_SITE_URL", "NEXT_PUBLIC_BUILD_SHA"])
   })

@@ -7,14 +7,18 @@
  * dans sa fenêtre, il se décroche. Un refus d'admission n'est PAS une exception :
  * l'appel est inscrit déjà terminé, des deux côtés, et la raison est RENDUE.
  */
-import { v } from "convex/values"
+import { type Infer, v } from "convex/values"
 
+import type { Doc, Id } from "../../_generated/dataModel"
+import type { MutationCtx } from "../../_generated/server"
 import { failRule, notFound } from "../../lib/errors"
 import { networkMutation } from "../../lib/functions"
 import { enforceRateLimit } from "../../lib/rateLimit"
 import { isBlockedBetween } from "../graph/graph"
 import { callRoomName, reachablePerson } from "./access"
 import { reapStaleCallsOf } from "./cleanup"
+import { callConversationOf, conversationFieldsOf } from "./conversation"
+import { conversationCallPairAllowed } from "./conversationAccess"
 import { evaluateCallAdmission, insertRefusedCall } from "./evaluate"
 import { scheduleDirectRingExpiry } from "./ringExpiry"
 import { callAdmissionReasonValidator, callMediaTypeValidator } from "./validators"
@@ -22,13 +26,28 @@ import { callAdmissionReasonValidator, callMediaTypeValidator } from "./validato
 /** Qui l'on appelle : sa personne, ou son identifiant public. */
 export const callTargetValidator = v.union(v.object({ personId: v.id("persons") }), v.object({ handle: v.string() }))
 
-export const callMember = networkMutation({
-  args: { target: callTargetValidator, mediaType: v.optional(callMediaTypeValidator) },
-  returns: v.union(
+export const directCallResultValidator = v.union(
     v.object({ admitted: v.literal(true), callId: v.id("calls"), calleePersonId: v.id("persons"), roomName: v.string(), mediaType: callMediaTypeValidator }),
     v.object({ admitted: v.literal(false), callId: v.id("calls"), calleePersonId: v.id("persons"), reason: callAdmissionReasonValidator, voicemailOffered: v.boolean() }),
-  ),
-  handler: async (ctx, args) => {
+  )
+export type DirectCallResult = Infer<typeof directCallResultValidator>
+export const callMember = networkMutation({
+  args: { target: callTargetValidator, mediaType: v.optional(callMediaTypeValidator) },
+  returns: directCallResultValidator,
+  handler: placeDirectCall,
+})
+
+/**
+ * Porte partagée ; seuls les wrappers de conversation ajoutent leur contexte — `commercialThreadId`
+ * (P10, `commercialMessaging/calls.startCall`) ou `contextualThreadId` (CC-4,
+ * `contextualMessaging/calls.start`), jamais les deux (sélecteur `conversation.ts` : refus indistinct).
+ * Toutes les gardes s'appliquent à chacun ; D5 (a) : un appel contextuel, dont la paire exige les
+ * accords des deux personnes dans ce fil, lève le seul réglage « hors de mes relations » de l'appelé.
+ */
+export async function placeDirectCall(
+  ctx: MutationCtx & { networkId: Id<"networks">; person: Doc<"persons"> },
+  args: { target: Infer<typeof callTargetValidator>; mediaType?: Infer<typeof callMediaTypeValidator>; commercialThreadId?: Id<"commercialThreads">; contextualThreadId?: Id<"contextualThreads"> },
+): Promise<DirectCallResult> {
     const me = ctx.person._id
     await enforceRateLimit(ctx, "call.place", me)
     const callee = await reachablePerson(ctx, ctx.networkId, args.target)
@@ -36,18 +55,22 @@ export const callMember = networkMutation({
     if (callee._id === me) return failRule("CALL_SELF")
     // Bloqué, dans un sens ou dans l'autre : le même refus qu'un inconnu.
     if (await isBlockedBetween(ctx, me, callee._id)) return notFound()
+    // Le sélecteur unique : au plus UN contexte de conversation, dont la paire est relue dans CE réseau.
+    const conversation = callConversationOf(args)
+    if (!(await conversationCallPairAllowed(ctx, ctx.networkId, conversation, me, callee._id))) return notFound()
 
     const now = Date.now()
     const mediaType = args.mediaType ?? "audio"
     await reapStaleCallsOf(ctx, ctx.networkId, me, now)
     const roomName = callRoomName("direct", now)
 
-    const admission = await evaluateCallAdmission(ctx, { networkId: ctx.networkId, calleePersonId: callee._id, callerPersonId: me, now })
+    const admission = await evaluateCallAdmission(ctx, { networkId: ctx.networkId, calleePersonId: callee._id, callerPersonId: me, now, ...(conversation.kind === "contextual" ? { viaContextualConsent: true } : {}) })
     if (!admission.decision.admitted) {
       const reason = admission.decision.reason
-      const callId = await insertRefusedCall(ctx, { networkId: ctx.networkId, callerId: me, calleeId: callee._id, roomName, mediaType, reason, now })
+      const callId = await insertRefusedCall(ctx, { networkId: ctx.networkId, callerId: me, calleeId: callee._id, roomName, mediaType, reason, now, ...conversationFieldsOf(conversation) })
       // Sur « hors de mes relations », aucune messagerie vocale : ce serait le contournement du réglage.
-      return { admitted: false as const, callId, calleePersonId: callee._id, reason, voicemailOffered: admission.voicemailEnabled && reason !== "outside_relations" }
+      // Une conversation (P10, contextuelle) n'en offre jamais : elle n'ouvre pas la messagerie vocale personnelle.
+      return { admitted: false as const, callId, calleePersonId: callee._id, reason, voicemailOffered: conversation.kind === "none" && admission.voicemailEnabled && reason !== "outside_relations" }
     }
 
     const callId = await ctx.db.insert("calls", {
@@ -61,6 +84,7 @@ export const callMember = networkMutation({
       mediaType,
       maxParticipants: 2,
       startedAt: now,
+      ...conversationFieldsOf(conversation),
       ...(admission.calleeEngaged ? { calleeEngagedAtCreate: true } : {}),
     })
     // L'appelant est dans sa salle dès la création ; l'appelé y entrera en décrochant.
@@ -68,5 +92,4 @@ export const callMember = networkMutation({
     await ctx.db.insert("callParticipants", { networkId: ctx.networkId, callId, personId: callee._id, role: "participant" })
     await scheduleDirectRingExpiry(ctx, { callId, startedAt: now, now })
     return { admitted: true as const, callId, calleePersonId: callee._id, roomName, mediaType }
-  },
-})
+}

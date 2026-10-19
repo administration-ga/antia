@@ -27,6 +27,23 @@ const RATE_LIMITS = {
   // Systèmes fédérés : clé issue du registre serveur émetteur/environnement,
   // distincte des budgets humains et impossible à recréer par le payload.
   "federation.receive": { kind: "token bucket", rate: 300, period: MINUTE, capacity: 60 },
+  // Liaison volontaire PRO.GA : budgets personnels, effacés par la porte commune.
+  "shop.link.begin": { kind: "token bucket", rate: 12, period: HOUR, capacity: 3 },
+  "shop.link.complete": { kind: "token bucket", rate: 30, period: HOUR, capacity: 6 },
+  "shop.link.revoke": { kind: "token bucket", rate: 30, period: HOUR, capacity: 6 },
+  "catalog.configure": { kind: "token bucket", rate: 30, period: HOUR, capacity: 6 },
+  "checkout.configure": { kind: "token bucket", rate: 30, period: HOUR, capacity: 6 },
+  "checkout.prepare": { kind: "token bucket", rate: 20, period: HOUR, capacity: 3 },
+  "checkout.control": { kind: "token bucket", rate: 120, period: HOUR, capacity: 12 },
+  "checkout.intent.stop": { kind: "token bucket", rate: 30, period: HOUR, capacity: 6 },
+  "payment.configure": { kind: "token bucket", rate: 30, period: HOUR, capacity: 6 },
+  "payment.start": { kind: "token bucket", rate: 20, period: HOUR, capacity: 3 },
+  "payment.control": { kind: "token bucket", rate: 120, period: HOUR, capacity: 12 },
+  "payment.refund": { kind: "token bucket", rate: 10, period: HOUR, capacity: 2 },
+  "purchase.control": { kind: "token bucket", rate: 120, period: HOUR, capacity: 12 },
+  "purchase.action": { kind: "token bucket", rate: 30, period: HOUR, capacity: 5 },
+  "catalog.reconcile": { kind: "token bucket", rate: 120, period: HOUR, capacity: 10 },
+  "catalog.post.link": { kind: "token bucket", rate: 60, period: HOUR, capacity: 12 },
   // Authentification (clé : l'adresse ou le numéro normalisé, jamais l'IP seule)
   "auth.login": { kind: "token bucket", rate: 5, period: 15 * MINUTE, capacity: 5 },
   "auth.otp.send": { kind: "token bucket", rate: 3, period: 5 * MINUTE, capacity: 3 },
@@ -35,6 +52,9 @@ const RATE_LIMITS = {
   "person.bootstrap": { kind: "token bucket", rate: 1200, period: HOUR, capacity: 300 },
   "person.identity": { kind: "token bucket", rate: 10, period: HOUR, capacity: 5 },
   "person.profile": { kind: "token bucket", rate: 30, period: HOUR, capacity: 10 },
+  // Thème du compte : choisi d'un clic, parcouru d'un thème à l'autre — budget propre,
+  // pour ne pas épuiser celui des réglages et du profil.
+  "person.theme": { kind: "token bucket", rate: 60, period: HOUR, capacity: 20 },
   "network.join": { kind: "token bucket", rate: 10, period: HOUR, capacity: 5 },
   "network.leave": { kind: "token bucket", rate: 10, period: HOUR, capacity: 5 },
   "person.facet": { kind: "token bucket", rate: 30, period: HOUR, capacity: 10 },
@@ -100,6 +120,7 @@ const RATE_LIMITS = {
   "event.create": { kind: "token bucket", rate: 20, period: HOUR, capacity: 5 },
   "event.invite": { kind: "token bucket", rate: 60, period: HOUR, capacity: 20 },
   "event.respond": { kind: "token bucket", rate: 60, period: HOUR, capacity: 20 },
+  "event.attendance": { kind: "token bucket", rate: 240, period: MINUTE, capacity: 30 },
   "event.manage": { kind: "token bucket", rate: 30, period: HOUR, capacity: 10 },
   // Stories (PA3 lot 12b).
   "story.publish": { kind: "token bucket", rate: 30, period: HOUR, capacity: 10 },
@@ -180,6 +201,86 @@ const RATE_LIMITS = {
   "diaspora.sponsor": { kind: "token bucket", rate: 10, period: HOUR, capacity: 5 },
   "diaspora.sponsor.revoke": { kind: "token bucket", rate: 20, period: HOUR, capacity: 10 },
   "diaspora.attestation.request": { kind: "token bucket", rate: 3, period: DAY, capacity: 1 },
+  // Mise en relation DIASPORALE (services, demandes, rendez-vous, adhésions
+  // d'associations), demandée par la session DIASPORALE le 18/10/2026. Les
+  // quotas métier restent dans `@diasporale/domain`, en plus de ces seaux.
+  "diaspora.service.offer": { kind: "token bucket", rate: 30, period: HOUR, capacity: 10 },
+  "diaspora.service.request": { kind: "token bucket", rate: 20, period: HOUR, capacity: 5 },
+  "diaspora.service.request.reinforced": { kind: "token bucket", rate: 5, period: DAY, capacity: 2 },
+  "diaspora.service.respond": { kind: "token bucket", rate: 60, period: HOUR, capacity: 20 },
+  "diaspora.service.booking": { kind: "token bucket", rate: 60, period: HOUR, capacity: 20 },
+  "diaspora.service.review": { kind: "token bucket", rate: 10, period: DAY, capacity: 3 },
+  "diaspora.association.membership": { kind: "token bucket", rate: 30, period: HOUR, capacity: 10 },
+  "diaspora.association.manage": { kind: "token bucket", rate: 120, period: HOUR, capacity: 30 },
+  // Vague H DIASPORALE (entraide, kit d'arrivée, mentorat, talents et emploi,
+  // modération par pays), ajoutée par la session DIASPORALE sur délégation
+  // d'ANTSIA le 18/10/2026. Valeurs de départ, mesurées au pilote.
+  "diaspora.aid.post": { kind: "token bucket", rate: 20, period: HOUR, capacity: 5 },
+  "diaspora.aid.post.reinforced": { kind: "token bucket", rate: 5, period: DAY, capacity: 2 },
+  "diaspora.aid.answer": { kind: "token bucket", rate: 60, period: HOUR, capacity: 20 },
+  "diaspora.aid.manage": { kind: "token bucket", rate: 60, period: HOUR, capacity: 20 },
+  "diaspora.kit.write": { kind: "token bucket", rate: 30, period: HOUR, capacity: 10 },
+  "diaspora.kit.review": { kind: "token bucket", rate: 60, period: HOUR, capacity: 20 },
+  "diaspora.mentor.profile": { kind: "token bucket", rate: 30, period: HOUR, capacity: 10 },
+  "diaspora.mentor.request": { kind: "token bucket", rate: 20, period: HOUR, capacity: 5 },
+  "diaspora.mentor.request.reinforced": { kind: "token bucket", rate: 5, period: DAY, capacity: 2 },
+  "diaspora.mentor.respond": { kind: "token bucket", rate: 60, period: HOUR, capacity: 20 },
+  "diaspora.job.offer": { kind: "token bucket", rate: 30, period: HOUR, capacity: 10 },
+  "diaspora.job.apply": { kind: "token bucket", rate: 20, period: HOUR, capacity: 5 },
+  "diaspora.job.apply.reinforced": { kind: "token bucket", rate: 5, period: DAY, capacity: 2 },
+  "diaspora.job.review": { kind: "token bucket", rate: 120, period: HOUR, capacity: 30 },
+  "diaspora.talent.profile": { kind: "token bucket", rate: 30, period: HOUR, capacity: 10 },
+  "diaspora.moderation.decide": { kind: "token bucket", rate: 300, period: HOUR, capacity: 60 },
+  // Boutiques (P07, `convex/modules/shops`). Préparer une boutique est un geste
+  // rare, doublé d'un quota MÉTIER (trois brouillons sans page par personne et
+  // par réseau, `modules/shops/rules.ts`) ; éditer est fréquent ; demander ou
+  // retirer la publication et régler la diffusion publique sont des gestes de
+  // décision ; les décisions de l'équipe de la plateforme ont leur seau propre.
+  // Les URL de dépôt du logo consomment « upload.url », comme toute image.
+  // P10 : première prise de contact, paire et destination ont des budgets distincts.
+  "commercial.request.member": { kind: "token bucket", rate: 10, period: DAY, capacity: 3 },
+  "commercial.request.pair": { kind: "token bucket", rate: 2, period: DAY, capacity: 1 },
+  "commercial.request.shop": { kind: "token bucket", rate: 120, period: HOUR, capacity: 30 },
+  "commercial.message": { kind: "token bucket", rate: 30, period: MINUTE, capacity: 10 },
+  "commercial.team": { kind: "token bucket", rate: 30, period: HOUR, capacity: 10 },
+  "commercial.manage": { kind: "token bucket", rate: 120, period: HOUR, capacity: 30 },
+  "commercial.crm.submit": { kind: "token bucket", rate: 10, period: DAY, capacity: 3 },
+  "commercial.crm.retry": { kind: "token bucket", rate: 10, period: HOUR, capacity: 3 },
+  "shop.create": { kind: "token bucket", rate: 5, period: DAY, capacity: 3 },
+  "shop.edit": { kind: "token bucket", rate: 120, period: HOUR, capacity: 30 },
+  "shop.publish": { kind: "token bucket", rate: 20, period: HOUR, capacity: 6 },
+  "shop.decide": { kind: "token bucket", rate: 300, period: HOUR, capacity: 60 },
+  // P15 : emploi. Candidater sollicite un employeur : budget journalier, renforcé
+  // pour les comptes légers ; pièces, suivi et retrait ont leurs seaux ; la
+  // politique d'un réseau reste une décision opérateur. Valeurs de départ.
+  "shop.job.configure": { kind: "token bucket", rate: 30, period: HOUR, capacity: 6 },
+  "shop.job.apply": { kind: "token bucket", rate: 10, period: DAY, capacity: 3 },
+  "shop.job.apply.reinforced": { kind: "token bucket", rate: 3, period: DAY, capacity: 1 },
+  "shop.job.file": { kind: "token bucket", rate: 20, period: HOUR, capacity: 5 },
+  "shop.job.track": { kind: "token bucket", rate: 60, period: HOUR, capacity: 10 },
+  "shop.job.withdraw": { kind: "token bucket", rate: 30, period: HOUR, capacity: 6 },
+  // P14 : services, devis et rendez-vous. Solliciter un professionnel (devis,
+  // rendez-vous retenu, prestation commandée) a un budget journalier ; lire
+  // créneaux et devis, changer ou annuler, consulter un résultat perdu ont
+  // leurs seaux. La politique d'un réseau reste une décision opérateur.
+  "shop.service.configure": { kind: "token bucket", rate: 30, period: HOUR, capacity: 6 },
+  "shop.service.read": { kind: "token bucket", rate: 240, period: HOUR, capacity: 40 },
+  "shop.service.request": { kind: "token bucket", rate: 20, period: DAY, capacity: 5 },
+  "shop.service.book": { kind: "token bucket", rate: 12, period: DAY, capacity: 4 },
+  "shop.service.order": { kind: "token bucket", rate: 12, period: DAY, capacity: 4 },
+  "shop.service.accept": { kind: "token bucket", rate: 30, period: HOUR, capacity: 6 },
+  "shop.service.change": { kind: "token bucket", rate: 20, period: HOUR, capacity: 5 },
+  "shop.service.status": { kind: "token bucket", rate: 120, period: HOUR, capacity: 20 },
+  // Conversations contextuelles (CC-2b, ADR-0025, D14) : valeurs de départ, mesurées au pilote.
+  // Ouvrir à la demande d'une partie (le crochet de la tranche consomme le seau de son propre
+  // geste) ; écrire par personne, avec son renforcé pour un compte léger ; écrire par FIL (clé : le
+  // fil, consommée après la relecture du droit), pour qu'une équipe de vingt signataires ne
+  // submerge pas un demandeur ; gérer (lecture marquée, clôture, accords, retrait, appel).
+  "contextual.open": { kind: "token bucket", rate: 20, period: HOUR, capacity: 5 },
+  "contextual.message": { kind: "token bucket", rate: 30, period: MINUTE, capacity: 10 },
+  "contextual.message.reinforced": { kind: "token bucket", rate: 15, period: MINUTE, capacity: 5 },
+  "contextual.thread": { kind: "token bucket", rate: 120, period: HOUR, capacity: 30 },
+  "contextual.manage": { kind: "token bucket", rate: 120, period: HOUR, capacity: 30 },
 } as const satisfies Record<string, RateLimitConfig>
 
 export type RateLimitBucket = keyof typeof RATE_LIMITS & string
@@ -200,6 +301,12 @@ const REINFORCED_BUCKETS = {
   "connection.request": "connection.request.reinforced",
   "group.invite": "group.invite.reinforced",
   "groupThread.invite": "groupThread.invite.reinforced",
+  "diaspora.service.request": "diaspora.service.request.reinforced",
+  "diaspora.aid.post": "diaspora.aid.post.reinforced",
+  "diaspora.mentor.request": "diaspora.mentor.request.reinforced",
+  "diaspora.job.apply": "diaspora.job.apply.reinforced",
+  "shop.job.apply": "shop.job.apply.reinforced",
+  "contextual.message": "contextual.message.reinforced",
 } as const satisfies Partial<Record<RateLimitBucket, RateLimitBucket>>
 
 type NetworkRateContext = {

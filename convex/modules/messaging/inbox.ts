@@ -279,7 +279,7 @@ export const findThreadWithHandle = networkQuery({
  */
 export const startThreadWithHandle = networkMutation({
   minStatus: "declaree",
-  args: { handle: v.string(), initialMessage: v.string(), initialAttachmentFiles: v.optional(v.array(attachmentFileValidator)) },
+  args: { handle: v.string(), initialMessage: v.string(), initialAttachmentFiles: v.optional(v.array(attachmentFileValidator)), idempotencyKey: v.optional(v.string()) },
   returns: v.object({ threadId: v.id("personalThreads"), messageId: v.id("personalMessages"), created: v.boolean() }),
   handler: async (ctx, args) => {
     await enforceRateLimit(ctx, "thread.open", ctx.person._id)
@@ -293,6 +293,7 @@ export const startThreadWithHandle = networkMutation({
       initiatorPersonId: ctx.person._id,
       targetPersonId: found._id,
       initialMessage: args.initialMessage,
+      ...(args.idempotencyKey !== undefined ? { idempotencyKey: args.idempotencyKey } : {}),
       ...(args.initialAttachmentFiles !== undefined ? { initialAttachmentFiles: args.initialAttachmentFiles } : {}),
     })
   },

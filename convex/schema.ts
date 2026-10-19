@@ -1,11 +1,17 @@
+import { paymentTables } from "./modules/shops/paymentTables"
+import { purchaseTables } from "./modules/shops/purchaseTables"
 import { defineSchema } from "convex/server"
 
 import { albumsTables } from "./modules/albums/tables"
+import { commercialMessagingTables } from "./modules/commercialMessaging/tables"
+import { commercialCrmTables } from "./modules/commercialMessaging/crmTables"
+import { contextualMessagingTables } from "./modules/contextualMessaging/tables"
 import { callsTables } from "./modules/calls/tables"
 import { diasporaTables } from "./modules/diaspora/tables"
 import { engagementTables } from "./modules/engagement/tables"
 import { eventsTables } from "./modules/events/tables"
 import { federationTables } from "./modules/federation/tables"
+import { commerceTransportTables } from "./modules/federation/commerceTransportTables"
 import { filesTables } from "./modules/files/tables"
 import { graphTables } from "./modules/graph/tables"
 import { groupsTables } from "./modules/groups/tables"
@@ -20,8 +26,14 @@ import { dataTables } from "./modules/people/dataTables"
 import { peopleTables } from "./modules/people/tables"
 import { platformTables } from "./modules/platform/tables"
 import { consoleTables } from "./modules/platform/consoleTables"
+import { operationalTables } from "./modules/platform/operationalTables"
 import { postsTables } from "./modules/posts/tables"
+import { feedTables } from "./modules/posts/feedTables"
 import { publicTables } from "./modules/public/tables"
+import { shopsTables } from "./modules/shops/tables"
+import { commerceLinkTables } from "./modules/shops/commerceLinkTables"
+import { catalogTables } from "./modules/shops/catalogTables"
+import { checkoutTables } from "./modules/shops/checkoutTables"
 import { storiesTables } from "./modules/stories/tables"
 import { suggestionsTables } from "./modules/suggestions/tables"
 import { thematicGroupsTables } from "./modules/thematicGroups/tables"
@@ -48,15 +60,22 @@ export default defineSchema(
     ...dataTables,
     ...platformTables,
     ...consoleTables,
+    ...operationalTables,
     ...postsTables,
+    ...feedTables,
     ...publicTables,
     ...engagementTables,
     ...filesTables,
     ...federationTables,
+    ...commerceTransportTables,
     ...graphTables,
     ...notificationsTables,
     ...thematicGroupsTables,
     ...messagingTables,
+    ...commercialMessagingTables,
+    ...commercialCrmTables,
+    // Conversations contextuelles (CC-2b, ADR-0025) : tables à préfixe réservé `contextual`.
+    ...contextualMessagingTables,
     ...groupsTables,
     ...eventsTables,
     ...storiesTables,
@@ -67,6 +86,12 @@ export default defineSchema(
     ...liveTables,
     ...marksTables,
     ...moderationTables,
+    ...shopsTables,
+    ...commerceLinkTables,
+    ...catalogTables,
+    ...checkoutTables,
+    ...paymentTables,
+    ...purchaseTables,
     ...diasporaTables,
   },
   { schemaValidation: true },

@@ -21,6 +21,7 @@ import { badgeValidator } from "../../lib/validators"
 import { servableUrl } from "../files/storageGuard"
 import { badgesOf } from "../people/persons"
 import { notifyPerson } from "../notifications/notify"
+import { refreshReaderFeed } from "../posts/feedMaterialization"
 import { findPublishedPersonByHandle, isDiscoverablePerson, miniProfileCache } from "../people/miniProfile"
 import { acceptedCounterpartIds, isBlockedBetween, isFollowingPerson } from "./graph"
 
@@ -53,6 +54,7 @@ export const follow = networkMutation({
     const followId = await ctx.db.insert("follows", { networkId: ctx.networkId, followerPersonId: ctx.person._id, targetPersonId: target._id, createdAt: Date.now() })
     const row = await ctx.db.get(followId)
     if (row) await followerCounts.insert(ctx, row)
+    await refreshReaderFeed(ctx, ctx.networkId, ctx.person._id)
     // Un abonnement se dit — il n'engage à rien et n'appelle aucune décision.
     await notifyPerson(ctx, { networkId: ctx.networkId, recipientPersonId: target._id, actorPersonId: ctx.person._id, kind: "new_follower" })
     return { targetPersonId: target._id, following: true as const }
@@ -73,6 +75,7 @@ export const unfollow = networkMutation({
     if (existing) {
       await followerCounts.delete(ctx, existing)
       await ctx.db.delete(existing._id)
+      await refreshReaderFeed(ctx, ctx.networkId, ctx.person._id)
     }
     return { following: false as const }
   },

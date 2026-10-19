@@ -15,7 +15,8 @@ import { fail } from "../../lib/errors"
 import { enforceRateLimit } from "../../lib/rateLimit"
 import { getActiveIdentity } from "../../lib/session"
 import { bindOperatorSession } from "../../lib/operatorIdentity"
-import { badgeValidator, consentPurposeValidator, localeValidator } from "../../lib/validators"
+import { badgeValidator, consentPurposeValidator, localeValidator, memberThemeValidator } from "../../lib/validators"
+import { hasLiveAdministrationGrant } from "../federation/agentAuthority"
 import { resolveFileDelivery, withheldCodeOf, withheldCodeValidator } from "../files/storageGuard"
 import { syncIdentityForPerson } from "./identity"
 
@@ -26,7 +27,9 @@ export async function liveIdentityLinks(ctx: Pick<QueryCtx, "db">, personId: Id<
     .query("identityLinks")
     .withIndex("by_person_and_provider", (q) => q.eq("personId", personId))
     .take(16)
-  return links.filter((link) => link.revokedAt === undefined)
+  const live = links.filter((link) => link.revokedAt === undefined)
+  const administrationGranted = live.some((link) => link.provider === "administration") && await hasLiveAdministrationGrant(ctx, personId)
+  return live.filter((link) => link.provider !== "administration" || administrationGranted)
 }
 
 export async function badgesOf(ctx: Pick<QueryCtx, "db">, personId: Id<"persons">) {
@@ -46,6 +49,7 @@ const myPersonValidator = v.object({
   private: v.boolean(),
   locale: v.optional(localeValidator),
   timeZone: v.optional(v.string()),
+  theme: v.optional(memberThemeValidator),
   badges: v.array(badgeValidator),
   consentsInForce: v.array(consentPurposeValidator),
   /** Photo et couverture : URL servie par la garde, ou la retenue (analyse en cours, bloquée). */
@@ -70,7 +74,7 @@ export const getMyPerson = query({
   handler: async (ctx) => {
     const person = await getCurrentPerson(ctx)
     if (!person) return null
-    // borné : un consentement par finalité et par réseau, sept finalités.
+    // borné : historique des consentements d'une personne, cent lignes au plus.
     const consents = await ctx.db
       .query("consents")
       .withIndex("by_person_and_purpose", (q) => q.eq("personId", person._id))
@@ -93,6 +97,7 @@ export const getMyPerson = query({
       private: person.privateAt !== undefined,
       ...(person.locale ? { locale: person.locale } : {}),
       ...(person.timeZone ? { timeZone: person.timeZone } : {}),
+      ...(person.theme ? { theme: person.theme } : {}),
       badges: await badgesOf(ctx, person._id),
       consentsInForce: purposes,
       avatar: await profileImage(ctx, person.avatarStorageId),

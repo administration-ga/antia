@@ -10,10 +10,11 @@ import { getMembership, getRootNetwork, isActiveMember } from "../../lib/access"
 import { checked, fail, notFound } from "../../lib/errors"
 import { networkMutation, networkQuery, operatorMutation, operatorQuery, personMutation, personQuery } from "../../lib/functions"
 import { enforceRateLimit } from "../../lib/rateLimit"
+import { contextualDecisionConflict } from "../contextualMessaging/access"
 import { notifyPerson } from "../notifications/notify"
-import { liveSignatoryRole } from "../pages/access"
+import { liveSignatoryRole, signatoryRowsOf } from "../pages/access"
 import { appendAudit, networkRoleCapacity, operatorCapacity } from "../platform/audit"
-import { contentState } from "./policy"
+import { contentState, owningPageOfReport } from "./policy"
 import { refreshSuspension } from "./sanctions"
 import { contentReportStatusValidator, moderationSurfaceValidator, moderationTargetValidator, sanctionKindValidator } from "./tables"
 import { removeTarget, resolveVisibleTarget, restoreTarget } from "./targets"
@@ -23,6 +24,31 @@ type NetworkActor = { networkId: Id<"networks">; person: Doc<"persons">; members
 
 const motiveOf = (reason: string) => checked(() => assertDecisionReason(reason, 3))
 const pageOptions = (opts: { cursor: string | null; numItems: number }) => ({ ...opts, numItems: Math.max(1, Math.min(50, opts.numItems)) })
+
+/** Une signature de page ne permet jamais de modérer son propre contenu collectif. */
+async function assertNoPageDecisionConflict(ctx: ReadCtx, actorPersonId: Id<"persons">, target: Doc<"reports">["target"]): Promise<void> {
+  // CC-2b : une partie au fil contextuel, ou un signataire vivant de sa page, ne tranche jamais un dossier de ce fil.
+  if (target.kind === "contextualMessage" && (await contextualDecisionConflict(ctx, target.id, actorPersonId))) return notFound()
+  const state = await contentState(ctx, target.kind, target.id)
+  if (!state?.ownerPageId) return
+  const page = await ctx.db.get(state.ownerPageId)
+  if (page && await liveSignatoryRole(ctx, page, actorPersonId) !== null) return notFound()
+}
+
+/**
+ * P16 : un dossier SANS propriétaire personnel (contenu porté par une page : offre ou poste
+ * reflétés, réponse d'avis, évènement de page, contenus de page DIASPORALE) s'annonce par un
+ * avis NEUTRE — ni acteur, ni contenu, ni motif dans la cloche — à chaque signataire VIVANT de
+ * cette page (borné par le plafond des signataires). La porte des avis relit ce droit.
+ */
+async function notifyPageCase(ctx: MutationCtx, row: Pick<Doc<"reports">, "_id" | "networkId" | "ownerPersonId" | "target">): Promise<void> {
+  const page = await owningPageOfReport(ctx, row)
+  if (!page) return
+  for (const signatory of await signatoryRowsOf(ctx, page._id)) {
+    if (signatory.acceptedAt === undefined || (await liveSignatoryRole(ctx, page, signatory.personId)) === null) continue
+    await notifyPerson(ctx, { networkId: row.networkId, recipientPersonId: signatory.personId, kind: "moderation_decision", subject: { report: row._id } })
+  }
+}
 
 export async function teamCapacity(ctx: ReadCtx, actor: NetworkActor, scope: string, teamId?: Id<"moderationTeams">): Promise<AuditCapacity | null> {
   if (actor.membership.role === "network_admin") return "network_admin"
@@ -148,6 +174,7 @@ async function applyDecision(ctx: MutationCtx, row: Doc<"reports">, actorPersonI
   const now = Date.now()
   for (const item of sanctions) if (!validSanctionDuration(item.kind, item.until, now)) return fail("invalidArgument", { field: "until" })
   if (row.ownerPersonId === actorPersonId) return notFound()
+  await assertNoPageDecisionConflict(ctx, actorPersonId, row.target)
   const root = await getRootNetwork(ctx)
   const membership = row.ownerPersonId && root ? await getMembership(ctx, root._id, row.ownerPersonId) : null
   const previous = membership?.status === "suspendue" ? membership.statusBeforeSuspension : membership?.status
@@ -168,6 +195,7 @@ async function applyDecision(ctx: MutationCtx, row: Doc<"reports">, actorPersonI
   if (legacy) await ctx.db.patch(legacy._id, { status: decision, decisionReason: reason, reviewedByPersonId: actorPersonId, reviewedAt: now, updatedAt: now })
   await appendAudit(ctx, { action: "moderation.report_decide", capacity, actorPersonId, networkId: row.networkId, subject: { table: "reports", id: row._id }, details: { reason, targetKind: row.targetKind, decision, sanctionCount: sanctions.length } })
   if (row.ownerPersonId) await notifyPerson(ctx, { networkId: row.networkId, recipientPersonId: row.ownerPersonId, kind: "moderation_decision", subject: { report: row._id } })
+  else await notifyPageCase(ctx, row)
   return { status: decision }
 }
 
@@ -185,8 +213,10 @@ export const decide = networkMutation({
 
 async function ownsCase(ctx: ReadCtx, row: Doc<"reports">, personId: Id<"persons">): Promise<boolean> {
   if (row.ownerPersonId === personId) return true
-  if (row.ownerPersonId !== undefined || row.target.kind !== "page") return false
-  const page = await ctx.db.get(row.target.id)
+  // P16 : sans propriétaire personnel, la page porteuse (la page elle-même, ou le contenu qu'elle
+  // porte : offre, poste, réponse d'avis, évènement, contenus de page DIASPORALE) se défend par
+  // un signataire VIVANT, comme la page déjà ; un suspendu ne parle pour aucune page.
+  const page = await owningPageOfReport(ctx, row)
   return page !== null && (await liveSignatoryRole(ctx, page, personId)) !== null
 }
 
@@ -213,6 +243,8 @@ async function decideAppeal(ctx: MutationCtx, appeal: Doc<"appeals">, actorPerso
   const row = await ctx.db.get(appeal.reportId)
   if (!row || appeal.status !== "open") return fail("conflict")
   if (row.reviewedByPersonId === actorPersonId || appeal.personId === actorPersonId) return notFound()
+  // P16 : un signataire de la page porteuse ne juge pas le recours de sa propre page.
+  await assertNoPageDecisionConflict(ctx, actorPersonId, row.target)
   if (overturn) {
     const sanctions = await ctx.db.query("sanctions").withIndex("by_report", (q) => q.eq("reportId", row._id)).take(6)
     for (const sanction of sanctions) if (sanction.status === "active") await ctx.db.patch(sanction._id, { status: "revoked", updatedAt: Date.now() })
@@ -223,6 +255,7 @@ async function decideAppeal(ctx: MutationCtx, appeal: Doc<"appeals">, actorPerso
   }
   await ctx.db.patch(appeal._id, { status: overturn ? "overturned" : "upheld", decisionReason: reason, reviewedByPersonId: actorPersonId, updatedAt: Date.now() })
   if (row.ownerPersonId) await notifyPerson(ctx, { networkId: row.networkId, recipientPersonId: row.ownerPersonId, kind: "moderation_decision", subject: { report: row._id } })
+  else await notifyPageCase(ctx, row)
   return { action: "moderation.appeal_decide" as const, capacity, actorPersonId, networkId: row.networkId, subject: { table: "appeals" as const, id: appeal._id }, details: { reason, overturn, level: appeal.level } }
 }
 
@@ -261,6 +294,34 @@ export const myDecisions = personQuery({
       page.push({ ...queueDto(row), sanctions: sanctions.map((sanction) => ({ sanctionId: sanction._id, kind: sanction.kind, status: sanction.status, until: sanction.until ?? null, reason: sanction.reason })), appeals: appeals.map((appeal) => ({ appealId: appeal._id, level: appeal.level, status: appeal.status, decisionReason: appeal.decisionReason ?? null })) })
     }
     return { ...result, page }
+  },
+})
+
+/**
+ * P16 : les décisions qui ont RETIRÉ un contenu porté par une page (offre, poste, réponse d'avis,
+ * évènement, contenus de page DIASPORALE), lues par un signataire VIVANT de cette page dans son
+ * réseau, avec l'état des recours. Ni déclarant, ni contenu, ni identité du modérateur ; une
+ * fenêtre dont les contenus sont tous publiés reste vide et garde sa continuation. Le recours
+ * passe par `fileAppeal` (signature inchangée), ouvert au signataire vivant de la page porteuse.
+ */
+export const pageDecisions = networkQuery({
+  args: { pageId: v.id("pages"), paginationOpts: paginationOptsValidator },
+  handler: async (ctx, args) => {
+    const page = await ctx.db.get(args.pageId)
+    if (!page || page.networkId !== ctx.networkId || (await liveSignatoryRole(ctx, page, ctx.person._id)) === null) return notFound()
+    const result = await ctx.db.query("moderationContentStates").withIndex("by_network_page_updatedAt", (q) => q.eq("networkId", ctx.networkId).eq("ownerPageId", page._id)).order("desc").paginate(pageOptions(args.paginationOpts))
+    const decisions = []
+    for (const state of result.page) {
+      if (state.status !== "removed") continue
+      // borné : trois décisions au plus par contenu retiré (une par dossier ouvert sur la cible).
+      const reports = await ctx.db.query("reports").withIndex("by_target_status", (q) => q.eq("targetKind", state.targetKind).eq("targetId", state.targetId).eq("status", "actioned")).take(3)
+      for (const row of reports) {
+        if (row.networkId !== ctx.networkId || row.ownerPersonId !== undefined) continue
+        const appeals = await ctx.db.query("appeals").withIndex("by_report_level", (q) => q.eq("reportId", row._id)).take(2)
+        decisions.push({ ...queueDto(row), appeals: appeals.map((appeal) => ({ appealId: appeal._id, level: appeal.level, status: appeal.status, decisionReason: appeal.decisionReason ?? null })) })
+      }
+    }
+    return { ...result, page: decisions }
   },
 })
 
@@ -305,6 +366,7 @@ export const reviewContent = networkMutation({
     const state = await contentState(ctx, args.target.kind, args.target.id)
     if (!state || state.networkId !== ctx.networkId || state.status !== "pending_review") return notFound()
     if (state.ownerPersonId === ctx.person._id) return notFound()
+    await assertNoPageDecisionConflict(ctx, ctx.person._id, args.target)
     const teams = await ctx.db.query("moderationTeams").withIndex("by_network_active", (q) => q.eq("networkId", ctx.networkId).eq("active", true)).take(101)
     const team = teams.find((row) => row.scope === args.target.kind) ?? teams.find((row) => row.scope === undefined)
     const capacity = await teamCapacity(ctx, ctx, args.target.kind, team?._id)
@@ -315,6 +377,10 @@ export const reviewContent = networkMutation({
     const now = Date.now()
     const reportId = await ctx.db.insert("reports", { networkId: ctx.networkId, target: args.target, targetKind: args.target.kind, targetId: args.target.id, ...(state.ownerPersonId ? { ownerPersonId: state.ownerPersonId } : {}), source: "pre_review", reason: "pre_review", ...(team ? { teamId: team._id } : {}), level: team ? "team" : "network", status: args.approve ? "dismissed" : "actioned", removedTarget: !args.approve, decisionReason: reason, reviewedByPersonId: ctx.person._id, reviewedAt: now, createdAt: now, updatedAt: now })
     if (state.ownerPersonId) await notifyPerson(ctx, { networkId: ctx.networkId, recipientPersonId: state.ownerPersonId, kind: "moderation_decision", subject: { report: reportId } })
+    else {
+      const created = await ctx.db.get(reportId)
+      if (created) await notifyPageCase(ctx, created)
+    }
     await appendAudit(ctx, { action: "moderation.content_review", capacity, actorPersonId: ctx.person._id, networkId: ctx.networkId, subject: { table: "moderationContentStates", id: state._id }, details: { reason, approve: args.approve, surface: args.target.kind } })
     return null
   },

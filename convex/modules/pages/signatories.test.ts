@@ -221,15 +221,20 @@ describe("la console des pages", () => {
   })
 })
 
-describe("le groupe d'adhérents d'une page d'association (EXF-DG-26)", () => {
-  it("seul un administrateur vivant de la page le crée ; la fiche porte la page ; la découverte rend les groupes d'une page", async () => {
+describe("le groupe d'adhérents d'une page d'association (EXF-DG-26, contrat DG-010 V1)", () => {
+  // DG-010 V1 (DIASPORALE, `diaspora/associationGroups.ts`) : un groupe PRIVÉ par association, nommé
+  // d'après la page ; refus indistinct pour qui n'en est pas administrateur vivant.
+  it("seul un administrateur vivant le crée ; le groupe privé ne se lit ni ne se découvre hors de l'association", async () => {
     const t = testConvex()
     const { root, alice, pageId, handle } = await alicePage(t)
     const bob = await enter(t, root, "bob")
-    expect(await codeOf(bob.as.mutation(GROUPS.create, { networkId: root, name: "Adhérents", associationPageId: pageId, idempotencyKey: "g-1" }))).toBe("pageRoleRequired")
+    expect(await codeOf(bob.as.mutation(GROUPS.create, { networkId: root, name: "Adhérents", associationPageId: pageId, idempotencyKey: "g-1" }))).toBe("notFound")
     const { groupId } = await alice.as.mutation(GROUPS.create, { networkId: root, name: "Adhérents", associationPageId: pageId, idempotencyKey: "g-2" })
+    // Un groupe ordinaire, sans page, ne change pas.
     await alice.as.mutation(GROUPS.create, { networkId: root, name: "Autre groupe", idempotencyKey: "g-3" })
-    expect((await bob.as.query(GROUPS.getGroup, { networkId: root, groupId })).associationPage).toMatchObject({ pageId, handle })
-    expect((await bob.as.query(GROUPS.discover, { networkId: root, associationPageId: pageId })).map((card) => card.groupId)).toEqual([groupId])
+    expect(await alice.as.query(GROUPS.getGroup, { networkId: root, groupId })).toMatchObject({ name: "Association des Gabonais", associationPage: { pageId, handle } })
+    expect((await alice.as.query(GROUPS.discover, { networkId: root, associationPageId: pageId })).map((card) => card.groupId)).toEqual([groupId])
+    expect(await codeOf(bob.as.query(GROUPS.getGroup, { networkId: root, groupId }))).toBe("notFound")
+    expect(await bob.as.query(GROUPS.discover, { networkId: root, associationPageId: pageId })).toEqual([])
   })
 })

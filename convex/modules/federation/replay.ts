@@ -1,4 +1,4 @@
-// Dupliqué de socle/convex/modules/reseau/federation.ts @ 25398f565 — adaptations : rejeu par administrateur IDN vivant, même reçu/corps signé, journal moteur et trace dédiée, registre métier fermé sans re-provisionnement.
+// Dupliqué de socle/convex/modules/reseau/federation.ts @ 25398f565 — adaptations : rejeu par administrateur IDN vivant, même reçu/corps signé, journal moteur ; PA9A réapplique le traitement de page sans re-provisionnement.
 import { assertDecisionReason } from "@antsia/social-domain/audit"
 import { FEDERATION_BODY_MAX_BYTES, federationEnvironment, parseFederationEnvelope } from "@antsia/social-domain/federationProtocol"
 import { paginationOptsValidator } from "convex/server"
@@ -10,10 +10,12 @@ import { enforceRateLimit } from "../../lib/rateLimit"
 import { appendAudit, operatorCapacity } from "../platform/audit"
 import { requireFederationAdmin } from "./access"
 import { federationBodyDigest } from "./signature"
+import { applyFederationEnvelope, isPersonalFederationEnvelope } from "./reseauPublic"
+import { validateCommerceTransportBody } from "./commerceTransport"
 
 export const replay = operatorMutation({
   args: { deadLetterId: v.id("federationDeadLetters"), reason: v.string() },
-  returns: v.object({ outcome: v.union(v.literal("deduplicated"), v.literal("still_failing")), eventId: v.string() }),
+  returns: v.object({ outcome: v.union(v.literal("deduplicated"), v.literal("still_failing"), v.literal("applied"), v.literal("discarded")), eventId: v.string() }),
   handler: async (ctx, args) => {
     await requireFederationAdmin(ctx, ctx)
     await enforceRateLimit(ctx, "moderation.decide", ctx.person._id)
@@ -30,12 +32,30 @@ export const replay = operatorMutation({
     const receipt = await ctx.db.get(row.receiptId)
     if (!envelope.ok || !receipt || digest !== row.bodySha256 || receipt.bodySha256 !== digest || receipt.emitterId !== row.emitterId || receipt.environment !== row.environment || receipt.networkId !== row.networkId || receipt.eventId !== row.eventId || envelope.envelope.eventId !== row.eventId || envelope.envelope.contract !== row.contract || envelope.envelope.objectRef !== row.objectRef) return fail("conflict")
     const now = Date.now()
-    const outcome = receipt.status === "applied" ? "deduplicated" as const : "still_failing" as const
-    if (outcome === "still_failing") {
-      // Aucun handler PA5 : conserver les mêmes identifiants et la même
-      // enveloppe. Le nombre de tentatives porte l'observabilité du rejeu.
-      await ctx.db.patch(row._id, { status: "dead_letter", reason: "unsupported_contract", attempts: row.attempts + 1, lastAttemptAt: now, resolvedAt: undefined })
+    // Une ancienne lettre personnelle n'est jamais réappliquée : son corps est expurgé.
+    // L'émetteur devra produire un nouvel événement sur un accord local courant.
+    if (isPersonalFederationEnvelope(envelope.envelope)) {
+      await ctx.db.patch(row._id, { rawBody: "", objectRef: "personal-event-redacted", status: "resolved", resolvedAt: now, lastAttemptAt: now, attempts: row.attempts + 1 })
+      await ctx.db.patch(receipt._id, { status: "discarded", objectRef: "personal-event-redacted", updatedAt: now })
+      await ctx.db.insert("federationReplayAudit", { networkId: row.networkId, emitterId: row.emitterId, environment: row.environment, deadLetterId: row._id, eventId: row.eventId, requestedByPersonId: ctx.person._id, reason, outcome: "discarded", requestedAt: now })
+      await appendAudit(ctx, { action: "federation.replay", capacity: operatorCapacity(ctx.operator), actorPersonId: ctx.person._id, networkId: row.networkId, subject: { table: "federationDeadLetters", id: row._id }, details: { reason, outcome: "discarded" }, at: now })
+      return { outcome: "discarded" as const, eventId: row.eventId }
+    }
+    const transportBody = validateCommerceTransportBody(row.rawBody, envelope.envelope, row.environment, now)
+    if (transportBody !== "valid") return fail(transportBody === "unauthorized" ? "policyRefused" : "conflict")
+    const application = receipt.status === "applied" ? null : await applyFederationEnvelope(ctx, emitter, envelope.envelope, now, row.rawBody)
+    const outcome = application === null ? "deduplicated" as const : application.applied ? "applied" as const : "still_failing" as const
+    if (application !== null && !application.applied) {
+      await ctx.db.patch(row._id, { status: "dead_letter", reason: application.reason, attempts: row.attempts + 1, lastAttemptAt: now, resolvedAt: undefined })
       await ctx.db.patch(receipt._id, { status: "dead_letter", updatedAt: now })
+    } else if (application !== null) {
+      await ctx.db.patch(row._id, { status: "resolved", attempts: row.attempts + 1, lastAttemptAt: now, resolvedAt: row.resolvedAt ?? now })
+      if (receipt.status !== "applied") await ctx.db.patch(receipt._id, { status: "applied", updatedAt: now })
+    } else if (row.status !== "resolved") {
+      // Dédoublonnage (reçu déjà appliqué) : aucune tentative n'a lieu, `attempts` et `lastAttemptAt`
+      // restent ceux des vraies tentatives (PA5). Une lettre encore ouverte est seulement close, le
+      // reçu appliqué faisant foi du succès (ADR-0013 §5) ; la demande de rejeu vit dans l'audit.
+      await ctx.db.patch(row._id, { status: "resolved", resolvedAt: now })
     }
     await ctx.db.insert("federationReplayAudit", { networkId: row.networkId, emitterId: row.emitterId, environment: row.environment, deadLetterId: row._id, eventId: row.eventId, requestedByPersonId: ctx.person._id, reason, outcome, requestedAt: now })
     await appendAudit(ctx, { action: "federation.replay", capacity: operatorCapacity(ctx.operator), actorPersonId: ctx.person._id, networkId: row.networkId, subject: { table: "federationDeadLetters", id: row._id }, details: { reason, eventId: row.eventId, outcome }, at: now })

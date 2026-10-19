@@ -5,11 +5,22 @@ import type { Doc, Id, TableNames } from "../../_generated/dataModel"
 import { internalMutation, type MutationCtx } from "../../_generated/server"
 import { fail, notFound } from "../../lib/errors"
 import { personMutation, personQuery } from "../../lib/functions"
-import { enforceRateLimit, erasePersonalRateLimits } from "../../lib/rateLimit"
+import { enforceRateLimit, erasePersonalRateLimits, rateLimiter } from "../../lib/rateLimit"
 import { appendAudit } from "../platform/audit"
 import { followerCounts } from "../graph/follows"
 import { unrecordComment, unrecordGroupMember, unrecordPageFollower, unrecordPagePost, unrecordShare, applyReactionDelta } from "../posts/counters"
+import { unrecordPageEventParticipation } from "../events/pageEventRegistrations"
+import { removeDiasporaCounters } from "../diaspora/contentCounters"
 import { DATA_TABLE_POLICIES } from "./dataPolicies"
+import { feedErasurePage, isFeedDataTable } from "./feedDataPage"
+import { revokeAdministrationForPerson } from "../federation/agentLifecycle"
+import { revokeCommercialCrmForPerson } from "../commercialMessaging/crm"
+import { revokeCrmPersonRef } from "../commercialMessaging/crmPrivacy"
+import { revokeCommerceForPerson } from "../shops/commerceLinkLifecycle"
+import { revokeCheckoutsForPerson } from "../shops/checkoutLifecycle"
+import { revokePurchaseDataForPerson } from "../shops/purchaseLifecycle"
+import { continueJobRevocationRef, revokeJobApplicationsForPerson } from "../shops/jobApplicationLifecycle"
+import { continueServiceRevocationRef, revokeServicesForPerson } from "../shops/serviceLifecycle"
 import { adjustPersonalUnreadTotal, adjustUnreadPart } from "../messaging/threads"
 import { anonymizeReferences, dataTableNames, directlyOwned, exportableRecord, referencesIn, shapeFor, unclassifiedDataTables, type DataRecord } from "./dataInventory"
 
@@ -17,6 +28,31 @@ export const ERASURE_GRACE_MS = 30 * 24 * 60 * 60 * 1000
 const PAGE_SIZE = 20
 const PAGE_BYTES = 2 * 1024 * 1024
 const ANONYMOUS_AUTH_ID = "erased-account"
+
+/** P11 : fermer localement avant l'appel distant, sans attendre sa disponibilité. */
+async function revokeCheckoutPreparations(ctx: MutationCtx, personId: Id<"persons">): Promise<boolean> {
+  const result = await revokeCheckoutsForPerson(ctx, personId)
+  for (const release of result.releases) await ctx.scheduler.runAfter(0, internal.modules.shops.checkoutLifecycle.releaseAfterErasure, { release })
+  return result.done
+}
+
+/** P12 : invalidation locale bornée, sans ordre distant ni changement d'état financier. */
+export async function revokePaymentDataForPerson(ctx: MutationCtx, personId: Id<"persons">): Promise<boolean> {
+  if (!await revokePurchaseDataForPerson(ctx, personId)) return false
+  const now = Date.now()
+  const attempts = await ctx.db.query("shopPaymentAttempts").withIndex("by_person_revoked", q => q.eq("personId", personId).eq("privacyRevokedAt", undefined)).take(PAGE_SIZE + 1)
+  for (const row of attempts.slice(0, PAGE_SIZE)) await ctx.db.patch(row._id, {
+    privacyRevokedAt: now, generation: row.generation + 1, rawBody: undefined, leaseToken: undefined, leaseUntil: undefined,
+    authorizationExpiresAt: undefined, startAction: undefined, snapshot: row.snapshot ? { ...row.snapshot, action: null } : undefined,
+    privateUntil: Math.min(row.privateUntil, now), updatedAt: now,
+  })
+  // Reçus/requêtes éphémères supprimés : une réponse tardive ne trouve plus son bail.
+  const options = await ctx.db.query("shopPaymentOptions").withIndex("by_person", q => q.eq("personId", personId)).take(PAGE_SIZE + 1)
+  for (const row of options.slice(0, PAGE_SIZE)) await ctx.db.delete(row._id)
+  const requests = await ctx.db.query("shopPaymentRequests").withIndex("by_person", q => q.eq("personId", personId)).take(PAGE_SIZE + 1)
+  for (const row of requests.slice(0, PAGE_SIZE)) await ctx.db.delete(row._id)
+  return attempts.length <= PAGE_SIZE && options.length <= PAGE_SIZE && requests.length <= PAGE_SIZE
+}
 
 /** @selfScoped Une personne exerce son droit sans ouvrir les contenus d'un réseau, même suspendue. */
 export const requestErasure = personMutation({
@@ -39,6 +75,15 @@ export const requestErasure = personMutation({
     const dueAt = now + ERASURE_GRACE_MS
     const id = await ctx.db.insert("dataErasureJobs", { personId: ctx.person._id, authUserId: ctx.person.authUserId, phase: "waiting", requestedAt: now, dueAt, updatedAt: now, tableIndex: 0, cursor: null, changed: false, passes: 0, erasedRows: 0, identitySubjects: links.filter((link) => link.provider === "idn").map((link) => link.subject), contacts })
     await ctx.db.patch(ctx.person._id, { deletionRequestedAt: now, updatedAt: now })
+    if (!await revokePaymentDataForPerson(ctx, ctx.person._id)) await ctx.scheduler.runAfter(0, internal.modules.people.erasure.continuePaymentRevocation, { personId: ctx.person._id })
+    if (!await revokeCheckoutPreparations(ctx, ctx.person._id)) await ctx.scheduler.runAfter(0, internal.modules.people.erasure.continueCheckoutRevocation, { personId: ctx.person._id })
+    if (!await revokeCommercialCrmForPerson(ctx, ctx.person._id)) await ctx.scheduler.runAfter(60_000, revokeCrmPersonRef, { personId: ctx.person._id })
+    await revokeAdministrationForPerson(ctx, ctx.person._id)
+    if (!await revokeCommerceForPerson(ctx, ctx.person._id)) await ctx.scheduler.runAfter(0, internal.modules.people.erasure.continueCommerceRevocation, { personId: ctx.person._id })
+    // P15 : candidatures retirées dès la demande ; les copies PRO.GA sont révoquées par le canal privé.
+    if (!await revokeJobApplicationsForPerson(ctx, ctx.person._id)) await ctx.scheduler.runAfter(60_000, continueJobRevocationRef, { personId: ctx.person._id })
+    // P14 : corps signés et baux des demandes de services expurgés dès la demande ; aucune réponse tardive appliquée.
+    if (!await revokeServicesForPerson(ctx, ctx.person._id)) await ctx.scheduler.runAfter(0, continueServiceRevocationRef, { personId: ctx.person._id })
     await appendAudit(ctx, { action: "data.erasure_request", capacity: "member", actorPersonId: ctx.person._id, subject: { table: "dataErasureJobs", id } })
     return { dueAt }
   },
@@ -99,7 +144,12 @@ export const exportMyDataPage = personQuery({
     const names = dataTableNames()
     if (!Number.isInteger(args.tableIndex) || args.tableIndex < 0 || args.tableIndex >= names.length) return fail("invalidArgument", { field: "tableIndex" })
     const table = names[args.tableIndex]! as TableNames
-    const page = await ctx.db.query(table).paginate({ numItems: PAGE_SIZE, cursor: args.cursor, maximumBytesRead: PAGE_BYTES })
+    // PA10 : aucune ligne étrangère de fil à parcourir pour un export personnel.
+    const emptyFeedPage = { page: [], isDone: true, continueCursor: "" }
+    const page = table === "feedEntries" || table === "feedFanoutJobs" ? emptyFeedPage
+      : table === "feedCursors"
+        ? await ctx.db.query("feedCursors").withIndex("by_person", q => q.eq("personId", ctx.person._id)).paginate({ numItems: PAGE_SIZE, cursor: args.cursor, maximumBytesRead: PAGE_BYTES, maximumRowsRead: PAGE_SIZE })
+        : await ctx.db.query(table).paginate({ numItems: PAGE_SIZE, cursor: args.cursor, maximumBytesRead: PAGE_BYTES })
     const rows = page.page.flatMap((item) => {
       const row = item as unknown as DataRecord
       if (row._creationTime > job.requestedAt) return []
@@ -139,6 +189,12 @@ async function purgeBlobs(ctx: MutationCtx, row: DataRecord, table: string) {
   }
 }
 async function removeCounters(ctx: MutationCtx, table: string, row: DataRecord) {
+  // Vague H DIASPORALE (G9, délégué) : compteurs de nos tables seulement (réponses, inscriptions, signalements « périmée »).
+  await removeDiasporaCounters(ctx, table, row)
+  if (table === "commercialThreads" && typeof row.requesterPersonId === "string" && typeof row.shopId === "string") await rateLimiter.reset(ctx, "commercial.request.pair", { key: `${row.requesterPersonId}:${row.shopId}` })
+  // CC-2b : le budget d'un fil contextuel effacé disparaît avec lui (les clés personnelles sont remises à zéro à la fin).
+  if (table === "contextualThreads") await rateLimiter.reset(ctx, "contextual.thread", { key: row._id })
+  if (table === "eventParticipants") await unrecordPageEventParticipation(ctx, row as unknown as Doc<"eventParticipants">)
   if (table === "postComments") await unrecordComment(ctx, row as unknown as Doc<"postComments">)
   if (table === "posts") { await unrecordShare(ctx, row as unknown as Doc<"posts">); await unrecordPagePost(ctx, row as unknown as Doc<"posts">) }
   if (table === "follows") await followerCounts.deleteIfExists(ctx, row as unknown as Doc<"follows">)
@@ -219,6 +275,33 @@ export const continueErasure = internalMutation({
     if (!person || person.deletionRequestedAt !== job.requestedAt) return null
     if (unclassifiedDataTables().length) throw new Error("Incomplete erasure inventory")
     if (job.phase === "waiting") {
+      if (!await revokePaymentDataForPerson(ctx, job.personId)) {
+        await ctx.scheduler.runAfter(0, internal.modules.people.erasure.continueErasure, { jobId })
+        return null
+      }
+      if (!await revokeCheckoutPreparations(ctx, job.personId)) {
+        await ctx.scheduler.runAfter(0, internal.modules.people.erasure.continueErasure, { jobId })
+        return null
+      }
+      if (!await revokeCommercialCrmForPerson(ctx, job.personId)) {
+        await ctx.scheduler.runAfter(60_000, internal.modules.people.erasure.continueErasure, { jobId })
+        return null
+      }
+      await revokeAdministrationForPerson(ctx, job.personId)
+      if (!await revokeCommerceForPerson(ctx, job.personId)) {
+        await ctx.scheduler.runAfter(0, internal.modules.people.erasure.continueErasure, { jobId })
+        return null
+      }
+      // P15 : aucun effacement générique tant qu'un retrait de candidature attend PRO.GA (tentatives bornées).
+      if (!await revokeJobApplicationsForPerson(ctx, job.personId)) {
+        await ctx.scheduler.runAfter(60_000, internal.modules.people.erasure.continueErasure, { jobId })
+        return null
+      }
+      // P14 : reprise bornée de l'expurgation des commandes de services avant l'effacement générique.
+      if (!await revokeServicesForPerson(ctx, job.personId)) {
+        await ctx.scheduler.runAfter(0, internal.modules.people.erasure.continueErasure, { jobId })
+        return null
+      }
       const links = await ctx.db.query("identityLinks").withIndex("by_person_and_provider", (q) => q.eq("personId", job.personId)).take(16)
       const currentUser: unknown = await ctx.runQuery(components.betterAuth.adapter.findOne, { model: "user", where: [{ field: "_id", value: job.authUserId }] })
       const contacts = new Set(job.contacts)
@@ -259,7 +342,9 @@ export const continueErasure = internalMutation({
         else if (job.changed) await ctx.db.patch(jobId, { tableIndex: 0, cursor: null, changed: false, passes: job.passes + 1, updatedAt: Date.now() })
         else await ctx.db.patch(jobId, { phase: "auth", tableIndex: 0, cursor: null, updatedAt: Date.now() })
       } else {
-        const page = await ctx.db.query(table).paginate({ numItems: PAGE_SIZE, cursor: job.cursor, maximumBytesRead: PAGE_BYTES })
+        const page = isFeedDataTable(table)
+          ? await feedErasurePage(ctx, { table, personId: job.personId, jobId, cursor: job.cursor, numItems: PAGE_SIZE, maximumBytesRead: PAGE_BYTES })
+          : await ctx.db.query(table).paginate({ numItems: PAGE_SIZE, cursor: job.cursor, maximumBytesRead: PAGE_BYTES })
         let changed = job.changed, erasedRows = job.erasedRows
         const anonymousId = job.phase === "erase" ? await anonymousPerson(ctx) : null
         for (const item of page.page) {
@@ -314,6 +399,45 @@ export const continueErasure = internalMutation({
       }
     }
     await ctx.scheduler.runAfter(0, internal.modules.people.erasure.continueErasure, { jobId })
+    return null
+  },
+})
+
+/** P12 : poursuite locale avant suppression, fermée dès l'annulation de la demande d'effacement. */
+export const continuePaymentRevocation = internalMutation({
+  args: { personId: v.id("persons") }, returns: v.null(),
+  handler: async (ctx, { personId }) => {
+    const person = await ctx.db.get(personId)
+    if (person?.deletionRequestedAt === undefined) return null
+    const job = await ctx.db.query("dataErasureJobs").withIndex("by_person", q => q.eq("personId", personId)).unique()
+    if (!job || job.requestedAt !== person.deletionRequestedAt) return null
+    if (!await revokePaymentDataForPerson(ctx, personId)) await ctx.scheduler.runAfter(0, internal.modules.people.erasure.continuePaymentRevocation, { personId })
+    return null
+  },
+})
+
+/** P11 : poursuite bornée de l'invalidation des préparations, avant toute suppression. */
+export const continueCheckoutRevocation = internalMutation({
+  args: { personId: v.id("persons") }, returns: v.null(),
+  handler: async (ctx, { personId }) => {
+    const person = await ctx.db.get(personId)
+    if (person?.deletionRequestedAt === undefined) return null
+    const job = await ctx.db.query("dataErasureJobs").withIndex("by_person", q => q.eq("personId", personId)).unique()
+    if (!job || job.requestedAt !== person.deletionRequestedAt) return null
+    if (!await revokeCheckoutPreparations(ctx, personId)) await ctx.scheduler.runAfter(0, internal.modules.people.erasure.continueCheckoutRevocation, { personId })
+    return null
+  },
+})
+
+/** Révocation commerciale bornée dès la demande, avant le terme du délai d'annulation. */
+export const continueCommerceRevocation = internalMutation({
+  args: { personId: v.id("persons") }, returns: v.null(),
+  handler: async (ctx, { personId }) => {
+    const person = await ctx.db.get(personId)
+    if (person?.deletionRequestedAt === undefined) return null
+    const job = await ctx.db.query("dataErasureJobs").withIndex("by_person", (q) => q.eq("personId", personId)).unique()
+    if (!job || job.requestedAt !== person.deletionRequestedAt) return null
+    if (!await revokeCommerceForPerson(ctx, personId)) await ctx.scheduler.runAfter(0, internal.modules.people.erasure.continueCommerceRevocation, { personId })
     return null
   },
 })

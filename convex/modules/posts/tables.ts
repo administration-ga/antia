@@ -9,7 +9,13 @@ import { storedMediaValidator } from "../media/media"
 export const postsTables = {
   posts: defineTable({
     networkId: v.id("networks"),
-    authorPersonId: v.id("persons"),
+    /** Absent pour une page fédérée ou une galerie collective ; aucune personne technique n’est créée. */
+    authorPersonId: v.optional(v.id("persons")),
+    federationSource: v.optional(v.object({ emitterId: v.id("federationEmitters"), objectRef: v.string() })),
+    federationMedia: v.optional(v.object({
+      status: v.union(v.literal("pending"), v.literal("failed")),
+      items: v.array(v.object({ kind: v.union(v.literal("image"), v.literal("video")), mimeType: v.string(), width: v.optional(v.number()), height: v.optional(v.number()), durationMs: v.optional(v.number()), altText: v.optional(v.string()) })),
+    })),
     /** Le corps, déjà validé (`assertPostContent`) ; vide pour un partage ou une photo sans légende. */
     body: v.string(),
     audience: postAudienceValidator,
@@ -40,6 +46,8 @@ export const postsTables = {
     groupId: v.optional(v.id("thematicGroups")),
     /** L'ÉVÈNEMENT annoncé par cette publication (son organisateur seul l'annonce, une fois). */
     eventId: v.optional(v.id("events")),
+    /** DG-023 : galerie collective après événement, distincte de son annonce. */
+    pageEventGalleryId: v.optional(v.id("events")),
     /**
      * L'ANNONCE d'une conférence en DIRECT (`liveSessions`) : la carte du fil
      * relit la session à chaque lecture (statut, titre). Invariant tenu à
@@ -48,11 +56,13 @@ export const postsTables = {
      */
     liveSessionId: v.optional(v.id("liveSessions")),
     /**
-     * La PAGE au nom de laquelle la publication parle (`authorPersonId` est
-     * alors son SIGNATAIRE, pour l'audit et l'idempotence). Audience `public`
+     * La PAGE au nom de laquelle la publication parle. Une ligne native ordinaire
+     * garde son SIGNATAIRE dans `authorPersonId` ; la galerie collective l'omet. Audience `public`
      * ou `followers` seulement, jamais de groupe ni de partage (`writePost`).
      */
     pageId: v.optional(v.id("pages")),
+    /** P09 : référence d'offre seulement ; prix, état et droits sont relus dans la projection catalogue. */
+    commerceOffer: v.optional(v.object({ shopId: v.id("shops"), offerRef: v.string() })),
     /** Portée, parmi celles que le réseau déclare (`networks.reachValues`). */
     reach: v.optional(v.string()),
     /** Pays (ISO 3166-1 alpha-2) ; exigé par la portée locale. */
@@ -82,6 +92,8 @@ export const postsTables = {
     .index("by_network_group_status_publishedAt", ["networkId", "groupId", "status", "publishedAt"])
     // Le MUR d'une page et sa fenêtre de fil, dans son réseau, puis depuis la racine.
     .index("by_network_page_status_publishedAt", ["networkId", "pageId", "status", "publishedAt"])
+    .index("by_network_eventGallery_status_publishedAt", ["networkId", "pageEventGalleryId", "status", "publishedAt"])
+    .index("by_network_eventGallery_key", ["networkId", "pageEventGalleryId", "idempotencyKey"])
     .index("by_root_page_status_publishedAt", ["onRoot", "pageId", "status", "publishedAt"])
     // Les VOIES d'un fil (le hub d'un pays, « toute la diaspora ») : une portée et un pays, ou une portée seule.
     .index("by_network_reach_country_status_publishedAt", ["networkId", "reach", "country", "status", "publishedAt"])

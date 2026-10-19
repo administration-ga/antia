@@ -7,6 +7,15 @@ export async function federationBodyDigest(rawBody: string): Promise<string> {
   return hex(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(rawBody)))
 }
 
+/** Signature de texte avec clé du registre : jamais la clé ni le corps dans les journaux. */
+export async function federationTextSignature(text: string, keyEnvName: string): Promise<string | null> {
+  if (!validFederationKeyEnvName(keyEnvName)) return null
+  const secret = process.env[keyEnvName]
+  if (!secret || new TextEncoder().encode(secret).byteLength < 32 || secret.length > 4096) return null
+  const key = await crypto.subtle.importKey("raw", new TextEncoder().encode(secret), { name: "HMAC", hash: "SHA-256" }, false, ["sign"])
+  return hex(await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(text)))
+}
+
 export async function verifyFederationSignature(input: { environment: FederationEnvironment; timestamp: string; rawBody: string; signature: string; keyEnvName: string }): Promise<"valid" | "invalid" | "unavailable"> {
   if (!validFederationKeyEnvName(input.keyEnvName)) return "unavailable"
   const secret = process.env[input.keyEnvName]

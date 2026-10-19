@@ -20,11 +20,28 @@ afterEach(() => {
 const PENDING_SWEEP = "modules/calls/cleanup:sweepPendingCalls"
 const LIVE_SWEEP = "modules/calls/cleanup:sweepLiveCalls"
 
+/**
+ * Lignes de `_scheduled_functions` laissées par l'amorce de `world()`, par harnais. convex-test garde
+ * chaque ligne, jouée ou non, dans l'ordre de création : `jobs` rend la suite, soit TOUT ce que les
+ * étapes testées planifient, sans filtre de nom.
+ */
+const fixtureJobCount = new WeakMap<T, number>()
+
+async function scheduledRows(t: T) {
+  return await t.run((ctx) => ctx.db.system.query("_scheduled_functions").take(100))
+}
+
 async function world() {
   const t = testConvex()
   const { root, testClosed } = await seed(t)
   const alice = await enter(t, root, "alice")
   const bob = await enter(t, root, "bob")
+  // PA10 : chaque entrée (`joinNetwork` → `refreshReaderContexts`) planifie le rattrapage du fil de la
+  // personne (`modules/posts/feedMaterialization:backfill`, sept étapes chaînées). Joué ICI, avant
+  // l'étape testée et avec le drain des autres cas de ce fichier : le vrai planificateur des tests ne
+  // joue ensuite que le nettoyage, et ces lignes restent hors du décompte de `jobs`.
+  await t.finishAllScheduledFunctions(vi.runAllTimers)
+  fixtureJobCount.set(t, (await scheduledRows(t)).length)
   return { t, root, testClosed, alice, bob }
 }
 
@@ -44,8 +61,9 @@ async function insertCall(t: T, networkId: Id<"networks">, personId: Id<"persons
   )
 }
 
+/** Les tâches planifiées depuis la fin de l'amorce de `world()`, dans l'ordre de création. */
 async function jobs(t: T) {
-  return await t.run((ctx) => ctx.db.system.query("_scheduled_functions").take(100))
+  return (await scheduledRows(t)).slice(fixtureJobCount.get(t) ?? 0)
 }
 
 describe("nettoyage des appels — pagination et préservation", () => {

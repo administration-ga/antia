@@ -115,6 +115,11 @@ export const _record = internalMutation({
     const now = Date.now()
     const { outcome } = args
 
+    if (scan.requiresFullScan && (outcome.kind === "skipped" || (outcome.kind === "verdict" && outcome.status === "clean" && outcome.av?.verdict !== "clean"))) {
+      await settleError(ctx, scan, "FEDERATED_FULL_SCAN_REQUIRED")
+      return null
+    }
+
     if (outcome.kind === "skipped") {
       await ctx.db.patch(scan._id, {
         status: "skipped",

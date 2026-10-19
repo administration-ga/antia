@@ -13,6 +13,7 @@ import { type CallAdmissionReason, type CallMediaType, isLiveCallStatus } from "
 import type { Id } from "../../_generated/dataModel"
 import type { MutationCtx, QueryCtx } from "../../_generated/server"
 import { isConnectedTo } from "../graph/graph"
+import { pageEventAccess } from "../events/pageEventAccess"
 import { notifyPerson } from "../notifications/notify"
 import { type AdmissionDecision, decideCallAdmission } from "./admission"
 
@@ -76,6 +77,7 @@ export async function isInAcceptedEvent(ctx: ReadCtx, networkId: Id<"networks">,
     .order("desc")
     .take(EVENTS_SCAN)
   for (const event of organised) {
+    if (event.organizerPageId && !(await pageEventAccess(ctx, event, personId))) continue
     if (event.status !== "cancelled" && event.startAt <= now && now < event.endAt) return true
   }
   const invited = await ctx.db
@@ -86,6 +88,7 @@ export async function isInAcceptedEvent(ctx: ReadCtx, networkId: Id<"networks">,
   for (const participation of invited) {
     if (participation.status !== "accepted") continue
     const event = await ctx.db.get(participation.eventId)
+    if (event?.organizerPageId && !(await pageEventAccess(ctx, event, personId))) continue
     if (event && event.status !== "cancelled" && event.startAt <= now && now < event.endAt) return true
   }
   return false
@@ -111,16 +114,22 @@ export interface CallAdmissionContext {
  * `viaGroupThread` : l'appel part d'un fil de groupe dont l'appelé est membre —
  * le fil vaut consentement, le réglage « hors de mes relations » ne s'y applique
  * pas (on ne choisit pas qui, dans son groupe, lance l'appel du groupe).
+ *
+ * `viaContextualConsent` (CC-4, D5 amendé option (a)) : l'appel part d'une
+ * conversation contextuelle où l'appelé a donné son accord EXPLICITE, dans ce
+ * fil — cet accord vaut admission pour ce seul fil, au-dessus du réglage « hors
+ * de mes relations : silencieux ». « Ne pas déranger », le silence de réunion,
+ * l'occupation et l'absence connue restent appliqués.
  */
 export async function evaluateCallAdmission(
   ctx: ReadCtx,
-  args: { networkId: Id<"networks">; calleePersonId: Id<"persons">; callerPersonId: Id<"persons">; now: number; viaGroupThread?: boolean },
+  args: { networkId: Id<"networks">; calleePersonId: Id<"persons">; callerPersonId: Id<"persons">; now: number; viaGroupThread?: boolean; viaContextualConsent?: boolean },
 ): Promise<CallAdmissionContext> {
   const prefs = await ctx.db
     .query("callPreferences")
     .withIndex("by_person", (q) => q.eq("personId", args.calleePersonId))
     .unique()
-  const silent = prefs?.outsideRelationsCalls === "silent" && args.viaGroupThread !== true
+  const silent = prefs?.outsideRelationsCalls === "silent" && args.viaGroupThread !== true && args.viaContextualConsent !== true
   const callerIsRelation = silent ? await isConnectedTo(ctx, args.networkId, args.calleePersonId, args.callerPersonId) : null
   const inMeeting = prefs?.autoMeetingDnd?.enabled === true ? await isInAcceptedEvent(ctx, args.networkId, args.calleePersonId, args.now) : false
   const calleeActiveCallCount = await countLiveCalls(ctx, args.networkId, args.calleePersonId)
@@ -154,7 +163,7 @@ export async function voicemailEnabledFor(ctx: ReadCtx, personId: Id<"persons">)
  */
 export async function insertRefusedCall(
   ctx: MutationCtx,
-  args: { networkId: Id<"networks">; callerId: Id<"persons">; calleeId: Id<"persons">; roomName: string; mediaType: CallMediaType; reason: CallAdmissionReason; now: number },
+  args: { networkId: Id<"networks">; callerId: Id<"persons">; calleeId: Id<"persons">; roomName: string; mediaType: CallMediaType; reason: CallAdmissionReason; now: number; commercialThreadId?: Id<"commercialThreads">; contextualThreadId?: Id<"contextualThreads"> },
 ): Promise<Id<"calls">> {
   const callId = await ctx.db.insert("calls", {
     networkId: args.networkId,
@@ -171,6 +180,9 @@ export async function insertRefusedCall(
     maxParticipants: 2,
     startedAt: args.now,
     endedAt: args.now,
+    ...(args.commercialThreadId ? { commercialThreadId: args.commercialThreadId } : {}),
+    // CC-4 : le refus d'un appel contextuel reste au journal de la conversation (jamais les deux contextes : la porte d'appel refuse le conflit).
+    ...(args.contextualThreadId ? { contextualThreadId: args.contextualThreadId } : {}),
   })
   await ctx.db.insert("callParticipants", { networkId: args.networkId, callId, personId: args.callerId, role: "host", leftAt: args.now })
   await ctx.db.insert("callParticipants", { networkId: args.networkId, callId, personId: args.calleeId, role: "participant", leftAt: args.now })

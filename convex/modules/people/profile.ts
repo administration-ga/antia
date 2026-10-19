@@ -18,10 +18,12 @@ import { networkQuery, personMutation, personQuery } from "../../lib/functions"
 import { enforceRateLimit } from "../../lib/rateLimit"
 import { guardUploadUrl } from "../../lib/uploadPolicy"
 import { badgeValidator, literals } from "../../lib/validators"
-import { admitStoredUpload, assertFreshUpload } from "../files/admission"
+import { admitStoredUpload, assertFreshUpload, findScanByStorageId } from "../files/admission"
+import { purgeStoredFile } from "../files/purge"
 import { resolveFileDelivery, withheldCodeOf, withheldCodeValidator } from "../files/storageGuard"
 import { isBlockedBetween } from "../graph/graph"
 import { syncPersonDirectory } from "./directory"
+import { revokeAdministrationForPerson } from "../federation/agentLifecycle"
 import { findPublishedPersonByHandle, isPublishedPerson } from "./miniProfile"
 import { badgesOf } from "./persons"
 
@@ -158,6 +160,7 @@ export const withdrawMyProfile = personMutation({
     if (ctx.person.publishedAt === undefined || ctx.person.withdrawnAt !== undefined) return { withdrawn: true as const }
     const now = Date.now()
     await ctx.db.patch(ctx.person._id, { withdrawnAt: now, updatedAt: now })
+    await revokeAdministrationForPerson(ctx, ctx.person._id)
     await syncPersonDirectory(ctx, ctx.person._id)
     return { withdrawn: true as const }
   },
@@ -204,6 +207,15 @@ export const generateProfileUploadUrl = personMutation({
 
 const imageDeliveryValidator = v.object({ url: v.union(v.string(), v.null()), withheld: v.union(withheldCodeValidator, v.null()) })
 
+/** Une image peut occuper les DEUX emplacements : relire le profil après sa modification. */
+async function purgeDetachedProfileImage(ctx: MutationCtx, personId: Id<"persons">, storageId: Id<"_storage"> | undefined): Promise<void> {
+  if (storageId === undefined) return
+  const person = await ctx.db.get(personId)
+  if (!person || person.avatarStorageId === storageId || person.coverStorageId === storageId) return
+  const scan = await findScanByStorageId(ctx, storageId)
+  if (scan?.source === "profile" && scan.uploadedByPersonId === personId) await purgeStoredFile(ctx, storageId)
+}
+
 /**
  * Pose (ou retire) une image de profil de la personne de la session. Elle
  * n'existe QUE sur un profil publié : une photo sans profil serait une donnée
@@ -222,6 +234,7 @@ async function setProfileImage(
   const place = (value: Id<"_storage"> | undefined) => (field === "avatarStorageId" ? { avatarStorageId: value } : { coverStorageId: value })
   if (storageId === null) {
     await ctx.db.patch(ctx.person._id, { ...place(undefined), updatedAt: Date.now() })
+    await purgeDetachedProfileImage(ctx, ctx.person._id, ctx.person[field])
     return { url: null, withheld: null }
   }
   if (storageId !== ctx.person.avatarStorageId && storageId !== ctx.person.coverStorageId) {
@@ -235,6 +248,7 @@ async function setProfileImage(
     )
   }
   await ctx.db.patch(ctx.person._id, { ...place(storageId), updatedAt: Date.now() })
+  await purgeDetachedProfileImage(ctx, ctx.person._id, ctx.person[field])
   const delivery = await resolveFileDelivery(ctx, storageId)
   return { url: delivery.url, withheld: withheldCodeOf(delivery.scan) }
 }

@@ -13,6 +13,8 @@ import { directEgressOutcomeFromStatus } from "@antsia/social-domain/live/replay
 import { httpRouter } from "convex/server"
 
 import { inbox as federationInbox } from "./modules/federation/http"
+import { media as catalogueMedia } from "./modules/federation/commerceCatalogMediaHttp"
+import { transfer as agentConsentTransfer, AGENT_CONSENT_TRANSFER_PATH } from "./modules/federation/agentConsentTransfer"
 import { internal } from "./_generated/api"
 import { httpAction } from "./_generated/server"
 import { createAuth, trustedOrigins } from "./betterAuth/auth"
@@ -27,6 +29,9 @@ import {
 } from "./lib/livekitEgressWebhook"
 
 const http = httpRouter()
+
+// P09 : URL de copie locale, droits et scan relus à chaque lecture, sans cache public.
+http.route({ pathPrefix: "/catalogue/media/", method: "GET", handler: catalogueMedia })
 
 const AUTH_PATH = "/api/auth"
 
@@ -259,5 +264,6 @@ http.route({
 })
 
 http.route({ path: "/federation/inbox", method: "POST", handler: federationInbox })
+http.route({ path: AGENT_CONSENT_TRANSFER_PATH, method: "POST", handler: agentConsentTransfer })
 
 export default http

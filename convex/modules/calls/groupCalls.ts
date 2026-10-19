@@ -43,6 +43,7 @@ import {
   requireCallParticipant,
 } from "./access"
 import { photographedGroupCallCapacity } from "./capacity"
+import { isConversationCall } from "./conversation"
 import { evaluateCallAdmission } from "./evaluate"
 import { scheduleIncomingCallPush } from "./push"
 import { scheduleRingingExpiry } from "./ringExpiry"
@@ -252,6 +253,8 @@ export const addInvitee = networkMutation({
     await enforceRateLimit(ctx, "call.invite", me)
     // Refus UNIQUE : appel inconnu, terminé, ou dont je ne suis pas dans la salle — même réponse.
     const { call, participation } = await requireCallParticipant(ctx, ctx.networkId, args.callId, me)
+    // Une conversation (contact commercial P10, conversation contextuelle CC-4) reste un tête-à-tête : ni invitation ni promotion.
+    if (isConversationCall(call)) return notFound()
     if (call.status !== "active" || isTerminalCallStatus(call.callStatus) || !isPresent(participation)) return notFound()
     if (args.personId === me) return failRule("GROUP_CALL_ALREADY_IN")
 

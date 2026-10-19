@@ -34,10 +34,16 @@ export const fileScanAvValidator = v.object({
 })
 
 export const filesTables = {
+  /** Copie PA9 déposée par le serveur et réservée avant son admission. */
+  fileStagingReservations: defineTable({
+    networkId: v.id("networks"), storageId: v.id("_storage"), mirrorId: v.id("mirrors"), createdAt: v.number(),
+  }).index("by_storageId", ["storageId"]).index("by_mirror", ["mirrorId"]),
   fileScans: defineTable({
     storageId: v.id("_storage"),
     status: fileScanStatusValidator,
     source: fileScanSourceValidator,
+    /** Médias fédérés : aucun scan sauté ou verdict AV absent ne permet la délivrance. */
+    requiresFullScan: v.optional(v.boolean()),
     /** Le réseau où le fichier entre — absent pour un fichier de profil (la personne est unique). */
     networkId: v.optional(v.id("networks")),
     uploadedByPersonId: v.optional(v.id("persons")),

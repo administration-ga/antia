@@ -16,6 +16,9 @@ export const contentReportStatusValidator = literals(CONTENT_REPORT_STATUSES)
 export const moderationSurfaceValidator = literals(MODERATION_SURFACES)
 export const sanctionKindValidator = literals(SANCTION_KINDS)
 export const moderationTargetValidator = v.union(
+  v.object({ kind: v.literal("commercialMessage"), id: v.id("commercialMessages") }),
+  // CC-2b (ADR-0025) : surface UNIQUE des messages contextuels ; la nature du fil est dérivée côté serveur.
+  v.object({ kind: v.literal("contextualMessage"), id: v.id("contextualMessages") }),
   v.object({ kind: v.literal("post"), id: v.id("posts") }),
   v.object({ kind: v.literal("comment"), id: v.id("postComments") }),
   v.object({ kind: v.literal("groupMessage"), id: v.id("groupMessages") }),
@@ -25,6 +28,21 @@ export const moderationTargetValidator = v.union(
   v.object({ kind: v.literal("live"), id: v.id("liveSessions") }),
   v.object({ kind: v.literal("story"), id: v.id("stories") }),
   v.object({ kind: v.literal("album"), id: v.id("albums") }),
+  v.object({ kind: v.literal("serviceReview"), id: v.id("serviceReviews") }),
+  v.object({ kind: v.literal("serviceReviewReply"), id: v.id("serviceReviewReplies") }),
+  v.object({ kind: v.literal("commerceOffer"), id: v.id("commerceCatalogHeads") }),
+  // P15 : offre d'emploi reflétée, contenu public de la page (jamais une candidature).
+  v.object({ kind: v.literal("commerceJob"), id: v.id("commerceJobHeads") }),
+  // Vague H DIASPORALE (G9, ajout délégué) : contenus de l'entraide, du mentorat, du kit d'arrivée et de l'emploi.
+  v.object({ kind: v.literal("diasporaAidQuestion"), id: v.id("aidQuestions") }),
+  v.object({ kind: v.literal("diasporaAidAnswer"), id: v.id("aidAnswers") }),
+  v.object({ kind: v.literal("diasporaAidMission"), id: v.id("aidMissions") }),
+  v.object({ kind: v.literal("diasporaMentorProfile"), id: v.id("mentorProfiles") }),
+  v.object({ kind: v.literal("diasporaMentoringRequest"), id: v.id("mentoringRequests") }),
+  v.object({ kind: v.literal("diasporaKitResource"), id: v.id("kitResources") }),
+  v.object({ kind: v.literal("diasporaJobOffer"), id: v.id("jobOffers") }),
+  v.object({ kind: v.literal("diasporaTalentProfile"), id: v.id("talentProfiles") }),
+  v.object({ kind: v.literal("diasporaJobApplication"), id: v.id("jobApplications") }),
 )
 
 export const moderationTables = {
@@ -70,11 +88,12 @@ export const moderationTables = {
   moderationPolicies: defineTable({ networkId: v.id("networks"), surface: moderationSurfaceValidator, preReview: v.boolean(), maxLinks: v.number(), maxWrites: v.number(), windowMs: v.number(), updatedAt: v.number() })
     .index("by_network_surface", ["networkId", "surface"]),
   moderationContentStates: defineTable({
-    networkId: v.id("networks"), targetKind: moderationSurfaceValidator, targetId: v.string(), ownerPersonId: v.optional(v.id("persons")),
+    networkId: v.id("networks"), targetKind: moderationSurfaceValidator, targetId: v.string(), ownerPersonId: v.optional(v.id("persons")), ownerPageId: v.optional(v.id("pages")),
     status: v.union(v.literal("published"), v.literal("pending_review"), v.literal("removed")), createdAt: v.number(), updatedAt: v.number(),
   }).index("by_target", ["targetKind", "targetId"])
     .index("by_network_status_updatedAt", ["networkId", "status", "updatedAt"])
-    .index("by_network_owner_updatedAt", ["networkId", "ownerPersonId", "updatedAt"]),
+    .index("by_network_owner_updatedAt", ["networkId", "ownerPersonId", "updatedAt"])
+    .index("by_network_page_updatedAt", ["networkId", "ownerPageId", "updatedAt"]),
   moderationTransparency: defineTable({ networkId: v.id("networks"), periodStart: v.number(), periodEnd: v.number(), cases: v.number(), distinctAuthors: v.number(), actioned: v.number(), dismissed: v.number(), generatedAt: v.number() })
     .index("by_network_period", ["networkId", "periodStart"]),
   contentReports: defineTable({

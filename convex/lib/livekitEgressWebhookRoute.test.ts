@@ -1,5 +1,5 @@
 // @vitest-environment edge-runtime
-// Dupliqué de socle/convex/tests/livekitEgressWebhook.test.ts @ ad2e7fdc2 — adaptations : SIMPLIFIÉ au direct, seul propriétaire d'un egress dans le moteur — trois cas RETIRÉS avec leurs traitements absents du moteur : « un enregistrement d'appel en échec garde son motif d'avant » (`callRecordings`), « un enregistrement d'appel et un message vocal reçoivent leur fichier confronté » (`callRecordings`, `voicemails`), « une piste iRéunion reçoit le fichier ET les métadonnées de capture » (`ireunionRecordingTracks`) ; « les quatre requêtes répondent pour leur table » devient la seule requête du direct ; l'egress d'APPEL de l'autre déploiement devient un chemin hors contrat ; « un fichier déposé pour un egress DISPARU » porté sur la branche du direct ; actions du moteur (`modules/live/egressActions`, `ingestEgressFile` sans début de capture ni taille), sessions `liveSessions` COMPLÈTES posées par l'outillage du module ; motifs attendus en CODES (`egress_aborted`, `transfer_download_failed`, `upload_refused`) ; horloge simulée dans tout le fichier (aucun job planifié ne part seul) ; cas NEUFS : le fichier rapatrié entre à la garde des fichiers (admis à l'analyse, réseau et hôte), et un fichier que la garde connaît déjà n'est ni rattaché ni supprimé.
+// Dupliqué de socle/convex/tests/livekitEgressWebhook.test.ts @ ad2e7fdc2 — adaptations : SIMPLIFIÉ au direct, seul propriétaire d'un egress dans le moteur — trois cas RETIRÉS avec leurs traitements absents du moteur : « un enregistrement d'appel en échec garde son motif d'avant » (`callRecordings`), « un enregistrement d'appel et un message vocal reçoivent leur fichier confronté » (`callRecordings`, `voicemails`), « une piste iRéunion reçoit le fichier ET les métadonnées de capture » (`ireunionRecordingTracks`) ; « les quatre requêtes répondent pour leur table » devient la seule requête du direct ; l'egress d'APPEL de l'autre déploiement devient un chemin hors contrat ; « un fichier déposé pour un egress DISPARU » porté sur la branche du direct ; actions du moteur (`modules/live/egressActions`, `ingestEgressFile` sans début de capture ni taille), sessions `liveSessions` COMPLÈTES posées par l'outillage du module ; motifs attendus en CODES (`egress_aborted`, `transfer_download_failed`, `upload_refused`) ; horloge simulée dans tout le fichier (aucun job planifié ne part seul) ; « en ÉCHEC déclaré » compte les jobs depuis un relevé pris après l'amorce, l'entrée de l'hôte planifiant le rattrapage de son fil (PA10) ; cas NEUFS : le fichier rapatrié entre à la garde des fichiers (admis à l'analyse, réseau et hôte), et un fichier que la garde connaît déjà n'est ni rattaché ni supprimé.
 /**
  * `POST /webhooks/livekit-egress` — correctifs du 2026-09-17.
  *
@@ -319,6 +319,11 @@ describe("NOTRE egress terminé : rapatrié en flux, ou conclu tout de suite", (
   it("en ÉCHEC déclaré : conclu tout de suite chez son propriétaire, sans rien télécharger", async () => {
     const t = testConvex()
     const sessionId = await directEnAttente(t, "EG_OURS")
+    // PA10 : l'entrée de l'hôte (`joinNetwork`) a déjà planifié le rattrapage de son fil, qui ne part
+    // pas seul sous l'horloge simulée. Seul compte ce que le webhook ajoute, relevé comme pour
+    // l'egress d'un autre déploiement : convex-test ne retire aucune ligne de `_scheduled_functions`,
+    // un décompte inchangé prouve donc qu'aucune tâche (rapatriement compris) n'a été planifiée.
+    const before = await counts(t)
     vi.spyOn(console, "error").mockImplementation(() => {})
     const body = egressEvent("egress_ended", {
       egressId: "EG_OURS",
@@ -333,7 +338,7 @@ describe("NOTRE egress terminé : rapatrié en flux, ou conclu tout de suite", (
     const failed = await row(t, sessionId)
     expect(failed?.replayStatus).toBe("failed")
     expect(failed?.replayFailureReason).toBe("egress_aborted")
-    expect(await counts(t)).toMatchObject({ jobs: 0, files: 0 })
+    expect(await counts(t)).toEqual({ jobs: before.jobs, files: 0 })
   })
 })
 

@@ -23,6 +23,7 @@ import { pageCardCache } from "../pages/access"
 import type { PageCard } from "../pages/validators"
 import { miniProfileCache, type PersonMiniProfile } from "../people/miniProfile"
 import { assertVisiblePost, canSeePostDoc, type ReaderContext } from "../posts/access"
+import { hasNativePostAuthor } from "../posts/nativeAuthor"
 import { type PostMarkKind, postMarkKindValidator } from "./tables"
 
 type ReadCtx = Pick<QueryCtx, "db">
@@ -134,7 +135,7 @@ export type MarkedPostDto = {
   publishedAt: number
   markedAt: number
   /** Le SIGNATAIRE quand la publication est celle d'une page — l'en-tête est alors `page`. */
-  author: Pick<PersonMiniProfile, "personId" | "displayName" | "handle" | "avatarUrl">
+  author: Omit<Pick<PersonMiniProfile, "personId" | "displayName" | "handle" | "avatarUrl">, "personId"> & { personId: Id<"persons"> | null }
   page: PageCard | null
 }
 
@@ -162,13 +163,13 @@ async function paginateMarked(
     if (!post || !(await canSeePostDoc(ctx, reader, post))) continue
     const card = post.pageId === undefined ? null : await pageOf(post.pageId)
     if (post.pageId !== undefined && card === null) continue
-    const author = await profileOf(post.authorPersonId)
+    const author = hasNativePostAuthor(post) ? await profileOf(post.authorPersonId) : null
     page.push({
       postId: post._id,
       body: post.body,
       publishedAt: post.publishedAt,
       markedAt: mark.createdAt,
-      author: { personId: author.personId, displayName: author.displayName, handle: author.handle, avatarUrl: author.avatarUrl },
+      author: { personId: author?.personId ?? null, displayName: author?.displayName ?? null, handle: author?.handle ?? null, avatarUrl: author?.avatarUrl ?? null },
       page: card,
     })
   }

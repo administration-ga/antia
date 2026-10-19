@@ -272,6 +272,11 @@ describe("les transitions de la récolte", () => {
     const sessionId = await insertSession(t, { networkId: root, host: alice })
     // Dernier battement : bail (30 s) + grâce (120 s) + 10 s.
     await poserBail(t, sessionId, alice, DIRECT_HOST_LEASE_MS + DIRECT_HOST_GRACE_MS + 10_000)
+    // PA10 : les trois entrées de `cast()` (`joinNetwork`) ont déjà planifié le rattrapage de leur fil,
+    // qui ne part pas seul sous l'horloge simulée. Relevé AVANT la récolte, comme dans `direct.test.ts`
+    // (même scénario, avec Egress) : convex-test garde chaque ligne dans l'ordre de création, la suite
+    // du relevé est donc exactement ce que la récolte a planifié.
+    const avant = (await planifiees(t)).length
 
     await recolter(t)
 
@@ -280,7 +285,7 @@ describe("les transitions de la récolte", () => {
     expect(session.endReason).toBe("host_absent")
     expect(must(session.endedAt) - must(session.startedAt)).toBeLessThan(DIRECT_LIVE_MAX_DURATION_MS)
     // Sans Egress, rien à arrêter ; le solde des invitations, lui, part toujours.
-    expect((await planifiees(t)).map((job) => job.name)).toEqual(["modules/live/invitationSettle:expireSessionInvitations"])
+    expect((await planifiees(t)).slice(avant).map((job) => job.name)).toEqual(["modules/live/invitationSettle:expireSessionInvitations"])
   })
 
   it("bail éteint DANS la grâce → session intacte, absence CONSTATÉE une seule fois sur le bail, compteurs rafraîchis", async () => {

@@ -32,6 +32,7 @@ import { notifyPerson, resolveNotifications } from "../notifications/notify"
 import { findPublishedPersonByHandle, isDiscoverablePerson, isPublishedPerson, miniProfileCache } from "../people/miniProfile"
 import { acceptedCounterpartIds, findConnection, isBlockedBetween, pairBlockState } from "./graph"
 import { connectionStatusValidator } from "./tables"
+import { refreshReaderFeed, scheduleReaderRefresh } from "../posts/feedMaterialization"
 
 // ═══════════════════════════════════════════════════════════════
 // Demander, répondre
@@ -139,6 +140,8 @@ export const respondToConnection = networkMutation({
       at: now,
     })
     if (status === "accepted") {
+      await refreshReaderFeed(ctx, ctx.networkId, ctx.person._id)
+      await refreshReaderFeed(ctx, ctx.networkId, other)
       await notifyPerson(ctx, {
         networkId: ctx.networkId,
         recipientPersonId: connection.requestedByPersonId,
@@ -226,6 +229,8 @@ export const blockPerson = networkMutation({
     }
     // La paire SE FERME : la pastille de messagerie de chaque côté perd les non-lus du fil (D38).
     if (!wasBlocked) {
+      await scheduleReaderRefresh(ctx, ctx.person._id)
+      await scheduleReaderRefresh(ctx, targetPersonId)
       await onPairBlockChanged(ctx, ctx.person._id, targetPersonId, true)
       await onPairBlockChangedInGroups(ctx, ctx.person._id, targetPersonId)
       await ctx.scheduler.runAfter(0, internal.modules.live.revocation.revokeConnectionDirects, { firstPersonId: ctx.person._id, secondPersonId: targetPersonId })
@@ -254,6 +259,8 @@ export const unblockPerson = networkMutation({
     for (const row of mine) await ctx.db.patch(row._id, { status: "declined", blockedByPersonId: undefined, updatedAt: now })
     // La paire ne se ROUVRE que si l'autre ne bloque pas de son côté : la pastille retrouve alors ses non-lus.
     if (!(await isBlockedBetween(ctx, ctx.person._id, targetPersonId))) {
+      await scheduleReaderRefresh(ctx, ctx.person._id)
+      await scheduleReaderRefresh(ctx, targetPersonId)
       await onPairBlockChanged(ctx, ctx.person._id, targetPersonId, false)
       await onPairBlockChangedInGroups(ctx, ctx.person._id, targetPersonId)
     }

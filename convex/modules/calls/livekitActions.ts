@@ -21,6 +21,7 @@ import { networkAction } from "../../lib/functions"
 import { getLiveKitConfig } from "../../lib/livekit"
 import { buildLiveKitIdentity } from "../../lib/livekitIdentity"
 import { ensureLiveKitAwake } from "../../lib/livekitWake"
+import { CONVERSATION_CALL_TOKEN_TTL, isConversationCall } from "./conversation"
 import { callMediaTypeValidator } from "./validators"
 
 /** Durée de vie d'un jeton de salle : un appel plus long en redemande un en se reconnectant. */
@@ -37,12 +38,19 @@ export const requestToken = networkAction({
     // Configuration depuis l'environnement du déploiement (source unique, aucune URL en dur).
     const { apiKey, apiSecret, wsUrl } = getLiveKitConfig()
     await ensureLiveKitAwake(wsUrl)
+    // CC-4 : le sélecteur unique — tout appel de conversation (P10 ou contextuelle) est relu après le réveil et reçoit un jeton court.
+    const conversationCall = isConversationCall(grant)
+    if (conversationCall) {
+      // Le réveil peut prendre du temps : ni mandat, ni accord, ni phase ne sont photographiés avant lui.
+      const fresh = await ctx.runQuery(internal.modules.calls.token.authorizeToken, { networkId: ctx.networkId, callId: args.callId })
+      if (fresh === null || fresh.roomName !== grant.roomName || fresh.commercialThreadId !== grant.commercialThreadId || fresh.contextualThreadId !== grant.contextualThreadId) return notFound()
+    }
 
     const identity = await ctx.auth.getUserIdentity()
     if (!identity) return fail("unauthenticated")
     const token = new AccessToken(apiKey, apiSecret, {
       identity: buildLiveKitIdentity({ kind: "call", subject: identity.subject, nonce: randomUUID().slice(0, 8) }),
-      ttl: TOKEN_TTL,
+      ttl: conversationCall ? CONVERSATION_CALL_TOKEN_TTL : TOKEN_TTL,
       ...(grant.displayName !== null ? { name: grant.displayName } : {}),
       attributes: { personId: grant.personId },
       // Repli pour un serveur antérieur aux attributs de participant.

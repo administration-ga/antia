@@ -5,9 +5,10 @@ import { engineErrorCode } from "@antsia/social-contracts/errors"
 import { internal } from "../../_generated/api"
 import { httpAction } from "../../_generated/server"
 import { verifyFederationSignature } from "./signature"
+import type { FederationReceiptCorrelation } from "./commerceTransport"
 
-function response(status: number, outcome: string, receiptStatus?: string): Response {
-  return new Response(JSON.stringify({ outcome, ...(receiptStatus ? { status: receiptStatus } : {}) }), { status, headers: { "Content-Type": "application/json", "Cache-Control": "no-store" } })
+function response(status: number, outcome: string, receiptStatus?: string, correlation?: FederationReceiptCorrelation): Response {
+  return new Response(JSON.stringify({ outcome, ...(receiptStatus ? { status: receiptStatus } : {}), ...correlation }), { status, headers: { "Content-Type": "application/json", "Cache-Control": "no-store" } })
 }
 
 /** Corps lu en flux, borne réelle en octets même sans Content-Length. */
@@ -50,7 +51,11 @@ export const inbox = httpAction(async (ctx, request): Promise<Response> => {
   try {
     const admitted = await ctx.runMutation(internal.modules.federation.inbox.admit, { emitterId: emitter.emitterId, emitterRevision: emitter.revision, environment, timestamp, signature, rawBody: body.rawBody })
     const status = { accepted: 202, duplicate: 200, conflict: 409, unauthorized: 401, unavailable: 503, invalid_envelope: 400 }[admitted.outcome]
-    return response(status, admitted.outcome, admitted.status)
+    const correlation = (admitted.outcome === "accepted" || admitted.outcome === "duplicate") && admitted.eventId && admitted.bodySha256 && admitted.applicationStatus
+      ? { eventId: admitted.eventId, bodySha256: admitted.bodySha256, applicationStatus: admitted.applicationStatus }
+      : undefined
+    // Seules les admissions qui portent un reçu exposent son statut ; les refus n'en ont aucun.
+    return response(status, admitted.outcome, "status" in admitted ? admitted.status : undefined, correlation)
   } catch (error) {
     if (engineErrorCode(error) === "rateLimited") return response(429, "rate_limited")
     // Aucun corps, secret, sujet ou détail technique dans le refus HTTP.

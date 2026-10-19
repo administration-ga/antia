@@ -18,9 +18,12 @@ import type { QueryCtx } from "../../_generated/server"
 import { notFound } from "../../lib/errors"
 import { isActiveMember } from "../../lib/access"
 import { isBlockedBetween, isConnectedTo } from "../graph/graph"
+import { isFederatedContentAvailable } from "../federation/mirrorAccess"
 import { liveSignatoryRole } from "../pages/access"
 import { isFollowingPage } from "../pages/follows"
-import { isLiveThematicGroupMember } from "../thematicGroups/access"
+import { canAccessAssociationGroupPost, isLiveThematicGroupMember } from "../thematicGroups/access"
+import { hasNativePostAuthor } from "./nativeAuthor"
+import { canReadPageEventGalleryPost } from "../events/pageEventGalleryAccess"
 
 type ReadCtx = Pick<QueryCtx, "db">
 
@@ -45,9 +48,15 @@ export async function canSeePostDoc(ctx: ReadCtx, reader: ReaderContext, post: D
   if (!isInReadingContext(post, reader.network)) return false
   const origin = await ctx.db.get(post.networkId)
   if (!origin || origin.status !== "active") return false
+  // DG-023 : le lien événementiel précède toute exception auteur, page ou modérateur.
+  if (!(await canReadPageEventGalleryPost(ctx, post, reader.personId, reader.network._id))) return false
+  // DG-010 : la fermeture associative précède toute exception auteur/page/modérateur.
+  if (!(await canAccessAssociationGroupPost(ctx, post, reader.personId, reader.network._id))) return false
   if (reader.network.kind === "root" && origin._id !== reader.network._id && (origin.kind !== "closed" || origin.parentId !== reader.network._id)) return false
   if (!(await canReadModeratedContent(ctx, "post", post._id, reader.personId))) return false
+  if (!(await isFederatedContentAvailable(ctx, "posts", post._id))) return false
   if (post.pageId !== undefined) return await canSeePagePostDoc(ctx, reader, post, post.pageId)
+  if (!hasNativePostAuthor(post)) return false
   const author = await ctx.db.get(post.authorPersonId)
   if (!author || author.erasedAt !== undefined || author.deletionRequestedAt !== undefined || !(await isActiveMember(ctx, post.networkId, post.authorPersonId))) return false
   const isAuthor = post.authorPersonId === reader.personId
@@ -82,6 +91,7 @@ export async function canSeePostDoc(ctx: ReadCtx, reader: ReaderContext, post: D
 async function canSeePagePostDoc(ctx: ReadCtx, reader: ReaderContext, post: Doc<"posts">, pageId: Id<"pages">): Promise<boolean> {
   const page = await ctx.db.get(pageId)
   if (!page || page.networkId !== post.networkId || page.status !== "active" || !(await canReadModeratedContent(ctx, "page", page._id, reader.personId))) return false
+  if (!(await isFederatedContentAvailable(ctx, "pages", page._id))) return false
   const isPageAudience =
     post.audience === "followers"
       ? (await isFollowingPage(ctx, pageId, reader.personId)) || (await liveSignatoryRole(ctx, page, reader.personId)) !== null

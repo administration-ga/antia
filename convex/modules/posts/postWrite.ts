@@ -18,10 +18,10 @@ import type { ProvinceSlug } from "@antsia/social-domain/provinces"
 import { extractHashtags } from "@antsia/social-domain/richText"
 import { buildSearchableText } from "@antsia/social-domain/searchText"
 
-import { moderateContentWrite } from "../moderation/policy"
+import { moderateContentWrite, moderatePageContentWrite } from "../moderation/policy"
 import type { Doc, Id } from "../../_generated/dataModel"
 import type { MutationCtx } from "../../_generated/server"
-import { checked } from "../../lib/errors"
+import { checked, notFound } from "../../lib/errors"
 import { isBlockedBetween, isConnectedTo } from "../graph/graph"
 import type { StoredMedia } from "../media/media"
 import { notifyPerson } from "../notifications/notify"
@@ -31,6 +31,11 @@ import { resolveMentionedPersonIds } from "../people/miniProfile"
 import { isLiveThematicGroupMember } from "../thematicGroups/access"
 import { recordPagePost, recordShare } from "./counters"
 import { appendAudit } from "../platform/audit"
+import { hasNativePostAuthor } from "./nativeAuthor"
+import { purgeMaterializedPost, schedulePostFeed } from "./feedMaterialization"
+import { getRootNetwork } from "../../lib/access"
+import { pageEventAccess } from "../events/pageEventAccess"
+import { canReadPageEventGalleryPost } from "../events/pageEventGalleryAccess"
 
 export type PostWriteInput = {
   network: Doc<"networks">
@@ -56,6 +61,8 @@ export type PostWriteInput = {
   liveSessionId?: Id<"liveSessions">
   /** La PAGE au nom de laquelle on publie — le rôle VIVANT du signataire est DÉJÀ vérifié par l'appelant. */
   pageId?: Id<"pages">
+  /** DG-023 : galerie collective, distincte de l'annonce eventId. L'acteur de dépôt n'en est pas propriétaire. */
+  pageEventGalleryId?: Id<"events">
 }
 
 /** Lisible depuis la racine : née à la racine, ou `root`. */
@@ -67,6 +74,10 @@ export function isOnRoot(network: Pick<Doc<"networks">, "kind">, visibility: Con
 export async function withdrawPostRootVisibility(ctx: MutationCtx, post: Doc<"posts">, network: Doc<"networks">, actorPersonId?: Id<"persons">): Promise<void> {
   if (post.visibility !== "root") return
   await ctx.db.patch(post._id, { visibility: "network", onRoot: isOnRoot(network, "network"), updatedAt: Date.now() })
+  if (network.kind !== "root") {
+    const root = await getRootNetwork(ctx)
+    if (root) await purgeMaterializedPost(ctx, post._id, root._id)
+  }
   await appendAudit(ctx, { action: "post.root_withdraw", capacity: actorPersonId ? "member" : "system", ...(actorPersonId ? { actorPersonId } : {}), networkId: post.networkId, subject: { table: "posts", id: post._id }, details: { ...(actorPersonId ? {} : { recette: true }) } })
 }
 
@@ -80,9 +91,10 @@ export async function withdrawPostRootVisibility(ctx: MutationCtx, post: Doc<"po
  */
 export async function mentionCanSeePost(
   ctx: Pick<MutationCtx, "db">,
-  post: { networkId: Id<"networks">; authorPersonId: Id<"persons">; audience: PersonalPostAudience; groupId?: Id<"thematicGroups">; pageId?: Id<"pages"> },
+  post: { networkId: Id<"networks">; authorPersonId?: Id<"persons">; federationSource?: unknown; audience: PersonalPostAudience; groupId?: Id<"thematicGroups">; pageId?: Id<"pages"> },
   mentionedPersonId: Id<"persons">,
 ): Promise<boolean> {
+  if (!hasNativePostAuthor(post)) return false
   if (mentionedPersonId === post.authorPersonId) return true
   if (post.audience === "public") return true
   if (post.audience === "followers") {
@@ -104,9 +116,10 @@ export async function mentionCanSeePost(
 /** Sonne les personnes citées qui VOIENT la publication. */
 export async function notifyMentions(
   ctx: MutationCtx,
-  post: { _id: Id<"posts">; networkId: Id<"networks">; authorPersonId: Id<"persons">; audience: PersonalPostAudience; groupId?: Id<"thematicGroups">; pageId?: Id<"pages"> },
+  post: { _id: Id<"posts">; networkId: Id<"networks">; authorPersonId?: Id<"persons">; federationSource?: unknown; audience: PersonalPostAudience; groupId?: Id<"thematicGroups">; pageId?: Id<"pages"> },
   personIds: readonly Id<"persons">[],
 ): Promise<void> {
+  if (!hasNativePostAuthor(post)) return
   for (const personId of personIds) {
     if (!(await mentionCanSeePost(ctx, post, personId))) continue
     await notifyPerson(ctx, { networkId: post.networkId, recipientPersonId: personId, actorPersonId: post.authorPersonId, kind: "mention", subject: { post: post._id } })
@@ -120,6 +133,13 @@ export async function notifyMentions(
  * chaîne VIDE, jamais `undefined` (une chaîne vide n'apparie aucun terme).
  */
 export async function writePost(ctx: MutationCtx, input: PostWriteInput): Promise<{ postId: Id<"posts"> }> {
+  if (!hasNativePostAuthor(input)) return notFound()
+  if (input.pageEventGalleryId !== undefined) {
+    const event = await ctx.db.get(input.pageEventGalleryId)
+    if (!event || !input.pageId || input.eventId !== undefined || input.liveSessionId !== undefined || input.province !== undefined || input.country !== undefined || input.reach !== "diaspora" || !input.media?.length) return notFound()
+    const access = await pageEventAccess(ctx, event, input.authorPersonId)
+    if (!access?.canManage || access.moderation !== "published" || !(await canReadPageEventGalleryPost(ctx, { ...input, networkId: input.network._id, onRoot: false }, input.authorPersonId, input.network._id))) return notFound()
+  }
   checked(() => assertGroupAudienceShape({ audience: input.audience, hasGroup: input.groupId !== undefined }))
   checked(() =>
     assertPageAudienceShape({ audience: input.audience, hasPage: input.pageId !== undefined, hasGroup: input.groupId !== undefined, hasShare: input.sharedPostId !== undefined }),
@@ -127,12 +147,12 @@ export async function writePost(ctx: MutationCtx, input: PostWriteInput): Promis
 
   // Dénormalisés à l'ÉCRITURE : le filtre du fil reste une comparaison de tableau.
   const tags = extractHashtags(input.body)
-  const mentionedPersonIds = (await resolveMentionedPersonIds(ctx, input.network._id, input.body)).filter((id) => id !== input.authorPersonId)
+  const mentionedPersonIds = input.pageEventGalleryId !== undefined ? [] : (await resolveMentionedPersonIds(ctx, input.network._id, input.body)).filter((id) => id !== input.authorPersonId)
 
   const now = Date.now()
   const doc = {
     networkId: input.network._id,
-    authorPersonId: input.authorPersonId,
+    ...(input.pageEventGalleryId === undefined ? { authorPersonId: input.authorPersonId } : { pageEventGalleryId: input.pageEventGalleryId }),
     body: input.body,
     audience: input.audience,
     visibility: input.visibility,
@@ -156,8 +176,11 @@ export async function writePost(ctx: MutationCtx, input: PostWriteInput): Promis
     updatedAt: now,
   }
   const postId = await ctx.db.insert("posts", doc)
-  const admitted = await moderateContentWrite(ctx, { networkId: input.network._id, ownerPersonId: input.authorPersonId, kind: "post", id: postId, text: input.body })
+  const admitted = input.pageEventGalleryId !== undefined && input.pageId !== undefined
+    ? await moderatePageContentWrite(ctx, { networkId: input.network._id, pageId: input.pageId, kind: "post", id: postId, text: input.body })
+    : await moderateContentWrite(ctx, { networkId: input.network._id, ownerPersonId: input.authorPersonId, kind: "post", id: postId, text: input.body })
   if (!admitted) return { postId }
+  await schedulePostFeed(ctx, postId)
   await recordShare(ctx, { _id: postId, ...(input.sharedPostId ? { sharedPostId: input.sharedPostId } : {}), publishedAt: now })
   await recordPagePost(ctx, { _id: postId, ...(input.pageId ? { pageId: input.pageId } : {}), publishedAt: now })
   await notifyMentions(ctx, { _id: postId, ...doc }, mentionedPersonIds)

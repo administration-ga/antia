@@ -28,7 +28,7 @@ import { miniProfileCache } from "../people/miniProfile"
 import { attachmentFileValidator, type StoredAttachment, verifyDeclaredAttachments } from "../messaging/attachmentStorage"
 import { type ForwardedFrom, isForwardedOriginAlive } from "../messaging/forwardedFrom"
 import { type AttachmentDto, counterpartOf, deliverAttachments } from "../messaging/participation"
-import { previewColumns } from "../messaging/threads"
+import { assertMessageIdempotencyKey, previewColumns } from "../messaging/threads"
 import { messageReactionCountsValidator, messageReactionKindValidator } from "../messaging/tables"
 import { blockedCache, historyFloor, isClearedForMember, isHiddenForPerson, requireLiveMembership } from "./access"
 import type { groupSystemEventValidator } from "./tables"
@@ -301,8 +301,12 @@ export const sendGroupMessage = networkMutation({
     await enforceRateLimit(ctx, "message.send", ctx.person._id)
     const { thread, member } = await requireLiveMembership(ctx, ctx.networkId, args.threadId, ctx.person._id)
     if (thread.closedAt !== undefined) return failRule("GROUP_CLOSED")
+    assertMessageIdempotencyKey(args.idempotencyKey)
     const replay = await findGroupReplay(ctx, thread._id, args.idempotencyKey)
-    if (replay) return { messageId: replay._id, deduplicated: true }
+    if (replay) {
+      if (replay.senderPersonId !== ctx.person._id) return notFound()
+      return { messageId: replay._id, deduplicated: true }
+    }
     const content = checked(() => assertMessageContent(args.content, (args.attachmentFiles?.length ?? 0) > 0))
     if (args.replyToMessageId !== undefined) {
       // Citer l'identifiant d'un message d'ailleurs ferait relire son extrait sous la garde de ce fil.

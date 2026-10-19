@@ -15,6 +15,14 @@ const crons = cronJobs()
 // Tranche DIASPORALE (session DIASPORALE, PD1) : compteurs matérialisés des hubs
 // pays. Sans réseau `diasporale` gouverné par la tranche, le passage ne fait rien.
 crons.daily("compteurs des hubs DIASPORALE", { hourUTC: 2, minuteUTC: 30 }, internal.modules.diaspora.hubs.refreshHubCounters, {})
+// Tranche DIASPORALE (plan global, lignes déléguées par ANTSIA le 18/10/2026) : demandes de
+// service et de mentorat échues passées « expirées », par lots bornés ; la suite au passage suivant.
+crons.interval("diaspora-service-requests-expiry", { minutes: 15 }, internal.modules.diaspora.serviceRequests.expireDueServiceRequests, {})
+crons.interval("diaspora-mentoring-requests-expiry", { hours: 1 }, internal.modules.diaspora.mentoring.expireDueMentoringRequests, {})
+// Mesure du pilote DIASPORALE : agrégats nocturnes, après les compteurs des hubs (chaîne paginée bornée).
+crons.daily("diaspora-pilot-metrics", { hourUTC: 2, minuteUTC: 50 }, internal.modules.diaspora.pilotMetrics.refreshPilotMetrics, {})
+// Offres d'emploi DIASPORALE dont la date limite est passée : clôture écrite par lots bornés.
+crons.interval("diaspora-job-offers-expiry", { hours: 1 }, internal.modules.diaspora.jobs.closeExpiredJobOffers, {})
 
 // Garde des fichiers : relance des analyses perdues (job tombé, redéploiement),
 // et purge des fichiers infectés au-delà de la rétention (la ligne reste).
@@ -64,5 +72,31 @@ crons.daily("operators-purge-expired-idn-proofs", { hourUTC: 3, minuteUTC: 55 },
 
 // PA8 : mesures publiques par générations et tranches bornées, sans identités.
 crons.interval("public-refresh-aggregates", { minutes: 15 }, internal.modules.public.aggregate.refresh, {})
+
+// PA10 : distribution/reprise et rétention du fil, dépôts abandonnés non admis,
+// observation bornée des tâches planifiées. Aucun contenu dans la télémétrie.
+crons.interval("feed-maintain-materialized", { minutes: 15 }, internal.modules.posts.feedMaterialization.maintain, {})
+crons.daily("files-purge-unadmitted-orphans", { hourUTC: 3, minuteUTC: 25 }, internal.modules.files.orphans.run, {})
+crons.interval("operations-observe-scheduled-jobs", { minutes: 5 }, internal.modules.platform.operationalHealth.observe, {})
+
+// P10 : rétention des conversations et reprise privée sans contenu dans les arguments.
+crons.interval("commercial-drain-crm", { minutes: 1 }, internal.modules.commercialMessaging.crmTransport.drain, {})
+crons.daily("commercial-purge-closed", { hourUTC: 4, minuteUTC: 45 }, internal.modules.commercialMessaging.retention.purgeExpired, {})
+crons.interval("commercial-revalidate-calls", { minutes: 1 }, internal.modules.commercialMessaging.retention.revalidateCalls, {})
+
+// CC-4 (ADR-0025) : revalidation des appels contextuels VIVANTS — une perte de droit née hors du
+// module (adhésion, signataire, blocage, consentement, page) arrête aussi la salle établie. Ce n'est
+// pas une conservation : D7 reste sans durée, aucune purge temporelle des conversations contextuelles.
+crons.interval("contextual-revalidate-calls", { minutes: 1 }, internal.modules.contextualMessaging.retention.revalidateCalls, {})
+
+// P11 : filet de purge des corps prives transitoires, par lots bornes.
+crons.interval("checkout-purge-private-bodies", { minutes: 15 }, internal.modules.shops.checkoutLifecycle.purgeExpired, {})
+
+// P12 : conservation courte des octets privés, sans effet financier ni appel fournisseur.
+crons.interval("payment-purge-private-bodies", { minutes: 15 }, internal.modules.shops.paymentFlow.purgeExpired, {})
+// P13 : support privé court, suivi canonique conservé sans texte de message.
+crons.interval("purchase-purge-private-bodies", { minutes: 15 }, internal.modules.shops.purchaseLifecycle.purgeExpired, {})
+// P15 : reprise des candidatures (envoi, pièces, suivi, retrait), arguments sans contenu.
+crons.interval("jobs-drain-applications", { minutes: 1 }, internal.modules.shops.jobApplicationTransport.drain, {})
 
 export default crons

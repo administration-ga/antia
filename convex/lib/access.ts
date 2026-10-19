@@ -15,6 +15,7 @@ import type { QueryCtx } from "../_generated/server"
 import { fail, notFound } from "./errors"
 import { getActiveIdentity } from "./session"
 import { hasLiveGlobalSanction } from "../modules/moderation/policy"
+import { hasLiveAdministrationGrant } from "../modules/federation/agentAuthority"
 
 /** La personne liée à la session, ou `null` (pas de session, ou personne pas encore créée). */
 export async function getCurrentPerson(ctx: QueryCtx): Promise<Doc<"persons"> | null> {
@@ -98,6 +99,7 @@ export async function requireMembership(
   if (!membership || status === null || status === "partie") return notFound()
   if (status === "suspendue") return fail("membershipSuspended")
   if (!satisfiesMinimum(status, minStatus)) return fail("statusInsufficient")
+  if (network.slug === "administration" && network.membershipPolicy === "mirror" && !await hasLiveAdministrationGrant(ctx, person._id, network._id)) return notFound()
   return { person, network, membership, rootNetwork }
 }
 
@@ -129,6 +131,7 @@ async function effectiveStatusOf(ctx: Pick<QueryCtx, "db">, networkId: Id<"netwo
   if (!network || network.status !== "active") return null
   const membership = await getMembership(ctx, network._id, personId)
   if (!membership) return null
+  if (network.slug === "administration" && network.membershipPolicy === "mirror" && !await hasLiveAdministrationGrant(ctx, personId, network._id)) return null
   const root = network.kind === "root" ? network : await getRootNetwork(ctx)
   const rootMembership = network.kind === "root" || !root ? membership : await getMembership(ctx, root._id, personId)
   return effectiveAccessStatus({

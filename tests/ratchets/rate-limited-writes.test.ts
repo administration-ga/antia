@@ -11,7 +11,18 @@ const FUNCTIONS = "convex/lib/functions"
 const SERVER = "convex/_generated/server"
 const RATE_LIMIT = "convex/lib/rateLimit"
 const READ_ONLY_ACTIONS = new Set(["convex/modules/live/livekitActions.ts#checkBroadcastConfiguration"])
-const SYSTEM_HTTP_ADMISSIONS = new Map([["convex/modules/federation/http.ts#inbox", "modules.federation.inbox.admit"]])
+const SYSTEM_HTTP_ADMISSIONS = new Map([
+  ["convex/modules/federation/http.ts#inbox", "modules.federation.inbox.admit"],
+  // PA9C : transfert de consentement d'agent signé ; `redeem` consomme `federation.receive` avant tout effet.
+  ["convex/modules/federation/agentConsentTransfer.ts#transfer", "modules.federation.agentConsentTransfer.redeem"],
+])
+/**
+ * P16 : portes HTTP de LECTURE seule, nominatives et vérifiées sans effet (ni écriture, ni
+ * planification, ni stockage) : le proxy des médias de catalogue (P09) rejoue ses gardes à
+ * chaque GET et ne consomme aucun budget d'écriture. Toute autre action HTTP garde son
+ * admission système nominative.
+ */
+const READ_ONLY_HTTP_ACTIONS = new Set(["convex/modules/federation/commerceCatalogMediaHttp.ts#media"])
 const PUBLIC_WRITES = new Set(["mutation", "action", "authMutation", "authAction", "httpAction", "networkMutation", "personMutation", "operatorMutation", "networkAction"])
 const GUARDED_MUTATIONS = new Set(["networkMutation", "personMutation", "operatorMutation"])
 const EFFECTS = new Set(["insert", "patch", "replace", "delete", "store", "generateUploadUrl", "runMutation", "runAction", "runAfter", "runAt"])
@@ -208,6 +219,11 @@ export function detectUnmeteredWrites(file: string, text: string): Finding[] {
     if (binding?.mutable) { report(node, `${name} : alias mutable du constructeur public`); continue }
     const config = call.arguments[0]
     if (builder === "httpAction") {
+      if (READ_ONLY_HTTP_ACTIONS.has(`${file}#${name}`)) {
+        const readOnly = binding?.module === SERVER && config !== undefined && (ts.isArrowFunction(config) || ts.isFunctionExpression(config)) && !effectIn(config)
+        if (!readOnly) report(node, `${name} : lecture HTTP déclarée mais porteuse d'effets ou de provenance inconnue`)
+        continue
+      }
       const reference = SYSTEM_HTTP_ADMISSIONS.get(`${file}#${name}`)
       if (binding?.module !== SERVER || !reference || !hasSystemAdmission(config, reference, bindings)) report(node, `${name} : action HTTP sans admission système nominative attendue`)
       continue
@@ -313,6 +329,18 @@ describe("rate-limited-writes — admission obligatoire de toute entrée publiqu
     expect(detectUnmeteredWrites("convex/modules/federation/http.ts", guardedTry)).toEqual([])
     expect(detectUnmeteredWrites("convex/modules/federation/http.ts", guardedTry.replace('if (error) return new Response(null, { status: 429 }); return new Response(null, { status: 503 })', 'await ctx.storage.store(blob); return new Response()'))).toHaveLength(1)
     expect(detectUnmeteredWrites("convex/modules/federation/http.ts", guardedTry.replace('if (error) return new Response(null, { status: 429 }); return new Response(null, { status: 503 })', 'const continued = true'))).toHaveLength(1)
+  })
+
+  it("P16 : une lecture HTTP nominative passe sans effet ; une écriture, un autre nom ou une autre provenance sont refusés", () => {
+    const file = "convex/modules/federation/commerceCatalogMediaHttp.ts"
+    const source = 'import { httpAction } from "../../_generated/server"; export const media = httpAction(async (ctx, request) => { const asset = await ctx.runQuery(gate, { token: request.url }); const blob = await ctx.storage.get(asset.storageId); return new Response(blob) })'
+    expect(detectUnmeteredWrites(file, source)).toEqual([])
+    expect(detectUnmeteredWrites(file, source.replace("const blob = await ctx.storage.get(asset.storageId)", "const blob = await ctx.storage.store(asset)"))).toHaveLength(1)
+    expect(detectUnmeteredWrites(file, source.replace("const asset = await ctx.runQuery(gate", "const asset = await ctx.runMutation(gate"))).toHaveLength(1)
+    expect(detectUnmeteredWrites(file, source.replace("return new Response(blob)", "await ctx.scheduler.runAfter(0, gate, {}); return new Response(blob)"))).toHaveLength(1)
+    expect(detectUnmeteredWrites(file, source.replace("export const media", "export const other"))).toHaveLength(1)
+    expect(detectUnmeteredWrites(file, source.replace('"../../_generated/server"', '"../../fake"'))).toHaveLength(1)
+    expect(detectUnmeteredWrites("convex/modules/federation/other.ts", source)).toHaveLength(1)
   })
 
   it("alias, namespaces et exports séparés gardent la provenance", () => {

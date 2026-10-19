@@ -18,6 +18,9 @@ import { findPageByHandle } from "../pages/access"
 import { isDiscoverablePerson } from "../people/miniProfile"
 import { badgesOf } from "../people/persons"
 import { canSeePostDoc, type ReaderContext } from "../posts/access"
+import { hasNativePostAuthor } from "../posts/nativeAuthor"
+import { isFederatedContentAvailable } from "../federation/mirrorAccess"
+import { publicAgentAffiliation } from "../federation/agentAuthority"
 
 export type PublicReader = ReaderContext | null
 type ReadCtx = Pick<QueryCtx, "db">
@@ -54,6 +57,7 @@ async function publicContentAllowed(ctx: ReadCtx, kind: ModerationSurface, id: s
 
 export async function publicPageEligible(ctx: ReadCtx, context: PublicContext, page: Doc<"pages">): Promise<boolean> {
   if (page.trust !== "official" || page.status !== "active") return false
+  if (!await isFederatedContentAvailable(ctx, "pages", page._id)) return false
   if (page.networkId !== context.root._id && (page.visibility !== "root" || !page.onRoot)) return false
   return await publicOriginNetwork(ctx, context.root, page.networkId) !== null && await publicContentAllowed(ctx, "page", page._id) && await canReadModeratedContent(ctx, "page", page._id, context.reader?.personId)
 }
@@ -61,6 +65,7 @@ export async function publicPageEligible(ctx: ReadCtx, context: PublicContext, p
 /** Prédicat sans enrichissement, partagé par les listes et les mesures système. */
 export async function publicPostEligible(ctx: ReadCtx, context: PublicContext, post: Doc<"posts">): Promise<boolean> {
   if (post.status !== "published" || post.onRoot !== true || post.visibility !== "root" || post.audience !== "public" || post.groupId !== undefined) return false
+  if (!await isFederatedContentAvailable(ctx, "posts", post._id)) return false
   if (!await publicOriginNetwork(ctx, context.root, post.networkId) || !await canReadModeratedContent(ctx, "post", post._id, context.reader?.personId)) return false
   // La lecture publique refuse toujours la prélecture, même à son propriétaire/modérateur.
   if (!await publicContentAllowed(ctx, "post", post._id)) return false
@@ -68,6 +73,7 @@ export async function publicPostEligible(ctx: ReadCtx, context: PublicContext, p
     const page = await ctx.db.get(post.pageId)
     if (!page || page.networkId !== post.networkId || !await publicPageEligible(ctx, context, page)) return false
   } else {
+    if (!hasNativePostAuthor(post)) return false
     const author = await ctx.db.get(post.authorPersonId)
     if (!author || author.erasedAt !== undefined || author.deletionRequestedAt !== undefined || !await isActiveMember(ctx, post.networkId, author._id)) return false
   }
@@ -85,6 +91,7 @@ async function authorDto(ctx: Pick<QueryCtx, "db" | "storage">, context: PublicC
     if (!page) return notFound()
     return { kind: "page", handle: page.handle, displayName: page.name, badges: [computePageBadge(page.trust)], avatarUrl: page.logoStorageId ? await servableUrl(ctx, page.logoStorageId) : null }
   }
+  if (!hasNativePostAuthor(post)) return notFound()
   const person = await ctx.db.get(post.authorPersonId)
   if (!person || !isDiscoverablePerson(person) || !await publicContentAllowed(ctx, "person", person._id) || !await canReadModeratedContent(ctx, "person", person._id, context.reader?.personId)) {
     return { kind: "person", handle: null, displayName: null, badges: [], avatarUrl: null }
@@ -101,13 +108,14 @@ export async function publicPostDto(ctx: QueryCtx, context: PublicContext, post:
     const original = await ctx.db.get(post.sharedPostId)
     const originalOrigin = original ? await publicOriginNetwork(ctx, context.root, original.networkId) : null
     shared = original && originalOrigin && await publicPostEligible(ctx, context, original)
-      ? { available: true, id: original._id, body: original.body, publishedAt: original.publishedAt, author: await authorDto(ctx, context, original), origin: originDto(originalOrigin), media: await resolvePostMediaDtos(ctx, original.media) }
+      ? { available: true, id: original._id, body: original.body, publishedAt: original.publishedAt, author: await authorDto(ctx, context, original), origin: originDto(originalOrigin), media: await resolvePostMediaDtos(ctx, original.media, original.federationMedia) }
       : { available: false }
   }
   return {
     id: post._id, body: post.body, publishedAt: post.publishedAt, editedAt: post.editedAt ?? null,
     tags: post.tags ?? [], province: post.province ?? null, author: await authorDto(ctx, context, post), origin: originDto(origin),
-    media: await resolvePostMediaDtos(ctx, post.media), shared,
+    media: await resolvePostMediaDtos(ctx, post.media, post.federationMedia), shared,
+    ...(post.commerceOffer ? { hasCommerceOffer: true } : {}),
   }
 }
 
@@ -116,7 +124,8 @@ export async function publicProfileByHandle(ctx: QueryCtx, context: PublicContex
   if (!person || !person.handle || !person.displayName || !isDiscoverablePerson(person) || !await isActiveMember(ctx, context.root._id, person._id)) return null
   if (!await publicContentAllowed(ctx, "person", person._id) || !await canReadModeratedContent(ctx, "person", person._id, context.reader?.personId)) return null
   if (context.reader && await isBlockedBetween(ctx, context.reader.personId, person._id)) return null
-  return { handle: person.handle, displayName: person.displayName, headline: person.headline ?? null, avatarUrl: person.avatarStorageId ? await servableUrl(ctx, person.avatarStorageId) : null, badges: await badgesOf(ctx, person._id) }
+  const publicAgent = await publicAgentAffiliation(ctx, person._id)
+  return { handle: person.handle, displayName: person.displayName, headline: person.headline ?? null, avatarUrl: person.avatarStorageId ? await servableUrl(ctx, person.avatarStorageId) : null, badges: await badgesOf(ctx, person._id), ...(publicAgent ? { publicAgent } : {}) }
 }
 
 export async function publicPageByHandle(ctx: QueryCtx, context: PublicContext, handle: string): Promise<Doc<"pages"> | null> {

@@ -16,6 +16,8 @@ import { networkQuery } from "../../lib/functions"
 import { counterpartOf } from "../messaging/participation"
 import { miniProfileCache } from "../people/miniProfile"
 import { isLiveMemberOfThreadCall } from "./access"
+import { conversationFieldsOfCall } from "./conversation"
+import { conversationCallInJournal } from "./conversationAccess"
 
 /** Lignes lues par source — trois sources de cent couvrent les cinquante appels les plus récents. */
 const SOURCE_SCAN = 100
@@ -26,6 +28,9 @@ const JOURNAL_MAX = 50
 
 export type CallHistoryItemDto = {
   callId: Id<"calls">
+  commercialThreadId?: Id<"commercialThreads">
+  /** CC-4 : « le journal rappelle par la conversation » — l'écran rappelle par CE fil, jamais par l'appel personnel. */
+  contextualThreadId?: Id<"contextualThreads">
   kind: "direct" | "group"
   category: CallCategory
   /** Raison d'un refus AUTOMATIQUE — `null` pour tous les autres. */
@@ -92,6 +97,8 @@ export const listCallHistory = networkQuery({
     const labelOf = async (personId: Id<"persons">) => ({ personId, label: await counterpartOf(ctx, personId, profileOf) })
     const calls: CallHistoryItemDto[] = []
     for (const call of ordered.slice(0, JOURNAL_MAX)) {
+      // Le sélecteur unique : un appel de conversation ne reste au journal que selon la règle de SA famille (un ancien participant ne garde rien).
+      if ((await conversationCallInJournal(ctx, call, me)) === false) continue
       const createdByMe = call.createdByPersonId === me
       const ticket = ticketOf.get(call._id)
       // Convié par un ticket (appel de groupe, ou ajout écarté sur un tête-à-tête) : c'est MON ticket qui dit ce qui m'est arrivé.
@@ -101,6 +108,7 @@ export const listCallHistory = networkQuery({
       const threadMember = call.kind === "group" ? await isLiveMemberOfThreadCall(ctx, call, me) : null
       calls.push({
         callId: call._id,
+        ...conversationFieldsOfCall(call),
         kind: call.kind,
         category,
         reason,

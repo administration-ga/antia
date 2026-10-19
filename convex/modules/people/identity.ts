@@ -15,6 +15,7 @@ import { getMembership, getRootNetwork } from "../../lib/access"
 import { fail, notFound } from "../../lib/errors"
 import { enforceRateLimit } from "../../lib/rateLimit"
 import { getActiveIdentity } from "../../lib/session"
+import { revokeAdministrationForPerson } from "../federation/agentLifecycle"
 import { syncPersonDirectory } from "./directory"
 import { idnLoaValidator, idnProfileTypeValidator } from "./tables"
 
@@ -65,6 +66,10 @@ export const recordIdnProof = internalMutation({
     const proof = { ...args, observedAt: Date.now() }
     if (existing) await ctx.db.patch(existing._id, { ...proof, loa: args.loa, nationality: args.nationality, profileType: args.profileType })
     else await ctx.db.insert("idnProofs", proof)
+    if ((args.loa ?? 0) < 2 || (args.loa ?? 0) < (existing?.loa ?? 0)) {
+      const link = await ctx.db.query("identityLinks").withIndex("by_provider_and_subject", (q) => q.eq("provider", "idn").eq("subject", args.subject)).unique()
+      if (link) await revokeAdministrationForPerson(ctx, link.personId)
+    }
     return null
   },
 })
@@ -87,6 +92,20 @@ async function ownLink(ctx: QueryCtx, personId: Id<"persons">, provider: LinkInp
   return await ctx.db.query("identityLinks").withIndex("by_person_and_provider", (q) => q.eq("personId", personId).eq("provider", provider)).unique()
 }
 
+/** Sujet IDN confirmé côté serveur : compte, lien vivant et preuve doivent encore concorder. */
+export async function currentVerifiedIdnSubjectOf(ctx: QueryCtx | MutationCtx, person: Doc<"persons">): Promise<string | null> {
+  if (person.erasedAt !== undefined || person.deletionRequestedAt !== undefined) return null
+  const user = await authUserOf(ctx, person.authUserId)
+  if (!user || user._id !== person.authUserId) return null
+  const account = await idnAccountOf(ctx, person.authUserId)
+  if (!account) return null
+  const link = await ownLink(ctx, person._id, "idn")
+  const proof = await ctx.db.query("idnProofs").withIndex("by_subject", (q) => q.eq("subject", account.accountId)).unique()
+  if (!link || link.revokedAt !== undefined || link.subject !== account.accountId || (link.loa ?? 0) < 2 || !proof || (proof.loa ?? 0) < 2) return null
+  assertSubject(account.accountId)
+  return account.accountId
+}
+
 /** Upsert unique : une identité déjà liée à une autre personne reste refusée, même révoquée. */
 async function writeLink(ctx: MutationCtx, person: Doc<"persons">, input: LinkInput, linkedAt: number): Promise<boolean> {
   const other = await ctx.db.query("identityLinks").withIndex("by_provider_and_subject", (q) => q.eq("provider", input.provider).eq("subject", input.subject)).unique()
@@ -94,6 +113,9 @@ async function writeLink(ctx: MutationCtx, person: Doc<"persons">, input: LinkIn
   const existing = await ownLink(ctx, person._id, input.provider)
   if (existing && existing.revokedAt === undefined && existing.subject === input.subject && existing.loa === input.loa && existing.nationality === input.nationality && existing.profileType === input.profileType && existing.channel === input.channel) return false
   await enforceRateLimit(ctx, "person.identity", person._id)
+  if (input.provider === "idn" && (existing?.subject !== input.subject || existing?.revokedAt !== undefined || (input.loa ?? 0) < 2 || (input.loa ?? 0) < (existing?.loa ?? 0))) {
+    await revokeAdministrationForPerson(ctx, person._id)
+  }
   const fields = { ...input, loa: input.loa, nationality: input.nationality, profileType: input.profileType, channel: input.channel, linkedAt, revokedAt: undefined }
   if (existing) await ctx.db.patch(existing._id, fields)
   else await ctx.db.insert("identityLinks", { personId: person._id, ...input, linkedAt })
@@ -101,6 +123,7 @@ async function writeLink(ctx: MutationCtx, person: Doc<"persons">, input: LinkIn
 }
 
 async function revokeLink(ctx: MutationCtx, person: Doc<"persons">, provider: LinkInput["provider"]): Promise<boolean> {
+  if (provider === "idn") await revokeAdministrationForPerson(ctx, person._id)
   const existing = await ownLink(ctx, person._id, provider)
   if (!existing || existing.revokedAt !== undefined) return false
   await enforceRateLimit(ctx, "person.identity", person._id)

@@ -13,7 +13,7 @@ import { assertMessageContent } from "@antsia/social-contracts/messaging"
 
 import type { Doc, Id } from "../../_generated/dataModel"
 import type { MutationCtx, QueryCtx } from "../../_generated/server"
-import { checked, failRule, notFound } from "../../lib/errors"
+import { checked, fail, failRule, notFound } from "../../lib/errors"
 import { isBlockedBetween } from "../graph/graph"
 import { type DeclaredAttachment, type StoredAttachment, verifyDeclaredAttachments } from "./attachmentStorage"
 import type { ForwardedFrom } from "./forwardedFrom"
@@ -230,6 +230,13 @@ export async function ensurePersonalThread(
   return { thread, created: true }
 }
 
+/** Une clé opaque bornée, commune au premier message et aux envois suivants. */
+export function assertMessageIdempotencyKey(key: string | undefined): void {
+  // Clés opaques existantes et UUID conservés, sans imposer un nouveau format.
+  // Aucun caractère de contrôle, aucune clé vide, au plus 256 caractères.
+  if (key !== undefined && (key.trim().length === 0 || key.length > 256 || Array.from(key).some((character) => character.charCodeAt(0) < 32 || character.charCodeAt(0) === 127))) fail("invalidArgument", { field: "idempotencyKey" })
+}
+
 /** Le message déjà déposé sous cette clé d'idempotence dans ce fil, ou `null`. */
 export async function findIdempotentReplay(ctx: ReadCtx, threadId: Id<"personalThreads">, idempotencyKey: string | undefined): Promise<Doc<"personalMessages"> | null> {
   if (idempotencyKey === undefined) return null
@@ -283,6 +290,8 @@ export type OpenThreadInput = {
   targetPersonId: Id<"persons">
   initialMessage: string
   initialAttachmentFiles?: DeclaredAttachment[]
+  /** Une intention initiale peut être rejouée après une réponse réseau perdue. */
+  idempotencyKey?: string
 }
 
 /**
@@ -294,8 +303,16 @@ export async function openOrContinuePersonalThread(
   input: OpenThreadInput,
 ): Promise<{ threadId: Id<"personalThreads">; messageId: Id<"personalMessages">; created: boolean }> {
   if (input.targetPersonId === input.initiatorPersonId) return failRule("THREAD_SELF")
-  const content = checked(() => assertMessageContent(input.initialMessage, (input.initialAttachmentFiles?.length ?? 0) > 0))
   const { thread, created } = await ensurePersonalThread(ctx, input.network._id, input.initiatorPersonId, input.targetPersonId)
+  assertMessageIdempotencyKey(input.idempotencyKey)
+  // Les gardes réseau/relation/blocage précèdent cet appel. Un rejeu ne
+  // réadmet pas des fichiers qui sont déjà rattachés au premier message.
+  const replay = await findIdempotentReplay(ctx, thread._id, input.idempotencyKey)
+  if (replay !== null) {
+    if (replay.senderPersonId !== input.initiatorPersonId) return notFound()
+    return { threadId: thread._id, messageId: replay._id, created: false }
+  }
+  const content = checked(() => assertMessageContent(input.initialMessage, (input.initialAttachmentFiles?.length ?? 0) > 0))
   const attachmentFiles = await verifyDeclaredAttachments(ctx, input.initialAttachmentFiles, {
     actorPersonId: input.initiatorPersonId,
     networkId: input.network._id,
@@ -305,6 +322,7 @@ export async function openOrContinuePersonalThread(
     senderPersonId: input.initiatorPersonId,
     content,
     ...(attachmentFiles ? { attachmentFiles } : {}),
+    ...(input.idempotencyKey !== undefined ? { idempotencyKey: input.idempotencyKey } : {}),
   })
   return { threadId: thread._id, messageId, created }
 }

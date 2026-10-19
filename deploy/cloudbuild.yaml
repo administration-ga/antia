@@ -23,6 +23,8 @@ steps:
       - NEXT_PUBLIC_POSTHOG_KEY=${_NEXT_PUBLIC_POSTHOG_KEY}
       - --build-arg
       - NEXT_PUBLIC_POSTHOG_HOST=${_NEXT_PUBLIC_POSTHOG_HOST}
+      - --build-arg
+      - NEXT_PUBLIC_POSTHOG_EU_RELAY_ORIGIN=${_NEXT_PUBLIC_POSTHOG_EU_RELAY_ORIGIN}
       # Variables propres à diasporale_com : vides pour les autres applications
       # (le plan les passe toutes ; un ARG absent du Dockerfile est ignoré).
       - --build-arg

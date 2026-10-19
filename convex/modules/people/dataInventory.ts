@@ -83,6 +83,8 @@ const EXPORT_PERSON_FIELDS: Readonly<Record<string, readonly string[]>> = {
   liveSpeakers: ["personId"], liveViewerGrants: ["personId"], liveAntennaRequests: ["personId"], liveDelegations: ["personId"], liveInvitees: ["personId"], liveChatMutes: ["personId"], liveReactions: ["personId"], liveHostPresence: ["hostPersonId"],
   postMarks: ["personId"], mutes: ["personId"], consularAttestations: ["personId"], memberPrivacy: ["personId"],
   notificationPreferences: ["personId"], pushSubscriptions: ["personId"], notificationDeliveryJobs: ["recipientPersonId"], notificationWeeklyUsage: ["personId"], notificationDigestReceipts: ["personId"], dataExports: ["personId"],
+  // Tranche DIASPORALE (délégué) : le relecteur retrouve ses relectures du kit d'arrivée, sans la ressource.
+  kitResourceReviews: ["reviewerPersonId"],
 }
 
 /**
@@ -90,8 +92,84 @@ const EXPORT_PERSON_FIELDS: Readonly<Record<string, readonly string[]>> = {
  * document d'autrui. Les relations partagées ont leurs propres projections.
  */
 export function exportableRecord(table: string, row: DataRecord, personId: string): Record<string, unknown> | null {
+  // P13 : le suivi personnel n'exporte ni texte de support, ni octets signés, ni sujet/session.
+  if (table === "shopPurchaseRequests") return null
+  if (table === "shopPurchaseSnapshots") {
+    if (row.personId !== personId) return null
+    const order = row.order && typeof row.order === "object" && !Array.isArray(row.order) ? row.order as Record<string, unknown> : null
+    return { ...projectedRecord(row, [...RECORD_METADATA, "purchaseId", "checkoutAttemptId", "observedAt"]), ...(order ? { order: Object.fromEntries(["orderRef", "checkoutRef", "paymentRef", "shopRef", "reference", "sellerLabel", "createdAt", "updatedAt", "revision", "paymentRevision", "lines", "fees", "amount", "orderState", "paymentState", "stockState", "refundState", "reviewRequired", "fulfillment", "receipt", "settlementState", "cancellationState", "returnState", "history", "historyTruncated", "consentTextVersion"].filter((key) => Object.prototype.hasOwnProperty.call(order, key)).map((key) => [key, redactExportValue(order[key])])) } : {}) }
+  }
+  // P12 : ni corps signé, reçu de préparation, URL prestataire, bail ni contexte d'autorité.
+  if (table === "shopPaymentRequests" || table === "shopPaymentPolicies") return null
+  if (table === "shopPaymentOptions") {
+    if (row.personId !== personId) return null
+    const options = row.options && typeof row.options === "object" && !Array.isArray(row.options) ? row.options as Record<string, unknown> : null
+    return { ...projectedRecord(row, [...RECORD_METADATA, "checkoutAttemptId", "checkoutRef", "observedAt", "validUntil"]), ...(options ? { options: Object.fromEntries(["available", "reason", "amount", "expiresAt", "providerLabel", "beneficiaryLabel", "modes", "consentTextVersion"].filter((key) => Object.prototype.hasOwnProperty.call(options, key)).map((key) => [key, redactExportValue(options[key])])) } : {}) }
+  }
+  if (table === "shopPaymentAttempts") {
+    if (row.personId !== personId) return null
+    const snapshot = row.snapshot && typeof row.snapshot === "object" && !Array.isArray(row.snapshot) ? row.snapshot as Record<string, unknown> : null
+    return { ...projectedRecord(row, [...RECORD_METADATA, "paymentAttemptId", "checkoutAttemptId", "checkoutRef", "amount", "consentedAt", "consentTextVersion", "state", "paymentRef", "orderRef", "paymentState", "observedAt", "privacyRevokedAt"]), ...(snapshot ? { snapshot: Object.fromEntries(["checkoutRef", "paymentRef", "orderRef", "paymentState", "orderState", "stockState", "refundState", "reviewRequired", "revision", "updatedAt", "amount"].filter((key) => Object.prototype.hasOwnProperty.call(snapshot, key)).map((key) => [key, redactExportValue(snapshot[key])])) } : {}) }
+  }
+  // P11 : les corps signés, adresses, sujets opaques et preuves de session restent privés.
+  if (table === "checkoutRequests" || table === "shopCheckoutPolicies" || table === "checkoutClientIntentFences") return null
+  if (table === "checkoutAttempts") return row.personId === personId ? projectedRecord(row, [...RECORD_METADATA, "shopId", "attemptId", "state", "expectedLines", "expectedFees", "expectedPolicyVersion", "result", "consentedAt", "consentTextVersion", "createdAt", "updatedAt"]) : null
   const policy = DATA_TABLE_POLICIES[table]
   if (!policy) return null
+  // PA10 : les files, références de tiers et curseurs techniques ne sont pas
+  // des copies exportables du contenu. Le propriétaire reçoit seulement la
+  // fenêtre de sa préparation ; ses publications suivent la politique posts.
+  if (table === "shopCommerceBuyerSubjects") return null
+  if (table === "commercialCrmTransfers") return row.personId === personId ? projectedRecord(row, [...RECORD_METADATA, "threadId", "state", "selectedText", "displayName", "textVersion", "consentedAt", "revokedAt", "submittedAt"]) : null
+  if (table === "commercialThreads") return row.requesterPersonId === personId ? projectedRecord(row, [...RECORD_METADATA, "shopId", "offerRef", "state", "revision", "buyerCallsAllowed", "lastMessageAt"]) : null
+  // P16 : un blocage s'exporte à la seule personne qui l'a posé (son geste) ; le demandeur ne reçoit
+  // ni le blocage posé côté boutique ni l'identité du membre d'équipe qui l'a posé.
+  if (table === "commercialBlocks") return row.personId === personId ? projectedRecord(row, [...RECORD_METADATA, "threadId", "shopId", "side"]) : null
+  // CC-2b (ADR-0025, PA5) : une référence ne vaut pas propriété. Le fil se projette, sans aperçu ni
+  // contenu d'objet, à la personne demandeuse ou répondante (côté propre, nature, référence, statut,
+  // dates) — jamais aux signataires d'une page, le fil étant un contenu de la page. Un message en voix
+  // de personne s'exporte à son auteur (texte, nom/type/taille des pièces, dates, retrait), sans clé,
+  // empreinte ni `storageId` ; en voix de page, le signataire ne reçoit qu'une trace sans contenu (D13,
+  // à confirmer juridiquement) ; jamais le message d'autrui. Ses propres états de lecture et d'accord.
+  if (table === "contextualPolicies") return null
+  if (table === "contextualThreads") {
+    const side = row.requesterPersonId === personId ? "requester" : row.responderPersonId === personId ? "responder" : null
+    return side === null ? null : { ...projectedRecord(row, [...RECORD_METADATA, "kind", "serviceRequestId", "mentoringRequestId", "jobApplicationId", "status", "closedAt", "closedCause", "closedBySide", "lastMessageAt"]), side }
+  }
+  if (table === "contextualMessages") {
+    if (row.voice === "person" && row.authorPersonId === personId) {
+      const files: readonly unknown[] = Array.isArray(row.attachmentFiles) ? (row.attachmentFiles as unknown[]) : []
+      return {
+        ...projectedRecord(row, [...RECORD_METADATA, "threadId", "side", "voice", "content", "deletedAt"]),
+        attachmentFiles: files.flatMap((file) => {
+          if (!file || typeof file !== "object" || Array.isArray(file)) return []
+          const item = file as Record<string, unknown>
+          return [{ filename: item.filename ?? null, mimeType: item.mimeType ?? null, sizeBytes: item.sizeBytes ?? null, durationMs: item.durationMs ?? null }]
+        }),
+      }
+    }
+    if (row.voice === "page" && row.pageSpeakerPersonId === personId) return projectedRecord(row, [...RECORD_METADATA, "threadId", "side", "voice", "deletedAt"])
+    return null
+  }
+  if (table === "contextualPersonStates") return row.personId === personId ? projectedRecord(row, [...RECORD_METADATA, "threadId", "readAt", "callsAllowed"]) : null
+  if (table === "feedEntries" || table === "feedFanoutJobs") return null
+  if (table === "fileStagingReservations") return null
+  if (table === "feedCursors") return row.personId === personId ? projectedRecord(row, [...RECORD_METADATA, "personId", "scope", "status", "windowStart", "startedAt", "completedAt"]) : null
+  // P08 : les preuves de possession restent serveur, même dans l'export personnel.
+  // P09 : aucun catalogue collectif, corps signé, jeton de média ni mapping dans l'export du signataire.
+  if (table === "shopCatalogPolicies" || table === "commerceCatalogMappings" || table === "commerceCatalogHeads" || table === "commerceCatalogMediaAssets") return null
+  // P15 : ni corps signé, session, sujet opaque ni identifiant de stockage ; la candidature et ses pièces au seul candidat.
+  if (table === "commerceJobPolicies" || table === "commerceJobHeads" || table === "commerceApplicationSubjects") return null
+  if (table === "commerceApplicationFiles") return row.personId === personId ? projectedRecord(row, [...RECORD_METADATA, "kind", "filename", "sha256", "byteSize", "state", "retiredAt"]) : null
+  if (table === "commerceApplications") return row.personId === personId ? projectedRecord(row, [...RECORD_METADATA, "shopId", "jobRef", "jobTitle", "civilName", "motivation", "files", "state", "rejection", "applicationRef", "submittedAt", "remoteState", "remoteUpdatedAt", "consentTextVersion", "consentedAt", "revokedAt", "revokeReason"]) : null
+  // P14 : ni corps signé, session, sujet opaque, liaison, empreinte ni bail ; la demande, ses consentements et les états servis au seul acheteur.
+  if (table === "commerceServicePolicies") return null
+  if (table === "commerceServiceRequests") return row.personId === personId ? projectedRecord(row, [...RECORD_METADATA, "shopId", "handle", "requestRowId", "mode", "offerRef", "offerTitle", "state", "reason", "threadId", "inquiryRef", "desiredDate", "chosenAttachmentCount", "serviceRef", "serviceLabel", "booking", "pendingReplacement", "order", "acceptedQuote", "purgeAt"]) : null
+  if (table === "commerceServiceCommands") return row.personId === personId ? projectedRecord(row, [...RECORD_METADATA, "requestRowId", "kind", "state", "reason", "issuedAt", "expiresAt", "consentTextVersion", "consentedAt", "quoteRef", "quoteVersion", "acceptedTotal", "serviceRef", "slotStartAt", "slotEndAt", "appointmentRef", "expectedRevision", "offerRef", "quantity", "expectedUnitAmount", "expectedCatalogRevision", "currentVersion", "currentTotal", "currentUnitAmount", "currentCatalogRevision", "resultRef"]) : null
+  if (table === "shopCommerceLinkCommands" || table === "shopCommerceSubjects" || table === "shopCommerceShopRefs") return null
+  if (table === "shopCommerceLinks") return row.personId === personId ? projectedRecord(row, [...RECORD_METADATA, "personId", "shopId", "pageId", "source", "environment", "state", "shopRef", "linkRef", "permissions", "consentTextVersion", "consentedAt", "linkedAt", "revokedAt", "updatedAt"]) : null
+  if (table === "shopCommerceLinkChallenges") return row.personId === personId ? projectedRecord(row, [...RECORD_METADATA, "personId", "shopId", "status", "phase", "permissions", "consentTextVersion", "consentedAt", "expiresAt", "updatedAt"]) : null
+  if (table === "federationAgentGrants") return row.personId === personId ? projectedRecord(row, [...RECORD_METADATA, "personId", "status", "generation", "grantedAt", "revokedAt", "sourceConsentedAt", "roleLabel"]) : null
   if (table === "persons") return row._id === personId ? redactExportValue(row) as Record<string, unknown> : null
   if (table === "personalThreads") return row.personLow === personId || row.personHigh === personId ? projectedRecord(row, THREAD_METADATA) : null
   if (table === "groupThreads") return row.createdByPersonId === personId ? projectedRecord(row, THREAD_METADATA) : null
@@ -108,8 +186,45 @@ export function exportableRecord(table: string, row: DataRecord, personId: strin
     return null
   }
   if (table === "engineAudit") return row.actorPersonId === personId ? projectedRecord(row, [...RECORD_METADATA, "action", "capacity", "subjectTable", "subjectId", "at"]) : null
+  // Tranche DIASPORALE (délégué par ANTSIA le 18/10/2026) : une demande de mentorat appartient aux
+  // deux parties ; le mentoré exporte toute sa demande, le mentor jamais l'objectif, le message ni
+  // les clés d'idempotence du mentoré (une référence ne vaut pas propriété du contenu d'autrui).
+  // Candidature d'emploi DIASPORALE (DG-025) : au seul candidat, sans clé d'idempotence ni identité du
+  // signataire qui a décidé ; le motif de non-sélection, jamais montré sans relecture, reste hors
+  // export tant que ce point n'est pas tranché (droit d'accès face à la relecture humaine).
+  // Relecture du kit d'arrivée : au seul relecteur, son verdict et son motif, jamais le contenu relu.
+  if (table === "kitResourceReviews") {
+    return row.reviewerPersonId === personId ? projectedRecord(row, [...RECORD_METADATA, "resourceId", "revision", "reviewerPersonId", "outcome", "reason"]) : null
+  }
+  if (table === "jobApplications") {
+    return row.candidatePersonId === personId
+      ? projectedRecord(row, [...RECORD_METADATA, "offerId", "pageId", "candidatePersonId", "offerTitle", "offerVersion", "message", "status", "identityConsentAt", "shareTalentProfile", "talentConsentAt", "seenAt", "decidedAt", "withdrawnAt"])
+      : null
+  }
+  if (table === "mentoringRequests") {
+    const shared = [...RECORD_METADATA, "mentorProfileId", "domain", "status", "expiresAt", "slot", "slotVersion", "acceptedAt", "closedBy", "closedAt"]
+    if (row.menteePersonId === personId) return projectedRecord(row, [...shared, "mentorPersonId", "menteePersonId", "goal", "message", "wishedSlots", "timeZone", "consentAt", "closedReason"])
+    if (row.mentorPersonId === personId) return projectedRecord(row, [...shared, "mentorPersonId"])
+    return null
+  }
   if (table === "dataErasureJobs") return row.personId === personId ? projectedRecord(row, ["_id", "personId", "phase", "requestedAt", "dueAt", "updatedAt"]) : null
   if (table === "pages" || table === "thematicGroups") return row.createdByPersonId === personId ? redactExportValue(row) as Record<string, unknown> : null
+  if (table === "shops") {
+    // Un brouillon sans page appartient à son propriétaire. La préparation
+    // historique d'une page ne donne aucun droit sur son état commercial actuel.
+    if (row.pageId === undefined && row.ownerPersonId === personId) return redactExportValue(row) as Record<string, unknown>
+    const fields = ["_id", "_creationTime", "networkId", "createdAt"]
+    let personal = false
+    if (row.preparedByPersonId === personId) {
+      fields.push("preparedByPersonId")
+      personal = true
+    }
+    if (row.publicConsentByPersonId === personId) {
+      fields.push("publicConsentByPersonId", "publicConsentAt", "publicConsentTextVersion", "publicConsentRevokedAt")
+      personal = true
+    }
+    return personal ? projectedRecord(row, fields) : null
+  }
   if (policy.shared) return null
   const owners = policy.owners ?? EXPORT_PERSON_FIELDS[table]
   if (!owners?.some((field) => row[field] === personId)) return null

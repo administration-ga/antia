@@ -17,6 +17,7 @@ import { networkMutation, networkQuery } from "../../lib/functions"
 import { enforceRateLimit } from "../../lib/rateLimit"
 import { isLiveMemberOfThreadCall, loadGroupParticipants, participationOf, participationsOf, requireCallParticipant } from "./access"
 import { photographedGroupCallCapacity } from "./capacity"
+import { conversationFieldsOfCall } from "./conversation"
 import { scheduleIncomingCallPush } from "./push"
 import { declineGroupInvite, endGroupCallIfDeserted, finishCall, markGroupInviteJoined } from "./state"
 import {
@@ -167,6 +168,9 @@ const callStateValidator = v.object({
   heldBy: v.array(v.id("persons")),
   declineNote: v.union(v.string(), v.null()),
   groupThreadId: v.union(v.id("groupThreads"), v.null()),
+  commercialThreadId: v.optional(v.id("commercialThreads")),
+  /** CC-4 : la conversation contextuelle de l'appel (exclusive de `commercialThreadId`). */
+  contextualThreadId: v.optional(v.id("contextualThreads")),
   /** Lignes de l'appel, hôte compris (l'effectif d'un appel de groupe). */
   participantCount: v.number(),
   /** Le titre du fil d'origine d'un appel de groupe ; `null` sinon (l'écran compose les noms). */
@@ -189,6 +193,8 @@ export type CallStateDto = {
   heldBy: Id<"persons">[]
   declineNote: string | null
   groupThreadId: Id<"groupThreads"> | null
+  commercialThreadId?: Id<"commercialThreads">
+  contextualThreadId?: Id<"contextualThreads">
   participantCount: number
   title: string | null
   startedAt: number
@@ -225,6 +231,7 @@ export const getCall = networkQuery({
       heldBy: call.heldBy ?? [],
       declineNote: call.declineNote ?? null,
       groupThreadId: call.groupThreadId ?? null,
+      ...conversationFieldsOfCall(call),
       participantCount: (await participationsOf(ctx, call._id)).length,
       title: thread?.title ?? null,
       startedAt: call.startedAt,
