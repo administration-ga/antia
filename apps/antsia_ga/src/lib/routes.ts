@@ -186,6 +186,8 @@ export const engineRoutes: EngineRoutes = {
   profile: routes.profile,
   page: routes.page,
   conference: routes.conference,
+  // `/direct/…` sert la même page que la conférence : le moteur doit la reconnaître (carte flottante).
+  conferenceAliases: (sessionId) => [routes.direct(sessionId)],
   // Les paramètres de l'application (affichage, thème, langue et fuseau) : entrée du rail et du Profil.
   settings: routes.settings,
   // Navigation par destinations (P02) : les deux destinations propres de

@@ -28,15 +28,24 @@ describe("F3c — lecture et géométrie du retour", () => {
     expect(replayRetentionIsNear(100, 100)).toBe(false)
     expect(replayRetentionIsNear(100, 99)).toBe(true)
   })
-  it("adapte la pose et compare uniquement la route injectée de la session tenue", () => {
+  it("adapte la pose et compare uniquement les routes injectées de la session tenue", () => {
     expect(directCardPose({ isMobile: null, minimized: false })).toBeNull()
     expect(directCardPose({ isMobile: true, minimized: true })).toBe("mobile")
     expect(directCardPose({ isMobile: false, minimized: true })).toBe("pill")
-    const input = { heldSessionId: "a", hasCredentials: true, pathname: "/room/a", conferenceHref: "/room/a" }
+    const input = { heldSessionId: "a", hasCredentials: true, pathname: "/room/a", pageHrefs: ["/room/a"] }
     expect(directPresentationPlace(input)).toBe("page")
     expect(directPresentationPlace({ ...input, pathname: "/room/b" })).toBe("floating")
     expect(directPresentationPlace({ ...input, heldSessionId: null })).toBe("hidden")
     expect(directPresentationPlace({ ...input, hasCredentials: false })).toBe("hidden")
     expect(directPresentationPlace({ ...input, pathname: "/feed", hasCredentials: false, pendingOrError: true })).toBe("floating")
+    expect(directPresentationPlace({ ...input, pathname: null })).toBe("floating")
+  })
+  it("un alias de la page de la session est la page, l'alias d'une autre session non", () => {
+    const input = { heldSessionId: "a", hasCredentials: true, pageHrefs: ["/conference/a", "/direct/a"] }
+    expect(directPresentationPlace({ ...input, pathname: "/direct/a" })).toBe("page")
+    expect(directPresentationPlace({ ...input, pathname: "/direct/a/" })).toBe("page")
+    expect(directPresentationPlace({ ...input, pathname: "/conference/a" })).toBe("page")
+    expect(directPresentationPlace({ ...input, pathname: "/direct/b" })).toBe("floating")
+    expect(directPresentationPlace({ ...input, pathname: "/direct/a", hasCredentials: false, pendingOrError: true })).toBe("page")
   })
 })

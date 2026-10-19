@@ -46,6 +46,12 @@ export interface EngineRoutes {
   /** Conférence en direct (lot `live`). */
   conference: (sessionId: string) => string
   /**
+   * Les AUTRES adresses qui servent la même page de conférence (alias hérités,
+   * `/direct/…` d'antsia.ga). Le moteur les reconnaît comme la page : la carte
+   * flottante du direct ne s'y pose pas. Absente : seule `conference` l'est.
+   */
+  conferenceAliases?: (sessionId: string) => readonly string[]
+  /**
    * Destination « Découvrir » des membres (navigation par destinations) : le
    * lieu qui regroupe contenus nationaux, provinces, mots-clés et volets du
    * réseau. Absente, la coque garde sa navigation par volets.
