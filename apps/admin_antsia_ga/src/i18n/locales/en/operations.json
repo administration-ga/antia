@@ -33,7 +33,22 @@
     "person": "Profiles",
     "live": "Live sessions",
     "story": "Stories",
-    "album": "Albums"
+    "album": "Albums",
+    "serviceReview": "Service reviews",
+    "serviceReviewReply": "Service review replies",
+    "commerceOffer": "Store offers",
+    "commercialMessage": "Commercial message",
+    "contextualMessage": "Request conversation messages",
+    "commerceJob": "Job openings",
+    "diasporaAidQuestion": "DIASPORALE mutual aid questions",
+    "diasporaAidAnswer": "DIASPORALE mutual aid answers",
+    "diasporaAidMission": "DIASPORALE volunteer missions",
+    "diasporaMentorProfile": "DIASPORALE mentor profiles",
+    "diasporaMentoringRequest": "DIASPORALE mentoring requests",
+    "diasporaKitResource": "DIASPORALE arrival kit resources",
+    "diasporaJobOffer": "DIASPORALE job offers",
+    "diasporaTalentProfile": "DIASPORALE talent profiles",
+    "diasporaJobApplication": "DIASPORALE job applications"
   },
   "teams": {
     "title": "Moderation teams",
@@ -62,7 +77,7 @@
   },
   "federation": {
     "title": "Federation",
-    "lead": "Emitters, receipts and dead letters for this network. Technical receipt does not prove that a mirror was applied.",
+    "lead": "Emitters, receipts, media transfers and dead letters for this network. Technical receipt does not prove that a mirror was applied.",
     "emitters": "Emitters",
     "configureEmitter": "Configure emitter",
     "editEmitter": "Edit configuration",
@@ -83,6 +98,29 @@
     "revision": "Revision {{revision}}",
     "noContracts": "No allowed contracts.",
     "receipts": "Receipts",
+    "pageSyncTitle": "Official administration pages and posts",
+    "pageSyncHint": "The connection supports official page identity and withdrawal, posts declared public, their withdrawals and media imports under the file guard. Voluntary agents will be connected later. An authorised emitter, its key and media origins must be configured.",
+    "mediaTransfers": "Media transfers",
+    "mediaTransfersHint": "These states track file imports. Transferred media remain subject to file analysis before delivery.",
+    "mediaReference": "{{kind}} · {{reference}}",
+    "mediaKind": {
+      "pages": "Page",
+      "posts": "Post"
+    },
+    "mediaStatus": {
+      "pending": "Waiting for transfer",
+      "running": "Transfer in progress",
+      "attached": "Transferred · file analysis required",
+      "failed": "Transfer failed"
+    },
+    "mediaFailure": {
+      "configuration": "Media origins are missing or invalid in the server configuration. They must be configured before retrying.",
+      "download": "The download was refused or interrupted.",
+      "obsolete": "The revision was withdrawn or its source object became unavailable.",
+      "admission": "A file was refused by the admission policy."
+    },
+    "mediaRetry": "Retry transfer",
+    "mediaRetryQueued": "Retry scheduled. Files will remain subject to analysis.",
     "deadLetters": "Dead letters",
     "replayHint": "Replay preserves the receipt and its envelope. A contract without a business handler will still fail.",
     "replay": "Request replay",
@@ -91,15 +129,24 @@
     "receiptStatus": {
       "received": "Received, processing not confirmed",
       "applied": "Applied",
-      "dead_letter": "Dead letter"
+      "dead_letter": "Dead letter",
+      "discarded": "Personal event discarded, body not retained"
     },
     "failure": {
       "unsupported_contract": "Business handler unavailable",
-      "contract_not_allowed": "Contract not allowed"
+      "contract_not_allowed": "Contract not allowed in this network",
+      "invalid_payload": "Invalid synchronisation data",
+      "unsupported_event": "Update type not supported",
+      "unsupported_media": "Remote image support pending",
+      "source_conflict": "Conflicting source reference or revision",
+      "consent_required": "Current personal consent required",
+      "identity_not_linked": "IDN identity not correlated or access unavailable"
     },
     "outcome": {
       "deduplicated": "The receipt is already applied. No additional processing was performed.",
-      "still_failing": "The replay was recorded, but processing still fails. No mirror was applied."
+      "still_failing": "The replay was recorded, but processing still fails. No mirror was applied.",
+      "applied": "The update was processed and the dead letter is resolved.",
+      "discarded": "The personal body was redacted without applying it. A new event tied to current consent is required."
     }
   },
   "pages": {
@@ -170,6 +217,27 @@
     "refresh": "Refresh counters",
     "queued": "Calculation requested. Wait for the new dated state.",
     "snapshotHint": "Calculation spans several batches; this is a dated state, not an atomic snapshot of every table.",
+    "operational": {
+      "title": "Engine scheduled jobs",
+      "lead": "Technical observation shared by all networks, limited to job documents retained by Convex. Function names, arguments and error text are not retained in this dashboard.",
+      "notGenerated": "No observation is available. The scheduled observer must be connected and complete a pass.",
+      "observed": "Observed on",
+      "window": "Window:",
+      "scanned": "{{count}} documents examined, capped at {{limit}} per observation.",
+      "complete": "All job documents currently retained by Convex have been examined. This does not cover every function error or records already purged by Convex.",
+      "bounded": "The read reached a limit. Counts describe only the examined slice; zero failures does not prove that no other failures occurred.",
+      "stale": "This observation is more than fifteen minutes old. Dashboard freshness is no longer guaranteed.",
+      "warning": "{{count}} failed job(s) observed in the window. Use authorised Convex tools for diagnosis; private error text is not copied here.",
+      "noneObserved": "No failure observed in this slice and window. This result is not an availability guarantee.",
+      "synchronousNotMeasured": "Errors from synchronous queries and mutations are not measured here. Monitoring them requires a log drain configured by the owner. This dashboard sends no external notification.",
+      "metrics": {
+        "failed": "Failed",
+        "pending": "Pending",
+        "inProgress": "In progress",
+        "successful": "Completed",
+        "canceled": "Cancelled"
+      }
+    },
     "metrics": {
       "members": "Active members",
       "openReports": "Open reports",
@@ -193,5 +261,126 @@
     "downloaded": "Aggregate export download requested.",
     "failed": "The file could not be downloaded. You can retry.",
     "invalid": "This aggregate projection cannot be exported; download is blocked."
+  },
+  "commercialContact": {
+    "title": "Commercial contact",
+    "lead": "This channel stays closed until the network and shop enable it. Personal conversations stay separate.",
+    "enabled": "Channel enabled",
+    "disabled": "Channel disabled",
+    "enable": "Enable channel",
+    "disable": "Disable channel"
+  },
+  "contextualPolicy": {
+    "title": "Request conversations",
+    "lead": "Opens or closes, for this network and for each kind, the private conversations that start from a service request, an accepted mentorship or a shortlisted application. Closed by default; every decision requires a reason and is recorded in the log.",
+    "existingHint": "Closing blocks any opening, message and call; the history stays readable to the parties. Personal messaging stays separate.",
+    "enabled": "Conversations open for this kind",
+    "disabled": "Conversations closed for this kind",
+    "enable": "Open conversations of this kind",
+    "disable": "Close conversations of this kind",
+    "updated": "Last decision on",
+    "kinds": {
+      "diasporaServiceRequest": "Service requests (DIASPORALE)",
+      "diasporaMentoring": "Accepted mentorships (DIASPORALE)",
+      "diasporaJobApplication": "Shortlisted applications (DIASPORALE)"
+    }
+  },
+  "paymentPolicy": {
+    "title": "New payments",
+    "lead": "Allow or close new payment starts for this network. Every decision requires a reason and is recorded in the audit log.",
+    "providerHint": "Enabling this policy alone does not configure a provider or make payment available. PRO.GA configuration and authorisations are still required.",
+    "existingHint": "Closing this policy keeps tracking and reconciliation of existing payments accessible. It does not cancel or refund a payment.",
+    "enabled": "New payment starts allowed by the platform",
+    "disabled": "New payment starts closed",
+    "enable": "Allow new payments",
+    "disable": "Close new payments",
+    "updated": "Last decision on"
+  },
+  "servicePolicy": {
+    "title": "Quotes, appointments and services",
+    "lead": "Open or close, for this network, quote, appointment and fixed-price service requests to shops linked to PRO.GA. Every decision requires a reason and is recorded in the audit log.",
+    "linkHint": "Opening this policy alone makes no service available: each shop must be linked to PRO.GA with the matching permission, and PRO.GA re-checks its mandate on every request.",
+    "existingHint": "Closing this policy keeps existing appointments and orders viewable and cancellable. It cancels no appointment.",
+    "enabled": "Service requests opened by the platform",
+    "disabled": "Service requests closed",
+    "enable": "Open service requests",
+    "disable": "Close service requests",
+    "updated": "Last decision on"
+  },
+  "jobPolicy": {
+    "title": "Job openings and applications",
+    "lead": "Open or close, for this network, the display of job openings received from PRO.GA and the sending of applications. Closed by default; every decision requires a reason and is recorded in the audit log.",
+    "linkHint": "Opening this policy alone publishes no opening: the employer must agree to publication in PRO.GA and link its shop with the matching permissions. PRO.GA re-checks the mandate on every application.",
+    "jobsEnabled": "Job openings shown in this network",
+    "jobsDisabled": "Job openings hidden in this network",
+    "applicationsEnabled": "Applications through ANTSIA open",
+    "applicationsDisabled": "Applications through ANTSIA closed",
+    "enableJobs": "Show job openings",
+    "disableJobs": "Hide job openings (and close applications)",
+    "enableApplications": "Open applications",
+    "disableApplications": "Close applications",
+    "updated": "Last decision on"
+  },
+  "storefrontPolicy": {
+    "title": "Storefront publication",
+    "lead": "Sets, for this network, how declared storefronts are published: closed (drafts only) or reviewed admission, one storefront at a time. Closed by default; every decision requires a reason and is recorded in the audit log.",
+    "closeHint": "Closing immediately removes storefronts from discovery without erasing anything; queued requests stay and can still be rejected, but no longer admitted.",
+    "autoHint": "Automatic admission of verified memberships is not offered here: it awaits approval of the list of restricted sectors.",
+    "updated": "Last decision on",
+    "state": {
+      "closed": "Storefront publication closed",
+      "review": "Reviewed admission, one storefront at a time",
+      "auto_verified": "Automatic admission of verified memberships (in force)"
+    },
+    "openReview": "Open reviewed admission",
+    "backToReview": "Return to reviewed admission",
+    "close": "Close storefront publication",
+    "queue": {
+      "title": "Admission queue",
+      "lead": "Publication requests, oldest first. Admitting publishes the storefront and creates its page if it has none; the reason for a rejection is shown to the managers.",
+      "closedHint": "Publication is closed: requests can be rejected, not admitted.",
+      "unnamed": "Unnamed storefront",
+      "page": "Page: {{handle}}",
+      "preparer": "Prepared by {{name}}",
+      "preparerWithHandle": "Prepared by {{name}} (@{{handle}})",
+      "noPreparer": "Preparer not disclosed",
+      "requested": "Requested on",
+      "admit": "Admit the storefront",
+      "reject": "Reject the storefront",
+      "model": {
+        "products": "Products",
+        "quote_services": "Services on quote"
+      },
+      "membership": {
+        "en_attente": "Membership pending",
+        "declaree": "Declared membership",
+        "verifiee": "Verified membership",
+        "suspendue": "Suspended membership",
+        "partie": "Left the network",
+        "none": "No membership"
+      }
+    }
+  },
+  "catalogPolicy": {
+    "title": "Shop catalogs",
+    "lead": "Open or close, for this network, the display of catalogs received from PRO.GA: offers, product pages and post slots. Closed by default; every decision requires a reason and is recorded in the audit log.",
+    "linkHint": "Opening this policy alone shows no offer: each shop must be linked to PRO.GA with the permission to publish its catalog, then attached to its emitter by a separate decision.",
+    "existingHint": "Closing immediately removes offers from every read without erasing the received copies; a new order preparation requires an open catalog.",
+    "enabled": "Catalogs shown in this network",
+    "disabled": "Catalogs closed",
+    "enable": "Open catalogs",
+    "disable": "Close catalogs",
+    "updated": "Last decision on"
+  },
+  "checkoutPolicy": {
+    "title": "Order preparation",
+    "lead": "Open or close, for this network, the private preparation of orders with shops linked to PRO.GA: summary and a fifteen-minute stock hold. Closed by default; every decision requires a reason and is recorded in the audit log.",
+    "linkHint": "Opening this policy alone makes no order possible: the catalog must be open and the shop linked to PRO.GA with the permission to receive orders. No payment follows from it.",
+    "existingHint": "Closing blocks any new preparation without erasing anything; holds already placed run to their expiry.",
+    "enabled": "Order preparation opened by the platform",
+    "disabled": "Order preparation closed",
+    "enable": "Open order preparation",
+    "disable": "Close order preparation",
+    "updated": "Last decision on"
   }
 }

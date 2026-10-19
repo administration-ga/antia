@@ -241,3 +241,48 @@ describe("raccords des opérations de console", () => {
     expect(state.toast).not.toHaveBeenCalled()
   })
 })
+
+describe("finitions DP-37 — portes des vitrines, du catalogue et de la préparation", () => {
+  const storefrontItem = { shopId: "shop", networkId: networkA, networkSlug: "antsia", storefront: "pending_review", model: "products", name: "Atelier de recette", description: "Présentation déclarée", specialty: null, serviceArea: null, hours: null, logoUrl: null, pageHandle: null, requestedAt: 1000, preparer: { displayName: "Awa", handle: "awa.demo", membership: "declaree" } }
+  const hasButton = (label: string) => Array.from(container.querySelectorAll("button")).some((element) => element.textContent?.includes(label))
+
+  it("vitrines fermées par défaut : l'admission motivée se propose, jamais l'admission d'office ; la file refuse mais n'admet pas", async () => {
+    state.data["modules/shops/operator:storefrontPolicy"] = { policy: "closed", updatedAt: null }
+    state.data["modules/shops/operator:storefrontQueue"] = page([storefrontItem])
+    await render({ section: "pages", networkId: networkA, canAdmin: true })
+    expect(container.textContent).toContain("Publication des vitrines fermée")
+    expect(button("Ouvrir l’admission motivée").disabled).toBe(false)
+    expect(hasButton("d’office")).toBe(false)
+    expect(container.textContent).toContain("Préparée par Awa (@awa.demo)")
+    expect(container.textContent).toContain("Adhésion déclarée")
+    expect(button("Admettre la vitrine").disabled).toBe(true)
+    expect(button("Refuser la vitrine").disabled).toBe(false)
+  })
+
+  it("un refus motivé transmet la décision de la file ; un opérateur lecteur ne règle ni la politique ni les portes d'administration", async () => {
+    state.data["modules/shops/operator:storefrontPolicy"] = { policy: "review", updatedAt: 1000 }
+    state.data["modules/shops/operator:storefrontQueue"] = page([storefrontItem])
+    await render({ section: "pages", networkId: networkA, canAdmin: false })
+    expect(hasButton("Fermer la publication des vitrines")).toBe(false)
+    expect(state.queries.mock.calls.some(([name]) => name === "modules/shops/catalogControl:getPolicy" || name === "modules/shops/checkoutPolicy:getPolicy")).toBe(false)
+    expect(button("Admettre la vitrine").disabled).toBe(false)
+    await act(async () => button("Refuser la vitrine").click())
+    await changeInput("reason", "Présentation incomplète")
+    await submitForm('form[aria-label="Refuser la vitrine"]')
+    expect(state.mutation).toHaveBeenCalledWith({ shopId: "shop", decision: "reject", reason: "Présentation incomplète" })
+  })
+
+  it("catalogue et préparation : fermés par défaut, ouverture motivée transmise au réseau choisi", async () => {
+    state.data["modules/shops/operator:storefrontPolicy"] = { policy: "review", updatedAt: 1000 }
+    state.data["modules/shops/operator:storefrontQueue"] = page([])
+    state.data["modules/shops/catalogControl:getPolicy"] = { networkId: networkA, enabled: false, configured: false, updatedAt: null }
+    state.data["modules/shops/checkoutPolicy:getPolicy"] = { networkId: networkA, enabled: false, configured: false, updatedAt: null }
+    await render({ section: "pages", networkId: networkA, canAdmin: true })
+    expect(container.textContent).toContain("Catalogues fermés")
+    expect(container.textContent).toContain("Préparation des commandes fermée")
+    await act(async () => button("Ouvrir les catalogues").click())
+    await changeInput("reason", "Ouverture décidée pour le pilote")
+    await submitForm('form[aria-label="Ouvrir les catalogues"]')
+    expect(state.mutation).toHaveBeenCalledWith({ networkId: networkA, enabled: true, reason: "Ouverture décidée pour le pilote" })
+  })
+})

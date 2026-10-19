@@ -12,6 +12,15 @@ import { z } from "zod"
 
 import { ConsoleDate, controlStyle, EmptyRows, inputStyle, LoadingRows, MotiveAction, OperationFailure, panelClass, reasonSchema, useOperation, useOperationDraft, useOperationDraftGuard, useWindowCursor, WindowPagination } from "./console-operation-controls"
 
+import { CommercialContactPolicy } from "./console-commercial-contact"
+import { ContextualConversationPolicy } from "./console-contextual-policy"
+import { PaymentPolicy } from "./console-payment-policy"
+import { ServicePolicy } from "./console-service-policy"
+import { JobPolicy } from "./console-job-policy"
+import { StorefrontPolicy } from "./console-storefront-policy"
+import { CatalogPolicy } from "./console-catalog-policy"
+import { CheckoutPolicy } from "./console-checkout-policy"
+
 type PageValues = { name: string; handle: string; country: string; reason: string }
 function CreateInstitutionPage({ networkId, canAdmin }: { networkId: Id<"networks">; canAdmin: boolean }) {
   const { t } = useTranslation("operations")
@@ -72,6 +81,6 @@ export function PagesPanel({ networkId, canAdmin }: { networkId: Id<"networks">;
       <Field htmlFor={id} label={t("pages.filter")}><Select id={id} style={inputStyle} value={status} onChange={(event) => { const next = event.target.value === "inactive" ? "inactive" : "active"; if (next !== status && canChange()) setStatus(next) }}><option value="active">{t("pages.status.active")}</option><option value="inactive">{t("pages.status.inactive")}</option></Select></Field>
       <PageList key={status} networkId={networkId} status={status} canAdmin={canAdmin} />
     </section>
-    {canAdmin ? <CreateInstitutionPage networkId={networkId} canAdmin={canAdmin} /> : <p className={`${panelClass} text-sm text-muted-foreground`}>{t("common.adminRequired")}</p>}
+    <div className="flex min-w-0 flex-col gap-5"><CommercialContactPolicy networkId={networkId} canAdmin={canAdmin} /><ContextualConversationPolicy networkId={networkId} canAdmin={canAdmin} /><StorefrontPolicy networkId={networkId} canAdmin={canAdmin} />{canAdmin ? <><CatalogPolicy networkId={networkId} /><CheckoutPolicy networkId={networkId} /><PaymentPolicy networkId={networkId} /><ServicePolicy networkId={networkId} /><JobPolicy networkId={networkId} /><CreateInstitutionPage networkId={networkId} canAdmin={canAdmin} /></> : <p className={`${panelClass} text-sm text-muted-foreground`}>{t("common.adminRequired")}</p>}</div>
   </div>
 }

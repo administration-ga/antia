@@ -1,6 +1,7 @@
 "use client"
 
 import { api, type Id } from "@antsia/api/engine"
+import { MODERATION_SURFACES } from "@antsia/social-domain/moderationPolicy"
 import { Button, Field, Select, TextArea, TextInput } from "@antsia/ui"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useMutation, useQuery } from "convex/react"
@@ -12,7 +13,7 @@ import { z } from "zod"
 
 import { controlStyle, EmptyRows, inputStyle, LoadingRows, MotiveAction, OperationFailure, panelClass, reasonSchema, useOperation, useOperationDraft, useOperationDraftGuard } from "./console-operation-controls"
 
-const surfaces = ["post", "comment", "groupMessage", "event", "page", "person", "live", "story", "album"] as const
+const surfaces = MODERATION_SURFACES
 const teamScopes = ["all", ...surfaces] as const
 type TeamScope = typeof teamScopes[number]
 type TeamValues = { name: string; scope: TeamScope; reason: string }

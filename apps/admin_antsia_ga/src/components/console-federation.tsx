@@ -99,12 +99,31 @@ function FederationReceipts({ networkId }: { networkId: Id<"networks"> }) {
   </section>
 }
 
+function MediaTransfers({ networkId, canAdmin }: { networkId: Id<"networks">; canAdmin: boolean }) {
+  const { t } = useTranslation("operations")
+  const window = useWindowCursor()
+  const result = useQuery(api.modules.federation.mediaOperations.paginate, { networkId, paginationOpts: { cursor: window.cursor, numItems: 20, maximumRowsRead: 25, maximumBytesRead: 524_288 } })
+  const retry = useMutation(api.modules.federation.mediaOperations.retry)
+  return <section className={`${panelClass} flex min-w-0 flex-col gap-4`}>
+    <h3 className="font-semibold">{t("federation.mediaTransfers")}</h3>
+    <p className="text-sm text-muted-foreground">{t("federation.mediaTransfersHint")}</p>
+    {result === undefined ? <LoadingRows /> : result.page.length === 0 ? <EmptyRows done={result.isDone} /> : <ul className="flex flex-col gap-4">{result.page.map((row) => <li key={row.mirrorId} className="flex min-w-0 flex-col gap-2 border-b border-border pb-4">
+      <p className="break-words font-medium">{t("federation.mediaReference", { kind: t(`federation.mediaKind.${row.localTable}`), reference: row.objectRef })}</p>
+      <p className="text-sm">{t(`federation.mediaStatus.${row.status}`)}</p>
+      {row.reason ? <p className="text-sm text-muted-foreground">{t(`federation.mediaFailure.${row.reason}`)}</p> : null}
+      <p className="text-xs text-muted-foreground">{t("federation.attempts", { count: row.attempts })} · <ConsoleDate at={row.updatedAt} /></p>
+      {canAdmin && row.status === "failed" ? <MotiveAction label={t("federation.mediaRetry")} minLength={10} successKey="federation.mediaRetryQueued" onDecision={(reason) => retry({ mirrorId: row.mirrorId, reason })} /> : null}
+    </li>)}</ul>}
+    <WindowPagination window={window} result={result} />
+  </section>
+}
+
 function DeadLetters({ networkId, canAdmin }: { networkId: Id<"networks">; canAdmin: boolean }) {
   const { t } = useTranslation("operations")
   const window = useWindowCursor()
   const result = useQuery(api.modules.federation.replay.paginateDeadLetters, { networkId, status: "dead_letter", paginationOpts: { cursor: window.cursor, numItems: 10, maximumRowsRead: 20, maximumBytesRead: 1_572_864 } })
   const replay = useMutation(api.modules.federation.replay.replay)
-  const [outcomes, setOutcomes] = useState<Record<string, "deduplicated" | "still_failing">>({})
+  const [outcomes, setOutcomes] = useState<Record<string, "deduplicated" | "still_failing" | "applied" | "discarded">>({})
   return <section className={`${panelClass} flex min-w-0 flex-col gap-4`}>
     <h3 className="font-semibold">{t("federation.deadLetters")}</h3>
     <p className="text-sm text-muted-foreground">{t("federation.replayHint")}</p>
@@ -116,7 +135,7 @@ function DeadLetters({ networkId, canAdmin }: { networkId: Id<"networks">; canAd
       {canAdmin ? <MotiveAction label={t("federation.replay")} minLength={10} successKey={null} onDecision={(reason) => replay({ deadLetterId: row._id, reason })} onSuccess={(response) => {
         setOutcomes((previous) => ({ ...previous, [row._id]: response.outcome }))
         if (response.outcome === "still_failing") toast.warning(t("federation.outcome.still_failing"))
-        else toast.success(t("federation.outcome.deduplicated"))
+        else toast.success(t(`federation.outcome.${response.outcome}`))
       }} /> : null}
     </li>)}</ul>}
     <WindowPagination window={window} result={result} />
@@ -127,7 +146,12 @@ export function FederationPanel({ networkId, canAdmin }: { networkId: Id<"networ
   const { t } = useTranslation("operations")
   return <div className="flex min-w-0 flex-col gap-5">
     <div><h2 className="flex items-center gap-2 text-xl font-semibold"><Link2 size={22} aria-hidden="true" />{t("federation.title")}</h2><p className="mt-2 text-sm text-muted-foreground">{t("federation.lead")}</p></div>
+    <section className={`${panelClass} flex min-w-0 flex-col gap-2`} aria-label={t("federation.pageSyncTitle")}>
+      <h3 className="font-semibold">{t("federation.pageSyncTitle")}</h3>
+      <p className="text-sm text-muted-foreground">{t("federation.pageSyncHint")}</p>
+    </section>
     <Emitters networkId={networkId} canAdmin={canAdmin} />
     <div className="grid min-w-0 gap-5 lg:grid-cols-2"><FederationReceipts networkId={networkId} /><DeadLetters networkId={networkId} canAdmin={canAdmin} /></div>
+    <MediaTransfers networkId={networkId} canAdmin={canAdmin} />
   </div>
 }
