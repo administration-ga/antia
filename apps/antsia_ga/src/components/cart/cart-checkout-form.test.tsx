@@ -7,6 +7,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { appResources } from "@/i18n/resources"
 import { CheckoutPreparationForm, type CheckoutCartLine } from "@/components/checkout/checkout-form"
 import { catalogOfferFixture, ESTABLISHMENT_REF, optionsFixture, VARIANT_REF } from "@/components/checkout/checkout-fixtures.test-support"
+import { checkoutAmount } from "@/components/checkout/checkout-model"
 
 vi.mock("convex/react", () => ({ useConvexAuth: () => ({ isAuthenticated: true }) }))
 vi.mock("@antsia/api/sign-out-everywhere", () => ({ isSigningOutEverywhere: () => false }))
@@ -38,6 +39,36 @@ describe("préparation réelle d'un panier mono-vendeur", () => {
     expect(prepare.mock.calls[0]![0].lines).toEqual([{ offerRef: lines()[0]!.offer.offerRef, variantRef: VARIANT_REF, quantity: 2, expectedCatalogRevision: 3, expectedUnitAmount: { amount: 17500, currency: "XAF" } }, { offerRef: "pro.ga:offer:second", quantity: 3, expectedCatalogRevision: 3, expectedUnitAmount: { amount: 3000, currency: "XAF" } }])
     expect(prepare.mock.calls[0]![0].expectedPolicyVersion).toBe(optionsFixture.policyVersion)
     expect(persist.mock.invocationCallOrder[0]).toBeLessThan(prepare.mock.invocationCallOrder[0]!)
+  })
+  it("récapitule chaque ligne à son prix, variante comprise, sans déclarer le panier inexact", async () => {
+    await render()
+    const summary = container.querySelector("section")!
+    expect(summary.textContent).not.toContain(i18n.t("notPurchasable"))
+    expect(summary.textContent).not.toContain(i18n.t("cart:notExact"))
+    expect(summary.textContent).not.toContain(i18n.t("unitAmount"))
+    expect(summary.textContent).toContain(`${i18n.t("cart:itemsAmount")} : ${checkoutAmount(17500 * 2 + 3000 * 3, "fr")}`)
+    expect((container.querySelector('button[type="submit"]') as HTMLButtonElement).disabled).toBe(false)
+  })
+  it.each([
+    ["un devis", [{ offer: catalogOfferFixture({ variants: [], price: { mode: "quote", currency: "XAF" } }), quantity: 1 }]],
+    ["une variante retirée", [lines()[1]!, { ...lines()[0]!, variantRef: "pro.ga:variant:retiree" }]],
+  ])("%s dans le panier : montant inexact annoncé et préparation fermée", async (_case, items) => {
+    await render(items as CheckoutCartLine[])
+    const summary = container.querySelector("section")!
+    expect(summary.textContent).toContain(i18n.t("cart:notExact"))
+    expect(summary.textContent).not.toContain(i18n.t("cart:itemsAmount"))
+    expect((container.querySelector('button[type="submit"]') as HTMLButtonElement).disabled).toBe(true)
+    await consent()
+    // Aucun montant de repli (prix de base, -1) ne fabrique un total.
+    expect(summary.textContent).not.toContain(`${i18n.t("total")} :`)
+    expect((container.querySelector('button[type="submit"]') as HTMLButtonElement).disabled).toBe(true)
+    await submit()
+    expect(prepare).not.toHaveBeenCalled()
+  })
+  it("un vendeur différent refusé à l'envoi le dit au lieu de se taire", async () => {
+    await render([lines()[0]!, { ...lines()[1]!, offer: { ...lines()[1]!.offer, shopHandle: "autre" } }]); await consent(); await submit()
+    expect(prepare).not.toHaveBeenCalled()
+    expect(container.querySelector('[role="alert"]')?.textContent).toBe(i18n.t("validation.choiceChanged"))
   })
   it("un devis ou un vendeur différent n'est pas rendu payable par le panier", async () => {
     await render([{ offer: catalogOfferFixture({ variants: [], price: { mode: "quote", currency: "XAF" } }), quantity: 1 }]); await consent(); await submit()
