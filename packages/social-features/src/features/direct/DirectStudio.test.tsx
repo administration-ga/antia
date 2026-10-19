@@ -9,6 +9,7 @@ import { createAppI18n } from "../../i18n"
 import { directSessionStore } from "../../stores/direct-session-store"
 import { DirectStudio } from "./DirectStudio"
 import type { DirectSession } from "./DirectPage"
+import { DIRECT_SCENE_CELL_CLASS } from "./direct-tile-fit"
 
 const mocks = vi.hoisted(() => ({ cameras: [] as unknown[], screens: [] as unknown[], speaking: [] as unknown[], screenShare: vi.fn() }))
 vi.mock("@livekit/components-react", () => ({
@@ -75,6 +76,24 @@ describe("studio F3b — présentation et commandes", () => {
     render(tree(session({ viewerRole: "speaker" })))
     fireEvent.click(screen.getByRole("button", { name: "Allumer la caméra" }))
     expect(directSessionStore.getState().intent).toMatchObject({ audioOnly: false, cameraEnabled: true })
+  })
+  // Mesuré dans Chromium (390 px) : `h-full` + `aspect-ratio` donnait des tuiles de 332 px
+  // dans des colonnes de 162 px. Une tuile se borne à sa case : largeur ET hauteur
+  // (la largeur en unités de conteneur, que jsdom ne retient pas, est éprouvée par `direct-tile-fit`).
+  it("chaque tuile et chaque place libre restent contenues dans leur case, à la proportion de la source", () => {
+    const contained = (box: HTMLElement) => {
+      expect(box.parentElement).toHaveClass(...DIRECT_SCENE_CELL_CLASS.split(" "))
+      expect(box).not.toHaveClass("h-full")
+      expect(parseFloat(box.style.aspectRatio)).toBeCloseTo(16 / 9)
+    }
+    const pinned = () => screen.getAllByRole("button", { name: /^Épingler/ }).map((button) => button.parentElement!)
+    const view = render(tree(session({ stageFormat: "television", stageLayout: "fixed" })))
+    for (const box of [...pinned(), ...screen.getAllByText("Place libre")]) contained(box)
+    view.rerender(tree(session({ stageFormat: "television" })))
+    fireEvent.change(screen.getByLabelText("Disposition de mon écran"), { target: { value: "speaker" } })
+    expect(screen.getByLabelText("Scène : personne qui parle en grand")).toBeInTheDocument()
+    expect(pinned()).toHaveLength(2)
+    for (const box of pinned()) contained(box)
   })
   it("un spotlight hors connexion ne remplace pas une présentation disponible", () => {
     mocks.cameras = [track("alice", "camera")]; mocks.screens = [track("alice", "screen_share")]

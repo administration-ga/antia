@@ -20,7 +20,7 @@ const mocks = vi.hoisted(() => ({
 vi.mock("@antsia/ui/overlay", () => ({ useIsReseauMobile: () => false }))
 vi.mock("@antsia/api/network", () => ({
   useNetwork: () => ({ networkId: mocks.networkId, personId: "person-a", charte: "antsia" }),
-  useRoutes: () => ({ home: () => "/fil", conference: (id: string) => `/conference/${id}` }),
+  useRoutes: () => ({ home: () => "/fil", conference: (id: string) => `/conference/${id}`, conferenceAliases: (id: string) => [`/direct/${id}`] }),
 }))
 vi.mock("@antsia/api/hooks", () => ({ useAuthenticatedConvexQuery: () => ({ data: mocks.session, isError: false }) }))
 vi.mock("@antsia/api/routing", () => ({
@@ -105,6 +105,16 @@ describe("direct F3a — entrée et durée de vie de la salle", () => {
     expect(mocks.mounted).toHaveBeenCalledTimes(1)
     expect(mocks.unmounted).not.toHaveBeenCalled()
     expect(screen.getByRole("link", { name: "Conférence de recette" })).toHaveAttribute("href", "/conference/session-a")
+  })
+
+  // La page de la session se reconnaît à toutes ses adresses : la conférence et
+  // ses alias déclarés par l'application (`/direct/:id` d'antsia.ga).
+  it.each(["/conference/session-a", "/direct/session-a", "/direct/session-a/"])("aucune carte flottante ne recouvre la page de la session sur %s", async (path) => {
+    mocks.path = path
+    render(tree())
+    fireEvent.click(screen.getByRole("button", { name: "Rejoindre la salle" }))
+    await waitFor(() => expect(directSessionStore.getState().credentials).not.toBeNull())
+    expect(screen.queryByRole("link", { name: "Conférence de recette" })).toBeNull()
   })
 
   it("ne rouvre pas une salle avec un jeton reçu après le départ volontaire", async () => {

@@ -11,7 +11,7 @@ import { useTranslation } from "react-i18next"
 import { Button, Card, Field, TextInput } from "@/components/shared/controls"
 import { SHOP_SELECT_CLASS, useShopAction } from "@/components/shops/shop-ui"
 import { useCartConnectivity } from "@/components/cart/use-cart-draft"
-import { checkoutAmount, checkoutFormSchema, EMPTY_CHECKOUT_FORM, type CheckoutFormValues } from "./checkout-model"
+import { checkoutAmount, checkoutCartLines, checkoutFormSchema, checkoutUnitAmount, EMPTY_CHECKOUT_FORM, type CheckoutFormValues } from "./checkout-model"
 
 export type CheckoutOptions = Extract<CheckoutOptionsResult, { outcome: "ready" }>
 export type CheckoutPrepareInput = { lines: CommerceCheckoutLineInput[]; fulfillment: CommerceFulfillment; consentTextVersion: string; clientRequestId: string; expectedPolicyVersion: number }
@@ -46,14 +46,13 @@ export function CheckoutPreparationForm({ offer, cartLines, options, consentText
   const { setValue } = form
   useEffect(() => { if (!intentRef.current) setValue("consent", false) }, [consentTextVersion, consentEpoch, connectivity.generation, setValue])
   const values = form.watch()
-  const variant = offer.variants.find((candidate) => candidate.variantRef === values.variantRef)
-  const amount = intent?.lines[0]?.expectedUnitAmount.amount ?? (offer.variants.length ? variant?.amount : offer.price.mode === "fixed" || offer.price.mode === "unit" ? offer.price.amount : undefined)
+  // Le prix unitaire d'une offre SEULE. Un panier porte celui de CHAQUE ligne,
+  // variante comprise : la sélection de variante de ce formulaire ne le concerne pas.
+  const amount = cartLines ? undefined : intent?.lines[0]?.expectedUnitAmount.amount ?? checkoutUnitAmount(offer, values.variantRef)
   const quantity = intent?.lines[0]?.quantity ?? (/^[1-9]\d{0,2}$/.test(values.quantity) ? Number(values.quantity) : null)
-  const preparedLines = intent?.lines ?? (cartLines ? cartLines.map((line) => {
-    const variant = line.offer.variants.find((entry) => entry.variantRef === line.variantRef)
-    const unit = variant?.amount ?? (line.offer.price.mode === "fixed" || line.offer.price.mode === "unit" ? line.offer.price.amount : undefined)
-    return { offerRef: line.offer.offerRef, ...(line.variantRef ? { variantRef: line.variantRef } : {}), quantity: line.quantity, expectedCatalogRevision: line.offer.revision, expectedUnitAmount: { amount: unit ?? -1, currency: "XAF" as const } }
-  }) : null)
+  // `null` dès qu'une ligne n'a pas de prix exact : rien n'est alors préparable.
+  const cartPrepared = cartLines ? checkoutCartLines(cartLines) : null
+  const preparedLines = intent?.lines ?? cartPrepared
   const lineAmount = preparedLines ? preparedLines.reduce((sum, line) => sum + line.expectedUnitAmount.amount * line.quantity, 0) : amount !== undefined && quantity !== null ? amount * quantity : null
   const fees = [...options.fees, ...(values.fulfillmentMode === "seller_delivery" && options.sellerDelivery ? [{ amount: options.sellerDelivery.fee, label: options.sellerDelivery.label, kind: "delivery" as const }] : [])]
   const total = lineAmount === null ? null : lineAmount + fees.reduce((sum, fee) => sum + fee.amount.amount, 0)
@@ -104,10 +103,12 @@ export function CheckoutPreparationForm({ offer, cartLines, options, consentText
       {values.fulfillmentMode === "seller_delivery" ? <div className="grid gap-4"><p className="text-sm text-muted-foreground">{t("addressHint")}</p><Field id={`${id}-country`} label={t("country")} error={errorFor("country")}><select id={`${id}-country`} className={SHOP_SELECT_CLASS} autoComplete={CHECKOUT_ADDRESS_AUTOCOMPLETE.country} {...form.register("country")}><option value="">{t("choose")}</option><option value="GA">{t("gabon")}</option></select></Field>{(["locality", "line1", "line2", "instructions"] as const).map((name) => <Field key={name} id={`${id}-${name}`} label={t(name)} error={errorFor(name)}><TextInput id={`${id}-${name}`} autoComplete={CHECKOUT_ADDRESS_AUTOCOMPLETE[name]} aria-invalid={!!errorFor(name)} {...form.register(name)} /></Field>)}</div> : null}
       <label className="flex min-h-11 items-start gap-3 text-sm"><input type="checkbox" className="mt-1 size-5 shrink-0 accent-primary" {...form.register("consent")} />{t("consent")}</label>{errorFor("consent") ? <p role="alert" className="text-sm text-destructive">{errorFor("consent")}</p> : null}<p className="text-xs text-muted-foreground">{t("consentVersion", { version: intent?.consentTextVersion ?? consentTextVersion })}</p>
     </fieldset>
-    <section aria-labelledby={`${id}-summary`} className="grid gap-3 rounded-xl border border-border bg-background p-4"><h3 id={`${id}-summary`} className="font-semibold">{t("estimated")}</h3>{amount !== undefined ? <p>{t("unitAmount")} : {checkoutAmount(amount, locale)}</p> : <p>{t("notPurchasable")}</p>}{lineAmount !== null ? <p>{t("lineAmount")} : {checkoutAmount(lineAmount, locale)}</p> : null}<h4 className="font-medium">{t("fees")}</h4>{fees.length ? <ul className="grid gap-1">{fees.map((fee, index) => <li key={index}>{fee.label} : {checkoutAmount(fee.amount.amount, locale)}</li>)}</ul> : <p className="text-sm">{t("noFees")}</p>}{total !== null && values.fulfillmentMode ? <p className="font-semibold">{t("total")} : {checkoutAmount(total, locale)}</p> : null}<p className="text-sm text-muted-foreground">{t("unconfirmedTotal")}</p></section>
+    <section aria-labelledby={`${id}-summary`} className="grid gap-3 rounded-xl border border-border bg-background p-4"><h3 id={`${id}-summary`} className="font-semibold">{t("estimated")}</h3>{cartLines ? (preparedLines ? null : <p>{t("cart:notExact")}</p>) : amount !== undefined ? <p>{t("unitAmount")} : {checkoutAmount(amount, locale)}</p> : <p>{t("notPurchasable")}</p>}{lineAmount !== null ? <p>{cartLines ? t("cart:itemsAmount") : t("lineAmount")} : {checkoutAmount(lineAmount, locale)}</p> : null}<h4 className="font-medium">{t("fees")}</h4>{fees.length ? <ul className="grid gap-1">{fees.map((fee, index) => <li key={index}>{fee.label} : {checkoutAmount(fee.amount.amount, locale)}</li>)}</ul> : <p className="text-sm">{t("noFees")}</p>}{total !== null && values.fulfillmentMode ? <p className="font-semibold">{t("total")} : {checkoutAmount(total, locale)}</p> : null}<p className="text-sm text-muted-foreground">{t("unconfirmedTotal")}</p></section>
     {!connectivity.online ? <p role="status">{t("cart:offline")}</p> : null}{suspended && connectivity.online ? <p role="status">{t("cart:refreshRequired")}</p> : null}
+    {/* Un panier n'a pas de champ de variante : son refus d'envoi se dit ici, jamais en silence. */}
+    {cartLines && errorFor("variantRef") ? <p role="alert" className="text-sm text-destructive">{errorFor("variantRef")}</p> : null}
     {/* Demander la préparation, et sa reprise : couleur du commerce (ADR-0027). */}
-    {!intent ? <Button type="submit" variant="commerce" pending={action.pending} disabled={refused || (!cartLines && amount === undefined) || !validTotal || suspended || !connectivity.online}>{t("prepare")}</Button> : <><p role="status" className="text-sm">{t("uncertainIntent")}</p>{(action.error || uncertain) && !refused ? <Button type="button" variant="commerce" pending={action.pending} disabled={suspended || !connectivity.online} onClick={() => send(intent, true)}>{t("retryIntent")}</Button> : null}</>}
+    {!intent ? <Button type="submit" variant="commerce" pending={action.pending} disabled={refused || (cartLines ? cartPrepared === null : amount === undefined) || !validTotal || suspended || !connectivity.online}>{t("prepare")}</Button> : <><p role="status" className="text-sm">{t("uncertainIntent")}</p>{(action.error || uncertain) && !refused ? <Button type="button" variant="commerce" pending={action.pending} disabled={suspended || !connectivity.online} onClick={() => send(intent, true)}>{t("retryIntent")}</Button> : null}</>}
     {action.error ? <p role="alert" className="text-sm text-destructive">{t("failed")}</p> : null}{refused ? <p role="alert" className="text-sm">{t("refused")}</p> : null}
   </form></Card>
 }

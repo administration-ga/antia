@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/direct/DirectScene.tsx @ ad2e7fdc2 — adaptations : studio réécrit sur la salle persistante ANTSIA, personId au lieu des noms, géométrie pure du socle, commandes d’intention conservées dans le store et partage explicite ; i18n et jetons.
+// Dupliqué de socle/packages/agent-features/src/features/direct/DirectScene.tsx @ ad2e7fdc2 — adaptations : studio réécrit sur la salle persistante ANTSIA, personId au lieu des noms, géométrie pure du socle, commandes d’intention conservées dans le store et partage explicite ; i18n et jetons ; chaque tuile CONTENUE dans sa case mesurée (requête de conteneur), à la proportion de la source.
 "use client"
 
 import { Button } from "@antsia/ui"
@@ -10,6 +10,7 @@ import { directSessionStore, useDirectSessionStore } from "../../stores/direct-s
 import type { DirectSession } from "./DirectPage"
 import { orderDirectTiles, planDirectScene } from "./direct-scene"
 import { directParticipantPersonId, directRosterTracks } from "./direct-studio-model"
+import { DIRECT_SCENE_CELL_CLASS, directTileFit } from "./direct-tile-fit"
 import { DIRECT_SCENE_VIEWS, type DirectSceneView } from "./direct-view"
 import { useDirectCommand } from "./use-direct-command"
 
@@ -64,11 +65,11 @@ export function DirectStudio({ session, onLeave, onEnd }: { session: DirectSessi
     return () => document.removeEventListener("fullscreenchange", update)
   }, [])
 
-  const tile = (candidate: typeof candidates[number]) => <div key={candidate.key} className="relative h-full min-h-0 min-w-0 overflow-hidden rounded-lg border border-border bg-muted" style={{ aspectRatio: plan.tileAspect }}>
+  const tile = (candidate: typeof candidates[number]) => <div className="relative min-h-0 min-w-0 overflow-hidden rounded-lg border border-border bg-muted" style={directTileFit(plan.tileAspect)}>
     {candidate.track ? <><ParticipantTile trackRef={candidate.track} className="h-full w-full [&_.lk-participant-metadata]:hidden" /><span className="absolute top-1 left-1 rounded bg-background px-2 py-1 text-sm">{candidate.displayName || t("person")}</span></> : <div className="flex h-full min-h-24 flex-col items-center justify-center gap-1 p-3 text-center"><span>{candidate.displayName || t("person")}</span><span className="text-xs text-muted-foreground">{t("studio.notConnected")}</span></div>}
     <Button size="sm" variant="ghost" className="absolute bottom-1 right-1" style={{ background: "var(--background)" }} aria-label={t(effectivePin === candidate.key ? "studio.unpinPerson" : "studio.pinPerson", { name: candidate.displayName || t("person") })} aria-pressed={effectivePin === candidate.key} onClick={() => setPinned(effectivePin === candidate.key ? null : candidate.key)}>{t(effectivePin ===candidate.key ? "studio.unpin" : "studio.pin")}</Button>
   </div>
-  const presentation = screen ? <div className="relative h-full min-h-0 min-w-0 overflow-hidden rounded-lg border border-border bg-muted" aria-label={t("studio.presentation")}><ParticipantTile trackRef={screen} className="h-full w-full [&_video]:object-contain [&_.lk-participant-metadata]:hidden" /><span className="absolute top-1 left-1 rounded bg-background px-2 py-1 text-sm">{t("studio.presentation")}</span></div> : null
+  const presentation = screen ? <div className="relative h-full w-full min-h-0 min-w-0 overflow-hidden rounded-lg border border-border bg-muted" aria-label={t("studio.presentation")}><ParticipantTile trackRef={screen} className="h-full w-full [&_video]:object-contain [&_.lk-participant-metadata]:hidden" /><span className="absolute top-1 left-1 rounded bg-background px-2 py-1 text-sm">{t("studio.presentation")}</span></div> : null
 
   return <div ref={frame} data-lk-theme="antsia" className="flex min-w-0 flex-col gap-3 rounded-xl border border-border bg-card p-3" style={{ ...studioTokens, ...(fullscreen ? { height: "100%", overflow: "hidden" } : {}) }}>
     <div className="flex shrink-0 flex-wrap items-center justify-between gap-2">
@@ -78,13 +79,13 @@ export function DirectStudio({ session, onLeave, onEnd }: { session: DirectSessi
     <div ref={scene} aria-label={t(`studio.scene.${plan.kind}`, { count: plan.tiles })} className="flex min-h-0 min-w-0 flex-col gap-2 overflow-hidden" style={fullscreen ? { flex: "1 1 0%" } : { height: "clamp(12rem, 60vh, 38rem)" }}>
       {candidates.length === 0 && !screen ? <p className="p-6">{t("emptyStage")}</p> : banded ? <>
         <div className="grid min-h-0 flex-1 gap-2" style={{ gridTemplateColumns: plan.band === "right" ? "minmax(0, 1fr) minmax(6rem, 22%)" : "minmax(0, 1fr)", gridTemplateRows: plan.band === "bottom" ? "minmax(0, 1fr) 6rem" : "minmax(0, 1fr)" }}>
-          <div className="min-h-0 min-w-0">{dominant ? tile(dominant) : presentation}</div>
-          {plan.kind !== "cinema" ? <div className={`flex min-h-0 min-w-0 gap-2 ${plan.band === "right" ? "flex-col overflow-y-auto" : "overflow-x-auto"}`}>{rest.map((candidate) => <div key={candidate.key} className={plan.band === "right" ? "h-24 shrink-0" : "w-32 shrink-0"}>{tile(candidate)}</div>)}{dominant && screen ? <div className={plan.band === "right" ? "h-24 shrink-0" : "w-48 shrink-0"}>{presentation}</div> : null}</div> : null}
+          <div className={DIRECT_SCENE_CELL_CLASS}>{dominant ? tile(dominant) : presentation}</div>
+          {plan.kind !== "cinema" ? <div className={`flex min-h-0 min-w-0 gap-2 ${plan.band === "right" ? "flex-col overflow-y-auto" : "overflow-x-auto"}`}>{rest.map((candidate) => <div key={candidate.key} className={`${DIRECT_SCENE_CELL_CLASS} ${plan.band === "right" ? "h-24 shrink-0" : "w-32 shrink-0"}`}>{tile(candidate)}</div>)}{dominant && screen ? <div className={plan.band === "right" ? "h-24 shrink-0" : "w-48 shrink-0"}>{presentation}</div> : null}</div> : null}
         </div>
         {plan.hidden > 0 ? <p className="text-sm text-muted-foreground">{t("studio.hidden", { count: plan.hidden })}</p> : null}
       </> : <div className="grid min-h-0 min-w-0 flex-1 gap-2" style={{ gridTemplateColumns: `repeat(${plan.columns}, minmax(0, 1fr))`, gridTemplateRows: `repeat(${plan.rows}, minmax(0, 1fr))` }}>
-        {candidates.map(tile)}
-        {plan.kind === "fixed" ? Array.from({ length: Math.max(0, plan.maxVisible - candidates.length) }, (_, index) => <div key={`open-${index}`} className="flex min-h-24 items-center justify-center rounded-lg border border-dashed border-border p-2 text-sm text-muted-foreground" style={{ aspectRatio: plan.tileAspect }}>{t("studio.freePlace")}</div>) : null}
+        {candidates.map((candidate) => <div key={candidate.key} className={DIRECT_SCENE_CELL_CLASS}>{tile(candidate)}</div>)}
+        {plan.kind === "fixed" ? Array.from({ length: Math.max(0, plan.maxVisible - candidates.length) }, (_, index) => <div key={`open-${index}`} className={DIRECT_SCENE_CELL_CLASS}><div className="flex min-h-0 min-w-0 items-center justify-center overflow-hidden rounded-lg border border-dashed border-border p-2 text-center text-sm text-muted-foreground" style={directTileFit(plan.tileAspect)}>{t("studio.freePlace")}</div></div>) : null}
       </div>}
     </div>
     <div className="flex min-h-14 shrink-0 flex-wrap gap-2 border-t border-border pt-3 pb-[env(safe-area-inset-bottom)]" aria-label={t("studio.controls")}>

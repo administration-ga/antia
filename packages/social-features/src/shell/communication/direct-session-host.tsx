@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/shell/direct-session-host.tsx @ ad2e7fdc2 — adaptations : première tranche réécrite sur le moteur, baux et rôle dans la coque persistante, réseau courant ; carte flottante consommant le registre hors route injectée (F3c).
+// Dupliqué de socle/packages/agent-features/src/shell/direct-session-host.tsx @ ad2e7fdc2 — adaptations : première tranche réécrite sur le moteur, baux et rôle dans la coque persistante, réseau courant ; carte flottante consommant le registre hors route injectée (F3c), la conférence ET ses alias (`conferenceAliases`) étant la page.
 "use client"
 
 import { api, type Id } from "@antsia/api/engine"
@@ -70,8 +70,10 @@ function ActiveDirect({ sessionId }: { sessionId: Id<"liveSessions"> }) {
       release()
     }
   }, [beatsViewer, networkId, sessionId, viewerHeartbeat, leaveViewer])
+  // La page de la session a plusieurs adresses (alias hérités) : sur chacune, pas de carte par-dessus.
+  const pageHrefs = [routes.conference(sessionId), ...(routes.conferenceAliases?.(sessionId) ?? [])]
   return <>
     <DirectRoomMount sessionId={sessionId} />
-    {directPresentationPlace({ heldSessionId: state.sessionId, hasCredentials: !!state.credentials, pendingOrError: state.phase === "connecting" || state.phase === "error", pathname, conferenceHref: routes.conference(sessionId) }) === "floating" ? <DirectFloatingCard session={session.data} onLeave={() => { if (directSessionStore.getState().sessionId === sessionId) directSessionStore.leave(); void leaveViewer({ networkId, sessionId }).catch(() => undefined); if (role === "speaker") void leaveStage({ networkId, sessionId }).catch(() => undefined) }} /> : null}
+    {directPresentationPlace({ heldSessionId: state.sessionId, hasCredentials: !!state.credentials, pendingOrError: state.phase === "connecting" || state.phase === "error", pathname, pageHrefs }) === "floating" ? <DirectFloatingCard session={session.data} onLeave={() => { if (directSessionStore.getState().sessionId === sessionId) directSessionStore.leave(); void leaveViewer({ networkId, sessionId }).catch(() => undefined); if (role === "speaker") void leaveStage({ networkId, sessionId }).catch(() => undefined) }} /> : null}
   </>
 }

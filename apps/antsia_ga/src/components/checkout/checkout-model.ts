@@ -1,4 +1,5 @@
 import { COMMERCE_COMMAND_LIMITS, type CommerceCheckoutLineInput, type CommerceCheckoutResult } from "@antsia/social-domain/commerce/command"
+import type { CatalogOffer } from "@convex/modules/shops/catalogValidators"
 import type { TFunction } from "i18next"
 import { z } from "zod"
 
@@ -8,6 +9,30 @@ export const CHECKOUT_QUANTITY_MAX = COMMERCE_COMMAND_LIMITS.quantityMax
 /** Prix et quantités attendus ne deviennent jamais l'autorité commerciale. */
 export function checkoutAmount(amount: number, locale: string): string {
   return new Intl.NumberFormat(locale, { style: "currency", currency: "XAF", currencyDisplay: "code", minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(amount)
+}
+
+/**
+ * Le prix unitaire EXACT d'une ligne, ou `undefined` : celui de la variante
+ * désignée ; sans variante, le prix fixe ou unitaire d'une offre qui n'en
+ * propose aucune. Un devis, une variante retirée ou une variante à choisir
+ * n'ont pas de prix à préparer : aucun montant n'est choisi à la place de la
+ * personne (mêmes règles que la garde d'envoi du formulaire).
+ */
+export function checkoutUnitAmount(offer: Pick<CatalogOffer, "price" | "variants">, variantRef?: string): number | undefined {
+  if (variantRef) return offer.variants.find((variant) => variant.variantRef === variantRef)?.amount
+  if (offer.variants.length) return undefined
+  return offer.price.mode === "fixed" || offer.price.mode === "unit" ? offer.price.amount : undefined
+}
+
+/** Les lignes d'un panier à leur prix exact, variante comprise ; `null` dès qu'une ligne n'en a pas. */
+export function checkoutCartLines(lines: readonly { offer: CatalogOffer; variantRef?: string; quantity: number }[]): CommerceCheckoutLineInput[] | null {
+  const prepared: CommerceCheckoutLineInput[] = []
+  for (const line of lines) {
+    const amount = checkoutUnitAmount(line.offer, line.variantRef)
+    if (amount === undefined) return null
+    prepared.push({ offerRef: line.offer.offerRef, ...(line.variantRef ? { variantRef: line.variantRef } : {}), quantity: line.quantity, expectedCatalogRevision: line.offer.revision, expectedUnitAmount: { amount, currency: "XAF" } })
+  }
+  return prepared
 }
 
 export function checkoutDate(value: number, locale: string): string {

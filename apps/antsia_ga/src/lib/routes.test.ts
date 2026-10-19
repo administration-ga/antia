@@ -96,6 +96,11 @@ describe("navigation par destinations (P02)", () => {
     expect(usageScreenForPath(routes.me())).toBeNull()
   })
 
+  it("déclare au moteur l'alias `/direct/…` comme la page de la conférence", () => {
+    expect(engineRoutes.conference("s 1")).toBe(routes.conference("s 1"))
+    expect(engineRoutes.conferenceAliases?.("s 1")).toEqual([routes.direct("s 1")])
+  })
+
   it("reconnaît les pages de direct, plein écran, sans confondre leur annuaire", () => {
     expect(isLiveSessionPath(routes.direct("s 1"))).toBe(true)
     expect(isLiveSessionPath(routes.conference("s1"))).toBe(true)
