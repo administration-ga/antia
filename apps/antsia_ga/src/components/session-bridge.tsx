@@ -6,7 +6,7 @@ import { useTranslation } from "react-i18next"
 import { isSigningOutEverywhere } from "@antsia/api/sign-out-everywhere"
 
 import { authClient } from "@/lib/auth-client"
-import { BRIDGE_RESUME_EVENT, BRIDGE_TIMEOUT_MS } from "@/lib/session-bridge"
+import { BRIDGE_CLIENT_TIMEOUT_MS, BRIDGE_RESUME_EVENT, sdkSessionCookie } from "@/lib/session-bridge"
 import { clearLocalSessionForAnonymousBridge, currentSessionBridgeGeneration, requestSessionBridge, rotateSessionBridgeFence } from "@/lib/session-bridge-client"
 
 /** La génération ferme l'ancien reçu AVANT que le SDK ne consomme un éventuel OTT. */
@@ -59,8 +59,12 @@ export function SessionBridge({ children }: { children: ReactNode }) {
       try {
         if (isAuthenticated) {
           const cookie = authClient.getCookie()
-          const result = await Promise.race([authClient.convex.token({ fetchOptions: { throw: false, signal: controller.signal } }), new Promise<never>((_resolve, reject) => { timer = setTimeout(() => { controller.abort(); reject(new Error("bridgeTimeout")) }, BRIDGE_TIMEOUT_MS) })])
-          if (!result.error && typeof result.data?.token === "string" && currentSessionBridgeGeneration() === generation && authClient.getCookie() === cookie && !isSigningOutEverywhere()) admitted = await requestSessionBridge("POST", { generation: generation!, cookie, jwt: result.data.token }, fetch, controller.signal)
+          const sessionCookie = sdkSessionCookie(cookie)
+          const result = await Promise.race([authClient.convex.token({ fetchOptions: { throw: false, signal: controller.signal } }), new Promise<never>((_resolve, reject) => { timer = setTimeout(() => { controller.abort(); reject(new Error("bridgeTimeout")) }, BRIDGE_CLIENT_TIMEOUT_MS) })])
+          // Le SDK renouvelle aussi des cookies auxiliaires (JWT/cache) : seul le SID signé porte la session.
+          const currentCookie = sdkSessionCookie(authClient.getCookie())
+          const sameSession = sessionCookie !== null && currentCookie?.name === sessionCookie.name && currentCookie.value === sessionCookie.value
+          if (!result.error && typeof result.data?.token === "string" && currentSessionBridgeGeneration() === generation && sameSession && !isSigningOutEverywhere()) admitted = await requestSessionBridge("POST", { generation: generation!, cookie, jwt: result.data.token }, fetch, controller.signal)
         } else {
           const anonymous = clearLocalSessionForAnonymousBridge()
           admitted = await requestSessionBridge("DELETE", { generation: generation!, anonymous }) && anonymous

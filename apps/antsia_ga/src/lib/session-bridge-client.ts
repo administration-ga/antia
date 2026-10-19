@@ -4,7 +4,7 @@ import { clearCrossDomainSessionResidue } from "@antsia/api/cross-domain-session
 import type { IdentityAuthClient } from "@antsia/social-features/identity"
 import { authClient } from "./auth-client"
 import { routes } from "./routes"
-import { BRIDGE_RESUME_EVENT, BRIDGE_TIMEOUT_MS, BRIDGE_TTL_SECONDS, bridgeCookieNames, isBridgeGeneration, sdkSessionCookie } from "./session-bridge"
+import { BRIDGE_CLIENT_TIMEOUT_MS, BRIDGE_RESUME_EVENT, BRIDGE_TTL_SECONDS, bridgeCookieNames, isBridgeGeneration, sdkSessionCookie } from "./session-bridge"
 
 export function currentSessionBridgeGeneration(): string | null {
   if (typeof document === "undefined") return null
@@ -36,7 +36,7 @@ export async function requestSessionBridge(method: "POST" | "DELETE", body: { ge
     const response = await Promise.race([
       fetchImpl(routes.publicSessionBridge(), { method, credentials: "same-origin", cache: "no-store", redirect: "error", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body), signal: controller.signal }),
       interrupted,
-      new Promise<never>((_resolve, reject) => { timer = setTimeout(() => { controller.abort(); reject(new Error("bridgeTimeout")) }, BRIDGE_TIMEOUT_MS) }),
+      new Promise<never>((_resolve, reject) => { timer = setTimeout(() => { controller.abort(); reject(new Error("bridgeTimeout")) }, BRIDGE_CLIENT_TIMEOUT_MS) }),
     ])
     return response.ok && currentSessionBridgeGeneration() === body.generation
   } catch { return false }

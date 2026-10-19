@@ -1,6 +1,8 @@
 /** Pont propre à ANTSIA : ces noms ne sont ni les cookies Better Auth ni ceux des autres applications. */
 export const BRIDGE_TTL_SECONDS = 60 * 60 * 24 * 7
 export const BRIDGE_TIMEOUT_MS = 4_000
+/** Le transport inclut réseau/préparation Next ; le travail serveur garde sa propre borne de 4 s. */
+export const BRIDGE_CLIENT_TIMEOUT_MS = 15_000
 export const BRIDGE_RESUME_EVENT = "antsia:public-session-resume"
 
 export function bridgeCookieNames(secure: boolean) {

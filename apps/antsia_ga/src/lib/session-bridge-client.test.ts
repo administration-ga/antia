@@ -4,9 +4,31 @@ import type { IdentityAuthClient } from "@antsia/social-features/identity"
 
 vi.mock("./auth-client", () => ({ authClient: { getCookie: () => "", getSessionData: () => null } }))
 import { currentSessionBridgeGeneration, fencedIdentityEntryClient, requestSessionBridge, rotateSessionBridgeFence } from "./session-bridge-client"
+import { BRIDGE_CLIENT_TIMEOUT_MS, BRIDGE_TIMEOUT_MS } from "./session-bridge"
 
 afterEach(() => vi.useRealTimers())
 describe("fence avant entrée, client partagé intact", () => {
+  it("attend la préparation HTTP initiale sans abandonner au délai du travail serveur", async () => {
+    vi.useFakeTimers()
+    const generation = rotateSessionBridgeFence()
+    const pending = requestSessionBridge("DELETE", { generation, anonymous: false }, () => new Promise<Response>((resolve) => {
+      setTimeout(() => resolve(new Response(null, { status: 204 })), BRIDGE_TIMEOUT_MS + 1_000)
+    }))
+    await vi.advanceTimersByTimeAsync(BRIDGE_TIMEOUT_MS + 1_001)
+    expect(await pending).toBe(true)
+  })
+  it("un transport bloqué reste borné et une réponse tardive n'est jamais admise", async () => {
+    vi.useFakeTimers()
+    const generation = rotateSessionBridgeFence()
+    let finish: (response: Response) => void = () => undefined
+    const fetchImpl = vi.fn<typeof fetch>(() => new Promise<Response>((resolve) => { finish = resolve }))
+    const pending = requestSessionBridge("POST", { generation, cookie: "sdk", jwt: "jwt" }, fetchImpl)
+    await vi.advanceTimersByTimeAsync(BRIDGE_CLIENT_TIMEOUT_MS + 1)
+    expect(await pending).toBe(false)
+    expect(fetchImpl.mock.calls[0]?.[1]?.signal?.aborted).toBe(true)
+    finish(new Response(null, { status: 204 }))
+    expect(await pending).toBe(false)
+  })
   it("ferme avant OTP/IDN/vérification SMS, y compris les refus, sans transformer les envois de code", async () => {
     const calls: string[] = []
     const original: IdentityAuthClient = { signIn: { oauth2: async () => { calls.push("idn"); return { error: true } }, emailOtp: async () => { calls.push("otp"); return { error: true } } }, emailOtp: { sendVerificationOtp: async () => { calls.push("send"); return {} } }, phoneNumber: { sendOtp: async () => ({}), verify: async () => { calls.push("sms"); return { error: true } } } }
