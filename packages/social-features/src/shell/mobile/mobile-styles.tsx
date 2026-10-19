@@ -102,6 +102,30 @@ export const RESEAU_MOBILE_CSS = `
         letter-spacing: -0.01em;
         color: var(--foreground);
       }
+      /* La MARQUE déclarée par l'application (ADR-0027) : le nom en capitales
+         espacées et son point à l'aplat d'identité, comme la maquette. */
+      .rm-wordmark[data-brand] {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 21px;
+        letter-spacing: 0.06em;
+      }
+      .rm-wordmark-dot {
+        display: inline-block;
+        flex: 0 0 auto;
+        width: 7px;
+        height: 7px;
+        border-radius: 999px;
+        background: var(--primary-fill);
+      }
+      /* Les boutons icônes de l'EN-TÊTE (recherche, cloche) : un rond gris dans
+         les thèmes à trois couleurs (ADR-0027), comme la maquette et la loupe du
+         bureau ; replis : l'angle et le fond transparent de l'onglet. */
+      .rm-header .rm-tab {
+        border-radius: var(--esp-header-icon-radius, 12px);
+        background: var(--esp-header-icon-bg, transparent);
+      }
       .rm-avatar-link {
         display: inline-flex;
         align-items: center;

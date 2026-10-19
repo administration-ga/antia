@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/stories/stories-tray.ts @ ad2e7fdc2 — adaptations : auteur du plateau du moteur (`personId` au lieu de `userId`, nom nullable du contrat `counterpartLabel`, dit par un libellé neutre traduit — `storyAuthorName`) ; vignette `cover` toujours portée par le moteur (champ de compatibilité `coverUrl` et son repli retirés) ; âge et nom accessible traduits (`t` en dernier paramètre, clés `stories:storiesTray.*`) ; instant arrondi des lectures du serveur (`storyQueryInstant` : le moteur ne lit pas l'horloge dans une requête).
+// Dupliqué de socle/packages/agent-features/src/features/stories/stories-tray.ts @ ad2e7fdc2 — adaptations : auteur du plateau du moteur (`personId` au lieu de `userId`, nom nullable du contrat `counterpartLabel`, dit par un libellé neutre traduit — `storyAuthorName`) ; vignette `cover` toujours portée par le moteur (champ de compatibilité `coverUrl` et son repli retirés) ; âge et nom accessible traduits (`t` en dernier paramètre, clés `stories:storiesTray.*`) ; instant arrondi des lectures du serveur (`storyQueryInstant` : le moteur ne lit pas l'horloge dans une requête) ; libellé court d'un médaillon (`storyAuthorShortName`, le prénom) pour la présentation « rings » (ADR-0027).
 /**
  * stories-tray — ce que la BARRE de stories montre, et dans quel ordre.
  *
@@ -94,6 +94,24 @@ export function storyAuthorName(
 	t: TFunction,
 ): string {
 	return displayName ?? t("stories:storiesTray.unknownAuthor")
+}
+
+/**
+ * Le libellé COURT d'un médaillon (présentation « rings ») : le prénom. Les noms
+ * de personnes écrivent le NOM en majuscules (« Awa NDONG », « NDONG MBA Awa ») :
+ * c'est le premier mot qui n'est pas en majuscules ; à défaut, le premier mot.
+ * Un auteur sans nom garde le libellé neutre. La phrase complète reste dans le
+ * nom accessible de la tuile (`trayTileLabel`).
+ */
+export function storyAuthorShortName(
+	displayName: string | null,
+	t: TFunction,
+): string {
+	const words = (displayName ?? "").trim().split(/\s+/).filter((word) => word.length > 0)
+	const first = words[0]
+	if (first === undefined) return t("stories:storiesTray.unknownAuthor")
+	const isSurname = (word: string) => word === word.toLocaleUpperCase("fr") && word !== word.toLocaleLowerCase("fr")
+	return words.find((word) => !isSurname(word)) ?? first
 }
 
 /**

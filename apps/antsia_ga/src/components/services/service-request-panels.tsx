@@ -10,7 +10,7 @@ import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 
-import { Button, Card } from "@/components/shared/controls"
+import { Button, type ButtonVariant, Card } from "@/components/shared/controls"
 import { useShopAction } from "@/components/shops/shop-ui"
 import {
   bookingConsequences, decisionSchema, deviceTimeZone, displayTimeZones, newClientRequestId, SERVICE_AGENDA_TIME_ZONE, serviceAmount, serviceDateTime,
@@ -23,14 +23,14 @@ type ReadyQuote = Extract<ServiceQuoteResult, { outcome: "ready" }>["quote"]
 type QuoteSummary = Extract<ServiceQuotesResult, { outcome: "ready" }>["quotes"][number]
 
 /** Un accord explicite, remis à zéro à chaque nouvelle intention. */
-function Decision({ label, submitLabel, pending, onConfirm }: { label: string; submitLabel: string; pending: boolean; onConfirm: () => void }) {
+function Decision({ label, submitLabel, pending, onConfirm, variant = "primary" }: { label: string; submitLabel: string; pending: boolean; onConfirm: () => void; variant?: ButtonVariant }) {
   const { t } = useTranslation("services")
   const form = useForm<DecisionValues>({ resolver: zodResolver(decisionSchema(t)), defaultValues: { consent: false } })
   const error = form.formState.errors.consent?.message
   return <form noValidate className="grid gap-3" onSubmit={form.handleSubmit(() => { form.reset({ consent: false }); onConfirm() })}>
     <label className="flex items-start gap-3 text-sm"><input type="checkbox" className="mt-1 size-4" aria-invalid={error ? true : undefined} {...form.register("consent")} /><span>{label}</span></label>
     {error ? <p role="alert" className="text-sm text-destructive">{error}</p> : null}
-    <Button type="submit" pending={pending}>{submitLabel}</Button>
+    <Button type="submit" variant={variant} pending={pending}>{submitLabel}</Button>
   </form>
 }
 
@@ -105,7 +105,8 @@ function QuoteDetail({ request, quoteRef, onClose }: { request: ServiceRequestDt
       {quote.notes ? <p className="whitespace-pre-line break-words text-sm text-muted-foreground">{quote.notes}</p> : null}
       {quote.acceptable && !expired ? <div className="grid gap-2">
         <p className="text-sm" role="status">{t("quotes.recap", { reference: quote.reference, version: quote.version, total: serviceAmount(quote.total.amount, locale) })}</p>
-        <Decision label={t("consents.quoteAcceptance")} submitLabel={t("quotes.accept")} pending={action.pending} onConfirm={() => {
+        {/* Accepter le devis, c'est commander : couleur du commerce (ADR-0027). */}
+        <Decision label={t("consents.quoteAcceptance")} submitLabel={t("quotes.accept")} variant="commerce" pending={action.pending} onConfirm={() => {
           setMessage(null)
           void action.run(() => accept({ networkId, requestRowId: request.requestRowId, quoteRef: quote.quoteRef, quoteVersion: quote.version, acceptedTotal: { ...quote.total }, consentTextVersion: detail?.outcome === "ready" ? detail.consentTextVersion : COMMERCE_SERVICE_CONSENTS.quote_acceptance.textVersion, clientRequestId }), (result) => {
             if (result.outcome !== "request") setMessage(result.outcome === "refused" ? "quotes.acceptRefused" : "common.unavailable")

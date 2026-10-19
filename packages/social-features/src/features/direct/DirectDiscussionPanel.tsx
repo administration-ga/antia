@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/direct/DirectCommentsPanel.tsx @ ad2e7fdc2 — adaptations : commentaires et réactions abonnés seulement dans le volet ouvert, API moteur et réseau, formulaire RHF/Zod, modération par permission serveur et i18n.
+// Dupliqué de socle/packages/agent-features/src/features/direct/DirectCommentsPanel.tsx @ ad2e7fdc2 — adaptations : commentaires et réactions abonnés seulement dans le volet ouvert, API moteur et réseau, formulaire RHF/Zod, modération par permission serveur et i18n ; couleurs par fonction (ADR-0027) : réactions du direct à la teinte des réactions (`--role-react-soft`, `--role-react-label`), facture du bouton fantôme en repli.
 "use client"
 
 import { api } from "@antsia/api/engine"
@@ -8,6 +8,7 @@ import { DIRECT_COMMENT_MAX_LENGTH } from "@antsia/social-domain/live/domain"
 import { Button } from "@antsia/ui"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useMutation } from "convex/react"
+import type { CSSProperties } from "react"
 import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { z } from "zod"
@@ -16,6 +17,8 @@ import { useDirectCommand } from "./use-direct-command"
 
 const commentSchema = z.object({ body: z.string().trim().min(1).max(DIRECT_COMMENT_MAX_LENGTH) })
 const reactionKinds = ["like", "bravo", "soutien", "instructif"] as const
+// Réactions : couleur des réactions (ADR-0027), facture du bouton fantôme en repli.
+const REACTION_BUTTON_STYLE = { background: "var(--role-react-soft, transparent)", color: "var(--role-react-label, var(--ink-700))" } satisfies CSSProperties
 
 export function DirectDiscussionPanel({ session }: { session: DirectSession }) {
   const { t } = useTranslation("direct")
@@ -37,7 +40,7 @@ export function DirectDiscussionPanel({ session }: { session: DirectSession }) {
     </div>
     {session.chatMode === "closed" ? <p role="status">{t("discussion.closed")}</p> : <form onSubmit={handleSubmit(async ({ body }) => { if (await command.run(() => send({ networkId, sessionId: session.sessionId, body }))) reset() })} className="flex flex-col gap-2"><label className="flex flex-col gap-2">{t("discussion.write")}<textarea {...register("body")} maxLength={DIRECT_COMMENT_MAX_LENGTH} rows={3} aria-invalid={!!errors.body} className="min-h-24 rounded-lg border border-input bg-background p-3" /></label>{errors.body ? <p role="alert">{t("discussion.invalid", { max: DIRECT_COMMENT_MAX_LENGTH })}</p> : null}<Button type="submit" disabled={command.pending}>{t("discussion.send")}</Button></form>}
     <div className="flex flex-wrap gap-2" aria-label={t("discussion.reactions")}>
-      {reactions.isError ? <p role="alert">{t("discussion.reactionsFailed")}</p> : !reactions.data ? <p role="status">{t("loading")}</p> : reactionKinds.map((kind) => <Button key={kind} size="sm" variant="ghost" disabled={command.pending} onClick={() => void command.run(() => react({ networkId, sessionId: session.sessionId, kind, burst: 1 }))}>{t(`discussion.reaction.${kind}`, { count: reactions.data!.byKind.find((row) => row.kind === kind)?.count ?? 0 })}</Button>)}
+      {reactions.isError ? <p role="alert">{t("discussion.reactionsFailed")}</p> : !reactions.data ? <p role="status">{t("loading")}</p> : reactionKinds.map((kind) => <Button key={kind} size="sm" variant="ghost" style={REACTION_BUTTON_STYLE} disabled={command.pending} onClick={() => void command.run(() => react({ networkId, sessionId: session.sessionId, kind, burst: 1 }))}>{t(`discussion.reaction.${kind}`, { count: reactions.data!.byKind.find((row) => row.kind === kind)?.count ?? 0 })}</Button>)}
     </div>
     {command.error ? <p role="alert">{command.error}</p> : null}
   </div>

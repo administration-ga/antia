@@ -171,6 +171,7 @@
   --esp-surface-card: var(--card);
   --esp-surface-raised: var(--popover);
   --esp-surface-border: var(--border); /* carte et fond de même couleur : un filet */
+  --esp-story-ring-fill: conic-gradient(from 210deg, var(--esp-theme-swatch-1), var(--esp-theme-swatch-2), var(--esp-theme-swatch-3), var(--esp-theme-swatch-1)); /* l'anneau « à voir » des actus : les trois couleurs du thème, celles du sélecteur */
   --esp-neutral-chip: var(--muted);
   --esp-neutral-hover: var(--muted);
   --esp-mobilebar-border: var(--border);

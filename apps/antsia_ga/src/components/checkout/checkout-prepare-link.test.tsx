@@ -20,6 +20,8 @@ describe("entrée membre de préparation", () => {
   it("ouvre uniquement le parcours privé de l'offre localement admissible", () => {
     expect(html()).toContain(routes.checkoutPrepare("atelier", "offer-a"))
     expect(html()).toContain("Préparer une commande")
+    // Le chemin d'achat principal porte la couleur du commerce (ADR-0027).
+    expect(html()).toContain("--role-commerce-fill")
   })
   it("masque le lien sur refus, erreur ou offre sans montant exact", () => {
     mocks.available = false; expect(html()).toBe("")

@@ -94,7 +94,8 @@ function BookingFlow({ handle, offerRef, services }: { handle: string; offerRef:
       </fieldset>
       <label className="flex items-start gap-3 text-sm"><input type="checkbox" className="mt-1 size-4" aria-invalid={errors.consent ? true : undefined} {...form.register("consent")} /><span>{t("consents.booking")}</span></label>
       {errors.consent?.message ? <p role="alert" className="text-sm text-destructive">{errors.consent.message}</p> : null}
-      <Button type="submit" pending={action.pending}>{t("booking.submit")}</Button>
+      {/* Réserver : couleur du commerce (ADR-0027). */}
+      <Button type="submit" variant="commerce" pending={action.pending}>{t("booking.submit")}</Button>
       {failure ? <p role="alert">{t(failure)}</p> : null}
       {action.error ? <p role="alert">{action.error}</p> : null}
     </form></Card> : null}

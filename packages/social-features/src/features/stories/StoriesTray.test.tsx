@@ -199,3 +199,47 @@ describe("StoriesTray — branchement sur le plateau du moteur", () => {
 		expect(screen.getByText("Nom paul")).toBeInTheDocument()
 	})
 })
+
+describe("StoriesTray — médaillons déclarés par l'application (ADR-0027)", () => {
+	function ringsTray(onOpen = vi.fn(), onCreate = vi.fn()) {
+		return (
+			<NetworkProvider networkId={TEST_NETWORK_ID} personId={TEST_PERSON_ID} slug="stories-rings" charte="antsia" routes={TEST_ROUTES} storiesPresentation="rings">
+				<StoriesTray myHandle="moi" now={BASE} onOpen={onOpen} onCreate={onCreate} />
+			</NetworkProvider>
+		)
+	}
+
+	it("par défaut, les cartes : rien ne change pour une application qui ne déclare rien", () => {
+		mocks.byInstant.set(BASE, { groups: [group("marie")], truncated: false })
+		renderTray(BASE)
+		expect(screen.getByRole("group").getAttribute("data-presentation")).toBe("cards")
+		expect(document.querySelector(".st-card")).not.toBeNull()
+		expect(document.querySelector(".st-ring-tile")).toBeNull()
+	})
+
+	it("des médaillons ronds dans leur anneau, le prénom dessous ; « Vous » et son « + » en tête", () => {
+		const onOpen = vi.fn()
+		const onCreate = vi.fn()
+		mocks.byInstant.set(BASE, {
+			groups: [
+				group("awa", { unseenCount: 1, author: { ...group("awa").author, displayName: "Awa NDONG" } }),
+				group("jr", { author: { ...group("jr").author, displayName: "Jean-Rémy ÉLOÏSE" } }),
+			],
+			truncated: false,
+		})
+		renderWithEngine(ringsTray(onOpen, onCreate))
+		const tray = screen.getByRole("group")
+		expect(tray.getAttribute("data-presentation")).toBe("rings")
+		expect(document.querySelector(".st-card")).toBeNull()
+		expect([...tray.querySelectorAll(".st-ring-name")].map((name) => name.textContent)).toEqual(["Vous", "Awa", "Jean-Rémy"])
+		expect(tray.querySelector(".st-tray-create .st-ring-plus")).not.toBeNull()
+		// L'anneau dit toujours vu / pas vu : celui de la série à voir porte le dégradé.
+		expect(tray.querySelectorAll(".esp-story-ring")).toHaveLength(1)
+		expect(tray.querySelectorAll(".esp-story-ring-seen")).toHaveLength(1)
+		// Mêmes gestes et mêmes noms accessibles que les cartes.
+		fireEvent.click(screen.getByRole("button", { name: /Awa NDONG/ }))
+		expect(onOpen).toHaveBeenCalledWith("awa")
+		fireEvent.click(tray.querySelector<HTMLButtonElement>(".st-tray-create")!)
+		expect(onCreate).toHaveBeenCalledTimes(1)
+	})
+})

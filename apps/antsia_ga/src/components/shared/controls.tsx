@@ -9,14 +9,18 @@ import { type ButtonHTMLAttributes, forwardRef, type InputHTMLAttributes, type R
  * couleur littérale). Les surfaces dupliquées du socle (PA6) apporteront leurs
  * propres composants ; ceux-ci restent volontairement sobres.
  */
+export type ButtonVariant = "primary" | "commerce" | "ghost" | "outline"
+
 /** La facture d'un bouton, aussi pour un LIEN qui mène à une page (une destination reste un lien). */
-export function buttonClassName(variant: "primary" | "ghost" | "outline" = "primary", className?: string): string {
+export function buttonClassName(variant: ButtonVariant = "primary", className?: string): string {
   return cn(
     // Système épuré (ADR-0027) : pilule, et contour seulement à couleur égale.
     "inline-flex min-h-11 items-center justify-center gap-2 rounded-[var(--ui2-button-radius,var(--radius-lg))] px-4 text-sm font-medium transition-colors",
     "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
     "disabled:cursor-not-allowed disabled:opacity-60",
     variant === "primary" && "bg-[var(--primary-fill)] text-[color:var(--primary-fill-on,var(--primary-foreground))] hover:bg-[var(--primary-fill-hover)]",
+    // Acheter, commander, payer, participer : couleur du commerce (ADR-0027), l'aplat d'identité en repli.
+    variant === "commerce" && "bg-[var(--role-commerce-fill,var(--primary-fill))] text-[color:var(--role-commerce-on,var(--primary-fill-on,var(--primary-foreground)))] hover:brightness-[0.95]",
     // Le neutre (Annuler, Plus tard) : gris, sans filet dans les thèmes ANTSIA.
     variant === "outline" && "border border-[color:var(--ui2-button-outline-border,var(--border))] bg-[var(--ui2-button-outline-bg,var(--card))] text-foreground hover:brightness-[0.97]",
     variant === "ghost" && "text-foreground hover:bg-muted",
@@ -30,7 +34,7 @@ export function Button({
   className,
   children,
   ...props
-}: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: "primary" | "ghost" | "outline"; pending?: boolean }) {
+}: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: ButtonVariant; pending?: boolean }) {
   return (
     <button
       {...props}

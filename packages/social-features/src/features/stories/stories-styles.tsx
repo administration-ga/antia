@@ -230,6 +230,67 @@ const STORIES_CSS = `
         object-fit: cover;
       }
 
+      /* ── LES MÉDAILLONS (présentation « rings », ADR-0027) ────────────────
+         Déclarés par l'application (storiesPresentation) : un rond par
+         auteur dans son anneau, le prénom dessous, « Vous » et son « + » en
+         tête — la maquette de la série 3. Les cartes restent le défaut. La
+         tuile garde une largeur figée : la rangée ne se recompose pas selon
+         la longueur des prénoms, tronqués d'une ellipse. */
+      .st-tray[data-presentation="rings"] {
+        gap: 12px;
+        padding: 4px 2px 8px;
+      }
+      .st-tray[data-presentation="rings"] .st-tray-tile {
+        width: 72px;
+        text-align: center;
+      }
+      .st-ring-tile {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 6px;
+      }
+      .st-ring-tile .st-tray-ring {
+        width: 68px;
+        height: 68px;
+        padding: 3px;
+      }
+      /* « Vous » : un disque neutre, sans anneau, et son « + » à l'aplat
+         d'identité, comme le bouton Créer. */
+      .st-ring-self {
+        position: relative;
+        display: flex;
+        width: 68px;
+        height: 68px;
+      }
+      .st-ring-self .st-tray-disc {
+        border: none;
+      }
+      .st-ring-plus {
+        position: absolute;
+        right: -2px;
+        bottom: -2px;
+        display: flex;
+        width: 26px;
+        height: 26px;
+        align-items: center;
+        justify-content: center;
+        border: 3px solid var(--background);
+        border-radius: 999px;
+        background: var(--primary-fill);
+        color: var(--primary-fill-on, var(--on-fill));
+      }
+      .st-ring-name {
+        max-width: 72px;
+        overflow: hidden;
+        font-size: 12px;
+        font-weight: 600;
+        line-height: 1.25;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        color: var(--foreground);
+      }
+
       /* ── LE LECTEUR PLEIN ÉCRAN ───────────────────────────────────────── */
       /* Le cadre. Au telephone il prend tout ; sur le bureau il devient un
          rectangle 9:16 centre — un media vertical etale sur 1600 px ne se

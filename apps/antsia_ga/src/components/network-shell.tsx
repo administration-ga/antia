@@ -2,6 +2,7 @@
 
 import { NetworkProvider } from "@antsia/api/network"
 import { NextRouterAdapter } from "@antsia/api/routing/next"
+import { BRAND_NAME } from "@antsia/social-contracts/brand"
 import { CommunicationShell, FeedReturnSessionBoundary, MediaPlaybackProvider } from "@antsia/social-features/shell"
 import { IcomListSessionBoundary } from "@antsia/social-features/messagerie"
 import { PostHogProvider } from "@antsia/social-features/shell/analytics"
@@ -62,6 +63,12 @@ export function useMemberSession(): MemberSession {
  * (`FeedReturnSessionBoundary`) sont montés ICI, une fois, avec la coque.
  * Retirer la prop rend la liste historique ; retirer le fournisseur rend aux
  * vidéos leur comportement P03 — c'est le retour arrière.
+ *
+ * `storiesPresentation="rings"` et `wordmark` (ADR-0027) : antsia.ga reprend la
+ * maquette de la série 3 — la rangée d'actus en médaillons ronds (l'anneau aux
+ * trois couleurs du thème, le prénom dessous, « Vous » et son « + » en tête) et
+ * sa marque, avec son point, en tête du téléphone. Retirer ces props rend les
+ * cartes d'actus et le libellé « Réseau », à l'identique — c'est le retour arrière.
  */
 export function NetworkShell({ children }: { children: ReactNode }) {
   const { t, i18n } = useTranslation("antsia")
@@ -86,7 +93,7 @@ export function NetworkShell({ children }: { children: ReactNode }) {
 
   return (
     <NextRouterAdapter>
-      <NetworkProvider networkId={session.root._id} slug={session.root.slug} personId={session.person._id} charte={appearance?.charte ?? CHARTE} routes={engineRoutes} liveAvailable navigation="destinations" postPresentation="media" feedPresentation="immersive" PostOfferRenderer={OfferPostSlot}>
+      <NetworkProvider networkId={session.root._id} slug={session.root.slug} personId={session.person._id} charte={appearance?.charte ?? CHARTE} routes={engineRoutes} liveAvailable navigation="destinations" postPresentation="media" feedPresentation="immersive" storiesPresentation="rings" wordmark={BRAND_NAME} PostOfferRenderer={OfferPostSlot}>
         <MemberSessionContext.Provider value={session}>
           <PostHogProvider configuration={usageConfiguration} consented={!permission.paused && session.person.consentsInForce.includes("usage_analytics")} screen={usageScreenForPath(pathname)} networkSlug={session.root.slug} locale={i18n.resolvedLanguage === "en" ? "en" : "fr"}>
             <CommunicationShell />

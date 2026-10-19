@@ -3,7 +3,9 @@
 import { api } from "@antsia/api/engine"
 import { useAuthenticatedConvexQuery } from "@antsia/api/hooks"
 import { useNetwork } from "@antsia/api/network"
+import Link from "next/link"
 import { useTranslation } from "react-i18next"
+import { buttonClassName } from "@/components/shared/controls"
 import { ShopLink } from "@/components/shops/shop-ui"
 import { routes } from "@/lib/routes"
 
@@ -16,5 +18,6 @@ export function CheckoutPrepareLink({ handle, offerRef }: { handle: string; offe
   if (query.data.pending) return <ShopLink href={routes.checkoutAttempt(query.data.pending.attemptId)}>{t("openAttempt")}</ShopLink>
   const offer = query.data.offer
   if (!offer.variants.length && offer.price.mode !== "fixed" && offer.price.mode !== "unit") return null
-  return <ShopLink href={routes.checkoutPrepare(handle, offerRef)}>{t("title")}</ShopLink>
+  // Le chemin d'achat principal : un lien (une destination), à la couleur du commerce (ADR-0027).
+  return <Link href={routes.checkoutPrepare(handle, offerRef)} className={buttonClassName("commerce")}>{t("title")}</Link>
 }

@@ -603,6 +603,11 @@
      carte se distingue déjà du fond le pose à `transparent` : pas de contour
      quand la surface n'a pas la couleur de son fond. */
   --esp-surface-border: initial;
+  /* Le DÉGRADÉ de l'anneau « à voir » des actus (`.esp-story-ring`, couche de
+     communication). `initial` : l'anneau historique, du bleu d'action vers sa
+     version claire, écrit en repli là où il est lu. Un thème à trois couleurs
+     (ADR-0027) y fait tourner ses trois couleurs (ses nuanciers), comme la maquette. */
+  --esp-story-ring-fill: initial;
   /* Trait des liens du TEXTE COURANT (mots-dièse et mentions d'une publication
      ou d'un commentaire), jamais des liens de navigation : aucun par défaut. */
   --esp-inline-link-decoration: none;

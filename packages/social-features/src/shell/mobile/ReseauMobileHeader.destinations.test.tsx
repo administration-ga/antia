@@ -48,4 +48,35 @@ describe("ReseauMobileHeader — navigation par destinations (P02)", () => {
     fireEvent.click(screen.getByRole("button", { name: "Lancer la recherche" }))
     expect(onSearch).toHaveBeenCalledWith("santé")
   })
+
+  function header(wordmark?: string) {
+    const i18n = createAppI18n({ locale: "fr", appResources: { fr: {}, en: {} }, defaultNS: "social" })
+    return (
+      <I18nextProvider i18n={i18n}>
+        <RouterProvider implementation={memoryRouter({ pathname: TEST_ROUTES.home() }).implementation}>
+          <NetworkProvider networkId={TEST_NETWORK_ID} slug="test" personId={TEST_PERSON_ID} charte="antsia" routes={ROUTES} navigation="destinations" wordmark={wordmark}>
+            <ReseauMobileHeader onSearch={vi.fn()} searchQuery="" profileHref={null} avatarUrl={null} displayName="Awa Ndong" />
+          </NetworkProvider>
+        </RouterProvider>
+      </I18nextProvider>
+    )
+  }
+
+  it("la marque déclarée par l'application, et son point, remplacent le libellé neutre (ADR-0027)", () => {
+    const view = render(header("ANTSIA"))
+    const wordmark = view.container.querySelector(".rm-wordmark")!
+    expect(wordmark.textContent).toBe("ANTSIA")
+    expect(wordmark.hasAttribute("data-brand")).toBe(true)
+    expect(wordmark.querySelector(".rm-wordmark-dot")?.getAttribute("aria-hidden")).toBe("true")
+    // Un libellé visuel, jamais un second titre.
+    expect(view.container.querySelector("h1")).toBeNull()
+  })
+
+  it("sans marque déclarée, le libellé neutre du moteur, sans point", () => {
+    const view = render(header())
+    const wordmark = view.container.querySelector(".rm-wordmark")!
+    expect(wordmark.textContent).toBe("Réseau")
+    expect(wordmark.hasAttribute("data-brand")).toBe(false)
+    expect(wordmark.querySelector(".rm-wordmark-dot")).toBeNull()
+  })
 })

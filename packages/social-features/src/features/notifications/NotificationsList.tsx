@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/notifications/NotificationsList.tsx @ ad2e7fdc2 — adaptations : cloche sociale du moteur (`notifications.bell.{paginateNotifications, unreadCount, markRead, markAllRead}`, réseau courant de `useNetwork()`) ; décompte à LACUNE (`{ count, capped }`) dit par `tabBadge` / `unreadLabel` de `notification-center-tabs` au lieu de `formatUnreadBadge` (qui écrit « 99+ » dès 99) ; lignes typées par l'API (plus de conversion d'identifiants) ; refus d'un marquage dit par son code (`readFailureText`) ; libellés traduits (espace `notifications`, clés `notificationsList.…`) ; commentaires sans l'onglet « Administration », iRéseau ni le volet « Activité » de l'espace agent.
+// Dupliqué de socle/packages/agent-features/src/features/notifications/NotificationsList.tsx @ ad2e7fdc2 — adaptations : cloche sociale du moteur (`notifications.bell.{paginateNotifications, unreadCount, markRead, markAllRead}`, réseau courant de `useNetwork()`) ; décompte à LACUNE (`{ count, capped }`) dit par `tabBadge` / `unreadLabel` de `notification-center-tabs` au lieu de `formatUnreadBadge` (qui écrit « 99+ » dès 99) ; lignes typées par l'API (plus de conversion d'identifiants) ; refus d'un marquage dit par son code (`readFailureText`) ; libellés traduits (espace `notifications`, clés `notificationsList.…`) ; commentaires sans l'onglet « Administration », iRéseau ni le volet « Activité » de l'espace agent ; couleurs par fonction (ADR-0027) : pastille de décompte de l'en-tête aux couleurs des réactions (`--role-react-*`), ton `primary` d'origine en repli.
 "use client"
 
 /**
@@ -29,6 +29,7 @@ import { useNetwork } from "@antsia/api/network"
 import { Link } from "@antsia/api/routing"
 import { Badge, Button } from "@antsia/ui"
 import { useMutation } from "convex/react"
+import type { CSSProperties } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { ReseauPaginatedErrorBoundary } from "../../shell/ReseauPaginatedErrorBoundary"
@@ -46,6 +47,17 @@ import {
 export type { NotificationListItem } from "./ReseauNotificationRow"
 
 export const NOTIFICATIONS_PAGE_SIZE = 20
+
+/**
+ * La pastille de décompte de l'en-tête : aplat des réactions dans les thèmes
+ * qui le déclarent (ADR-0027, comme le rail et la cloche) ; ailleurs, le ton
+ * `primary` d'origine du badge.
+ */
+const COUNT_BADGE_STYLE: CSSProperties = {
+	background: "var(--role-react-fill, var(--primary-50))",
+	color: "var(--role-react-on, var(--primary-600))",
+	borderRadius: 999,
+}
 
 export interface NotificationsListProps {
 	now: number
@@ -143,7 +155,7 @@ function NotificationsListContent({
 						{t("notificationsList.heading")}
 					</h2>
 					{!compact && badge ? (
-						<Badge tone="primary" size="sm">
+						<Badge tone="primary" size="sm" style={COUNT_BADGE_STYLE}>
 							<span aria-label={badgeLabel ?? undefined}>{badge}</span>
 						</Badge>
 					) : null}

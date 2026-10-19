@@ -132,7 +132,8 @@ function AttemptActions({ attempt, expired, refetch, onRefused }: { attempt: Che
       <label className="flex min-h-11 items-start gap-3 text-sm"><input type="checkbox" className="mt-1 size-5 shrink-0 accent-primary" disabled={action.pending || refused || paused} {...decision.register("accepted")} />{t("reconfirmConsent", { amount: checkoutAmount(attempt.result.total.amount, i18n.resolvedLanguage ?? "fr") })}</label>
       <p className="text-xs text-muted-foreground">{t("consentVersion", { version: attempt.consentTextVersion })}</p>
       {decision.formState.errors.accepted ? <p role="alert" className="text-sm text-destructive">{decision.formState.errors.accepted.message}</p> : null}
-      <Button type="submit" pending={action.pending} disabled={!consent || refused || paused}>{t("reconfirm")}</Button>
+      {/* Reconfirmer les conditions d'achat : couleur du commerce (ADR-0027). */}
+      <Button type="submit" variant="commerce" pending={action.pending} disabled={!consent || refused || paused}>{t("reconfirm")}</Button>
     </form> : null}
     {attempt.canRelease ? <form onSubmit={abandon} className="grid gap-3 border-t border-border pt-4">
       <label className="flex min-h-11 items-start gap-3 text-sm"><input type="checkbox" className="mt-1 size-5 shrink-0 accent-primary" disabled={action.pending || refused || paused} {...releaseDecision.register("accepted")} />{t("releaseConsent")}</label>
