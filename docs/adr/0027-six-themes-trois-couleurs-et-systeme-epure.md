@@ -62,6 +62,10 @@ Nous allons :
      couleur du fond (Électrique) et reste transparent sinon. Une publication, sans filet depuis la
      décision du 21/08, reçoit alors un anneau intérieur qui ne déplace rien.
    - Un bouton Annuler en gris plein et des puces sans contour.
+   - Un état actif de navigation ou de filtre en pastille tonale (`--esp-tab-active-*`) : barre
+     d'onglets, destination du rail de bureau, Liste / Immersion, filtres et onglets d'iCom. Les
+     puces de portée du fil sur téléphone gardent l'aplat d'identité. La loupe de recherche du
+     fil est un rond gris, comme les icônes de l'en-tête.
    - Une barre d'onglets flottante (fond translucide, ombre légère), avec le bouton Créer en carré
      arrondi plein de 48 px. Son libellé reste son nom accessible.
    - Les champs de saisie gardent leur bordure (WCAG 1.4.11, correctifs P18b).

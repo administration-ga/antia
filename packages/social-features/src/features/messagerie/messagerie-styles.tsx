@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/messagerie/messagerie-styles.tsx @ ad2e7fdc2 — adaptations : fenêtre détachée au format téléphone UNIQUE du moteur, 440 × 956 (largeur suivant la hauteur disponible — formule de la fenêtre d'appel flottante —, hauteur dérivée ; l'iCom flottant du socle était en 390 × 844) ; plus aucune couleur littérale : ombre de déplacement et contraste obligé du code QR par jetons (`--icom-float-drag-shadow`, `--qr-code-surface`, `--qr-code-ink`) ; règles du sur-titre de fonction des fils de poste (`.msg-row-eyebrow`) retirées avec la branche poste ; feuille portée par la constante exportée `MESSAGERIE_STYLES_CSS` (le gabarit n'est plus un texte enfant du JSX) ; doc : cliquet de couleur du moteur, pile z sans iAsted. ; contour des surfaces posées sur la page lu dans --esp-surface-border, filet d'origine en repli (aucun contour quand le thème distingue déjà la carte du fond).
+// Dupliqué de socle/packages/agent-features/src/features/messagerie/messagerie-styles.tsx @ ad2e7fdc2 — adaptations : fenêtre détachée au format téléphone UNIQUE du moteur, 440 × 956 (largeur suivant la hauteur disponible — formule de la fenêtre d'appel flottante —, hauteur dérivée ; l'iCom flottant du socle était en 390 × 844) ; plus aucune couleur littérale : ombre de déplacement et contraste obligé du code QR par jetons (`--icom-float-drag-shadow`, `--qr-code-surface`, `--qr-code-ink`) ; règles du sur-titre de fonction des fils de poste (`.msg-row-eyebrow`) retirées avec la branche poste ; feuille portée par la constante exportée `MESSAGERIE_STYLES_CSS` (le gabarit n'est plus un texte enfant du JSX) ; doc : cliquet de couleur du moteur, pile z sans iAsted. ; contour des surfaces posées sur la page lu dans --esp-surface-border, filet d'origine en repli (aucun contour quand le thème distingue déjà la carte du fond). ; système épuré (ADR-0027) : filtres en puces grises sans filet (`--esp-chip-*`), filtre actif et onglet actif en pastille tonale (`--esp-tab-active-*`), décompte des non-lus aux couleurs des réactions (`--role-react-*`), facture d'origine en repli.
 "use client"
 
 /**
@@ -86,8 +86,8 @@ export const MESSAGERIE_STYLES_CSS = `
           font-weight: 700;
         }
         .icom-tab[aria-selected="true"] .icom-tab-icon {
-          background: var(--primary-100);
-          color: var(--primary-700);
+          background: var(--esp-tab-active-bg, var(--primary-100));
+          color: var(--esp-tab-active-fg, var(--primary-700));
         }
         .icom-tab:focus-visible {
           outline: 2px solid var(--ring);
@@ -577,18 +577,20 @@ export const MESSAGERIE_STYLES_CSS = `
           position: absolute;
           z-index: -1;
           inset: 5px 0;
-          border: 1px solid var(--ink-300);
-          border-radius: 999px;
-          background: var(--ink-0);
+          /* Système épuré (ADR-0027) : puce grise sans filet, à l'angle des puces,
+             dans les thèmes qui les déclarent ; ailleurs, la pilule cerclée. */
+          border: 1px solid var(--esp-chip-border, var(--ink-300));
+          border-radius: var(--esp-chip-radius, 999px);
+          background: var(--esp-chip-bg, var(--ink-0));
         }
         .msg-filter-btn:hover { color: var(--ink-900); }
         .msg-filter-btn:hover::before { background: var(--ink-100); }
         .msg-filter-btn[aria-pressed="true"] {
-          color: var(--primary-800);
+          color: var(--esp-tab-active-fg, var(--primary-800));
         }
         .msg-filter-btn[aria-pressed="true"]::before {
-          border-color: var(--primary-300);
-          background: var(--primary-100);
+          border-color: var(--esp-chip-border, var(--primary-300));
+          background: var(--esp-tab-active-bg, var(--primary-100));
         }
         .msg-filter-btn:focus-visible {
           outline: 2px solid var(--ring);
@@ -602,8 +604,9 @@ export const MESSAGERIE_STYLES_CSS = `
           height: 19px;
           padding: 0 5px;
           border-radius: 999px;
-          background: var(--danger-fill);
-          color: var(--on-fill);
+          /* Décompte des non-lus aux couleurs des réactions (ADR-0027), danger en repli. */
+          background: var(--role-react-fill, var(--danger-fill));
+          color: var(--role-react-on, var(--on-fill));
           font-family: var(--font-mono);
           font-size: 10px;
           font-weight: 750;
