@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/stories/stories-styles.tsx @ ad2e7fdc2 — adaptations : règles et sélecteurs inchangés (jetons de rôle seulement, aucune couleur littérale) ; feuille sortie du JSX dans une constante de module (`STORIES_CSS`) — un littéral enfant de `<style>` passerait pour une chaîne d'interface ; commentaires rapportés au cliquet `no-hardcoded-colors` et à la couche de communication de `@antsia/ui` (`communication.css` : classes `.esp-story-*`, `.esp-live-pill`, et le jeton de scène `--esp-immersive-on-ink` lu ici). ; contour des surfaces posées sur la page lu dans --esp-surface-border, filet d'origine en repli (aucun contour quand le thème distingue déjà la carte du fond).
+// Dupliqué de socle/packages/agent-features/src/features/stories/stories-styles.tsx @ ad2e7fdc2 — adaptations : règles et sélecteurs inchangés (jetons de rôle seulement, aucune couleur littérale) ; feuille sortie du JSX dans une constante de module (`STORIES_CSS`) — un littéral enfant de `<style>` passerait pour une chaîne d'interface ; commentaires rapportés au cliquet `no-hardcoded-colors` et à la couche de communication de `@antsia/ui` (`communication.css` : classes `.esp-story-*`, `.esp-live-pill`, et le jeton de scène `--esp-immersive-on-ink` lu ici). ; contour des surfaces posées sur la page lu dans --esp-surface-border, filet d'origine en repli (aucun contour quand le thème distingue déjà la carte du fond) ; aplats d'identité et leur texte selon les chartes (`--esp-identity-fill`, `--primary-fill-on`, pastille tonale des états actifs ; ADR-0027), facture d'origine en repli.
 "use client"
 
 /**
@@ -184,7 +184,7 @@ const STORIES_CSS = `
         border: 3px solid var(--card);
         border-radius: 999px;
         background: var(--primary-fill);
-        color: var(--on-fill);
+        color: var(--primary-fill-on, var(--on-fill));
       }
       .st-card-foot-label {
         font-size: 11.5px;

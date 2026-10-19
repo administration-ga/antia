@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/messagerie/messagerie-styles.tsx @ ad2e7fdc2 — adaptations : fenêtre détachée au format téléphone UNIQUE du moteur, 440 × 956 (largeur suivant la hauteur disponible — formule de la fenêtre d'appel flottante —, hauteur dérivée ; l'iCom flottant du socle était en 390 × 844) ; plus aucune couleur littérale : ombre de déplacement et contraste obligé du code QR par jetons (`--icom-float-drag-shadow`, `--qr-code-surface`, `--qr-code-ink`) ; règles du sur-titre de fonction des fils de poste (`.msg-row-eyebrow`) retirées avec la branche poste ; feuille portée par la constante exportée `MESSAGERIE_STYLES_CSS` (le gabarit n'est plus un texte enfant du JSX) ; doc : cliquet de couleur du moteur, pile z sans iAsted. ; contour des surfaces posées sur la page lu dans --esp-surface-border, filet d'origine en repli (aucun contour quand le thème distingue déjà la carte du fond). ; système épuré (ADR-0027) : filtres en puces grises sans filet (`--esp-chip-*`), filtre actif et onglet actif en pastille tonale (`--esp-tab-active-*`), décompte des non-lus aux couleurs des réactions (`--role-react-*`), facture d'origine en repli. ; réactions de message (`data-mine`) à la teinte des réactions (`--role-react-soft`) ; couleurs par fonction (ADR-0027) : « Écrire » d'une relation (`data-role="message"`) et bouton d'envoi du composeur aux couleurs des messages (`--role-message-*`), pastille de non-lus `.msg-badge` aux couleurs des réactions (`--role-react-*`), facture d'origine en repli. ; « Écrire à » du journal d'appels (`.icom-relations-action[data-role="message"]`) en tonal des messages (`--role-message-soft`, `--role-message-ink`), facture d'origine en repli.
+// Dupliqué de socle/packages/agent-features/src/features/messagerie/messagerie-styles.tsx @ ad2e7fdc2 — adaptations : fenêtre détachée au format téléphone UNIQUE du moteur, 440 × 956 (largeur suivant la hauteur disponible — formule de la fenêtre d'appel flottante —, hauteur dérivée ; l'iCom flottant du socle était en 390 × 844) ; plus aucune couleur littérale : ombre de déplacement et contraste obligé du code QR par jetons (`--icom-float-drag-shadow`, `--qr-code-surface`, `--qr-code-ink`) ; règles du sur-titre de fonction des fils de poste (`.msg-row-eyebrow`) retirées avec la branche poste ; feuille portée par la constante exportée `MESSAGERIE_STYLES_CSS` (le gabarit n'est plus un texte enfant du JSX) ; doc : cliquet de couleur du moteur, pile z sans iAsted. ; contour des surfaces posées sur la page lu dans --esp-surface-border, filet d'origine en repli (aucun contour quand le thème distingue déjà la carte du fond). ; système épuré (ADR-0027) : filtres en puces grises sans filet (`--esp-chip-*`), filtre actif et onglet actif en pastille tonale (`--esp-tab-active-*`), décompte des non-lus aux couleurs des réactions (`--role-react-*`), facture d'origine en repli. ; réactions de message (`data-mine`) à la teinte des réactions (`--role-react-soft`) ; couleurs par fonction (ADR-0027) : « Écrire » d'une relation (`data-role="message"`) et bouton d'envoi du composeur aux couleurs des messages (`--role-message-*`), pastille de non-lus `.msg-badge` aux couleurs des réactions (`--role-react-*`), facture d'origine en repli. ; « Écrire à » du journal d'appels (`.icom-relations-action[data-role="message"]`) en tonal des messages (`--role-message-soft`, `--role-message-ink`), facture d'origine en repli ; aplats d'identité et leur texte selon les chartes (`--esp-identity-fill`, `--primary-fill-on`, pastille tonale des états actifs ; ADR-0027), facture d'origine en repli.
 "use client"
 
 /**
@@ -798,7 +798,7 @@ export const MESSAGERIE_STYLES_CSS = `
         .msg-bubble[data-mine="true"] {
           align-self: flex-end;
           background: var(--primary-fill);
-          color: var(--on-fill);
+          color: var(--primary-fill-on, var(--on-fill));
         }
         /* Les coins de SALVE : seule la premiere bulle est ronde en haut du
            cote de son auteur, seule la derniere l'est en bas. C'est ce qui
@@ -1211,7 +1211,7 @@ export const MESSAGERIE_STYLES_CSS = `
         /* L'enregistreur EN COURS : le bouton se teinte, la duree se compte. */
         .msg-rec-btn[data-recording="true"] {
           background: var(--danger-fill);
-          color: var(--on-fill);
+          color: var(--role-danger-on, var(--on-fill));
         }
         .msg-rec-row {
           display: flex;
@@ -1279,7 +1279,7 @@ export const MESSAGERIE_STYLES_CSS = `
           border: none;
           border-radius: 999px;
           background: var(--primary-fill);
-          color: var(--on-fill);
+          color: var(--primary-fill-on, var(--on-fill));
           font: inherit;
           font-size: 12.5px;
           font-weight: 600;
@@ -1419,7 +1419,7 @@ export const MESSAGERIE_STYLES_CSS = `
         .icom-page-list { display: flex; flex-direction: column; min-width: 0; min-height: 0; border-right: 1px solid var(--border); }
         .icom-page-navigation { display: flex; gap: 4px; flex: 0 0 auto; padding: 8px; border-bottom: 1px solid var(--border); }
         .icom-page-navigation a { display: flex; flex: 1; align-items: center; justify-content: center; min-height: 44px; padding: 4px 8px; border-radius: var(--radius-lg); font-size: 14px; color: var(--muted-foreground); }
-        .icom-page-navigation a[aria-current="page"] { background: var(--accent); color: var(--accent-foreground); font-weight: 700; }
+        .icom-page-navigation a[aria-current="page"] { background: var(--esp-tab-active-bg, var(--accent)); color: var(--esp-tab-active-fg, var(--accent-foreground)); font-weight: 700; }
         .icom-page-navigation a:focus-visible, .icom-page-heading a:focus-visible { outline: 2px solid var(--ring); outline-offset: -2px; }
         .icom-messages-page .msg-panel[data-variant="page"][data-open="true"] { flex: 1 1 auto; min-height: 0; height: auto; padding-top: 0; }
         .icom-messages-page .msg-body { min-height: 0; overflow-y: auto; }
@@ -1569,11 +1569,11 @@ export const MESSAGERIE_STYLES_CSS = `
           height: 44px;
           border: 3px solid var(--ink-0);
           border-radius: 999px;
-          background: var(--primary-600);
-          color: var(--on-fill);
+          background: var(--esp-identity-fill, var(--primary-600));
+          color: var(--primary-fill-on, var(--on-fill));
           cursor: pointer;
         }
-        .msg-infos-avatar-edit:hover { background: var(--primary-700); }
+        .msg-infos-avatar-edit:hover { background: var(--esp-identity-fill-hover, var(--primary-700)); }
         .msg-infos-avatar-edit:disabled { opacity: .55; cursor: default; }
         .msg-infos-block {
           display: flex;

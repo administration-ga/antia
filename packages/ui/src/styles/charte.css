@@ -654,6 +654,12 @@
   --role-danger-fill: initial;
   --role-danger-on: initial;
   --role-danger-ink: initial;
+  /* APLAT D'IDENTITÉ aux sites qui peignaient l'encre (`--primary`, `--primary-600`) en fond plein :
+     « Nouvelles publications » du fil en immersion, case cochée et « Appeler » du lanceur
+     d'appel, photo d'un groupe. `initial` : chaque site garde son encre d'origine. Un thème
+     ANTSIA y pose `--primary-fill` (et `--primary-fill-hover`), avec `--primary-fill-on` pour le texte. */
+  --esp-identity-fill: initial;
+  --esp-identity-fill-hover: initial;
   /* Les trois couleurs d'un thème, pour son aperçu dans Préférences > Thème. */
   --esp-theme-swatch-1: initial;
   --esp-theme-swatch-2: initial;

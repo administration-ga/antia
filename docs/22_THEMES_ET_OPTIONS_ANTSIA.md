@@ -79,6 +79,16 @@ le danger (`--destructive`) se lisent en ENCRE (texte de confirmation, message d
 distincte de leur aplat (`--success-fill`, `--danger-fill`). Écrire est un bouton **tonal**
 (`--role-message-soft`), l'action réagie a son fond doux (`--role-react-soft`).
 
+**Aplat d'identité et son texte.** Publier, Créer, l'interrupteur, la case cochée, les bulles de
+mes messages, les puces de portée du fil, le bouton principal et la page courante d'une
+pagination du kit, « Nouvelles publications » du fil en immersion, « Appeler » du lanceur
+d'appel : aplat `--primary-fill` (`--esp-identity-fill` aux sites qui peignaient l'encre) et
+son texte `--primary-fill-on`, foncé sur une identité claire (mandarine, rose corail,
+turquoise). Jusqu'au 19/10/2026, une douzaine de ces sites portaient le texte commun
+`--on-fill`, blanc en clair : 1,9:1 sur le turquoise de Lagon, 2,6:1 sur la mandarine de
+Soleil. `antsia-themes.test.ts` refuse désormais ce couple. Les états actifs (onglet courant,
+ligne choisie) sont en pastille tonale (`--esp-tab-active-*`), jamais en encre pleine.
+
 **Angles : un par élément.**
 
 | Élément | Angle | Jeton |
