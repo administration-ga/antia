@@ -50,8 +50,10 @@ describe("routes et mesure facultative", () => {
     expect(appeal.searchParams.has("equipe")).toBe(false)
     expect(appeal.searchParams.get("curseur")).toBe("opaque")
   })
-  it("la navigation mobile rejoint les réglages personnels servis", () => {
-    expect(engineRoutes.settings?.()).toBe(routes.personalControls())
+  it("les réglages du moteur (rail, menu, rappel du profil) mènent à la page Paramètres, rangée sous Profil", () => {
+    expect(engineRoutes.settings?.()).toBe(routes.settings())
+    expect(routes.settings()).not.toBe(routes.personalControls())
+    expect(memberDestinationFor(routes.settings(), new URLSearchParams(""))).toEqual({ id: "profil", current: "section" })
   })
   it("projette seulement des catégories, sans identifiants privés", () => {
     expect(usageScreenForPath(routes.profile("private.handle"))).toBe("profile")

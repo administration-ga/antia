@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/ReseauMenuRail.tsx @ ad2e7fdc2 — adaptations : déplacé dans la coque (`shell/`) ; branché sur le moteur — ma fiche par `people.persons.getMyPerson` (sans réseau ; identité montrée seulement si le profil est publié, portrait servi par la garde des fichiers), mes groupes par `thematicGroups.thematicGroups.myGroups`, mes pages suivies par la première page de `pages.pages.paginateMyPageFollows` (pages GÉNÉRIQUES du moteur, au lieu des pages d'organisation), réseau courant par `useNetwork()` ; adresses par la table des routes INJECTÉE (`useRoutes()` : volets sur `home()`, mon profil sur `profile(handle)`, fiche d'une page sur `page(handle)`, réglages sur `settings?.()`) — `personal-nav` et ses URL de l'espace retirés, une destination absente RETIRE son entrée (et « Voir plus » disparaît quand il n'a plus rien à déplier) ; volets SERVIS seuls (`menuItemsFor(counts, home)`) ; libellés par l'i18n (`reseau:reseauMenuRail.*`, libellé du volet par sa clé, pastille par `menuBadgeLabel(item, t)`) ; « iRéseau » devient « réseau » ; liens par `Link` de `@antsia/api/routing`, d'UNE seule pièce (un lien à la facture du bouton fantôme au lieu d'un bouton DANS un lien : deux arrêts de tabulation pour un geste) ; rendu, ordre et styles inchangés ; P02 (18/10/2026) : monté aussi HORS de la page réseau (`activeTab` nul, volets rendus en liens quand aucun `onSelectTab` n'est fourni) et, sous la navigation par destinations déclarée par l'application, coiffé des cinq destinations Fil · Découvrir · Créer · Messages · Profil (« Créer » ouvre la carte de choix partagée) — le volet Fil et « Voir plus » cèdent alors leur place aux destinations Fil et Profil.
+// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/ReseauMenuRail.tsx @ ad2e7fdc2 — adaptations : déplacé dans la coque (`shell/`) ; branché sur le moteur — ma fiche par `people.persons.getMyPerson` (sans réseau ; identité montrée seulement si le profil est publié, portrait servi par la garde des fichiers), mes groupes par `thematicGroups.thematicGroups.myGroups`, mes pages suivies par la première page de `pages.pages.paginateMyPageFollows` (pages GÉNÉRIQUES du moteur, au lieu des pages d'organisation), réseau courant par `useNetwork()` ; adresses par la table des routes INJECTÉE (`useRoutes()` : volets sur `home()`, mon profil sur `profile(handle)`, fiche d'une page sur `page(handle)`, réglages sur `settings?.()`) — `personal-nav` et ses URL de l'espace retirés, une destination absente RETIRE son entrée (et « Voir plus » disparaît quand il n'a plus rien à déplier) ; volets SERVIS seuls (`menuItemsFor(counts, home)`) ; libellés par l'i18n (`reseau:reseauMenuRail.*`, libellé du volet par sa clé, pastille par `menuBadgeLabel(item, t)`) ; « iRéseau » devient « réseau » ; liens par `Link` de `@antsia/api/routing`, d'UNE seule pièce (un lien à la facture du bouton fantôme au lieu d'un bouton DANS un lien : deux arrêts de tabulation pour un geste) ; rendu, ordre et styles inchangés ; P02 (18/10/2026) : monté aussi HORS de la page réseau (`activeTab` nul, volets rendus en liens quand aucun `onSelectTab` n'est fourni) et, sous la navigation par destinations déclarée par l'application, coiffé des cinq destinations Fil · Découvrir · Créer · Messages · Profil (« Créer » ouvre la carte de choix partagée) — le volet Fil et « Voir plus » cèdent alors leur place aux destinations Fil et Profil ; les paramètres (`settings?.()`) gardent alors une entrée au pied du rail, courante sur leur page.
 "use client"
 
 /**
@@ -178,6 +178,7 @@ export function ReseauMenuRail({
 	const profileHref = handle !== null ? routes.profile(handle) : null
 	const displayName = person?.displayName ?? handle ?? ""
 	const settingsHref = routes.settings?.() ?? null
+	const pathname = usePathname()
 
 	/* L'identité mène au profil — c'est le geste qu'on cherche en premier dans
 	   un menu de réseau social. Sous la navigation par destinations, elle coiffe
@@ -356,6 +357,20 @@ export function ReseauMenuRail({
 							))}
 						</ul>
 					</section>
+				) : null}
+				{/* Sous la navigation par destinations, « Voir plus » n'est plus là :
+				    les paramètres de l'application (affichage, thème, langue) ont leur
+				    entrée propre, au pied du rail, courante sur leur page. */}
+				{destinationRoutes !== null && settingsHref !== null ? (
+					<Link
+						href={settingsHref}
+						aria-current={pathname === settingsHref ? "page" : undefined}
+						style={{ ...(pathname === settingsHref ? SELECTED_LINK_ITEM_STYLE : LINK_ITEM_STYLE), marginTop: 14 }}
+						className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+					>
+						<Icon name="settings" size={18} aria-hidden />
+						<span style={{ fontSize: 13.5, fontWeight: 600 }}>{t("reseauMenuRail.settings")}</span>
+					</Link>
 				) : null}
 				<AppearanceControl />
 			</nav>

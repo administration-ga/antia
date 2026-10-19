@@ -186,7 +186,8 @@ export const engineRoutes: EngineRoutes = {
   profile: routes.profile,
   page: routes.page,
   conference: routes.conference,
-  settings: routes.personalControls,
+  // Les paramètres de l'application (affichage, thème, langue et fuseau) : entrée du rail et du Profil.
+  settings: routes.settings,
   // Navigation par destinations (P02) : les deux destinations propres de
   // l'application, déclarées avec `NetworkProvider navigation="destinations"`.
   discover: routes.memberDiscover,
@@ -209,7 +210,7 @@ export function isLiveSessionPath(pathname: string): boolean {
 /**
  * La destination d'une page que SEULE l'application sait ranger : le fil
  * filtré (national, province, mot-clé) relève de « Découvrir », mes
- * préférences du fil, mes boutiques et la modération relèvent de « Profil » ;
+ * préférences du fil, mes paramètres, mes boutiques et la modération relèvent de « Profil » ;
  * une vitrine membre relève de « Découvrir ». `undefined`
  * pour toute autre page — la coque la range elle-même (fil et volets,
  * Découvrir, Profil, Messages, mon profil public).
@@ -226,7 +227,7 @@ export function memberDestinationFor(
   if (pathname === routes.paymentList() || pathname.startsWith(`${routes.paymentList()}/`)) return { id: "profil", current: "section" }
   if (pathname === routes.myApplications() || pathname.startsWith(`${routes.myApplications()}/`)) return { id: "profil", current: "section" }
   if (pathname === routes.serviceRequests() || pathname.startsWith(`${routes.serviceRequests()}/`)) return { id: "profil", current: "section" }
-  if (pathname === routes.feedPreferences() || pathname === routes.moderation()) return { id: "profil", current: "section" }
+  if (pathname === routes.feedPreferences() || pathname === routes.moderation() || pathname === routes.settings()) return { id: "profil", current: "section" }
   return undefined
 }
 

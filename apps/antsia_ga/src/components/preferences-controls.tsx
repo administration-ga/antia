@@ -4,7 +4,6 @@ import { canonicalTimeZone } from "@antsia/api/civil-date"
 import { useViewerTimeZone } from "@antsia/api/viewer-preferences"
 import { isSigningOutEverywhere } from "@antsia/api/sign-out-everywhere"
 import { isSupportedLocale } from "@antsia/social-features/i18n"
-import { AppearanceControl } from "@antsia/social-features/shell/appearance"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { api } from "@convex/_generated/api"
 import { useMutation, useQuery } from "convex/react"
@@ -14,9 +13,8 @@ import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { z } from "zod"
 
+import { DisplayPreferences } from "./display-preferences"
 import { Button, Card, Field, TextInput } from "./shared/controls"
-import { MotifPicker } from "./motif-picker"
-import { ThemePicker } from "./theme-picker"
 import { engineErrorMessage } from "@/lib/engine-errors"
 
 /** La même validation et canonisation que le provider ; le serveur reste l'arbitre. */
@@ -35,8 +33,12 @@ function samePreferences(a: PreferenceValues, b: PreferenceValues): boolean {
   return a.locale === b.locale && a.timeZone === b.timeZone
 }
 
-/** Réglages personnels explicites : une nouvelle lecture ne remplace jamais un brouillon. */
-export function PreferencesControls() {
+/**
+ * Réglages personnels explicites : une nouvelle lecture ne remplace jamais un brouillon.
+ * `complete` (« Mes données ») : langue, fuseau et affichage ; `language` (page
+ * Paramètres, qui présente l'affichage à part) : la langue et le fuseau seuls.
+ */
+export function PreferencesControls({ variant = "complete" }: { variant?: "complete" | "language" }) {
   const { t, i18n } = useTranslation("antsia")
   const viewerTimeZone = useViewerTimeZone()
   const person = useQuery(api.modules.people.persons.getMyPerson, {})
@@ -138,7 +140,7 @@ export function PreferencesControls() {
     <Card className="min-w-0">
       <div className="flex min-w-0 flex-col gap-5 [overflow-wrap:anywhere]">
         <div className="flex flex-col gap-2">
-          <h2 id={titleId} className="text-xl font-semibold">{t("preferences.title")}</h2>
+          <h2 id={titleId} className="text-xl font-semibold">{t(variant === "complete" ? "preferences.title" : "preferences.languageTitle")}</h2>
           <p className="text-sm text-muted-foreground">{t("preferences.lead")}</p>
         </div>
         {isDirty ? <p role="status" className="rounded-lg border border-border bg-muted p-3 text-sm">{t("preferences.unsaved")}</p> : null}
@@ -176,16 +178,7 @@ export function PreferencesControls() {
           {errors.root?.server ? <p ref={failureRef} id={errorId} role="alert" tabIndex={-1} className="rounded-lg border border-destructive p-3 text-sm text-destructive focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">{errors.root.server.message}</p> : null}
           <Button type="submit" pending={isSubmitting} disabled={!person} className="w-full whitespace-normal sm:w-auto sm:self-start">{t(isSubmitting ? "preferences.saving" : "preferences.save")}</Button>
         </form>
-        <div className="min-w-0 border-t border-border pt-4">
-          <AppearanceControl />
-          <p className="mt-1 text-xs text-muted-foreground">{t("preferences.appearanceHint")}</p>
-        </div>
-        <div className="min-w-0 border-t border-border pt-4">
-          <ThemePicker />
-        </div>
-        <div className="min-w-0 border-t border-border pt-4">
-          <MotifPicker />
-        </div>
+        {variant === "complete" ? <DisplayPreferences /> : null}
       </div>
     </Card>
   )

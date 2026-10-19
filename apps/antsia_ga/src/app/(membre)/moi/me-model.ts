@@ -67,6 +67,8 @@ export function meEntries(handle: string | null): MeEntry[] {
     { id: "serviceRequests", section: "activity", href: routes.serviceRequests(), labelKey: "services:requests.title", descriptionKey: "services:requests.lead" },
     // P15 : mes candidatures et leur retrait restent atteignables, même sans offre en cours.
     { id: "applications", section: "activity", href: routes.myApplications(), labelKey: "jobs:applications.title", descriptionKey: "jobs:applications.lead" },
+    // Les paramètres de l'application : affichage (apparence, thème, motif de fond), langue et fuseau.
+    { id: "settings", section: "preferences", href: routes.settings(), labelKey: "antsia:settings.title", descriptionKey: "antsia:me.settingsHint" },
     { id: "feedPreferences", section: "preferences", href: routes.feedPreferences(), labelKey: "antsia:feedPreferences.title", descriptionKey: "antsia:me.feedPreferencesHint" },
     { id: "moderation", section: "account", href: routes.moderation(), labelKey: "memberNetwork:nav.moderation", descriptionKey: "antsia:me.moderationHint" },
     { id: "personalData", section: "account", href: routes.personalControls(), labelKey: "antsia:personal.title", descriptionKey: "antsia:me.personalDataHint" },

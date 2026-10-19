@@ -1,21 +1,23 @@
 "use client"
 
 import { AppearanceControl } from "@antsia/social-features/shell/appearance"
-import { ArrowRight, LogOut } from "lucide-react"
+import { ArrowRight, LogOut, Settings } from "lucide-react"
 import Link from "next/link"
 import { useId, useState } from "react"
 import { useTranslation } from "react-i18next"
 
 import { MemberPage } from "@/components/member-chrome"
 import { useMemberSession } from "@/components/network-shell"
-import { Button } from "@/components/shared/controls"
+import { Button, buttonClassName } from "@/components/shared/controls"
+import { routes } from "@/lib/routes"
 import { signOutAndRedirect } from "@/lib/sign-out"
 import { meEntriesIn, type MeEntry, type MeSection } from "./me-model"
 
 const ENTRY_LINK =
   "flex min-h-11 items-start justify-between gap-3 rounded-xl border border-border bg-card p-4 text-card-foreground hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
 
-function EntryList({ entries }: { entries: readonly MeEntry[] }) {
+/** Une liste d'entrées menant à des pages déjà servies (Profil, Paramètres). */
+export function EntryList({ entries }: { entries: readonly MeEntry[] }) {
   const { t } = useTranslation("antsia")
   return (
     <ul className="grid gap-3">
@@ -55,7 +57,15 @@ export function MemberMeScreen() {
     <MemberPage>
       <div className="mx-auto flex w-full max-w-3xl min-w-0 flex-col gap-8">
         <header className="flex flex-col gap-2">
-          <h1 className="text-2xl font-semibold tracking-tight">{t("me.title")}</h1>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <h1 className="text-2xl font-semibold tracking-tight">{t("me.title")}</h1>
+            {/* Les paramètres (affichage, thème, langue) à portée dès l'arrivée : au
+                téléphone, Profil est leur seul chemin et ses Préférences suivent l'activité. */}
+            <Link href={routes.settings()} className={buttonClassName("outline")}>
+              <Settings aria-hidden="true" className="size-4" />
+              {t("settings.title")}
+            </Link>
+          </div>
           <p className="text-base text-muted-foreground">{t("me.lead")}</p>
           {handle !== null ? (
             <p className="text-sm text-muted-foreground">
