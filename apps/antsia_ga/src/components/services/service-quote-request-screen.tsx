@@ -40,8 +40,8 @@ function QuoteContext({ handle, offerRef }: { handle: string; offerRef: string }
     return <Card><div className="grid gap-3">
       <h2 className="text-lg font-semibold">{offer.data.title}</h2>
       <p>{t(thread.threadState === null ? "quote.needConversation" : thread.threadState === "requested" ? "quote.conversationPending" : "quote.conversationClosed")}</p>
-      {thread.threadState === null ? <ShopLink href={routes.shopContact(handle, offerRef)}>{t("quote.askContact")}</ShopLink> : null}
-      {thread.threadId !== null ? <ShopLink href={routes.commercialConversation(thread.threadId)}>{t("quote.openConversation")}</ShopLink> : null}
+      {thread.threadState === null ? <ShopLink variant="message" href={routes.shopContact(handle, offerRef)}>{t("quote.askContact")}</ShopLink> : null}
+      {thread.threadId !== null ? <ShopLink variant="message" href={routes.commercialConversation(thread.threadId)}>{t("quote.openConversation")}</ShopLink> : null}
     </div></Card>
   }
   return <QuoteRequestForm handle={handle} offerRef={offerRef} offerTitle={offer.data.title} threadId={thread.threadId} attachments={thread.attachments} attachmentsTruncated={thread.attachmentsTruncated} />

@@ -209,6 +209,23 @@ describe("les sept thèmes d'antsia.ga (ADR-0027)", () => {
     for (const [path, expression, count] of REACT_SITES) expect(read(path).split(expression).length - 1, `${path} : ${expression}`).toBe(count)
   })
 
+  it("Écrire dans les appels et le contact d'une boutique lisent les couleurs des messages, leur facture d'origine en repli", () => {
+    const MESSAGE_SITES: readonly (readonly [string, string, number])[] = [
+      // Scène d'appel : rond et pilule à l'aplat des messages, rendu neutre d'origine (survol compris) en repli.
+      ["../styles/communication.css", "background: var(--role-message-fill, color-mix(in srgb, var(--esp-immersive-on-ink) 12%, transparent));", 1],
+      ["../styles/communication.css", "background: var(--role-message-fill, color-mix(in srgb, var(--esp-immersive-on-ink) 18%, transparent));", 1],
+      ["../styles/communication.css", "background: var(--role-message-fill, color-mix(in srgb, var(--esp-immersive-on-ink) 10%, transparent));", 1],
+      ["../styles/communication.css", "background: var(--role-message-fill, color-mix(in srgb, var(--esp-immersive-on-ink) 16%, transparent));", 1],
+      ["../styles/communication.css", "color: var(--role-message-on, var(--esp-immersive-on-ink));", 2],
+      // Journal d'appels : « Écrire à » en tonal, facture du bouton en repli.
+      ["../../../social-features/src/features/messagerie/messagerie-styles.tsx", "background: var(--role-message-soft, var(--card));", 1],
+      // antsia.ga : tonal (Poser une question) et aplat (Envoyer la demande).
+      ["../../../../apps/antsia_ga/src/components/shared/button-class.ts", "bg-[var(--role-message-soft,var(--card))]", 1],
+      ["../../../../apps/antsia_ga/src/components/shared/button-class.ts", "bg-[var(--role-message-fill,var(--primary-fill))]", 1],
+    ]
+    for (const [path, expression, count] of MESSAGE_SITES) expect(read(path).split(expression).length - 1, `${path} : ${expression}`).toBe(count)
+  })
+
   it("le contrat de la base laisse DIASPORALE intact : chaque jeton du système épuré est à `initial`", () => {
     const base = new TokenCascade(BASE_SHEETS)
     const tokens = [...Object.keys(ANGLES).filter((token) => token !== "--rp-surface-radius"), "--primary-fill-on", "--esp-theme-swatch-1",

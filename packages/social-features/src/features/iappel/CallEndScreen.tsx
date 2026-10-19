@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/iappel/CallEndScreen.tsx @ ad2e7fdc2 — adaptations : branche « poste » élaguée (prop `scope` et titre de poste retirés) ; phrase d'admission du serveur retirée (prop `serverMessage` : le moteur rend un code, l'écran compose) ; actions traduites (i18n `iappel`) ; `describeCallEnd` et `peerDisplayName` reçoivent `t` en dernier paramètre.
+// Dupliqué de socle/packages/agent-features/src/features/iappel/CallEndScreen.tsx @ ad2e7fdc2 — adaptations : branche « poste » élaguée (prop `scope` et titre de poste retirés) ; phrase d'admission du serveur retirée (prop `serverMessage` : le moteur rend un code, l'écran compose) ; actions traduites (i18n `iappel`) ; `describeCallEnd` et `peerDisplayName` reçoivent `t` en dernier paramètre ; couleurs par fonction (ADR-0027) : « Écrire » à l'aplat des messages (`data-role="message"`, pilule discrète en repli).
 "use client"
 
 /**
@@ -135,7 +135,7 @@ export function CallEndScreen({
 					</button>
 				)}
 				{copy.canWrite && writeAvailable && (
-					<button type="button" onClick={onWrite} className="iappel-soft-action">
+					<button type="button" onClick={onWrite} className="iappel-soft-action" data-role="message">
 						<MessageSquare aria-hidden="true" className="h-4 w-4" />
 						{t("callEndScreen.write")}
 					</button>

@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/iappel/IncomingCallBanner.tsx @ ad2e7fdc2 — adaptations : branches retirées — poste (fonction, administration, portée), invitation de réunion iRéunion, appel prioritaire (aucune priorité dans le moteur) ; libellés et noms accessibles traduits (i18n `iappel`) ; `peerDisplayName`, `scopeBadgeLabel` et `incomingGroupBannerLabel` reçoivent `t` en dernier paramètre.
+// Dupliqué de socle/packages/agent-features/src/features/iappel/IncomingCallBanner.tsx @ ad2e7fdc2 — adaptations : branches retirées — poste (fonction, administration, portée), invitation de réunion iRéunion, appel prioritaire (aucune priorité dans le moteur) ; libellés et noms accessibles traduits (i18n `iappel`) ; `peerDisplayName`, `scopeBadgeLabel` et `incomingGroupBannerLabel` reçoivent `t` en dernier paramètre ; couleurs par fonction (ADR-0027) : « Refuser avec un message » à l'aplat des messages (`data-tone="message"`, rond neutre en repli).
 "use client"
 
 /**
@@ -134,6 +134,7 @@ export function IncomingCallBanner({
 						aria-label={t("incomingCallBanner.declineWithMessage")}
 						aria-expanded={repliesOpen}
 						className="iappel-ctl"
+						data-tone="message"
 						style={{ width: 36, height: 36, minWidth: 36, minHeight: 36 }}
 					>
 						<MessageSquare aria-hidden="true" className="h-4 w-4" />

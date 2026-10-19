@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/iappel/CallControlButton.tsx @ ad2e7fdc2 — adaptations : aucune hors provenance (libellés et raisons fournis traduits par l'appelant ; classes `.iappel-ctl` et jeton de scène fournis par la feuille d'appel de @antsia/ui).
+// Dupliqué de socle/packages/agent-features/src/features/iappel/CallControlButton.tsx @ ad2e7fdc2 — adaptations : aucune hors provenance (libellés et raisons fournis traduits par l'appelant ; classes `.iappel-ctl` et jeton de scène fournis par la feuille d'appel de @antsia/ui) ; couleurs par fonction (ADR-0027) : ton `message` (Écrire), à l'aplat des messages par la feuille d'appel, rond neutre en repli.
 "use client"
 
 /**
@@ -25,8 +25,11 @@ export interface CallControlButtonProps {
 	onClick?: () => void
 	/** Bascule enfoncée (micro coupé, caméra allumée) → `aria-pressed`. */
 	active?: boolean
-	/** Rôle de la commande : décide de la couleur via `data-tone`. */
-	tone?: "neutral" | "answer" | "hangup"
+	/**
+	 * Rôle de la commande : décide de la couleur via `data-tone`. `message`
+	 * (Écrire) prend l'aplat des messages (ADR-0027), le rond neutre en repli.
+	 */
+	tone?: "neutral" | "answer" | "hangup" | "message"
 	disabled?: boolean
 	/** Rend le bouton plus grand (répondre / raccrocher : 64 px). */
 	size?: "md" | "lg"

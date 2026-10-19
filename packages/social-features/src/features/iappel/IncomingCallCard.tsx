@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/iappel/IncomingCallCard.tsx @ ad2e7fdc2 — adaptations : branches retirées — poste (liseré institutionnel, emblème, fonction, administration, prop `orgEmblemUrl`), transmission au secrétariat, invitation de réunion iRéunion, appel prioritaire (aucune priorité dans le moteur) ; libellés et noms accessibles traduits (i18n `iappel`) ; `peerDisplayName` et `incomingGroupSummary` reçoivent `t` en dernier paramètre.
+// Dupliqué de socle/packages/agent-features/src/features/iappel/IncomingCallCard.tsx @ ad2e7fdc2 — adaptations : branches retirées — poste (liseré institutionnel, emblème, fonction, administration, prop `orgEmblemUrl`), transmission au secrétariat, invitation de réunion iRéunion, appel prioritaire (aucune priorité dans le moteur) ; libellés et noms accessibles traduits (i18n `iappel`) ; `peerDisplayName` et `incomingGroupSummary` reçoivent `t` en dernier paramètre ; couleurs par fonction (ADR-0027) : « Message » (refuser avec un message) à l'aplat des messages (`data-role="message"`, pilule discrète en repli).
 "use client"
 
 /**
@@ -260,6 +260,7 @@ export function IncomingCallCard({
 							<button
 								type="button"
 								className="iappel-soft-action"
+								data-role="message"
 								onClick={() => setRepliesOpen(true)}
 							>
 								<MessageSquare aria-hidden="true" className="h-4 w-4" />
