@@ -14,7 +14,8 @@ La porte commune `social-features/identity` est branchée dans ANTSIA, la consol
 | E-mail | `RESEND_API_KEY`, `RESEND_FROM_ADDRESS` | Refus 503 hors développement local |
 | SMS | `SMS_PROVIDER=webhook`, `SMS_ENDPOINT` HTTPS, `SMS_API_KEY` | Refus 503 hors développement local |
 | Origines | `SITE_URL`, `TRUSTED_ORIGINS` et catalogue | Contrôle exact des origines ; ports locaux seulement sous la double garde locale |
-| Langue des codes | `AUTH_DEFAULT_LOCALE` facultatif : `fr` ou `en` | Français |
+| Langue des codes | `Accept-Language` de la requête, que les applications posent sur la langue affichée ; à défaut, `AUTH_DEFAULT_LOCALE` facultatif : `fr` ou `en` | Français |
+| Marque des codes | Aucune : tirée de l'origine (application du catalogue ; DIASPORALE par le manifeste de sa tranche) | ANTSIA |
 
 Les codes à six chiffres expirent après cinq minutes, sont consommés une fois et limités à trois essais. Les vérifications OTP sont conservées hachées. Le double local conserve temporairement le code en clair uniquement dans l'outil de développement existant, protégé par la cible loopback et le drapeau local ; aucune délivrance réelle ni exposition de code sur un backend cloud.
 

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest"
 
 import catalog from "../../deploy/catalog.json"
-import { authenticationConfiguration, idnConfiguration, idnProfileProof, isE164Phone, parseOriginList, smsConfiguration, trustedOrigins } from "./settings"
+import { applicationOfOrigin, authenticationConfiguration, idnConfiguration, idnProfileProof, isE164Phone, parseOriginList, smsConfiguration, trustedOrigins } from "./settings"
 
 const idnEnv = {
   IDN_CLIENT_ID: "sandbox-client-fixture",
@@ -75,6 +75,30 @@ describe("configuration des portes PA4", () => {
     expect(result).toContain("https://peer.example.test")
     for (const app of Object.values(catalog.applications)) expect(result).toContain(new URL(app.site_url).origin)
     expect(new Set(result).size).toBe(result.length)
+  })
+})
+
+describe("application du catalogue servie à une origine", () => {
+  const local = { ANTSIA_DEV_TOOLS: "true", CONVEX_CLOUD_URL: "http://127.0.0.1:3210" }
+
+  it("reconnaît l'adresse publique de chaque application, chemin ignoré", () => {
+    for (const [key, app] of Object.entries(catalog.applications)) {
+      expect(applicationOfOrigin(new URL(app.site_url).origin, {})).toBe(key)
+      expect(applicationOfOrigin(`${new URL(app.site_url).origin}/entrer`, {})).toBe(key)
+    }
+  })
+
+  it("ne reconnaît les ports locaux qu'avec les outils de développement d'un backend local", () => {
+    for (const [key, app] of Object.entries(catalog.applications)) {
+      expect(applicationOfOrigin(`http://localhost:${app.dev_port}`, local)).toBe(key)
+      expect(applicationOfOrigin(`http://127.0.0.1:${app.dev_port}`, local)).toBe(key)
+      expect(applicationOfOrigin(`http://localhost:${app.dev_port}`, { ...local, CONVEX_CLOUD_URL: "https://backend.example.test" })).toBeNull()
+      expect(applicationOfOrigin(`http://localhost:${app.dev_port}`, {})).toBeNull()
+    }
+  })
+
+  it.each([null, undefined, "", "null", "not-a-url", "https://foreign.example.test", "https://user:pass@diasporale.com"])("aucune application pour l'origine %s", (origin) => {
+    expect(applicationOfOrigin(origin, local)).toBeNull()
   })
 })
 
