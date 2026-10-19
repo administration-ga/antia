@@ -1,4 +1,4 @@
-// Réécrit d'après socle/packages/agent-features/src/features/reseau-personnel/PageFollowButton.tsx @ ad2e7fdc2 — ce qui change : mutations `pages.pages.follow` (par l'adresse) et `pages.pages.unfollow` (par l'identifiant) du moteur, dans le réseau courant (`useNetwork`) ; identifiant `Id<"pages">` ; libellé et refus traduits (`followLabel(following, t)`, refus lu dans le CODE du moteur par `followActionErrorMessage(err, t)`) ; styles de surface lus dans la coque (`shell/design-styles`) ; props inchangés.
+// Réécrit d'après socle/packages/agent-features/src/features/reseau-personnel/PageFollowButton.tsx @ ad2e7fdc2 — ce qui change : mutations `pages.pages.follow` (par l'adresse) et `pages.pages.unfollow` (par l'identifiant) du moteur, dans le réseau courant (`useNetwork`) ; identifiant `Id<"pages">` ; libellé et refus traduits (`followLabel(following, t)`, refus lu dans le CODE du moteur par `followActionErrorMessage(err, t)`) ; styles de surface lus dans la coque (`shell/design-styles`) ; props inchangés ; couleurs par fonction (ADR-0027) : « Suivre » en variante `social`, neutre une fois la page suivie.
 "use client"
 
 /**
@@ -26,13 +26,19 @@ import { toast } from "sonner"
 import { RESEAU_PILL_ACTION_STYLE } from "../../shell/design-styles"
 import { followActionErrorMessage, followLabel } from "./pages-panel"
 
-const FOLLOW_BUTTON_STYLE = {
+/** La géométrie de la pilule, sans couleur : la variante `social` garde la sienne (ADR-0027). */
+const FOLLOW_BUTTON_SHAPE_STYLE = {
   ...RESEAU_PILL_ACTION_STYLE,
   padding: "6px 10px",
   minHeight: 44,
   fontSize: 11.5,
   fontWeight: 700,
-  color: "var(--primary-600)",
+} as const
+
+/** Page déjà suivie : le bouton redevient neutre (ADR-0027). */
+const FOLLOWING_BUTTON_STYLE = {
+  ...FOLLOW_BUTTON_SHAPE_STYLE,
+  color: "var(--muted-foreground)",
 } as const
 
 export interface PageFollowButtonProps {
@@ -73,11 +79,12 @@ export function PageFollowButton({ pageId, handle, following, onFollowChange }: 
     <Button
       type="button"
       size="sm"
-      variant="ghost"
+      // Suivre : couleur des relations ; une fois suivie, le bouton redevient neutre (ADR-0027).
+      variant={following ? "ghost" : "social"}
       aria-pressed={following}
       disabled={busy}
       onClick={() => void handleClick()}
-      style={FOLLOW_BUTTON_STYLE}
+      style={following ? FOLLOWING_BUTTON_STYLE : FOLLOW_BUTTON_SHAPE_STYLE}
     >
       {followLabel(following, t)}
     </Button>

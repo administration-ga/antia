@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/GroupsPanel.tsx @ ad2e7fdc2 — adaptations : groupes thématiques du réseau courant (`thematicGroups.thematicGroups.*`, `networkId` par `useNetwork()`) ; invitations reçues et membres PAGINÉS par le moteur (`paginateMyInvites`, `paginateMembers`, pannes dites par `ReseauPaginatedErrorBoundary`, « Voir plus ») ; `myGroups` borné qui dit sa lacune (`truncated`) ; vivier d'invitation `{ items, truncated }` du moteur passé tel quel au sélecteur ; mur à curseur COMPOSITE (`FeedCursor`, clé de page par `feedCursorKey`) et publications au DTO du fil (`_id`) rendues par `PostCard` ; membres et invitants nommés par la personne (`personId`, nom neutre quand le profil n'est pas publié) ; refus du moteur lus par code (`groupActionErrorText`), et le refus indistinct de la fiche (`notFound`) dit « plus accessible » ; états vides par `reseauEmptyState(id, home, t)` ; toutes les chaînes par l'i18n (espace `reseau`, clés `groupsPanel.*` et `groupesThematiques.*`) ; « agents » → le réseau ; primitives de `@antsia/ui`, kit d'espace de `@antsia/ui/espace-kit` (phrases de la pagination par `useEspacePaginationLabels`).
+// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/GroupsPanel.tsx @ ad2e7fdc2 — adaptations : groupes thématiques du réseau courant (`thematicGroups.thematicGroups.*`, `networkId` par `useNetwork()`) ; invitations reçues et membres PAGINÉS par le moteur (`paginateMyInvites`, `paginateMembers`, pannes dites par `ReseauPaginatedErrorBoundary`, « Voir plus ») ; `myGroups` borné qui dit sa lacune (`truncated`) ; vivier d'invitation `{ items, truncated }` du moteur passé tel quel au sélecteur ; mur à curseur COMPOSITE (`FeedCursor`, clé de page par `feedCursorKey`) et publications au DTO du fil (`_id`) rendues par `PostCard` ; membres et invitants nommés par la personne (`personId`, nom neutre quand le profil n'est pas publié) ; refus du moteur lus par code (`groupActionErrorText`), et le refus indistinct de la fiche (`notFound`) dit « plus accessible » ; états vides par `reseauEmptyState(id, home, t)` ; toutes les chaînes par l'i18n (espace `reseau`, clés `groupsPanel.*` et `groupesThematiques.*`) ; « agents » → le réseau ; primitives de `@antsia/ui`, kit d'espace de `@antsia/ui/espace-kit` (phrases de la pagination par `useEspacePaginationLabels`). ; couleurs par fonction (ADR-0027) : Rejoindre et Accepter l'invitation en variante `social`.
 "use client"
 
 /**
@@ -339,6 +339,8 @@ function GroupInvites({ onOpen }: { onOpen: (groupId: GroupId) => void }) {
             <span style={{ display: "inline-flex", gap: 8 }}>
               <Button
                 size="sm"
+                // Accepter : couleur des relations (ADR-0027).
+                variant="social"
                 onClick={() => {
                   void respondInvite({ networkId, inviteId: invite.inviteId, accept: true })
                     .then(() => {
@@ -430,7 +432,7 @@ function GroupCardRow({
         </div>
         <div style={{ display: "inline-flex", gap: 8 }}>
           {cta && onJoin ? (
-            <Button size="sm" onClick={onJoin} style={RESEAU_PRIMARY_ACTION_STYLE}>
+            <Button size="sm" variant="social" onClick={onJoin} style={RESEAU_PRIMARY_ACTION_STYLE}>
               {cta}
             </Button>
           ) : null}
@@ -636,6 +638,8 @@ function GroupPage({
             {group.pendingInviteId !== null && !isMember ? (
               <Button
                 size="sm"
+                // Accepter l'invitation : couleur des relations (ADR-0027).
+                variant="social"
                 style={RESEAU_PRIMARY_ACTION_STYLE}
                 onClick={() => {
                   if (group.pendingInviteId === null) return
@@ -650,7 +654,8 @@ function GroupPage({
             {!isMember ? (
               <Button
                 size="sm"
-                variant={group.pendingInviteId !== null ? "secondary" : "primary"}
+                // Rejoindre : couleur des relations, sauf quand l'invitation tient déjà ce rôle (ADR-0027).
+                variant={group.pendingInviteId !== null ? "secondary" : "social"}
                 style={group.pendingInviteId !== null ? RESEAU_SECONDARY_ACTION_STYLE : RESEAU_PRIMARY_ACTION_STYLE}
                 onClick={() => {
                   void join({ networkId, groupId })

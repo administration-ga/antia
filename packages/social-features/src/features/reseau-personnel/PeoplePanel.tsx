@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/PeoplePanel.tsx @ ad2e7fdc2 — adaptations : fonctions du moteur, réseau courant par `useNetwork()` — recherche dans l'annuaire du réseau (`people.directory.searchPeople`), demandes par identifiant (`graph.connections.requestConnection({ handle, message? })`), réponses (`graph.connections.respondToConnection`), suivis (`graph.follows.{follow, unfollow, paginateMyFollows, myFollowerCount}`), catalogue de suggestions (`suggestions.suggestions.{paginate, dismiss, restore, paginateDismissed, paginateSentInvitations}`) ; listes paginées nativement par une chaîne de pages à curseur (invitations envoyées, suivis — la pagination numérotée des suivis devient « Voir plus » —, catalogue), décomptes PLANCHERS marqués « + » quand une page reste ; ligne « fonction » réduite au titre publié (poste et administration retirés) ; personnes au DTO du moteur (`otherPersonId`, nom nullable rendu par le libellé neutre) ; appel d'une relation par `useRingRelation` de la brique d'appel (`features/iappel`, `calls.direct.callMember({ target: { personId } })`) ; adresses par la table de routes injectée (`useRoutes()` : profil, messagerie, page réseau) ; textes par l'i18n (espace `reseau`, clés `peoplePanel.*`) et refus du moteur dits par leur code ; « Agents à découvrir » devient « Personnes à découvrir » ; feuille du volet sortie du JSX dans une constante de module (`PEOPLE_PANEL_CSS`) — un littéral enfant de `<style>` passerait pour une chaîne d'interface —, règles inchangées ; primitives de `@antsia/ui` et kit d'espace de `@antsia/ui/espace-kit` (onglets « chemise », état vide ; la pagination numérotée n'est plus employée), surfaces de la coque ; Suivre en variante `social`, couleur des relations (ADR-0027).
+// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/PeoplePanel.tsx @ ad2e7fdc2 — adaptations : fonctions du moteur, réseau courant par `useNetwork()` — recherche dans l'annuaire du réseau (`people.directory.searchPeople`), demandes par identifiant (`graph.connections.requestConnection({ handle, message? })`), réponses (`graph.connections.respondToConnection`), suivis (`graph.follows.{follow, unfollow, paginateMyFollows, myFollowerCount}`), catalogue de suggestions (`suggestions.suggestions.{paginate, dismiss, restore, paginateDismissed, paginateSentInvitations}`) ; listes paginées nativement par une chaîne de pages à curseur (invitations envoyées, suivis — la pagination numérotée des suivis devient « Voir plus » —, catalogue), décomptes PLANCHERS marqués « + » quand une page reste ; ligne « fonction » réduite au titre publié (poste et administration retirés) ; personnes au DTO du moteur (`otherPersonId`, nom nullable rendu par le libellé neutre) ; appel d'une relation par `useRingRelation` de la brique d'appel (`features/iappel`, `calls.direct.callMember({ target: { personId } })`) ; adresses par la table de routes injectée (`useRoutes()` : profil, messagerie, page réseau) ; textes par l'i18n (espace `reseau`, clés `peoplePanel.*`) et refus du moteur dits par leur code ; « Agents à découvrir » devient « Personnes à découvrir » ; feuille du volet sortie du JSX dans une constante de module (`PEOPLE_PANEL_CSS`) — un littéral enfant de `<style>` passerait pour une chaîne d'interface —, règles inchangées ; primitives de `@antsia/ui` et kit d'espace de `@antsia/ui/espace-kit` (onglets « chemise », état vide ; la pagination numérotée n'est plus employée), surfaces de la coque ; Suivre, Se connecter et Accepter en variante `social`, couleur des relations (ADR-0027), Se connecter neutre une fois la demande envoyée ou reçue.
 "use client"
 
 /**
@@ -576,7 +576,8 @@ function SearchCard({ compact = false }: { compact?: boolean }) {
                     <Button
                       size="sm"
                       icon="userPlus"
-                      variant="secondary"
+                      // Se connecter : couleur des relations (ADR-0027).
+                      variant="social"
                       disabled={busyHandle === person.handle}
                       style={RESEAU_PILL_ACTION_STYLE}
                       onClick={() =>
@@ -687,7 +688,8 @@ function PendingRequestsCard({ pending }: { pending: ReturnType<typeof usePerson
                   <Button
                     size="sm"
                     icon="check"
-                    variant="secondary"
+                    // Accepter : couleur des relations (ADR-0027).
+                    variant="social"
                     disabled={busy === request.connectionId}
                     style={RESEAU_PILL_ACTION_STYLE}
                     onClick={() => void decide(request.connectionId, true)}
@@ -1001,7 +1003,8 @@ function SuggestionsCatalogCard() {
                       <Button
                         size="sm"
                         icon="userPlus"
-                        variant="secondary"
+                        // Se connecter : couleur des relations tant que la demande est possible (ADR-0027).
+                        variant={person.relationState === "none" ? "social" : "secondary"}
                         disabled={relationActionDisabled(person.relationState, busy)}
                         style={{ ...RESEAU_PILL_ACTION_STYLE, minHeight: 44 }}
                         onClick={() => void connect(person.handle)}

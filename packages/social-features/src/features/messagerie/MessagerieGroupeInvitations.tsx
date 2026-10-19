@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/messagerie/MessagerieGroupeInvitations.tsx @ ad2e7fdc2 — adaptations : invitations par `groups.invites.myGroupInvites` du moteur, PAGINÉE (une page bornée — la file d'un réseau tient en une page — lue sans lever : une panne ne fait pas tomber la liste des conversations) et `respondGroupInvite` (réseau courant, fil `groupThreads`) ; invitant nommé par le contrat `counterpartLabel` (profil publié = `source` « published », nom nul = libellé neutre) ; refus traduit (`messageErreurLisible(err, t)`) ; textes traduits (i18n `messagerie`, clés `messagerieGroupeInvitations.…`).
+// Dupliqué de socle/packages/agent-features/src/features/messagerie/MessagerieGroupeInvitations.tsx @ ad2e7fdc2 — adaptations : invitations par `groups.invites.myGroupInvites` du moteur, PAGINÉE (une page bornée — la file d'un réseau tient en une page — lue sans lever : une panne ne fait pas tomber la liste des conversations) et `respondGroupInvite` (réseau courant, fil `groupThreads`) ; invitant nommé par le contrat `counterpartLabel` (profil publié = `source` « published », nom nul = libellé neutre) ; refus traduit (`messageErreurLisible(err, t)`) ; textes traduits (i18n `messagerie`, clés `messagerieGroupeInvitations.…`) ; couleurs par fonction (ADR-0027) : la coche Rejoindre à l'encre des relations (`--role-social-ink`).
 "use client"
 
 /**
@@ -122,6 +122,8 @@ export function MessagerieGroupeInvitations({ nav }: { nav: MessagerieNav }) {
 										titre: invite.title,
 									})}
 									title={t("messagerieGroupeInvitations.joinTitle")}
+									// Rejoindre : encre des relations (ADR-0027).
+									style={{ color: "var(--role-social-ink, currentColor)" }}
 									disabled={repondre.isPending}
 									onClick={() => repondreA(invite.threadId, true)}
 								>

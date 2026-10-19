@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/ProfilPersonnePage.tsx @ ad2e7fdc2 — adaptations : fiche lue DANS le réseau courant (`people.profile.getPublicProfile({ networkId, handle })`, « c'est moi » rendu par le moteur `isMe`, photo et couverture servies par la garde des fichiers, une image retenue retombe sur le repli) ; mur par `posts.posts.personPosts` (réseau, curseur `Id<"posts">`, clé `_id`) et publication ÉPINGLÉE rendue en tête du mur (le moteur la sort de la liste ; « Désépingler » par `posts.posts.unpinMyWall` sur ma fiche) ; relation par `graph.connections.connectionWith` (personne), demande par `requestConnection` et réponse à une invitation reçue sur la fiche même (`respondToConnection`) ; suivi par `graph.follows.{isFollowing, follow, unfollow}` (personne) ; une relation se joint d'ici — « Écrire » ouvre le brouillon iCom (`dockStore.openDraft`, et l'adresse de la messagerie de l'application au téléphone) et « Appeler » passe par `useRingRelation` de la brique d'appel (`calls.direct.callMember`, puis le magasin d'appel : fenêtre sortante, ou écran de refus) ; section professionnelle RETIRÉE (résumé iProfil, « Mon dossier iProfil », `iProfiles.getMyIProfil`) ; « Modifier mon profil » ouvre la gestion de MON profil sur ma fiche (`ProfilReseauSection`, ouverte d'emblée par `?gerer=1`) au lieu des paramètres de l'espace, et un profil que j'ai retiré m'y ramène au lieu du refus ; adresses composées par `useRoutes()` (profil, page réseau, messagerie) — aucune route en dur ; aperçu « vu par les membres du réseau » avec retour sur ma fiche ; textes par l'i18n (`reseau:profilPersonnePage.*`, modules purs appelés avec `t`) ; kit d'espace (onglets, styles) par `@antsia/ui/espace-kit` ; albums par le barrel de leur tranche (`features/reseau-albums`) ; couleurs par fonction (ADR-0027) : Suivre en `social` (neutre une fois suivi), Écrire en `message` tonal, géométrie `RESEAU_ACTION_SHAPE_STYLE`.
+// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/ProfilPersonnePage.tsx @ ad2e7fdc2 — adaptations : fiche lue DANS le réseau courant (`people.profile.getPublicProfile({ networkId, handle })`, « c'est moi » rendu par le moteur `isMe`, photo et couverture servies par la garde des fichiers, une image retenue retombe sur le repli) ; mur par `posts.posts.personPosts` (réseau, curseur `Id<"posts">`, clé `_id`) et publication ÉPINGLÉE rendue en tête du mur (le moteur la sort de la liste ; « Désépingler » par `posts.posts.unpinMyWall` sur ma fiche) ; relation par `graph.connections.connectionWith` (personne), demande par `requestConnection` et réponse à une invitation reçue sur la fiche même (`respondToConnection`) ; suivi par `graph.follows.{isFollowing, follow, unfollow}` (personne) ; une relation se joint d'ici — « Écrire » ouvre le brouillon iCom (`dockStore.openDraft`, et l'adresse de la messagerie de l'application au téléphone) et « Appeler » passe par `useRingRelation` de la brique d'appel (`calls.direct.callMember`, puis le magasin d'appel : fenêtre sortante, ou écran de refus) ; section professionnelle RETIRÉE (résumé iProfil, « Mon dossier iProfil », `iProfiles.getMyIProfil`) ; « Modifier mon profil » ouvre la gestion de MON profil sur ma fiche (`ProfilReseauSection`, ouverte d'emblée par `?gerer=1`) au lieu des paramètres de l'espace, et un profil que j'ai retiré m'y ramène au lieu du refus ; adresses composées par `useRoutes()` (profil, page réseau, messagerie) — aucune route en dur ; aperçu « vu par les membres du réseau » avec retour sur ma fiche ; textes par l'i18n (`reseau:profilPersonnePage.*`, modules purs appelés avec `t`) ; kit d'espace (onglets, styles) par `@antsia/ui/espace-kit` ; albums par le barrel de leur tranche (`features/reseau-albums`) ; couleurs par fonction (ADR-0027) : Se connecter et Accepter en `social`, Suivre en `social` (neutre une fois suivi), Écrire en `message` tonal, géométrie `RESEAU_ACTION_SHAPE_STYLE`.
 "use client"
 
 /**
@@ -932,6 +932,8 @@ function ConnectionButton({
       return (
         <>
           <Button
+            // Accepter : couleur des relations (ADR-0027).
+            variant="social"
             icon="userCheck"
             disabled={pending}
             style={RESEAU_PRIMARY_ACTION_STYLE}
@@ -966,6 +968,8 @@ function ConnectionButton({
       // Refusée : une nouvelle demande est légitime (les gens changent d'avis).
       return (
         <Button
+          // Se connecter : couleur des relations (ADR-0027).
+          variant="social"
           icon="userPlus"
           disabled={pending}
           style={RESEAU_PRIMARY_ACTION_STYLE}

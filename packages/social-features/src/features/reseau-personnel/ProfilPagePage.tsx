@@ -1,4 +1,4 @@
-// Réécrit d'après socle/packages/agent-features/src/features/reseau-personnel/ProfilPagePage.tsx @ ad2e7fdc2 — ce qui change : la fiche d'une page à IDENTITÉ PROPRE du moteur (nom, sigle, logo, bannière, description, nature, pays) lue par `pages.pages.getPage` dans le réseau courant, au lieu d'une page d'administration dérivée de son organisation ; badge CALCULÉ par le serveur (Officiel, Vérifié, Communauté) ; suivi par `follow`/`unfollow` du moteur, refus lu dans son CODE ; publier au nom de la page réservé au RÔLE VIVANT du lecteur (`viewer.role`) — le composeur partagé reçoit `asPage` ; mur par `pagePosts` (fenêtres chaînées, curseur composite du moteur, éléments rendus par `PostCard`) ; adresses par la table des routes injectée (retour au volet par `reseauAgentHref("pages", routes.home())`, mots-clés par `reseauAgentTagHref`, mentions vers le PROFIL d'une personne, jamais vers une page) ; panne de la fiche et du mur dite avec Réessayer ; textes traduits (clés `profilPagePage.…`, décisions dans `profil-page.ts`) ; ajouts : invitation à signer (accepter, décliner), revendication ou demande de vérification pièces à l'appui (`pages.claims.*`), gestion pour un administrateur vivant — identité (`pages.identity.updatePageIdentity`), logo et bannière par la garde des fichiers (`generatePageImageUploadUrl`, `setPageImage`), signataires (`pages.signatories.*`) ; props inchangés (`handle`). ; PA6 : dates et jours civils dans le fuseau personnel du lecteur (repli appareil).
+// Réécrit d'après socle/packages/agent-features/src/features/reseau-personnel/ProfilPagePage.tsx @ ad2e7fdc2 — ce qui change : la fiche d'une page à IDENTITÉ PROPRE du moteur (nom, sigle, logo, bannière, description, nature, pays) lue par `pages.pages.getPage` dans le réseau courant, au lieu d'une page d'administration dérivée de son organisation ; badge CALCULÉ par le serveur (Officiel, Vérifié, Communauté) ; suivi par `follow`/`unfollow` du moteur, refus lu dans son CODE ; publier au nom de la page réservé au RÔLE VIVANT du lecteur (`viewer.role`) — le composeur partagé reçoit `asPage` ; mur par `pagePosts` (fenêtres chaînées, curseur composite du moteur, éléments rendus par `PostCard`) ; adresses par la table des routes injectée (retour au volet par `reseauAgentHref("pages", routes.home())`, mots-clés par `reseauAgentTagHref`, mentions vers le PROFIL d'une personne, jamais vers une page) ; panne de la fiche et du mur dite avec Réessayer ; textes traduits (clés `profilPagePage.…`, décisions dans `profil-page.ts`) ; ajouts : invitation à signer (accepter, décliner), revendication ou demande de vérification pièces à l'appui (`pages.claims.*`), gestion pour un administrateur vivant — identité (`pages.identity.updatePageIdentity`), logo et bannière par la garde des fichiers (`generatePageImageUploadUrl`, `setPageImage`), signataires (`pages.signatories.*`) ; props inchangés (`handle`). ; PA6 : dates et jours civils dans le fuseau personnel du lecteur (repli appareil). ; couleurs par fonction (ADR-0027) : « Suivre » et l'acceptation d'une invitation en variante `social`, Suivre neutre une fois la page suivie.
 "use client"
 
 /**
@@ -54,7 +54,7 @@ import { useCallback, useEffect, useId, useState, type ChangeEvent, type CSSProp
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 
-import { RESEAU_CARD_STYLE, RESEAU_SECONDARY_ACTION_STYLE } from "../../shell/design-styles"
+import { RESEAU_ACTION_SHAPE_STYLE, RESEAU_CARD_STYLE, RESEAU_SECONDARY_ACTION_STYLE } from "../../shell/design-styles"
 import { reseauAgentHref, reseauAgentTagHref } from "../../shell/reseau-agent-nav"
 import { ReseauQueryError } from "../../shell/ReseauQueryError"
 import { personHref } from "./author-link"
@@ -265,11 +265,12 @@ function PageProfile({ page }: { page: PageDto }) {
 
           <div className="pp-actions">
             <Button
-              variant="secondary"
+              // Suivre : couleur des relations ; une fois suivie, le bouton redevient neutre (ADR-0027).
+              variant={following ? "secondary" : "social"}
               icon={following ? "check" : "plus"}
               disabled={followPending}
               aria-pressed={following}
-              style={RESEAU_SECONDARY_ACTION_STYLE}
+              style={following ? RESEAU_SECONDARY_ACTION_STYLE : RESEAU_ACTION_SHAPE_STYLE}
               onClick={() => void handleFollowToggle()}
             >
               {pageFollowButtonLabel(following, t)}
@@ -559,7 +560,7 @@ function PageInvitationBanner({ pageId }: { pageId: Id<"pages"> }) {
         </h2>
         <p style={MUTED_TEXT_STYLE}>{pageInvitationText(invitation.role, t)}</p>
         <div style={ACTIONS_STYLE}>
-          <Button size="sm" variant="primary" disabled={busy} onClick={() => void answer(true)}>
+          <Button size="sm" variant="social" disabled={busy} onClick={() => void answer(true)}>
             {t("pagesPanel.invitation.accept")}
           </Button>
           <Button size="sm" variant="secondary" disabled={busy} onClick={() => void answer(false)}>
