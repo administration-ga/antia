@@ -10,7 +10,8 @@ const state = vi.hoisted(() => ({
 vi.mock("@antsia/api/engine", () => ({ api: { modules: { discovery: { discovery: { rootFeed: "root-feed" } } } } }))
 vi.mock("@antsia/api/network", () => ({ useNetwork: () => ({ networkId: "network" }) }))
 vi.mock("@antsia/api/hooks", () => ({ useAuthenticatedConvexQuery: (reference: unknown, args: unknown) => { state.calls.push([reference, args]); return { data: state.data, error: state.error, refetch: state.refetch } } }))
-vi.mock("@antsia/social-features/reseau-personnel", () => ({ PostCard: ({ post }: { post: { _id: string } }) => <article data-post={post._id} /> }))
+// P04 : le fil immersif n'est pas déclaré ici (`useFeedImmersion` rend `null`) — la liste historique, à l'identique.
+vi.mock("@antsia/social-features/reseau-personnel", () => ({ PostCard: ({ post }: { post: { _id: string } }) => <article data-post={post._id} />, useFeedImmersion: () => null }))
 vi.mock("@/components/member-chrome", () => ({ MemberPage: ({ children }: { children: import("react").ReactNode }) => <main>{children}</main> }))
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }) }))
 vi.mock("react-i18next", () => ({ useTranslation: () => ({ t: (key: string) => key }) }))

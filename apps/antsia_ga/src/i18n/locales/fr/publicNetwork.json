@@ -63,6 +63,10 @@
     "publicAudience": "Accessible sans compte",
     "edited": "Modifiée le {{date}}",
     "participate": "Entrer pour participer",
+    "actions": "Actions de la publication publique",
+    "open": "Ouvrir la publication",
+    "readMore": "Lire la suite",
+    "readLess": "Réduire la légende",
     "original": "Lire la publication originale",
     "originalUnavailable": "La publication originale n’est plus disponible dans cette vue."
   },

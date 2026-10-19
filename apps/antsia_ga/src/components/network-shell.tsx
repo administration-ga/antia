@@ -2,18 +2,26 @@
 
 import { NetworkProvider } from "@antsia/api/network"
 import { NextRouterAdapter } from "@antsia/api/routing/next"
-import { CommunicationShell } from "@antsia/social-features/shell"
+import { CommunicationShell, FeedReturnSessionBoundary, MediaPlaybackProvider } from "@antsia/social-features/shell"
+import { IcomListSessionBoundary } from "@antsia/social-features/messagerie"
 import { PostHogProvider } from "@antsia/social-features/shell/analytics"
+import { useOptionalAppearance } from "@antsia/social-features/shell/appearance"
 import { usePathname, useRouter } from "next/navigation"
 import { createContext, type ReactNode, useContext, useEffect } from "react"
 import { useTranslation } from "react-i18next"
 
 import { CenteredStatus } from "@/components/shared/controls"
 import { type SessionState, useSessionState } from "@/components/use-session-state"
-import { engineRoutes, routes, usageScreenForPath } from "@/lib/routes"
+import { engineRoutes, routes, shopContactFromLocation, usageScreenForPath } from "@/lib/routes"
+import { NOTIFICATION_REFERENCE_PARAM, parseNotificationReference } from "@/lib/notification-open"
 import { usageConfiguration, useUsagePermission } from "./analytics-permission"
+import { OfferPostSlot } from "./shops/offer-post-slot"
 
-/** La charte d'antsia.ga, redéclarée par les surfaces portalisées (dock, appel, stories). */
+/**
+ * La charte d'origine d'antsia.ga, redéclarée par les surfaces portalisées (dock,
+ * appel, stories). Le thème choisi dans Préférences > Thème la remplace (`charte`
+ * du fournisseur d'apparence), pour que ces surfaces suivent la page.
+ */
 const CHARTE = "antsia"
 
 export type MemberSession = Extract<SessionState, { status: "member" }>
@@ -32,6 +40,28 @@ export function useMemberSession(): MemberSession {
  * porte d'adhésion (connexion, profil publié, racine rejointe), adaptateur de
  * routage, réseau courant et adresses injectées (`NetworkProvider`), puis la
  * couche de communication montée UNE fois (iCom, appels, présence).
+ *
+ * `navigation="destinations"` (P02) : antsia.ga choisit les cinq destinations
+ * stables (Fil · Découvrir · Créer · Messages · Profil) que la coque du moteur
+ * rend au téléphone et au bureau ; `engineRoutes` sert leurs deux adresses
+ * propres (`discover`, `me`). Retirer cette prop rend la navigation par volets,
+ * à l'identique — c'est le retour arrière. La couche de communication, elle,
+ * ne bouge pas : toujours montée ICI, une fois, quelle que soit la navigation.
+ *
+ * `postPresentation="media"` (P03) : antsia.ga choisit la présentation média
+ * des publications (auteur → média → actions → légende, ratio réel du média,
+ * galerie et visionneuse) partout où le moteur rend une `PostCard`. Retirer
+ * cette prop rend la carte historique, à l'identique — c'est le retour arrière.
+ *
+ * `feedPresentation="immersive"` (P04) : antsia.ga propose le fil immersif —
+ * une publication par hauteur disponible, par défaut au téléphone, sur demande
+ * au bureau, le mode Liste toujours offert et mémorisé par réseau (sous le
+ * préfixe de stockage du réseau, purgé à la déconnexion). Le coordinateur de
+ * lecture (`MediaPlaybackProvider`, une vidéo à la fois, suspension pendant un
+ * appel ou onglet masqué) et la frontière de la mémoire de retour du fil
+ * (`FeedReturnSessionBoundary`) sont montés ICI, une fois, avec la coque.
+ * Retirer la prop rend la liste historique ; retirer le fournisseur rend aux
+ * vidéos leur comportement P03 — c'est le retour arrière.
  */
 export function NetworkShell({ children }: { children: ReactNode }) {
   const { t, i18n } = useTranslation("antsia")
@@ -39,22 +69,30 @@ export function NetworkShell({ children }: { children: ReactNode }) {
   const permission = useUsagePermission()
   const router = useRouter()
   const session = useSessionState()
+  const appearance = useOptionalAppearance()
 
   useEffect(() => {
+    // Seule cette porte possède une continuation de push. Elle transporte une
+    // référence opaque, jamais l'adresse d'un contenu issue du navigateur.
+    const references = pathname === routes.openNotification() ? new URLSearchParams(window.location.search).getAll(NOTIFICATION_REFERENCE_PARAM) : []
+    const notification = references.length === 1 ? parseNotificationReference(references[0]) : undefined
+    const contact = shopContactFromLocation(pathname, window.location.search)
     if (session.status === "restricted") router.replace(routes.personalControls())
-    else if (session.status === "signedOut") router.replace(routes.signIn())
-    else if (session.status === "welcome") router.replace(routes.welcome())
-  }, [session.status, router])
+    else if (session.status === "signedOut") router.replace(routes.signIn(undefined, undefined, notification, contact))
+    else if (session.status === "welcome") router.replace(routes.welcome(undefined, notification, contact))
+  }, [session.status, pathname, router])
 
   if (session.status !== "member") return <CenteredStatus label={t("session.checking")} />
 
   return (
     <NextRouterAdapter>
-      <NetworkProvider networkId={session.root._id} slug={session.root.slug} personId={session.person._id} charte={CHARTE} routes={engineRoutes} liveAvailable>
+      <NetworkProvider networkId={session.root._id} slug={session.root.slug} personId={session.person._id} charte={appearance?.charte ?? CHARTE} routes={engineRoutes} liveAvailable navigation="destinations" postPresentation="media" feedPresentation="immersive" PostOfferRenderer={OfferPostSlot}>
         <MemberSessionContext.Provider value={session}>
           <PostHogProvider configuration={usageConfiguration} consented={!permission.paused && session.person.consentsInForce.includes("usage_analytics")} screen={usageScreenForPath(pathname)} networkSlug={session.root.slug} locale={i18n.resolvedLanguage === "en" ? "en" : "fr"}>
             <CommunicationShell />
-            {children}
+            <IcomListSessionBoundary />
+            <FeedReturnSessionBoundary />
+            <MediaPlaybackProvider>{children}</MediaPlaybackProvider>
           </PostHogProvider>
         </MemberSessionContext.Provider>
       </NetworkProvider>

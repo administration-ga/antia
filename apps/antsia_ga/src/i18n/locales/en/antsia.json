@@ -41,7 +41,21 @@
     "home": "Home",
     "messages": "Messages",
     "myProfile": "My profile",
-    "label": "Network navigation"
+    "label": "Network navigation",
+    "sessionTools": "Notifications, identity and session"
+  },
+  "me": {
+    "title": "Profile",
+    "lead": "Your space: public profile, preferences, personal data and sign-out.",
+    "activityTitle": "My activity",
+    "preferencesTitle": "Preferences",
+    "accountTitle": "Account and data",
+    "profile": "View my public profile",
+    "profileHint": "What members see of you: posts, albums and connections.",
+    "storiesHint": "Your stories and your network's, full screen.",
+    "feedPreferencesHint": "Hidden posts and muted authors, to show again whenever you want.",
+    "moderationHint": "Moderation queues, for authorised teams.",
+    "personalDataHint": "Export, erasure, decisions about you and notifications. Open even during a suspension."
   },
   "signIn": {
     "title": "Sign in to {{brand}}",
@@ -93,6 +107,12 @@
   "feed": {
     "title": "The feed"
   },
+  "feedPreferences": {
+    "title": "My feed",
+    "lead": "Find posts you have hidden and authors you have muted. You can undo these choices at any time.",
+    "scope": "These choices apply to your ANTSIA feed. Authors are not notified. Restoring a post does not unmute its author; unmuting an author does not restore posts hidden individually.",
+    "availability": "Only posts you can still access are shown here."
+  },
   "reactions": {
     "groupLabel": "Reactions",
     "like": "Like",
@@ -107,6 +127,13 @@
   },
   "messages": {
     "title": "Messages"
+  },
+  "notificationOpen": {
+    "title": "Open a notification",
+    "loading": "Checking the notification…",
+    "unavailable": "This notification is no longer available in your session. You can view your other notifications.",
+    "error": "The notification could not be checked. Try again or view your other notifications.",
+    "fallback": "View my notifications"
   },
   "stories": {
     "title": "Statuses"
@@ -186,7 +213,20 @@
       "overturned": "Decision reviewed"
     },
     "pushDisable": "Disable notifications on this device",
-    "weeklyLimitError": "Choose a whole number between 0 and 100."
+    "weeklyLimitError": "Choose a whole number between 0 and 100.",
+    "commerceTitle": "My commercial consents",
+    "commerceLead": "Withdraw consent or retry its withdrawal even if the shop or network is no longer accessible. Pending means confirmation from PRO.GA is still missing.",
+    "commerceEmpty": "No commercial consents on this page.",
+    "commerceVersion": "Consent text: {{version}}",
+    "commercePrevious": "Previous",
+    "commerceNext": "Next",
+    "eraseBookings": "Upcoming appointments with professionals: {{count}}. Erasing your account does not cancel them on their side; cancel them first from My requests.",
+    "eraseBookingsMany": "You have at least {{count}} upcoming appointments with professionals. Erasing your account does not cancel them on their side; cancel them first from My requests.",
+    "eraseBookingsLink": "Open My requests",
+    "pageDecisionsTitle": "Decisions about my pages",
+    "pageDecisionsLead": "Content carried by a page you represent (offer, job post, reply, event) can be removed by moderation. An active signatory of the page can appeal on its behalf.",
+    "pageDecisionsEmpty": "No decision concerns this page.",
+    "pageDecisionsUnavailable": "This page’s decisions are not available right now."
   },
   "preferences": {
     "title": "Your preferences",
@@ -204,8 +244,61 @@
     "saving": "Saving…",
     "saved": "Your preferences have been saved.",
     "appearanceHint": "Appearance changes immediately. This choice is saved for this network on this device.",
+    "theme": {
+      "label": "Theme",
+      "hint": "The theme sets the color of main buttons, links and selections. Backgrounds stay light or dark according to your appearance setting. The change is immediate and saved to your account, so you find it on your other devices.",
+      "hintDevice": "The theme sets the color of main buttons, links and selections. Backgrounds stay light or dark according to your appearance setting. The change is immediate and saved for this network on this device.",
+      "saveFailed": "The theme could not be saved to your account. {{reason}}",
+      "options": {
+        "antsia": { "name": "Plum", "description": "The network’s original theme." },
+        "atlantique": { "name": "Atlantic", "description": "Bright blue on very light gray." },
+        "indigo": { "name": "Indigo", "description": "Indigo on a white background." },
+        "hibiscus": { "name": "Hibiscus", "description": "Vivid pink-red on a white background." },
+        "encre": { "name": "Ink", "description": "Black and white, no accent color." },
+        "foret": { "name": "Forest", "description": "Deep green on light beige." },
+        "lagon": { "name": "Lagoon", "description": "Teal on very light gray." },
+        "mandarine": { "name": "Tangerine", "description": "Deep orange on light beige." }
+      }
+    },
     "unsaved": "Your changes have not been saved. Save your preferences before leaving this page.",
     "leaveConfirm": "Leave this page without saving your preferences?"
+  },
+  "publicAgent": {
+    "title": "Appear as a public agent",
+    "lead": "With your permission and active administrative proof, the Public agent badge, your administration’s name and your public role may appear on your ANTSIA profile. Your chosen name and headline are not replaced. Your profile’s privacy and visibility settings continue to apply.",
+    "independent": "This permission is optional. Withdrawing it removes the display of your public agent status; it does not unpublish your profile, delete your account or leave your other networks.",
+    "consentLabel": "I allow ANTSIA to display my public agent status, administration and public role under the conditions above.",
+    "consentRequired": "Select the checkbox to give your explicit permission.",
+    "grant": "Record my permission",
+    "withdraw": "Withdraw my permission",
+    "loading": "Loading your permission…",
+    "loadFailed": "Your permission could not be loaded. Try again before enabling it.",
+    "retry": "Try again",
+    "idnRequired": "An admitted IDN identity already linked to your account is required to give this permission. Existing permission can still be withdrawn.",
+    "sourceUnavailable": "The administrative source is not configured or available. New permission cannot be enabled right now. You can still withdraw existing permission.",
+    "versionLabel": "Current text version",
+    "grantedAtLabel": "Last permission recorded on",
+    "revokedAtLabel": "Withdrawal recorded on",
+    "versionChanged": "The text has changed. Read the conditions again and select the checkbox again to give your permission.",
+    "granted": "Your permission is recorded. Display also depends on active administrative proof and your profile’s visibility.",
+    "withdrawn": "Your permission has been withdrawn.",
+    "transferLead": "To send this permission to your administration, prepare a temporary link and then open it. Preparing it does not leave this page.",
+    "prepareTransfer": "Continue in my administration",
+    "openTransfer": "Open the link to my administration",
+    "transferExpires": "This temporary link expires on {{date}}. Open it to continue in your administration.",
+    "transferExpired": "This link has expired. Prepare a new link to continue.",
+    "transferFailed": "The link could not be prepared. Try again. You can still withdraw your permission.",
+    "statuses": {
+      "inactive": "You have no active permission for this display.",
+      "waiting": "Your permission is recorded. Proof from your administration is pending; your public agent status is not displayed yet.",
+      "active": "Your permission and active administrative proof are recorded. Display respects your profile’s visibility.",
+      "revoked": "Your permission is withdrawn. Your public agent status is no longer displayed.",
+      "unavailable": "Your public agent status cannot be displayed right now."
+    },
+    "affiliationTitle": "Public agent status",
+    "publicExplanation": "This administrative status is displayed with the person’s permission and active administrative proof. It is separate from their chosen name and headline.",
+    "administrationLabel": "Administration",
+    "roleLabel": "Public role"
   },
   "analytics": {
     "title": "Optional usage measurement",
@@ -219,5 +312,24 @@
     "revoked": "Your permission was withdrawn.",
     "grantFailed": "Your permission could not be recorded. Try again.",
     "revokeFailed": "Measurement has stopped in this browser, but your withdrawal could not be recorded. Try again before closing this page."
+  },
+  "access": {
+    "headline": "Make connections. Grow your network.",
+    "lead": "Keep in touch, share your ideas and meet communities across Gabon.",
+    "signInTitle": "Log in",
+    "createAccount": "Create an account",
+    "signUpTitle": "Create your {{brand}} account",
+    "signUpLead": "Continue with your IDN identity or a code, then create your profile.",
+    "newHere": "New to {{brand}}?",
+    "accountPromise": "Your profile, your posts, your communities.",
+    "existingAccount": "I already have an account: log in",
+    "discover": "Explore public posts",
+    "footer": "Information and languages",
+    "about": "About",
+    "signature": "{{brand}} · The Gabonese public social network",
+    "legal": "Legal notice",
+    "privacy": "Privacy",
+    "french": "Français",
+    "english": "English"
   }
 }

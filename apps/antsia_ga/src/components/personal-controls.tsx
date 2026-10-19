@@ -21,6 +21,10 @@ import { Button, Card, CenteredStatus, Field, TextArea, TextInput } from "./shar
 import { NotificationControls } from "./notification-controls"
 import { PreferencesControls } from "./preferences-controls"
 import { AnalyticsControls } from "./analytics-controls"
+import { PersonalCommerceControls } from "./personal-commerce-controls"
+import { ErasureCommerceNotice } from "./erasure-commerce-notice"
+import { PageModerationDecisions } from "./page-moderation-decisions"
+import { PublicAgentControls } from "./public-agent-controls"
 import { routes } from "@/lib/routes"
 import { signOutAndRedirect } from "@/lib/sign-out"
 
@@ -106,7 +110,7 @@ function DataRights() {
       }}><Download aria-hidden="true" className="size-4" />{t(exporting ? "personal.exporting" : "personal.export")}</Button>
       {exporting ? <progress className="mt-3 w-full" max={progress.max} value={progress.value} aria-label={t("personal.exporting")} /> : null}
     </Card>
-    <Card><h2 className="text-xl font-semibold">{t("personal.eraseTitle")}</h2><p className="my-3 text-sm text-muted-foreground">{t("personal.eraseLead")}</p>
+    <Card><h2 className="text-xl font-semibold">{t("personal.eraseTitle")}</h2><p className="my-3 text-sm text-muted-foreground">{t("personal.eraseLead")}</p><ErasureCommerceNotice />
       {job === undefined ? <p role="status">{t("personal.loading")}</p> : job ? <>
         <p role="status" className="mb-4">{t("personal.eraseRequested", { date: formatViewerDate(job.dueAt, i18n.language, { dateStyle: "long" }, timeZone) })}</p>
         <Button variant="outline" pending={canceling} disabled={!job.canCancel} onClick={async () => { setCanceling(true); try { await cancel({}); toast.success(t("personal.eraseCancelled")) } catch { toast.error(t("personal.error")) } finally { setCanceling(false) } }}>{t("personal.cancelErase")}</Button>
@@ -139,7 +143,8 @@ export function PersonalControls() {
     </nav></header>
     <main id="contenu" tabIndex={-1} className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-4 py-8 focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring">
       <header><ShieldCheck aria-hidden="true" className="mb-3 size-6 text-primary" /><h1 className="text-3xl">{t("personal.title")}</h1><p className="mt-3 text-muted-foreground">{t("personal.lead")}</p><Link className="mt-4 inline-flex min-h-11 items-center text-sm underline" href={routes.feed()}>{t("personal.home")}</Link></header>
-      <PreferencesControls /><AnalyticsControls /><DataRights /><Decisions />
+      <PreferencesControls /><PublicAgentControls key={person._id} /><AnalyticsControls /><PersonalCommerceControls key={person._id} personId={person._id} /><DataRights /><Decisions />
+      {root && active ? <PageModerationDecisions key={person._id} networkId={root._id} /> : null}
       {root && memberships?.some((membership) => membership.networkId === root._id) ? <NotificationControls networkId={root._id} canActivate={Boolean(active)} /> : null}
     </main>
   </div>

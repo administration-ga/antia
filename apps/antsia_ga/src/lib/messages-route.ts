@@ -19,6 +19,6 @@ export function parseMessagesSegments(segments: readonly string[]): MessagesRout
     return null
   }
   const kind = decodeURIComponent(first)
-  if (!(CONVERSATION_ROUTE_KINDS as readonly string[]).includes(kind)) return null
+  if (kind !== "commerce" && !(CONVERSATION_ROUTE_KINDS as readonly string[]).includes(kind)) return null
   return { kind, id: decodeURIComponent(second) }
 }

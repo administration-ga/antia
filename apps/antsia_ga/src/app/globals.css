@@ -1,6 +1,14 @@
 @import "tailwindcss";
 @import "@antsia/ui/styles.css";
 @import "@antsia/ui/themes/antsia.css";
+/* Les sept thèmes que le membre choisit dans Préférences > Thème (`data-charte="antsia-<thème>"`). */
+@import "@antsia/ui/themes/antsia-atlantique.css";
+@import "@antsia/ui/themes/antsia-indigo.css";
+@import "@antsia/ui/themes/antsia-hibiscus.css";
+@import "@antsia/ui/themes/antsia-encre.css";
+@import "@antsia/ui/themes/antsia-foret.css";
+@import "@antsia/ui/themes/antsia-lagon.css";
+@import "@antsia/ui/themes/antsia-mandarine.css";
 
 /* Les classes utilisées par les paquets du moteur doivent être générées pour
    cette application : Tailwind ne parcourt que le dossier de l'application.
@@ -9,3 +17,72 @@
    paquets dans la feuille), alors que ces chemins-ci le font. */
 @source "../../../../packages/ui/src";
 @source "../../../../packages/social-features/src";
+
+/* P18b (A13, WCAG 2.4.11) : un élément focalisé ou visé par une ancre ne passe
+   plus sous les barres fixes. En haut, la barre de membre collante (jeton du
+   thème) ; sous 960 px, la barre des destinations, sa marge basse et la zone
+   sûre du téléphone (jeton de réserve déjà partagé par la barre et les
+   éléments flottants). Aucune valeur recopiée : les deux jetons font foi. */
+html {
+  scroll-padding-top: var(--esp-sticky-header-inset);
+}
+@media (max-width: 959px) {
+  html {
+    scroll-padding-bottom: calc(var(--esp-reseau-tabbar-inset) + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+/* Toasts (sonner) aux couleurs de la charte ANTSIA. Sonner pose sa propre
+   palette sur le conteneur des toasts, selon son thème clair ou sombre
+   (spécificité 0,2,0) ; cette règle (0,3,0) la remplace par les rôles du
+   thème, qui suivent déjà le clair et le sombre posés sur <html>. Aucune
+   couleur littérale : uniquement des jetons du contrat de la charte. Variables
+   visées et contrastes vérifiés par `packages/ui/src/themes/antsia-toasts.test.ts`. */
+[data-charte="antsia"] [data-sonner-toaster][data-sonner-theme] {
+  --normal-bg: var(--popover);
+  --normal-bg-hover: var(--primary-50);
+  --normal-border: var(--border);
+  --normal-border-hover: var(--input);
+  --normal-text: var(--popover-foreground);
+  --success-bg: var(--success-50);
+  --success-border: var(--success-100);
+  --success-text: var(--success-600);
+  --info-bg: var(--primary-50);
+  --info-border: var(--primary-100);
+  --info-text: var(--primary-700);
+  --warning-bg: var(--warning-50);
+  --warning-border: var(--warning-100);
+  --warning-text: var(--warning-600);
+  --error-bg: var(--danger-50);
+  --error-border: var(--danger-100);
+  --error-text: var(--danger-700);
+}
+
+/* Les mêmes toasts sous les sept thèmes choisis dans les réglages : déclarations
+   identiques à la règle ci-dessus (parité vérifiée par
+   `packages/ui/src/themes/antsia-themes.test.ts`). */
+[data-charte="antsia-atlantique"] [data-sonner-toaster][data-sonner-theme],
+[data-charte="antsia-indigo"] [data-sonner-toaster][data-sonner-theme],
+[data-charte="antsia-hibiscus"] [data-sonner-toaster][data-sonner-theme],
+[data-charte="antsia-encre"] [data-sonner-toaster][data-sonner-theme],
+[data-charte="antsia-foret"] [data-sonner-toaster][data-sonner-theme],
+[data-charte="antsia-lagon"] [data-sonner-toaster][data-sonner-theme],
+[data-charte="antsia-mandarine"] [data-sonner-toaster][data-sonner-theme] {
+  --normal-bg: var(--popover);
+  --normal-bg-hover: var(--primary-50);
+  --normal-border: var(--border);
+  --normal-border-hover: var(--input);
+  --normal-text: var(--popover-foreground);
+  --success-bg: var(--success-50);
+  --success-border: var(--success-100);
+  --success-text: var(--success-600);
+  --info-bg: var(--primary-50);
+  --info-border: var(--primary-100);
+  --info-text: var(--primary-700);
+  --warning-bg: var(--warning-50);
+  --warning-border: var(--warning-100);
+  --warning-text: var(--warning-600);
+  --error-bg: var(--danger-50);
+  --error-border: var(--danger-100);
+  --error-text: var(--danger-700);
+}

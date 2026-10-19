@@ -12,16 +12,18 @@ import { api } from "@convex/_generated/api"
 import { useQuery } from "convex/react"
 import { type ReactNode, useEffect } from "react"
 import { useTranslation } from "react-i18next"
-import { Toaster } from "sonner"
 
 import { APP_NAMESPACE, appResources } from "@/i18n/resources"
+import { APPEARANCE } from "@/lib/appearance"
 import { authClient } from "@/lib/auth-client"
 import { UsagePermissionProvider } from "./analytics-permission"
+import { PersonalTheme } from "./personal-theme"
 import { SessionBridge, SessionBridgePreflight } from "./session-bridge"
+import { ToastRegion } from "./toast-region"
 
 const CONVEX_URL = process.env.NEXT_PUBLIC_CONVEX_URL ?? ""
 
-/** La préférence personnelle s'applique après preuve de session, sans recopier les claims IDN. */
+/** La préférence personnelle s'applique après preuve de session, sans recopier les claims IDN ; le thème suit le compte. */
 function PersonalLocale({ children }: { children: ReactNode }) {
   const { isAuthenticated } = useStableConvexAuth()
   const person = useQuery(api.modules.people.persons.getMyPerson, isAuthenticated ? {} : "skip")
@@ -31,12 +33,17 @@ function PersonalLocale({ children }: { children: ReactNode }) {
     document.documentElement.lang = person.locale
     if (i18n.language !== person.locale) void i18n.changeLanguage(person.locale)
   }, [person?.locale, i18n])
-  return <ViewerPreferencesProvider timeZone={person?.timeZone}>{children}</ViewerPreferencesProvider>
+  return (
+    <ViewerPreferencesProvider timeZone={person?.timeZone}>
+      <PersonalTheme signedIn={isAuthenticated && !!person} accountTheme={person?.theme}>{children}</PersonalTheme>
+    </ViewerPreferencesProvider>
+  )
 }
 
+/** P18b (A07) : la région des toasts reste annoncée pendant une modale (hôte exempté de l'inertage). */
 function EngineToaster() {
   const appearance = useOptionalAppearance()
-  return <Toaster theme={appearance?.resolvedAppearance ?? "light"} position="top-center" richColors closeButton />
+  return <ToastRegion theme={appearance?.resolvedAppearance ?? "light"} position="top-center" richColors closeButton />
 }
 
 /** Session Better Auth + client Convex ; sans moteur configuré, un avertissement plutôt qu'un écran blanc. */
@@ -67,7 +74,7 @@ export function SessionProviders({ children }: { children: ReactNode }) {
 export function Providers({ locale, children }: { locale: Locale; children: ReactNode }) {
   return (
     <I18nProvider locale={locale} appResources={appResources} defaultNS={APP_NAMESPACE} defaultVariables={{ brand: BRAND_NAME }}>
-      <AppearanceProvider storagePrefix="antsia:antsia:">
+      <AppearanceProvider storagePrefix={APPEARANCE.storagePrefix} themes={APPEARANCE.themes}>
         <UsagePermissionProvider>{children}</UsagePermissionProvider>
         <EngineToaster />
       </AppearanceProvider>

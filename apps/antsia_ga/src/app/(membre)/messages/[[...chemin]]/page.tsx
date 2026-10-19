@@ -11,9 +11,10 @@ export function generateMetadata(): Metadata {
 }
 
 /**
- * La messagerie (iCom) en pages : liste, conversation, composeurs. Au bureau,
- * ces adresses ouvrent la carte iCom détachée sur le fil ; au téléphone, elles
- * rendent la page iCom (`MessagesRoute` choisit).
+ * La messagerie (iCom) en pages : liste, conversation, composeurs. La capacité
+ * de navigation ANTSIA sert une liste et un détail au bureau, puis des pages
+ * immersives au téléphone. L'aiguillage historique reste disponible aux autres
+ * consommateurs (`MessagesRoute` choisit).
  */
 export default async function MessagesPage({ params }: { params: Promise<{ chemin?: string[] }> }) {
   const { chemin = [] } = await params

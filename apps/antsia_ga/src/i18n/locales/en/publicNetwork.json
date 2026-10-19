@@ -63,6 +63,10 @@
     "publicAudience": "Readable without an account",
     "edited": "Edited on {{date}}",
     "participate": "Sign in to participate",
+    "actions": "Public post actions",
+    "open": "Open post",
+    "readMore": "Read more",
+    "readLess": "Collapse caption",
     "original": "Read the original publication",
     "originalUnavailable": "The original publication is no longer available in this view."
   },

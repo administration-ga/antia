@@ -15,7 +15,11 @@ import { z } from "zod"
 
 import { Button, Card, CenteredStatus, Field, TextInput } from "@/components/shared/controls"
 import { useSessionState } from "@/components/use-session-state"
+import { useOnboardingUsage } from "./analytics-permission"
 import { engineErrorMessage } from "@/lib/engine-errors"
+import { parseShopContactContinuation, type ShopContactContinuation } from "@/lib/shop-contact-continuation"
+import { parsePublicPostContinuation } from "@/lib/public-post-continuation"
+import { parseNotificationReference } from "@/lib/notification-open"
 import { routes } from "@/lib/routes"
 import { signOutAndRedirect } from "@/lib/sign-out"
 
@@ -29,11 +33,20 @@ function useSettled<T>(value: T, delayMs = 350): T {
   return settled
 }
 
-export function WelcomeScreen() {
-  const { t } = useTranslation()
+export function WelcomeScreen({ publicPostId, notificationReference, shopContact }: { publicPostId?: string; notificationReference?: string; shopContact?: ShopContactContinuation } = {}) {
+  const { t, i18n } = useTranslation()
   const router = useRouter()
   const [signingOut, setSigningOut] = useState(false)
   const session = useSessionState()
+  const usagePerson = session.status === "welcome" || session.status === "member" ? session.person : null
+  const usageConsented = usagePerson?.consentsInForce.includes("usage_analytics") === true
+  const captureStep = useOnboardingUsage(usageConsented, session.status === "welcome" || session.status === "member" ? session.root.slug : "", i18n.resolvedLanguage === "en" ? "en" : "fr")
+  const canCaptureEntry = session.status === "welcome" && session.person !== null && usageConsented
+  useEffect(() => { if (canCaptureEntry) captureStep("entry_started") }, [canCaptureEntry, captureStep])
+  const continuationPostId = parsePublicPostContinuation(publicPostId)
+  const notification = continuationPostId ? undefined : parseNotificationReference(notificationReference)
+  const contact = continuationPostId || notification ? undefined : parseShopContactContinuation(shopContact)
+  const destination = continuationPostId ? routes.memberPost(continuationPostId) : notification ? routes.openNotification(notification) : contact ? routes.shopContact(contact.handle, contact.offerRef) : routes.feed()
   const recordConsent = useMutation(api.modules.people.consents.recordConsent)
   const publishMyProfile = useMutation(api.modules.people.profile.publishMyProfile)
   const joinNetwork = useMutation(api.modules.people.memberships.joinNetwork)
@@ -71,9 +84,9 @@ export function WelcomeScreen() {
 
   useEffect(() => {
     if (session.status === "restricted") router.replace(routes.personalControls())
-    else if (session.status === "signedOut") router.replace(routes.signIn())
-    else if (session.status === "member") router.replace(routes.feed())
-  }, [session.status, router])
+    else if (session.status === "signedOut") router.replace(routes.signIn(undefined, continuationPostId, notification, contact))
+    else if (session.status === "member") router.replace(destination)
+  }, [session.status, continuationPostId, notification, contact?.handle, contact?.offerRef, destination, router])
 
   const displayName = useSettled(useWatch({ control: form.control, name: "displayName" }))
   const suggestions = useQuery(
@@ -91,9 +104,12 @@ export function WelcomeScreen() {
       if (!consentGiven) await recordConsent({ purpose: "social_profile", origin: "onboarding" })
       await setPreferences({ locale: values.locale, timeZone: values.timeZone })
       await publishMyProfile({ handle: values.handle, displayName: values.displayName })
+      captureStep("profile_completed")
       await joinNetwork({ networkId: root._id })
+      captureStep("membership_joined")
+      captureStep("entry_completed")
       toast.success(t("antsia:welcome.done", { name: values.displayName.trim() }))
-      router.replace(routes.feed())
+      router.replace(destination)
     } catch (error) {
       toast.error(engineErrorMessage(error, t))
     }

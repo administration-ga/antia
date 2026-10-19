@@ -24,7 +24,7 @@ const author = z.object({ kind: z.enum(["person", "page"]), handle: shortText.nu
 const media = z.object({ url: assetUrl.nullable(), withheld: z.enum(["fileScanPending", "fileQuarantined"]).nullable(), kind: z.enum(["image", "video"]), mimeType: shortText, width: z.number().int().positive().max(20_000).optional(), height: z.number().int().positive().max(20_000).optional(), durationMs: timestamp.optional(), altText: shortText.optional() }).strict()
 const shared = z.union([z.object({ available: z.literal(false) }).strict(), z.object({ available: z.literal(true), id: shortText, body: text, publishedAt: timestamp, author, origin, media: z.array(media).max(20) }).strict()])
 
-export const publicPostSchema: z.ZodType<PublicPost> = z.object({ id: shortText, body: text, publishedAt: timestamp, editedAt: timestamp.nullable(), tags: z.array(shortText).max(10), province: z.enum(PROVINCE_SLUGS).nullable(), author, origin, media: z.array(media).max(20), shared: shared.nullable() }).strict()
+export const publicPostSchema: z.ZodType<PublicPost> = z.object({ id: shortText, body: text, publishedAt: timestamp, editedAt: timestamp.nullable(), tags: z.array(shortText).max(10), province: z.enum(PROVINCE_SLUGS).nullable(), author, origin, media: z.array(media).max(20), shared: shared.nullable(), hasCommerceOffer: z.boolean().optional() }).strict()
 export const publicProfileSchema: z.ZodType<PublicProfile> = z.object({ handle: shortText, displayName: shortText, headline: shortText.nullable(), avatarUrl: assetUrl.nullable(), badges: z.array(z.enum(BADGES)).max(4) }).strict()
 export const publicPageSchema: z.ZodType<PublicPage> = z.object({ id: shortText, handle: shortText, name: shortText, shortName: shortText.nullable(), description: text.nullable(), logoUrl: assetUrl.nullable(), bannerUrl: assetUrl.nullable(), badge: z.literal("official"), origin }).strict()
 export const publicSnapshotSchema: z.ZodType<PublicNetworkSnapshot> = z.object({ generatedAt: timestamp.nullable(), periodStart: timestamp.nullable(), periodEnd: timestamp.nullable(), publishedPosts: count.nullable(), officialPages: count.nullable(), networks: z.array(origin).max(100), trends: z.array(z.object({ tag: shortText, posts: count }).strict()).max(100), bounded: z.boolean() }).strict()
@@ -50,7 +50,8 @@ const publicContext = cache(async () => {
   } catch { return { status: "unavailable" } as const }
 })
 
-async function projected<T>(reference: FunctionReference<"query", "public">, args: Record<string, unknown>, schema: z.ZodType<T>, handoff: boolean): Promise<PublicResult<T>> {
+/** Porte commune des projections SSR ; conserve la décision de session et refuse les DTO hors contrat. */
+export async function projected<T>(reference: FunctionReference<"query", "public">, args: Record<string, unknown>, schema: z.ZodType<T>, handoff: boolean): Promise<PublicResult<T>> {
   if (handoff) return { status: "handoff" }
   const context = await publicContext()
   if (context.status !== "ready") return { status: context.status }

@@ -1,4 +1,12 @@
 {
+  "commerce": {
+    "myShop": "Ma boutique",
+    "myShopLead": "Préparez votre présentation et gérez les vitrines de vos activités.",
+    "shops": "Boutiques",
+    "shopsLead": "Découvrez les vitrines admises dans ce réseau, sans catalogue ni achat encore activé.",
+    "all": "Tout découvrir",
+    "sections": "Rubriques de découverte"
+  },
   "nav": {
     "national": "National",
     "discover": "Découvrir",
@@ -20,12 +28,27 @@
     "memberScope": "Vous lisez le réseau {{brand}} comme membre. Chaque contenu conserve son audience et son réseau d’origine.",
     "provinceLabel": "Province de la publication",
     "allProvinces": "Toutes les provinces",
+    "provinceApply": "Afficher",
     "publicDiscover": "Découvrir les contenus accessibles sans compte",
     "empty": "Aucune publication ne correspond à ce filtre.",
     "emptyWindow": "Cette page ne contient aucun contenu admissible. La page suivante peut en contenir.",
     "pagination": "Pages du fil national",
     "invalidTitle": "Filtre non disponible",
     "invalidFilter": "La portée, la province ou la continuation demandée n’est pas valable. Choisissez un filtre disponible."
+  },
+  "discoverHub": {
+    "lead": "Explorez le réseau au-delà de votre fil : contenus nationaux, provinces, mots-clés, communautés et évènements.",
+    "contentTitle": "Publications du réseau",
+    "nationalLead": "Les publications ouvertes à tout le réseau, des plus récentes aux plus anciennes.",
+    "provincesTitle": "Par province",
+    "tagTitle": "Chercher par mot-clé",
+    "tagLabel": "Mot-clé",
+    "tagHint": "De 2 à 30 lettres, chiffres ou soulignés, sans espace. Le # est facultatif.",
+    "tagInvalid": "Saisissez de 2 à 30 lettres, chiffres ou soulignés, sans espace.",
+    "tagSubmit": "Voir les publications",
+    "networkTitle": "Dans le réseau",
+    "publicTitle": "Vue publique",
+    "publicLead": "Ce qu’une personne sans compte peut lire. Cette vue s’ouvre hors de votre espace de membre."
   },
   "moderation": {
     "title": "Modération nationale",
@@ -74,7 +97,22 @@
       "person": "Profil",
       "live": "Direct",
       "story": "Statut",
-      "album": "Album"
+      "album": "Album",
+      "commercialMessage": "Message commercial",
+      "commerceJob": "Offre d’emploi",
+      "serviceReview": "Avis de prestation",
+      "serviceReviewReply": "Réponse à un avis de prestation",
+      "commerceOffer": "Offre de boutique",
+      "contextualMessage": "Message de mise en relation",
+      "diasporaAidQuestion": "Question d’entraide DIASPORALE",
+      "diasporaAidAnswer": "Réponse d’entraide DIASPORALE",
+      "diasporaAidMission": "Mission bénévole DIASPORALE",
+      "diasporaMentorProfile": "Profil de mentor DIASPORALE",
+      "diasporaMentoringRequest": "Demande de mentorat DIASPORALE",
+      "diasporaKitResource": "Ressource du kit d’arrivée DIASPORALE",
+      "diasporaJobOffer": "Offre d’emploi DIASPORALE",
+      "diasporaTalentProfile": "Profil de talent DIASPORALE",
+      "diasporaJobApplication": "Candidature DIASPORALE"
     },
     "preview": "Extrait du contenu à relire",
     "previewBounded": "Extrait limité, accessible dans votre périmètre actuel.",

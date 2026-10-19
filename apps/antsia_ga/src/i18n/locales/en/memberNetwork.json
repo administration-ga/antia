@@ -1,4 +1,12 @@
 {
+  "commerce": {
+    "myShop": "My shop",
+    "myShopLead": "Prepare your presentation and manage your activity storefronts.",
+    "shops": "Shops",
+    "shopsLead": "Discover storefronts admitted to this network. Catalogs and purchases are not yet enabled.",
+    "all": "Discover everything",
+    "sections": "Discovery sections"
+  },
   "nav": {
     "national": "National",
     "discover": "Discover",
@@ -20,12 +28,27 @@
     "memberScope": "You are reading {{brand}} as a member. Each post retains its audience and its source network.",
     "provinceLabel": "Post province",
     "allProvinces": "All provinces",
+    "provinceApply": "Show",
     "publicDiscover": "Discover content available without an account",
     "empty": "No post matches this filter.",
     "emptyWindow": "No content on this page is eligible. The next page may contain results.",
     "pagination": "National feed pages",
     "invalidTitle": "Filter unavailable",
     "invalidFilter": "The requested scope, province or continuation is invalid. Choose an available filter."
+  },
+  "discoverHub": {
+    "lead": "Explore the network beyond your feed: national content, provinces, hashtags, communities and events.",
+    "contentTitle": "Network posts",
+    "nationalLead": "Posts open to the whole network, newest first.",
+    "provincesTitle": "By province",
+    "tagTitle": "Search by hashtag",
+    "tagLabel": "Hashtag",
+    "tagHint": "2 to 30 letters, digits or underscores, no spaces. The # is optional.",
+    "tagInvalid": "Enter 2 to 30 letters, digits or underscores, no spaces.",
+    "tagSubmit": "See the posts",
+    "networkTitle": "In the network",
+    "publicTitle": "Public view",
+    "publicLead": "What someone without an account can read. This view opens outside your member space."
   },
   "moderation": {
     "title": "National moderation",
@@ -74,7 +97,22 @@
       "person": "Profile",
       "live": "Live stream",
       "story": "Status",
-      "album": "Album"
+      "album": "Album",
+      "commercialMessage": "Commercial message",
+      "commerceJob": "Job opening",
+      "serviceReview": "Service review",
+      "serviceReviewReply": "Service review reply",
+      "commerceOffer": "Store offer",
+      "contextualMessage": "Matchmaking message",
+      "diasporaAidQuestion": "DIASPORALE mutual aid question",
+      "diasporaAidAnswer": "DIASPORALE mutual aid answer",
+      "diasporaAidMission": "DIASPORALE volunteer mission",
+      "diasporaMentorProfile": "DIASPORALE mentor profile",
+      "diasporaMentoringRequest": "DIASPORALE mentoring request",
+      "diasporaKitResource": "DIASPORALE arrival kit resource",
+      "diasporaJobOffer": "DIASPORALE job offer",
+      "diasporaTalentProfile": "DIASPORALE talent profile",
+      "diasporaJobApplication": "DIASPORALE job application"
     },
     "preview": "Content excerpt for review",
     "previewBounded": "Limited excerpt, accessible within your current scope.",

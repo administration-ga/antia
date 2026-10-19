@@ -4,6 +4,8 @@ import Image from "next/image"
 import Link from "next/link"
 import { notFound } from "next/navigation"
 
+import { AccessHomeScreen } from "@/components/access-home-screen"
+import { getAppT } from "@/i18n/server"
 import { loadOfficialPage, loadOfficialPagePosts, loadPublicPost, loadPublicPosts, loadPublicProfile, loadPublicSnapshot, loadPublicTransparency, publicMetadata, publicSearch } from "@/lib/public-data"
 import { decodeRouteSegment } from "@/lib/route-params"
 import { routes } from "@/lib/routes"
@@ -26,33 +28,15 @@ async function fallbackMetadata(path: string) {
 }
 
 export async function HomeMetadata(props: PublicPageProps) {
-  const t = getPublicT(await getPublicLocale())
-  const result = await loadPublicSnapshot((await searchOf(props)).handoff)
-  return result.status === "ready" ? publicMetadata(t("home.title"), t("home.lead"), routes.home()) : fallbackMetadata(routes.home())
+  if ((await searchOf(props)).handoff) return fallbackMetadata(routes.home())
+  const { t } = getAppT(await getPublicLocale())
+  return publicMetadata(t("meta.title"), t("access.lead"), routes.home())
 }
 
 export async function HomeScreen(props: PublicPageProps) {
   const search = await searchOf(props)
-  const [locale, snapshot, posts] = await Promise.all([getPublicLocale(), loadPublicSnapshot(search.handoff), loadPublicPosts(search.cursor, undefined, undefined, search.handoff)])
-  const t = getPublicT(locale)
-  if (search.handoff) return <PublicShell viewer="handoff"><PublicStatus status="handoff" locale={locale} /></PublicShell>
-  return <PublicShell viewer={snapshot.status === "ready" ? snapshot.viewer : snapshot.status}>
-    <div className="grid min-w-0 gap-10 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-14">
-      <div className="flex min-w-0 flex-col gap-8">
-        <header><p className="text-sm font-medium uppercase tracking-widest text-primary">{t("home.eyebrow")}</p><h1 className="mt-4 text-4xl font-semibold leading-tight tracking-tight sm:text-5xl lg:text-6xl">{t("home.title")}</h1><p className="mt-5 max-w-lg text-lg leading-relaxed text-muted-foreground">{t("home.lead")}</p><div className="mt-6 flex flex-wrap items-center gap-3"><Link href={routes.signIn()} prefetch={false} className={PUBLIC_CTA}>{t("home.join")}</Link><Link href={routes.discover()} prefetch={false} className={PUBLIC_LINK}>{t("home.read")}</Link></div></header>
-        <section className="border-t border-border pt-6"><h2 className="text-lg font-semibold">{t("home.contextTitle")}</h2><p className="mt-3 max-w-lg leading-relaxed text-muted-foreground">{t("home.contextBody")}</p></section>
-        {snapshot.status === "ready" ? <section className="border-t border-border pt-6"><h2 className="text-lg font-semibold">{t("snapshot.title")}</h2>
-          {snapshot.data.generatedAt !== null ? <p className="mt-2 text-xs text-muted-foreground">{t("snapshot.updated", { date: publicDate(snapshot.data.generatedAt, locale) })}</p> : <p className="mt-2 text-sm text-muted-foreground">{t("snapshot.pending")}</p>}
-          {snapshot.data.periodStart !== null && snapshot.data.periodEnd !== null ? <p className="mt-2 text-xs text-muted-foreground">{t("snapshot.period", { start: publicDate(snapshot.data.periodStart, locale), end: publicDate(snapshot.data.periodEnd, locale) })}</p> : null}
-          {snapshot.data.publishedPosts !== null || snapshot.data.officialPages !== null ? <dl className="mt-4 grid grid-cols-2 gap-4">{snapshot.data.publishedPosts !== null ? <div><dt className="text-xs text-muted-foreground">{t("snapshot.posts")}</dt><dd className="mt-1 text-2xl font-semibold tabular-nums">{new Intl.NumberFormat(locale).format(snapshot.data.publishedPosts)}</dd></div> : null}{snapshot.data.officialPages !== null ? <div><dt className="text-xs text-muted-foreground">{t("snapshot.pages")}</dt><dd className="mt-1 text-2xl font-semibold tabular-nums">{new Intl.NumberFormat(locale).format(snapshot.data.officialPages)}</dd></div> : null}</dl> : null}
-          {snapshot.data.bounded ? <p className="mt-3 text-xs text-muted-foreground">{t("snapshot.bounded")}</p> : null}
-          {snapshot.data.networks.length ? <ul className="mt-4 flex flex-wrap gap-2">{snapshot.data.networks.map((network) => <li key={network.slug} className="rounded-lg bg-muted px-3 py-2 text-sm">{network.name}</li>)}</ul> : null}
-        </section> : null}
-        <ProvinceLinks locale={locale} />
-      </div>
-      <section aria-labelledby="public-feed-heading" className="min-w-0"><header className="mb-5 border-l-2 border-primary pl-4"><p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">{BRAND_NAME}</p><h2 id="public-feed-heading" className="mt-1 text-2xl font-semibold">{t("feed.title")}</h2><p className="mt-2 text-sm text-muted-foreground">{t("feed.lead")}</p></header><PublicFeed result={posts} locale={locale} base={routes.home()} /></section>
-    </div>
-  </PublicShell>
+  if (search.handoff) return <PublicShell viewer="handoff"><PublicStatus status="handoff" locale={await getPublicLocale()} /></PublicShell>
+  return <AccessHomeScreen />
 }
 
 function ProvinceLinks({ locale }: { locale: "fr" | "en" }) {
@@ -127,7 +111,26 @@ export async function ProfileScreen(props: PublicDynamicProps<"publicHandle">) {
   const locale = await getPublicLocale(), t = getPublicT(locale), result = await loadPublicProfile(handle, (await searchOf(props)).handoff)
   if (result.status !== "ready") return <PublicShell viewer={result.status}><PublicStatus status={result.status} locale={locale} /></PublicShell>
   if (!result.data) notFound()
-  return <PublicShell viewer={result.viewer}><article className="mx-auto max-w-3xl rounded-2xl border border-border bg-card p-6 sm:p-10"><p className="mb-6 text-sm font-medium text-primary">{t("profile.public")}</p><PublicIdentity author={{ kind: "person", handle: result.data.handle, displayName: result.data.displayName, avatarUrl: result.data.avatarUrl, badges: result.data.badges }} locale={locale} /><h1 className="mt-6 break-words text-3xl font-semibold">{result.data.displayName}</h1>{result.data.headline ? <p className="mt-3 whitespace-pre-wrap break-words text-muted-foreground">{result.data.headline}</p> : null}<p className="mt-6 text-sm text-muted-foreground">{t("profile.reduced")}</p><Link href={routes.profile(result.data.handle)} prefetch={false} className={`${PUBLIC_CTA} mt-6`}>{t("profile.member")}</Link></article></PublicShell>
+  const { t: tApp } = getAppT(locale)
+  const affiliation = result.data.publicAgent
+  return <PublicShell viewer={result.viewer}>
+    <article className="mx-auto max-w-3xl rounded-2xl border border-border bg-card p-6 sm:p-10">
+      <p className="mb-6 text-sm font-medium text-primary">{t("profile.public")}</p>
+      <PublicIdentity author={{ kind: "person", handle: result.data.handle, displayName: result.data.displayName, avatarUrl: result.data.avatarUrl, badges: result.data.badges }} locale={locale} />
+      <h1 className="mt-6 break-words text-3xl font-semibold">{result.data.displayName}</h1>
+      {result.data.headline ? <p className="mt-3 whitespace-pre-wrap break-words text-muted-foreground">{result.data.headline}</p> : null}
+      {affiliation ? <section aria-labelledby="public-agent-title" className="mt-6 rounded-xl border border-border p-4">
+        <h2 id="public-agent-title" className="text-lg font-semibold">{tApp("publicAgent.affiliationTitle")}</h2>
+        <p className="mt-2 text-sm text-muted-foreground">{tApp("publicAgent.publicExplanation")}</p>
+        <dl className="mt-3 grid gap-3 text-sm">
+          <div><dt className="font-medium">{tApp("publicAgent.administrationLabel")}</dt><dd><Link href={routes.officialPage(affiliation.administrationHandle)} prefetch={false} className={PUBLIC_LINK}>{affiliation.administrationName}</Link></dd></div>
+          <div><dt className="font-medium">{tApp("publicAgent.roleLabel")}</dt><dd className="break-words">{affiliation.roleLabel}</dd></div>
+        </dl>
+      </section> : null}
+      <p className="mt-6 text-sm text-muted-foreground">{t("profile.reduced")}</p>
+      <Link href={routes.profile(result.data.handle)} prefetch={false} className={`${PUBLIC_CTA} mt-6`}>{t("profile.member")}</Link>
+    </article>
+  </PublicShell>
 }
 
 export async function PageMetadata(props: PublicDynamicProps<"handle">) {
