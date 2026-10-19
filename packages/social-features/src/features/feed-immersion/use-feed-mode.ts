@@ -92,7 +92,7 @@ export function __resetFeedModeMemoryForTests(): void {
 }
 
 export function useFeedMode(): FeedModeState | null {
-  const { storagePrefix, feedPresentation } = useNetwork()
+  const { storagePrefix, feedPresentation, postPresentation } = useNetwork()
   const mobile = useIsReseauMobile()
   const reducedMotion = useReducedMotion() === true
   const key = feedModeStorageKey(storagePrefix)
@@ -108,7 +108,9 @@ export function useFeedMode(): FeedModeState | null {
   )
 
   if (feedPresentation !== "immersive") return null
-  const resolution = resolveFeedMode({ pose, stored, reducedMotion, viewportHeight: height })
+  // L'écran des chartes (ADR-0028) ouvre le fil du téléphone en liste.
+  const phoneDefault: FeedMode = postPresentation === "charte" ? "list" : "immersive"
+  const resolution = resolveFeedMode({ pose, stored, reducedMotion, viewportHeight: height, phoneDefault })
   if (mobile === null) {
     // Largeur inconnue : aucun arbre immersif monté « en attendant ».
     return { ...resolution, effective: "list", fallback: null, pose, known: false, setMode }
