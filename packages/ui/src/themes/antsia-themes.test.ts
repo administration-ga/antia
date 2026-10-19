@@ -199,6 +199,16 @@ describe("les sept thèmes d'antsia.ga (ADR-0027)", () => {
     for (const [path, expression, count] of ACTIVE_SITES) expect(read(path).split(expression).length - 1, `${path} : ${expression}`).toBe(count)
   })
 
+  it("les pastilles de décompte et les réactions de message lisent les couleurs des réactions, leur facture d'origine en repli", () => {
+    const REACT_SITES: readonly (readonly [string, string, number])[] = [
+      ["../../../social-features/src/shell/ReseauMenuRail.tsx", 'background: "var(--role-react-fill, var(--primary-50))"', 1],
+      ["../../../social-features/src/shell/ReseauDesktopIcomLink.tsx", 'background: "var(--role-react-fill, var(--danger-fill))"', 1],
+      ["../../../social-features/src/features/messagerie/messagerie-styles.tsx", "background: var(--role-react-soft, var(--primary-50));", 2],
+      ["../../../social-features/src/features/messagerie/messagerie-styles.tsx", "background: var(--role-react-fill, var(--danger-fill));", 1],
+    ]
+    for (const [path, expression, count] of REACT_SITES) expect(read(path).split(expression).length - 1, `${path} : ${expression}`).toBe(count)
+  })
+
   it("le contrat de la base laisse DIASPORALE intact : chaque jeton du système épuré est à `initial`", () => {
     const base = new TokenCascade(BASE_SHEETS)
     const tokens = [...Object.keys(ANGLES).filter((token) => token !== "--rp-surface-radius"), "--primary-fill-on", "--esp-theme-swatch-1",

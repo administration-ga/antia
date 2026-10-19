@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/ReseauMenuRail.tsx @ ad2e7fdc2 — adaptations : déplacé dans la coque (`shell/`) ; branché sur le moteur — ma fiche par `people.persons.getMyPerson` (sans réseau ; identité montrée seulement si le profil est publié, portrait servi par la garde des fichiers), mes groupes par `thematicGroups.thematicGroups.myGroups`, mes pages suivies par la première page de `pages.pages.paginateMyPageFollows` (pages GÉNÉRIQUES du moteur, au lieu des pages d'organisation), réseau courant par `useNetwork()` ; adresses par la table des routes INJECTÉE (`useRoutes()` : volets sur `home()`, mon profil sur `profile(handle)`, fiche d'une page sur `page(handle)`, réglages sur `settings?.()`) — `personal-nav` et ses URL de l'espace retirés, une destination absente RETIRE son entrée (et « Voir plus » disparaît quand il n'a plus rien à déplier) ; volets SERVIS seuls (`menuItemsFor(counts, home)`) ; libellés par l'i18n (`reseau:reseauMenuRail.*`, libellé du volet par sa clé, pastille par `menuBadgeLabel(item, t)`) ; « iRéseau » devient « réseau » ; liens par `Link` de `@antsia/api/routing`, d'UNE seule pièce (un lien à la facture du bouton fantôme au lieu d'un bouton DANS un lien : deux arrêts de tabulation pour un geste) ; rendu, ordre et styles inchangés ; P02 (18/10/2026) : monté aussi HORS de la page réseau (`activeTab` nul, volets rendus en liens quand aucun `onSelectTab` n'est fourni) et, sous la navigation par destinations déclarée par l'application, coiffé des cinq destinations Fil · Découvrir · Créer · Messages · Profil (« Créer » ouvre la carte de choix partagée) — le volet Fil et « Voir plus » cèdent alors leur place aux destinations Fil et Profil ; les paramètres (`settings?.()`) gardent alors une entrée au pied du rail, courante sur leur page. ; système épuré (ADR-0027) : destination active en pastille tonale sans filet (`--esp-tab-active-*`, `--esp-chip-border`) et angle des puces (`--esp-chip-radius`), facture d'origine en repli.
+// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/ReseauMenuRail.tsx @ ad2e7fdc2 — adaptations : déplacé dans la coque (`shell/`) ; branché sur le moteur — ma fiche par `people.persons.getMyPerson` (sans réseau ; identité montrée seulement si le profil est publié, portrait servi par la garde des fichiers), mes groupes par `thematicGroups.thematicGroups.myGroups`, mes pages suivies par la première page de `pages.pages.paginateMyPageFollows` (pages GÉNÉRIQUES du moteur, au lieu des pages d'organisation), réseau courant par `useNetwork()` ; adresses par la table des routes INJECTÉE (`useRoutes()` : volets sur `home()`, mon profil sur `profile(handle)`, fiche d'une page sur `page(handle)`, réglages sur `settings?.()`) — `personal-nav` et ses URL de l'espace retirés, une destination absente RETIRE son entrée (et « Voir plus » disparaît quand il n'a plus rien à déplier) ; volets SERVIS seuls (`menuItemsFor(counts, home)`) ; libellés par l'i18n (`reseau:reseauMenuRail.*`, libellé du volet par sa clé, pastille par `menuBadgeLabel(item, t)`) ; « iRéseau » devient « réseau » ; liens par `Link` de `@antsia/api/routing`, d'UNE seule pièce (un lien à la facture du bouton fantôme au lieu d'un bouton DANS un lien : deux arrêts de tabulation pour un geste) ; rendu, ordre et styles inchangés ; P02 (18/10/2026) : monté aussi HORS de la page réseau (`activeTab` nul, volets rendus en liens quand aucun `onSelectTab` n'est fourni) et, sous la navigation par destinations déclarée par l'application, coiffé des cinq destinations Fil · Découvrir · Créer · Messages · Profil (« Créer » ouvre la carte de choix partagée) — le volet Fil et « Voir plus » cèdent alors leur place aux destinations Fil et Profil ; les paramètres (`settings?.()`) gardent alors une entrée au pied du rail, courante sur leur page. ; système épuré (ADR-0027) : destination active en pastille tonale sans filet (`--esp-tab-active-*`, `--esp-chip-border`) et angle des puces (`--esp-chip-radius`), facture d'origine en repli. Pastilles de décompte aux couleurs des réactions (`--role-react-*`), ton d'origine en repli.
 "use client"
 
 /**
@@ -98,6 +98,17 @@ const SELECTED_LINK_ITEM_STYLE: CSSProperties = {
 	background: "var(--esp-tab-active-bg, var(--ink-0))",
 	color: "var(--esp-tab-active-fg, var(--primary-500))",
 	border: "1px solid var(--esp-chip-border, var(--primary-500))",
+}
+
+/**
+ * La pastille de décompte d'une entrée : aplat des réactions dans les thèmes qui
+ * le déclarent (ADR-0027, comme la barre mobile et la cloche) ; ailleurs, le ton
+ * `primary` d'origine du badge.
+ */
+const COUNT_BADGE_STYLE: CSSProperties = {
+	background: "var(--role-react-fill, var(--primary-50))",
+	color: "var(--role-react-on, var(--primary-600))",
+	borderRadius: 999,
 }
 
 /** Le titre d'un groupe d'entrées du rail (« Vos raccourcis », « Dans le réseau »). */
@@ -243,7 +254,7 @@ export function ReseauMenuRail({
 								<Icon name={item.icon} size={18} aria-hidden />
 								<span style={{ flex: 1, fontSize: 13.5, fontWeight: 600 }}>{t(item.labelKey)}</span>
 								{item.badge !== null ? (
-									<Badge tone="primary" size="sm">
+									<Badge tone="primary" size="sm" style={COUNT_BADGE_STYLE}>
 										{/* Le chiffre est masqué au lecteur d'écran : la phrase
 										    qui suit dit 3 QUOI, ce qu'un « 3 » nu ne dit pas. */}
 										<span aria-hidden="true">{item.badge > 99 ? "99+" : item.badge}</span>
@@ -444,7 +455,7 @@ function RailDestinations({
 							<DestinationIcon aria-hidden="true" size={18} />
 							<span style={{ flex: 1, fontSize: 13.5, fontWeight: 600 }}>{t(destination.labelKey)}</span>
 							{badge !== null ? (
-								<Badge tone="primary" size="sm">
+								<Badge tone="primary" size="sm" style={COUNT_BADGE_STYLE}>
 									<span aria-hidden="true">{badge}</span>
 								</Badge>
 							) : null}
