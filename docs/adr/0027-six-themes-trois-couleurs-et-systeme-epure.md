@@ -54,6 +54,22 @@ Nous allons :
    L'aplat d'identité reçoit son propre texte (`--primary-fill-on`), et `--primary` reste une encre
    lisible en texte (≥ 4,5:1). L'encre des réactions est une encre d'icône (≥ 3:1) : le libellé
    d'un bouton réagi garde la couleur du texte.
+
+   Écrire se dit en tonal des messages (`--role-message-soft` et `--role-message-ink`), Envoyer à
+   l'aplat des messages (`--role-message-fill`), y compris dans les appels et la messagerie
+   commerciale (lot ultérieur, 19/10/2026) :
+   - sur la scène sombre d'un appel, le fond tonal des cartes n'a pas de sens : « Écrire »
+     (pendant l'appel, à la fin d'un appel qui n'a pas abouti) et « Message » / « Refuser avec
+     un message » d'un appel entrant prennent l'aplat des messages (`.iappel-ctl[data-tone="message"]`,
+     `.iappel-soft-action[data-role="message"]`) ; « Écrire à » du journal d'appels, posé sur
+     une carte, reste tonal ;
+   - dans antsia.ga, « Poser une question » et l'ouverture d'une conversation commerciale sont en
+     tonal (variante `message` du bouton de l'application), « Envoyer la demande » à l'aplat
+     (variante `send`). La facture des boutons vit dans `button-class.ts`, hors du module client,
+     pour qu'une page serveur (catalogue public) puisse habiller un lien en bouton.
+
+   Chaque site garde en repli son rendu d'origine, survol compris : DIASPORALE et la console ne
+   changent pas.
 3. **Porter le système épuré** par des jetons de géométrie et de surface, eux aussi à `initial`
    avec repli sur le rendu historique : DIASPORALE et la console ne changent pas.
    - Un angle par élément : bouton en pilule, badge 6 px, puce 10 px, avatar de page 12 px,
@@ -102,9 +118,12 @@ Nous allons :
 
 - Davantage de jetons au contrat, et une couleur par fonction à tester dans chaque thème.
 - Certaines surfaces gardent leur traitement historique : carte d'identité du profil (`.pp-identity`,
-  fond de page et filet, conforme à la règle), sélecteur Liste / Immersion (encre pleine). La
-  messagerie contextuelle, les appels et la messagerie commerciale adopteront les jetons de rôle
-  dans un lot ultérieur.
+  fond de page et filet, conforme à la règle), sélecteur Liste / Immersion (encre pleine). Les
+  appels et la messagerie commerciale ont adopté les jetons des messages le 19/10/2026 (§2) ; la
+  messagerie contextuelle les adoptera dans un lot ultérieur. Restent à trancher par le
+  propriétaire : « Candidater » (emploi), « Rejoindre la salle » et « Demander la parole » du
+  direct, et le filet de ma réaction à un message (`.msg-reaction-chip[data-mine]`, aujourd'hui
+  sans filet dans les thèmes ANTSIA).
 - Le changement de validateur exige une poussée Convex annoncée (un seul pousseur).
 
 ### Neutres
