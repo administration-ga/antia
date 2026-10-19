@@ -70,6 +70,14 @@ Nous allons :
 
    Chaque site garde en repli son rendu d'origine, survol compris : DIASPORALE et la console ne
    changent pas.
+
+   Participer se dit à la couleur du commerce (`--role-commerce-*`, variante `commerce`), sur
+   décision du propriétaire du 19/10/2026 : « Je participe » (évènements), « Rejoindre la salle »
+   et « Demander la parole » (direct), « Candidater » et « Envoyer ma candidature » (emploi). Le
+   filet de ma réaction à un message reste sans contour dans les thèmes ANTSIA : sa teinte
+   (`--role-react-soft`) suffit. Dans DIASPORALE, les deux gestes du direct gardent l'aplat
+   d'identité en repli ; seul leur filet d'un pixel, de la couleur de l'aplat, devient
+   transparent, comme pour « Je participe ».
 3. **Porter le système épuré** par des jetons de géométrie et de surface, eux aussi à `initial`
    avec repli sur le rendu historique : DIASPORALE et la console ne changent pas.
    - Un angle par élément : bouton en pilule, badge 6 px, puce 10 px, avatar de page 12 px,
@@ -119,11 +127,9 @@ Nous allons :
 - Davantage de jetons au contrat, et une couleur par fonction à tester dans chaque thème.
 - Certaines surfaces gardent leur traitement historique : carte d'identité du profil (`.pp-identity`,
   fond de page et filet, conforme à la règle), sélecteur Liste / Immersion (encre pleine). Les
-  appels et la messagerie commerciale ont adopté les jetons des messages le 19/10/2026 (§2) ; la
-  messagerie contextuelle les adoptera dans un lot ultérieur. Restent à trancher par le
-  propriétaire : « Candidater » (emploi), « Rejoindre la salle » et « Demander la parole » du
-  direct, et le filet de ma réaction à un message (`.msg-reaction-chip[data-mine]`, aujourd'hui
-  sans filet dans les thèmes ANTSIA).
+  appels et la messagerie commerciale ont adopté les jetons des messages le 19/10/2026, et les
+  gestes de participation du direct et de l'emploi la couleur du commerce (§2) ; la messagerie
+  contextuelle adoptera les jetons de rôle dans un lot ultérieur.
 - Le changement de validateur exige une poussée Convex annoncée (un seul pousseur).
 
 ### Neutres

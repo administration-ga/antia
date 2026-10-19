@@ -127,6 +127,6 @@ export function JobApplicationForm({ job }: { job: JobDto }) {
       {errors.consent?.message ? <p role="alert" className="text-sm text-destructive">{errors.consent.message}</p> : null}
     </section>
     {error ? <p role="alert" className="text-sm text-destructive">{error}</p> : null}
-    <Button type="submit" form={ids.form} pending={form.formState.isSubmitting} className="justify-self-start"><Send aria-hidden="true" className="size-4" />{t("apply.submit")}</Button>
+    <Button type="submit" form={ids.form} variant="commerce" pending={form.formState.isSubmitting} className="justify-self-start"><Send aria-hidden="true" className="size-4" />{t("apply.submit")}</Button>
   </section></Card>
 }

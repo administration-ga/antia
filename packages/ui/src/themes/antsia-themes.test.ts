@@ -226,6 +226,19 @@ describe("les sept thèmes d'antsia.ga (ADR-0027)", () => {
     for (const [path, expression, count] of MESSAGE_SITES) expect(read(path).split(expression).length - 1, `${path} : ${expression}`).toBe(count)
   })
 
+  it("participer (évènement, direct, candidature) prend la couleur de la participation, l'aplat d'identité en repli", () => {
+    // Décision du propriétaire du 19/10/2026 : Je participe, Rejoindre la salle, Demander la parole,
+    // Candidater et Envoyer ma candidature en variante `commerce` (Acheter, Participer).
+    const PARTICIPATION_SITES: readonly (readonly [string, number])[] = [
+      ["../../../social-features/src/features/reseau-personnel/EvenementsPanel.tsx", 1],
+      ["../../../social-features/src/features/direct/DirectPage.tsx", 1],
+      ["../../../social-features/src/features/direct/DirectAntennaPanel.tsx", 1],
+      ["../../../../apps/antsia_ga/src/components/jobs/member-shop-jobs-screen.tsx", 1],
+      ["../../../../apps/antsia_ga/src/components/jobs/job-application-form.tsx", 1],
+    ]
+    for (const [path, count] of PARTICIPATION_SITES) expect(read(path).split('variant="commerce"').length - 1, path).toBe(count)
+  })
+
   it("le contrat de la base laisse DIASPORALE intact : chaque jeton du système épuré est à `initial`", () => {
     const base = new TokenCascade(BASE_SHEETS)
     const tokens = [...Object.keys(ANGLES).filter((token) => token !== "--rp-surface-radius"), "--primary-fill-on", "--esp-theme-swatch-1",

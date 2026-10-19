@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/direct/DirectAntennaPanel.tsx @ ad2e7fdc2 — adaptations : API typée et réseau courant, droits du DTO, invitations consenties sans ouverture automatique du matériel, horloge effective et i18n ; recherche privée réservée à l’hôte ; couleurs par fonction (ADR-0027) : Accepter en variante `social`.
+// Dupliqué de socle/packages/agent-features/src/features/direct/DirectAntennaPanel.tsx @ ad2e7fdc2 — adaptations : API typée et réseau courant, droits du DTO, invitations consenties sans ouverture automatique du matériel, horloge effective et i18n ; recherche privée réservée à l’hôte ; couleurs par fonction (ADR-0027) : Accepter en variante `social`, « Demander la parole » en participation (variante `commerce`, aplat d’identité en repli).
 "use client"
 
 import { api } from "@antsia/api/engine"
@@ -42,7 +42,7 @@ export function DirectMyAntenna({ session, admitted }: { session: DirectSession;
       {state.invitation && state.invitation.status !== "pending" ? <p role="status">{t(`antenna.invitationStatus.${state.invitation.status}`)}</p> : null}
       {state.request?.status === "pending" ? <><p role="status">{t("antenna.handPending")}</p><Button variant="ghost" disabled={command.pending} onClick={() => void command.run(() => cancel({ networkId, sessionId: session.sessionId }))}>{t("antenna.cancelHand")}</Button></> : <>
         {state.request ? <p role="status">{t(`antenna.requestStatus.${state.request.status}`)}</p> : null}
-        <Button disabled={!admitted || command.pending} onClick={() => void command.run(() => raise({ networkId, sessionId: session.sessionId }))}>{t("antenna.raiseHand")}</Button>
+        <Button variant="commerce" disabled={!admitted || command.pending} onClick={() => void command.run(() => raise({ networkId, sessionId: session.sessionId }))}>{t("antenna.raiseHand")}</Button>
         {!admitted ? <p className="text-sm text-muted-foreground">{t("antenna.joinFirst")}</p> : null}
       </>}
     </>}
