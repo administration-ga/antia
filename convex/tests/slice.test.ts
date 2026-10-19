@@ -4,7 +4,7 @@
  * racine, publier, lire le fil, réagir — avec les gardes du moteur (adhésion,
  * refus indistinct, débit, règles du domaine, compteurs fragmentés).
  */
-import { engineErrorRule } from "@antia/social-contracts/errors"
+import { engineErrorRule } from "@antsia/social-contracts/errors"
 import { describe, expect, it } from "vitest"
 
 import { api, internal } from "../_generated/api"
@@ -26,7 +26,7 @@ async function enter(t: T, subject: string, handle: string, displayName = handle
   const personId = await as.mutation(api.modules.people.persons.ensureMyPerson, {})
   await as.mutation(api.modules.people.consents.recordConsent, { purpose: "social_profile", origin: "onboarding" })
   await as.mutation(api.modules.people.profile.publishMyProfile, { handle, displayName })
-  const root = await t.query(api.modules.networks.networks.getBySlug, { slug: "antia" })
+  const root = await t.query(api.modules.networks.networks.getBySlug, { slug: "antsia" })
   if (!root) throw new Error("racine absente")
   await as.mutation(api.modules.people.memberships.joinNetwork, { networkId: root._id })
   return { as, personId, rootId: root._id }
@@ -166,7 +166,7 @@ describe("publier et lire le fil", () => {
     expect(again.postId).toEqual(first.postId)
   })
 
-  it("la publication est bornée en débit", async () => {
+  it("la publication d'un membre déclaré sans badge fort est bornée au seuil renforcé", async () => {
     const t = testConvex()
     await seed(t)
     const lynda = await enter(t, "auth-lynda", "lynda.onanga")
@@ -174,8 +174,8 @@ describe("publier et lire le fil", () => {
     for (let index = 0; index < 12; index += 1) {
       codes.push(code(await caught(lynda.as.mutation(api.modules.posts.posts.publish, { networkId: lynda.rootId, body: `Billet ${index}` }))))
     }
-    expect(codes.slice(0, 10).every((value) => value === null)).toBe(true)
-    expect(codes).toContain("rateLimited")
+    expect(codes.slice(0, 3)).toEqual([null, null, null])
+    expect(codes.slice(3).every((value) => value === "rateLimited")).toBe(true)
   })
 })
 
@@ -227,9 +227,9 @@ describe("réagir", () => {
 describe("garde-fous de développement", () => {
   it("les outils de développement exigent la variable ET un backend local", () => {
     expect(devToolsAllowed({})).toBe(false)
-    expect(devToolsAllowed({ ANTIA_DEV_TOOLS: "true" })).toBe(false)
-    expect(devToolsAllowed({ ANTIA_DEV_TOOLS: "true", CONVEX_CLOUD_URL: "https://exemple.convex.cloud" })).toBe(false)
-    expect(devToolsAllowed({ ANTIA_DEV_TOOLS: "true", CONVEX_CLOUD_URL: "http://127.0.0.1:3210" })).toBe(true)
+    expect(devToolsAllowed({ ANTSIA_DEV_TOOLS: "true" })).toBe(false)
+    expect(devToolsAllowed({ ANTSIA_DEV_TOOLS: "true", CONVEX_CLOUD_URL: "https://exemple.convex.cloud" })).toBe(false)
+    expect(devToolsAllowed({ ANTSIA_DEV_TOOLS: "true", CONVEX_CLOUD_URL: "http://127.0.0.1:3210" })).toBe(true)
     expect(isLocalDeployment({ CONVEX_CLOUD_URL: "http://localhost:3210" })).toBe(true)
   })
 

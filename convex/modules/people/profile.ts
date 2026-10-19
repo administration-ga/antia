@@ -4,22 +4,26 @@
  * affiché, son accroche. Rien n'est publié d'office (invariant 7) : c'est la
  * personne qui choisit et publie.
  */
-import type { MediaWithheld } from "@antia/social-contracts/media"
-import { assertDisplayName, assertHandle, assertHeadline, normalizeHandle } from "@antia/social-domain/content"
-import { handleLadder } from "@antia/social-domain/handleSuggestion"
+import type { MediaWithheld } from "@antsia/social-contracts/media"
+import { assertDisplayName, assertHandle, assertHeadline, normalizeHandle } from "@antsia/social-domain/content"
+import { handleLadder } from "@antsia/social-domain/handleSuggestion"
 import { v } from "convex/values"
 
+import { canReadModeratedContent, moderateContentWrite } from "../moderation/policy"
 import type { Doc, Id } from "../../_generated/dataModel"
 import type { MutationCtx, QueryCtx } from "../../_generated/server"
-import { checked, fail } from "../../lib/errors"
+import { getRootNetwork } from "../../lib/access"
+import { checked, fail, notFound } from "../../lib/errors"
 import { networkQuery, personMutation, personQuery } from "../../lib/functions"
 import { enforceRateLimit } from "../../lib/rateLimit"
 import { guardUploadUrl } from "../../lib/uploadPolicy"
 import { badgeValidator, literals } from "../../lib/validators"
-import { admitStoredUpload, assertFreshUpload } from "../files/admission"
+import { admitStoredUpload, assertFreshUpload, findScanByStorageId } from "../files/admission"
+import { purgeStoredFile } from "../files/purge"
 import { resolveFileDelivery, withheldCodeOf, withheldCodeValidator } from "../files/storageGuard"
 import { isBlockedBetween } from "../graph/graph"
 import { syncPersonDirectory } from "./directory"
+import { revokeAdministrationForPerson } from "../federation/agentLifecycle"
 import { findPublishedPersonByHandle, isPublishedPerson } from "./miniProfile"
 import { badgesOf } from "./persons"
 
@@ -108,8 +112,38 @@ export const publishMyProfile = personMutation({
       withdrawnAt: undefined,
       updatedAt: now,
     })
+    const root = await getRootNetwork(ctx)
+    if (!root) return notFound()
+    await moderateContentWrite(ctx, { networkId: root._id, ownerPersonId: ctx.person._id, kind: "person", id: ctx.person._id, text: `${displayName} ${headline ?? ""}` })
     await syncPersonDirectory(ctx, ctx.person._id)
     return { handle }
+  },
+})
+
+/**
+ * @selfScoped Édite le nom choisi et l'accroche du profil déjà constitué de la
+ * personne de la session. Le retrait et la confidentialité sont conservés :
+ * seule `publishMyProfile` exprime un geste de (re)publication. Accessible comme
+ * les autres réglages personnels même si les réseaux refusent la personne.
+ * `expectedPersonId` corrèle l'écran à la session courante après un changement
+ * de compte ; il ne choisit jamais la personne à modifier.
+ */
+export const updateMyProfile = personMutation({
+  args: { displayName: v.string(), headline: v.optional(v.string()), expectedPersonId: v.optional(v.id("persons")) },
+  returns: v.object({ updatedAt: v.number() }),
+  handler: async (ctx, args) => {
+    if (args.expectedPersonId !== undefined && args.expectedPersonId !== ctx.person._id) return notFound()
+    await enforceRateLimit(ctx, "person.profile", ctx.person._id)
+    if (!ctx.person.handle || !ctx.person.displayName || ctx.person.publishedAt === undefined || ctx.person.erasedAt !== undefined) return fail("profileRequired")
+    const displayName = checked(() => assertDisplayName(args.displayName))
+    const headline = checked(() => assertHeadline(args.headline))
+    const root = await getRootNetwork(ctx)
+    if (!root) return notFound()
+    await moderateContentWrite(ctx, { networkId: root._id, ownerPersonId: ctx.person._id, kind: "person", id: ctx.person._id, text: `${displayName} ${headline ?? ""}` })
+    const updatedAt = Date.now()
+    await ctx.db.patch(ctx.person._id, { displayName, headline, updatedAt })
+    await syncPersonDirectory(ctx, ctx.person._id)
+    return { updatedAt }
   },
 })
 
@@ -126,6 +160,7 @@ export const withdrawMyProfile = personMutation({
     if (ctx.person.publishedAt === undefined || ctx.person.withdrawnAt !== undefined) return { withdrawn: true as const }
     const now = Date.now()
     await ctx.db.patch(ctx.person._id, { withdrawnAt: now, updatedAt: now })
+    await revokeAdministrationForPerson(ctx, ctx.person._id)
     await syncPersonDirectory(ctx, ctx.person._id)
     return { withdrawn: true as const }
   },
@@ -172,6 +207,15 @@ export const generateProfileUploadUrl = personMutation({
 
 const imageDeliveryValidator = v.object({ url: v.union(v.string(), v.null()), withheld: v.union(withheldCodeValidator, v.null()) })
 
+/** Une image peut occuper les DEUX emplacements : relire le profil après sa modification. */
+async function purgeDetachedProfileImage(ctx: MutationCtx, personId: Id<"persons">, storageId: Id<"_storage"> | undefined): Promise<void> {
+  if (storageId === undefined) return
+  const person = await ctx.db.get(personId)
+  if (!person || person.avatarStorageId === storageId || person.coverStorageId === storageId) return
+  const scan = await findScanByStorageId(ctx, storageId)
+  if (scan?.source === "profile" && scan.uploadedByPersonId === personId) await purgeStoredFile(ctx, storageId)
+}
+
 /**
  * Pose (ou retire) une image de profil de la personne de la session. Elle
  * n'existe QUE sur un profil publié : une photo sans profil serait une donnée
@@ -190,6 +234,7 @@ async function setProfileImage(
   const place = (value: Id<"_storage"> | undefined) => (field === "avatarStorageId" ? { avatarStorageId: value } : { coverStorageId: value })
   if (storageId === null) {
     await ctx.db.patch(ctx.person._id, { ...place(undefined), updatedAt: Date.now() })
+    await purgeDetachedProfileImage(ctx, ctx.person._id, ctx.person[field])
     return { url: null, withheld: null }
   }
   if (storageId !== ctx.person.avatarStorageId && storageId !== ctx.person.coverStorageId) {
@@ -203,6 +248,7 @@ async function setProfileImage(
     )
   }
   await ctx.db.patch(ctx.person._id, { ...place(storageId), updatedAt: Date.now() })
+  await purgeDetachedProfileImage(ctx, ctx.person._id, ctx.person[field])
   const delivery = await resolveFileDelivery(ctx, storageId)
   return { url: delivery.url, withheld: withheldCodeOf(delivery.scan) }
 }
@@ -247,7 +293,7 @@ export const getPublicProfile = networkQuery({
   ),
   handler: async (ctx, { handle }) => {
     const person = await findPublishedPersonByHandle(ctx, ctx.networkId, handle)
-    if (!person || !person.handle || !person.displayName) return null
+    if (!person || !person.handle || !person.displayName || !(await canReadModeratedContent(ctx, "person", person._id, ctx.person._id))) return null
     if (person._id !== ctx.person._id && (await isBlockedBetween(ctx, ctx.person._id, person._id))) return null
     const image = async (storageId: Id<"_storage"> | undefined) => {
       if (!storageId) return { url: null, withheld: null }

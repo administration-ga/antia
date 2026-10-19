@@ -1,0 +1,192 @@
+{
+  "peoplePanel": {
+    "views": {
+      "relations": "Mes relations",
+      "suggestions": "Suggestions",
+      "invitations": "Invitations"
+    },
+    "viewsLabel": "Sous-vues des relations",
+    "invitationsBadge_one": "{{count}} invitation reçue",
+    "invitationsBadge_many": "{{count}} invitations reçues",
+    "invitationsBadge_other": "{{count}} invitations reçues",
+    "invitationsBadgeAtLeast_one": "Au moins {{count}} invitation reçue",
+    "invitationsBadgeAtLeast_many": "Au moins {{count}} invitations reçues",
+    "invitationsBadgeAtLeast_other": "Au moins {{count}} invitations reçues",
+    "loading": "Chargement…",
+    "unnamed": "Personne du réseau",
+    "unpublished": "Profil non publié",
+    "profileOf": "Profil de {{name}}",
+    "profile": "Profil",
+    "write": "Écrire",
+    "call": "Appeler",
+    "callLabel": "Appeler {{name}}",
+    "search": {
+      "title": "Trouver quelqu'un",
+      "hint": "Par nom publié ou par identifiant public. Seules les personnes ayant publié un profil de réseau apparaissent.",
+      "hintCompact": "Par nom publié ou identifiant public. Seules les personnes ayant publié leur profil apparaissent.",
+      "formLabel": "Trouver une personne",
+      "inputLabel": "Chercher une personne",
+      "placeholder": "Nom ou @identifiant",
+      "submit": "Chercher",
+      "errorTitle": "Recherche indisponible",
+      "errorMessage": "La recherche n'a pas pu aboutir.",
+      "loading": "Recherche…",
+      "messageLabel": "Message de mise en relation (facultatif)",
+      "messagePlaceholder": "Bonjour, nous travaillons sur le même sujet…",
+      "follow": "Suivre",
+      "connectionSent": "Demande de connexion envoyée.",
+      "followDone": "Suivi enregistré.",
+      "actionFailed": "Action impossible pour cette personne."
+    },
+    "pending": {
+      "title": "Invitations reçues",
+      "errorTitle": "Invitations indisponibles",
+      "errorMessage": "Vos invitations n'ont pas pu être chargées.",
+      "quotedMessage": "« {{message}} »",
+      "accept": "Accepter",
+      "decline": "Décliner",
+      "accepted": "Connexion acceptée.",
+      "declined": "Invitation déclinée.",
+      "respondFailed": "La réponse n'a pas pu être enregistrée.",
+      "loadMore": "Voir plus d'invitations",
+      "loadingMore": "Chargement des invitations précédentes…"
+    },
+    "sent": {
+      "title": "Invitations envoyées",
+      "errorTitle": "Invitations envoyées indisponibles",
+      "errorMessage": "Vos demandes en attente n'ont pas pu être chargées.",
+      "awaiting": "En attente de réponse.",
+      "loadMore": "Voir plus d'invitations envoyées",
+      "cancel": "Annuler la demande",
+      "cancelled": "Demande annulée.",
+      "cancelFailed": "La demande n’a pas pu être annulée.",
+      "cancelLabel": "Annuler la demande envoyée à {{name}}"
+    },
+    "catalogue": {
+      "title": "Personnes à découvrir",
+      "showDismissed": "Afficher les suggestions masquées",
+      "showDismissedCount": "Afficher les suggestions masquées ({{count}})",
+      "showDismissedCountCapped": "Afficher les suggestions masquées ({{count}}+)",
+      "hideDismissed": "Cacher les suggestions masquées",
+      "errorTitle": "Suggestions indisponibles",
+      "errorMessage": "Les personnes à découvrir n'ont pas pu être chargées.",
+      "listLabel": "Personnes proposées",
+      "answer": "Répondre",
+      "restore": "Réafficher",
+      "dismiss": "Masquer",
+      "dismissLabel": "Masquer la suggestion {{name}}",
+      "loadMore": "Voir plus de personnes",
+      "dismissFailed": "Le masquage n'a pas pu être enregistré.",
+      "restoreFailed": "La suggestion n'a pas pu être réaffichée."
+    },
+    "connections": {
+      "title": "Mes connexions",
+      "errorTitle": "Connexions indisponibles",
+      "errorMessage": "Vos connexions n'ont pas pu être chargées.",
+      "loadMore": "Voir plus de connexions",
+      "loadingMore": "Chargement des connexions précédentes…"
+    },
+    "follows": {
+      "title": "Personnes suivies",
+      "followers_one": "{{count}} personne suit vos publications.",
+      "followers_many": "{{count}} personnes suivent vos publications.",
+      "followers_other": "{{count}} personnes suivent vos publications.",
+      "errorTitle": "Personnes suivies indisponibles",
+      "errorMessage": "Les personnes que vous suivez n'ont pas pu être chargées.",
+      "unfollow": "Ne plus suivre",
+      "unfollowed": "Suivi retiré.",
+      "unfollowFailed": "Le retrait n'a pas pu être enregistré.",
+      "loadMore": "Voir plus de personnes suivies"
+    },
+    "blocks": {
+      "title": "Personnes bloquées",
+      "globalScope": "Ces blocages s’appliquent à tous vos réseaux ANTSIA. Aucune nouvelle relation n’est créée au déblocage. Les abonnements existants sont conservés.",
+      "neutral": "Personne bloquée",
+      "blockedAt": "Bloquée le {{date}}",
+      "empty": "Vous n’avez bloqué aucune personne.",
+      "loadMore": "Voir plus de blocages",
+      "errorTitle": "Blocages indisponibles",
+      "errorMessage": "Vos blocages n’ont pas pu être chargés.",
+      "unblock": "Débloquer",
+      "confirmTitle": "Débloquer cette personne ?",
+      "confirmBody": "Le blocage que vous avez défini sera retiré sur tous vos réseaux ANTSIA. Aucune nouvelle relation n’est créée. Les abonnements existants sont conservés.",
+      "cancel": "Annuler",
+      "close": "Fermer la confirmation",
+      "unblocked": "Blocage retiré.",
+      "unblockFailed": "Le blocage n’a pas pu être retiré."
+    }
+  },
+  "suggestionsActions": {
+    "connect": "Se connecter",
+    "connecting": "Connexion…",
+    "requestSent": "Demande envoyée",
+    "invitationReceived": "Invitation reçue"
+  },
+  "suggestionsPanel": {
+    "title": "Personnes à découvrir",
+    "unavailable": "Les personnes à découvrir sont momentanément indisponibles.",
+    "retry": "Réessayer",
+    "empty": "Aucune nouvelle personne à proposer pour le moment. Vos connexions et les profils déjà suivis restent accessibles dans Relations.",
+    "seeAll": "Voir tout",
+    "listLabel": "Personnes proposées",
+    "dismissLabel": "Masquer la suggestion {{name}}",
+    "profileOf": "Profil de {{name}}",
+    "connectionSent": "Demande de connexion envoyée.",
+    "actionFailed": "Action impossible pour cette personne.",
+    "dismissFailed": "Le masquage n'a pas pu être enregistré."
+  },
+  "relationPicker": {
+    "searchLabel": "Chercher parmi mes relations",
+    "placeholder": "Nom ou @identifiant",
+    "searchFailed": "La recherche n'a pas abouti. Les relations déjà chargées restent affichées.",
+    "retry": "Réessayer",
+    "searching": "Recherche en cours…",
+    "close": "Fermer",
+    "status": {
+      "member": "Déjà membre",
+      "invited": "Invitation en attente"
+    },
+    "selectionNone": "Aucune personne sélectionnée",
+    "selection_one": "{{count}} personne sélectionnée",
+    "selection_many": "{{count}} personnes sélectionnées",
+    "selection_other": "{{count}} personnes sélectionnées",
+    "defaultVerb": "Inviter",
+    "submitWithCount_one": "{{verb}} {{count}} personne",
+    "submitWithCount_many": "{{verb}} {{count}} personnes",
+    "submitWithCount_other": "{{verb}} {{count}} personnes",
+    "noMatch": "Aucune relation ne correspond.",
+    "searchContinues": "Aucune relation chargée ne correspond — la recherche se poursuit."
+  },
+  "contactsRail": {
+    "title": "Contacts",
+    "filterLabel": "Filtrer mes contacts",
+    "errorTitle": "Contacts indisponibles",
+    "errorMessage": "Vos contacts n'ont pas pu être chargés.",
+    "noHandle": "Cette personne n'a pas publié de profil de réseau.",
+    "noMatch": "Aucun contact ne correspond à cette recherche.",
+    "empty": "Vos connexions apparaîtront ici. Trouvez des personnes depuis le volet Relations.",
+    "countNone": "Aucun contact",
+    "count_one": "{{count}} contact",
+    "count_many": "{{count}} contacts",
+    "count_other": "{{count}} contacts",
+    "unnamed": "Personne du réseau"
+  },
+  "emptyStates": {
+    "text": {
+      "signets": "Aucune publication enregistrée.",
+      "conferencesEnDirect": "Personne n'est en direct pour le moment.",
+      "conferencesEnDirectAvecRediffusions": "Aucune conférence en direct ; les rediffusions sont plus bas.",
+      "rediffusions": "Aucune rediffusion disponible pour le moment.",
+      "relationsConnexions": "Aucune connexion.",
+      "relationsAbonnements": "Vous ne suivez personne.",
+      "relationsInvitationsRecues": "Aucune invitation en attente.",
+      "relationsDemandesEnvoyees": "Aucune demande en attente de réponse.",
+      "relationsRecherche": "Aucune personne trouvée.",
+      "suggestions": "Aucune nouvelle personne à proposer pour le moment."
+    },
+    "action": {
+      "openFeed": "Ouvrir le fil",
+      "seeSuggestions": "Voir les suggestions"
+    }
+  }
+}

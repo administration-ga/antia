@@ -1,5 +1,5 @@
 // Dupliqué de socle/convex/lib/livekit.test.ts @ ad2e7fdc2 — adaptations : le refus se lit par son CODE du moteur (`engineErrorCode` → `mediaServerNotConfigured`) au lieu de la chaîne `LIVEKIT_NOT_CONFIGURED` ; les sept cas conservés.
-import { engineErrorCode } from "@antia/social-contracts/errors"
+import { engineErrorCode } from "@antsia/social-contracts/errors"
 import { ConvexError } from "convex/values"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 

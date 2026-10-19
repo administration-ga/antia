@@ -15,7 +15,7 @@
  * ni effacé de ma vue, ni d'une personne bloquée. Un message retiré pour tous
  * reste compté : sa pierre tombale est une ligne du fil.
  */
-import { NOTIFICATION_UNREAD_CAP } from "@antia/social-domain/notifications"
+import { NOTIFICATION_UNREAD_CAP } from "@antsia/social-domain/notifications"
 import { v } from "convex/values"
 
 import { internal } from "../../_generated/api"

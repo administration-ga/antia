@@ -1,18 +1,18 @@
 ---
-title: "ANTIA — Owner map de duplication : du socle administration.ga au moteur social"
+title: "ANTSIA — Owner map de duplication : du socle administration.ga au moteur social"
 version: "1.0"
 date: "2026-10-14"
 statut: "Livrable de PA1 (lecture seule du socle) ; ordre de marche de PA3 (backend) et de PA6 (front)"
-projet: "ANTIA"
+projet: "ANTSIA"
 source: "socle administration.ga, origin/main = ad2e7fdc2 (fusion de la PR 772, 09/10/2026), copie propre par git worktree add"
 dependances:
-  - "docs/00_CAHIER_DES_CHARGES_ANTIA.md"
-  - "docs/01_PLAN_IMPLEMENTATION_PROMPTS_ANTIA.md (§3 table de correspondance, PA1, PA3, PA6)"
+  - "docs/00_CAHIER_DES_CHARGES_ANTSIA.md"
+  - "docs/01_PLAN_IMPLEMENTATION_PROMPTS_ANTSIA.md (§3 table de correspondance, PA1, PA3, PA6)"
   - "Documentation/RESEAUX_SOCIAUX/annexes/A_* et B_* (inventaire du 14/10, que ce document contredit là où il le faut)"
   - "docs/02_annexes/A1 à A6 (les six inventaires complets, à la ligne près)"
 ---
 
-# ANTIA — Owner map de duplication
+# ANTSIA — Owner map de duplication
 
 > **Commit du socle lu : `ad2e7fdc2`** (`origin/main`, fusion de la PR 772 du 09/10/2026), dans une copie
 > propre créée par `git worktree add` — jamais l'arbre de travail partagé, en retard et modifié.
@@ -49,7 +49,7 @@ dependances:
 | **patron** | On reprend une forme (idempotence, lots chaînés, lettres mortes, audit), pas le code. |
 | **exclu** | Administratif : non dupliqué. |
 
-Front seulement : **TQ\*** = tel quel avec une branche `scope === "poste"` inerte ; ANTIA l'élague **dans le même
+Front seulement : **TQ\*** = tel quel avec une branche `scope === "poste"` inerte ; ANTSIA l'élague **dans le même
 commit que la copie** (aucune notion de poste dans le moteur).
 
 ### 0.2 Adaptations mécaniques (valables partout, jamais répétées ensuite)
@@ -66,13 +66,13 @@ commit que la copie** (aucune notion de poste dans le moteur).
 - `networkId` sur chaque table sociale et chaque ligne ; toute lecture « mes … », toute découverte et tout index de
   recherche sont préfixés ou filtrés par `networkId` (`filterFields`).
 - Erreurs : `ReseauPersonnelViolation`, `ReseauAlbumsViolation`, `throw new Error`, libellés français en dur →
-  codes `ENGINE_ERROR_CODES` (`@antia/social-contracts/errors`) levés par `fail()` ; le texte vit dans les
+  codes `ENGINE_ERROR_CODES` (`@antsia/social-contracts/errors`) levés par `fail()` ; le texte vit dans les
   locales fr/en de l'écran.
 - `Date.now()` est interdit dans une query (paramètre `now` arrondi passé par l'écran, ou état posé par une mutation
   planifiée) ; toléré dans les mutations.
 - Délivrance : tout `ctx.storage.getUrl` passe par `servableUrl` de `convex/modules/files/storageGuard.ts`.
-- Front : `@convex/_generated/api` → références typées de `@antia/api` ; `import type { Id }` → alias de
-  `@antia/social-contracts` ; le réseau courant vient de `useNetwork()`, les adresses de `useRoutes()` ; toute chaîne
+- Front : `@convex/_generated/api` → références typées de `@antsia/api` ; `import type { Id }` → alias de
+  `@antsia/social-contracts` ; le réseau courant vient de `useNetwork()`, les adresses de `useRoutes()` ; toute chaîne
   d'interface passe en clé i18n (fr, en).
 - En-tête de provenance, première ligne de chaque fichier copié :
   `// Dupliqué de <chemin> @ ad2e7fdc2 — adaptations : …` (cliquet `provenance-headers`).
@@ -81,7 +81,7 @@ commit que la copie** (aucune notion de poste dans le moteur).
 
 ### 0.3 Cibles
 
-| Abréviation | Chemin dans ANTIA |
+| Abréviation | Chemin dans ANTSIA |
 |---|---|
 | `M/<module>/` | `convex/modules/<module>/` |
 | `L/` | `convex/lib/` |
@@ -164,7 +164,7 @@ commit que la copie** (aucune notion de poste dans le moteur).
     chaque table dupliquée est validée champ par champ (aucun `v.any()`, cliquet `no-any-validators`).
 19. **Les cliquets front du socle lisent la coque et des fichiers administratifs** (`app-shell`, `IcomPosteWindow`,
     `CallCenterShell`, `IAstedContactTab`, `convex/` par chemin relatif) : ils casseront à la copie et sont réécrits
-    sur la coque légère. Inversement, les cliquets génériques d'ANTIA sont **trop étroits** pour le front :
+    sur la coque légère. Inversement, les cliquets génériques d'ANTSIA sont **trop étroits** pour le front :
     `no-hardcoded-urls` ne voit que 6 des 39 lignes de code portant `/espace`, `no-hardcoded-strings` ne voit que le
     JSX (les constantes de texte des `.ts` lui échappent). → cliquet dédié « aucune base `/espace` » et extension aux
     `.ts` (PA6).
@@ -267,7 +267,7 @@ errors, rateLimit, validators}` — ces derniers remplacent `lib/customFunctions
 (jamais par réécriture libre), les morceaux suivants, que PA3 complète ensuite sans les refaire :
 
 1. authentification : `socle/convex/betterAuth/auth.ts` (OTP par e-mail, code affiché en développement quand
-   `ANTIA_DEV_TOOLS=true`), `socle/convex/http.ts` (routes Better Auth), proxy Next `/api/auth/[...path]`,
+   `ANTSIA_DEV_TOOLS=true`), `socle/convex/http.ts` (routes Better Auth), proxy Next `/api/auth/[...path]`,
    `socle/packages/api/src/{auth-client, cross-domain-session-bootstrap, stable-convex-better-auth-provider, hooks,
    provider, sign-out-everywhere}.ts` ;
 2. `people` réduit : `suggestHandles`, `confirmMyHandle`, `publishMyProfile` (copiés de `people.ts`) sur `persons` ;
@@ -308,7 +308,7 @@ PA5 reprend ensuite, sur ces modules : `notifications/{push, pushSubscriptions, 
 ### 4.3 Front (PA6)
 
 ```text
-0  contrats et API typée (@antia/api) · paquets api, routing, chat, livekit, i18n réduit · CSS d'appel et de la coque
+0  contrats et API typée (@antsia/api) · paquets api, routing, chat, livekit, i18n réduit · CSS d'appel et de la coque
 1  primitives et coque basse : useRoutes · useNetwork · design-styles · query-state · ReseauQueryError ·
    ReseauPaginatedErrorBoundary · primitives mobiles (mobile-shell, useIsReseauMobile, useVisualViewport,
    useBodyScrollLock, ImmersiveOverlay, gestures, VerticalPager) · floating-surface · floating-card · espace-kit ·
@@ -794,12 +794,12 @@ relatif sous `SF/f/<tranche>/`.
 
 ### 7.0 Modules serveur que le front importait (sortent du backend)
 
-Le front du socle importe `@convex/*` directement ; celui d'ANTIA n'importe jamais `convex/` : ce qu'il lisait
+Le front du socle importe `@convex/*` directement ; celui d'ANTSIA n'importe jamais `convex/` : ce qu'il lisait
 passe dans les paquets (PA2 pour les modules purs, PA3 à mesure que les modules arrivent).
 
 | Import du socle | Consommateurs front | Cible |
 |---|---|---|
-| `@convex/_generated/api` | ≈ 80 fichiers (réseau personnel 33, messagerie 14, iappel 16, direct 10, stories 5, notifications 6, hôtes et hooks) | `@antia/api` (références typées) |
+| `@convex/_generated/api` | ≈ 80 fichiers (réseau personnel 33, messagerie 14, iappel 16, direct 10, stories 5, notifications 6, hôtes et hooks) | `@antsia/api` (références typées) |
 | `@convex/_generated/dataModel` (`Id<…>`) | ≈ 65 fichiers | alias d'identifiants de `SC/` |
 | `@convex/modules/reseauPersonnel/domain` | `RichText`, `useMediaDraft`, `groupe-gestion`, `StoriesTray`, `StoryCreateSheet`, `StoryViewer`, `stories-viewer`, `story-create`, `story-video-policy` (+ 2 tests) | `SD/{content, richText, stories, groupThreads}.ts` |
 | `@convex/modules/reseauPersonnel/media` (type `PostMediaDto` seul) | `PostCard`, `PostMedia` | `SC/media.ts` |
@@ -856,7 +856,7 @@ passe dans les paquets (PA2 pour les modules purs, PA3 à mesure que les modules
   les chemins du moteur ; ceux qui lisent la coque ou iAsted sont réécrits.
 - **Contrats.** `@convex/modules/reseauPersonnel/domain` (`splitBodyRich`, constantes `POST_*`) → `SD/` ;
   `PostMediaDto` (type seul, `media.ts` n'est pas pur) → `SC/media.ts` ; `@convex/modules/reseauAlbums/domain` →
-  `SD/albums.ts` ; `_generated/api` (33 fichiers) → `@antia/api` ; `_generated/dataModel` (18 fichiers,
+  `SD/albums.ts` ; `_generated/api` (33 fichiers) → `@antsia/api` ; `_generated/dataModel` (18 fichiers,
   `import type { Id }`) → alias de `SC/`.
 - **Parité backend** : 71 fonctions `api.modules.reseauPersonnel.*` + `reseau.connections.withAgent` +
   `direct.sessions.{listLive, listReplays, listMinePage}` (liste fichier:ligne, annexe A5 §9). `paginateMine` et

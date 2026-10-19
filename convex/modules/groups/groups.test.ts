@@ -1,8 +1,8 @@
 // @vitest-environment edge-runtime
 // Dupliqué de socle/convex/modules/reseauPersonnel/groupes.test.ts (avec socle/convex/modules/reseauPersonnel/groupes.cascadeBlobs.test.ts et les cas de transfert de groupe de socle/convex/modules/messagerieScope/transfert.test.ts) @ ad2e7fdc2 — adaptations : personnes et réseaux (graine des fondations) ; codes et règles au lieu des libellés ; appels de groupe (→ lot 15), espaces poste / personnel, comptes publics et coffre retirés ; membres et conviés lus par pages ; la pastille est un compteur TENU (diffusion par lots exécutée par le harnais) ; tests neufs : la diffusion rejouée ne recompte rien, le blocage recompte les fils partagés (D23), masquage par table (D22), fil et jeton d'un autre réseau introuvables, transfert refusé entre réseaux, purge qui épargne le blob d'une copie vivante.
-import { GROUP_MEMBERS_MAX } from "@antia/social-contracts/groupCapacity"
-import { engineErrorCode, engineErrorRule } from "@antia/social-contracts/errors"
-import { MESSAGE_EDIT_WINDOW_MS } from "@antia/social-contracts/messaging"
+import { GROUP_MEMBERS_MAX } from "@antsia/social-contracts/groupCapacity"
+import { engineErrorCode, engineErrorRule } from "@antsia/social-contracts/errors"
+import { MESSAGE_EDIT_WINDOW_MS } from "@antsia/social-contracts/messaging"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 import { api, internal } from "../../_generated/api"
@@ -473,6 +473,20 @@ describe("réponse citée, réactions et suppressions", () => {
     expect((await history(root, bob, threadId))[0]!.replyTo).toMatchObject({ excerpt: "Version corrigée", deleted: false })
     await alice.as.mutation(G.messages.deleteGroupMessage, { networkId: root, messageId: cited })
     expect((await history(root, bob, threadId))[0]!.replyTo).toMatchObject({ excerpt: "", deleted: true })
+  })
+
+  it("R9 : citation de groupe anonyme après suppression physique, sans texte ni identifiants", async () => {
+    const t = testConvex(), { root } = await seed(t), { alice, bob, carla } = await trio(t, root)
+    const threadId = await constituted(alice, root, [bob, carla])
+    const original = await send(root, alice, threadId, "Texte à purger")
+    const response = await send(root, bob, threadId, "Ma réponse demeure", { replyToMessageId: original })
+    await t.run(async (ctx) => { await ctx.db.patch(response, { replyToMessageId: undefined, replyToDeletedAccount: true }); await ctx.db.delete(original) })
+    const row = (await history(root, carla, threadId)).find((message) => message.messageId === response)!
+    expect(row.content).toBe("Ma réponse demeure")
+    expect(row.replyTo).toEqual({ messageId: null, senderPersonId: null, excerpt: "", deleted: true, authorDeleted: true })
+    expect(await t.run(async (ctx) => await ctx.db.get(original))).toBeNull()
+    expect(JSON.stringify(row.replyTo)).not.toContain(alice.personId)
+    expect(JSON.stringify(row.replyTo)).not.toContain("Texte à purger")
   })
 
   it("réagir : pose, remplace, retire ; additionne deux personnes et rend MA réaction ; un non-membre est refusé", async () => {

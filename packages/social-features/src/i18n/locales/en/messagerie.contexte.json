@@ -1,0 +1,138 @@
+{
+  "contextualConversation": {
+    "filter": "Request conversations",
+    "kinds": {
+      "diasporaServiceRequest": "Service request",
+      "diasporaMentoring": "Mentoring",
+      "diasporaJobApplication": "Job application"
+    },
+    "roles": {
+      "diasporaServiceRequest": {
+        "requester": "Client",
+        "responder": "Provider"
+      },
+      "diasporaMentoring": {
+        "requester": "Mentee",
+        "responder": "Mentor"
+      },
+      "diasporaJobApplication": {
+        "requester": "Candidate",
+        "responder": "Employer"
+      }
+    },
+    "openObject": {
+      "diasporaServiceRequest": "View the request",
+      "diasporaMentoring": "View the mentoring",
+      "diasporaJobApplication": "View the application"
+    },
+    "counterpart": {
+      "person": "Member whose profile was withdrawn",
+      "page": "Page unavailable"
+    },
+    "header": {
+      "subtitle": "{{kind}} · {{state}}"
+    },
+    "context": {
+      "title": "Conversation context",
+      "summary": "{{kind}} · your role: {{role}}",
+      "objectStatus": "Where things stand: {{status}}",
+      "privacy": "A private exchange between the parties to this request: it creates no personal connection and shows no read receipts."
+    },
+    "state": {
+      "open": "Conversation open.",
+      "closed": "Conversation closed: its history remains readable.",
+      "unavailable": "Conversation unavailable for now: its history remains readable."
+    },
+    "stateShort": {
+      "open": "Open",
+      "closed": "Closed",
+      "unavailable": "Unavailable"
+    },
+    "voice": {
+      "page": "You are writing on behalf of the page: {{counterpart}} sees the page, never your name.",
+      "facingPage": "You are talking with the {{page}} team, which replies to you with a single voice.",
+      "person": "You are writing under your published name."
+    },
+    "unavailable": "This conversation is not available.",
+    "loadError": "The conversation could not be loaded.",
+    "loading": "Loading the conversation…",
+    "retry": "Try again",
+    "back": "Back",
+    "composer": {
+      "placeholder": "Write a message…",
+      "label": "Message to {{name}}"
+    },
+    "errors": {
+      "appRule": "This message does not follow a rule of this request conversation. Edit it before sending."
+    },
+    "messages": {
+      "empty": "No messages yet.",
+      "errorTitle": "Messages unavailable",
+      "errorMessage": "The messages of this conversation could not be loaded.",
+      "teammate": "{{name}} for {{page}}"
+    },
+    "actions": {
+      "title": "Message actions",
+      "close": "Close",
+      "copy": "Copy the text",
+      "copied": "Text copied.",
+      "remove": "Remove my message",
+      "removeConfirm": "Remove this message for all parties? Its attachments are deleted with it.",
+      "removeConfirmAction": "Remove the message",
+      "removed": "Message removed.",
+      "report": "Report this message",
+      "reportReason": "Reason for reporting",
+      "reportSubmit": "Send the report",
+      "reported": "Report sent to moderation.",
+      "cancel": "Cancel",
+      "none": "No action is possible on this message."
+    },
+    "close": {
+      "action": "Close the conversation",
+      "confirm": "Close this conversation for good? The other party is notified. The subject of the request stays unchanged, and the conversation cannot be reopened.",
+      "confirmAction": "Close for good",
+      "cancel": "Cancel",
+      "done": "Conversation closed."
+    },
+    "calls": {
+      "title": "Calls in this conversation",
+      "toggle": "Calls",
+      "rule": "A call requires both parties' consent in this conversation. Nothing rings automatically.",
+      "consentPerson": "By giving your consent, you agree to call and be called in this conversation only.",
+      "consentPage": "By giving your consent, you agree to call and be called in this conversation, and to be named in it: {{counterpart}} will see your name during the call.",
+      "give": "Give my call consent",
+      "withdraw": "Withdraw my call consent",
+      "given": "Your call consent is given for this conversation. You can withdraw it at any time.",
+      "saved": "Call consent saved.",
+      "withdrawn": "Call consent withdrawn.",
+      "silentOverride": "Your “outside my connections: silent” setting does not apply to this consent: it covers this conversation only.",
+      "silentOverrideIfConsent": "If you give your consent, your “outside my connections: silent” setting will not apply to this conversation.",
+      "dndActive": "“Do not disturb” is on until {{until}}: no call rings for you, including in this conversation.",
+      "meetingSilence": "Your automatic silence during meetings also applies to this conversation.",
+      "callWaitingOff": "You turned off the call-waiting signal: if you are already on a call, you show as busy, here too.",
+      "incomingPushOff": "You turned off ringing outside the tab: a call from this conversation only rings in an open tab.",
+      "target": "Person to call",
+      "noTarget": "Nobody on the team can be called right now.",
+      "chooseTarget": "Choose the team member to call.",
+      "audio": "Audio call",
+      "video": "Video call",
+      "busy": "A call is already in progress.",
+      "origin": "Request conversation",
+      "callBackFromJournal": "Call {{name}} back from the request conversation",
+      "writeFromJournal": "Write to {{name}} in the request conversation"
+    },
+    "list": {
+      "title": "Request conversations",
+      "search": "Search request conversations",
+      "scope": "Search covers the request conversations already loaded.",
+      "empty": "No request conversations yet. They open with a service request, an accepted mentoring or a shortlisted application.",
+      "noMatch": "No loaded request conversation matches “{{term}}”.",
+      "loadMore": "Show more request conversations",
+      "loading": "Loading…",
+      "errorTitle": "Request conversations unavailable",
+      "errorMessage": "The list of request conversations could not be loaded.",
+      "unread": "Unread messages",
+      "summary": "{{kind}} · {{state}}"
+    }
+  }
+}

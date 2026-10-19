@@ -8,8 +8,9 @@
  *
  * Aucune fonction Convex ici : c'est une garde, pas une API.
  */
-import { isAlbumVisibleTo } from "@antia/social-domain/albums"
+import { isAlbumVisibleTo } from "@antsia/social-domain/albums"
 
+import { canReadModeratedContent } from "../moderation/policy"
 import type { Doc, Id } from "../../_generated/dataModel"
 import type { QueryCtx } from "../../_generated/server"
 import { resolveFileDelivery, type WithheldCode, withheldCodeOf } from "../files/storageGuard"
@@ -42,6 +43,7 @@ export async function albumReadContext(
 /** Ce lecteur peut-il voir cet album MAINTENANT, depuis ce réseau ? */
 export async function canSeeAlbum(ctx: ReadCtx, album: Doc<"albums">, reader: AlbumReader): Promise<boolean> {
   if (album.networkId !== reader.networkId || album.deletingAt !== undefined) return false
+  if (!(await canReadModeratedContent(ctx, "album", album._id, reader.personId))) return false
   const context = await albumReadContext(ctx, album, reader.personId)
   return isAlbumVisibleTo({ audience: album.audience, status: album.status, ...context })
 }

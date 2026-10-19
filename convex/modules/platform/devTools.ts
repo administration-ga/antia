@@ -1,7 +1,7 @@
 /**
  * Codes à usage unique de DÉVELOPPEMENT LOCAL : sans service de courriel, la
  * personne qui teste lit son code à l'écran de connexion. Fermé partout
- * ailleurs (`devToolsAllowed` : variable `ANTIA_DEV_TOOLS` ET backend local) —
+ * ailleurs (`devToolsAllowed` : variable `ANTSIA_DEV_TOOLS` ET backend local) —
  * en production la table reste vide et la lecture rend `null`.
  */
 import { v } from "convex/values"

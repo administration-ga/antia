@@ -15,15 +15,16 @@
  * gestes qui désignent UNE story (`markSeen`, `viewers`, `remove`) l'acceptent
  * de son auteur jusqu'à la purge.
  */
-import type { CounterpartLabel } from "@antia/social-contracts/counterpart"
-import type { MediaWithheld } from "@antia/social-contracts/media"
-import { PERSONAL_REACH_AUDIENCES } from "@antia/social-domain/content"
-import { boundedFeedSourceIds } from "@antia/social-domain/feedScale"
-import { assertStoryCaption, assertStoryMedia, isStoryExpired, isStoryVisibleTo, STORY_ACTIVE_PER_AUTHOR_MAX, STORY_TTL_MS, storyExpiresAt } from "@antia/social-domain/stories"
+import type { CounterpartLabel } from "@antsia/social-contracts/counterpart"
+import type { MediaWithheld } from "@antsia/social-contracts/media"
+import { PERSONAL_REACH_AUDIENCES } from "@antsia/social-domain/content"
+import { boundedFeedSourceIds } from "@antsia/social-domain/feedScale"
+import { assertStoryCaption, assertStoryMedia, isStoryExpired, isStoryVisibleTo, STORY_ACTIVE_PER_AUTHOR_MAX, STORY_TTL_MS, storyExpiresAt } from "@antsia/social-domain/stories"
 import { paginationOptsValidator, type PaginationResult } from "convex/server"
 import { v } from "convex/values"
 
 import { internal } from "../../_generated/api"
+import { canReadModeratedContent, moderateContentWrite } from "../moderation/policy"
 import type { Doc, Id } from "../../_generated/dataModel"
 import { internalMutation, type QueryCtx } from "../../_generated/server"
 import { checked, fail, failRule, notFound } from "../../lib/errors"
@@ -148,7 +149,7 @@ function isVisibleLine(story: Doc<"stories">, facts: { readerPersonId: Id<"perso
 /** La story, dans le réseau appelé, VISIBLE de ce lecteur — sinon le refus indistinct. */
 async function requireVisibleStory(ctx: ReadCtx, networkId: Id<"networks">, storyId: Id<"stories">, readerPersonId: Id<"persons">, now: number): Promise<Doc<"stories">> {
   const story = await ctx.db.get(storyId)
-  if (!story || story.networkId !== networkId) return notFound()
+  if (!story || story.networkId !== networkId || !(await canReadModeratedContent(ctx, "story", story._id, readerPersonId))) return notFound()
   const isAuthor = story.authorPersonId === readerPersonId
   const isConnected = isAuthor ? false : await isConnectedTo(ctx, networkId, readerPersonId, story.authorPersonId)
   const isBlockedWithAuthor = isAuthor ? false : await isBlockedBetween(ctx, readerPersonId, story.authorPersonId)
@@ -197,6 +198,7 @@ export const publish = networkMutation({
       expiresAt,
       ...(args.idempotencyKey !== undefined ? { idempotencyKey: args.idempotencyKey } : {}),
     })
+    await moderateContentWrite(ctx, { networkId: ctx.networkId, ownerPersonId: ctx.person._id, kind: "story", id: storyId, text: caption ?? "" })
     return { storyId, created: true, expiresAt }
   },
 })
@@ -243,9 +245,11 @@ export const tray = networkQuery({
     for (const authorPersonId of sources) {
       const isOwn = authorPersonId === me
       const isBlockedWithAuthor = !isOwn && (blocked.ids.has(authorPersonId) || (blocked.truncated && (await isBlockedBetween(ctx, me, authorPersonId))))
-      const visible = (await liveStoriesOf(ctx, ctx.networkId, authorPersonId, args.now)).filter(
+      const candidates = (await liveStoriesOf(ctx, ctx.networkId, authorPersonId, args.now)).filter(
         (story) => story.removedAt === undefined && isVisibleLine(story, { readerPersonId: me, isConnected: connections.ids.has(authorPersonId), isBlockedWithAuthor, now: args.now }),
       )
+      const visible: Doc<"stories">[] = []
+      for (const story of candidates) if (await canReadModeratedContent(ctx, "story", story._id, me)) visible.push(story)
       if (visible.length === 0) continue
       const byRecency = [...visible].sort((left, right) => right.publishedAt - left.publishedAt)
       let cover: TrayGroup["cover"] | null = null
@@ -301,7 +305,7 @@ export const listByAuthor = networkQuery({
     const [rows, seenIds] = await Promise.all([liveStoriesOf(ctx, ctx.networkId, author._id, args.now), myRecentlySeenStoryIds(ctx, ctx.networkId, me, args.now)])
     const items: StoryDto[] = []
     for (const story of [...rows].sort((a, b) => a.publishedAt - b.publishedAt)) {
-      if (story.removedAt !== undefined) continue
+      if (story.removedAt !== undefined || !(await canReadModeratedContent(ctx, "story", story._id, ctx.person._id))) continue
       if (!isVisibleLine(story, { readerPersonId: me, isConnected, isBlockedWithAuthor: false, now: args.now })) continue
       const dto = await storyDto(ctx, story, { isOwn, seen: seenIds.has(story._id) })
       if (dto !== null) items.push(dto)
@@ -317,7 +321,7 @@ export const myActive = networkQuery({
     const rows = await liveStoriesOf(ctx, ctx.networkId, ctx.person._id, args.now)
     const items: StoryDto[] = []
     for (const story of [...rows].sort((a, b) => a.publishedAt - b.publishedAt)) {
-      if (story.removedAt !== undefined) continue
+      if (story.removedAt !== undefined || !(await canReadModeratedContent(ctx, "story", story._id, ctx.person._id))) continue
       const dto = await storyDto(ctx, story, { isOwn: true, seen: true })
       if (dto !== null) items.push(dto)
     }

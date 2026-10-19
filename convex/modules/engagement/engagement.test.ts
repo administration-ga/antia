@@ -1,6 +1,6 @@
 // @vitest-environment edge-runtime
 // Dupliqué de socle/convex/modules/reseauPersonnel/reseauPersonnel.test.ts (cas `engagement.*`, mentions et abonnés, l. 582-718 et 1399-1592) @ ad2e7fdc2 — adaptations : personnes et réseaux ; commentaires paginés par racine (D03) au lieu de `listComments` ; décomptes par fragments et agrégat (D01 : la publication n'est jamais réécrite) ; abonnés servis par la diffusion par lots (D08) ; cas de suspension (ADR-0087) rendus au statut d'adhésion par le constructeur ; tests neufs : 150 racines paginées, réponses paginées et décomptées, commentaires d'un auteur bloqué écartés.
-import { engineErrorCode } from "@antia/social-contracts/errors"
+import { engineErrorCode } from "@antsia/social-contracts/errors"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 import { api, internal } from "../../_generated/api"

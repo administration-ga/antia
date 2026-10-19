@@ -1,0 +1,4 @@
+{
+  "notification_one": "{{count}} new notification. Open the application to view your activity.",
+  "notification_other": "{{count}} new notifications. Open the application to view your activity."
+}

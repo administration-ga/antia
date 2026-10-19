@@ -22,11 +22,11 @@ import {
   canSetThematicGroupRole,
   isThematicGroupModerator,
   type ThematicGroupRole,
-} from "@antia/social-domain/thematicGroups"
-import { assertCountryCode, groupViewingReasonFor } from "@antia/social-domain/content"
-import type { PersonalFeedCursor } from "@antia/social-domain/feedScale"
-import { cursorForFeedPost } from "@antia/social-domain/feedScale"
-import { buildSearchableText, foldSearchQuery } from "@antia/social-domain/searchText"
+} from "@antsia/social-domain/thematicGroups"
+import { assertCountryCode, groupViewingReasonFor } from "@antsia/social-domain/content"
+import type { PersonalFeedCursor } from "@antsia/social-domain/feedScale"
+import { cursorForFeedPost } from "@antsia/social-domain/feedScale"
+import { buildSearchableText, foldSearchQuery } from "@antsia/social-domain/searchText"
 import { paginationOptsValidator, type PaginationResult } from "convex/server"
 import { type Infer, v } from "convex/values"
 
@@ -36,15 +36,18 @@ import { internalMutation, type MutationCtx, type QueryCtx } from "../../_genera
 import { checked, fail, notFound } from "../../lib/errors"
 import { networkMutation, networkQuery } from "../../lib/functions"
 import { enforceRateLimit } from "../../lib/rateLimit"
+import { createAssociationGroupForPage } from "../diaspora/associationGroups"
 import { purgeStoredFile } from "../files/purge"
 import { acceptedCounterpartIds, blockedCounterpartIds, isBlockedBetween, isConnectedTo } from "../graph/graph"
 import { hiddenPostIds, readerMarks } from "../marks/marks"
+import { contentState } from "../moderation/policy"
 import { notifyPerson, resolveNotifications } from "../notifications/notify"
 import { findPublishedPersonByHandle, miniProfileCache, type PersonMiniProfile } from "../people/miniProfile"
-import { pageCardOf, requireManagedPage } from "../pages/access"
+import { pageCardOf } from "../pages/access"
 import { type PageCard, pageCardValidator } from "../pages/validators"
 import { canSeePostDoc, type ReaderContext } from "../posts/access"
 import { markPostRemoved } from "../posts/contentRemoval"
+import { hasNativePostAuthor } from "../posts/nativeAuthor"
 import { countGroupMembers, recordGroupMember, unrecordComment, unrecordGroupMember } from "../posts/counters"
 import {
   clampLimit,
@@ -59,7 +62,7 @@ import {
   toFeedItem,
   WALL_WINDOWS_MAX,
 } from "../posts/posts"
-import { isActiveThematicGroup, liveThematicGroupMembership, requireLiveThematicGroupMembership } from "./access"
+import { associationGroupPageOrNull, associationGroupRoleOrNull, canDiscoverThematicGroup, isActiveThematicGroup, liveThematicGroupMembership, requireLiveThematicGroupMembership } from "./access"
 
 type ReadCtx = Pick<QueryCtx, "db">
 
@@ -86,6 +89,7 @@ async function groupInNetwork(ctx: ReadCtx, networkId: Id<"networks">, groupId: 
 
 /** Une ligne d'appartenance vivante (créée, ou reprise en simple membre), comptée. */
 async function admitMember(ctx: MutationCtx, group: Doc<"thematicGroups">, personId: Id<"persons">, now: number): Promise<void> {
+  if (group.associationPageId !== undefined && (await associationGroupRoleOrNull(ctx, group, personId)) === null) return notFound()
   const existing = await ctx.db
     .query("thematicGroupMembers")
     .withIndex("by_group_and_person", (q) => q.eq("groupId", group._id).eq("personId", personId))
@@ -131,23 +135,25 @@ export const create = networkMutation({
   },
   returns: v.object({ groupId: v.id("thematicGroups"), created: v.boolean() }),
   handler: async (ctx, args) => {
+    if (args.associationPageId !== undefined) {
+      await enforceRateLimit(ctx, "group.create", ctx.person._id)
+      return await createAssociationGroupForPage(ctx, args.associationPageId, args.idempotencyKey)
+    }
     const replay = await ctx.db
       .query("thematicGroups")
       .withIndex("by_creator_and_idempotencyKey", (q) => q.eq("createdByPersonId", ctx.person._id).eq("idempotencyKey", args.idempotencyKey))
       .unique()
-    if (replay) return replay.networkId === ctx.networkId ? { groupId: replay._id, created: false } : fail("conflict")
+    if (replay) return replay.networkId === ctx.networkId && replay.associationPageId === undefined ? { groupId: replay._id, created: false } : fail("conflict")
     await enforceRateLimit(ctx, "group.create", ctx.person._id)
     const name = checked(() => assertThematicGroupName(args.name))
     const description = checked(() => assertThematicGroupDescription(args.description))
     const country = args.country === undefined ? undefined : checked(() => assertCountryCode(args.country ?? ""))
-    if (args.associationPageId !== undefined) await requireManagedPage(ctx, { networkId: ctx.networkId, personId: ctx.person._id }, args.associationPageId, "admin")
     const now = Date.now()
     const groupId = await ctx.db.insert("thematicGroups", {
       networkId: ctx.networkId,
       name,
       ...(description !== undefined ? { description } : {}),
       ...(country !== undefined ? { country } : {}),
-      ...(args.associationPageId !== undefined ? { associationPageId: args.associationPageId } : {}),
       createdByPersonId: ctx.person._id,
       searchText: buildSearchableText(name, description ?? ""),
       idempotencyKey: args.idempotencyKey,
@@ -188,6 +194,7 @@ export const join = networkMutation({
 
 /** Quitter. Idempotent. L'`owner` ne part pas (il ferme, archive ou supprime). */
 export const leave = networkMutation({
+  writeBucket: "group.leave",
   minStatus: "en_attente",
   args: { groupId: v.id("thematicGroups") },
   returns: v.object({ left: v.literal(true) }),
@@ -196,7 +203,8 @@ export const leave = networkMutation({
     if (!group) return notFound()
     const membership = await liveThematicGroupMembership(ctx, group._id, ctx.person._id)
     if (!membership) return { left: true as const }
-    checked(() => assertCanLeaveThematicGroup(membership.role))
+    // Le groupe d'association appartient à la page : son administrateur peut le quitter.
+    if (group.associationPageId === undefined) checked(() => assertCanLeaveThematicGroup(membership.role))
     await closeMembership(ctx, group, membership, Date.now())
     return { left: true as const }
   },
@@ -210,6 +218,9 @@ export const leave = networkMutation({
 async function requireOwner(ctx: ReadCtx, networkId: Id<"networks">, groupId: Id<"thematicGroups">, personId: Id<"persons">): Promise<Doc<"thematicGroups">> {
   const group = await groupInNetwork(ctx, networkId, groupId)
   if (!group) return notFound()
+  if (group.associationPageId !== undefined) {
+    return (await associationGroupRoleOrNull(ctx, group, personId)) === "owner" ? group : notFound()
+  }
   const membership = await liveThematicGroupMembership(ctx, groupId, personId)
   if (!membership) return fail("groupMembershipRequired")
   if (membership.role !== "owner") return fail("groupRoleRequired")
@@ -365,6 +376,8 @@ export const deleteGroup = networkMutation({
     await enforceRateLimit(ctx, "group.manage", ctx.person._id)
     const existing = await ctx.db.get(args.groupId)
     if (!existing || existing.networkId !== ctx.networkId) return notFound()
+    // DG-010 V1 : fermeture non destructive ; la ligne garde l'unicité par association.
+    if (existing.associationPageId !== undefined) return notFound()
     if (existing.deletingAt !== undefined) {
       return existing.createdByPersonId === ctx.person._id ? { deleted: true as const, pending: true } : notFound()
     }
@@ -393,10 +406,11 @@ export const invite = networkMutation({
   returns: v.object({ invited: v.boolean(), alreadyInvited: v.boolean() }),
   handler: async (ctx, args) => {
     await enforceRateLimit(ctx, "group.invite", ctx.person._id)
-    await requireLiveThematicGroupMembership(ctx, ctx.networkId, args.groupId, ctx.person._id)
+    const { group } = await requireLiveThematicGroupMembership(ctx, ctx.networkId, args.groupId, ctx.person._id)
     const found = await findPublishedPersonByHandle(ctx, ctx.networkId, args.handle)
     if (!found || found._id === ctx.person._id) return notFound()
     const inviteePersonId = found._id
+    if (!(await canDiscoverThematicGroup(ctx, group, inviteePersonId))) return notFound()
     if (!(await isConnectedTo(ctx, ctx.networkId, ctx.person._id, inviteePersonId)) || (await isBlockedBetween(ctx, ctx.person._id, inviteePersonId))) return notFound()
     if (await liveThematicGroupMembership(ctx, args.groupId, inviteePersonId)) return { invited: false, alreadyInvited: false }
 
@@ -436,7 +450,7 @@ export const listInviteCandidates = networkQuery({
   args: { groupId: v.id("thematicGroups") },
   returns: v.object({ items: v.array(inviteCandidateValidator), truncated: v.boolean() }),
   handler: async (ctx, args) => {
-    await requireLiveThematicGroupMembership(ctx, ctx.networkId, args.groupId, ctx.person._id)
+    const { group } = await requireLiveThematicGroupMembership(ctx, ctx.networkId, args.groupId, ctx.person._id)
     const connections = await acceptedCounterpartIds(ctx, ctx.networkId, ctx.person._id)
     const profileOf = miniProfileCache(ctx)
     const items: Infer<typeof inviteCandidateValidator>[] = []
@@ -447,6 +461,7 @@ export const listInviteCandidates = networkQuery({
         break
       }
       const personId = id as Id<"persons">
+      if (!(await canDiscoverThematicGroup(ctx, group, personId))) continue
       const person = await profileOf(personId)
       // Sans identifiant publié, pas d'adresse à donner à `invite`.
       if (!person.hasPublishedProfile || person.handle === null) continue
@@ -524,7 +539,7 @@ export const paginateMyInvites = networkQuery({
     const page: MyInviteDto[] = []
     for (const row of result.page) {
       const group = await ctx.db.get(row.groupId)
-      if (!group || !isActiveThematicGroup(group)) continue
+      if (!group || group.networkId !== ctx.networkId || !isActiveThematicGroup(group) || !(await canDiscoverThematicGroup(ctx, group, ctx.person._id))) continue
       const inviter = await profileOf(row.invitedByPersonId)
       page.push({
         inviteId: row._id,
@@ -550,7 +565,9 @@ export const setMemberRole = networkMutation({
   returns: v.object({ role: v.union(v.literal("moderator"), v.literal("member")) }),
   handler: async (ctx, args) => {
     await enforceRateLimit(ctx, "group.moderate", ctx.person._id)
-    const { membership: mine } = await requireLiveThematicGroupMembership(ctx, ctx.networkId, args.groupId, ctx.person._id)
+    const { group, membership: mine } = await requireLiveThematicGroupMembership(ctx, ctx.networkId, args.groupId, ctx.person._id)
+    // Les rôles associatifs se changent dans la page ou l'adhésion, jamais dans cette copie.
+    if (group.associationPageId !== undefined) return fail("groupRoleRequired")
     const target = await liveThematicGroupMembership(ctx, args.groupId, args.memberPersonId)
     if (!target) return notFound()
     if (!canSetThematicGroupRole({ actorRole: mine.role, targetRole: target.role })) return fail("groupRoleRequired")
@@ -600,8 +617,10 @@ export const paginateMembers = networkQuery({
     const profileOf = miniProfileCache(ctx)
     const page: GroupMemberDto[] = []
     for (const row of result.page) {
+      const membership = await liveThematicGroupMembership(ctx, args.groupId, row.personId)
+      if (!membership) continue
       const profile = await profileOf(row.personId)
-      page.push({ personId: row.personId, role: row.role, joinedAt: row.joinedAt, displayName: profile.displayName, handle: profile.handle, headline: profile.headline, avatarUrl: profile.avatarUrl })
+      page.push({ personId: row.personId, role: membership.role, joinedAt: row.joinedAt, displayName: profile.displayName, handle: profile.handle, headline: profile.headline, avatarUrl: profile.avatarUrl })
     }
     return { ...result, page }
   },
@@ -649,18 +668,18 @@ async function myGroupStates(ctx: ReadCtx, networkId: Id<"networks">, personId: 
       .take(INVITES_SCAN),
   ])
   return {
+    personId,
     memberships: memberships.slice(0, MY_GROUPS_SCAN),
     truncated: memberships.length > MY_GROUPS_SCAN,
-    roleByGroup: new Map<string, ThematicGroupRole>(memberships.map((row) => [row.groupId, row.role])),
     invitedGroups: new Set<string>(invites.map((row) => row.groupId)),
   }
 }
 
 /** La carte de la page d'association d'un groupe, si elle est servable. */
-async function associationPageOf(ctx: QueryCtx, group: Doc<"thematicGroups">): Promise<PageCard | null> {
+async function associationPageOf(ctx: QueryCtx, group: Doc<"thematicGroups">, personId: Id<"persons">): Promise<PageCard | null> {
   if (group.associationPageId === undefined) return null
-  const page = await ctx.db.get(group.associationPageId)
-  return page && page.status === "active" ? await pageCardOf(ctx, page) : null
+  const page = await associationGroupPageOrNull(ctx, group.networkId, group.associationPageId, personId)
+  return page ? await pageCardOf(ctx, page) : null
 }
 
 async function toCard(ctx: QueryCtx, group: Doc<"thematicGroups">, states: Awaited<ReturnType<typeof myGroupStates>>): Promise<GroupCard> {
@@ -669,10 +688,10 @@ async function toCard(ctx: QueryCtx, group: Doc<"thematicGroups">, states: Await
     name: group.name,
     description: group.description ?? null,
     country: group.country ?? null,
-    associationPage: await associationPageOf(ctx, group),
+    associationPage: await associationPageOf(ctx, group, states.personId),
     memberCount: await countGroupMembers(ctx, group._id),
     state: stateOf(group),
-    myRole: states.roleByGroup.get(group._id) ?? null,
+    myRole: (await liveThematicGroupMembership(ctx, group._id, states.personId))?.role ?? null,
     invited: states.invitedGroups.has(group._id),
     createdAt: group.createdAt,
   }
@@ -727,7 +746,7 @@ export const discover = networkQuery({
     }
     const states = await myGroupStates(ctx, ctx.networkId, ctx.person._id)
     const cards: GroupCard[] = []
-    for (const group of groups) if (isActiveThematicGroup(group)) cards.push(await toCard(ctx, group, states))
+    for (const group of groups) if (isActiveThematicGroup(group) && await canDiscoverThematicGroup(ctx, group, ctx.person._id)) cards.push(await toCard(ctx, group, states))
     return cards
   },
 })
@@ -741,7 +760,7 @@ export const myGroups = networkQuery({
     const groups: Doc<"thematicGroups">[] = []
     for (const membership of states.memberships) {
       const group = await ctx.db.get(membership.groupId)
-      if (group && group.deletingAt === undefined) groups.push(group)
+      if (group && group.networkId === ctx.networkId && group.deletingAt === undefined && await canDiscoverThematicGroup(ctx, group, ctx.person._id)) groups.push(group)
     }
     groups.sort((left, right) => right.updatedAt - left.updatedAt)
     const items: GroupCard[] = []
@@ -764,7 +783,7 @@ export const getGroup = networkQuery({
   }),
   handler: async (ctx, args) => {
     const group = await groupInNetwork(ctx, ctx.networkId, args.groupId)
-    if (!group) return notFound()
+    if (!group || !(await canDiscoverThematicGroup(ctx, group, ctx.person._id))) return notFound()
     const reader = readerOf(ctx)
     const [membership, invitation] = await Promise.all([
       liveThematicGroupMembership(ctx, group._id, ctx.person._id),
@@ -785,7 +804,7 @@ export const getGroup = networkQuery({
       name: group.name,
       description: group.description ?? null,
       country: group.country ?? null,
-      associationPage: await associationPageOf(ctx, group),
+      associationPage: await associationPageOf(ctx, group, ctx.person._id),
       memberCount: await countGroupMembers(ctx, group._id),
       state: stateOf(group),
       myRole: membership?.role ?? null,
@@ -813,7 +832,7 @@ export const groupWall = networkQuery({
   args: { groupId: v.id("thematicGroups"), cursor: v.optional(cursorValidator), limit: v.optional(v.number()) },
   returns: v.object({ items: v.array(feedItemValidator), nextCursor: v.union(cursorValidator, v.null()) }),
   handler: async (ctx, args) => {
-    await requireLiveThematicGroupMembership(ctx, ctx.networkId, args.groupId, ctx.person._id)
+    const { group } = await requireLiveThematicGroupMembership(ctx, ctx.networkId, args.groupId, ctx.person._id)
     const reader = readerOf(ctx)
     const limit = clampLimit(args.limit)
     const [blocked, hidden, marks, cursorCreationTime] = await Promise.all([
@@ -831,6 +850,9 @@ export const groupWall = networkQuery({
       const window = await feedWindow(groupReader(ctx, ctx.networkId, args.groupId), FEED_AUTHOR_SCAN, windowCursor, windowCreationTime)
       for (const post of window.rows) {
         lastExamined = post
+        if (!hasNativePostAuthor(post)) continue
+        if (!(await canSeePostDoc(ctx, reader, post))) continue
+        if (group.associationPageId !== undefined && (await contentState(ctx, "post", post._id))?.status !== "published") continue
         if (post.authorPersonId !== ctx.person._id) {
           if (blocked.ids.has(post.authorPersonId)) continue
           if (blocked.truncated && (await isBlockedBetween(ctx, ctx.person._id, post.authorPersonId))) continue

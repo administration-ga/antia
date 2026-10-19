@@ -5,14 +5,14 @@
  * dont le patron d'audit `reseauPlatformActsAudit` est repris : chaque décision
  * écrit sa ligne, un geste sans effet n'écrit rien).
  */
-import { engineErrorCode, engineErrorRule } from "@antia/social-contracts/errors"
-import { PAGE_SIGNATORIES_MAX } from "@antia/social-domain/pages"
+import { engineErrorCode, engineErrorRule } from "@antsia/social-contracts/errors"
+import { PAGE_SIGNATORIES_MAX } from "@antsia/social-domain/pages"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 import { api, internal } from "../../_generated/api"
 import type { Id } from "../../_generated/dataModel"
 import { SEED_CONFIRMATION } from "../../seeds/foundations"
-import { testConvex } from "../../test.setup"
+import { createTestOperatorProof, testConvex } from "../../test.setup"
 
 type T = ReturnType<typeof testConvex>
 type Person = { as: ReturnType<T["withIdentity"]>; personId: Id<"persons">; handle: string }
@@ -59,8 +59,9 @@ async function verify(t: T, networkId: Id<"networks">, person: Person): Promise<
 
 async function makeOperator(t: T, person: Person): Promise<void> {
   await t.run(async (ctx) => {
-    await ctx.db.insert("operators", { personId: person.personId, role: "platform_operator", grantedAt: 1 })
+    await ctx.db.insert("operators", { personId: person.personId, role: "platform_admin", grantedAt: 1 })
   })
+  await createTestOperatorProof(t, person.as, person.personId)
 }
 
 /** Un lien IDN de garantie 2 : l'identité forte qu'exige une page officielle. */
@@ -220,15 +221,20 @@ describe("la console des pages", () => {
   })
 })
 
-describe("le groupe d'adhérents d'une page d'association (EXF-DG-26)", () => {
-  it("seul un administrateur vivant de la page le crée ; la fiche porte la page ; la découverte rend les groupes d'une page", async () => {
+describe("le groupe d'adhérents d'une page d'association (EXF-DG-26, contrat DG-010 V1)", () => {
+  // DG-010 V1 (DIASPORALE, `diaspora/associationGroups.ts`) : un groupe PRIVÉ par association, nommé
+  // d'après la page ; refus indistinct pour qui n'en est pas administrateur vivant.
+  it("seul un administrateur vivant le crée ; le groupe privé ne se lit ni ne se découvre hors de l'association", async () => {
     const t = testConvex()
     const { root, alice, pageId, handle } = await alicePage(t)
     const bob = await enter(t, root, "bob")
-    expect(await codeOf(bob.as.mutation(GROUPS.create, { networkId: root, name: "Adhérents", associationPageId: pageId, idempotencyKey: "g-1" }))).toBe("pageRoleRequired")
+    expect(await codeOf(bob.as.mutation(GROUPS.create, { networkId: root, name: "Adhérents", associationPageId: pageId, idempotencyKey: "g-1" }))).toBe("notFound")
     const { groupId } = await alice.as.mutation(GROUPS.create, { networkId: root, name: "Adhérents", associationPageId: pageId, idempotencyKey: "g-2" })
+    // Un groupe ordinaire, sans page, ne change pas.
     await alice.as.mutation(GROUPS.create, { networkId: root, name: "Autre groupe", idempotencyKey: "g-3" })
-    expect((await bob.as.query(GROUPS.getGroup, { networkId: root, groupId })).associationPage).toMatchObject({ pageId, handle })
-    expect((await bob.as.query(GROUPS.discover, { networkId: root, associationPageId: pageId })).map((card) => card.groupId)).toEqual([groupId])
+    expect(await alice.as.query(GROUPS.getGroup, { networkId: root, groupId })).toMatchObject({ name: "Association des Gabonais", associationPage: { pageId, handle } })
+    expect((await alice.as.query(GROUPS.discover, { networkId: root, associationPageId: pageId })).map((card) => card.groupId)).toEqual([groupId])
+    expect(await codeOf(bob.as.query(GROUPS.getGroup, { networkId: root, groupId }))).toBe("notFound")
+    expect(await bob.as.query(GROUPS.discover, { networkId: root, associationPageId: pageId })).toEqual([])
   })
 })

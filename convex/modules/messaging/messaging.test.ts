@@ -1,7 +1,7 @@
 // @vitest-environment edge-runtime
 // Dupliqué de socle/convex/modules/reseauPersonnel/messagerie.test.ts (avec socle/convex/modules/messagerieScope/{threads,transfert}.test.ts et socle/convex/tests/{chatsMessagerie,chatsP2P,chatsPinning,chatsAttachmentsAdoption}.test.ts) @ ad2e7fdc2 — adaptations : personnes et réseaux (graine des fondations) ; codes et règles au lieu des libellés ; fils de poste, Standard, iAsted, ressortissants, coffre et appels (→ module des appels) retirés ; le cloisonnement poste / personnel réécrit ENTRE RÉSEAUX ; un poids déclaré qui ment est refusé (le socle l'écrasait) ; tests neufs : le blocage déplace la pastille à l'écriture (D38), contenu retiré absent (D37), saisie lue à l'instant fourni (D16), nom tu après une demande d'effacement, une paire a un fil par réseau.
-import { MESSAGE_EDIT_WINDOW_MS } from "@antia/social-contracts/messaging"
-import { engineErrorCode, engineErrorRule } from "@antia/social-contracts/errors"
+import { MESSAGE_EDIT_WINDOW_MS } from "@antsia/social-contracts/messaging"
+import { engineErrorCode, engineErrorRule } from "@antsia/social-contracts/errors"
 import type { PaginationResult } from "convex/server"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
@@ -608,6 +608,22 @@ describe("messages — gardes et gestes", () => {
     const long = await send(root, alice, threadId, "x".repeat(300))
     await reply(long, "Long")
     expect((await history(root, alice, threadId))[0]!.replyTo!.excerpt.length).toBe(140)
+  })
+
+  it("R9 : la citation d'un original purgé ne conserve ni identifiant ni extrait de l'auteur effacé", async () => {
+    const t = testConvex(), { root } = await seed(t), alice = await enter(t, root, "alice"), bob = await enter(t, root, "bob")
+    await connect(t, root, alice, bob)
+    const { threadId, messageId: original } = await open(root, alice, bob, "Texte à purger")
+    const { messageId: response } = await bob.as.mutation(M.messages.sendMessage, { networkId: root, threadId, content: "Ma réponse demeure", replyToMessageId: original })
+    // Contrat du purger : marquer la citation survivante, retirer la référence,
+    // puis supprimer PHYSIQUEMENT le message ; aucune pierre tombale de l'auteur.
+    await t.run(async (ctx) => { await ctx.db.patch(response, { replyToMessageId: undefined, replyToDeletedAccount: true }); await ctx.db.delete(original) })
+    const row = (await history(root, bob, threadId)).find((message) => message.messageId === response)!
+    expect(row.content).toBe("Ma réponse demeure")
+    expect(row.replyTo).toEqual({ messageId: null, senderPersonId: null, excerpt: "", deleted: true, authorDeleted: true })
+    expect(await t.run(async (ctx) => await ctx.db.get(original))).toBeNull()
+    expect(JSON.stringify(row.replyTo)).not.toContain(alice.personId)
+    expect(JSON.stringify(row.replyTo)).not.toContain("Texte à purger")
   })
 
   it("les deux suppressions : « pour moi » retire de MA vue seulement, s'ouvre au destinataire, se rejoue sans empiler ; « pour tous » reste à l'auteur", async () => {

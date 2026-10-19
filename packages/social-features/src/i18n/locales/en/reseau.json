@@ -1,0 +1,176 @@
+{
+  "postIdentity": {
+    "announcement": "{{name}}, {{badges}}"
+  },
+  "authorLink": {
+    "pageBadge": "Official page",
+    "signedBy": "Posted by {{name}}"
+  },
+  "shared": {
+    "audience": {
+      "connections": "My connections",
+      "public": "The whole network",
+      "group": "Group",
+      "followers": "Followers only"
+    },
+    "audienceHint": {
+      "connections": "Visible to the people you are connected with.",
+      "public": "Visible to anyone signed in to the platform."
+    },
+    "pageAudience": {
+      "followers": "Page followers"
+    },
+    "pageAudienceHint": {
+      "public": "Announcement: visible to anyone signed in to the platform.",
+      "followers": "Note to followers: visible only to the page's followers and its signatories."
+    },
+    "reaction": {
+      "like": "Like",
+      "bravo": "Bravo",
+      "soutien": "Support",
+      "instructif": "Insightful"
+    },
+    "feedReason": {
+      "own": "Your post",
+      "connection": "One of your connections",
+      "follow": "Someone you follow",
+      "public": "Open to the whole network",
+      "group": "Group member",
+      "page": "Page you follow"
+    },
+    "relativeDate": {
+      "now": "just now",
+      "minutes": "{{minutes}} min ago",
+      "hours": "{{hours}} h ago",
+      "days": "{{days}} d ago",
+      "absolute": "{{date, datetime}}"
+    },
+    "unreadBadge_one": "{{count}} unread notification",
+    "unreadBadge_many": "{{count}} unread notifications",
+    "unreadBadge_other": "{{count}} unread notifications",
+    "notification": {
+      "postReaction": "{{actor}} reacted to your post.",
+      "postComment": "{{actor}} commented on your post.",
+      "postShare": "{{actor}} shared your post.",
+      "mention": "{{actor}} mentioned you.",
+      "connectionRequest": "{{actor}} would like to connect with you.",
+      "connectionAccepted": "{{actor}} accepted your invitation.",
+      "newFollower": "{{actor}} now follows you.",
+      "groupMessage": "{{actor}} wrote in a group conversation.",
+      "groupAdded": "{{actor}} added you to a group conversation.",
+      "liveStarted": "{{actor}} started a live conference.",
+      "liveInvite": "{{actor}} invites you to a live conference.",
+      "liveAntennaInvite": "{{actor}} invites you to speak in a conference.",
+      "thematicGroupInvite": "{{actor}} invites you to join a group.",
+      "eventInvite": "{{actor}} invites you to an event.",
+      "liveReplayPublished": "{{actor}} published the recording of a conference."
+    },
+    "resolution": {
+      "connectionAccepted": "You accepted this invitation.",
+      "accepted": "Invitation accepted.",
+      "declined": "Invitation declined.",
+      "maybe": "You answered “maybe”.",
+      "cancelled": "Invitation cancelled.",
+      "withdrawn": "Invitation withdrawn.",
+      "liveEnded": "This conference has ended."
+    },
+    "shareExcerptEmpty": "Post without text.",
+    "composerTooLong_one": "Your post is {{count}} character too long.",
+    "composerTooLong_many": "Your post is {{count}} characters too long.",
+    "composerTooLong_other": "Your post is {{count}} characters too long.",
+    "emptyFeed": {
+      "orphan": "Your feed is empty: you have no connections or follows yet. Search for someone to get started.",
+      "linked": "Nothing new for now. Posts from your connections and the people you follow will appear here."
+    },
+    "handle": {
+      "required": "Choose a public handle.",
+      "length": "A public handle has between {{min}} and {{max}} characters.",
+      "charset": "Unaccented letters, digits, dot, hyphen or underscore only."
+    },
+    "searchStatus": {
+      "loading": "Searching for “{{query}}”…",
+      "none": "No results for “{{query}}”",
+      "results_one": "{{count}} result for “{{query}}”",
+      "results_many": "{{count}} results for “{{query}}”",
+      "results_other": "{{count}} results for “{{query}}”"
+    },
+    "avatar": {
+      "format": "Accepted formats: JPEG, PNG or WebP.",
+      "size": "A profile photo is limited to {{max}} MB."
+    }
+  },
+  "reseauQueryError": {
+    "retry": "Try again"
+  },
+  "reseauAgentNav": {
+    "tabs": {
+      "fil": {
+        "label": "Feed",
+        "shortLabel": "Feed",
+        "description": "What the network publishes. Choose below what you want to see."
+      },
+      "relations": {
+        "label": "Connections",
+        "shortLabel": "Connections",
+        "description": "Your invitations, your connections and the people you follow — your network belongs to you."
+      },
+      "groupes": {
+        "label": "Groups",
+        "shortLabel": "Groups",
+        "description": "Themed spaces: join them, create them, post in them — visible to members only."
+      },
+      "pages": {
+        "label": "Pages",
+        "shortLabel": "Pages",
+        "description": "Pages of the network's institutions, associations, companies and media. Follow them to get their posts in your feed."
+      },
+      "conferences": {
+        "label": "Conferences",
+        "shortLabel": "Conferences",
+        "description": "Conferences being broadcast right now, and replays of what you missed."
+      },
+      "evenements": {
+        "label": "Events",
+        "shortLabel": "Events",
+        "description": "Your invitations and the events you organise. Reply, and announce them to the network."
+      },
+      "enregistrements": {
+        "label": "Saved",
+        "shortLabel": "Bookmarks",
+        "description": "The posts you set aside to come back to."
+      }
+    }
+  },
+  "reseauLayout": {
+    "returnToFeed": "Back to the feed",
+    "heading": {
+      "tag": "Posts tagged #{{tag}}",
+      "search": "Search results",
+      "post": "Open post"
+    },
+    "invitationsBanner_one": "{{count}} pending invitation",
+    "invitationsBanner_many": "{{count}} pending invitations",
+    "invitationsBanner_other": "{{count}} pending invitations"
+  },
+  "reseauMobileTabs": {
+    "sections": {
+      "reseau": "Network",
+      "more": "More in the network"
+    },
+    "menu": {
+      "stories": "Stories",
+      "profile": "My profile",
+      "settings": "Settings"
+    }
+  },
+  "espacePagination": {
+    "navigation": "Pagination — {{list}}",
+    "previous": "Previous",
+    "next": "Next",
+    "page": "Page {{page}} of {{count}}",
+    "currentPage": "Page {{page}} of {{count}}, current page",
+    "empty": "No items",
+    "single": "1 item",
+    "range": "Page {{page}} of {{count}} — {{start}} to {{end}} of {{total}}"
+  }
+}

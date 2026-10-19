@@ -6,12 +6,12 @@
  * chemins génériques du moteur le refusent, car ils ignorent la nationalité
  * IDN, le parrainage et l'attestation consulaire. Ici, le statut se DÉRIVE des
  * faits par la règle du domaine (`@diasporale/domain`), dans l'ordre du moteur :
- * adhésion → éligibilité → limitation de débit → droit. L'adhésion ANTIA dérivée
+ * adhésion → éligibilité → limitation de débit → droit. L'adhésion ANTSIA dérivée
  * naît avec l'entrée (invariant 3) ; aucune adhésion n'est créée sans geste.
  */
-import { CONSENT_TEXT_VERSIONS as ENGINE_CONSENT_TEXT_VERSIONS, isConsentInForce, missingConsentsToJoin } from "@antia/social-domain/consent"
-import { assertDecisionReason } from "@antia/social-domain/audit"
-import { isActiveStatus } from "@antia/social-domain/membership"
+import { CONSENT_TEXT_VERSIONS as ENGINE_CONSENT_TEXT_VERSIONS, isConsentInForce, missingConsentsToJoin } from "@antsia/social-domain/consent"
+import { assertDecisionReason } from "@antsia/social-domain/audit"
+import { isActiveStatus } from "@antsia/social-domain/membership"
 import {
   capabilitiesOf,
   checkSponsorship,
@@ -297,7 +297,7 @@ export const revokeSponsorship = networkMutation({
   },
 })
 
-/** Quitter DIASPORALE (l'adhésion ANTIA reste) ; le parrainage reçu s'éteint avec le départ. */
+/** Quitter DIASPORALE (l'adhésion ANTSIA reste) ; le parrainage reçu s'éteint avec le départ. */
 export const leaveDiasporale = networkMutation({
   minStatus: "en_attente",
   args: {},
@@ -314,7 +314,7 @@ export const leaveDiasporale = networkMutation({
 
 /**
  * @selfScoped La personne de la session lit SON adhésion à DIASPORALE : statut
- * effectif (une suspension ANTIA vaut ici), facette complète avec ses niveaux,
+ * effectif (une suspension ANTSIA vaut ici), facette complète avec ses niveaux,
  * badges calculés, parrain en vigueur, dernière demande d'attestation (sans la
  * raison consulaire), capacités. `null` sans personne, sans réseau ou sans adhésion.
  */

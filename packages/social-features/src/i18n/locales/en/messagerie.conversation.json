@@ -1,0 +1,184 @@
+{
+  "callActions": {
+    "joinOngoing": "Join the ongoing call",
+    "groupAudio": "Group call",
+    "joinVideo": "Join with video",
+    "groupVideo": "Group video call",
+    "startGroup": "Start a group call",
+    "audio": "Audio call",
+    "video": "Video call"
+  },
+  "conversationScroll": {
+    "newMessages_one": "{{count}} new message",
+    "newMessages_other": "{{count}} new messages",
+    "newMessagesCapped": "99+ new messages"
+  },
+  "forwardTargets": {
+    "fallbackConversation": "Conversation",
+    "fallbackGroup": "Group",
+    "memberCount_one": "{{count}} member",
+    "memberCount_other": "{{count}} members",
+    "hintChat": "Forward to this conversation",
+    "hintGroup": "Forward to this group",
+    "hintRelation": "Forward — a conversation will be opened"
+  },
+  "messageActions": {
+    "reply": "Reply",
+    "react": "React",
+    "copy": "Copy text",
+    "forward": "Forward",
+    "pin": "Pin",
+    "unpin": "Unpin",
+    "edit": "Edit",
+    "deleteForMe": "Delete for me",
+    "deleteForEveryone": "Delete for everyone"
+  },
+  "messagerieBulles": {
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "deleted": "Message deleted",
+    "masked": "Message hidden"
+  },
+  "messagerieComposer": {
+    "bytes": "{{value}} B",
+    "kilobytes": "{{value}} KB",
+    "megabytes": "{{value}} MB",
+    "tooMany": "A message can carry at most {{max}} attachments.",
+    "empty": "“{{name}}” is empty.",
+    "tooLarge": "“{{name}}” weighs {{size}}: an attachment is limited to {{max}}."
+  },
+  "pinnedMessageBanner": {
+    "attachment": "Attachment",
+    "message": "Message",
+    "jump": "Go to the pinned message from {{sender}}: {{body}}",
+    "unpin": "Unpin the message"
+  },
+  "replyPreview": {
+    "deletedAccount": "Deleted account",
+    "quotedMessage": "Quoted message",
+    "replyTo": "Replying to {{author}}",
+    "cancel": "Cancel the reply",
+    "goTo": "Go to the quoted message from {{author}}"
+  },
+  "voiceRecorderButton": {
+    "micUnavailable": "The microphone is not available. Allow it in your browser settings.",
+    "releaseToSend": "Release to send",
+    "stopAndSendLabel": "Stop and send the voice message",
+    "stopAndSend": "Stop and send",
+    "voiceMessage": "Voice message"
+  },
+  "conversationHeader": {
+    "groupInfo": "Group information for {{title}}",
+    "openProfile": "Open the profile of {{title}}",
+    "expandNamed": "Expand the conversation {{title}}",
+    "backPage": "Back to conversations",
+    "backList": "Back to the conversation list",
+    "collapse": "Collapse the conversation",
+    "expand": "Expand the conversation",
+    "callActions": "Call actions for {{title}}"
+  },
+  "forwardMessageSheet": {
+    "close": "Close",
+    "title": "Forward the message",
+    "description": "The message will be marked “Forwarded” in the chosen conversation.",
+    "searchPlaceholder": "Search for a conversation, a person…",
+    "searchLabel": "Search for the forwarding target",
+    "rowLabel": "{{hint}}: {{title}}",
+    "loading": "Loading your conversations…",
+    "loadError": "Your conversations could not be loaded.",
+    "retry": "Retry",
+    "noMatch": "No target matches “{{term}}”.",
+    "noOther": "No other conversation for now.",
+    "newConversation": "Open a new conversation",
+    "searching": "Searching your connections…"
+  },
+  "messageActionsSheet": {
+    "close": "Close",
+    "title": "Message actions",
+    "reactions": {
+      "like": "Like",
+      "love": "Love",
+      "laugh": "Haha",
+      "wow": "Wow",
+      "sad": "Sad",
+      "pray": "Thank you"
+    }
+  },
+  "messageAttachment": {
+    "blocked": "blocked by the security scan",
+    "scanPending": "scan in progress",
+    "unavailable": "unavailable",
+    "voiceMessage": "Voice message",
+    "voiceMessageWithDuration": "Voice message, {{duration}}"
+  },
+  "messageBubble": {
+    "actions": "Message actions",
+    "actionsWithText": "Message actions: {{text}}",
+    "actionsFrom": "Actions on the message from {{name}}",
+    "actionsMine": "Actions on your message",
+    "speaker": "Message from {{name}}:",
+    "speakerMine": "Your message:",
+    "forwarded": "Forwarded",
+    "pinned": "Pinned message",
+    "edited": "(edited)",
+    "reactionCount": "{{reaction}}: {{total}}",
+    "read": "Read",
+    "sent": "Sent"
+  },
+  "messageComposer": {
+    "sendAlreadyPending": "A message is already being sent in this conversation.",
+    "uploadFailed": "The upload failed.",
+    "editFailed": "The edit could not be saved.",
+    "reselectOne": "“{{name}}” must be selected again: the file is no longer in memory.",
+    "reselectMany": "{{n}} attachments must be selected again: their files are no longer in memory.",
+    "reselectPiece": "An attachment must be selected again.",
+    "sendFailed": "The attachments could not be sent.",
+    "voiceFailed": "The voice message could not be sent.",
+    "editBanner": "Editing the message",
+    "cancelEdit": "Cancel the edit",
+    "toReselect": "to select again",
+    "alreadyUploaded": "Already uploaded",
+    "remove": "Remove {{name}}",
+    "attachFile": "Attach a file",
+    "editPlaceholder": "Edit the message…",
+    "editLabel": "Edit the message",
+    "saving": "Saving",
+    "saveEdit": "Save the edit",
+    "sending": "Sending",
+    "send": "Send"
+  },
+  "outboxMessages": {
+    "sending": "Sending",
+    "attachments_one": "{{count}} attachment",
+    "attachments_many": "{{count}} attachments",
+    "attachments_other": "{{count}} attachments"
+  },
+  "messagerieConversationView": {
+    "systemEvent": "Conversation event",
+    "callStarted": "Call started",
+    "callEnded": "Call ended",
+    "forwardDone": "Message forwarded.",
+    "groupCallFallbackTitle": "Group call",
+    "groupFallbackTitle": "Group",
+    "conversationFallbackTitle": "Conversation",
+    "loading": "Loading…",
+    "notInNetwork": "This conversation does not belong to this network.",
+    "backToConversations": "Back to conversations",
+    "members_one": "member",
+    "members_other": "members",
+    "callOngoing": "call in progress",
+    "newConversation": "New conversation. Your first message will open it.",
+    "empty": "No messages yet. Write the first one.",
+    "loadOlder": "See older messages",
+    "loadingOlder": "Loading older messages…",
+    "typingOne": "{{name}} is typing…",
+    "typingMany": "{{name}} and others are typing…",
+    "placeholderGroup": "Write to the group…",
+    "placeholderDirect": "Write a message…",
+    "composerLabelGroup": "Message to the group {{name}}",
+    "composerLabelDirect": "Message to {{name}}",
+    "arrival": "New message from {{name}}",
+    "arrivalWithText": "New message from {{name}}: {{text}}",
+    "arrivalWithAttachment": "New message from {{name}}, with an attachment"
+  }
+}

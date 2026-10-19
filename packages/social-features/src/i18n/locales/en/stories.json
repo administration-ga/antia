@@ -1,0 +1,142 @@
+{
+  "storiesTray": {
+    "unknownAuthor": "Network member",
+    "age": {
+      "justNow": "just now",
+      "expired": "expired",
+      "minutes": "{{minutes}} min ago",
+      "hours": "{{hours}} h ago"
+    },
+    "tile": {
+      "own": "Your story",
+      "author": "Stories by {{name}}",
+      "storyCount_one": "{{count}} story",
+      "storyCount_other": "{{count}} stories",
+      "unseenCount_one": "{{count}} unseen",
+      "unseenCount_other": "{{count}} unseen"
+    },
+    "label": "Stories",
+    "create": "Post a story",
+    "createShort": "Create a story",
+    "you": "You"
+  },
+  "storiesViewer": {
+    "label": {
+      "direct": "Conference by {{host}}: {{title}}",
+      "stories": "Stories by {{name}}"
+    }
+  },
+  "storyCreate": {
+    "units": {
+      "megabytes": "{{value}} MB",
+      "minutes_one": "{{count}} minute",
+      "minutes_other": "{{count}} minutes",
+      "seconds_one": "{{count}} second",
+      "seconds_other": "{{count}} seconds"
+    },
+    "refusal": {
+      "notMedia": "“{{name}}” is neither an accepted image (JPEG, PNG, WebP or GIF) nor a video.",
+      "empty": "“{{name}}” is empty.",
+      "imageTooLarge": "“{{name}}” exceeds {{size}}.",
+      "videoTooLarge": "“{{name}}” is too large. A video is limited to {{size}}."
+    }
+  },
+  "storyVideoPolicy": {
+    "refusal": {
+      "notDecodable": "This browser cannot play “{{name}}” — publish from Safari, or export the video as MP4 (H.264).",
+      "tooLong": "“{{name}}” is too long. A video lasts at most {{duration}}.",
+      "tooLongToConvert": "“{{name}}” must be converted to play everywhere, and the conversion happens here, in real time: beyond {{duration}} it takes too long to wait for. Export it as MP4 (H.264) — it will then be sent without conversion.",
+      "noEncoder": "This browser cannot convert “{{name}}” — export the video as MP4 (H.264) before publishing it."
+    }
+  },
+  "storyProgressBar": {
+    "segmentLabel": "Story {{position}} of {{total}}"
+  },
+  "storyOverlay": {
+    "close": "Close stories"
+  },
+  "liveDirectSlide": {
+    "live": "Live",
+    "admittedViewers_one": "{{count}} viewer admitted",
+    "admittedViewers_other": "{{count}} viewers admitted",
+    "resumeMine": "Resume my conference",
+    "join": "Join",
+    "close": "Close stories"
+  },
+  "storyViewersSheet": {
+    "title": "Seen by",
+    "close": "Close",
+    "empty": "No one has watched this story yet.",
+    "more": "See more"
+  },
+  "storyViewer": {
+    "unavailable": {
+      "title": "Stories unavailable",
+      "text": "This person has not published a network profile: their stories cannot be opened."
+    },
+    "loadFailed": {
+      "title": "This series could not load",
+      "text": "The network did not respond. Swipe to the next screen, or go back to the feed."
+    },
+    "loading": "Loading…",
+    "nothingLeft": {
+      "title": "Nothing left to see",
+      "text": "These stories have expired or been removed."
+    },
+    "failed": {
+      "video": "This browser cannot play this video",
+      "media": "This media cannot be displayed",
+      "text": "Ask its author for an MP4 export, or swipe to the next screen."
+    },
+    "backToFeed": "Back to the feed",
+    "imageAlt": "Story by {{name}}",
+    "play": "Play the video",
+    "unmute": "Turn sound on",
+    "mute": "Mute",
+    "seenBy_one": "Seen by {{count}} person",
+    "seenBy_other": "Seen by {{count}} people",
+    "removed": "Story removed.",
+    "removeFailed": "The removal did not go through.",
+    "confirmRemove": "Confirm removal",
+    "remove": "Remove"
+  },
+  "storiesViewerPage": {
+    "error": {
+      "title": "The viewer could not load",
+      "text": "The network did not respond. Try again, or go back to the feed."
+    },
+    "retry": "Try again",
+    "backToFeed": "Back to the feed",
+    "loading": "Loading…",
+    "empty": {
+      "title": "No stories for now",
+      "text": "Stories from your connections appear here for twenty-four hours, and live conferences come first. Post the first one."
+    },
+    "publish": "Post a story",
+    "pagerLabel": "Stories and conferences",
+    "pagerLabelWithItem": "Stories and conferences — {{item}}"
+  },
+  "storyCreateSheet": {
+    "title": "Post a story",
+    "close": "Close",
+    "refused": "File refused",
+    "takePhoto": "Take a photo",
+    "chooseFromGallery": "Choose from the gallery",
+    "probing": "Analysing the video…",
+    "converting": "Converting the video…",
+    "keepTabVisible": "It happens here, in real time: keep this tab visible until the end.",
+    "previewAlt": "Preview",
+    "captionLabel": "Caption (optional)",
+    "captionPlaceholder": "A word about this moment…",
+    "charactersLeft_one": "{{count}} character left",
+    "charactersLeft_other": "{{count}} characters left",
+    "audienceLabel": "Who can see it",
+    "publishing": "Posting…",
+    "publish": "Post the story",
+    "published": "Story posted — visible for twenty-four hours.",
+    "publishFailed": "The story could not be posted.",
+    "uploadFailed": "The upload failed.",
+    "convertedTooLarge": "The converted video is still too large. {{reason}} Shorten it, or export it as MP4 (H.264) before posting it.",
+    "conversionFailed": "The video conversion failed — export it as MP4 (H.264) and try again."
+  }
+}

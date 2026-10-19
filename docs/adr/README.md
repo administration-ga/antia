@@ -1,4 +1,4 @@
-# Décisions d'architecture du moteur ANTIA
+# Décisions d'architecture du moteur ANTSIA
 
 Format Nygard allégé, gabarit [`_template.md`](_template.md) (repris du socle). Un ADR
 accepté est immuable : on le remplace par un nouveau, on ne le réécrit pas. Les numéros se
@@ -10,3 +10,25 @@ réservent contre `origin/main` et les PR ouvertes de ce dépôt.
 | [0002](0002-identite-idn-unique-comptes-legers-badges-calcules.md) | Identité : IDN fournisseur unique, comptes légers, attestations externes, badges calculés côté serveur | Accepté |
 | [0003](0003-federation-entrante-par-contrats-signes.md) | Fédération entrante par contrats signés ; aucune lecture de base externe | Proposé |
 | [0004](0004-duplication-depuis-le-socle-dix-regles.md) | Duplication depuis le socle : dix règles, provenance, parité prouvée | Proposé |
+| [0005](0005-studio-persistant-et-droits-d-antenne.md) | Studio persistant, identités exactes et droits d'antenne servis par le moteur | Accepté |
+| [0006](0006-creation-et-rediffusion-dans-le-contexte-du-direct.md) | Création, rediffusion et fenêtre dans le contexte du direct | Accepté |
+| [0007](0007-nom-canonique-antsia.md) | Nom canonique ANTSIA et reprise des données et préférences existantes | Accepté |
+| [0008](0008-preuves-serveur-et-revocation-immediate-des-sessions.md) | Preuves serveur, rattachement explicite et révocation immédiate des sessions | Accepté |
+| [0009](0009-gardes-et-droits-personnels-pa5.md) | Gardes et droits personnels PA5 : modération, débit, données, notifications et fédération | Accepté |
+| [0010](0010-preferences-de-presentation-et-mesure-facultative.md) | Préférences de présentation, cache cohérent et mesure facultative PA6 | Accepté |
+| [0011](0011-console-idn-et-archivage-a-deux-personnes.md) | Console IDN, journal préalable et archivage à deux personnes | Accepté |
+| [0012](0012-projections-publiques-et-session-ssr-antsia.md) | Projections publiques, diffusion choisie et session SSR propre à ANTSIA | Accepté pour la recette locale |
+| [0013](0013-pages-administratives-federees-et-revisions-source.md) | Pages administratives fédérées, révisions source et gestion locale fermée | Proposé ; code PA9A, vérifications différées |
+| [0014](0014-publications-federees-sans-personne-technique.md) | Publications fédérées sans personne technique, retraits et import sous garde | Proposé ; code PA9B, vérifications différées |
+| [0015](0015-agents-volontaires-et-accord-local-renouvelable.md) | Agents volontaires et accord local renouvelable, retrait sans tombe IDN permanente | Proposé ; code PA9C, vérifications différées |
+| [0016](0016-producteur-administratif-et-transfert-de-consentement.md) | Producteur administratif, outbox signée et transfert privé du consentement | Proposé ; code PA9D, vérifications différées |
+| [0017](0017-refonte-sociale-charte-navigation-immersion.md) | Refonte sociale ANTSIA : charte encre et prune, navigation opt-in, immersion avec mode liste | Proposé ; code P01–P05, vérifications différées après P01/P02 |
+| [0018](0018-commerce-pro-ga-autorite-et-contrats.md) | Commerce ANTSIA × PRO.GA : autorité unique, liaison à double preuve, deux contrats | Proposé ; code P06–P13, vérifications différées après P06 |
+| [0019](0019-boutique-progressive-et-canal-commercial.md) | Boutique progressive, vitrine publique dédiée et canal commercial distinct | Proposé ; code P07/P10, vérifications différées |
+| [0020](0020-fil-materialise-et-preuves-de-lancement.md) | Fil matérialisé, rétention et preuves de lancement distinctes des sources | Proposé ; code PA10, vérifications différées |
+| [0021](0021-contact-commercial-et-consentement-crm.md) | Contact commercial distinct et consentement CRM révocable | Proposé ; code P10, vérifications différées |
+| [0022](0022-paiements-prives-et-repartition-antsia.md) | Paiement privé, retenue ANTSIA paramétrable et fonds vendeur en attente | Proposé ; code P12 partiel, contrôles et activation différés |
+| [0023](0023-achats-prives-et-reception-acheteur.md) | Suivi privé des engagements et réception explicite distincte du reversement | Proposé ; code P13, contrôles et recette différés |
+| [0024](0024-emploi-consenti-et-candidatures-privees.md) | Emploi consenti et candidatures privées | Proposé ; code P15, tests écrits, vérifications différées |
+| [0025](0025-conversation-contextuelle.md) | Conversation contextuelle ouverte et fermée par un objet déjà accepté | Accepté (validation du propriétaire du 19/10/2026 ; D7 et D13 à confirmer juridiquement) ; code CC-1/2a/2b, vérifications différées |
+| [0026](0026-apparence-avant-affichage-et-theme-du-compte.md) | Apparence posée avant l'affichage, thème enregistré sur le compte | Proposé ; code et tests verts, retour sur un second navigateur à observer |

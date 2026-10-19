@@ -6,7 +6,7 @@
  * « Pour vous » (une fenêtre d'auteur pleine laissait filer ses lignes plus
  * anciennes quand le filtre écartait toute la fenêtre).
  */
-import { engineErrorRule } from "@antia/social-contracts/errors"
+import { engineErrorRule } from "@antsia/social-contracts/errors"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 import { api, internal } from "../../_generated/api"

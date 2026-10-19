@@ -1,10 +1,10 @@
-// Dupliqué de socle/convex/functions/chats.ts (l. 1575-1633, `toggleMessageReaction`) @ ad2e7fdc2 — adaptations : participant, réseau et blocage par la garde du fil ; règles de bascule du contrat partagé (`@antia/social-contracts/messageReactions`) ; un message retiré n'accueille plus de réaction (refus indistinct) ; débit.
+// Dupliqué de socle/convex/functions/chats.ts (l. 1575-1633, `toggleMessageReaction`) @ ad2e7fdc2 — adaptations : participant, réseau et blocage par la garde du fil ; règles de bascule du contrat partagé (`@antsia/social-contracts/messageReactions`) ; un message retiré n'accueille plus de réaction (refus indistinct) ; débit.
 /**
  * Poser, remplacer ou RETIRER ma réaction à un message — reposer le genre déjà
  * donné le retire. La ligne (qui a réagi) et le décompte dénormalisé (combien)
  * se déplacent dans la MÊME transaction.
  */
-import { applyMessageReactionDelta, nextMessageReactionKind } from "@antia/social-contracts/messageReactions"
+import { applyMessageReactionDelta, nextMessageReactionKind } from "@antsia/social-contracts/messageReactions"
 import { v } from "convex/values"
 
 import { notFound } from "../../lib/errors"

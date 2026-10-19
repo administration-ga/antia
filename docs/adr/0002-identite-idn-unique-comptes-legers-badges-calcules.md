@@ -7,7 +7,7 @@
 ## Contexte
 
 Le moteur sert des personnes qui ne sont pas des agents publics : citoyens au pays, Gabonais de
-l'étranger, toute personne (ANTIA est ouvert, arbitrage A3). identite.ga (IDN) est le fournisseur
+l'étranger, toute personne (ANTSIA est ouvert, arbitrage A3). identite.ga (IDN) est le fournisseur
 d'identité unique du programme, déclaré à l'APDPVP ; consulat.ga n'est pas fournisseur OIDC. Le
 socle a appris à ses dépens qu'un profil créé d'office depuis une base existante pose problème
 (ADR-0080 et 0082 du socle) et que l'identité souveraine IDN prime sur l'e-mail.
@@ -33,7 +33,7 @@ Nous allons :
 
 ### Positives
 
-- Une même personne, qu'elle entre par antia.ga ou diasporale.com, est UNE personne (même `idnSub`).
+- Une même personne, qu'elle entre par antsia.ga ou diasporale.com, est UNE personne (même `idnSub`).
 - La confiance affichée ne peut pas être usurpée par un champ modifiable.
 
 ### Négatives
@@ -43,7 +43,7 @@ Nous allons :
 
 ### Neutres
 
-- Tant que les clients OIDC `antia` et `diasporale` n'existent pas en sandbox, seule la porte
+- Tant que les clients OIDC `antsia` et `diasporale` n'existent pas en sandbox, seule la porte
   « compte léger » fonctionne en développement.
 
 ## Alternatives considérées

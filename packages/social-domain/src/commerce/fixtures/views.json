@@ -1,0 +1,338 @@
+{
+  "contract": "PRO-COMMERCE-PUBLIC-V1",
+  "description": "Payabilité indicative, action principale et projection anonyme, à partir de charges d'offre valides.",
+  "offers": {
+    "fixed": {
+      "changedAt": 1792281600000,
+      "collectionRefs": [
+        "pro.ga:offer_collection:01JA00000000000000000000C1"
+      ],
+      "description": "Robe en wax cousue main.\nTailles sur demande.",
+      "kind": "product",
+      "leadTimeDays": 3,
+      "media": [
+        {
+          "altText": "Robe portée, vue de face",
+          "byteSize": 245760,
+          "height": 1350,
+          "mimeType": "image/jpeg",
+          "sha256": "1111111111111111111111111111111111111111111111111111111111111111",
+          "width": 1080
+        }
+      ],
+      "offerRef": "pro.ga:offer:01JA00000000000000000000F1",
+      "price": {
+        "amount": 25000,
+        "currency": "XAF",
+        "mode": "fixed"
+      },
+      "revision": 3,
+      "shopRef": "pro.ga:structure:01JA00000000000000000000S1",
+      "showsAvailability": true,
+      "tags": [
+        "robe",
+        "wax"
+      ],
+      "title": "Robe Nyota",
+      "type": "offer.published",
+      "variantAxes": [],
+      "variants": [],
+      "zone": "Libreville"
+    },
+    "range": {
+      "changedAt": 1792281600000,
+      "collectionRefs": [
+        "pro.ga:offer_collection:01JA00000000000000000000C1"
+      ],
+      "description": "Robe Ewaka, trois tailles.",
+      "kind": "product",
+      "media": [],
+      "offerRef": "pro.ga:offer:01JA00000000000000000000F2",
+      "price": {
+        "currency": "XAF",
+        "maxAmount": 32000,
+        "minAmount": 28000,
+        "mode": "range"
+      },
+      "revision": 5,
+      "shopRef": "pro.ga:structure:01JA00000000000000000000S1",
+      "showsAvailability": true,
+      "tags": [
+        "robe"
+      ],
+      "title": "Robe Ewaka",
+      "type": "offer.published",
+      "variantAxes": [
+        "Taille",
+        "Couleur"
+      ],
+      "variants": [
+        {
+          "amount": 28000,
+          "label": "M / Bleu",
+          "options": [
+            "M",
+            "Bleu"
+          ],
+          "variantRef": "pro.ga:offer_variant:01JA00000000000000000000V1"
+        },
+        {
+          "amount": 30000,
+          "label": "L / Bleu",
+          "options": [
+            "L",
+            "Bleu"
+          ],
+          "variantRef": "pro.ga:offer_variant:01JA00000000000000000000V2"
+        },
+        {
+          "amount": 32000,
+          "effectiveFrom": 1792371600000,
+          "label": "XL / Bleu",
+          "options": [
+            "XL",
+            "Bleu"
+          ],
+          "variantRef": "pro.ga:offer_variant:01JA00000000000000000000V3"
+        }
+      ]
+    },
+    "quote": {
+      "changedAt": 1792281600000,
+      "collectionRefs": [
+        "pro.ga:offer_collection:01JA00000000000000000000C2"
+      ],
+      "description": "Retouche ou création sur mesure, prix après prise de mesures.",
+      "kind": "service",
+      "media": [],
+      "offerRef": "pro.ga:offer:01JA00000000000000000000F4",
+      "price": {
+        "currency": "XAF",
+        "mode": "quote"
+      },
+      "revision": 2,
+      "shopRef": "pro.ga:structure:01JA00000000000000000000S1",
+      "showsAvailability": false,
+      "tags": [
+        "sur-mesure"
+      ],
+      "title": "Retouche sur mesure",
+      "type": "offer.updated",
+      "variantAxes": [],
+      "variants": []
+    },
+    "unit": {
+      "changedAt": 1792281600000,
+      "collectionRefs": [],
+      "description": "Manioc frais du jour.",
+      "kind": "product",
+      "media": [],
+      "offerRef": "pro.ga:offer:01JA00000000000000000000F5",
+      "price": {
+        "amount": 3500,
+        "currency": "XAF",
+        "mode": "unit",
+        "unit": "kg"
+      },
+      "revision": 1,
+      "shopRef": "pro.ga:structure:01JA00000000000000000000S1",
+      "showsAvailability": false,
+      "tags": [],
+      "title": "Manioc frais",
+      "type": "offer.updated",
+      "variantAxes": [],
+      "variants": []
+    }
+  },
+  "availability": {
+    "availability": "in_stock",
+    "availabilityRevision": 7,
+    "changedAt": 1792281600000,
+    "offerRef": "pro.ga:offer:01JA00000000000000000000F2",
+    "shopRef": "pro.ga:structure:01JA00000000000000000000S1",
+    "type": "offer.availabilityChanged",
+    "variants": [
+      {
+        "availability": "in_stock",
+        "variantRef": "pro.ga:offer_variant:01JA00000000000000000000V1"
+      },
+      {
+        "availability": "out_of_stock",
+        "variantRef": "pro.ga:offer_variant:01JA00000000000000000000V2"
+      }
+    ]
+  },
+  "purchasability": [
+    {
+      "offer": "fixed",
+      "variantRef": null,
+      "nowMs": 1792285200000,
+      "expect": {
+        "payable": true,
+        "unitAmount": 25000
+      }
+    },
+    {
+      "offer": "fixed",
+      "variantRef": "pro.ga:offer_variant:01JA00000000000000000000V1",
+      "nowMs": 1792285200000,
+      "expect": {
+        "payable": false,
+        "reason": "variant_unknown"
+      }
+    },
+    {
+      "offer": "quote",
+      "variantRef": null,
+      "nowMs": 1792285200000,
+      "expect": {
+        "payable": false,
+        "reason": "on_quote"
+      }
+    },
+    {
+      "offer": "range",
+      "variantRef": null,
+      "nowMs": 1792285200000,
+      "expect": {
+        "payable": false,
+        "reason": "variant_required"
+      }
+    },
+    {
+      "offer": "range",
+      "variantRef": "pro.ga:offer_variant:01JA00000000000000000000V1",
+      "nowMs": 1792285200000,
+      "expect": {
+        "payable": true,
+        "unitAmount": 28000
+      }
+    },
+    {
+      "offer": "range",
+      "variantRef": "pro.ga:offer_variant:01JA00000000000000000000V3",
+      "nowMs": 1792285200000,
+      "expect": {
+        "payable": false,
+        "reason": "variant_inactive"
+      }
+    },
+    {
+      "offer": "range",
+      "variantRef": "pro.ga:offer_variant:01JA00000000000000000000V3",
+      "nowMs": 1792371600000,
+      "expect": {
+        "payable": true,
+        "unitAmount": 32000
+      }
+    },
+    {
+      "offer": "unit",
+      "variantRef": null,
+      "nowMs": 1792285200000,
+      "expect": {
+        "payable": true,
+        "unit": "kg",
+        "unitAmount": 3500
+      }
+    }
+  ],
+  "primaryAction": [
+    {
+      "offer": "fixed",
+      "purchase": true,
+      "quote": true,
+      "expect": "buy"
+    },
+    {
+      "offer": "fixed",
+      "purchase": false,
+      "quote": true,
+      "expect": "contact"
+    },
+    {
+      "offer": "quote",
+      "purchase": true,
+      "quote": true,
+      "expect": "request_quote"
+    },
+    {
+      "offer": "quote",
+      "purchase": true,
+      "quote": false,
+      "expect": "contact"
+    },
+    {
+      "offer": "range",
+      "purchase": true,
+      "quote": true,
+      "expect": "buy"
+    },
+    {
+      "offer": "unit",
+      "purchase": true,
+      "quote": false,
+      "expect": "buy"
+    }
+  ],
+  "publicView": [
+    {
+      "offer": "range",
+      "withAvailability": true,
+      "nowMs": 1792285200000,
+      "purchase": true,
+      "quote": true,
+      "expect": {
+        "availability": "in_stock",
+        "primaryAction": "buy",
+        "variants": [
+          [
+            "pro.ga:offer_variant:01JA00000000000000000000V1",
+            "in_stock"
+          ],
+          [
+            "pro.ga:offer_variant:01JA00000000000000000000V2",
+            "out_of_stock"
+          ]
+        ]
+      }
+    },
+    {
+      "offer": "range",
+      "withAvailability": false,
+      "nowMs": 1792371600000,
+      "purchase": true,
+      "quote": true,
+      "expect": {
+        "availability": "unknown",
+        "primaryAction": "buy",
+        "variants": [
+          [
+            "pro.ga:offer_variant:01JA00000000000000000000V1",
+            "unknown"
+          ],
+          [
+            "pro.ga:offer_variant:01JA00000000000000000000V2",
+            "unknown"
+          ],
+          [
+            "pro.ga:offer_variant:01JA00000000000000000000V3",
+            "unknown"
+          ]
+        ]
+      }
+    },
+    {
+      "offer": "quote",
+      "withAvailability": true,
+      "nowMs": 1792285200000,
+      "purchase": true,
+      "quote": true,
+      "expect": {
+        "availability": null,
+        "primaryAction": "request_quote",
+        "variants": []
+      }
+    }
+  ]
+}

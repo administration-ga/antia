@@ -7,6 +7,7 @@
 import type { Id } from "../../_generated/dataModel"
 import type { MutationCtx } from "../../_generated/server"
 import { findScanByStorageId } from "./admission"
+import { releaseStagedFile } from "./staging"
 
 export async function purgeStoredFile(ctx: MutationCtx, storageId: Id<"_storage">): Promise<void> {
   const scan = await findScanByStorageId(ctx, storageId)
@@ -16,4 +17,5 @@ export async function purgeStoredFile(ctx: MutationCtx, storageId: Id<"_storage"
     // Blob déjà absent : la purge est acquise.
   }
   if (scan) await ctx.db.delete(scan._id)
+  await releaseStagedFile(ctx, storageId)
 }

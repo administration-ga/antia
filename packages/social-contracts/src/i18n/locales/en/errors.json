@@ -19,5 +19,6 @@
   "pageRoleRequired": "This action is reserved for the page's signatories.",
   "mediaServerNotConfigured": "Calls are not available on this service yet.",
   "mediaServerUnavailable": "The call server is not responding. Try again in a moment.",
-  "mediaServerNoCapacity": "The call server is temporarily at capacity. Try again in a few minutes."
+  "mediaServerNoCapacity": "The call server is temporarily at capacity. Try again in a few minutes.",
+  "liveRoleRequired": "Your role in this conference does not allow this action."
 }

@@ -1,4 +1,4 @@
-// Dupliqué de socle/convex/modules/fileGuard/admission.ts @ ad2e7fdc2 — adaptations : personnes et réseaux (`uploadedByPersonId`, `networkId`) ; `isKeptApartStorage` retiré (registres RH, signatures, marques officielles, courrier : aucun dans le moteur, la garde ne connaît que `fileScans`) ; coupe-circuit FAIL-CLOSED (la ligne naît `pending` sans analyse, retenue jusqu'à la levée) ; refus à code du moteur (`notFound` indistinct, `conflict` pour un fichier déjà joint par soi) ; sujet iDocument retiré.
+// Dupliqué de socle/convex/modules/fileGuard/admission.ts @ ad2e7fdc2 — adaptations : personnes et réseaux (`uploadedByPersonId`, `networkId`) ; registres métier du socle retirés, copies fédérées réservées et assets catalogue protégés avant admission ; coupe-circuit FAIL-CLOSED (la ligne naît `pending` sans analyse, retenue jusqu'à la levée) ; refus à code du moteur (`notFound` indistinct, `conflict` pour un fichier déjà joint par soi) ; sujet iDocument retiré.
 /**
  * Garde des fichiers — l'ADMISSION, temps unique d'entrée d'un fichier.
  *
@@ -21,13 +21,14 @@
  * Un fichier que la plateforme PRODUIT elle-même n'est pas admis : il est
  * INSCRIT (`registerGeneratedBlob`), né `skipped/server_generated`.
  */
-import { type DeclaredUpload, normalizeSha256, type StoredUpload } from "@antia/social-domain/uploadPolicy"
+import { type DeclaredUpload, normalizeSha256, type StoredUpload } from "@antsia/social-domain/uploadPolicy"
 
 import { internal } from "../../_generated/api"
 import type { Doc, Id } from "../../_generated/dataModel"
 import type { MutationCtx } from "../../_generated/server"
 import { fail, notFound } from "../../lib/errors"
 import { assertStoredUpload } from "../../lib/uploadPolicy"
+import { releaseStagedFile } from "./staging"
 import {
   FILE_GUARD_MAX_ATTEMPTS,
   FILE_GUARD_RUNNING_STALE_MS,
@@ -76,8 +77,8 @@ export async function findScanByStorageId(ctx: Pick<MutationCtx, "db">, storageI
  *
  * Un `storageId` n'est qu'une référence. Sans ce contrôle, connaître celui du
  * fichier d'un tiers suffirait à en faire la pièce d'une ligne à soi — servie
- * ensuite à ses lecteurs, détruite par sa purge. Neuf = inconnu du registre
- * d'admission (`fileScans`) ; l'admission qui suit l'y inscrit au nom de
+ * ensuite à ses lecteurs, détruite par sa purge. Neuf = inconnu des registres
+ * d'admission, de réservation serveur et d'assets catalogue ; l'admission qui suit l'inscrit au nom de
  * l'appelant, et un second dépôt du même fichier est refusé à son tour.
  *
  * Refus INDISTINCT (`notFound`, celui d'un identifiant inventé) : un dépôt ne
@@ -90,7 +91,15 @@ export async function findScanByStorageId(ctx: Pick<MutationCtx, "db">, storageI
  */
 export async function assertFreshUpload(ctx: MutationCtx, uploaderId: Id<"persons"> | null, storageId: Id<"_storage">): Promise<void> {
   const scan = await findScanByStorageId(ctx, storageId)
-  if (!scan) return
+  if (!scan) {
+    if (uploaderId !== null) {
+      const staged = await ctx.db.query("fileStagingReservations").withIndex("by_storageId", q => q.eq("storageId", storageId)).first()
+      if (staged) return notFound()
+      const catalog = await ctx.db.query("commerceCatalogMediaAssets").withIndex("by_storage", q => q.eq("storageId", storageId)).first()
+      if (catalog) return notFound()
+    }
+    return
+  }
   if (uploaderId !== null && scan.uploadedByPersonId === uploaderId) fail("conflict")
   notFound()
 }
@@ -126,6 +135,7 @@ export async function enqueueScan(
   const killSwitched = isKillSwitched(env)
 
   if (existing) {
+    await releaseStagedFile(ctx, stored.storageId)
     const patch = missingScanFacts(existing, meta)
     const stale = (existing.status === "pending" || existing.status === "running") && now - existing.updatedAt > FILE_GUARD_RUNNING_STALE_MS
     const retryable = existing.status === "error" && existing.attempts < FILE_GUARD_MAX_ATTEMPTS
@@ -152,6 +162,7 @@ export async function enqueueScan(
     createdAt: now,
     updatedAt: now,
   })
+  await releaseStagedFile(ctx, stored.storageId)
   // Coupe-circuit : la ligne attend la levée, sans job (retenue, fail-closed).
   if (killSwitched) return { scanId, status: "pending", created: true, scheduled: false }
   await scheduleScan(ctx, scanId)
@@ -211,6 +222,7 @@ export async function registerGeneratedBlob(
   const now = Date.now()
   const existing = await findScanByStorageId(ctx, storageId)
   if (existing) {
+    await releaseStagedFile(ctx, storageId)
     const patch = missingScanFacts(existing, meta)
     if (Object.keys(patch).length > 0) await ctx.db.patch(existing._id, { ...patch, updatedAt: now })
     return { scanId: existing._id, created: false }
@@ -232,5 +244,6 @@ export async function registerGeneratedBlob(
     createdAt: now,
     updatedAt: now,
   })
+  await releaseStagedFile(ctx, storageId)
   return { scanId, created: true }
 }

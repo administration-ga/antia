@@ -1,23 +1,24 @@
 {
-  "//": "Catalogue des applications du moteur ANTIA. Une entrée par application servie : service d'hébergement (identifiant stable, jamais renommé), Dockerfile construit en contexte ECOSYSTEMES (le dossier qui contient ANTIA et DIASPORALE), origine publique, port de développement, variables NEXT_PUBLIC_* inscrites au build (chacune doit être déclarée en ARG dans le Dockerfile : c'est le deuxième des « quatre câblages invisibles »), variables d'exécution. Les domaines sont des hypothèses du cahier (arbitrage A1) ; l'hébergement (Cloud Run ou Vercel) est l'arbitrage A5, non tranché : aucune publication sans décision du propriétaire. Une application EXTERNE (DIASPORALE) a son chemin relatif à ANTIA (`../DIASPORALE/apps/…`) et son Dockerfile dans son dépôt ; elle se construit dans le même contexte, avec l'installation d'ANTIA. Fichier partagé avec la session DIASPORALE : modifié par la session ANTIA seulement.",
+  "//": "Catalogue des applications du moteur ANTSIA. Une entrée par application servie : service d'hébergement (identifiant stable, jamais renommé), Dockerfile construit en contexte ECOSYSTEMES (le dossier qui contient ANTSIA et DIASPORALE), origine publique, port de développement, variables NEXT_PUBLIC_* inscrites au build (chacune doit être déclarée en ARG dans le Dockerfile : c'est le deuxième des « quatre câblages invisibles »), variables d'exécution. Les domaines sont des hypothèses du cahier (arbitrage A1) ; l'hébergement (Cloud Run ou Vercel) est l'arbitrage A5, non tranché : aucune publication sans décision du propriétaire. Une application EXTERNE (DIASPORALE) a son chemin relatif à ANTSIA (`../DIASPORALE/apps/…`) et son Dockerfile dans son dépôt ; elle se construit dans le même contexte, avec l'installation d'ANTSIA. Fichier partagé avec la session DIASPORALE : modifié par la session ANTSIA seulement.",
   "contextDir": "ECOSYSTEMES",
   "applications": {
-    "antia_ga": {
-      "package": "antia-ga",
-      "path": "apps/antia_ga",
-      "service": "antia-ga",
-      "dockerfile": "ANTIA/apps/antia_ga/Dockerfile",
-      "site_url": "https://antia.ga",
+    "antsia_ga": {
+      "package": "antsia-ga",
+      "path": "apps/antsia_ga",
+      "service": "antsia-ga",
+      "dockerfile": "ANTSIA/apps/antsia_ga/Dockerfile",
+      "site_url": "https://antsia.ga",
       "dev_port": 3030,
-      "build_args": ["NEXT_PUBLIC_CONVEX_URL", "NEXT_PUBLIC_SITE_URL", "NEXT_PUBLIC_BUILD_SHA"],
+      "build_args": ["NEXT_PUBLIC_CONVEX_URL", "NEXT_PUBLIC_SITE_URL", "NEXT_PUBLIC_BUILD_SHA", "NEXT_PUBLIC_POSTHOG_KEY", "NEXT_PUBLIC_POSTHOG_HOST", "NEXT_PUBLIC_POSTHOG_EU_RELAY_ORIGIN"],
+      "optional_build_args": ["NEXT_PUBLIC_POSTHOG_KEY", "NEXT_PUBLIC_POSTHOG_HOST", "NEXT_PUBLIC_POSTHOG_EU_RELAY_ORIGIN"],
       "runtime_env": ["CONVEX_SITE_URL"]
     },
-    "admin_antia_ga": {
-      "package": "admin-antia-ga",
-      "path": "apps/admin_antia_ga",
-      "service": "admin-antia-ga",
-      "dockerfile": "ANTIA/apps/admin_antia_ga/Dockerfile",
-      "site_url": "https://admin.antia.ga",
+    "admin_antsia_ga": {
+      "package": "admin-antsia-ga",
+      "path": "apps/admin_antsia_ga",
+      "service": "admin-antsia-ga",
+      "dockerfile": "ANTSIA/apps/admin_antsia_ga/Dockerfile",
+      "site_url": "https://admin.antsia.ga",
       "dev_port": 3032,
       "build_args": ["NEXT_PUBLIC_CONVEX_URL", "NEXT_PUBLIC_SITE_URL", "NEXT_PUBLIC_BUILD_SHA"],
       "runtime_env": ["CONVEX_SITE_URL"]

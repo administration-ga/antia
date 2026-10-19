@@ -30,6 +30,7 @@ export async function getScanForStorage(ctx: ReadCtx, storageId: Id<"_storage">)
 /** `null` = aucune ligne (fichier inconnu de la garde : retenu). */
 export async function getScanStatus(ctx: ReadCtx, storageId: Id<"_storage">): Promise<FileScanStatus | null> {
   const scan = await getScanForStorage(ctx, storageId)
+  if (scan?.requiresFullScan && scan.status !== "pending" && scan.status !== "running" && !(scan.status === "clean" && scan.av?.verdict === "clean")) return "error"
   return scan?.status ?? null
 }
 

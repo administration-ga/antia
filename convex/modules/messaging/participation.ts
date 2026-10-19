@@ -5,10 +5,11 @@
  * Être partie au fil, dans CE réseau, sans blocage entre les deux : sinon le
  * même refus que pour un fil inventé — un fil n'est pas un oracle.
  */
-import type { MediaWithheld } from "@antia/social-contracts/media"
-import { replyExcerpt } from "@antia/social-contracts/attachments"
-import { type CounterpartLabel, counterpartLabel } from "@antia/social-contracts/counterpart"
-import { emptyMessageReactionCounts, type MessageReactionCounts, type MessageReactionKind } from "@antia/social-contracts/messageReactions"
+import type { MediaWithheld } from "@antsia/social-contracts/media"
+import { replyExcerpt } from "@antsia/social-contracts/attachments"
+import { type CounterpartLabel, counterpartLabel } from "@antsia/social-contracts/counterpart"
+import { emptyMessageReactionCounts, type MessageReactionCounts, type MessageReactionKind } from "@antsia/social-contracts/messageReactions"
+import { deletedAccountReply, type MessageReplyQuote } from "@antsia/social-contracts/messaging"
 
 import type { Doc, Id } from "../../_generated/dataModel"
 import type { QueryCtx } from "../../_generated/server"
@@ -58,13 +59,14 @@ export async function requireSameThreadReply(
   return replyToMessageId
 }
 
-export type ReplyToDto = { messageId: Id<"personalMessages">; senderPersonId: Id<"persons">; excerpt: string; deleted: boolean }
+export type ReplyToDto = MessageReplyQuote<Id<"personalMessages">, Id<"persons">>
 
 /**
  * L'aperçu d'un message cité, RELU : retiré pour tous ou masqué pour moi, il
  * ne ressurgit pas dans la citation d'un tiers — `deleted` et pas un mot.
  */
-export async function projectReplyTo(ctx: ReadCtx, replyToMessageId: Id<"personalMessages"> | undefined, readerId: Id<"persons">): Promise<ReplyToDto | null> {
+export async function projectReplyTo(ctx: ReadCtx, replyToMessageId: Id<"personalMessages"> | undefined, readerId: Id<"persons">, authorDeleted = false): Promise<ReplyToDto | null> {
+  if (authorDeleted) return deletedAccountReply()
   if (replyToMessageId === undefined) return null
   const cited = await ctx.db.get(replyToMessageId)
   if (!cited) return null
@@ -168,7 +170,7 @@ export async function enrichMessagePage(ctx: QueryCtx, thread: Doc<"personalThre
       content: deleted ? null : (message.content ?? null),
       deleted,
       attachmentFiles,
-      replyTo: await projectReplyTo(ctx, message.replyToMessageId, readerId),
+      replyTo: await projectReplyTo(ctx, message.replyToMessageId, readerId, message.replyToDeletedAccount === true),
       reactions: { counts: message.reactionCounts ?? emptyMessageReactionCounts(), mine: mine.get(message._id) ?? null },
       forwarded: await isForwardedOriginAlive(ctx, message.forwardedFrom),
       createdAt: message.createdAt,

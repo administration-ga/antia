@@ -3,7 +3,7 @@
  * CONVERSATIONS DE GROUPE d'un réseau — distinctes du 1:1 (`messaging`) : la
  * paire ordonnée ne se généralise pas à N personnes.
  *
- * Plafond : `GROUP_MEMBERS_MAX` (`@antia/social-contracts/groupCapacity`),
+ * Plafond : `GROUP_MEMBERS_MAX` (`@antsia/social-contracts/groupCapacity`),
  * créateur compris — ne pas recopier le chiffre ici.
  */
 import { defineTable } from "convex/server"
@@ -138,6 +138,8 @@ export const groupsTables = {
     callId: v.optional(v.id("calls")),
     attachmentFiles: v.optional(v.array(storedAttachmentValidator)),
     replyToMessageId: v.optional(v.id("groupMessages")),
+    /** R9 : marque anonyme de citation, aucun extrait ni identifiant de compte effacé. */
+    replyToDeletedAccount: v.optional(v.boolean()),
     reactionCounts: v.optional(messageReactionCountsValidator),
     /** Retiré POUR TOUT LE MONDE par l'auteur, dans la fenêtre : pierre tombale, la ligne demeure. */
     deletedAt: v.optional(v.number()),

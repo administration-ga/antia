@@ -1,0 +1,351 @@
+{
+  "groupesThematiques": {
+    "returnLabel": "Revenir aux groupes",
+    "role": {
+      "owner": "Propriétaire",
+      "moderator": "Modérateur",
+      "member": "Membre"
+    },
+    "nameLength": "Un nom de groupe compte entre {{min}} et {{max}} caractères.",
+    "memberCount_zero": "{{count}} membres",
+    "memberCount_one": "{{count}} membre",
+    "memberCount_many": "{{count}} membres",
+    "memberCount_other": "{{count}} membres",
+    "emptyWall": {
+      "member": "Aucune publication dans ce groupe pour l'instant. Publiez la première.",
+      "visitor": "Aucune publication visible."
+    },
+    "emptyDiscover": "Aucun groupe ne correspond. Créez le premier sur ce thème.",
+    "emptyMyGroups": "Vous n'avez encore rejoint aucun groupe. Parcourez la découverte ci-dessous, ou créez le vôtre.",
+    "errors": {
+      "invites": {
+        "title": "Invitations indisponibles",
+        "message": "Vos invitations de groupe n'ont pas pu être chargées."
+      },
+      "mine": {
+        "title": "Mes groupes indisponibles",
+        "message": "Vos groupes n'ont pas pu être chargés."
+      },
+      "discover": {
+        "title": "Découverte indisponible",
+        "message": "Les groupes n'ont pas pu être cherchés."
+      },
+      "group": {
+        "title": "Groupe indisponible",
+        "message": "Ce groupe n'a pas pu être chargé."
+      },
+      "members": {
+        "title": "Membres indisponibles",
+        "message": "La liste des membres n'a pas pu être chargée."
+      },
+      "wall": {
+        "title": "Publications indisponibles",
+        "message": "Les publications du groupe n'ont pas pu être chargées."
+      },
+      "candidates": {
+        "title": "Relations indisponibles",
+        "message": "Vos relations n'ont pas pu être chargées."
+      }
+    },
+    "join": {
+      "acceptInvite": "Accepter l'invitation",
+      "join": "Rejoindre"
+    },
+    "invitesBanner_one": "{{count}} invitation de groupe en attente",
+    "invitesBanner_many": "{{count}} invitations de groupe en attente",
+    "invitesBanner_other": "{{count}} invitations de groupe en attente",
+    "unnamedPerson": "Personne du réseau",
+    "invite": {
+      "open": "Inviter des relations",
+      "picker": "Inviter des relations dans le groupe",
+      "empty": "Aucune relation à inviter pour l'instant. Développez votre réseau, puis revenez ici."
+    },
+    "inviteReport": {
+      "invited_one": "{{count}} invitation envoyée",
+      "invited_many": "{{count}} invitations envoyées",
+      "invited_other": "{{count}} invitations envoyées",
+      "alreadyInvited_one": "{{count}} rappel",
+      "alreadyInvited_many": "{{count}} rappels",
+      "alreadyInvited_other": "{{count}} rappels",
+      "alreadyMember_one": "{{count}} personne déjà membre",
+      "alreadyMember_many": "{{count}} personnes déjà membres",
+      "alreadyMember_other": "{{count}} personnes déjà membres",
+      "failed_one": "{{count}} échec",
+      "failed_many": "{{count}} échecs",
+      "failed_other": "{{count}} échecs",
+      "none": "Aucune invitation envoyée.",
+      "sentence": "{{parts}}."
+    }
+  },
+  "groupsPanel": {
+    "invites": {
+      "sentence": "<strong>{{name}}</strong> vous invite à rejoindre « {{group}} » ({{members}}).",
+      "accept": "Accepter",
+      "decline": "Décliner",
+      "more": "Voir plus d'invitations"
+    },
+    "toast": {
+      "joined": "Groupe rejoint.",
+      "inviteExpired": "Cette invitation n'est plus valable.",
+      "joinFailed": "Impossible de rejoindre ce groupe.",
+      "created": "Groupe créé.",
+      "createFailed": "Le groupe n'a pas pu être créé.",
+      "left": "Vous avez quitté le groupe.",
+      "leaveFailed": "Le départ n'a pas pu être enregistré.",
+      "unpinned": "Publication dés-épinglée.",
+      "unpinFailed": "Le dés-épinglage a échoué.",
+      "promoted": "Membre promu modérateur.",
+      "demoted": "Modérateur rétrogradé.",
+      "roleFailed": "Le changement de rôle a échoué.",
+      "memberRemoved": "Membre retiré du groupe.",
+      "removeFailed": "Le retrait a échoué.",
+      "pinned": "Publication épinglée en tête du groupe.",
+      "pinFailed": "L'épinglage a échoué.",
+      "postRemoved": "Publication retirée du groupe."
+    },
+    "directory": {
+      "mine": "Mes groupes",
+      "mineList": "mes groupes",
+      "mineTruncated": "Seuls vos groupes les plus actifs sont affichés.",
+      "discoverSection": "Découvrir des groupes",
+      "discover": "Découvrir",
+      "discoverList": "découvrir des groupes",
+      "searchForm": "Chercher un groupe",
+      "searchLabel": "Chercher un groupe par thème",
+      "searchPlaceholder": "Chercher un groupe par thème…",
+      "search": "Chercher"
+    },
+    "card": {
+      "open": "Ouvrir"
+    },
+    "create": {
+      "open": "Créer un groupe",
+      "form": "Créer un groupe",
+      "nameLabel": "Nom du groupe",
+      "namePlaceholder": "Nom du groupe (le thème, dit en clair)",
+      "descriptionLabel": "Description du groupe",
+      "descriptionPlaceholder": "Description (facultative) : à qui s'adresse ce groupe, pour quoi faire.",
+      "visibility": "La fiche du groupe (nom, description, effectif) est visible de tout le réseau ; les publications, des seuls membres.",
+      "cancel": "Annuler",
+      "submit": "Créer",
+      "submitting": "Création…"
+    },
+    "page": {
+      "notAccessible": "Ce groupe n'est plus accessible.",
+      "leave": "Quitter le groupe",
+      "showMembers": "Voir les membres",
+      "hideMembers": "Masquer les membres",
+      "membersReserved": "La liste des membres est réservée aux membres du groupe.",
+      "pinnedBadge": "Épinglée",
+      "unpin": "Dés-épingler",
+      "joinToRead": "Rejoignez ce groupe pour lire et publier ses contributions.",
+      "morePosts": "Voir plus de publications"
+    },
+    "members": {
+      "title": "Membres",
+      "promote": "Promouvoir",
+      "demote": "Rétrograder",
+      "remove": "Retirer",
+      "more": "Voir plus de membres"
+    },
+    "wall": {
+      "pin": "Épingler",
+      "removeFromGroup": "Retirer du groupe"
+    }
+  },
+  "evenementsList": {
+    "section": {
+      "upcoming": "À venir",
+      "today": "Aujourd'hui",
+      "pendingInvitations": "Invitations en attente",
+      "past": "Passés"
+    },
+    "response": {
+      "accepted": "Je participe",
+      "declined": "Je décline",
+      "maybe": "Peut-être",
+      "pending": "Sans réponse"
+    },
+    "participant": {
+      "accepted": "Participe",
+      "declined": "Décline",
+      "maybe": "Peut-être",
+      "pending": "Sans réponse"
+    },
+    "emptyAgenda": "Votre agenda personnel est vide. Créez un évènement pour inviter vos connexions, ou attendez une invitation.",
+    "announceAudience": {
+      "public": "tout le réseau",
+      "connections": "vos connexions"
+    },
+    "announceSummary_zero": "Aucun invité pour l'instant ; l'annonce sera visible par {{audience}}.",
+    "announceSummary_one": "{{count}} personne est invitée ; l'annonce sera visible par {{audience}}.",
+    "announceSummary_many": "{{count}} personnes sont invitées ; l'annonce sera visible par {{audience}}.",
+    "announceSummary_other": "{{count}} personnes sont invitées ; l'annonce sera visible par {{audience}}.",
+    "titleLength": "Un titre d'évènement compte entre {{min}} et {{max}} caractères.",
+    "endBeforeStart": "La fin doit être postérieure au début",
+    "unnamedPerson": "Personne du réseau",
+    "inviteReport": {
+      "invited_one": "{{count}} invitation envoyée",
+      "invited_many": "{{count}} invitations envoyées",
+      "invited_other": "{{count}} invitations envoyées",
+      "alreadyResponded_one": "{{count}} personne a déjà répondu",
+      "alreadyResponded_many": "{{count}} personnes ont déjà répondu",
+      "alreadyResponded_other": "{{count}} personnes ont déjà répondu",
+      "failed_one": "{{count}} échec",
+      "failed_many": "{{count}} échecs",
+      "failed_other": "{{count}} échecs",
+      "none": "Aucune invitation envoyée.",
+      "sentence": "{{parts}}."
+    }
+  },
+  "evenementsPanel": {
+    "errorTitle": "Agenda indisponible",
+    "errorMessage": "Vos évènements n'ont pas pu être chargés.",
+    "truncated": "Votre agenda est long : seuls les évènements les plus proches sont affichés.",
+    "create": "Créer un évènement",
+    "toast": {
+      "accepted": "Votre participation est enregistrée.",
+      "declined": "Votre refus est enregistré.",
+      "respondFailed": "Impossible d'enregistrer votre réponse.",
+      "cancelled": "Évènement annulé.",
+      "cancelFailed": "Impossible d'annuler cet évènement.",
+      "created": "Évènement créé.",
+      "createFailed": "L'évènement n'a pas pu être créé."
+    },
+    "card": {
+      "cancelledBadge": "Annulé",
+      "youOrganize": "Vous organisez",
+      "organizedBy": "Organisé par {{name}}",
+      "guests_one": "Invités : {{count}} accepté sur {{total}}",
+      "guests_many": "Invités : {{count}} acceptés sur {{total}}",
+      "guests_other": "Invités : {{count}} acceptés sur {{total}}",
+      "accept": "Je participe",
+      "decline": "Je décline",
+      "announce": "Annoncer au réseau",
+      "confirmCancelStatus": "Confirmez l'annulation de l'évènement, ou revenez en arrière.",
+      "confirmCancel": "Confirmer l'annulation",
+      "back": "Revenir",
+      "askCancel": "Annuler l'évènement"
+    },
+    "composer": {
+      "form": "Créer un évènement",
+      "title": "Nouvel évènement",
+      "zone": "Un évènement de votre agenda — le fuseau ({{timeZone}}) est fixé à la création.",
+      "titleLabel": "Titre",
+      "titlePlaceholder": "Pot de départ, réunion d'anciens…",
+      "date": "Date",
+      "start": "Début",
+      "end": "Fin",
+      "location": "Lieu (optionnel)",
+      "locationPlaceholder": "Salle, adresse, lien visio…",
+      "description": "Description (optionnelle)",
+      "missingTiming": "Renseignez la date et les heures de l'évènement.",
+      "cancel": "Annuler",
+      "submit": "Créer l'évènement",
+      "submitting": "Création…",
+      "invalidCivilTime": "Cette date ou cette heure n’existe pas dans le fuseau choisi. Choisissez un autre horaire."
+    },
+    "invite": {
+      "open": "Inviter des relations",
+      "picker": "Inviter des relations à « {{title}} »",
+      "empty": "Cherchez une relation par son nom ou son @identifiant."
+    },
+    "participants": {
+      "show": "Voir les invités",
+      "hide": "Masquer les invités",
+      "title": "Invités",
+      "empty": "Personne n'est encore invité.",
+      "more": "Voir plus d'invités",
+      "errorTitle": "Invités indisponibles",
+      "errorMessage": "La liste des invités n'a pas pu être chargée."
+    }
+  },
+  "associationAgenda": {
+    "organizedBy": "Association : {{name}}",
+    "confirmed": "Inscription confirmée",
+    "waitlisted": "Liste d’attente",
+    "waitlistHint": "Votre demande est en attente : aucune place n’est confirmée.",
+    "cancelled": "Événement annulé",
+    "open": "Consulter l’événement",
+    "pagination": {
+      "loading": "Chargement des événements de votre agenda…",
+      "loaded": "Cette vue porte sur les événements déjà chargés. D’autres peuvent encore suivre.",
+      "loadingMore": "Chargement d’autres événements…",
+      "more": "Charger d’autres événements"
+    }
+  },
+  "evenementsRail": {
+    "error": "Les évènements sont momentanément indisponibles.",
+    "retry": "Réessayer",
+    "title": "Évènements",
+    "seeAll": "Voir tout",
+    "awaitingReply": "Réponse attendue"
+  },
+  "announceEventDialog": {
+    "dialogLabel": "Annoncer « {{title}} » au réseau",
+    "heading": "Annoncer « {{title}} »",
+    "bodyLabel": "Ajouter un mot (facultatif)",
+    "bodyPlaceholder": "Pourquoi cet évènement compte, ce qu'on y fera…",
+    "audienceLabel": "Qui voit l'annonce",
+    "audienceHint": "L'annonce est une publication de votre fil. Elle n'invite personne : les invitations, elles, se font depuis l'évènement.",
+    "cancel": "Annuler",
+    "submit": "Annoncer",
+    "submitting": "Annonce…",
+    "toast": {
+      "announced": "Évènement annoncé dans votre fil.",
+      "failed": "Impossible d'annoncer cet évènement."
+    }
+  },
+  "bookmarksPanel": {
+    "empty": "Aucune publication enregistrée. Depuis le menu « … » d'une publication du fil, choisissez « Enregistrer » pour la retrouver ici.",
+    "count_zero": "{{count}} publications enregistrées",
+    "count_one": "{{count}} publication enregistrée",
+    "count_many": "{{count}} publications enregistrées",
+    "count_other": "{{count}} publications enregistrées",
+    "errorTitle": "Enregistrements indisponibles",
+    "errorMessage": "Vos publications enregistrées n'ont pas pu être chargées. Rien n'a été supprimé.",
+    "dates": "Publié {{published}} · enregistré {{marked}}",
+    "open": "Ouvrir la publication",
+    "remove": "Retirer",
+    "more": "Voir plus d'enregistrements",
+    "loadingMore": "Chargement des enregistrements précédents…",
+    "unnamedAuthor": "Personne du réseau",
+    "toast": {
+      "removed": "Publication retirée de vos enregistrements.",
+      "removeFailed": "Impossible de retirer cette publication."
+    }
+  },
+  "privacyLists": {
+    "errorTitle": "Confidentialité indisponible",
+    "errorMessage": "Vos listes n'ont pas pu être chargées. Aucun réglage n'a été perdu.",
+    "loading": "Chargement de vos réglages de confidentialité…",
+    "title": "Confidentialité du fil",
+    "itemLine": "{{author}} · {{body}}",
+    "mediaOnly": "Publication média",
+    "unnamedPerson": "Personne du réseau",
+    "loadingMore": "Chargement des éléments précédents…",
+    "bookmarks": {
+      "title": "Enregistrements",
+      "empty": "Aucune publication enregistrée.",
+      "more": "Voir plus d'enregistrements"
+    },
+    "mutes": {
+      "title": "Personnes en sourdine",
+      "empty": "Aucune personne en sourdine.",
+      "unmute": "Réafficher",
+      "more": "Voir plus de personnes en sourdine"
+    },
+    "hidden": {
+      "title": "Publications masquées",
+      "empty": "Aucune publication masquée.",
+      "restore": "Restaurer",
+      "more": "Voir plus de publications masquées"
+    },
+    "toast": {
+      "unmuted": "Sourdine retirée.",
+      "unmuteFailed": "La sourdine n'a pas pu être retirée.",
+      "restored": "Publication restaurée.",
+      "restoreFailed": "La publication n'a pas pu être restaurée."
+    }
+  }
+}

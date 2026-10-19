@@ -7,7 +7,7 @@ import { listFiles, readRepoFile } from "./lib/source-files"
  * `Dupliqué de <chemin> @ <commit> — adaptations : <liste>`. Les commits admis
  * sont ceux du socle effectivement lus (copie propre sur origin/main).
  */
-export const KNOWN_SOURCE_COMMITS = new Set(["ad2e7fdc2"])
+export const KNOWN_SOURCE_COMMITS = new Set(["ad2e7fdc2", "25398f565"])
 const HEADER = /Dupliqué de (\S+)(?: \([^)]*\))? @ ([0-9a-f]{7,40}) — adaptations : (.+)/
 
 describe("provenance-headers — en-tête de provenance des fichiers dupliqués", () => {

@@ -2,22 +2,28 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "antia-convex",
+      "name": "antsia-convex",
       "runtimeExecutable": "bun",
       "runtimeArgs": ["run", "dev:convex"],
       "port": 3210
     },
     {
-      "name": "antia-ga",
+      "name": "antsia-ga",
       "runtimeExecutable": "bun",
-      "runtimeArgs": ["run", "dev:antia"],
+      "runtimeArgs": ["run", "dev:antsia"],
       "port": 3030
     },
     {
-      "name": "admin-antia-ga",
+      "name": "admin-antsia-ga",
       "runtimeExecutable": "bun",
       "runtimeArgs": ["run", "dev:admin"],
       "port": 3032
+    },
+    {
+      "name": "pro-ga-convex-local",
+      "runtimeExecutable": "/bin/bash",
+      "runtimeArgs": ["-c", "cd \"/Users/okatech/okatech-projects/Digital GABON/DIGITAL_GOUV/NTSAGUI_DIGITAL/ECOSYSTEMES/PRO_GA\" && export PATH=\"/opt/homebrew/opt/node@22/bin:$HOME/.bun/bin:$PATH\" CONVEX_AGENT_MODE=anonymous && exec bunx convex dev --local-cloud-port 3220 --local-site-port 3221"],
+      "port": 3220
     }
   ]
 }

@@ -1,0 +1,159 @@
+{
+  "meta": {
+    "title": "Console du moteur {{brand}}",
+    "description": "Console des opérateurs du moteur social {{brand}} : réseaux, équipes de modération, fédération et journal."
+  },
+  "skipToContent": "Aller au contenu",
+  "home": {
+    "eyebrow": "Accès réservé",
+    "title": "Console du moteur {{brand}}",
+    "lead": "Piloter les réseaux, les équipes et les opérations du moteur.",
+    "access": "Accès réservé aux opérateurs habilités via IDN.",
+    "healthLink": "État du service"
+  },
+  "health": {
+    "title": "État du service",
+    "application": "Application",
+    "backend": "Moteur",
+    "configured": "configuré",
+    "missing": "non configuré",
+    "version": "Version",
+    "backHome": "Retour à l'accueil"
+  },
+  "session": {
+    "loading": "Vérification de la session…",
+    "failed": "La session ne peut pas être vérifiée.",
+    "retry": "Réessayer",
+    "backendMissing": "Le moteur n’est pas configuré pour cette console.",
+    "connected": "Session du moteur ouverte.",
+    "signedOut": "Vous n’êtes pas connecté au moteur.",
+    "noAuthority": "Une connexion IDN de niveau 2 ou supérieur et une habilitation d’opérateur vivante sont nécessaires. Vous pouvez relancer la connexion IDN.",
+    "signIn": "Me connecter",
+    "signOut": "Me déconnecter partout",
+    "signingOut": "Déconnexion…",
+    "globalSignOutFailed": "La session locale a été fermée, mais la révocation sur les autres appareils n’a pas pu être confirmée.",
+    "localSignOutFailed": "Le nettoyage local n’a pas pu être terminé. Rechargez la page et vérifiez votre session.",
+    "continue": "Recharger l’accueil",
+    "denied": "L’accès à la console n’est pas autorisé pour cette session.",
+    "recording": "Enregistrement de l’accès sécurisé…"
+  },
+  "signIn": {
+    "title": "Connexion à la console",
+    "idn": "Me connecter avec IDN",
+    "connecting": "Ouverture d’IDN…",
+    "loading": "Vérification de la disponibilité d’IDN…",
+    "help": "Utilisez votre identité IDN habilitée pour accéder aux outils du moteur.",
+    "unavailable": "La connexion IDN de cette console n’est pas encore configurée. Le propriétaire doit créer et configurer son client OIDC.",
+    "minimum": "IDN niveau 2 minimum. Une connexion seule ne crée aucune habilitation.",
+    "configurationFailed": "La disponibilité de la connexion ne peut pas être vérifiée."
+  },
+  "common": {
+    "loading": "Chargement des données…",
+    "loadFailed": "Les données ne peuvent pas être chargées. Vos droits n’ont pas été modifiés.",
+    "actionFailed": "L’action n’a pas pu être confirmée. Votre saisie est conservée ; réessayez.",
+    "saving": "Enregistrement…",
+    "pendingNavigation": "Une décision est en cours. Attendez son résultat avant de changer de vue.",
+    "closeNotice": "Fermer cette notification",
+    "notices": "Notifications de la console"
+  },
+  "console": {
+    "navigation": "Outils de la console",
+    "network": "Réseau de travail",
+    "networkHint": "Les outils propres à un réseau utilisent cette sélection. Les journaux et la santé concernent le moteur.",
+    "role": {
+      "platform_operator": "Opérateur plateforme",
+      "platform_admin": "Administrateur plateforme"
+    },
+    "selectNetwork": "Choisir un réseau"
+  },
+  "sections": {
+    "networks": "Réseaux",
+    "teams": "Équipes de modération",
+    "appeals": "Recours",
+    "federation": "Fédération",
+    "pages": "Pages officielles",
+    "incidents": "Incidents",
+    "audit": "Journal des décisions",
+    "health": "Santé du moteur",
+    "export": "Exports agrégés"
+  },
+  "networks": {
+    "lead": "Les réseaux et leurs politiques sont pilotés ici. Les données sont conservées lors d’un archivage.",
+    "create": "Créer un réseau",
+    "createTitle": "Nouveau réseau",
+    "createHint": "Un réseau enfant de la racine devient disponible sans déploiement. Choisissez une admission générique, sauf si la tranche DIASPORALE est nécessaire.",
+    "settings": "Réglages du réseau",
+    "settingsHint": "L’identifiant et le type d’admission sont fixés à la création. Tout changement de réglage est motivé et tracé.",
+    "readOnly": "Les réglages sont consultables. Leur modification est réservée aux administrateurs sur les réseaux actifs.",
+    "save": "Enregistrer les réglages",
+    "saved": "Les réglages du réseau ont été enregistrés.",
+    "created": "Le réseau a été créé.",
+    "unsaved": "Votre saisie contient des changements non enregistrés.",
+    "leaveConfirm": "Quitter ce formulaire et abandonner les changements non enregistrés ?",
+    "manage": "Gérer ce réseau",
+    "view": "Consulter ce réseau",
+    "back": "Retour aux réseaux",
+    "empty": "Aucun réseau n’est disponible.",
+    "unavailable": "Ce réseau n’est plus disponible dans cette liste.",
+    "bounded": "La liste est bornée à 200 réseaux actifs et 200 réseaux archivés, en plus de la racine.",
+    "invalid": "Vérifiez la valeur et les limites de ce champ.",
+    "facetInvalid": "Le schéma JSON de facette ne respecte pas le contrat : champs typés, visibilités admises et 24 champs maximum.",
+    "countryInvalid": "Utilisez uniquement des codes pays ISO à deux lettres majuscules, séparés par des virgules.",
+    "reasonRequired": "Le motif doit contenir entre 10 et 500 caractères.",
+    "slugHint": "3 à 32 caractères : minuscules, chiffres et tirets, sans tiret doublé. Identifiant immuable.",
+    "policyHint": "Ouverte : admission générique ; déclarée ou vérifiée : règles de statut ; miroir : reflets signés uniquement.",
+    "visibilityHint": "La diffusion à la racine reste soumise à une audience publique et aux règles de publication.",
+    "valuesHint": "Valeurs distinctes séparées par des virgules ; 50 valeurs maximum, 80 caractères chacune.",
+    "countryHint": "Codes ISO alpha-2 (GA, FR…) séparés par des virgules. Vide : aucun pays déclaré. La tranche d’admission détermine leur effet.",
+    "themeHint": "Identifiant d’un thème déjà installé : {{themes}}. Un identifiant seul n’installe pas de thème.",
+    "managedHint": "La tranche DIASPORALE impose sa propre admission. Ce choix est fixé à la création et ne recrée pas un réseau DIASPORALE existant.",
+    "facetHint": "Vide : aucune facette. JSON fermé { fields: […] } : key, kind, required et defaultVisibility. Aucune valeur libre ne sera transmise.",
+    "reasonHint": "10 à 500 caractères. Le motif est enregistré dans le journal des décisions.",
+    "fields": {
+      "slug": "Identifiant public",
+      "name": "Nom du réseau",
+      "membershipPolicy": "Politique d’adhésion",
+      "defaultVisibility": "Visibilité par défaut",
+      "reachValues": "Portées autorisées",
+      "openCountries": "Pays ouverts",
+      "theme": "Thème",
+      "managedBy": "Admission du réseau",
+      "facetSchema": "Schéma de facette (JSON)",
+      "reason": "Motif de la décision",
+      "status": "État"
+    },
+    "policies": {
+      "open": "Ouverte",
+      "declared_or_verified": "Déclarée ou vérifiée",
+      "mirror": "Miroir signé"
+    },
+    "visibilities": {
+      "network": "Dans ce réseau",
+      "root": "Diffusion vers la racine ANTSIA"
+    },
+    "statuses": {
+      "active": "Actif",
+      "archived": "Archivé"
+    },
+    "admission": {
+      "generic": "Admission générique du moteur",
+      "diaspora": "Tranche d’admission DIASPORALE"
+    }
+  },
+  "archive": {
+    "title": "Archivage sous double validation",
+    "help": "La racine ne peut pas être archivée. Pour ce réseau, une proposition motivée doit être approuvée par une autre personne habilitée. Aucune donnée n’est supprimée.",
+    "request": "Proposer l’archivage",
+    "requested": "La proposition d’archivage a été enregistrée. Elle attend une autre personne habilitée.",
+    "approve": "Approuver et archiver",
+    "approved": "Le réseau a été archivé après double validation.",
+    "cancel": "Retirer ma proposition",
+    "cancelled": "La proposition d’archivage a été retirée.",
+    "empty": "Aucune proposition d’archivage en cours.",
+    "own": "Votre proposition attend une seconde validation.",
+    "pending": "Une proposition attend votre décision.",
+    "expired": "Cette proposition a expiré ; une nouvelle demande est nécessaire.",
+    "expires": "Expiration : {{at}} ({{zone}}).",
+    "decisionReason": "Motif d’approbation ou de retrait"
+  }
+}

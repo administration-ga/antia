@@ -7,16 +7,17 @@
  * serait un déversement de l'annuaire. L'identifiant est une ADRESSE : il se
  * cherche aussi EXACTEMENT, en plus de la ressemblance du nom.
  */
-import type { Badge } from "@antia/social-domain/badges"
-import { normalizeHandle } from "@antia/social-domain/content"
-import { isActiveStatus } from "@antia/social-domain/membership"
-import { buildSearchableText, foldSearchQuery } from "@antia/social-domain/searchText"
+import type { Badge } from "@antsia/social-domain/badges"
+import { normalizeHandle } from "@antsia/social-domain/content"
+import { isActiveStatus } from "@antsia/social-domain/membership"
+import { buildSearchableText, foldSearchQuery } from "@antsia/social-domain/searchText"
 import { v } from "convex/values"
 
 import { internal } from "../../_generated/api"
+import { canReadModeratedContent } from "../moderation/policy"
 import type { Doc, Id } from "../../_generated/dataModel"
 import { internalMutation, type MutationCtx } from "../../_generated/server"
-import { isActiveMember } from "../../lib/access"
+import { effectiveMembershipStatus, isActiveMember } from "../../lib/access"
 import { fail } from "../../lib/errors"
 import { networkQuery } from "../../lib/functions"
 import { badgeValidator } from "../../lib/validators"
@@ -59,7 +60,7 @@ export async function syncPersonDirectory(ctx: MutationCtx, personId: Id<"person
     }
     const rootSuspended = await rootIsSuspended(ctx, memberships)
     for (const membership of memberships) {
-      if (!isActiveStatus(membership.status)) continue
+      if (!isActiveStatus(effectiveMembershipStatus(membership) ?? "partie")) continue
       const network = await ctx.db.get(membership.networkId)
       if (!network || network.status !== "active") continue
       const optedIn = network.managedBy === undefined || membership.directoryListed === true
@@ -106,7 +107,7 @@ export const resyncNetworkDirectory = internalMutation({
 
 async function rootIsSuspended(ctx: MutationCtx, memberships: readonly Doc<"networkMemberships">[]): Promise<boolean> {
   for (const membership of memberships) {
-    if (membership.status !== "suspendue") continue
+    if (effectiveMembershipStatus(membership) !== "suspendue") continue
     const network = await ctx.db.get(membership.networkId)
     if (network?.kind === "root") return true
   }
@@ -159,7 +160,7 @@ export const searchPeople = networkQuery({
       // Un blocage, dans un sens ou dans l'autre, retire la personne de l'annuaire.
       if (await isBlockedBetween(ctx, ctx.person._id, personId)) continue
       const person = await ctx.db.get(personId)
-      if (!person || !isDiscoverablePerson(person) || !person.handle || !person.displayName) continue
+      if (!person || !isDiscoverablePerson(person) || !person.handle || !person.displayName || !(await canReadModeratedContent(ctx, "person", person._id, ctx.person._id))) continue
       hits.push({
         personId,
         handle: person.handle,

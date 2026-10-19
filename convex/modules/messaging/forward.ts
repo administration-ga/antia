@@ -21,7 +21,7 @@
  * La copie porte `forwardedFrom` — une PROVENANCE, relue à chaque lecture :
  * l'original retiré emporte la marque.
  */
-import { assertMessageContent } from "@antia/social-contracts/messaging"
+import { assertMessageContent } from "@antsia/social-contracts/messaging"
 import { v } from "convex/values"
 
 import type { Doc, Id } from "../../_generated/dataModel"

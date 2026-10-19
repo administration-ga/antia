@@ -1,1 +1,1 @@
-export { default } from "@antia/eslint-config/library"
+export { default } from "@antsia/eslint-config/library"

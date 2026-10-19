@@ -1,0 +1,138 @@
+{
+  "contextualConversation": {
+    "filter": "Mises en relation",
+    "kinds": {
+      "diasporaServiceRequest": "Demande de service",
+      "diasporaMentoring": "Mentorat",
+      "diasporaJobApplication": "Candidature"
+    },
+    "roles": {
+      "diasporaServiceRequest": {
+        "requester": "Client",
+        "responder": "Prestataire"
+      },
+      "diasporaMentoring": {
+        "requester": "Mentoré",
+        "responder": "Mentor"
+      },
+      "diasporaJobApplication": {
+        "requester": "Candidat",
+        "responder": "Employeur"
+      }
+    },
+    "openObject": {
+      "diasporaServiceRequest": "Voir la demande",
+      "diasporaMentoring": "Voir le mentorat",
+      "diasporaJobApplication": "Voir la candidature"
+    },
+    "counterpart": {
+      "person": "Membre au profil retiré",
+      "page": "Page indisponible"
+    },
+    "header": {
+      "subtitle": "{{kind}} · {{state}}"
+    },
+    "context": {
+      "title": "Contexte de la conversation",
+      "summary": "{{kind}} · votre rôle : {{role}}",
+      "objectStatus": "Où en est l'objet : {{status}}",
+      "privacy": "Échange privé entre les parties de cette mise en relation : il ne crée aucune relation personnelle et n'affiche aucun accusé de lecture."
+    },
+    "state": {
+      "open": "Conversation ouverte.",
+      "closed": "Conversation fermée : l'historique reste lisible.",
+      "unavailable": "Conversation indisponible pour le moment : l'historique reste lisible."
+    },
+    "stateShort": {
+      "open": "Ouverte",
+      "closed": "Fermée",
+      "unavailable": "Indisponible"
+    },
+    "voice": {
+      "page": "Vous écrivez au nom de la page : {{counterpart}} voit la page, jamais votre nom.",
+      "facingPage": "Vous échangez avec l'équipe de {{page}}, qui vous répond d'une seule voix.",
+      "person": "Vous écrivez sous votre nom publié."
+    },
+    "unavailable": "Cette conversation n'est pas disponible.",
+    "loadError": "La conversation n'a pas pu être chargée.",
+    "loading": "Chargement de la conversation…",
+    "retry": "Réessayer",
+    "back": "Retour",
+    "composer": {
+      "placeholder": "Écrire un message…",
+      "label": "Message à {{name}}"
+    },
+    "errors": {
+      "appRule": "Ce message ne respecte pas une règle de cette mise en relation. Modifiez-le avant de l'envoyer."
+    },
+    "messages": {
+      "empty": "Aucun message pour l'instant.",
+      "errorTitle": "Messages indisponibles",
+      "errorMessage": "Les messages de cette conversation n'ont pas pu être chargés.",
+      "teammate": "{{name}} pour {{page}}"
+    },
+    "actions": {
+      "title": "Actions sur le message",
+      "close": "Fermer",
+      "copy": "Copier le texte",
+      "copied": "Texte copié.",
+      "remove": "Retirer mon message",
+      "removeConfirm": "Retirer ce message pour toutes les parties ? Ses pièces jointes sont supprimées avec lui.",
+      "removeConfirmAction": "Retirer le message",
+      "removed": "Message retiré.",
+      "report": "Signaler ce message",
+      "reportReason": "Motif du signalement",
+      "reportSubmit": "Envoyer le signalement",
+      "reported": "Signalement transmis à la modération.",
+      "cancel": "Annuler",
+      "none": "Aucune action n'est possible sur ce message."
+    },
+    "close": {
+      "action": "Clore la conversation",
+      "confirm": "Clore définitivement cette conversation ? L'autre partie en est avertie. L'objet de la mise en relation reste inchangé, et la conversation ne pourra pas être rouverte.",
+      "confirmAction": "Clore définitivement",
+      "cancel": "Annuler",
+      "done": "Conversation close."
+    },
+    "calls": {
+      "title": "Appels dans cette conversation",
+      "toggle": "Appels",
+      "rule": "Un appel exige l'accord des deux parties dans cette conversation. Rien ne sonne automatiquement.",
+      "consentPerson": "En donnant votre accord, vous acceptez d'appeler et d'être appelé dans cette conversation seulement.",
+      "consentPage": "En donnant votre accord, vous acceptez d'appeler et d'être appelé dans cette conversation, et d'y être nommé : {{counterpart}} verra votre nom pendant l'appel.",
+      "give": "Donner mon accord d'appel",
+      "withdraw": "Retirer mon accord d'appel",
+      "given": "Votre accord d'appel est donné pour cette conversation. Vous pouvez le retirer à tout moment.",
+      "saved": "Accord d'appel enregistré.",
+      "withdrawn": "Accord d'appel retiré.",
+      "silentOverride": "Votre réglage « hors de mes relations : silencieux » ne s'applique pas à cet accord : il vaut pour cette conversation seulement.",
+      "silentOverrideIfConsent": "Si vous donnez votre accord, votre réglage « hors de mes relations : silencieux » ne s'appliquera pas à cette conversation.",
+      "dndActive": "« Ne pas déranger » est actif jusqu'à {{until}} : aucun appel ne vous fait sonner, y compris dans cette conversation.",
+      "meetingSilence": "Votre silence automatique pendant les réunions s'applique aussi à cette conversation.",
+      "callWaitingOff": "Vous avez coupé le signal d'appel en attente : si vous êtes déjà en ligne, vous êtes indiqué occupé, y compris ici.",
+      "incomingPushOff": "Vous avez coupé la sonnerie hors de l'onglet : un appel de cette conversation ne sonne que dans un onglet ouvert.",
+      "target": "Personne à appeler",
+      "noTarget": "Aucune personne de l'équipe ne peut être appelée pour le moment.",
+      "chooseTarget": "Choisissez la personne de l'équipe à appeler.",
+      "audio": "Appel audio",
+      "video": "Appel vidéo",
+      "busy": "Un appel est déjà en cours.",
+      "origin": "Mise en relation",
+      "callBackFromJournal": "Rappeler {{name}} depuis la mise en relation",
+      "writeFromJournal": "Écrire à {{name}} dans la mise en relation"
+    },
+    "list": {
+      "title": "Mises en relation",
+      "search": "Rechercher une mise en relation",
+      "scope": "Recherche sur les mises en relation déjà chargées.",
+      "empty": "Aucune mise en relation pour l'instant. Elles s'ouvrent avec une demande de service, un mentorat accepté ou une candidature présélectionnée.",
+      "noMatch": "Aucune mise en relation chargée ne correspond à « {{term}} ».",
+      "loadMore": "Afficher plus de mises en relation",
+      "loading": "Chargement…",
+      "errorTitle": "Mises en relation indisponibles",
+      "errorMessage": "La liste des mises en relation n'a pas pu être chargée.",
+      "unread": "Messages non lus",
+      "summary": "{{kind}} · {{state}}"
+    }
+  }
+}

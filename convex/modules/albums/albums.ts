@@ -29,11 +29,12 @@ import {
   assertAlbumWithdrawable,
   nextPosition,
   reorderPositions,
-} from "@antia/social-domain/albums"
+} from "@antsia/social-domain/albums"
 import { paginationOptsValidator, type PaginationResult } from "convex/server"
 import { v } from "convex/values"
 
 import { internal } from "../../_generated/api"
+import { moderateContentWrite } from "../moderation/policy"
 import type { Doc, Id } from "../../_generated/dataModel"
 import { internalMutation, type MutationCtx, type QueryCtx } from "../../_generated/server"
 import { checked, fail, notFound } from "../../lib/errors"
@@ -205,6 +206,7 @@ export const update = networkMutation({
       ...(args.audience !== undefined ? { audience: args.audience } : {}),
       updatedAt: Date.now(),
     })
+    if (album.status === "published") await moderateContentWrite(ctx, { networkId: album.networkId, ownerPersonId: ctx.person._id, kind: "album", id: album._id, text: `${title ?? album.title} ${description ?? album.description ?? ""}` })
     return { updated: true as const }
   },
 })
@@ -288,6 +290,7 @@ export const addItems = networkMutation({
       )
       position += 1
     }
+    if (album.status === "published") await moderateContentWrite(ctx, { networkId: album.networkId, ownerPersonId: ctx.person._id, kind: "album", id: album._id, text: `${album.title} ${album.description ?? ""} ${args.items.map((item) => `${item.caption ?? ""} ${item.altText ?? ""}`).join(" ")}` })
     await ctx.db.patch(album._id, { itemCount: album.itemCount + itemIds.length, updatedAt: now })
     return { added: itemIds.length, skipped, itemIds }
   },
@@ -303,6 +306,7 @@ export const setCaption = networkMutation({
     const { item, album } = await ownItem(ctx, callerOf(ctx), args.itemId)
     const caption = checked(() => assertAlbumCaption(args.caption))
     const altText = checked(() => assertAlbumAltText(args.altText))
+    if (album.status === "published") await moderateContentWrite(ctx, { networkId: album.networkId, ownerPersonId: ctx.person._id, kind: "album", id: album._id, text: `${album.title} ${album.description ?? ""} ${caption ?? ""} ${altText ?? ""}` })
     await ctx.db.patch(item._id, { caption, altText })
     await ctx.db.patch(album._id, { updatedAt: Date.now() })
     return { updated: true as const }
@@ -395,11 +399,12 @@ export const publish = networkMutation({
   handler: async (ctx, args) => {
     await enforceRateLimit(ctx, "album.publish", ctx.person._id)
     const album = await ownAlbum(ctx, callerOf(ctx), args.albumId)
+    const admitted = await moderateContentWrite(ctx, { networkId: album.networkId, ownerPersonId: ctx.person._id, kind: "album", id: album._id, text: `${album.title} ${album.description ?? ""}` })
     if (album.status === "published") return { status: "published" as const, published: false }
     checked(() => assertAlbumPublishable({ status: album.status, itemCount: album.itemCount }))
     const now = Date.now()
     await ctx.db.patch(album._id, { status: "published", publishedAt: album.publishedAt ?? now, withdrawnAt: undefined, updatedAt: now })
-    if (album.publishedAt === undefined) {
+    if (admitted && album.publishedAt === undefined) {
       await enqueueFanout(ctx, { networkId: album.networkId, actorPersonId: ctx.person._id, kind: "album_published", subject: { album: album._id }, source: { kind: "albumFollowers", albumId: album._id } })
     }
     return { status: "published" as const, published: true }

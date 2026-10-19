@@ -1,6 +1,6 @@
 // @vitest-environment edge-runtime
 // Dupliqué de socle/convex/modules/reseauPersonnel/suggestions.test.ts @ ad2e7fdc2 — adaptations : personnes et réseaux (graine des fondations) ; codes au lieu des libellés ; poste et organisation remplacés par le titre ; listes paginées ; tests neufs : réseau gouverné refusé, masquage propre au réseau.
-import { engineErrorCode } from "@antia/social-contracts/errors"
+import { engineErrorCode } from "@antsia/social-contracts/errors"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 import { api, internal } from "../../_generated/api"
@@ -137,6 +137,23 @@ describe("catalogue des suggestions — filtres", () => {
 })
 
 describe("masquage d'une suggestion", () => {
+  it("la liste générique des suggestions masquées refuse un réseau devenu gouverné, même pour un masquage déjà connu", async () => {
+    const t = testConvex()
+    const { root, testClosed } = await seed(t)
+    const me = await enter(t, root, "moi")
+    const other = await enter(t, root, "autre")
+    await t.run(async (ctx) => {
+      for (const person of [me, other]) await ctx.db.insert("networkMemberships", { networkId: testClosed, personId: person.personId, status: "declaree", role: "member", directoryListed: false, joinedAt: 1, statusChangedAt: 1 })
+      await ctx.db.insert("suggestionDismissals", { networkId: testClosed, personId: me.personId, dismissedPersonId: other.personId, createdAt: Date.now() })
+    })
+    const args = { networkId: testClosed, paginationOpts: { numItems: 10, cursor: null } }
+    expect((await me.as.query(SG.paginateDismissed, args)).page).toMatchObject([{ targetPersonId: other.personId, handle: "autre" }])
+    await t.run(async (ctx) => await ctx.db.patch(testClosed, { managedBy: "diaspora" }))
+    expect(await codeOf(me.as.query(SG.paginateDismissed, args))).toBe("policyRefused")
+    // Le masquage n'est pas effacé : sa lecture appartient désormais à la tranche.
+    expect(await t.run(async (ctx) => (await ctx.db.query("suggestionDismissals").withIndex("by_network_person_createdAt", (q) => q.eq("networkId", testClosed).eq("personId", me.personId)).take(5)).length)).toBe(1)
+  })
+
   it("survit au rechargement, se liste, se lève ; `includeDismissed` la rend avec son drapeau", async () => {
     const t = testConvex()
     const { root } = await seed(t)
@@ -183,6 +200,24 @@ describe("masquage d'une suggestion", () => {
 })
 
 describe("état relationnel et invitations envoyées", () => {
+  it("un membre en attente relit ses demandes envoyées, sans ouvrir le droit d'en émettre une autre", async () => {
+    const t = testConvex()
+    const { root } = await seed(t)
+    const me = await enter(t, root, "moi")
+    const other = await enter(t, root, "autre")
+    await me.as.mutation(api.modules.graph.connections.requestConnection, { networkId: root, handle: other.handle })
+    const row = await t.run(async (ctx) => {
+      const membership = await ctx.db.query("networkMemberships").withIndex("by_network_and_person", (q) => q.eq("networkId", root).eq("personId", me.personId)).unique()
+      if (!membership) throw new Error("Adhésion de test absente")
+      await ctx.db.patch(membership._id, { status: "en_attente" })
+      return await ctx.db.query("connections").withIndex("by_network_requester_status", (q) => q.eq("networkId", root).eq("requestedByPersonId", me.personId).eq("status", "requested")).unique()
+    })
+
+    const sent = await me.as.query(SG.paginateSentInvitations, { networkId: root, paginationOpts: { numItems: 1, cursor: null } })
+    expect(sent.page).toMatchObject([{ connectionId: row!._id, otherPersonId: other.personId, at: row!.requestedAt }])
+    expect(await codeOf(me.as.mutation(api.modules.graph.connections.requestConnection, { networkId: root, handle: other.handle }))).toBe("statusInsufficient")
+  })
+
   it("une demande sortante se dit « requested_by_me » chez le demandeur, « requested_by_them » chez le destinataire ; acceptée, elle sort du catalogue", async () => {
     const t = testConvex()
     const { root } = await seed(t)

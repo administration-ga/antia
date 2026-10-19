@@ -1,5 +1,5 @@
-import { engineErrorAppRule, engineErrorCode, engineErrorRule } from "@antia/social-contracts/errors"
-import { assertHandle } from "@antia/social-domain/content"
+import { engineErrorAppRule, engineErrorCode, engineErrorRule } from "@antsia/social-contracts/errors"
+import { assertHandle } from "@antsia/social-domain/content"
 import { ConvexError } from "convex/values"
 import { describe, expect, it } from "vitest"
 

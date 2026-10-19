@@ -12,6 +12,7 @@ import { internal } from "../../_generated/api"
 import type { Doc, Id } from "../../_generated/dataModel"
 import { internalMutation, type MutationCtx } from "../../_generated/server"
 import { unrecordComment, unrecordPagePost, unrecordShare } from "./counters"
+import { purgeMaterializedPost } from "./feedMaterialization"
 
 /** Réponses retirées avec leur racine dans une même transaction ; au-delà, la suite part en lots planifiés. */
 const REPLIES_REMOVAL_BATCH = 100
@@ -19,6 +20,7 @@ const REPLIES_REMOVAL_BATCH = 100
 export async function markPostRemoved(ctx: MutationCtx, post: Doc<"posts">, removedAt: number): Promise<void> {
   if (post.status === "removed") return
   await ctx.db.patch(post._id, { status: "removed", removedAt, updatedAt: removedAt })
+  await purgeMaterializedPost(ctx, post._id)
   await unrecordShare(ctx, post)
   // Écrivain UNIQUE du décompte au retrait, quel que soit le chemin (signataire, modération).
   await unrecordPagePost(ctx, post)

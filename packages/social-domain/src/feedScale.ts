@@ -8,6 +8,26 @@
 export type PersonalFeedCursor<PostId extends string = string> = {
   publishedAt: number
   postId: PostId
+  /** Absents sur les anciens curseurs et les murs ; aucune bascule en cours de parcours. */
+  strategy?: "legacy" | "materialized"
+  generation?: number
+  windowStart?: number
+  postCreationTime?: number
+}
+
+/** Historique explicite : la matérialisation ne promet jamais l'antériorité. */
+export const MATERIALIZED_FEED_HISTORY_MS = 30 * 86_400_000
+export const MATERIALIZED_FEED_BATCH = 20
+export const MATERIALIZED_FEED_SCAN = 100
+export const MATERIALIZED_FEED_REBUILD_MS = 24 * 60 * 60_000
+
+export function shouldMaterializeFeed(input: { personSources: number; pageSources: number; truncated: boolean }): boolean {
+  return input.truncated || input.personSources + input.pageSources > PERSONAL_FEED_AUTHORS_MAX || input.pageSources > 50
+}
+
+/** Une génération incomplète ou remplacée n'est jamais une continuation silencieuse. */
+export function materializedCursorMatches(cursor: PersonalFeedCursor | undefined, state: { generation: number; windowStart: number; status: string } | null): boolean {
+  return state !== null && state.status === "ready" && (cursor === undefined || (cursor.strategy === "materialized" && cursor.generation === state.generation && cursor.windowStart === state.windowStart && Number.isFinite(cursor.postCreationTime)))
 }
 
 type OrderedPost<PostId extends string = string> = {

@@ -10,7 +10,7 @@ import { fileURLToPath } from "node:url"
 
 import ts from "typescript"
 
-/** Racine du dépôt ANTIA. */
+/** Racine du dépôt ANTSIA. */
 export const REPO_ROOT = resolve(fileURLToPath(new URL("../../..", import.meta.url)))
 
 const SKIPPED_DIRECTORIES = new Set([

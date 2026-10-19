@@ -35,6 +35,9 @@
  * Les contrastes (texte ≥ 4,5:1, contours et focus ≥ 3:1) sont recalculés dans les
  * deux thèmes, à travers la cascade complète base + thème, par le cliquet
  * `engine-theme-contrast.test.ts` de DIASPORALE.
+ * Version 3.3 (17/10/2026, correction du propriétaire sur le fil clair) :
+ * inversion des surfaces claires — fond papier, cartes sable. Les rôles du
+ * moteur et d'iCom suivent la même hiérarchie ; le sombre reste inchangé.
  */
 
 [data-charte="diasporale"] {
@@ -154,8 +157,8 @@
   --esp-seg-on-fg: #f9f8f5;
   --esp-night-seg-on: #e9e7e1;
   --esp-night-seg-on-fg: #151311;
-  /* Reliefs v2 : presque rien. La carte se détache par la clarté (papier sur
-     sable, encre sur nuit), sans filet ; l'ombre n'est qu'un souffle, à peine
+  /* Reliefs : presque rien. La carte se détache par la clarté (sable sur
+     papier en clair, carte éclaircie sur nuit en sombre), sans filet ; l'ombre n'est qu'un souffle, à peine
      plus marqué pour ce qui passe DEVANT la page (carte flottante, barre basse). */
   --esp-shadow: 0 1px 2px rgb(20 19 15 / 0.05);
   --esp-night-shadow: 0 1px 1px rgb(0 0 0 / 0.25);
@@ -165,19 +168,19 @@
 
   /* ── 2. Rôles — thème clair ── */
 
-  --background: var(--esp-neutral-100);
-  --background-dashboard: var(--esp-neutral-100);
+  --background: var(--esp-neutral-0);
+  --background-dashboard: var(--esp-neutral-0);
   --foreground: var(--esp-neutral-900);
-  --card: var(--esp-neutral-0);
+  --card: var(--esp-neutral-100);
   --card-foreground: var(--esp-neutral-900);
-  --popover: var(--esp-neutral-0);
+  --popover: var(--esp-neutral-100);
   --popover-foreground: var(--esp-neutral-900);
   --primary: var(--esp-blue-500);
   --primary-foreground: var(--esp-neutral-0);
   --primary-light: var(--esp-blue-50);
-  --secondary: var(--esp-neutral-0);
+  --secondary: var(--esp-neutral-100);
   --secondary-foreground: var(--esp-neutral-600);
-  --esp-surface-card: var(--esp-neutral-0);
+  --esp-surface-card: var(--esp-neutral-100);
   --muted: var(--esp-neutral-150);
   --muted-foreground: var(--esp-neutral-600);
   --accent: var(--esp-neutral-200);
@@ -226,9 +229,9 @@
   --primary-fill: var(--esp-blue-500);
   --primary-fill-hover: var(--esp-blue-600);
   --on-fill: var(--esp-neutral-0);
-  --ink-0: var(--esp-neutral-0);
+  --ink-0: var(--card);
   --ink-50: var(--esp-neutral-50);
-  --ink-100: var(--esp-neutral-100);
+  --ink-100: var(--background);
   --ink-150: var(--esp-neutral-150);
   --ink-200: var(--esp-neutral-rule);
   --ink-300: var(--esp-neutral-300);
@@ -246,6 +249,37 @@
   --info-600: var(--esp-blue-700);
   --status-active: var(--esp-blue-500);
   --status-active-bg: var(--esp-blue-50);
+  /* Familles sémantiques d'ui-v2 (danger, succès, alerte, statuts) sur les tons de
+     DIASPORALE, mêmes rôles que la base : fond 50, liseré 100, point et contour 500,
+     texte 600 (alerte, badge) ; en clair, l'aplat du bouton suit 500 et son survol
+     600 (alias de la base), sous l'encre claire. Paliers sans ton propre, dérivés en
+     OKLCH à la teinte de leur famille : liseré 100 à la clarté du liseré ambre
+     (L 90,6 %, chroma 0,05) ; rose 600 puis 700 au pas du vert 500 → 600 (L −8,2
+     points chaque fois, chroma à proportion). Statuts : neutres chauds, pas l'ardoise
+     bleutée du socle. */
+  --success-50: var(--esp-green-bg);
+  --success-100: #c9ead0;
+  --success-500: var(--esp-green-strong);
+  --success-600: var(--esp-green);
+  --warning-50: var(--esp-amber-bg);
+  --warning-100: var(--esp-amber-border);
+  --warning-500: var(--esp-amber-point);
+  --warning-600: var(--esp-amber);
+  --danger-50: var(--esp-rose-bg);
+  --danger-100: #ffd5cf;
+  --danger-500: var(--esp-rose);
+  --danger-600: #8c1c15;
+  --danger-700: #67120d;
+  --status-semi: var(--esp-neutral-500);
+  --status-semi-bg: var(--esp-neutral-150);
+  --status-inactive: var(--esp-neutral-400);
+  --status-inactive-bg: var(--esp-neutral-50);
+  --status-archived: var(--esp-green-strong);
+  --status-archived-bg: var(--esp-green-bg);
+  --status-destruct: var(--esp-amber-point);
+  --status-destruct-bg: var(--esp-amber-bg);
+  --status-error: var(--esp-rose);
+  --status-error-bg: var(--esp-rose-bg);
 
   /* Géométrie v2 — rayons resserrés : 4 px pour les badges et l'étiquette, 6 px
      pour les contrôles (bouton, champ, option), 8 px pour les cartes et les
@@ -267,7 +301,7 @@
   --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
 
   --esp-shadow-card: var(--esp-shadow);
-  --esp-mobilebar-bg: color-mix(in srgb, var(--esp-neutral-0) 94%, transparent);
+  --esp-mobilebar-bg: color-mix(in srgb, var(--card) 94%, transparent);
   --esp-mobilebar-border: var(--esp-neutral-rule);
   --esp-mobilebar-shadow: var(--esp-shadow-float);
   --esp-segment-on: var(--esp-seg-on);
@@ -374,6 +408,38 @@
   --info-600: var(--esp-blue-300);
   --status-active: var(--esp-blue-300);
   --status-active-bg: var(--esp-blue-900);
+  /* Familles sémantiques d'ui-v2 en sombre : les tons sombres de DIASPORALE, levés
+     au-dessus de la carte. L'aplat du bouton est CLAIR et l'encre se pose dessus,
+     comme sur le bleu (jamais de blanc) ; son survol s'éclaircit au pas de survol de
+     la base (L +5,3 points). Palier 100 au pas de la base : L +6,6 points au-dessus du
+     fond teinté, même teinte, même chroma. */
+  --danger-fill: var(--esp-rose-dark);
+  --danger-fill-hover: #f39d95;
+  --success-fill: var(--esp-green-dark);
+  --success-fill-hover: #7fcf95;
+  --success-50: var(--esp-green-bg-dark);
+  --success-100: #2b4431;
+  --success-500: var(--esp-green-dark);
+  --success-600: var(--esp-green-dark);
+  --warning-50: var(--esp-amber-bg-dark);
+  --warning-100: #4a3b21;
+  --warning-500: var(--esp-amber-dark);
+  --warning-600: var(--esp-amber-dark);
+  --danger-50: var(--esp-rose-bg-dark);
+  --danger-100: #523431;
+  --danger-500: var(--esp-rose-dark);
+  --danger-600: var(--esp-rose-dark);
+  --danger-700: #f39d95;
+  --status-semi: var(--esp-night-soft);
+  --status-semi-bg: var(--esp-night-chip);
+  --status-inactive: var(--esp-night-faint);
+  --status-inactive-bg: var(--esp-night-section);
+  --status-archived: var(--esp-green-dark);
+  --status-archived-bg: var(--esp-green-bg-dark);
+  --status-destruct: var(--esp-amber-dark);
+  --status-destruct-bg: var(--esp-amber-bg-dark);
+  --status-error: var(--esp-rose-dark);
+  --status-error-bg: var(--esp-rose-bg-dark);
   /* La navigation active lit `--esp-accent-*` directement : en sombre, l'ardoise
      levée et le bleu clair (la pastille claire du thème clair éblouissait, et son
      bleu profond tombait à 1,8:1 sur la barre basse). */

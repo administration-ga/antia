@@ -1,0 +1,6 @@
+{
+  "useChatAttachments": {
+    "tooLarge": "{{name}} exceeds the maximum allowed size ({{max}}).",
+    "typeNotAllowed": "{{name}}: file type not allowed ({{type}})."
+  }
+}

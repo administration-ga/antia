@@ -1,5 +1,5 @@
 {
-  "name": "@antia/social-domain",
+  "name": "@antsia/social-domain",
   "version": "0.0.0",
   "private": true,
   "license": "AGPL-3.0-or-later",
@@ -15,8 +15,8 @@
     "lint": "eslint ."
   },
   "devDependencies": {
-    "@antia/eslint-config": "workspace:*",
-    "@antia/tsconfig": "workspace:*",
+    "@antsia/eslint-config": "workspace:*",
+    "@antsia/tsconfig": "workspace:*",
     "@types/node": "catalog:",
     "@typescript/native-preview": "catalog:",
     "eslint": "catalog:",

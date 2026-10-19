@@ -1,0 +1,291 @@
+/*
+ * Thème du réseau public ANTSIA (`apps/antsia_ga`, `data-charte="antsia"`).
+ *
+ * Charte « Encre, ivoire et prune » (étude du 18/10/2026,
+ * docs/etudes/2026-10-18-social-commerce/03_DESIGN_SYSTEM.md §2, lot P01).
+ * Socle conservé : fond blanc et cartes beige en clair (demande du propriétaire
+ * sur le fil) ; le beige reste réservé aux cartes et aux panneaux. En sombre :
+ * fond charbon, cartes légèrement relevées, ce qui flotte un cran au-dessus.
+ * Aucune inversion des photos ; l'échelle d'encre est attribuée rôle par rôle.
+ *
+ * Règles (cliquet `theme-contract`) : uniquement des jetons du contrat de la
+ * charte de base, uniquement sous [data-charte="antsia"]. Trois blocs :
+ *   1. clair — les primitives du contrat réaccordées (valeurs uniques des
+ *      neutres, lues par les DEUX thèmes : le bloc sombre de la base ne
+ *      redéclare aucune primitive), les échelles d'action, de succès et de
+ *      danger du clair, puis les rôles propres au clair ;
+ *   2. sombre — échelles et rôles propres au sombre, à la spécificité 0,2,0 de
+ *      `.dark[data-charte]` (posé sur <html>) et de `.dark [data-charte]`
+ *      (portails qui redéclarent la charte : dock, appel, stories, carte
+ *      flottante). Sans lui, le bloc sombre de la base (0,2,0) l'emporterait
+ *      sur le bloc clair de ce thème (0,1,0) et le bleu du moteur reviendrait ;
+ *   3. commun — les familles ui-v2 (`--ink-*`, `--primary-fill`, `--on-fill`…),
+ *      `--esp-*` et les rôles dérivés suivent les rôles sémantiques. Le
+ *      sélecteur triple vaut 0,1,0 en clair et 0,2,0 en sombre : un seul renvoi
+ *      sert les deux thèmes.
+ * Rôles hérités tels quels de la base : avertissement ambré, tons de compteur,
+ * séries de graphique 2 à 5, sélecteur de comptes et ombres `--esp-*` (liste
+ * tenue par le test). Lot P01b : anneau de base plein, corps 16 px, face des
+ * titres corrigée, ombres d'ui-v2 à l'encre. Lot P03 : rayon des cartes du fil
+ * à 12 px, surface élevée des menus et feuilles des publications, liens du
+ * texte courant soulignés. Contrastes recalculés à travers la cascade complète (base + thème,
+ * <html> et portails) par `antsia-palette.test.ts`. Les couleurs du drapeau
+ * restent décoratives. Aucune police ajoutée : Inter et la marque actuelle.
+ */
+
+[data-charte="antsia"] {
+  /* ── 1. Primitives du contrat, réaccordées à la palette ──
+     Fond blanc (`--esp-neutral-0`) et carte ivoire (`--esp-neutral-100`) sont
+     déjà ceux de la base ; l'ivoire est aussi le texte principal du sombre. */
+  /* Encre : texte principal clair, 15,05:1 sur la carte, 16,27:1 sur le fond. */
+  --esp-neutral-900: #1f2024;
+  /* Texte secondaire clair (date, unité, aide), 5,52:1 sur la carte. */
+  --esp-neutral-600: #62636b;
+  /* Séparateur décoratif : jamais le seul repère d'un champ. */
+  --esp-neutral-rule: #dedce2;
+  /* Contour de contrôle clair, 4,05:1 sur la carte (≥ 3:1, WCAG 1.4.11). */
+  --esp-neutral-field: #7b7780;
+  /* Charbon du sombre : fond < carte (1,13:1) < surface élevée (1,14:1). */
+  --esp-night-bg: #141419;
+  --esp-night-card: #202026;
+  /* Surface élevée du sombre (menu, feuille, survol) : le barreau « chip » de
+     la base, le plus clair de ses surfaces nocturnes. */
+  --esp-night-chip: #2a2a33;
+  --esp-night-border: #3c3a44;
+  /* Contour de contrôle sombre, 4,78:1 sur la carte. */
+  --esp-night-input: #8f8998;
+  /* Texte secondaire sombre, 8,18:1 sur la carte. */
+  --esp-night-soft: #b9b7c0;
+
+  /* ── 2. Action, succès, danger — thème clair ──
+     Échelles d'ui-v2 en valeurs propres, comme `--danger-*` dans la base. La
+     prune remplace le bleu : 500 porte l'action, le lien et le focus (7,06:1
+     sur la carte, 7,63:1 sous le texte blanc d'un bouton plein). 300 et 400
+     servent d'anneaux et de contours dans les écrans : ils tiennent 3:1. */
+  --primary-50: #f5e6f0;
+  --primary-100: #ebd3e4;
+  --primary-200: #ddb6d2;
+  --primary-300: #a85592;
+  --primary-400: #9a3f83;
+  --primary-500: #8b2f73;
+  --primary-600: #7a2865;
+  --primary-700: #6e2459;
+  --primary-800: #561c46;
+  /* Succès 5,63:1 et danger 5,97:1 sur la carte. */
+  --success-50: #e3f1ea;
+  --success-100: #cbe5d7;
+  --success-500: #14704a;
+  --success-600: #0f5c3c;
+  --danger-50: #fbeaed;
+  --danger-100: #f4d2d9;
+  --danger-500: #b4233f;
+  --danger-600: #9a1c35;
+  --danger-700: #7a1426;
+
+  /* ── 3. Rôles du thème clair ── */
+  --background: var(--esp-neutral-0);
+  --foreground: var(--esp-neutral-900);
+  /* Les cartes du fil, des rails et d'iCom partagent ce rôle, distinct du fond. */
+  --card: var(--esp-neutral-100);
+  /* Surface élevée : menu, feuille, fenêtre de confirmation. */
+  --popover: var(--esp-neutral-0);
+  /* Creux ivoire : panneau posé dans une carte, survol, puce. Un cran sous la
+     carte (1,10:1) pour qu'un survol ou un encart s'y voie. */
+  --muted: var(--esp-neutral-200);
+  --muted-foreground: var(--esp-neutral-600);
+  --border: var(--esp-neutral-rule);
+  --input: var(--esp-neutral-field);
+  /* Encre des aplats d'action, de succès et de danger. */
+  --on-fill: var(--esp-neutral-0);
+  /* Couverture de repli (profil, mini-carte, album) : visuel de marque, jamais
+     derrière un prix ni une commande. Titre blanc ≥ 7,63:1 sur chaque arrêt. */
+  --esp-banner: linear-gradient(135deg, var(--primary-700) 0%, var(--primary-500) 100%);
+
+  /* Géométrie et typographie, valables dans les deux thèmes (le bloc sombre de
+     la base n'y touche pas). Rayon 12 px des cartes et panneaux `rounded-xl`
+     (`--radius-lg` et `--radius-md` valent déjà 12 px, `--radius-2xl` 16 px
+     pour les feuilles). Corps de texte à 16 px, interligne 1,5 (03 §3). */
+  --radius-xl: 12px;
+  /* Cartes du fil et surfaces de premier niveau du réseau : le même rayon de
+     12 px que les cartes `rounded-xl` (lot P03 ; 18 px dans la base). */
+  --rp-surface-radius: 12px;
+  /* Les liens du texte courant d'une publication (mots-dièse, mentions) sont
+     soulignés : la prune ne se distingue du texte qu'à 2,13:1 en clair et
+     1,68:1 en sombre, la couleur seule ne suffit pas (WCAG 1.4.1, lot P03). */
+  --esp-inline-link-decoration: underline;
+  /* La barre de membre collante (`member-chrome.tsx`) : 4 rem, la même
+     hauteur que le décalage du rail (`top-16`) — réservée en haut du
+     défilement pour qu'un élément focalisé ne passe pas dessous (P18b, A13). */
+  --esp-sticky-header-inset: 4rem;
+  --body-font-size: 16px;
+  /* « Inter » n'est chargée par aucune feuille du moteur : repli sur la police
+     du système tant que sa dépendance n'est pas ajoutée (rapport P01b). */
+  --font-sans: "Inter", system-ui, sans-serif;
+  /* Titres : le nom de la face réellement importée par `styles.css`
+     (`@fontsource-variable/familjen-grotesk` déclare « Familjen Grotesk
+     Variable » ; « Familjen Grotesk » ne correspondait à aucune face). */
+  --font-display: var(--font-familjen-grotesk, "Familjen Grotesk Variable"), "Inter", system-ui, sans-serif;
+
+  /* Ombres teintées de l'encre (#1f2024) au lieu du bleu nuit du socle :
+     mêmes géométries et opacités. En sombre, les ombres noires de la couche
+     de communication (0,2,0) restent en vigueur, déjà neutres. Valeurs
+     `rgb(… / α)` : un `color-mix()` sur `var()` serait compilé en repli opaque. */
+  --shadow-xs: 0 1px 2px rgb(31 32 36 / 0.05);
+  --shadow-sm: 0 1px 3px rgb(31 32 36 / 0.08), 0 1px 2px rgb(31 32 36 / 0.04);
+  --shadow-md: 0 4px 12px rgb(31 32 36 / 0.08), 0 2px 4px rgb(31 32 36 / 0.04);
+  --shadow-lg: 0 12px 32px rgb(31 32 36 / 0.12), 0 4px 12px rgb(31 32 36 / 0.06);
+  --shadow-xl: 0 20px 40px rgb(31 32 36 / 0.16), 0 8px 16px rgb(31 32 36 / 0.08);
+  --icom-float-drag-shadow: 0 18px 54px rgb(31 32 36 / 0.3);
+}
+
+.dark[data-charte="antsia"],
+.dark [data-charte="antsia"] {
+  /* ── Action, succès, danger — thème sombre ──
+     Rose prune doux : 500 tient 8,93:1 sur la carte et 9,90:1 sous l'encre
+     d'un bouton plein. Les teintes 50 et 100 (sélection) se lèvent au-dessus de
+     la carte et de la surface élevée au lieu d'y creuser un trou. */
+  --primary-50: #4a2d42;
+  --primary-100: #5a3852;
+  --primary-200: #6e4064;
+  --primary-300: #d98bc4;
+  --primary-400: #e39ccd;
+  --primary-500: #edadd8;
+  --primary-600: #f2c1e3;
+  --primary-700: #f6d3eb;
+  --primary-800: #fbe6f4;
+  /* Succès 9,31:1 et danger 9,15:1 sur la carte. */
+  --success-50: #1d3a2c;
+  --success-100: #25483a;
+  --success-500: #83d5ab;
+  --success-600: #a6e3c3;
+  --danger-50: #4e2630;
+  --danger-100: #5e2e3a;
+  --danger-500: #ffacb9;
+  --danger-600: #ffc2cb;
+  --danger-700: #ffdce1;
+
+  /* ── Rôles du thème sombre ── */
+  --background: var(--esp-night-bg);
+  --foreground: var(--esp-neutral-100);
+  --card: var(--esp-night-card);
+  --popover: var(--esp-night-chip);
+  /* En sombre, le panneau et le survol se LÈVENT au-dessus de la carte. */
+  --muted: var(--esp-night-chip);
+  --muted-foreground: var(--esp-night-soft);
+  --border: var(--esp-night-border);
+  --input: var(--esp-night-input);
+  /* Encre posée sur les aplats éclaircis du sombre (action, succès, danger) :
+     le blanc y tomberait sous le seuil. */
+  --on-fill: #24101f;
+  /* Couverture de repli du sombre : les deux teintes profondes de la prune,
+     titre blanc ≥ 9:1. */
+  --esp-banner: linear-gradient(135deg, var(--primary-100) 0%, var(--primary-50) 100%);
+}
+
+[data-charte="antsia"],
+.dark[data-charte="antsia"],
+.dark [data-charte="antsia"] {
+  /* ── Surfaces : la même paire fond/carte pour le fil, le profil, les pages,
+     les messages, les feuilles et les formulaires ── */
+  --background-dashboard: var(--background);
+  --card-foreground: var(--foreground);
+  --popover-foreground: var(--foreground);
+  /* `--secondary` est la surface de carte du kit (FlatCard), pas un gris. */
+  --secondary: var(--card);
+  --secondary-foreground: var(--muted-foreground);
+  --esp-surface-card: var(--card);
+  /* Surface ÉLEVÉE des menus, feuilles et dialogues des publications (lot
+     P03) : blanc en clair, #2A2A33 en sombre — au lieu de la carte beige ou
+     du fond qu'elles peignaient chacune. */
+  --esp-surface-raised: var(--popover);
+  /* Aucun contour de carte ni de panneau : leur surface se distingue déjà du
+     fond (demande du propriétaire du 19/10/2026). Les cartes posées sur une
+     carte de même couleur et les champs gardent leur filet. */
+  --esp-surface-border: transparent;
+  /* Puce et survol lus en direct par la cloche et le bouton de création. */
+  --esp-neutral-chip: var(--muted);
+  --esp-neutral-hover: var(--muted);
+  --esp-mobilebar-border: var(--border);
+  --sidebar: var(--card);
+  --sidebar-foreground: var(--foreground);
+  --sidebar-border: var(--border);
+  --sidebar-muted: var(--muted-foreground);
+  /* Voile des surfaces superposées (commentaires, feuilles d'ui-v2) : l'encre
+     #1f2024 à 55 % au lieu du bleu nuit du socle, identique dans les deux
+     thèmes. Valeur `rgb(… / α)` et non `color-mix()` sur un `var()` : la
+     compilation remplace ce dernier par un repli OPAQUE pour les navigateurs
+     sans `color-mix` (constaté dans la feuille servie). Le test vérifie qu'elle
+     suit l'encre. */
+  --ui2-scrim: rgb(31 32 36 / 0.55);
+
+  /* ── Action : une seule couleur, la prune ── */
+  --primary: var(--primary-500);
+  --primary-foreground: var(--on-fill);
+  --primary-light: var(--primary-100);
+  --primary-fill: var(--primary-500);
+  --primary-fill-hover: var(--primary-600);
+  --accent: var(--primary-500);
+  --accent-foreground: var(--on-fill);
+  --accent-purple: var(--primary-500);
+  --chart-1: var(--primary-500);
+  --sidebar-primary: var(--primary-500);
+  --sidebar-primary-foreground: var(--on-fill);
+  /* États actifs et sélectionnés : teinte de sélection + encre d'accent. */
+  --sidebar-accent: var(--primary-50);
+  --sidebar-accent-foreground: var(--primary-700);
+  --esp-accent-soft: var(--primary-50);
+  --esp-accent-deep: var(--primary-700);
+  --info-50: var(--primary-50);
+  --info-100: var(--primary-100);
+  --info-500: var(--primary-500);
+  --info-600: var(--primary-600);
+  --status-active: var(--primary-500);
+  --status-active-bg: var(--primary-50);
+  /* Focus : la couleur d'action ; anneau de 2 px détaché du fond par 2 px. */
+  --ring: var(--primary-500);
+  --sidebar-ring: var(--ring);
+  --shadow-focus: 0 0 0 2px var(--background), 0 0 0 4px var(--ring);
+  /* Anneau du navigateur sur une commande sans style de focus propre : plein
+     (≥ 3:1) au lieu de l'anneau à 50 % de la base (2,41:1 sur la carte). */
+  --outline-ring: var(--ring);
+
+  /* ── Succès et danger : icône + texte, jamais la couleur seule ── */
+  --success: var(--success-500);
+  --success-light: var(--success-50);
+  --success-fill: var(--success-500);
+  --success-fill-hover: var(--success-600);
+  /* Lu en direct comme aplat (bouton « Créer un compte » de l'accueil). */
+  --esp-green-strong: var(--success-500);
+  --status-archived: var(--success-500);
+  --status-archived-bg: var(--success-50);
+  --destructive: var(--danger-500);
+  --destructive-light: var(--danger-50);
+  --danger-fill: var(--danger-500);
+  --danger-fill-hover: var(--danger-600);
+  --status-error: var(--danger-500);
+  --status-error-bg: var(--danger-50);
+  /* Statuts neutres (badge) : plus de gris bleuté. */
+  --status-semi: var(--muted-foreground);
+  --status-semi-bg: var(--muted);
+  --status-inactive: var(--input);
+  --status-inactive-bg: var(--muted);
+
+  /* ── Échelle d'encre d'ui-v2, attribuée rôle par rôle ──
+     Deux niveaux de texte seulement (principal, secondaire), comme la palette ;
+     300 est le contour des champs et des boutons « outline », 200 le filet.
+     Fond et carte suivent la demande du propriétaire : `--ink-0` est la carte
+     beige, `--ink-100` le fond blanc (en sombre : la carte relevée et le fond
+     charbon), `--ink-50` la surface élevée. */
+  --ink-900: var(--foreground);
+  --ink-800: var(--foreground);
+  --ink-700: var(--foreground);
+  --ink-600: var(--muted-foreground);
+  --ink-500: var(--muted-foreground);
+  --ink-400: var(--muted-foreground);
+  --ink-300: var(--input);
+  --ink-200: var(--border);
+  --ink-150: var(--muted);
+  --ink-100: var(--background);
+  --ink-50: var(--popover);
+  --ink-0: var(--card);
+}

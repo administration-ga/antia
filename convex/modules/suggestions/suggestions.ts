@@ -148,11 +148,13 @@ export type DismissedSuggestionDto = { targetPersonId: Id<"persons">; handle: st
 /**
  * Les personnes que j'ai masquées dans ce réseau — pour les rouvrir. Le profil
  * est RELU à l'affichage, jamais recopié : une personne dépubliée redevient un
- * nom neutre, comme partout ailleurs.
+ * nom neutre, comme partout ailleurs. Un réseau gouverné sert sa propre liste,
+ * dont la projection applique les règles d'annuaire de sa tranche.
  */
 export const paginateDismissed = networkQuery({
   args: { paginationOpts: paginationOptsValidator },
   handler: async (ctx, args): Promise<PaginationResult<DismissedSuggestionDto>> => {
+    if (ctx.network.managedBy !== undefined) return fail("policyRefused")
     const result = await ctx.db
       .query("suggestionDismissals")
       .withIndex("by_network_person_createdAt", (q) => q.eq("networkId", ctx.networkId).eq("personId", ctx.person._id))
@@ -184,6 +186,7 @@ export type SentInvitationDto = {
  * par un index du demandeur et paginée.
  */
 export const paginateSentInvitations = networkQuery({
+  minStatus: "en_attente",
   args: { paginationOpts: paginationOptsValidator },
   handler: async (ctx, args): Promise<PaginationResult<SentInvitationDto>> => {
     const result = await ctx.db

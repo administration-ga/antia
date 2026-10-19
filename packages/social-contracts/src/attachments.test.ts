@@ -1,5 +1,5 @@
 // Dupliqué de socle/convex/modules/reseauPersonnel/messagerie/attachments.test.ts @ ad2e7fdc2 — adaptations : refus par code de règle au lieu des phrases ; l'aperçu rend une nature (l'écran accorde le pluriel) ; parité des listes blanches devenue structurelle (dérivées de la politique de dépôt), le test vérifie l'effet.
-import { DomainViolation } from "@antia/social-domain/violation"
+import { DomainViolation } from "@antsia/social-domain/violation"
 import { describe, expect, it } from "vitest"
 
 import {

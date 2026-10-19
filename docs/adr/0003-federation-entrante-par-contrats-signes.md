@@ -5,7 +5,7 @@
 
 ## Contexte
 
-ANTIA doit montrer les pages des administrations vérifiées et leurs publications déclarées
+ANTSIA doit montrer les pages des administrations vérifiées et leurs publications déclarées
 publiques (socle), et DIASPORALE doit recevoir une attestation consulaire et des objets publics
 (consulat.ga). La doctrine d'interopérabilité du programme est l'étanchéité : dépôts, déploiements
 et secrets distincts ; un lien se construit en HTTP contractuel, jamais en lecture de base à base
@@ -34,7 +34,7 @@ consulaire. Le moteur n'importe aucun `_generated`, schéma ni paquet d'un autre
 ### Négatives
 
 - Chaque flux exige un travail des deux côtés (outbox et ADR côté socle, PR côté gabon-diplomatie).
-- Rien ne remonte vers le socle en V1 : les échanges faits dans ANTIA sur un reflet y restent.
+- Rien ne remonte vers le socle en V1 : les échanges faits dans ANTSIA sur un reflet y restent.
 
 ### Neutres
 

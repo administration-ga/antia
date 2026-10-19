@@ -1,0 +1,227 @@
+{
+  "audioRoute": {
+    "reason": {
+      "ios": "On iPhone, the audio output is chosen in Control Center (AirPlay icon) — the call follows the phone's setting.",
+      "androidNoStrategy": "This browser cannot switch between the earpiece and the speaker.",
+      "desktopNoSelection": "This browser cannot choose the audio output: sound follows the computer's settings.",
+      "desktopOutputsHidden": "The browser only shows audio outputs once the microphone is allowed.",
+      "desktopSingleOutput": "Only one audio output on this device: plug in a headset or a speaker to choose."
+    },
+    "device": {
+      "default": "Default output",
+      "communications": "Communications output",
+      "generic": "Audio output"
+    },
+    "button": {
+      "speaker": "Speaker",
+      "earpiece": "Earpiece",
+      "output": "Audio output"
+    }
+  },
+  "callControls": {
+    "quality": {
+      "excellent": "Good quality",
+      "good": "Fair quality",
+      "poor": "Weak network",
+      "lost": "Connection lost",
+      "unknown": "Unknown quality"
+    }
+  },
+  "callErrors": {
+    "mediaServerNotConfigured": "Video calling is not configured on this deployment. Contact the platform administrator.",
+    "mediaServerUnavailable": "The call server is starting. Wait a minute, then try again.",
+    "mediaServerNoCapacity": "The call server cannot restart right now. Try again in a few minutes.",
+    "unauthenticated": "Your session has expired. Sign in again to call.",
+    "notFound": "This call is no longer available or is not meant for you.",
+    "fallback": "Could not connect to the call. Try again in a moment.",
+    "roomUnreachable": "Could not connect to the call server. Check your network and try again in a moment."
+  },
+  "callKindReconcile": {
+    "defaultGroupTitle": "Group call"
+  },
+  "callPeer": {
+    "fallbackName": "Your contact",
+    "scopePersonnel": "Personal call"
+  },
+  "callPhase": {
+    "phase": {
+      "failed": "Connection failed",
+      "reconnecting": "Reconnecting…",
+      "held": "On hold",
+      "peerHeld": "Put on hold",
+      "active": "In call",
+      "ringing": "Ringing…",
+      "connecting": "Connecting…",
+      "preparing": "Setting up the call…"
+    },
+    "end": {
+      "missed": "No answer",
+      "declined": "Call declined",
+      "busy": "Busy",
+      "dnd": "Do not disturb",
+      "inMeeting": "In a meeting",
+      "offline": "Offline",
+      "outsideRelations": "Outside their connections",
+      "cancelled": "Call cancelled",
+      "error": "Connection failed",
+      "ended": "Call ended"
+    },
+    "copy": {
+      "subjectFallback": "Your contact",
+      "missed": "{{subject}} did not answer.",
+      "declinedNote": "“{{note}}”",
+      "declined": "{{subject}} is not available right now.",
+      "busy": "{{subject}} is already on a call.",
+      "dnd": "{{subject}} is unavailable right now.",
+      "inMeeting": "{{subject}} is in a meeting.",
+      "offline": "{{subject}} is offline right now.",
+      "outsideRelations": "{{subject}} only takes calls from their connections.",
+      "error": "The call could not be established. Check your connection, then try again.",
+      "cancelled": "You cancelled the call.",
+      "duration": "Duration: {{duration}}"
+    }
+  },
+  "callSeats": {
+    "people_one": "{{count}} person",
+    "people_other": "{{count}} people",
+    "pendingInvites_one": "{{count}} pending invitation",
+    "pendingInvites_other": "{{count}} pending invitations",
+    "seatsLeft_one": "{{count}} seat left",
+    "seatsLeft_other": "{{count}} seats left",
+    "full": "full ({{max}} participants, including you)"
+  },
+  "callTimer": {
+    "justNow": "just now",
+    "minutesAgo": "{{minutes}} min ago",
+    "yesterday": "yesterday"
+  },
+  "conferenceHint": {
+    "audience": {
+      "thread": "the whole group"
+    },
+    "launch": "Start a conference",
+    "t1": {
+      "eyebrow": "Before the call",
+      "title": "This group has {{members}} members.",
+      "body": "A group call brings together at most {{capacity}} people, you included. Choose up to {{others}} people, or bring {{audience}} together in a conference.",
+      "primary": "Choose {{others}} people"
+    },
+    "t2": {
+      "eyebrow": "The call is full",
+      "title": "{{others}} people — the call is full.",
+      "body": "To talk to more people at once, the conference welcomes {{audience}}.",
+      "secondary": "Continue the call"
+    },
+    "t3": {
+      "eyebrow": "Call full",
+      "title": "Call full · {{capacity}} people.",
+      "body": "To bring more people together, start a conference."
+    }
+  },
+  "conferenceLaunchStore": {
+    "refusal": {
+      "personalElsewhere": "Conferences are started from your network."
+    }
+  },
+  "dndPresets": {
+    "thirtyMinutes": "30 minutes",
+    "oneHour": "1 hour",
+    "twoHours": "2 hours",
+    "tomorrowMorning": "Until tomorrow 08:00",
+    "untilDisabled": "Until turned off"
+  },
+  "groupCallCapacity": {
+    "counter": "{{shown}}/{{max}} people",
+    "full": "{{max}}/{{max}} people — call full ({{total}} in all, including you)"
+  },
+  "groupStage": {
+    "status": {
+      "ringing": "Ringing…",
+      "left": "Left",
+      "missed": "No answer",
+      "declined": "Declined",
+      "unavailable": "Unavailable",
+      "busy": "Already on a call",
+      "inMeeting": "In a meeting"
+    },
+    "subtitle": {
+      "connected_one": "{{count}} online",
+      "connected_other": "{{count}} online",
+      "ringing_one": "{{count}} ringing",
+      "ringing_other": "{{count}} ringing",
+      "nobodyAnswered": "Nobody answered"
+    },
+    "shortLabel": {
+      "withCount": "Group call · {{members}}",
+      "plain": "Group call"
+    },
+    "title": {
+      "plain": "Group call",
+      "names": "Group call — {{names}}",
+      "namesMore": "Group call — {{names}} +{{more}}"
+    }
+  },
+  "incomingGroup": {
+    "listPair": "{{head}} and {{last}}",
+    "withCorrespondents_one": "With {{count}} person, including you",
+    "withCorrespondents_other": "With {{count}} people, including you",
+    "namelessInvitee": "someone",
+    "others_one": "{{count}} other",
+    "others_other": "{{count}} others",
+    "withList": "With {{list}}, including you",
+    "label": {
+      "groupOnly": "Group call",
+      "call": "Call",
+      "group_one": "Group call · {{count}} person",
+      "group_other": "Group call · {{count}} people"
+    },
+    "bannerLabel_one": "{{title}} · {{count}} person",
+    "bannerLabel_other": "{{title}} · {{count}} people"
+  },
+  "mediaErrors": {
+    "camera": {
+      "denied": "Camera access denied — allow it in the browser's address bar.",
+      "notFound": "No camera detected — plug in a video device.",
+      "inUse": "Camera unavailable — another program may be using it.",
+      "generic": "Could not turn on the camera. Check the browser's permissions."
+    },
+    "mic": {
+      "denied": "Microphone access denied — allow it in the browser's address bar, then reload the page.",
+      "notFound": "No microphone detected — plug in an audio device.",
+      "inUse": "Microphone unavailable — another program may be using it.",
+      "generic": "Could not turn on the microphone. Check the browser's permissions."
+    },
+    "callMedia": {
+      "denied": "Microphone or camera access denied — allow them in the browser's address bar, then restart the call.",
+      "notFound": "No microphone or camera detected — plug in a device.",
+      "inUse": "Microphone or camera unavailable — another program may be using them.",
+      "generic": "Could not turn on the microphone or the camera. Check the browser's permissions."
+    },
+    "micBlocked": {
+      "consequence": "you can hear the other person, but they cannot hear you.",
+      "denied": "Your browser is blocking the microphone: {{consequence}} Allow the microphone in the address bar, then tap “Microphone blocked”.",
+      "notFound": "No microphone detected: {{consequence}} Plug in a microphone, then tap “Microphone blocked”.",
+      "inUse": "The microphone is being used by another program: {{consequence}} Free it, then tap “Microphone blocked”.",
+      "generic": "The microphone did not start: {{consequence}} Tap “Microphone blocked” to try again."
+    }
+  },
+  "mediaWatchdog": {
+    "cameraTimeout": "The camera is not responding — check its permission in the browser's address bar, then reload the page."
+  },
+  "useIappelActions": {
+    "declineFailed": "The decline could not be sent.",
+    "hangUpFailed": "The call could not be hung up cleanly."
+  },
+  "useIncomingCalls": {
+    "defaultQuickReplies": {
+      "callBack": "I'll call you back in 10 minutes",
+      "inMeeting": "In a meeting, text me",
+      "cannotAnswer": "I can't answer right now"
+    }
+  },
+  "useSpeakerOutput": {
+    "switchFailed": "Could not change the audio output.",
+    "selected": "Audio output: {{label}}",
+    "chosenDevice": "chosen device"
+  }
+}

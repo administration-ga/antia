@@ -1,4 +1,4 @@
-// Dupliqué de socle/convex/tests/storageArgFreshnessRatchet.test.ts @ ad2e7fdc2 — adaptations : constructeurs publics du moteur (`networkMutation`, `personMutation`, `operatorMutation`, `mutation`, `action`) ; gardes `assertFreshUpload` et `admitPosedUploads` (ni `admitPosedImages`, ni preuve de reprise FP) ; aucune exception ; analyseur sur des sources injectables, pour un « test du test » sur sources fabriquées (le moteur n'a pas encore d'entrée publique qui reçoive un fichier).
+// Dupliqué de socle/convex/tests/storageArgFreshnessRatchet.test.ts @ ad2e7fdc2 — adaptations : constructeurs publics du moteur (`networkMutation`, `personMutation`, `operatorMutation`, `mutation`, `action`, `networkAction`) ; gardes `assertFreshUpload` et `admitPosedUploads` (ni `admitPosedImages`, ni preuve de reprise FP) ; aucune exception ; analyseur sur des sources injectables, pour un « test du test » sur sources fabriquées.
 /**
  * storage-arg-freshness — CE QU'IL INTERDIT : qu'une fonction PUBLIQUE
  * d'écriture (mutation ou action) reçoive un identifiant de fichier
@@ -14,7 +14,9 @@
  *     fonctions dont le corps appelle `assertFreshUpload` ou `admitPosedUploads`
  *     (alias d'import compris), et sur les RÉFÉRENCES des fonctions Convex
  *     exportées qui l'atteignent (`internal.modules.x.y`, pour une action) ;
- *  3. une entrée publique qui reçoit un fichier sans rien de cela est un défaut.
+ *  3. une entrée publique qui reçoit un fichier sans rien de cela est un défaut,
+ *     même avec un constructeur renommé ou un export local séparé.
+ * Les commentaires, chaînes et simples mentions d’une référence ne sont pas des appels.
  *
  * SES LIMITES (nommées, comme au socle) : il voit la garde APPELÉE, pas qu'elle
  * porte sur le bon identifiant ; la résolution par NOM peut confondre deux
@@ -24,10 +26,11 @@
 import ts from "typescript"
 import { describe, expect, it } from "vitest"
 
-import { isTestFile, listFiles, readRepoFile } from "./lib/source-files"
+import { calledNames, exportedCalls, importedNames } from "./lib/detectors"
+import { isTestFile, listFiles, readRepoFile, walk } from "./lib/source-files"
 
 /** Constructeurs de fonctions PUBLIQUES qui peuvent écrire (ou faire écrire). */
-const PUBLIC_BUILDERS = new Set(["mutation", "networkMutation", "personMutation", "operatorMutation", "action"])
+const PUBLIC_BUILDERS = new Set(["mutation", "networkMutation", "personMutation", "operatorMutation", "action", "networkAction", "authMutation", "authAction"])
 
 /** Les gardes de départ du point fixe. */
 const GUARDS = ["assertFreshUpload", "admitPosedUploads"]
@@ -42,113 +45,108 @@ const GENERIC_NAMES = new Set([
 /** Entrées publiques qui reçoivent un fichier SANS atteindre la garde, et pourquoi. Vide. */
 const EXCEPTIONS: Record<string, string> = {}
 
-const STORAGE_ID = /v\.id\(\s*["']_storage["']\s*\)/
-
 type Source = { rel: string; text: string }
 type Entry = { key: string; guarded: boolean }
 
 export function analyse(sources: readonly Source[]): Entry[] {
-  const files = sources.map(({ rel, text }) => ({ rel, sf: ts.createSourceFile(rel, text, ts.ScriptTarget.Latest, true) }))
+  const files = sources.map(({ rel, text }) => {
+    const sf = ts.createSourceFile(rel, text, ts.ScriptTarget.Latest, true)
+    return { rel, sf, names: importedNames(sf) }
+  })
 
   // 1. Validateurs nommés porteurs d'un identifiant de fichier (point fixe).
-  const declarations: { name: string; text: string }[] = []
-  for (const { sf } of files) {
+  const declarations: { name: string; node: ts.Expression; names: ReadonlyMap<string, string> }[] = []
+  for (const { sf, names } of files) {
     for (const statement of sf.statements) {
       if (!ts.isVariableStatement(statement)) continue
       for (const declaration of statement.declarationList.declarations) {
         if (!ts.isIdentifier(declaration.name) || !declaration.initializer) continue
-        const text = declaration.initializer.getText(sf).trim()
-        if (!/^(v\.|\{)/.test(text) || declaration.name.text.length < 4) continue
-        declarations.push({ name: declaration.name.text, text })
+        const node = declaration.initializer
+        if (!(ts.isObjectLiteralExpression(node) || ts.isIdentifier(node) || (ts.isCallExpression(node) && ts.isPropertyAccessExpression(node.expression))) || declaration.name.text.length < 4) continue
+        declarations.push({ name: declaration.name.text, node, names })
       }
     }
   }
   const storageValidators = new Set<string>()
-  const carriesStorage = (text: string): boolean => STORAGE_ID.test(text) || [...storageValidators].some((name) => new RegExp(`\\b${name}\\b`).test(text))
+  const carriesStorage = (node: ts.Node, names: ReadonlyMap<string, string>): boolean => {
+    let carries = false
+    walk(node, (child) => {
+      if (ts.isIdentifier(child) && storageValidators.has(child.text)) carries = true
+      if (!ts.isCallExpression(child) || !ts.isPropertyAccessExpression(child.expression) || child.expression.name.text !== "id") return
+      const owner = child.expression.expression
+      const argument = child.arguments[0]
+      if (ts.isIdentifier(owner) && (names.get(owner.text) ?? owner.text) === "v" && argument && ts.isStringLiteralLike(argument) && argument.text === "_storage") carries = true
+    })
+    return carries
+  }
   for (let changed = true; changed; ) {
     changed = false
-    for (const { name, text } of declarations) {
-      if (storageValidators.has(name) || !carriesStorage(text)) continue
+    for (const { name, node, names } of declarations) {
+      if (storageValidators.has(name) || !carriesStorage(node, names)) continue
       storageValidators.add(name)
       changed = true
     }
   }
 
   // 2. Fonctions qui atteignent la garde (point fixe sur les noms et les références).
-  const bodies: { name: string; text: string }[] = []
-  for (const { sf } of files) {
-    const visit = (node: ts.Node): void => {
+  const bodies: { name: string; node: ts.Node; names: ReadonlyMap<string, string> }[] = []
+  for (const { sf, names } of files) {
+    walk(sf, (node) => {
       if (ts.isFunctionDeclaration(node) && node.name && node.body) {
-        bodies.push({ name: node.name.text, text: node.body.getText(sf) })
+        bodies.push({ name: node.name.text, node: node.body, names })
       } else if (ts.isVariableDeclaration(node) && ts.isIdentifier(node.name) && node.initializer && (ts.isArrowFunction(node.initializer) || ts.isFunctionExpression(node.initializer))) {
-        bodies.push({ name: node.name.text, text: node.initializer.getText(sf) })
+        bodies.push({ name: node.name.text, node: node.initializer, names })
       }
-      ts.forEachChild(node, visit)
-    }
-    visit(sf)
+    })
   }
-  const definitions: { reference: string; text: string }[] = []
-  for (const { rel, sf } of files) {
+  const definitions = files.flatMap(({ rel, sf, names }) => {
     const module = rel.replace(/^convex\//, "").replace(/\.ts$/, "").split("/").join(".")
-    for (const statement of sf.statements) {
-      if (!ts.isVariableStatement(statement)) continue
-      if (!statement.modifiers?.some((modifier) => modifier.kind === ts.SyntaxKind.ExportKeyword)) continue
-      for (const declaration of statement.declarationList.declarations) {
-        if (!ts.isIdentifier(declaration.name) || !declaration.initializer || !ts.isCallExpression(declaration.initializer)) continue
-        definitions.push({ reference: `${module}.${declaration.name.text}`, text: declaration.initializer.getText(sf) })
-      }
-    }
-  }
+    return exportedCalls(sf).map(({ name, call }) => ({ reference: `${module}.${name}`, node: call, names }))
+  })
   const guards = new Set(GUARDS)
   const references = new Set<string>()
-  const calls = (text: string, names: Iterable<string>): boolean => {
-    for (const name of names) if (new RegExp(`\\b${name}\\s*\\(`).test(text)) return true
-    return false
+  const calls = (node: ts.Node, names: ReadonlyMap<string, string>): boolean => [...calledNames(node, names)].some((name) => guards.has(name))
+  const referenceOf = (node: ts.Expression): string | undefined => {
+    if (ts.isIdentifier(node)) return node.text
+    if (!ts.isPropertyAccessExpression(node)) return undefined
+    const receiver = referenceOf(node.expression)
+    return receiver ? `${receiver}.${node.name.text}` : undefined
   }
-  const escape = (text: string): string => text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
-  const executes = (text: string): boolean => {
-    for (const reference of references) if (new RegExp(`\\b(?:internal|api)\\.${escape(reference)}\\b`).test(text)) return true
-    return false
+  const executes = (node: ts.Node): boolean => {
+    let guarded = false
+    walk(node, (child) => {
+      if (!ts.isCallExpression(child) || !ts.isPropertyAccessExpression(child.expression) || !["runMutation", "runAction"].includes(child.expression.name.text)) return
+      const reference = child.arguments[0] ? referenceOf(child.arguments[0]) : undefined
+      if (reference && /^(internal|api)\./.test(reference) && references.has(reference.replace(/^(internal|api)\./, ""))) guarded = true
+    })
+    return guarded
   }
   for (let changed = true; changed; ) {
     changed = false
-    for (const { name, text } of bodies) {
+    for (const { name, node, names } of bodies) {
       if (guards.has(name) || GENERIC_NAMES.has(name) || name.length < 6) continue
-      if (!calls(text, guards) && !executes(text)) continue
+      if (!calls(node, names) && !executes(node)) continue
       guards.add(name)
       changed = true
     }
-    for (const { reference, text } of definitions) {
+    for (const { reference, node, names } of definitions) {
       if (references.has(reference)) continue
-      if (!calls(text, guards) && !executes(text)) continue
+      if (!calls(node, names) && !executes(node)) continue
       references.add(reference)
       changed = true
     }
   }
 
-  // 3. Entrées publiques qui reçoivent un fichier.
+  // 3. Entrées publiques, même si le constructeur est importé sous un alias ou l'export séparé.
   const entries: Entry[] = []
-  for (const { rel, sf } of files) {
-    const local = new Set(guards)
-    for (const statement of sf.statements) {
-      if (!ts.isImportDeclaration(statement)) continue
-      const bindings = statement.importClause?.namedBindings
-      if (!bindings || !ts.isNamedImports(bindings)) continue
-      for (const element of bindings.elements) if (element.propertyName && guards.has(element.propertyName.text)) local.add(element.name.text)
-    }
-    for (const statement of sf.statements) {
-      if (!ts.isVariableStatement(statement)) continue
-      if (!statement.modifiers?.some((modifier) => modifier.kind === ts.SyntaxKind.ExportKeyword)) continue
-      for (const declaration of statement.declarationList.declarations) {
-        if (!ts.isIdentifier(declaration.name) || !declaration.initializer || !ts.isCallExpression(declaration.initializer)) continue
-        const call = declaration.initializer
-        if (!ts.isIdentifier(call.expression) || !PUBLIC_BUILDERS.has(call.expression.text)) continue
-        const definition = call.arguments[0]
-        if (!definition || !ts.isObjectLiteralExpression(definition)) continue
-        const args = definition.properties.find((property) => property.name !== undefined && property.name.getText(sf) === "args")
-        if (!args || !carriesStorage(args.getText(sf))) continue
-        entries.push({ key: `${rel}#${declaration.name.text}`, guarded: calls(call.getText(sf), local) || executes(call.getText(sf)) })
-      }
+  for (const { rel, sf, names } of files) {
+    for (const { name, call } of exportedCalls(sf)) {
+      if (!ts.isIdentifier(call.expression) || !PUBLIC_BUILDERS.has(names.get(call.expression.text) ?? call.expression.text)) continue
+      const definition = call.arguments[0]
+      if (!definition || !ts.isObjectLiteralExpression(definition)) continue
+      const args = definition.properties.find((property) => property.name !== undefined && property.name.getText(sf) === "args")
+      if (!args || !carriesStorage(args, names)) continue
+      entries.push({ key: `${rel}#${name}`, guarded: calls(call, names) || executes(call) })
     }
   }
   return entries.sort((a, b) => a.key.localeCompare(b.key))
@@ -202,6 +200,40 @@ describe("storage-arg-freshness — toute entrée publique qui reçoit un fichie
       ["viaAction", true],
       ["viaAlias", true],
       ["viaHelper", true],
+    ])
+  })
+
+  it("test du test : networkAction, constructeur renommé et export séparé reçoivent la même garde", () => {
+    const entries = analyse([{
+      rel: "convex/modules/media/fixture.ts",
+      text: [
+        'import { networkAction as act } from "../../lib/functions"',
+        'import { assertFreshUpload as fresh } from "../files/admission"',
+        'const fileArg = v.id("_storage")',
+        'const local = act({ args: { file: fileArg }, handler: async () => null })',
+        'export { local as separated }',
+        'export const direct = networkAction({ args: { file: fileArg }, handler: async () => null })',
+        'export const good = act({ args: { file: fileArg }, handler: async (ctx, a) => fresh(ctx, null, a.file) })',
+        'export const fake = act({ args: { file: fileArg }, handler: async () => { /* assertFreshUpload(ctx, null, file) */ return "assertFreshUpload(" } })',
+        'export const noFile = act({ args: { text: v.string() }, handler: async () => "v.id(\\\"_storage\\\")" })',
+      ].join("\n"),
+    }])
+    expect(entries.map((entry) => [entry.key.split("#")[1], entry.guarded])).toEqual([
+      ["direct", false], ["fake", false], ["good", true], ["separated", false],
+    ])
+  })
+
+  it("test du test : seul un appel de la référence gardée protège une action", () => {
+    const entries = analyse([
+      { rel: "convex/modules/media/guard.ts", text: 'export const fresh = internalMutation({ args: {}, handler: async (ctx) => assertFreshUpload(ctx, null, "x") })' },
+      { rel: "convex/modules/media/actions.ts", text: [
+        'export const mentioned = action({ args: { file: v.id("_storage") }, handler: async () => { /* internal.modules.media.guard.fresh */ return "assertFreshUpload(" } })',
+        'export const referenceOnly = action({ args: { file: v.id("_storage") }, handler: async () => internal.modules.media.guard.fresh })',
+        'export const executed = action({ args: { file: v.id("_storage") }, handler: async (ctx) => ctx.runMutation(internal.modules.media.guard.fresh, {}) })',
+      ].join("\n") },
+    ])
+    expect(entries.map((entry) => [entry.key.split("#")[1], entry.guarded])).toEqual([
+      ["executed", true], ["mentioned", false], ["referenceOnly", false],
     ])
   })
 })

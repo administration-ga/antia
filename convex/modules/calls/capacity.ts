@@ -8,7 +8,7 @@
  *
  * Module PUR.
  */
-import { GROUP_CALL_DEFAULT_MAX_PARTICIPANTS, GROUP_CALL_MIN_PARTICIPANTS } from "@antia/social-contracts/groupCapacity"
+import { GROUP_CALL_DEFAULT_MAX_PARTICIPANTS, GROUP_CALL_MIN_PARTICIPANTS } from "@antsia/social-contracts/groupCapacity"
 
 /** Un appel de GROUPE réunit l'appelant et au moins deux correspondants. */
 export const GROUP_CALL_FLOOR = GROUP_CALL_MIN_PARTICIPANTS

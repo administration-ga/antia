@@ -11,7 +11,7 @@
  *  5. aucun identifiant de stockage dans un DTO, aucune photo retenue montrée à
  *     un autre que son propriétaire, aucun orphelin après une suppression.
  */
-import { engineErrorCode, engineErrorRule } from "@antia/social-contracts/errors"
+import { engineErrorCode, engineErrorRule } from "@antsia/social-contracts/errors"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 import { api, internal } from "../../_generated/api"
@@ -40,13 +40,22 @@ async function seed(t: T) {
   return await t.mutation(internal.seeds.foundations.run, { confirmNonProduction: SEED_CONFIRMATION })
 }
 
-async function enter(t: T, rootId: Id<"networks">, handle: string): Promise<Person> {
+async function enter(t: T, rootId: Id<"networks">, handle: string, status: "declaree" | "verifiee" = "declaree"): Promise<Person> {
   vi.setSystemTime(Date.now() + 1000)
   const as = t.withIdentity({ subject: `auth-${handle}` })
   const personId = await as.mutation(api.modules.people.persons.ensureMyPerson, {})
   await as.mutation(api.modules.people.consents.recordConsent, { purpose: "social_profile", origin: "onboarding" })
   await as.mutation(api.modules.people.profile.publishMyProfile, { handle, displayName: `Nom publié ${handle}` })
   await as.mutation(api.modules.people.memberships.joinNetwork, { networkId: rootId })
+  // Les cas de cycle de vie/diffusion qui font plusieurs publications utilisent
+  // une fixture vérifiée ; les autres gardent le vrai statut déclaré et ses quotas.
+  if (status === "verifiee") {
+    await t.run(async (ctx) => {
+      const membership = await ctx.db.query("networkMemberships").withIndex("by_network_and_person", (q) => q.eq("networkId", rootId).eq("personId", personId)).unique()
+      if (!membership) throw new Error("Adhésion de fixture absente")
+      await ctx.db.patch(membership._id, { status, statusChangedAt: Date.now() })
+    })
+  }
   return { as, personId, handle }
 }
 
@@ -365,7 +374,7 @@ describe("ACL — l'audience recontrôlée à chaque lecture", () => {
   it("republier rouvre l'album en gardant sa date d'origine ; publier deux fois est un rejeu ; un album vide ne se publie pas", async () => {
     const t = testConvex()
     const { root } = await seed(t)
-    const alice = await enter(t, root, "alice")
+    const alice = await enter(t, root, "alice", "verifiee")
     const bob = await enter(t, root, "bob")
     const albumId = await mkAlbum(t, alice, root, { publish: true })
     const premier = await alice.as.query(A.getAlbum, { networkId: root, albumId })
@@ -495,7 +504,7 @@ describe("les DTO ne portent ni identifiant de stockage ni état civil", () => {
   it("les abonnés sont prévenus à la PREMIÈRE publication seulement, et seulement s'ils voient l'album", async () => {
     const t = testConvex()
     const { root } = await seed(t)
-    const alice = await enter(t, root, "alice")
+    const alice = await enter(t, root, "alice", "verifiee")
     const follower = await enter(t, root, "abonne")
     const friend = await enter(t, root, "amie")
     await connect(t, root, alice, friend)

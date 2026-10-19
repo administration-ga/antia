@@ -10,8 +10,8 @@
  * pas de `contentType` : le type DÉCLARÉ à l'admission sert de repli, et c'est
  * précisément ce que l'inspection des octets vient confronter.
  */
-import { engineErrorCode, engineErrorRule } from "@antia/social-contracts/errors"
-import type { UploadUsage } from "@antia/social-domain/uploadPolicy"
+import { engineErrorCode, engineErrorRule } from "@antsia/social-contracts/errors"
+import type { UploadUsage } from "@antsia/social-domain/uploadPolicy"
 import JSZip from "jszip"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
@@ -19,7 +19,7 @@ import { api, internal } from "../../_generated/api"
 import type { Doc, Id } from "../../_generated/dataModel"
 import type { MutationCtx } from "../../_generated/server"
 import { SEED_CONFIRMATION } from "../../seeds/foundations"
-import { testConvex } from "../../test.setup"
+import { createTestOperatorProof, testConvex } from "../../test.setup"
 import { admitStoredUpload, assertFreshUpload, enqueueScan, findScanByStorageId, registerGeneratedBlob } from "./admission"
 import { EICAR_SIGNATURE } from "./avProviders"
 import { admitPosedUploads } from "./posedUploads"
@@ -82,6 +82,7 @@ async function operator(t: T, rootId: Id<"networks">, subject: string) {
   await t.run(async (ctx) => {
     await ctx.db.insert("operators", { personId: person.personId, role: "platform_operator", grantedAt: Date.now() })
   })
+  await createTestOperatorProof(t, person.as, person.personId)
   return person
 }
 

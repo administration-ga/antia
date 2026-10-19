@@ -2,7 +2,7 @@
 /**
  * Ce qu'un message de conversation est, des deux côtés de l'API.
  */
-import { DomainViolation } from "@antia/social-domain/violation"
+import { DomainViolation } from "@antsia/social-domain/violation"
 
 /**
  * Fenêtre pendant laquelle l'AUTEUR peut encore modifier ou retirer son
@@ -13,6 +13,19 @@ export const MESSAGE_EDIT_WINDOW_MS = 15 * 60 * 1000
 
 /** Un message n'est pas un document : 4 000 caractères au plus. */
 export const MESSAGE_MAX_LENGTH = 4000
+
+/** Une citation est une référence relue ; un compte effacé ne conserve aucun identifiant. */
+export type MessageReplyQuote<MessageId extends string, PersonId extends string> = {
+  messageId: MessageId | null
+  senderPersonId: PersonId | null
+  excerpt: string
+  deleted: boolean
+  authorDeleted?: boolean
+}
+
+export function deletedAccountReply(): { messageId: null; senderPersonId: null; excerpt: ""; deleted: true; authorDeleted: true } {
+  return { messageId: null, senderPersonId: null, excerpt: "", deleted: true, authorDeleted: true }
+}
 
 /** Le texte d'un message, nettoyé : vide seulement s'il porte des pièces ; borné. */
 export function assertMessageContent(text: string, hasAttachments: boolean): string {

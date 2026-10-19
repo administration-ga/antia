@@ -1,0 +1,343 @@
+{
+  "post": {
+    "origin": "Posted from {{name}}",
+    "event": {
+      "label": "Announced event",
+      "scheduled": "Scheduled event",
+      "cancelled": "Cancelled event",
+      "timeZone": "Times shown in your time zone: {{timeZone}}",
+      "participation": "Your recorded response: {{response}}"
+    }
+  },
+  "feedPages": {
+    "errorTitle": "Feed unavailable",
+    "errorMessage": "Posts could not be loaded.",
+    "incomplete": "This feed is incomplete. Some posts may not be displayed.",
+    "preparing": "Your feed is being prepared. Some posts may be missing during preparation.",
+    "historySince": "This feed shows posts since {{date}}."
+  },
+  "reseauFeedPages": {
+    "loadMore": {
+      "none": "No more posts.",
+      "added_one": "{{count}} more post.",
+      "added_many": "{{count}} more posts.",
+      "added_other": "{{count}} more posts."
+    }
+  },
+  "feedScopes": {
+    "chips": {
+      "pour_vous": {
+        "label": "For you",
+        "description": "Posts from your connections and from the people you follow."
+      },
+      "recents": {
+        "label": "Recent",
+        "description": "Everything you are allowed to see, newest first — including people you do not follow yet."
+      }
+    }
+  },
+  "postComposerTarget": {
+    "heading": {
+      "group": "Post in “{{name}}”",
+      "page": "Post as {{name}}",
+      "feed": "Post to your network"
+    },
+    "audienceNote": {
+      "group": "Visible to group members only."
+    },
+    "disclaimer": {
+      "page": "This post speaks for the page: you are its signatory, never the displayed author.",
+      "personal": "What you post here belongs to you. A message that commits an organization is posted on behalf of its page."
+    },
+    "submit": {
+      "pending": "Posting…",
+      "page": "Post as {{name}}",
+      "idle": "Post"
+    }
+  },
+  "postOverflow": {
+    "bookmark": {
+      "addLabel": "Save",
+      "removeLabel": "Remove from saved",
+      "addHint": "To find it again in your saved posts.",
+      "removeHint": "It will no longer be among your saved posts."
+    },
+    "edit": {
+      "label": "Edit",
+      "hint": "Rework the text of the post, in place."
+    },
+    "pin": {
+      "label": "Pin to my wall",
+      "hint": "It stays at the top of your profile."
+    },
+    "remove": {
+      "label": "Remove my post",
+      "hint": "It disappears from the network. You can still see it."
+    },
+    "notify": {
+      "onLabel": "Get notified of comments",
+      "offLabel": "Stop notifications",
+      "onHint": "You will be notified of its new comments.",
+      "offHint": "You will no longer be notified of its new comments."
+    },
+    "hide": {
+      "label": "Hide this post",
+      "hint": "It leaves your feed. Nobody is told."
+    },
+    "muteAuthor": {
+      "label": "Stop seeing posts from {{name}}",
+      "hint": "Only in your feed. The person can still be found, and you can still write to each other."
+    },
+    "report": {
+      "label": "Report",
+      "hint": "Sent to the platform's moderation. The post leaves your feed right away."
+    },
+    "undo": {
+      "hidden": "Post hidden.",
+      "muted": "You will no longer see posts from {{name}}."
+    }
+  },
+  "creationController": {
+    "entries": {
+      "publication": {
+        "label": "Post",
+        "description": "A written update, addressed to your network."
+      },
+      "actu": {
+        "label": "Story",
+        "description": "A picture or a few words that fade away after twenty-four hours."
+      },
+      "evenement": {
+        "label": "Event",
+        "description": "A date to announce, with its invitations and their answers."
+      },
+      "album": {
+        "label": "Album",
+        "description": "A collection of photos, ordered and captioned, on your profile."
+      },
+      "conference": {
+        "label": "Conference",
+        "description": "Prepare a broadcast in this network."
+      }
+    }
+  },
+  "useMediaDraft": {
+    "rejection": {
+      "notImage": "“{{name}}” is not an accepted image.",
+      "notMedia": "“{{name}}” is neither an accepted image nor an accepted video.",
+      "videoAlone": "A video stands alone in its post.",
+      "tooMany": "A post holds at most {{max}} media.",
+      "tooBig": "“{{name}}” exceeds {{max}} MB."
+    },
+    "error": {
+      "reselect": "“{{name}}” must be selected again: the file is no longer in memory.",
+      "uploadRefused": "Upload refused for “{{name}}”."
+    }
+  },
+  "reportContentDialog": {
+    "title": {
+      "publication": "Report this post",
+      "commentaire": "Report this comment"
+    },
+    "description": "The platform reviews the report. The author does not learn who you are.",
+    "reasonLabel": "Reason",
+    "reasons": {
+      "harassment": "Harassment or intimidation",
+      "hate": "Hate or discrimination",
+      "violence": "Violence or threat",
+      "sexual_content": "Inappropriate sexual content",
+      "misinformation": "Misleading information",
+      "other": "Other reason"
+    },
+    "noteLabel": "Optional details",
+    "noteAriaLabel": "Details of the report",
+    "cancel": "Cancel",
+    "submitting": "Sending…",
+    "submit": "Send"
+  },
+  "postReactionControl": {
+    "trigger": "{{label}}. Long press or arrow key to pick a reaction.",
+    "triggerWithCount_one": "{{label}} · {{formatted}} reaction. Long press or arrow key to pick a reaction.",
+    "triggerWithCount_many": "{{label}} · {{formatted}} reactions. Long press or arrow key to pick a reaction.",
+    "triggerWithCount_other": "{{label}} · {{formatted}} reactions. Long press or arrow key to pick a reaction.",
+    "title": "React",
+    "palette": "Pick a reaction",
+    "more": "Show reaction choices",
+    "optionWithCount": "{{label}} · {{formatted}}",
+    "toggle": "{{label}}",
+    "toggleWithCount_one": "{{label}} · {{formatted}} reaction",
+    "toggleWithCount_many": "{{label}} · {{formatted}} reactions",
+    "toggleWithCount_other": "{{label}} · {{formatted}} reactions"
+  },
+  "postMedia": {
+    "videoLabel": "Video of the post",
+    "position": "Image {{position}} of {{total}}",
+    "carouselRole": "carousel",
+    "carouselLabel": "Photos of the post, {{total}} images",
+    "slideRole": "slide",
+    "expand": "Show image {{position}} of {{total}} full screen",
+    "expandSingle": "Show image full screen",
+    "fullscreenSingle": "Image full screen",
+    "fullscreenLabel": "{{announcement}} full screen",
+    "closeFullscreen": "Close full screen",
+    "previous": "Previous image",
+    "next": "Next image",
+    "chooseImage": "Choose an image",
+    "show": "Show image {{position}} of {{total}}",
+    "unavailable": "Image unavailable",
+    "mediaUnavailable": "Media unavailable"
+  },
+  "postCard": {
+    "actionsLabel": "Actions on the post",
+    "caption": {
+      "more": "Read more",
+      "less": "Show less"
+    },
+    "toast": {
+      "editFailed": "The edit could not be saved.",
+      "reported": "Report sent. The post is hidden from your feed.",
+      "reportFailed": "The report could not be sent.",
+      "reactionFailed": "This post is no longer accessible.",
+      "removed": "Post removed.",
+      "removeFailed": "The removal could not be saved.",
+      "pinned": "Post pinned to your wall.",
+      "pinFailed": "Pinning failed.",
+      "edited": "Post edited."
+    },
+    "unknownAuthor": "Network member",
+    "context": "{{audience}}. {{reason}}.",
+    "editLabel": "Edit the post",
+    "save": "Save",
+    "cancel": "Cancel",
+    "comment": "Comment",
+    "commentWithCount": "Comment · {{formatted}}",
+    "share": "Share",
+    "shareWithCount": "Share · {{formatted}}",
+    "shareUnavailable": "Post unavailable.",
+    "publication": {
+      "withdraw": "Withdraw from public reading",
+      "withdrawing": "Withdrawing from public reading…",
+      "withdrawConfirm": "Withdraw this post from reading without an account on {{brand}}? It will remain available to members according to its audience.",
+      "withdrawn": "The post has been withdrawn from reading without an account.",
+      "withdrawFailed": "Withdrawal from public reading could not be saved.",
+      "availableOnRoot": "Also readable in {{brand}}."
+    }
+  },
+  "sharePostDialog": {
+    "title": "Share {{name}}'s post",
+    "close": "Close",
+    "linkLabel": "Post link",
+    "linkHint": "Recipients must have access to this post to view it.",
+    "copyLink": "Copy link",
+    "copied": "Link copied.",
+    "copyFailed": "Automatic copying failed. The link is selected: copy it manually.",
+    "quote": "Share to my feed",
+    "wordLabel": "Add a few words (optional)",
+    "wordPlaceholder": "Why you are sharing it…",
+    "audienceLabel": "Who sees your share",
+    "audienceHint": "You are sharing a post already open to the whole network. Your share follows the audience you choose here.",
+    "cancel": "Cancel",
+    "sending": "Sharing…",
+    "share": "Share",
+    "toast": {
+      "shared": "Post shared.",
+      "failed": "The share could not be saved."
+    }
+  },
+  "commentsSurface": {
+    "title": "Comments",
+    "conversations_one": "{{count}} conversation",
+    "conversations_many": "{{count}} conversations",
+    "conversations_other": "{{count}} conversations",
+    "join": "Join the conversation",
+    "close": "Close comments",
+    "closeTitle": "Close",
+    "loading": "Loading comments…",
+    "unavailable": "Comments are not available.",
+    "retry": "Try again",
+    "empty": "No comments yet.",
+    "loadMore": "Show more comments",
+    "loadingMore": "Loading…",
+    "showAllReplies_one": "Show the reply",
+    "showAllReplies_many": "Show the {{count}} replies",
+    "showAllReplies_other": "Show the {{count}} replies",
+    "loadingReplies": "Loading replies…",
+    "moreReplies": "Show more replies",
+    "repliesErrorTitle": "Replies unavailable",
+    "repliesErrorMessage": "Replies are not available.",
+    "replyingTo": "Replying to a comment",
+    "cancel": "Cancel",
+    "placeholder": "Write a comment… (@handle to mention)",
+    "inputLabel": "Write a comment",
+    "tooLong_one": "{{count}} character too many",
+    "tooLong_many": "{{count}} characters too many",
+    "tooLong_other": "{{count}} characters too many",
+    "sending": "Posting…",
+    "send": "Post",
+    "unknownAuthor": "Network member",
+    "reply": "Reply",
+    "edit": "Edit",
+    "editLabel": "Edit the comment",
+    "save": "Save",
+    "remove": "Remove",
+    "report": "Report",
+    "published": "Comment posted.",
+    "toast": {
+      "publishFailed": "The comment could not be posted.",
+      "removeFailed": "The removal could not be saved.",
+      "editFailed": "The edit could not be saved."
+    }
+  },
+  "postOverflowMenu": {
+    "trigger": "More actions on this post",
+    "menu": "Actions on this post",
+    "undo": "Undo",
+    "toast": {
+      "bookmarked": "Post saved.",
+      "unbookmarked": "Removed from your saved posts.",
+      "notifying": "You will follow the comments.",
+      "notNotifying": "You no longer follow this post.",
+      "failed": "The action could not be saved."
+    }
+  },
+  "postComposer": {
+    "placeholder": "Share news, a practice, a question… Use #keyword and @handle.",
+    "reselectOne": "“{{name}}” must be selected again: the file was not kept.",
+    "reselectMany_one": "{{count}} media item must be selected again: the file was not kept.",
+    "reselectMany_many": "{{count}} media items must be selected again: the files were not kept.",
+    "reselectMany_other": "{{count}} media items must be selected again: the files were not kept.",
+    "tileUploaded": "{{name}} — already uploaded",
+    "tileReselect": "{{name}} — select again",
+    "removeMedia": "Remove {{name}}",
+    "altPlaceholder": "Describe this media (recommended)",
+    "altLabel": "Alternative text for {{name}}",
+    "addMedia": "Photo or video",
+    "audienceLabel": "Who can see",
+    "remaining_one": "{{count}} character left",
+    "remaining_many": "{{count}} characters left",
+    "remaining_other": "{{count}} characters left",
+    "toast": {
+      "published": "Post published.",
+      "failed": "The post could not be saved."
+    },
+    "publication": {
+      "legend": "Post distribution",
+      "withoutAccount": "Available without an account",
+      "alsoOnRoot": "Also publish on {{brand}}, available without an account",
+      "publicHint": "This post may be read and shared without an account on {{brand}}. Your choice applies to this content, not to your profile privacy.",
+      "memberHint": "Without this choice, the post remains restricted to members according to its audience.",
+      "provinceLabel": "Content province (optional)",
+      "noProvince": "No province assigned",
+      "provinceHint": "Choose a province only if the content concerns it. No location is inferred from your profile.",
+      "pagePolicyHint": "Distribution follows this page’s settings."
+    }
+  },
+  "postComposerSheet": {
+    "title": "Post",
+    "confirmAnnouncement": "Confirm discarding the draft, or go back.",
+    "confirmDiscard": "Confirm discard",
+    "back": "Go back",
+    "discard": "Discard the draft",
+    "close": "Close"
+  }
+}

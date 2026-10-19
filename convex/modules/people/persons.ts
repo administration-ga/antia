@@ -4,8 +4,8 @@
  * (invariant 7). Les badges ne sont pas stockés : ils sont calculés ici, à
  * chaque lecture, à partir des liens d'identité (invariant 5).
  */
-import { computePersonBadges, hasStrongIdentity } from "@antia/social-domain/badges"
-import { isConsentInForce } from "@antia/social-domain/consent"
+import { computePersonBadges, hasStrongIdentity } from "@antsia/social-domain/badges"
+import { isConsentInForce, type ConsentPurpose } from "@antsia/social-domain/consent"
 import { v } from "convex/values"
 
 import type { Doc, Id } from "../../_generated/dataModel"
@@ -13,8 +13,12 @@ import { mutation, query, type QueryCtx } from "../../_generated/server"
 import { getCurrentPerson } from "../../lib/access"
 import { fail } from "../../lib/errors"
 import { enforceRateLimit } from "../../lib/rateLimit"
-import { badgeValidator, consentPurposeValidator, localeValidator } from "../../lib/validators"
+import { getActiveIdentity } from "../../lib/session"
+import { bindOperatorSession } from "../../lib/operatorIdentity"
+import { badgeValidator, consentPurposeValidator, localeValidator, memberThemeValidator } from "../../lib/validators"
+import { hasLiveAdministrationGrant } from "../federation/agentAuthority"
 import { resolveFileDelivery, withheldCodeOf, withheldCodeValidator } from "../files/storageGuard"
+import { syncIdentityForPerson } from "./identity"
 
 /** Liens d'identité VIVANTS d'une personne (bornés : un par fournisseur, quatre fournisseurs). */
 export async function liveIdentityLinks(ctx: Pick<QueryCtx, "db">, personId: Id<"persons">): Promise<Doc<"identityLinks">[]> {
@@ -23,7 +27,9 @@ export async function liveIdentityLinks(ctx: Pick<QueryCtx, "db">, personId: Id<
     .query("identityLinks")
     .withIndex("by_person_and_provider", (q) => q.eq("personId", personId))
     .take(16)
-  return links.filter((link) => link.revokedAt === undefined)
+  const live = links.filter((link) => link.revokedAt === undefined)
+  const administrationGranted = live.some((link) => link.provider === "administration") && await hasLiveAdministrationGrant(ctx, personId)
+  return live.filter((link) => link.provider !== "administration" || administrationGranted)
 }
 
 export async function badgesOf(ctx: Pick<QueryCtx, "db">, personId: Id<"persons">) {
@@ -43,6 +49,7 @@ const myPersonValidator = v.object({
   private: v.boolean(),
   locale: v.optional(localeValidator),
   timeZone: v.optional(v.string()),
+  theme: v.optional(memberThemeValidator),
   badges: v.array(badgeValidator),
   consentsInForce: v.array(consentPurposeValidator),
   /** Photo et couverture : URL servie par la garde, ou la retenue (analyse en cours, bloquée). */
@@ -67,12 +74,20 @@ export const getMyPerson = query({
   handler: async (ctx) => {
     const person = await getCurrentPerson(ctx)
     if (!person) return null
-    // borné : un consentement par finalité et par réseau, six finalités.
+    // borné : historique des consentements d'une personne, cent lignes au plus.
     const consents = await ctx.db
       .query("consents")
       .withIndex("by_person_and_purpose", (q) => q.eq("personId", person._id))
       .take(100)
-    const purposes = [...new Set(consents.map((consent) => consent.purpose))].filter((purpose) => isConsentInForce(consents, purpose))
+    const applicableConsents = consents.filter((consent) => consent.purpose !== "usage_analytics")
+    const purposes: ConsentPurpose[] = [...new Set(applicableConsents.map((consent) => consent.purpose))].filter((purpose) => isConsentInForce(applicableConsents, purpose))
+    // borné : une seule preuve analytics, la plus récente ; historique et réseaux ne l'élargissent pas.
+    const latestAnalytics = await ctx.db
+      .query("consents")
+      .withIndex("by_person_and_purpose", (q) => q.eq("personId", person._id).eq("purpose", "usage_analytics"))
+      .order("desc")
+      .take(1)
+    if (latestAnalytics[0]?.networkId === undefined && isConsentInForce(latestAnalytics, "usage_analytics")) purposes.push("usage_analytics")
     return {
       _id: person._id,
       ...(person.handle ? { handle: person.handle } : {}),
@@ -82,6 +97,7 @@ export const getMyPerson = query({
       private: person.privateAt !== undefined,
       ...(person.locale ? { locale: person.locale } : {}),
       ...(person.timeZone ? { timeZone: person.timeZone } : {}),
+      ...(person.theme ? { theme: person.theme } : {}),
       badges: await badgesOf(ctx, person._id),
       consentsInForce: purposes,
       avatar: await profileImage(ctx, person.avatarStorageId),
@@ -98,16 +114,26 @@ export const getMyPerson = query({
 export const ensureMyPerson = mutation({
   args: {},
   returns: v.id("persons"),
-  handler: async (ctx) => {
-    const identity = await ctx.auth.getUserIdentity()
+  handler: async (ctx): Promise<Id<"persons">> => {
+    const identity = await getActiveIdentity(ctx)
     if (!identity) return fail("unauthenticated")
+    await enforceRateLimit(ctx, "person.bootstrap", identity.subject)
     const existing = await ctx.db
       .query("persons")
       .withIndex("by_authUserId", (q) => q.eq("authUserId", identity.subject))
       .unique()
-    if (existing) return existing._id
+    if (existing) {
+      await syncIdentityForPerson(ctx, existing)
+      await bindOperatorSession(ctx, identity.sessionId, existing)
+      return existing._id
+    }
     await enforceRateLimit(ctx, "person.ensure", identity.subject)
     const now = Date.now()
-    return await ctx.db.insert("persons", { authUserId: identity.subject, createdAt: now, updatedAt: now })
+    const personId = await ctx.db.insert("persons", { authUserId: identity.subject, createdAt: now, updatedAt: now })
+    const person = await ctx.db.get(personId)
+    if (!person) return fail("unauthenticated")
+    await syncIdentityForPerson(ctx, person)
+    await bindOperatorSession(ctx, identity.sessionId, person)
+    return personId
   },
 })

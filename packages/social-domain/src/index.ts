@@ -1,5 +1,5 @@
 /**
- * @antia/social-domain — source de vérité des règles du moteur social.
+ * @antsia/social-domain — source de vérité des règles du moteur social.
  *
  * TypeScript PUR : aucun import de Convex, de React ni d'un autre paquet. Le
  * backend (`convex/`) et les applications importent ces règles ; elles ne
@@ -12,7 +12,7 @@
  *    thématiques, évènements, stories, fils de groupe, recherche, fil, état des
  *    demandes de relation, propositions d'identifiant.
  *
- * Chaque module s'importe aussi par son chemin (`@antia/social-domain/content`).
+ * Chaque module s'importe aussi par son chemin (`@antsia/social-domain/content`).
  */
 export const SOCIAL_DOMAIN_VERSION = "0.0.0" as const
 

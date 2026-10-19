@@ -1,0 +1,198 @@
+{
+  "localPip": {
+    "move": "Déplacer ma vignette"
+  },
+  "remoteVideoStage": {
+    "connecting": "Connexion vidéo…",
+    "cameraOff": "Caméra coupée",
+    "cameraOffBy": "Caméra coupée par {{name}}"
+  },
+  "heldCallChips": {
+    "label": "Appels en attente",
+    "held": "En attente",
+    "resume": "Reprendre l'appel avec {{name}}",
+    "hangUp": "Raccrocher l'appel avec {{name}}"
+  },
+  "speakerPickerPanel": {
+    "title": "Sortie audio"
+  },
+  "callMinimizedPill": {
+    "move": "Déplacer la pilule d'appel",
+    "label": "Appel en cours avec {{name}}",
+    "restore": "Revenir à l'appel avec {{name}}",
+    "unmute": "Réactiver le micro",
+    "mute": "Couper le micro",
+    "fullscreen": "Afficher l'appel en plein écran",
+    "hangUp": "Raccrocher",
+    "heldSuffix": "en attente"
+  },
+  "callSurface": {
+    "label": "Appel avec {{name}}",
+    "move": "Déplacer la fenêtre d'appel",
+    "moveHelp": "Flèches pour déplacer, Maj pour un pas plus grand, Origine et Fin pour les coins, Échap pour annuler un déplacement en cours, double-clic pour revenir à la position d'origine."
+  },
+  "conferenceHintCard": {
+    "close": "Fermer"
+  },
+  "groupCallGrid": {
+    "cameraPending": "Caméra en cours…",
+    "videoConnecting": "Connexion vidéo…",
+    "thisPeer": "ce correspondant",
+    "announce": "{{name}}",
+    "announceCaller": "{{name}} (appelant)",
+    "announceMe": "{{name}} (vous)",
+    "mutedState": "micro coupé",
+    "pin": "Mettre {{name}} à la scène",
+    "unpin": "Détacher {{name}} de la scène",
+    "labelWithState": "{{action}} — {{state}}",
+    "caller": "Appelant",
+    "muted": "Micro coupé",
+    "peer": "Correspondant",
+    "meName": "{{name}} (vous)",
+    "addLabel": "Ajouter une personne à l'appel",
+    "add": "Ajouter",
+    "others": "Autres participants"
+  },
+  "callEndScreen": {
+    "retrying": "Rappel en cours…",
+    "retry": "Rappeler",
+    "voicemail": "Laisser un message",
+    "write": "Écrire",
+    "close": "Fermer"
+  },
+  "callWaitingChip": {
+    "label": "Appel en attente de {{name}}",
+    "decline": "Refuser l'appel de {{name}}",
+    "acceptHint": "L'appel en cours passera en attente",
+    "accept": "Prendre"
+  },
+  "incomingCallBanner": {
+    "groupLabel": "Appel de groupe de {{name}} — {{group}}",
+    "label": "Appel entrant de {{name}}",
+    "audioBlocked": "Cliquez n'importe où pour activer le son",
+    "ringtoneMuted": "Sonnerie coupée dans vos réglages",
+    "declineWithMessage": "Refuser avec un message",
+    "decline": "Refuser l'appel",
+    "answerVideo": "Répondre en vidéo",
+    "answer": "Répondre"
+  },
+  "incomingCallCard": {
+    "groupVideo": "Appel vidéo de groupe",
+    "group": "Appel de groupe",
+    "incomingVideo": "Appel vidéo entrant",
+    "incoming": "Appel entrant",
+    "audioBlocked": "Touchez l'écran pour activer le son",
+    "ringtoneMuted": "Sonnerie coupée dans vos réglages",
+    "personal": "Appel personnel",
+    "includingYou": "vous compris",
+    "declineWithMessage": "Refuser avec un message",
+    "cancel": "Annuler",
+    "message": "Message",
+    "answerAudio": "Répondre en audio",
+    "answerVideo": "Répondre en vidéo",
+    "decline": "Refuser",
+    "answer": "Répondre"
+  },
+  "callStage": {
+    "busy": "Occupé",
+    "duration": "Durée de l'appel",
+    "minimize": "Réduire l'appel",
+    "groupCall": "Appel de groupe",
+    "participants_one": "{{count}} participant",
+    "participants_other": "{{count}} participants",
+    "heldByMe": "Votre correspondant ne vous entend plus — reprenez quand vous voulez.",
+    "heldByPeer": "Votre correspondant vous a mis en attente.",
+    "micBlocked": "On ne vous entend pas — votre micro est bloqué. Touchez « Micro bloqué » pour réessayer.",
+    "micBlockedLabel": "Micro bloqué",
+    "muted": "Muet",
+    "mic": "Micro",
+    "camera": "Caméra",
+    "cameraOff": "Caméra off",
+    "flip": "Retourner",
+    "add": "Ajouter",
+    "hold": "En attente",
+    "resume": "Reprendre",
+    "write": "Écrire",
+    "hangUp": "Raccrocher"
+  },
+  "presenceDot": {
+    "available": "En ligne",
+    "inCall": "Occupé",
+    "dnd": "Ne pas déranger",
+    "offline": "Hors ligne"
+  },
+  "voicemailRecorder": {
+    "sent": "Message déposé pour {{name}}.",
+    "failed": "Le message n'a pas pu être déposé. Réessayez.",
+    "label": "Laisser un message vocal à {{name}}",
+    "sending": "Dépôt du message…",
+    "prompt": "Enregistrez un message pour {{name}}. Il le retrouvera dans son journal d'appels.",
+    "cancel": "Annuler"
+  },
+  "callRoomMount": {
+    "connectionFailed": "Connexion audio impossible — vérifiez votre réseau ou rechargez la page."
+  },
+  "iappelJournal": {
+    "today": "Aujourd'hui",
+    "yesterday": "Hier",
+    "category": {
+      "incoming": "Entrant",
+      "outgoing": "Sortant",
+      "missed": "Manqué",
+      "declinedWithNote": "Refusé · avec message",
+      "declined": "Refusé",
+      "autoDeclinedDnd": "Refusé automatiquement · Ne pas déranger",
+      "autoDeclinedBusy": "Refusé automatiquement · Occupé",
+      "autoDeclinedInMeeting": "Refusé automatiquement · En réunion",
+      "autoDeclinedOutsideRelations": "Refusé automatiquement · Hors relations",
+      "autoDeclined": "Refusé automatiquement"
+    },
+    "label": "Journal des appels",
+    "filterLabel": "Filtrer le journal des appels",
+    "all": "Tous",
+    "missed": "Manqués",
+    "loading": "Chargement de vos appels…",
+    "emptyMissed": "Aucun appel manqué.",
+    "empty": "Aucun appel pour l'instant.",
+    "peer": "Correspondant",
+    "write": "Écrire à {{name}}",
+    "callBack": "Rappeler {{name}}"
+  },
+  "globalCallSurfaceHost": {
+    "answerSecondary": "{{name}} · répondre",
+    "incomingRegion": "Appel entrant",
+    "groupFallbackTitle": "Appel de groupe",
+    "announceIncoming": "Appel entrant de {{name}}",
+    "announceIncomingVideo": "Appel vidéo entrant de {{name}}"
+  },
+  "addToCallPanel": {
+    "alreadyIn": "Cette personne est déjà dans l'appel.",
+    "ringing": "Son téléphone sonne.",
+    "unavailable": "Indisponible pour le moment — l'appel continue sans lui.",
+    "failed": "L'ajout n'a pas abouti. Réessayez.",
+    "reinviteSuffix": "{{label}} · Réinviter",
+    "alreadyInName": "{{name}} — déjà dans l'appel",
+    "reinvite": "Réinviter {{name}}",
+    "add": "Ajouter {{name}} à l'appel",
+    "title": "Ajouter à l'appel",
+    "close": "Fermer",
+    "seatsUpdating": "{{seats}} · mise à jour…",
+    "searchPlaceholder": "Rechercher une relation…",
+    "searchLabel": "Rechercher une personne à ajouter",
+    "loading": "Chargement de vos relations…",
+    "errorTitle": "Relations indisponibles",
+    "errorMessage": "Vos relations n'ont pas pu être chargées.",
+    "empty": "Aucune relation à ajouter. Les personnes de votre réseau apparaissent ici.",
+    "searching": "Recherche parmi vos relations…",
+    "noMatch": "Aucune relation ne correspond à « {{term}} ».",
+    "loadingMore": "Chargement…",
+    "more": "Voir plus de relations"
+  },
+  "myPresenceRow": {
+    "failed": "Impossible de changer le statut. Réessayez.",
+    "title": "Mon statut",
+    "until": "jusqu'à {{time}}",
+    "disable": "Désactiver",
+    "dnd": "Ne pas déranger…"
+  }
+}

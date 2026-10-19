@@ -1,0 +1,184 @@
+{
+  "nav": {
+    "label": "Public navigation",
+    "footer": "Information and rights",
+    "discover": "Discover",
+    "transparency": "Transparency",
+    "enter": "Sign in",
+    "myFeed": "My feed",
+    "about": "About",
+    "legal": "Legal notice",
+    "privacy": "Privacy",
+    "data": "My data",
+    "signOut": "Sign out",
+    "signingOut": "Signing out…"
+  },
+  "home": {
+    "eyebrow": "Gabon’s public network",
+    "title": "One country. Connections. Your voice.",
+    "lead": "Read open publications, find official pages and join conversations with a social identity you control.",
+    "join": "Join {{brand}}",
+    "read": "Read the public network",
+    "contextTitle": "A clear origin, a deliberate share",
+    "contextBody": "Conversations in a closed network stay there. A contribution appears here when its author chooses public distribution on {{brand}}."
+  },
+  "snapshot": {
+    "title": "Network measures",
+    "updated": "Latest measurement: {{date}}",
+    "pending": "Public measurements are not available yet.",
+    "posts": "Open publications in this period",
+    "pages": "Official pages",
+    "bounded": "Bounded measurement: some publications, pages or topics may be omitted.",
+    "period": "From {{start}} to {{end}}"
+  },
+  "feed": {
+    "title": "The origin feed",
+    "lead": "Publications you can read without an account. Open your member space to publish or participate.",
+    "emptyTitle": "No public publication in this view",
+    "emptyBody": "Member content stays within its context. Explore another province or join the network.",
+    "filteredWindow": "This window has no visible publication. A next page remains available.",
+    "pagination": "Public publication pagination",
+    "first": "First page",
+    "next": "Next page"
+  },
+  "discover": {
+    "title": "Discover the network",
+    "lead": "Explore a province or topic and read contributions their authors chose to make public.",
+    "member": "Open the member view",
+    "trends": "Measured topics",
+    "period": "From {{start}} to {{end}}"
+  },
+  "provinces": {
+    "title": "The nine provinces",
+    "lead": "A publication’s province is chosen by its author. It does not indicate residence or location."
+  },
+  "tag": {
+    "title": "Topic #{{tag}}"
+  },
+  "post": {
+    "title": "Public publication",
+    "withdrawnAuthor": "Unpublished profile",
+    "badges": "Trust indicators",
+    "origin": "Origin: {{name}}",
+    "publicAudience": "Readable without an account",
+    "edited": "Edited on {{date}}",
+    "participate": "Sign in to participate",
+    "actions": "Public post actions",
+    "open": "Open post",
+    "readMore": "Read more",
+    "readLess": "Collapse caption",
+    "original": "Read the original publication",
+    "originalUnavailable": "The original publication is no longer available in this view."
+  },
+  "badges": {
+    "official": "Official",
+    "verified": "Verified",
+    "public_agent": "Public agent",
+    "community": "Community"
+  },
+  "media": {
+    "image": "Publication image",
+    "video": "Publication video",
+    "pending": "This media is being reviewed.",
+    "quarantined": "This media is withheld by file protection.",
+    "unavailable": "This media is unavailable."
+  },
+  "profile": {
+    "public": "Reduced public profile",
+    "reduced": "This preview contains only information the person published. Connections and conversations remain in the member space.",
+    "member": "Open this profile in the network"
+  },
+  "page": {
+    "member": "Follow this page in the network"
+  },
+  "states": {
+    "retry": "Try again",
+    "home": "Return home",
+    "continue": "Continue signing in",
+    "refused": {
+      "title": "Content unavailable",
+      "body": "This address cannot be read in this session. Return home or confirm your sign-in."
+    },
+    "unavailable": {
+      "title": "Reading is temporarily unavailable",
+      "body": "Publications cannot be loaded at the moment. Try again shortly."
+    },
+    "handoff": {
+      "title": "Resuming your sign-in",
+      "body": "Your session must be confirmed before reading the content."
+    }
+  },
+  "session": {
+    "preparing": "Preparing sign-in…",
+    "confirming": "Confirming your session…",
+    "unavailable": "Your session cannot be confirmed. Try again to resume sign-in.",
+    "handoffRefused": "The sign-in transfer could not be confirmed. Start a new sign-in.",
+    "resume": "Confirm this session again"
+  },
+  "transparency": {
+    "title": "Moderation transparency",
+    "lead": "Aggregated totals by period, without identities, individual reasons or case content.",
+    "threshold": "A period is published only when it has at least {{count}} cases and {{count}} distinct authors.",
+    "period": "From {{start}} to {{end}}",
+    "suppressed": "Total not published",
+    "cases_one": "{{count}} case",
+    "cases_other": "{{count}} cases",
+    "empty": "No aggregated period is available yet."
+  },
+  "legal": {
+    "eyebrow": "Understanding {{brand}}",
+    "draft": "Working version. Legal information and service terms require validation before public release.",
+    "sources": "Reference texts",
+    "apdpvp": "APDPVP: texts and decisions",
+    "journal": "Official Journal: Law No. 025/2023 of 12 July 2023",
+    "gdpr": "EUR-Lex: General Data Protection Regulation",
+    "about": {
+      "title": "One network, several contexts",
+      "lead": "{{brand}} connects the public life of the network with contributions voluntarily shared by its child networks.",
+      "purpose": {
+        "title": "People keep their social identity",
+        "body": "Each person chooses a handle and a profile. An additional network adds a participation context; it does not create a second person."
+      },
+      "contexts": {
+        "title": "Making content public remains a choice",
+        "body": "Content restricted to a closed network is not shown in this public view. Distribution on {{brand}} requires an explicit choice and a public audience; withdrawal of that distribution also applies here."
+      },
+      "trust": {
+        "title": "Trust indicators are calculated",
+        "body": "Official describes the trust attributed to an institutional page. Verified and Public agent rely on active identity evidence. Community describes participation without those additional proofs. These indicators do not guarantee a publication’s truthfulness."
+      }
+    },
+    "legal": {
+      "title": "Legal notice",
+      "lead": "Information identifying the publisher and the service terms is being validated.",
+      "publisher": {
+        "title": "Publisher and responsibilities",
+        "body": "NTSAGUI Digital leads this project. Its full legal name, contact details and publication responsibility must be completed and validated before publication. The technical provider and processing locations remain undecided."
+      },
+      "law": {
+        "title": "Data protection",
+        "body": "The Gabonese framework includes Law No. 001/2011, amended by Law No. 025/2023 of 12 July 2023. APDPVP procedures and the applicability of the GDPR, particularly Article 3, must be assessed with legal counsel according to the processing and people concerned."
+      },
+      "publication": {
+        "title": "Validation status",
+        "body": "These texts are not a declaration of compliance, an APDPVP approval or evidence of data location. Release remains subject to validation of the texts and operating conditions."
+      }
+    },
+    "privacy": {
+      "title": "Privacy and your choices",
+      "lead": "Understand what is public and find the controls for your profile, consents and data.",
+      "profile": {
+        "title": "Your publications and profile",
+        "body": "Reading without an account shows only admitted public projections: open publications, reduced profiles and Official pages. Private mode and profile withdrawal apply across the engine. Withdrawing a profile does not automatically delete its publications; publication withdrawal and data rights are separate controls."
+      },
+      "cookies": {
+        "title": "Sign-in and optional measurement",
+        "body": "Cookies specific to {{brand}} correlate the browser session with server rendering. They support sign-in and its closure. Optional usage measurement requires specific consent; reading public content does not grant it."
+      },
+      "rights": {
+        "title": "Your data controls",
+        "body": "My data provides preferences, consents, notifications, export and erasure requests, and appeals. It remains available if network participation is suspended. Controller contact details, legal bases, retention periods and response procedures must be completed during legal validation."
+      }
+    }
+  }
+}

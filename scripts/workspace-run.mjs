@@ -290,7 +290,7 @@ async function main() {
   if (plan.persistent && plan.steps.length > options.concurrency) {
     throw new Error(
       `${plan.steps.length} tâches persistantes « ${options.task} » pour --concurrency=${options.concurrency} : ` +
-      "lancer une application à la fois (bun run dev:<application>, par exemple dev:antia) ou filtrer (--filter=<paquet>)."
+      "lancer une application à la fois (bun run dev:<application>, par exemple dev:antsia) ou filtrer (--filter=<paquet>)."
     );
   }
   const ordered = orderSteps(plan.steps);

@@ -6,8 +6,8 @@
  * le fichier — aucun pipeline serveur. Un appel n'accepte qu'UN message : un
  * second dépôt (réseau qui rejoue, double clic) rend celui qui existe.
  */
-import { MAX_VOICEMAIL_DURATION_MS } from "@antia/social-contracts/calls"
-import type { CounterpartLabel } from "@antia/social-contracts/counterpart"
+import { MAX_VOICEMAIL_DURATION_MS } from "@antsia/social-contracts/calls"
+import type { CounterpartLabel } from "@antsia/social-contracts/counterpart"
 import { v } from "convex/values"
 
 import type { Doc, Id } from "../../_generated/dataModel"
@@ -25,6 +25,7 @@ import { counterpartOf } from "../messaging/participation"
 import { dropNotificationsAbout, notifyPerson } from "../notifications/notify"
 import { miniProfileCache } from "../people/miniProfile"
 import { requireCallInNetwork } from "./access"
+import { isConversationCall } from "./conversation"
 
 const DEFAULT_LIST_LIMIT = 20
 const MAX_LIST_LIMIT = 50
@@ -52,6 +53,8 @@ export const leave = networkMutation({
     const me = ctx.person._id
     await enforceRateLimit(ctx, "voicemail.leave", me)
     const call = await requireCallInNetwork(ctx, ctx.networkId, args.callId)
+    // Une conversation (canal commercial P10, conversation contextuelle CC-4) n'ouvre pas une messagerie vocale personnelle.
+    if (isConversationCall(call)) return notFound()
     // Seul celui qui a COMPOSÉ le numéro laisse un message : c'est son silence qu'on enregistre.
     if (call.createdByPersonId !== me) return notFound()
     const recipientId = call.calleePersonId

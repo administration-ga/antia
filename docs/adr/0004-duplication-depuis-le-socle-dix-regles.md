@@ -30,7 +30,7 @@ Nous allons dupliquer le réseau social du socle **depuis une copie propre de `o
 
 Deux précisions propres au moteur : la duplication suit la pose des fondations multi-réseaux
 (PA2), pour que chaque module arrive avec `networkId` ; les modules purs que le front importait
-depuis `convex/` sortent dans `@antia/social-contracts`. La dette connue du socle est corrigée au
+depuis `convex/` sortent dans `@antsia/social-contracts`. La dette connue du socle est corrigée au
 passage, par une liste fermée et testée (compteurs fragmentés, pagination des commentaires et des
 connexions, diffusion par lots, garde de délivrance partout, `schemaValidation: true`).
 

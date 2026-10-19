@@ -76,6 +76,14 @@ export const callsTables = {
     declineNote: v.optional(v.string()),
     /** Le fil de groupe d'où part l'appel : un fil n'a qu'un appel vivant, et le droit d'y être se relit sur le fil. */
     groupThreadId: v.optional(v.id("groupThreads")),
+    /** P10 : tête-à-tête soumis aux droits et consentements commerciaux vivants. */
+    commercialThreadId: v.optional(v.id("commercialThreads")),
+    /**
+     * CC-4 (CONVERSATION-CONTEXTUELLE-V1 §3.2, §11.3) : tête-à-tête d'une conversation contextuelle,
+     * soumis aux accords explicites des deux personnes DANS ce fil. EXCLUSIF de `commercialThreadId` :
+     * un appel porte au plus un contexte (sélecteur `calls/conversation.ts`).
+     */
+    contextualThreadId: v.optional(v.id("contextualThreads")),
     startedAt: v.number(),
     endedAt: v.optional(v.number()),
   })
@@ -86,7 +94,12 @@ export const callsTables = {
     // Le nettoyage périodique, par état.
     .index("by_callStatus", ["callStatus"])
     // L'appel vivant d'un fil de groupe.
-    .index("by_groupThread_status", ["groupThreadId", "status"]),
+    .index("by_groupThread_status", ["groupThreadId", "status"])
+    .index("by_commercial_thread_status", ["commercialThreadId", "status"])
+    .index("by_status_commercial_thread", ["status", "commercialThreadId"])
+    // CC-4 : l'appel vivant d'un fil contextuel (au plus un), et la revalidation paginée des appels contextuels vivants.
+    .index("by_contextual_thread_status", ["contextualThreadId", "status"])
+    .index("by_status_contextual_thread", ["status", "contextualThreadId"]),
 
   /** Une personne d'un appel : l'hôte (qui a composé) ou un participant (appelé, invité). */
   callParticipants: defineTable({

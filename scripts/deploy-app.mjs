@@ -7,8 +7,8 @@
  *   node scripts/deploy-app.mjs <application>    affiche le plan de publication
  *   node scripts/deploy-app.mjs <application> --execute
  *                                                 publie (Cloud Build), seulement si
- *                                                 ANTIA_GCP_PROJECT, ANTIA_GCP_REGION
- *                                                 et ANTIA_DEPLOY_AUTORISE=oui sont posés
+ *                                                 ANTSIA_GCP_PROJECT, ANTSIA_GCP_REGION
+ *                                                 et ANTSIA_DEPLOY_AUTORISE=oui sont posés
  *
  * Par défaut, RIEN ne part : l'hébergement (arbitrage A5) n'est pas décidé, et
  * aucune publication ne se fait sans décision du propriétaire. Le plan affiché
@@ -23,16 +23,23 @@ import { fileURLToPath, pathToFileURL } from "node:url"
 
 export const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..")
 export const ECOSYSTEMS = resolve(ROOT, "..")
+const OPTIONAL_PUBLIC_ARGS = new Set(["NEXT_PUBLIC_POSTHOG_KEY", "NEXT_PUBLIC_POSTHOG_HOST", "NEXT_PUBLIC_POSTHOG_EU_RELAY_ORIGIN"])
+
+/** Seules les options explicitement admises peuvent rester absentes au build. */
+export function requiredBuildArgs(app) {
+  const optional = new Set((app.optional_build_args ?? []).filter((name) => OPTIONAL_PUBLIC_ARGS.has(name)))
+  return (app.build_args ?? []).filter((name) => !optional.has(name))
+}
 
 export function readCatalog(root = ROOT) {
   return JSON.parse(readFileSync(join(root, "deploy", "catalog.json"), "utf8"))
 }
 
 /**
- * Espaces de travail EXTERNES (hors d'ANTIA : `../DIASPORALE/…`) dont dépend la
- * racine d'ANTIA, en chemins relatifs à ECOSYSTEMES. `bun install
+ * Espaces de travail EXTERNES (hors d'ANTSIA : `../DIASPORALE/…`) dont dépend la
+ * racine d'ANTSIA, en chemins relatifs à ECOSYSTEMES. `bun install
  * --frozen-lockfile` les exige même dans une installation élaguée : toute image
- * construite avec l'installation d'ANTIA doit les copier.
+ * construite avec l'installation d'ANTSIA doit les copier.
  * @returns {string[]}
  */
 export function externalRootWorkspaces(root = ROOT) {
@@ -82,6 +89,9 @@ export function checkCatalog(catalog, root = ROOT) {
   if (cloudbuild === null) problems.push("deploy/cloudbuild.yaml introuvable")
   const externals = existsSync(join(root, "package.json")) ? externalRootWorkspaces(root) : []
   for (const [key, app] of Object.entries(catalog.applications ?? {})) {
+    for (const arg of app.optional_build_args ?? []) {
+      if (!OPTIONAL_PUBLIC_ARGS.has(arg) || !(app.build_args ?? []).includes(arg)) problems.push(`${key} : variable facultative non admise ${arg}`)
+    }
     for (const field of ["package", "path", "service", "dockerfile", "site_url", "dev_port", "build_args"]) {
       if (app[field] === undefined) problems.push(`${key} : champ « ${field} » manquant`)
     }
@@ -104,7 +114,7 @@ export function checkCatalog(catalog, root = ROOT) {
         if (cloudbuild !== null && !cloudbuild.includes(`${arg}=\${_${arg}}`)) problems.push(`${key} : deploy/cloudbuild.yaml ne passe pas ${arg}`)
       }
       for (const external of externals) {
-        if (!copiesPath(dockerfile, external)) problems.push(`${key} : le Dockerfile ne copie pas ${external} (dépendance de la racine d'ANTIA)`)
+        if (!copiesPath(dockerfile, external)) problems.push(`${key} : le Dockerfile ne copie pas ${external} (dépendance de la racine d'ANTSIA)`)
       }
       if (!existsSync(`${dockerfilePath}.dockerignore`)) problems.push(`${key} : ${app.dockerfile}.dockerignore absent (contexte ECOSYSTEMES sans liste blanche)`)
     }
@@ -117,17 +127,19 @@ export function checkCatalog(catalog, root = ROOT) {
 export function buildPlan(catalog, appKey, env = process.env) {
   const app = catalog.applications?.[appKey]
   if (!app) throw new Error(`Application inconnue du catalogue : ${appKey}`)
-  const project = env.ANTIA_GCP_PROJECT ?? "<ANTIA_GCP_PROJECT>"
-  const region = env.ANTIA_GCP_REGION ?? "<ANTIA_GCP_REGION>"
-  const image = `${region}-docker.pkg.dev/${project}/antia/${app.service}:latest`
-  const buildArgs = (app.build_args ?? []).flatMap((name) => ["--build-arg", `${name}=${env[name] ?? `<${name}>`}`])
+  const project = env.ANTSIA_GCP_PROJECT ?? "<ANTSIA_GCP_PROJECT>"
+  const region = env.ANTSIA_GCP_REGION ?? "<ANTSIA_GCP_REGION>"
+  const image = `${region}-docker.pkg.dev/${project}/antsia/${app.service}:latest`
+  const required = new Set(requiredBuildArgs(app))
+  const valueOf = (name) => env[name] ?? (required.has(name) ? `<${name}>` : "")
+  const buildArgs = (app.build_args ?? []).flatMap((name) => ["--build-arg", `${name}=${valueOf(name)}`])
   // Toutes les clés du gabarit Cloud Build : celles de l'application, et vides
   // celles des autres (la substitution reste stricte).
   const allArgs = [...new Set(Object.values(catalog.applications).flatMap((entry) => entry.build_args ?? []))]
   const substitutions = [
     `_DOCKERFILE=${app.dockerfile}`,
     `_IMAGE=${image}`,
-    ...allArgs.map((name) => `_${name}=${(app.build_args ?? []).includes(name) ? (env[name] ?? `<${name}>`) : ""}`),
+    ...allArgs.map((name) => `_${name}=${(app.build_args ?? []).includes(name) ? valueOf(name) : ""}`),
   ].join(",")
   return {
     app,
@@ -136,7 +148,7 @@ export function buildPlan(catalog, appKey, env = process.env) {
       "gcloud", "builds", "submit", ECOSYSTEMS,
       "--project", project,
       "--config", join(ROOT, "deploy", "cloudbuild.yaml"),
-      "--ignore-file", "ANTIA/deploy/gcloudignore",
+      "--ignore-file", "ANTSIA/deploy/gcloudignore",
       "--substitutions", substitutions,
     ],
     run: ["gcloud", "run", "deploy", app.service, "--image", image, "--project", project, "--region", region],
@@ -173,10 +185,10 @@ function main() {
     console.log("\nRien n'a été publié (ajouter --execute, sur décision du propriétaire).")
     return
   }
-  // Jamais un marqueur `<NOM>` inscrit dans un bundle : chaque variable de build doit être posée.
-  const missing = ["ANTIA_GCP_PROJECT", "ANTIA_GCP_REGION", ...(plan.app.build_args ?? [])].filter((name) => !process.env[name])
-  if (missing.length > 0 || process.env.ANTIA_DEPLOY_AUTORISE !== "oui") {
-    console.error(`✗ publication refusée : ${missing.length > 0 ? `variables manquantes (${missing.join(", ")})` : ""}${process.env.ANTIA_DEPLOY_AUTORISE !== "oui" ? " ANTIA_DEPLOY_AUTORISE≠oui (décision du propriétaire)" : ""}`)
+  // Les variables nécessaires doivent être posées ; seules les options admises restent vides.
+  const missing = ["ANTSIA_GCP_PROJECT", "ANTSIA_GCP_REGION", ...requiredBuildArgs(plan.app)].filter((name) => !process.env[name])
+  if (missing.length > 0 || process.env.ANTSIA_DEPLOY_AUTORISE !== "oui") {
+    console.error(`✗ publication refusée : ${missing.length > 0 ? `variables manquantes (${missing.join(", ")})` : ""}${process.env.ANTSIA_DEPLOY_AUTORISE !== "oui" ? " ANTSIA_DEPLOY_AUTORISE≠oui (décision du propriétaire)" : ""}`)
     process.exitCode = 1
     return
   }

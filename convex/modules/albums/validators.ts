@@ -6,7 +6,7 @@
  * (`reachAudienceValidator` : `public` ou `connections`). Deux définitions
  * divergeraient au premier ajout de portée.
  */
-import { ALBUM_STATUSES } from "@antia/social-domain/albums"
+import { ALBUM_STATUSES } from "@antsia/social-domain/albums"
 import { v } from "convex/values"
 
 import { literals } from "../../lib/validators"

@@ -1,5 +1,5 @@
 {
-  "name": "@antia/social-features",
+  "name": "@antsia/social-features",
   "version": "0.0.0",
   "private": true,
   "license": "AGPL-3.0-or-later",
@@ -9,7 +9,18 @@
     ".": "./src/index.ts",
     "./i18n": "./src/i18n/index.ts",
     "./i18n/client": "./src/i18n/client.tsx",
-    "./*": "./src/*.ts"
+    "./shell": "./src/shell/index.ts",
+    "./messagerie": "./src/features/messagerie/index.ts",
+    "./iappel": "./src/features/iappel/index.ts",
+    "./stories": "./src/features/stories/index.ts",
+    "./reseau-personnel": "./src/features/reseau-personnel/index.ts",
+    "./albums": "./src/features/reseau-albums/index.ts",
+    "./notifications": "./src/features/notifications/index.ts",
+    "./identity": "./src/features/identity/index.ts",
+    "./*": "./src/*.ts",
+    "./direct": "./src/features/direct/index.ts",
+    "./shell/appearance": "./src/shell/appearance/index.ts",
+    "./shell/analytics": "./src/shell/analytics/index.ts"
   },
   "scripts": {
     "typecheck": "tsgo --noEmit -p tsconfig.json",
@@ -17,20 +28,32 @@
     "lint": "eslint ."
   },
   "dependencies": {
-    "@antia/api": "workspace:*",
-    "@antia/social-contracts": "workspace:*",
-    "@antia/social-domain": "workspace:*",
-    "@antia/ui": "workspace:*",
+    "@antsia/api": "workspace:*",
+    "@antsia/social-contracts": "workspace:*",
+    "@antsia/social-domain": "workspace:*",
+    "@antsia/ui": "workspace:*",
+    "@livekit/components-react": "catalog:",
+    "@livekit/components-styles": "catalog:",
+    "convex": "catalog:",
     "i18next": "catalog:",
-    "react-i18next": "catalog:"
+    "livekit-client": "catalog:",
+    "lucide-react": "catalog:",
+    "motion": "catalog:",
+    "react-i18next": "catalog:",
+    "react-qr-code": "catalog:",
+    "sonner": "catalog:",
+    "tslib": "catalog:",
+    "@hookform/resolvers": "catalog:",
+    "react-hook-form": "catalog:",
+    "zod": "catalog:"
   },
   "peerDependencies": {
     "react": "catalog:",
     "react-dom": "catalog:"
   },
   "devDependencies": {
-    "@antia/eslint-config": "workspace:*",
-    "@antia/tsconfig": "workspace:*",
+    "@antsia/eslint-config": "workspace:*",
+    "@antsia/tsconfig": "workspace:*",
     "@testing-library/dom": "catalog:",
     "@testing-library/jest-dom": "catalog:",
     "@testing-library/react": "catalog:",

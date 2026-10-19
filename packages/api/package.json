@@ -1,5 +1,5 @@
 {
-  "name": "@antia/api",
+  "name": "@antsia/api",
   "version": "0.0.0",
   "private": true,
   "license": "AGPL-3.0-or-later",
@@ -11,6 +11,10 @@
     "./next-config": "./next-config.mjs",
     "./stable-convex-better-auth-provider": "./src/stable-convex-better-auth-provider.tsx",
     "./next-provider": "./src/next-provider.tsx",
+    "./network": "./src/network.tsx",
+    "./viewer-preferences": "./src/viewer-preferences.tsx",
+    "./routing": "./src/routing/index.ts",
+    "./routing/next": "./src/routing/adapters/next.tsx",
     "./*": "./src/*.ts"
   },
   "scripts": {
@@ -19,7 +23,8 @@
     "lint": "eslint ."
   },
   "dependencies": {
-    "@antia/social-contracts": "workspace:*",
+    "@antsia/social-contracts": "workspace:*",
+    "@antsia/social-domain": "workspace:*",
     "@convex-dev/better-auth": "catalog:",
     "@convex-dev/react-query": "catalog:",
     "@tanstack/react-query": "catalog:",
@@ -32,8 +37,8 @@
     "react-dom": "catalog:"
   },
   "devDependencies": {
-    "@antia/eslint-config": "workspace:*",
-    "@antia/tsconfig": "workspace:*",
+    "@antsia/eslint-config": "workspace:*",
+    "@antsia/tsconfig": "workspace:*",
     "@types/node": "catalog:",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",

@@ -1,10 +1,10 @@
-// Dupliqué de plateforme/espace/espace_administration_ga/src/app/api/auth/[...path]/route.ts @ ad2e7fdc2 — adaptations : factorisé dans @antia/api pour toutes les applications du moteur (antia.ga, diasporale.com…), qui le réexportent ; configuration injectable pour les tests (`proxyToConvex`) ; réécriture des cookies `__Secure-` réservée au développement ; journal d'erreur sans détail de requête.
+// Dupliqué de plateforme/espace/espace_administration_ga/src/app/api/auth/[...path]/route.ts @ ad2e7fdc2 — adaptations : factorisé dans @antsia/api pour toutes les applications du moteur (antsia.ga, diasporale.com…), qui le réexportent ; configuration injectable pour les tests (`proxyToConvex`) ; réécriture des cookies `__Secure-` réservée au développement ; journal d'erreur sans détail de requête.
 /**
  * Proxy Better Auth → actions HTTP Convex du moteur : l'application parle à
  * l'authentification par SA propre origine. Une application l'emploie par
  *
  *   // src/app/api/auth/[...path]/route.ts
- *   export { DELETE, GET, PATCH, POST, PUT } from "@antia/api/auth-proxy"
+ *   export { DELETE, GET, PATCH, POST, PUT } from "@antsia/api/auth-proxy"
  *
  * `CONVEX_SITE_URL` est inscrit par la configuration Next commune (`.env.local`
  * du moteur en développement, variable d'exécution en production).

@@ -10,18 +10,27 @@
  * fondations d'abord). En production, la console crée le réseau avec
  * `managedBy: "diaspora"`.
  */
-import { normalizeHandle } from "@antia/social-domain/content"
-import { validateFacetSchema } from "@antia/social-domain/facets"
-import { isValidNetworkSlug, validateNetworkShape } from "@antia/social-domain/network"
+import { normalizeHandle } from "@antsia/social-domain/content"
+import { validateFacetSchema } from "@antsia/social-domain/facets"
+import { isActiveStatus } from "@antsia/social-domain/membership"
+import { isValidNetworkSlug, validateNetworkShape } from "@antsia/social-domain/network"
 import { DAY_MS, DIASPORALE_NETWORK_SEED, DIASPORALE_SLICE, type EngineFacetField } from "@diasporale/domain"
 import { v } from "convex/values"
 
-import { internalMutation } from "../../_generated/server"
+import type { Doc } from "../../_generated/dataModel"
+import { internalMutation, type MutationCtx } from "../../_generated/server"
 import { getMembership, getRootNetwork } from "../../lib/access"
+import { isLocalDeployment } from "../../lib/devTools"
 import { membershipStatusValidator } from "../../lib/validators"
 import { assertSeedsAllowed, ensureNetwork } from "../../seeds/foundations"
+import { followerCounts } from "../graph/follows"
+import { isBlockedBetween, isFollowingPerson } from "../graph/graph"
+import { verifiedEmailHashOf } from "../people/identity"
+import { isPublishedPerson } from "../people/miniProfile"
 import { liveIdentityLinks } from "../people/persons"
-import { activeSponsorshipOf, applyDerivedStatus, facetOf, membershipGrounds } from "./facts"
+import { writePost } from "../posts/postWrite"
+import { sha256Hex } from "./attestation"
+import { activeSponsorshipOf, applyDerivedStatus, effectiveStatusIn, facetOf, isDiasporaNetwork, membershipGrounds } from "./facts"
 import { hubRow } from "./hubs"
 
 /** Un champ de facette du domaine (listes figées) au format mutable des tables du moteur. */
@@ -137,5 +146,161 @@ export const verifyForRecette = internalMutation({
     const status = await applyDerivedStatus(ctx, membership, grounds, sponsorship?.sponsorPersonId ?? null, now)
     if (status === "verifiee") await ctx.db.patch(membership._id, { statusChangedAt: now - (args.verifiedDaysAgo ?? 31) * DAY_MS })
     return { status }
+  },
+})
+
+/** Cible FICTIVE fermée : cette graine n'accepte aucun identifiant en argument. */
+const PROFILE_POSTS_RECETTE_HANDLE = "relations.recette"
+const PROFILE_POSTS_RECETTE_EMAIL = "relations.recette@exemple.test"
+const PROFILE_POSTS_RECETTE_COUNT = 35
+const ALBUM_DRAFTS_RECETTE_COUNT = 13
+const STORY_READER_RECETTE_HANDLE = "pd4.lecture"
+const STORY_READER_RECETTE_EMAIL = "pd4.recette@exemple.test"
+
+/** La cible fermée des recettes locales, relue sans créer ni modifier d'identité. */
+async function requireLocalRecetteAuthor(ctx: MutationCtx): Promise<{ network: Doc<"networks">; person: Doc<"persons"> }> {
+  // Même une autorisation de graines sur un déploiement en nuage ne suffit pas.
+  if (!isLocalDeployment()) throw new Error("Recette refusée : backend local obligatoire.")
+
+  const network = await ctx.db
+    .query("networks")
+    .withIndex("by_slug", (q) => q.eq("slug", DIASPORALE_NETWORK_SEED.slug))
+    .unique()
+  const root = await getRootNetwork(ctx)
+  if (!isDiasporaNetwork(network) || network.kind !== "closed" || !root || network.parentId !== root._id) {
+    throw new Error("Recette refusée : réseau diasporale actif et racine préexistante requis.")
+  }
+  const person = await ctx.db
+    .query("persons")
+    .withIndex("by_handle", (q) => q.eq("handle", PROFILE_POSTS_RECETTE_HANDLE))
+    .unique()
+  if (!person || !isPublishedPerson(person)) throw new Error("Recette refusée : profil fictif préexistant requis.")
+  const access = await effectiveStatusIn(ctx, network, person._id)
+  if (!access.membership || (access.status !== "declaree" && access.status !== "verifiee") || (access.rootStatus !== "declaree" && access.rootStatus !== "verifiee")) {
+    throw new Error("Recette refusée : adhésion préexistante autorisée à publier requise.")
+  }
+  // Le handle seul ne permet jamais d'écrire pour une autre personne : le
+  // composant d'authentification doit attester CETTE adresse fictive vérifiée.
+  if (await verifiedEmailHashOf(ctx, person._id) !== await sha256Hex(PROFILE_POSTS_RECETTE_EMAIL)) {
+    throw new Error("Recette refusée : identité fictive vérifiée requise.")
+  }
+  return { network, person }
+}
+
+/**
+ * Recette du mur paginé, strictement LOCALE : trente-cinq textes clairement
+ * fictifs dans DIASPORALE, jamais à la racine. La personne, son adresse de
+ * recette vérifiée, son profil et ses adhésions doivent déjà exister ; rien
+ * de tout cela n'est créé ni modifié ici. Rejouer ne crée que les publications
+ * manquantes, sans rétablir ni supprimer une publication existante.
+ */
+export const profilePostsForRecette = internalMutation({
+  args: { confirmNonProduction: v.string() },
+  returns: v.object({ handle: v.literal("relations.recette"), created: v.number(), existing: v.number() }),
+  handler: async (ctx, { confirmNonProduction }) => {
+    assertSeedsAllowed(confirmNonProduction)
+    const { network, person } = await requireLocalRecetteAuthor(ctx)
+
+    let created = 0
+    let existing = 0
+    for (let index = 1; index <= PROFILE_POSTS_RECETTE_COUNT; index += 1) {
+      const number = String(index).padStart(2, "0")
+      const body = `PD4 mur recette ${number}/35 — Publication fictive pour vérifier la pagination du profil.`
+      const idempotencyKey = `diasporale:pd4-mur-recette:${PROFILE_POSTS_RECETTE_HANDLE}:${number}`
+      const previous = await ctx.db
+        .query("posts")
+        .withIndex("by_author_and_idempotencyKey", (q) => q.eq("authorPersonId", person._id).eq("idempotencyKey", idempotencyKey))
+        .unique()
+      if (previous) {
+        if (previous.networkId !== network._id || previous.body !== body || previous.audience !== "public" || previous.visibility !== "network" || previous.onRoot !== false || previous.groupId !== undefined || previous.pageId !== undefined || previous.sharedPostId !== undefined) {
+          throw new Error("Recette refusée : publication existante hors du périmètre attendu.")
+        }
+        existing += 1
+        continue
+      }
+      // « public » signifie ici public DANS le réseau fermé : la visibilité
+      // network, portée par le helper commun, interdit toute lecture racine.
+      await writePost(ctx, { network, authorPersonId: person._id, body, audience: "public", visibility: "network", reach: "diaspora", idempotencyKey })
+      created += 1
+    }
+    return { handle: PROFILE_POSTS_RECETTE_HANDLE, created, existing } as const
+  },
+})
+
+/** Treize brouillons VIDES et privés pour la recette de pagination/reprise des albums. */
+export const albumDraftsForRecette = internalMutation({
+  args: { confirmNonProduction: v.string() },
+  returns: v.object({ handle: v.literal("relations.recette"), created: v.number(), existing: v.number() }),
+  handler: async (ctx, { confirmNonProduction }) => {
+    assertSeedsAllowed(confirmNonProduction)
+    const { network, person } = await requireLocalRecetteAuthor(ctx)
+    const now = Date.now()
+    let created = 0
+    let existing = 0
+    for (let index = 1; index <= ALBUM_DRAFTS_RECETTE_COUNT; index += 1) {
+      const number = String(index).padStart(2, "0")
+      const idempotencyKey = `diasporale:pd4-album-recette:${PROFILE_POSTS_RECETTE_HANDLE}:${number}`
+      const previous = await ctx.db
+        .query("albums")
+        .withIndex("by_owner_idempotencyKey", (q) => q.eq("ownerPersonId", person._id).eq("idempotencyKey", idempotencyKey))
+        .unique()
+      if (previous) {
+        if (previous.networkId !== network._id || previous.deletingAt !== undefined) {
+          throw new Error("Recette refusée : album existant hors du périmètre attendu.")
+        }
+        // La recette peut ensuite corriger, publier ou retirer cet album :
+        // son rejeu ne restaure jamais le titre, l'audience ou le statut initial.
+        existing += 1
+        continue
+      }
+      const timestamp = now - ALBUM_DRAFTS_RECETTE_COUNT + index
+      await ctx.db.insert("albums", {
+        networkId: network._id,
+        ownerPersonId: person._id,
+        title: `PD4 album recette ${number}/13`,
+        audience: "connections",
+        status: "draft",
+        itemCount: 0,
+        idempotencyKey,
+        createdAt: timestamp,
+        updatedAt: timestamp,
+      })
+      created += 1
+    }
+    return { handle: PROFILE_POSTS_RECETTE_HANDLE, created, existing } as const
+  },
+})
+
+/** Une source de lecture fictive pour le membre EN ATTENTE, sans changer son admission. */
+export const storyReaderForRecette = internalMutation({
+  args: { confirmNonProduction: v.string() },
+  returns: v.object({ created: v.boolean() }),
+  handler: async (ctx, { confirmNonProduction }) => {
+    assertSeedsAllowed(confirmNonProduction)
+    const { network, person: author } = await requireLocalRecetteAuthor(ctx)
+    const reader = await ctx.db
+      .query("persons")
+      .withIndex("by_handle", (q) => q.eq("handle", STORY_READER_RECETTE_HANDLE))
+      .unique()
+    if (!reader || !isPublishedPerson(reader)) throw new Error("Recette refusée : profil lecteur fictif préexistant requis.")
+    const access = await effectiveStatusIn(ctx, network, reader._id)
+    if (!access.membership || access.status !== "en_attente" || access.rootStatus === null || !isActiveStatus(access.rootStatus)) {
+      throw new Error("Recette refusée : lecteur en attente et adhésion racine active requis.")
+    }
+    if (await verifiedEmailHashOf(ctx, reader._id) !== await sha256Hex(STORY_READER_RECETTE_EMAIL)) {
+      throw new Error("Recette refusée : identité fictive vérifiée du lecteur requise.")
+    }
+    if (await isFollowingPerson(ctx, network._id, reader._id, author._id)) return { created: false }
+    if (await isBlockedBetween(ctx, reader._id, author._id)) throw new Error("Recette refusée : paire fictive indisponible.")
+    const followId = await ctx.db.insert("follows", {
+      networkId: network._id,
+      followerPersonId: reader._id,
+      targetPersonId: author._id,
+      createdAt: Date.now(),
+    })
+    const follow = await ctx.db.get(followId)
+    if (!follow) throw new Error("Recette refusée : abonnement fictif indisponible.")
+    await followerCounts.insert(ctx, follow)
+    return { created: true }
   },
 })

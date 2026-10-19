@@ -1,13 +1,13 @@
 ---
-title: "ANTIA — Rapport de parité du backend (PA3)"
+title: "ANTSIA — Rapport de parité du backend (PA3)"
 version: "0.1"
-date: "2026-10-15"
-statut: "En cours — un chapitre par module dupliqué, dans l'ordre de l'owner map (docs/02 §4.2)"
-projet: "ANTIA"
+date: "2026-10-16"
+statut: "PA3 achevé — lots 2 à 17 vérifiés ; compléments PA4/PA5 distincts"
+projet: "ANTSIA"
 source: "socle administration.ga, origin/main = ad2e7fdc2"
 ---
 
-# ANTIA — Rapport de parité du backend
+# ANTSIA — Rapport de parité du backend
 
 Pour chaque module dupliqué du socle (`docs/02_OWNER_MAP_DUPLICATION.md` §6) : la liste de parité cochée
 (fichier par fichier), les adaptations (liste fermée du préambule de PA3), les corrections de dette (§5 de
@@ -31,6 +31,10 @@ l'owner map), les tests portés et neufs, les écarts assumés. Un module n'entr
 | 13 | `pages` (réécrit : identité propre, signataires vivants, revendications, console) | `06e31fa` | 2 fichiers convex + 1 fichier domaine | D02, D05, D14, D19 |
 | 14 | `albums` (photos par réseau sous la garde des fichiers, purge sans orphelin) | `daf3750` | 1 fichier convex (26 cas) + 1 fichier domaine (32 cas) | D05, D09, D14 |
 | 15 | `calls` (appels 1:1 et de groupe, sonnerie, attente, journal, présence, réglages, messagerie vocale, jeton LiveKit) | voir journal git (`feat(calls)`) | 4 fichiers convex (114 cas) + 2 purs du module (22 cas) + 3 bibliothèques LiveKit (21 cas) + 1 fichier domaine (14 cas) + 2 fichiers contrats (29 cas) | D02, D05, D11, D13, D14, D16, D19, D21, D26, D27 |
+| 16 | `live` (le direct : sessions, découverte, audience, antenne, orateurs, délégations, modération, présences, récolte, commentaires, réactions, rediffusion Egress, jeton, route du webhook, crons) | `78e2dca` (fondation), lot 16b | 25 fichiers convex du module (≈ 430 cas) + 4 bibliothèques Egress (≈ 50 cas) + 4 purs du domaine (≈ 60 cas) | D05, D10, D11, D14, D16, D19, D28, D35 |
+
+Le lot 17 (crons et cliquets PA3, `feat(maintenance)`) complète cet inventaire :
+13 nouveaux cas backend et 49 nouveaux cas de cliquets ; verify complet vert.
 
 Ordre suivi (owner map §4.2), avec un écart : le lot 1 (modules purs) est porté avec chaque module qui le
 consomme ; l'avis de verdict des fichiers (`files/notify`) est arrivé avec le module `notifications` (lot 5), dont il
@@ -393,11 +397,11 @@ dépend.
   factorisés (réseau, racine, auteur) ; portée « mon_administration », collègues, organisations et notes de service
   retirés ; `lacunar` rendu à l'écran.
 - **Publier** : groupe (appartenance vivante, forme, pas de partage), médias sous la garde des fichiers, partage aplati
-  sur l'original, portée et pays jugés contre le réseau (`assertPostReach`), « aussi sur ANTIA » ; idempotence par
+  sur l'original, portée et pays jugés contre le réseau (`assertPostReach`), « aussi sur ANTSIA » ; idempotence par
   auteur (une clé rejouée dans un autre réseau est refusée) ; cloches du partage et des citations par la porte unique.
 - **Épingle** par réseau, posée sur l'adhésion, rendue à part en première page du mur.
 - **Marques et sourdines par réseau** (celui où elles sont posées) ; listes paginées seules.
-- **`feed`** (fil « Récents » à curseur natif de la tranche verticale) gardé pour les écrans existants (antia.ga,
+- **`feed`** (fil « Récents » à curseur natif de la tranche verticale) gardé pour les écrans existants (antsia.ga,
   DIASPORALE), DTO étendu sans retrait.
 - **Réaction** sous la même garde (`assertVisiblePost`).
 - Débit : `post.edit`, `post.remove`, `mark.toggle`, `mute.toggle`.
@@ -419,7 +423,7 @@ dépend.
   retenue, poids réel, vidéo seule, cinq images), partage (garde du lecteur, aplatissement, décompte), recherche
   (accents, inconnu, garde, retrait, requête courte, partage sans corps), citations, mur (audiences, retirées, refus
   indistinct, continuation de 75 publications), masquer, enregistrer, suivre, sourdine, pagination de plus de 50 marques.
-- Neufs : contexte de lecture (R4, « aussi sur ANTIA » avec origine, natif de la racine), blocage qui l'emporte sur
+- Neufs : contexte de lecture (R4, « aussi sur ANTSIA » avec origine, natif de la racine), blocage qui l'emporte sur
   `public`, portée et pays, groupe (forme, appartenance, départ), édition, épingle, lacune, fil natif compatible,
   marque par réseau ; domaine : `assertPostReach`, blocage dans `isVisibleTo`.
 
@@ -1191,3 +1195,153 @@ dépend.
   si la CLI tourne sous un Node non supporté — réglé le même jour : `codegen` passe lui aussi par `scripts/convex-dev.mjs`
   (piège mis à jour dans `CLAUDE.md`).
 - **Écrans** (iAppel, journal, réglages, grille, surface d'appel) : PA6.
+
+## Lot 16 — `live` (le direct : conférences en direct d'un réseau)
+
+Méthode : une FONDATION (lot 16a, `78e2dca` : tables, validateurs, gardes, purs, débits, codes, sujet de la cloche),
+puis cinq lots parallèles (agents Opus, brief commun et fiche des contrats de la fondation) : sessions et découverte,
+audience, scène, vie de la salle, médias ; intégration et `verify` par la session.
+
+### Parité, fichier par fichier
+
+| Source (`socle/convex/…`) | Cible | Sort | État |
+|---|---|---|---|
+| `modules/direct/{domain,permissions,replayComposition}.ts`, constantes d'`antenna.ts` | `packages/social-domain/src/live/*` (réexportés par `convex/modules/live/`) | à adapter / tel quel | ✅ (audience « organisation » → `followers` ; motifs de rediffusion et libellés → CODES) |
+| `modules/direct/{validators,tables}.ts` | `convex/modules/live/{validators,tables}.ts` | à adapter | ✅ (13 tables `live*`, `networkId` partout, compteurs dans `liveSessionCounters`) |
+| `modules/direct/{access,grants,retention}.ts` | `convex/modules/live/` | à adapter / tel quel | ✅ (adhésion d'abord, `authorizeToken` du moteur) |
+| `modules/direct/sessions.ts` | `convex/modules/live/sessions.ts` | à adapter | ✅ (page au lieu de l'organisation, cloche par la diffusion, découverte préfixée par le réseau, annonce au fil) |
+| `modules/direct/{invitees,invitationSettle,revocation}.ts` | `convex/modules/live/` | à adapter / tel quel | ✅ (révocations par page, relation, adhésion) |
+| `modules/direct/{antenna,speakers,delegations,moderation}.ts` | `convex/modules/live/` | tel quel | ✅ (cible déclarée exigée) |
+| `modules/direct/{presence,hostPresence,reap,comments,reactions}.ts` | `convex/modules/live/` | tel quel | ✅ (récolte par tranches chaînées, écrivain unique des compteurs) |
+| `modules/direct/replay.ts`, `actions/livekitDirect.ts` | `convex/modules/live/{replay,livekitActions,egressActions}.ts` | tel quel | ✅ (`networkAction` pour le jeton et les sous-titres) |
+| `lib/egress{FileTransfer,Routing,Uploads,Webhook}.ts` | `convex/lib/livekitEgress*.ts` | tel quel / à simplifier | ✅ (branche `directs/` seule ; dépôt sous la garde des fichiers) |
+| `http.ts` (route `POST /webhooks/livekit-egress`) | `convex/http.ts` | à simplifier | ✅ (propriété limitée au direct) |
+| crons `reap-stale-directs`, `purge-expired-direct-replays`, `reconcile-direct-replays` | `live-reap-stale` (60 s), `live-purge-expired-replays` (1 h), `live-reconcile-replays` (15 min) | patron | ✅ |
+| `modules/direct/manifest.ts` | — | exclu | — |
+
+### Adaptations (liste fermée)
+
+- **Par réseau** : toute session, ligne d'antenne, invitation, présence, commentaire et réaction porte `networkId` ; une
+  session d'un autre réseau est introuvable ; la découverte et ses curseurs sont préfixés par le réseau (V37).
+- **Adhésion d'abord** (V35) : la décision d'accès exige un membre ACTIF du réseau ; un invité ne franchit son invitation
+  que s'il reste membre et non effacé ; perdre l'adhésion (départ, suspension — point unique `people/admission.setMembershipStatus`)
+  coupe les salles où la personne était admise.
+- **Organisation → page** (V36, V38-V40) : l'audience « organisation » devient **`followers`** — les abonnés et les
+  signataires vivants d'une page ; parler au nom d'une page exige d'en être signataire ; une invitation ne franchit jamais
+  ce cercle ; se désabonner, perdre sa signature, retirer la page coupent les connexions ouvertes.
+- **Compteurs hors de la session** (D28) : `liveSessionCounters`, écrite par la seule récolte et seulement sur changement ;
+  l'admission n'écrit plus la session ; capacité jugée sur les présents recomptés.
+- **Récolte par tranches chaînées** : cinq sessions par transaction (pire cas mesuré ≈ 2,3 Mo par session face à la
+  limite de 16 Mio), suite planifiée par curseur — au socle, les directs au-delà du 50e n'étaient jamais récoltés.
+- **Cibles déclarées** : l'antenne, la délégation et la promotion exigent une adhésion `declaree` (un membre en attente ne
+  peut ni obtenir de jeton ni agir).
+- **Débit** (D14) : `live.create`, `live.inviteesAdd`, `live.presence`, `live.hostPresence` (refus attrapé : un battement
+  ne lève jamais), `live.token`, et les quatre seaux du socle (commentaire, réaction, main levée, invitation à l'antenne).
+- **Codes** : 46 règles `LIVE_*` et `liveRoleRequired` ; motifs d'échec de rediffusion (22 codes), langues de sous-titres et
+  libellés de délégation en CODES (le front traduit).
+- **Fichiers** : la rediffusion rapatriée entre à la GARDE (analyse jusqu'à 60 Mo, inscription au-delà) ; la piste de
+  sous-titres est analysée ; chaque purge emporte sa ligne d'analyse (D10) ; délivrance par `servableUrl` (D05).
+- **Cloche** : sujet `liveSession` ; `live_started` diffusé par lots (`liveSessionAudience`), décision d'accès rejugée par
+  destinataire ; un exclu n'est plus sonné, une conférence terminée ne sonne plus « a démarré ».
+- **Annonce au fil** : publication portant `liveSessionId` (visibilité `network`), carte `live` facultative du fil.
+
+### Corrections de dette
+
+- **D28**, **D11** (aucun `.collect()`), **D14**, **D16** (instant fourni par l'écran aux lectures d'antenne et du bail de
+  l'hôte), **D19** (ensembles préchargés tronqués relus à la source), **D05**, **D10**, **D35** (aucun index de
+  publication par direct).
+- **Garde des fichiers** (hors lot, trouvée par le lot) : l'analyse lisait le fichier ENTIER avant de juger sa taille — un
+  fichier de plus de 512 Mio faisait tomber l'action ; la taille stockée est désormais jugée avant tout téléchargement.
+
+### Tests
+
+- Portés : les 21 fichiers du direct (340 cas) — `organisationAccess` et `revocation` RÉÉCRITS (page, adhésion) —, les
+  tests des bibliothèques Egress et de la route du webhook (cas d'enregistrement d'appel, de messagerie vocale et
+  d'iRéunion retirés avec leur branche).
+- Neufs : refus indistinct d'un autre réseau, débit, adhésion en attente, audience `followers`, compteurs écrits par la seule
+  récolte, récolte au-delà de 50 directs, jeton (identité, attributs, configuration absente), portes du cercle d'une page,
+  analyse jugée sur la taille stockée.
+- Suite du module et des bibliothèques : 31 fichiers, 467 cas verts.
+
+### Écarts assumés
+
+- **Audience `followers`** au lieu d'un simple retrait de l'audience « organisation » (décision à valider) ; l'annonce au fil
+  d'une conférence `followers` reste refusée (parité du socle).
+- **Gestes sans seau** (passer en direct, terminer, régler, déléguer, modérer, promouvoir, rediffusion, quitter, retirer un
+  commentaire) : parité du socle ; à déclarer en exceptions du cliquet `rate-limited-writes` (PA5).
+- **Effacement** des tables `live*` : PA5 (aucun index par personne).
+- **Écrans** (salle, antenne, console de l'hôte, rediffusion, carte du direct dans le fil) : PA6, lot F3.
+
+
+## Complément F3a — configuration avant diffusion (16/10/2026)
+
+`live.livekitActions.checkBroadcastConfiguration` vérifie la session dans le réseau puis le
+droit d’hôte, avant de lire la configuration LiveKit. Sans configuration, la conférence reste
+programmée : le front ne demande pas les périphériques et n’appelle pas `goLive`. Aucun secret,
+jeton, admission ou réveil du service dans ce contrôle ; les gardes du démarrage et du jeton
+restent exercées lors de ces gestes. Deux tests ajoutés (configuration sans démarrage, refus
+indistinct avant configuration) ; fichier `livekitActions.test.ts` : 6 cas verts.
+
+`bun run verify` final : 1 101 cas backend verts. La disponibilité réelle du SFU reste une
+recette distincte ; les premières surfaces du direct sont détaillées dans le rapport 04.
+
+## Lot 17 — crons et garde-fous (16/10/2026)
+
+Le registre `convex/crons.ts` porte les dix passages PA3 attendus : saisie personnelle et de
+groupe, stories, présence, appels, récolte du direct, rétention et réconciliation des replays,
+relance des analyses et purge des blobs infectés. Le cron de compteurs DIASPORALE est conservé.
+Sources de référence : owner map §4.2/§8 ; socle `origin/main` lu au commit `25398f565`,
+dont les crons des appels et du direct reprennent les cadences inventoriées à `ad2e7fdc2`.
+
+### Corrections et bornes
+
+- Saisie : 500 lignes expirées par transaction ; un lot plein programme sa suite. Les signaux
+  encore actifs et ceux dont l'échéance égale l'instant du passage restent présents.
+- Fichiers : 50 analyses périmées par état, 50 blobs par passage ; les lots pleins continuent.
+  Les lignes quittent leur file par changement d'état/date ou `blobPurgedAt`. Le plafond de
+  tentatives et le coupe-circuit de l'analyse restent appliqués ; la purge garde le verdict
+  et produit une seule trace système par blob.
+- Appels : une chaîne par état, pages de 50. Des groupes protégés en tête n'empêchent plus
+  d'examiner les suivants. L'âge ne se déduit plus de l'ordre de création ; l'instant des
+  composés et sonneries voyage avec le curseur. Une invitation échue ne protège plus un
+  appel dont sa tâche d'expiration a été perdue.
+- Direct : les conférences programmées expirées sont également parcourues par chaîne de 50,
+  indépendamment des directs vivants. Leur borne de cinq sessions par transaction, mesurée
+  au lot 16, reste inchangée. L'expiration par cron retire aussi la langue des sous-titres.
+- Stories, présence, replays : passages indexés et bornés déjà livrés, gardés par leurs tests.
+
+### Cliquets du §8
+
+- Nouveau `crons-contract` : les dix identifiants, méthodes, cadences, cibles et arguments
+  PA3 sont contrôlés par AST. Le registre doit être créé depuis Convex et exporté ; les
+  inscriptions restent directes, uniques, ASCII et internes. Les extensions DIASPORALE/PA5
+  ne sont pas enfermées dans l'inventaire PA3.
+- Réseau : imports renommés et exports locaux séparés détectés ; une citation de
+  `requireMembership` ne remplace plus l'appel attendu sur le réseau du handler.
+- Fichiers : accès entre crochets et alias locaux du stockage détectés ; admission et
+  fraîcheur analysées sur de vrais appels, commentaires et chaînes exclus. `networkAction`
+  et constructeurs renommés entrent dans l'analyse des arguments de fichier.
+- Notifications : insertions analysées par AST, dont crochets et alias ; une chaîne contenant
+  `//` ne peut plus masquer l'insertion suivante.
+- Les modules actuels sont tous classés ; aucun contournement actuel du backend n'a été
+  trouvé par l'audit. Les nouvelles fixtures démontrent les contournements des détecteurs.
+
+### Vérification et limites
+
+`bun run verify` final **code 0**, le 16/10/2026 : codegen sous Node 22, typage Convex et
+tests, typage/tests des dix espaces et lint des neuf espaces sans erreur. **5 403 tests** :
+1 124 backend, 102 cliquets, 24 scripts, 418 domaine, 86 UI, 56 contrats, 50 API,
+2 891 surfaces, 5 application ANTSIA, 238 domaine DIASPORALE, 254 surfaces DIASPORALE
+et 155 application DIASPORALE. Les 69 avertissements surfaces et six UI hérités restent
+présents. Passage ciblé préalable : 76 backend et 102 cliquets, code 0.
+Logs `/tmp/antsia-pa3-lot17-{targeted,verify}.log`. Backend local : codegen et déploiement
+de développement acceptés, `health:ping` → `ok` ; application 3030 rétablie, HTTP 200.
+Les tests fonctionnels utilisent uniquement le backend simulé, ses tables et son planificateur
+réels. Ils couvrent saturation, suite, conservation du vivant, expiration et rejeu ; le registre
+réel est importé et toutes ses cibles sont vérifiées comme mutations internes exportées.
+
+Ces contrôles statiques ne prouvent pas le contrôle de flux complet, la bonne identité de chaque
+fichier ni les références calculées entre modules. Les gardes à l'exécution et les tests restent
+nécessaires. `rate-limited-writes` relève de PA5, `sign-out-everywhere` de PA4 et les cliquets
+front de PA6. Rétention des notifications, effacement et fédération restent en PA5. Aucune
+recette de médias LiveKit ni publication en production dans ce lot.

@@ -9,9 +9,14 @@
  * qu'il n'existe qu'UNE définition de « membre vivant » : celle dont dépend
  * l'audience `group` du fil.
  */
+import type { ThematicGroupRole } from "@antsia/social-domain/thematicGroups"
+
 import type { Doc, Id } from "../../_generated/dataModel"
 import type { QueryCtx } from "../../_generated/server"
+import { isActiveMember } from "../../lib/access"
 import { fail, notFound } from "../../lib/errors"
+import { isFederatedPage } from "../federation/mirrorAccess"
+import { liveSignatoryRole, readablePageOrNull } from "../pages/access"
 
 type ReadCtx = Pick<QueryCtx, "db">
 
@@ -21,6 +26,50 @@ type ReadCtx = Pick<QueryCtx, "db">
  */
 export function isActiveThematicGroup(group: Doc<"thematicGroups">): boolean {
   return group.closedAt === undefined && group.archivedAt === undefined && group.deletingAt === undefined
+}
+
+/** DG-010 : la page native d'association active et lisible dans SON réseau. */
+export async function associationGroupPageOrNull(ctx: ReadCtx, networkId: Id<"networks">, pageId: Id<"pages">, personId: Id<"persons">): Promise<Doc<"pages"> | null> {
+  const network = await ctx.db.get(networkId)
+  if (!network || network.status !== "active") return null
+  const page = await readablePageOrNull(ctx, network, pageId, personId)
+  if (!page || page.networkId !== networkId || page.ownerKind !== "association" || await isFederatedPage(ctx, page._id)) return null
+  return page
+}
+
+/**
+ * DG-010 : éligibilité et autorité ACTUELLES, sans créer d'appartenance au groupe.
+ * Une ligne d'association non acceptée ferme l'accès, même à un signataire.
+ * Sans aucune ligne, un responsable vivant peut choisir de rejoindre.
+ */
+export async function associationGroupRoleOrNull(ctx: ReadCtx, group: Pick<Doc<"thematicGroups">, "networkId" | "associationPageId">, personId: Id<"persons">): Promise<ThematicGroupRole | null> {
+  if (group.associationPageId === undefined) return null
+  if (!(await isActiveMember(ctx, group.networkId, personId))) return null
+  const page = await associationGroupPageOrNull(ctx, group.networkId, group.associationPageId, personId)
+  if (!page) return null
+  const association = await ctx.db.query("associationMemberships")
+    .withIndex("by_network_and_page_and_person", (q) => q.eq("networkId", group.networkId).eq("pageId", page._id).eq("personId", personId)).unique()
+  if (association && association.status !== "accepted") return null
+  const signatory = await liveSignatoryRole(ctx, page, personId)
+  if (signatory === "admin") return "owner"
+  if (signatory === "signatory") return "moderator"
+  if (!association) return null
+  return association.role === "animator" ? "moderator" : "member"
+}
+
+/** La découverte privée n'est ouverte qu'aux personnes éligibles, même avant leur adhésion explicite. */
+export async function canDiscoverThematicGroup(ctx: ReadCtx, group: Doc<"thematicGroups">, personId: Id<"persons">): Promise<boolean> {
+  return group.associationPageId === undefined || (await associationGroupRoleOrNull(ctx, group, personId)) !== null
+}
+
+/** Les posts d'association n'ont aucune exception auteur, même via une URL ou un autre réseau. */
+export async function canAccessAssociationGroupPost(ctx: ReadCtx, post: Pick<Doc<"posts">, "networkId" | "groupId">, personId: Id<"persons">, readingNetworkId: Id<"networks">): Promise<boolean> {
+  if (post.groupId === undefined) return true
+  const group = await ctx.db.get(post.groupId)
+  if (!group) return false
+  if (group.associationPageId === undefined) return true
+  return group.networkId === post.networkId && readingNetworkId === group.networkId && isActiveThematicGroup(group)
+    && (await liveThematicGroupMembership(ctx, group._id, personId)) !== null
 }
 
 /** La ligne d'appartenance VIVANTE d'une personne, ou `null`. */
@@ -34,7 +83,11 @@ export async function liveThematicGroupMembership(
     .withIndex("by_group_and_person", (q) => q.eq("groupId", groupId).eq("personId", personId))
     .unique()
   if (!row || row.leftAt !== undefined) return null
-  return row
+  const group = await ctx.db.get(groupId)
+  if (!group || row.networkId !== group.networkId) return null
+  if (group.associationPageId === undefined) return row
+  const role = await associationGroupRoleOrNull(ctx, group, personId)
+  return role === null ? null : { ...row, role }
 }
 
 /** Membre VIVANT d'un groupe vivant ? — la question que pose la garde d'audience `group`. */
@@ -61,6 +114,6 @@ export async function requireLiveThematicGroupMembership(
   const group = await ctx.db.get(groupId)
   if (!group || group.networkId !== networkId || !isActiveThematicGroup(group)) return notFound()
   const membership = await liveThematicGroupMembership(ctx, groupId, personId)
-  if (!membership) return fail("groupMembershipRequired")
+  if (!membership) return group.associationPageId === undefined ? fail("groupMembershipRequired") : notFound()
   return { group, membership }
 }

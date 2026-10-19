@@ -1,0 +1,184 @@
+{
+  "callActions": {
+    "joinOngoing": "Rejoindre l'appel en cours",
+    "groupAudio": "Appel de groupe",
+    "joinVideo": "Rejoindre en vidéo",
+    "groupVideo": "Appel vidéo de groupe",
+    "startGroup": "Démarrer un appel de groupe",
+    "audio": "Appel audio",
+    "video": "Appel vidéo"
+  },
+  "conversationScroll": {
+    "newMessages_one": "{{count}} nouveau message",
+    "newMessages_other": "{{count}} nouveaux messages",
+    "newMessagesCapped": "99+ nouveaux messages"
+  },
+  "forwardTargets": {
+    "fallbackConversation": "Conversation",
+    "fallbackGroup": "Groupe",
+    "memberCount_one": "{{count}} membre",
+    "memberCount_other": "{{count}} membres",
+    "hintChat": "Transférer dans cette conversation",
+    "hintGroup": "Transférer dans ce groupe",
+    "hintRelation": "Transférer — une conversation sera ouverte"
+  },
+  "messageActions": {
+    "reply": "Répondre",
+    "react": "Réagir",
+    "copy": "Copier le texte",
+    "forward": "Transférer",
+    "pin": "Épingler",
+    "unpin": "Désépingler",
+    "edit": "Modifier",
+    "deleteForMe": "Supprimer pour moi",
+    "deleteForEveryone": "Supprimer pour tout le monde"
+  },
+  "messagerieBulles": {
+    "today": "Aujourd'hui",
+    "yesterday": "Hier",
+    "deleted": "Message supprimé",
+    "masked": "Message masqué"
+  },
+  "messagerieComposer": {
+    "bytes": "{{value}} o",
+    "kilobytes": "{{value}} ko",
+    "megabytes": "{{value}} Mo",
+    "tooMany": "Un message porte au plus {{max}} pièces jointes.",
+    "empty": "« {{name}} » est vide.",
+    "tooLarge": "« {{name}} » pèse {{size}} : une pièce jointe est limitée à {{max}}."
+  },
+  "pinnedMessageBanner": {
+    "attachment": "Pièce jointe",
+    "message": "Message",
+    "jump": "Aller au message épinglé de {{sender}} : {{body}}",
+    "unpin": "Désépingler le message"
+  },
+  "replyPreview": {
+    "deletedAccount": "Compte supprimé",
+    "quotedMessage": "Message cité",
+    "replyTo": "Réponse à {{author}}",
+    "cancel": "Annuler la réponse",
+    "goTo": "Aller au message cité de {{author}}"
+  },
+  "voiceRecorderButton": {
+    "micUnavailable": "Le micro n'est pas accessible. Autorisez-le dans les réglages du navigateur.",
+    "releaseToSend": "Relâchez pour envoyer",
+    "stopAndSendLabel": "Arrêter et envoyer le message vocal",
+    "stopAndSend": "Arrêter et envoyer",
+    "voiceMessage": "Message vocal"
+  },
+  "conversationHeader": {
+    "groupInfo": "Informations du groupe {{title}}",
+    "openProfile": "Ouvrir le profil de {{title}}",
+    "expandNamed": "Déployer la conversation {{title}}",
+    "backPage": "Revenir aux conversations",
+    "backList": "Revenir à la liste des conversations",
+    "collapse": "Rétracter la conversation",
+    "expand": "Déployer la conversation",
+    "callActions": "Actions d'appel pour {{title}}"
+  },
+  "forwardMessageSheet": {
+    "close": "Fermer",
+    "title": "Transférer le message",
+    "description": "Le message sera marqué « Transféré » dans la conversation choisie.",
+    "searchPlaceholder": "Rechercher une conversation, une personne…",
+    "searchLabel": "Rechercher la cible du transfert",
+    "rowLabel": "{{hint}} : {{title}}",
+    "loading": "Chargement de vos conversations…",
+    "loadError": "Vos conversations n'ont pas pu être chargées.",
+    "retry": "Réessayer",
+    "noMatch": "Aucune cible ne correspond à « {{term}} ».",
+    "noOther": "Aucune autre conversation pour le moment.",
+    "newConversation": "Ouvrir une nouvelle conversation",
+    "searching": "Recherche parmi vos relations…"
+  },
+  "messageActionsSheet": {
+    "close": "Fermer",
+    "title": "Actions sur le message",
+    "reactions": {
+      "like": "J'aime",
+      "love": "J'adore",
+      "laugh": "Ça me fait rire",
+      "wow": "Ça m'étonne",
+      "sad": "Ça me touche",
+      "pray": "Merci"
+    }
+  },
+  "messageAttachment": {
+    "blocked": "bloqué par l'analyse",
+    "scanPending": "analyse en cours",
+    "unavailable": "indisponible",
+    "voiceMessage": "Message vocal",
+    "voiceMessageWithDuration": "Message vocal, {{duration}}"
+  },
+  "messageBubble": {
+    "actions": "Actions sur le message",
+    "actionsWithText": "Actions sur le message : {{text}}",
+    "actionsFrom": "Actions sur le message de {{name}}",
+    "actionsMine": "Actions sur votre message",
+    "speaker": "Message de {{name}} :",
+    "speakerMine": "Votre message :",
+    "forwarded": "Transféré",
+    "pinned": "Message épinglé",
+    "edited": "(modifié)",
+    "reactionCount": "{{reaction}} : {{total}}",
+    "read": "Lu",
+    "sent": "Envoyé"
+  },
+  "messageComposer": {
+    "sendAlreadyPending": "Un envoi est déjà en cours dans cette conversation.",
+    "uploadFailed": "Le téléversement a échoué.",
+    "editFailed": "La modification n'a pas pu être enregistrée.",
+    "reselectOne": "« {{name}} » est à resélectionner : le fichier n'est plus en mémoire.",
+    "reselectMany": "{{n}} pièces sont à resélectionner : leurs fichiers ne sont plus en mémoire.",
+    "reselectPiece": "Une pièce jointe est à resélectionner.",
+    "sendFailed": "Les pièces jointes n'ont pas pu être envoyées.",
+    "voiceFailed": "Le message vocal n'a pas pu être envoyé.",
+    "editBanner": "Modification du message",
+    "cancelEdit": "Annuler la modification",
+    "toReselect": "à resélectionner",
+    "alreadyUploaded": "Déjà téléversée",
+    "remove": "Retirer {{name}}",
+    "attachFile": "Joindre un fichier",
+    "editPlaceholder": "Modifier le message…",
+    "editLabel": "Modifier le message",
+    "saving": "Enregistrement en cours",
+    "saveEdit": "Enregistrer la modification",
+    "sending": "Envoi en cours",
+    "send": "Envoyer"
+  },
+  "outboxMessages": {
+    "sending": "Envoi en cours",
+    "attachments_one": "{{count}} pièce jointe",
+    "attachments_many": "{{count}} pièces jointes",
+    "attachments_other": "{{count}} pièces jointes"
+  },
+  "messagerieConversationView": {
+    "systemEvent": "Évènement de la conversation",
+    "callStarted": "Appel démarré",
+    "callEnded": "Appel terminé",
+    "forwardDone": "Message transféré.",
+    "groupCallFallbackTitle": "Appel de groupe",
+    "groupFallbackTitle": "Groupe",
+    "conversationFallbackTitle": "Conversation",
+    "loading": "Chargement…",
+    "notInNetwork": "Cette conversation n’appartient pas à ce réseau.",
+    "backToConversations": "Revenir aux conversations",
+    "members_one": "membre",
+    "members_other": "membres",
+    "callOngoing": "appel en cours",
+    "newConversation": "Nouvelle conversation. Votre premier message l'ouvrira.",
+    "empty": "Aucun message pour l'instant. Écrivez le premier.",
+    "loadOlder": "Voir les messages plus anciens",
+    "loadingOlder": "Chargement des anciens…",
+    "typingOne": "{{name}} écrit…",
+    "typingMany": "{{name}} et d'autres écrivent…",
+    "placeholderGroup": "Écrire au groupe…",
+    "placeholderDirect": "Écrire un message…",
+    "composerLabelGroup": "Message au groupe {{name}}",
+    "composerLabelDirect": "Message à {{name}}",
+    "arrival": "Nouveau message de {{name}}",
+    "arrivalWithText": "Nouveau message de {{name}} : {{text}}",
+    "arrivalWithAttachment": "Nouveau message de {{name}}, avec une pièce jointe"
+  }
+}

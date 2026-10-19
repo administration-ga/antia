@@ -17,8 +17,8 @@
  *    du décideur). Validée, elle fait du demandeur un administrateur et de la
  *    page `community` une page `verified`.
  */
-import { assertDecisionReason } from "@antia/social-domain/audit"
-import { pageTrustRank, assertPageClaimable, assertPageClaimEvidenceCount, isPageClaimOpen, normalizePageClaimNote } from "@antia/social-domain/pages"
+import { assertDecisionReason } from "@antsia/social-domain/audit"
+import { pageTrustRank, assertPageClaimable, assertPageClaimEvidenceCount, isPageClaimOpen, normalizePageClaimNote } from "@antsia/social-domain/pages"
 import { paginationOptsValidator, type PaginationResult } from "convex/server"
 import { type Infer, v } from "convex/values"
 
@@ -29,6 +29,7 @@ import { checked, fail, failRule, notFound } from "../../lib/errors"
 import { networkMutation, networkQuery } from "../../lib/functions"
 import { enforceRateLimit } from "../../lib/rateLimit"
 import { guardUploadUrl } from "../../lib/uploadPolicy"
+import { assertNativePageManagement } from "../federation/mirrorAccess"
 import { admitStoredUpload, assertFreshUpload, findScanByStorageId } from "../files/admission"
 import { purgeStoredFile } from "../files/purge"
 import { resolveFileDelivery, withheldCodeOf, withheldCodeValidator } from "../files/storageGuard"
@@ -109,6 +110,7 @@ export const requestPageClaim = networkMutation({
     await enforceRateLimit(ctx, "page.claim", ctx.person._id)
     const page = await ctx.db.get(args.pageId)
     if (!page || page.networkId !== ctx.networkId || page.status !== "active") return notFound()
+    await assertNativePageManagement(ctx, page._id)
     const [myRole, liveAdmins] = await Promise.all([liveSignatoryRole(ctx, page, ctx.person._id), countLiveAdmins(ctx, page)])
     checked(() => assertPageClaimable({ trust: page.trust, hasLiveAdmin: liveAdmins > 0, claimantIsAdmin: myRole === "admin" }))
     const pending = await ctx.db
@@ -251,6 +253,7 @@ export const decidePageClaim = networkMutation({
     const now = Date.now()
     let trust = page.trust
     if (args.decision === "approved") {
+      await assertNativePageManagement(ctx, page._id)
       if (page.trust === "official") return failRule("PAGE_NOT_CLAIMABLE")
       if (!(await isActiveMember(ctx, page.networkId, claim.claimantPersonId))) return fail("conflict")
       const row = await signatoryRowOf(ctx, page._id, claim.claimantPersonId)

@@ -10,7 +10,7 @@
  *
  * Aucune fonction Convex ici.
  */
-import type { NotificationKind } from "@antia/social-domain/notifications"
+import type { NotificationKind } from "@antsia/social-domain/notifications"
 
 import type { Doc, Id } from "../../_generated/dataModel"
 import type { MutationCtx, QueryCtx } from "../../_generated/server"

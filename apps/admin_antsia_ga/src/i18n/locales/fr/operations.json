@@ -1,0 +1,386 @@
+{
+  "common": {
+    "loading": "Chargement des données autorisées…",
+    "empty": "Aucun élément dans cette liste.",
+    "emptyWindow": "Aucun élément dans cette tranche. La page suivante peut contenir des résultats.",
+    "pagination": "Pagination de la liste",
+    "previous": "Précédent",
+    "next": "Suivant",
+    "failed": "L’opération n’a pas pu aboutir. Vos saisies sont conservées ; vous pouvez réessayer.",
+    "saved": "Décision enregistrée dans le journal.",
+    "saving": "Enregistrement…",
+    "reason": "Motif de la décision",
+    "reasonHint": "Expliquez la décision sans copier de coordonnées, de secrets ou de contenu privé.",
+    "reasonInvalid": "Le motif doit contenir entre {{min}} et 500 caractères.",
+    "confirmAction": "Confirmer : {{action}}",
+    "confirm": "Confirmer la décision",
+    "cancel": "Annuler",
+    "active": "Actif",
+    "inactive": "Inactif",
+    "adminRequired": "Cette configuration exige le rôle d’administrateur de la plateforme.",
+    "selectNetwork": "Choisissez un réseau pour ouvrir ces outils.",
+    "draftNotice": "Des saisies non enregistrées ou des décisions en cours sont présentes. Terminez-les ou annulez-les avant de changer de section ou de réseau.",
+    "discardDraftConfirm": "Ce changement peut effacer des saisies non enregistrées. Continuer ?",
+    "pendingChangeBlocked": "Une décision est en cours. Attendez son résultat avant de changer de vue."
+  },
+  "surfaces": {
+    "all": "Toutes les surfaces",
+    "post": "Publications",
+    "comment": "Commentaires",
+    "groupMessage": "Messages de groupe",
+    "event": "Événements",
+    "page": "Pages",
+    "person": "Profils",
+    "live": "Directs",
+    "story": "Stories",
+    "album": "Albums",
+    "serviceReview": "Avis de prestations",
+    "serviceReviewReply": "Réponses aux avis de prestations",
+    "commerceOffer": "Offres des boutiques",
+    "commercialMessage": "Message commercial",
+    "contextualMessage": "Messages de mise en relation",
+    "commerceJob": "Offres d’emploi",
+    "diasporaAidQuestion": "Questions d’entraide DIASPORALE",
+    "diasporaAidAnswer": "Réponses d’entraide DIASPORALE",
+    "diasporaAidMission": "Missions bénévoles DIASPORALE",
+    "diasporaMentorProfile": "Profils de mentor DIASPORALE",
+    "diasporaMentoringRequest": "Demandes de mentorat DIASPORALE",
+    "diasporaKitResource": "Ressources du kit d’arrivée DIASPORALE",
+    "diasporaJobOffer": "Offres d’emploi DIASPORALE",
+    "diasporaTalentProfile": "Profils de talent DIASPORALE",
+    "diasporaJobApplication": "Candidatures DIASPORALE"
+  },
+  "teams": {
+    "title": "Équipes de modération",
+    "lead": "Les capacités sont relues dans le réseau. Un membre non publié ou retiré de l’annuaire reste présenté sous un libellé neutre.",
+    "create": "Créer une équipe",
+    "name": "Nom de l’équipe",
+    "nameInvalid": "Le nom doit contenir entre 2 et 100 caractères.",
+    "scope": "Surface de modération",
+    "handle": "Identifiant du membre",
+    "handleHint": "Recherchez un membre publié du réseau ; un identifiant technique ne donne aucun accès.",
+    "handleInvalid": "Saisissez un identifiant entre 1 et 64 caractères.",
+    "find": "Rechercher le membre",
+    "notFound": "Aucun membre visible ne correspond à cet identifiant.",
+    "neutralMember": "Membre non visible",
+    "memberHandle": "@{{handle}}",
+    "add": "Ajouter à l’équipe",
+    "remove": "Retirer de l’équipe",
+    "noMembers": "Aucun membre dans cette équipe."
+  },
+  "appeals": {
+    "title": "Recours auprès de la plateforme",
+    "lead": "Recours ouverts du réseau sélectionné. Chaque décision laisse une trace dans le journal.",
+    "independence": "L’auteur du recours et l’opérateur ayant pris la décision initiale ne peuvent pas arbitrer ce recours.",
+    "uphold": "Maintenir la décision",
+    "overturn": "Annuler la décision"
+  },
+  "federation": {
+    "title": "Fédération",
+    "lead": "Émetteurs, reçus, transferts de médias et lettres mortes de ce réseau. La réception technique ne prouve pas l’application d’un reflet.",
+    "emitters": "Émetteurs",
+    "configureEmitter": "Configurer un émetteur",
+    "editEmitter": "Modifier la configuration",
+    "newEmitter": "Configurer un autre émetteur",
+    "slug": "Identifiant de l’émetteur",
+    "slugInvalid": "Utilisez 2 à 64 lettres minuscules, chiffres ou tirets, en commençant par une lettre.",
+    "environment": "Environnement",
+    "sandbox": "Sandbox",
+    "production": "Production",
+    "keyReference": "Nom de la variable de clé",
+    "keyHint": "Saisissez uniquement la référence ANTSIA_FEDERATION_…_KEY. La clé elle-même se configure hors de la console et n’est jamais affichée.",
+    "keyInvalid": "La référence doit suivre ANTSIA_FEDERATION_…_KEY, avec des majuscules, chiffres ou soulignés (160 caractères au maximum).",
+    "contracts": "Contrats autorisés",
+    "contractsHint": "Un contrat par ligne. Autoriser un contrat ne crée pas son traitement métier.",
+    "contractsInvalid": "Indiquez jusqu’à 32 contrats distincts au format CONTRAT-V1, de 100 caractères au maximum.",
+    "enabled": "Activer cet émetteur",
+    "saveEmitter": "Enregistrer la configuration",
+    "revision": "Révision {{revision}}",
+    "noContracts": "Aucun contrat autorisé.",
+    "receipts": "Reçus",
+    "pageSyncTitle": "Pages et publications officielles des administrations",
+    "pageSyncHint": "La connexion prend en charge l’identité et le retrait des pages officielles, les publications déclarées publiques, leurs retraits et l’import des médias sous la garde des fichiers. Les agents volontaires seront raccordés ultérieurement. Un émetteur autorisé, sa clé et les origines de médias doivent être configurés.",
+    "mediaTransfers": "Transferts de médias",
+    "mediaTransfersHint": "Ces états suivent l’import des fichiers. Les médias transférés restent soumis à l’analyse des fichiers avant leur délivrance.",
+    "mediaReference": "{{kind}} · {{reference}}",
+    "mediaKind": {
+      "pages": "Page",
+      "posts": "Publication"
+    },
+    "mediaStatus": {
+      "pending": "En attente de transfert",
+      "running": "Transfert en cours",
+      "attached": "Transféré · analyse des fichiers requise",
+      "failed": "Transfert en échec"
+    },
+    "mediaFailure": {
+      "configuration": "Les origines de médias sont absentes ou invalides dans la configuration du serveur. Leur configuration est nécessaire avant une relance.",
+      "download": "Le téléchargement a été refusé ou interrompu.",
+      "obsolete": "La révision a été retirée ou son objet source est devenu indisponible.",
+      "admission": "Un fichier a été refusé par la politique d’admission."
+    },
+    "mediaRetry": "Relancer le transfert",
+    "mediaRetryQueued": "Relance planifiée. Les fichiers resteront soumis à l’analyse.",
+    "deadLetters": "Lettres mortes",
+    "replayHint": "Le rejeu conserve le reçu et son enveloppe. Un contrat sans traitement métier restera en échec.",
+    "replay": "Demander un rejeu",
+    "attempts_one": "{{count}} tentative",
+    "attempts_other": "{{count}} tentatives",
+    "receiptStatus": {
+      "received": "Reçu, traitement non confirmé",
+      "applied": "Appliqué",
+      "dead_letter": "En lettre morte",
+      "discarded": "Événement personnel écarté, corps non conservé"
+    },
+    "failure": {
+      "unsupported_contract": "Traitement métier indisponible",
+      "contract_not_allowed": "Contrat non autorisé dans ce réseau",
+      "invalid_payload": "Données de synchronisation invalides",
+      "unsupported_event": "Type de mise à jour non pris en charge",
+      "unsupported_media": "Image distante en attente de prise en charge",
+      "source_conflict": "Référence ou révision de la source en conflit",
+      "consent_required": "Accord personnel courant requis",
+      "identity_not_linked": "Identité IDN non corrélée ou accès indisponible"
+    },
+    "outcome": {
+      "deduplicated": "Le reçu est déjà appliqué. Aucun traitement supplémentaire n’a été effectué.",
+      "still_failing": "Le rejeu a été enregistré, mais le traitement reste en échec. Aucun reflet n’a été appliqué.",
+      "applied": "La mise à jour a été traitée et la lettre morte est résolue.",
+      "discarded": "Le corps personnel a été expurgé sans application. Un nouvel événement lié à un accord courant est nécessaire."
+    }
+  },
+  "pages": {
+    "title": "Pages et confiance",
+    "lead": "Le niveau de confiance provient du moteur. Le statut Officiel est réservé aux institutions et à une décision administrative tracée.",
+    "create": "Créer une page d’institution",
+    "creationHint": "Cette création attribue Officiel à une institution. La visibilité reste limitée au réseau ; elle ne confère aucun badge à une personne.",
+    "name": "Nom de l’institution",
+    "nameInvalid": "Le nom doit contenir entre 1 et 120 caractères.",
+    "handle": "Adresse de la page",
+    "handleInvalid": "Saisissez 3 à 60 caractères minuscules : lettres, chiffres, points, tirets ou soulignés, avec une lettre ou un chiffre aux extrémités.",
+    "country": "Pays (facultatif)",
+    "countryHint": "Code ISO de deux lettres majuscules, par exemple GA.",
+    "countryInvalid": "Utilisez un code pays de deux lettres majuscules ou laissez le champ vide.",
+    "filter": "État des pages",
+    "address": "Adresse : {{handle}}",
+    "deactivate": "Retirer la page",
+    "reactivate": "Rétablir la page",
+    "trust": {
+      "official": "Officiel",
+      "verified": "Vérifié",
+      "community": "Communauté"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Retirée"
+    }
+  },
+  "incidents": {
+    "title": "Incidents",
+    "lead": "Suivi opérationnel daté. Les incidents sont résolus sans suppression du journal.",
+    "create": "Ouvrir un incident",
+    "networkScope": "L’incident sera rattaché au réseau sélectionné.",
+    "globalScope": "L’incident sera rattaché à la plateforme.",
+    "name": "Titre de l’incident",
+    "titleHint": "Décrivez le problème opérationnel sans inclure de données personnelles.",
+    "titleInvalid": "Le titre doit contenir entre 2 et 160 caractères.",
+    "severity": "Gravité",
+    "level": {
+      "info": "Information",
+      "warning": "Avertissement",
+      "critical": "Critique"
+    },
+    "status": {
+      "open": "Ouvert",
+      "resolved": "Résolu"
+    },
+    "resolve": "Résoudre l’incident"
+  },
+  "audit": {
+    "title": "Journal des décisions",
+    "networkLead": "Décisions tracées dans le réseau sélectionné, de la plus récente à la plus ancienne.",
+    "globalLead": "Décisions tracées dans la plateforme, de la plus récente à la plus ancienne.",
+    "subjectLead": "Historique du sujet sélectionné. Aucun détail technique ou contenu privé n’est exporté.",
+    "system": "Système",
+    "hiddenActor": "Acteur non visible",
+    "subjectType": "Type de sujet : {{table}}",
+    "subjectHistory": "Voir l’historique du sujet",
+    "back": "Revenir au journal"
+  },
+  "health": {
+    "title": "Santé du réseau",
+    "lead": "Comptages matérialisés des files et des membres. Ces nombres décrivent le moteur ; ils ne prouvent pas la disponibilité des prestataires.",
+    "notGenerated": "Aucun comptage n’a encore été produit. Lancez un calcul pour obtenir un état daté.",
+    "building": "Calcul en cours par tranches. Les valeurs incomplètes ne sont pas présentées comme un état final.",
+    "generated": "Calcul achevé le",
+    "dateMissing": "La date de ce comptage n’est pas disponible.",
+    "refresh": "Actualiser les compteurs",
+    "queued": "Calcul demandé. Attendez le nouvel état daté.",
+    "snapshotHint": "Le calcul parcourt plusieurs tranches ; il s’agit d’un état daté, et non d’une photographie atomique de toutes les tables.",
+    "operational": {
+      "title": "Tâches planifiées du moteur",
+      "lead": "Observation technique commune à tous les réseaux, limitée aux documents de tâches retenus par Convex. Les noms, arguments et textes d’erreur ne sont pas conservés dans ce tableau.",
+      "notGenerated": "Aucune observation n’est disponible. L’observateur planifié doit être raccordé et avoir terminé un passage.",
+      "observed": "État observé le",
+      "window": "Fenêtre :",
+      "scanned": "{{count}} documents examinés, avec un plafond de {{limit}} par observation.",
+      "complete": "Tous les documents de tâches actuellement retenus par Convex ont été examinés. Cela ne couvre pas les erreurs de toutes les fonctions ni les données déjà purgées par Convex.",
+      "bounded": "La lecture a atteint une borne. Les compteurs décrivent seulement la tranche examinée ; zéro échec ne prouve pas l’absence d’autres échecs.",
+      "stale": "Cette observation date de plus de quinze minutes. La fraîcheur du tableau n’est plus garantie.",
+      "warning": "{{count}} tâche(s) en échec observée(s) dans la fenêtre. Examinez les outils Convex autorisés pour le diagnostic ; aucun texte d’erreur privé n’est recopié ici.",
+      "noneObserved": "Aucun échec observé dans cette tranche et cette fenêtre. Ce résultat ne constitue pas une garantie de disponibilité.",
+      "synchronousNotMeasured": "Les erreurs des queries et mutations synchrones ne sont pas mesurées ici. Leur surveillance nécessite un log drain configuré par le propriétaire. Aucune notification externe n’est envoyée par ce tableau.",
+      "metrics": {
+        "failed": "En échec",
+        "pending": "En attente",
+        "inProgress": "En cours",
+        "successful": "Terminées",
+        "canceled": "Annulées"
+      }
+    },
+    "metrics": {
+      "members": "Membres actifs",
+      "openReports": "Signalements ouverts",
+      "openAppeals": "Recours ouverts",
+      "pendingFiles": "Fichiers en attente d’analyse",
+      "deadLetters": "Lettres mortes"
+    }
+  },
+  "export": {
+    "title": "Export agrégé",
+    "lead": "Douze périodes au maximum, sans identité ni texte libre. Seuil de confidentialité : {{threshold}} dossiers et auteurs distincts.",
+    "suppressionHint": "Les petites cohortes et sous-cohortes sont masquées. Une valeur masquée n’est pas un zéro et n’est pas reconstituée dans l’export.",
+    "suppressed": "Masqué",
+    "columns": {
+      "cases": "Dossiers",
+      "actioned": "Décisions appliquées",
+      "dismissed": "Dossiers classés"
+    },
+    "json": "Télécharger le JSON agrégé",
+    "csv": "Télécharger le CSV agrégé",
+    "downloaded": "Téléchargement de l’export agrégé demandé.",
+    "failed": "Le fichier n’a pas pu être téléchargé. Vous pouvez réessayer.",
+    "invalid": "La projection agrégée n’est pas exportable ; le téléchargement est fermé."
+  },
+  "commercialContact": {
+    "title": "Contact commercial",
+    "lead": "Ce canal reste fermé tant que le réseau et la boutique ne l’ont pas ouvert. Les conversations personnelles restent séparées.",
+    "enabled": "Canal ouvert",
+    "disabled": "Canal fermé",
+    "enable": "Ouvrir le canal",
+    "disable": "Fermer le canal"
+  },
+  "contextualPolicy": {
+    "title": "Conversations de mise en relation",
+    "lead": "Ouvre ou ferme, pour ce réseau et pour chaque nature, les conversations privées qui naissent d'une demande de service, d'un mentorat accepté ou d'une candidature présélectionnée. Fermé par défaut ; chaque décision exige un motif et est inscrite au journal.",
+    "existingHint": "La fermeture bloque toute ouverture, tout message et tout appel ; l'historique reste lisible des parties. La messagerie personnelle reste séparée.",
+    "enabled": "Conversations ouvertes pour cette nature",
+    "disabled": "Conversations fermées pour cette nature",
+    "enable": "Ouvrir les conversations de cette nature",
+    "disable": "Fermer les conversations de cette nature",
+    "updated": "Dernière décision le",
+    "kinds": {
+      "diasporaServiceRequest": "Demandes de service (DIASPORALE)",
+      "diasporaMentoring": "Mentorats acceptés (DIASPORALE)",
+      "diasporaJobApplication": "Candidatures présélectionnées (DIASPORALE)"
+    }
+  },
+  "paymentPolicy": {
+    "title": "Nouveaux paiements",
+    "lead": "Autorise ou ferme les nouveaux lancements de paiement pour ce réseau. Chaque décision exige un motif et est inscrite au journal.",
+    "providerHint": "L’ouverture seule ne configure pas de prestataire et ne rend pas le paiement disponible. La configuration et les autorisations de PRO.GA restent nécessaires.",
+    "existingHint": "La fermeture laisse le suivi et le rapprochement des paiements existants accessibles. Elle n’annule ni ne rembourse un paiement.",
+    "enabled": "Nouveaux lancements de paiement autorisés par la plateforme",
+    "disabled": "Nouveaux lancements de paiement fermés",
+    "enable": "Autoriser les nouveaux paiements",
+    "disable": "Fermer les nouveaux paiements",
+    "updated": "Dernière décision le"
+  },
+  "servicePolicy": {
+    "title": "Devis, rendez-vous et prestations",
+    "lead": "Ouvre ou ferme, pour ce réseau, les demandes de devis, de rendez-vous et de prestations à tarif fixe auprès des boutiques liées à PRO.GA. Chaque décision exige un motif et est inscrite au journal.",
+    "linkHint": "L’ouverture seule ne rend aucune prestation disponible : chaque boutique doit être liée à PRO.GA avec la permission correspondante, et PRO.GA revérifie son mandat à chaque demande.",
+    "existingHint": "La fermeture laisse consultables et annulables les rendez-vous et commandes existants. Elle n’annule aucun rendez-vous.",
+    "enabled": "Demandes de services ouvertes par la plateforme",
+    "disabled": "Demandes de services fermées",
+    "enable": "Ouvrir les demandes de services",
+    "disable": "Fermer les demandes de services",
+    "updated": "Dernière décision le"
+  },
+  "jobPolicy": {
+    "title": "Offres d’emploi et candidatures",
+    "lead": "Ouvre ou ferme, pour ce réseau, l’affichage des offres d’emploi reçues de PRO.GA et l’envoi des candidatures. Fermé par défaut ; chaque décision exige un motif et est inscrite au journal.",
+    "linkHint": "L’ouverture seule ne publie aucune offre : l’employeur doit consentir à la publication dans PRO.GA et lier sa boutique avec les permissions correspondantes. PRO.GA revérifie le mandat à chaque candidature.",
+    "jobsEnabled": "Offres d’emploi affichées dans ce réseau",
+    "jobsDisabled": "Offres d’emploi masquées dans ce réseau",
+    "applicationsEnabled": "Candidatures par ANTSIA ouvertes",
+    "applicationsDisabled": "Candidatures par ANTSIA fermées",
+    "enableJobs": "Afficher les offres d’emploi",
+    "disableJobs": "Masquer les offres d’emploi (et fermer les candidatures)",
+    "enableApplications": "Ouvrir les candidatures",
+    "disableApplications": "Fermer les candidatures",
+    "updated": "Dernière décision le"
+  },
+  "storefrontPolicy": {
+    "title": "Publication des vitrines",
+    "lead": "Règle, pour ce réseau, la publication des vitrines déclarées : fermée (brouillons seulement) ou admission motivée, une vitrine à la fois. Fermée par défaut ; chaque décision exige un motif et est inscrite au journal.",
+    "closeHint": "La fermeture retire aussitôt les vitrines de la découverte sans rien effacer ; les demandes en file y restent et peuvent être refusées, mais plus admises.",
+    "autoHint": "L’admission d’office des adhésions vérifiées n’est pas proposée ici : elle attend la validation de la liste des secteurs restreints.",
+    "updated": "Dernière décision le",
+    "state": {
+      "closed": "Publication des vitrines fermée",
+      "review": "Admission motivée, une vitrine à la fois",
+      "auto_verified": "Admission d’office des adhésions vérifiées (en vigueur)"
+    },
+    "openReview": "Ouvrir l’admission motivée",
+    "backToReview": "Revenir à l’admission motivée",
+    "close": "Fermer la publication des vitrines",
+    "queue": {
+      "title": "File d’admission",
+      "lead": "Les demandes de publication, la plus ancienne d’abord. Admettre publie la vitrine et crée sa page si elle n’en a pas ; le motif d’un refus est rendu aux gérants.",
+      "closedHint": "La publication est fermée : les demandes peuvent être refusées, pas admises.",
+      "unnamed": "Vitrine sans nom",
+      "page": "Page : {{handle}}",
+      "preparer": "Préparée par {{name}}",
+      "preparerWithHandle": "Préparée par {{name}} (@{{handle}})",
+      "noPreparer": "Préparateur non communiqué",
+      "requested": "Demandée le",
+      "admit": "Admettre la vitrine",
+      "reject": "Refuser la vitrine",
+      "model": {
+        "products": "Produits",
+        "quote_services": "Services sur devis"
+      },
+      "membership": {
+        "en_attente": "Adhésion en attente",
+        "declaree": "Adhésion déclarée",
+        "verifiee": "Adhésion vérifiée",
+        "suspendue": "Adhésion suspendue",
+        "partie": "A quitté le réseau",
+        "none": "Sans adhésion"
+      }
+    }
+  },
+  "catalogPolicy": {
+    "title": "Catalogues des boutiques",
+    "lead": "Ouvre ou ferme, pour ce réseau, l’affichage des catalogues reçus de PRO.GA : offres, fiches et emplacements des publications. Fermé par défaut ; chaque décision exige un motif et est inscrite au journal.",
+    "linkHint": "L’ouverture seule n’affiche aucune offre : chaque boutique doit être liée à PRO.GA avec la permission de publier son catalogue, puis rattachée à son émetteur par une décision distincte.",
+    "existingHint": "La fermeture retire aussitôt les offres des lectures sans effacer les copies reçues ; une nouvelle préparation de commande exige un catalogue ouvert.",
+    "enabled": "Catalogues affichés dans ce réseau",
+    "disabled": "Catalogues fermés",
+    "enable": "Ouvrir les catalogues",
+    "disable": "Fermer les catalogues",
+    "updated": "Dernière décision le"
+  },
+  "checkoutPolicy": {
+    "title": "Préparation des commandes",
+    "lead": "Ouvre ou ferme, pour ce réseau, la préparation privée des commandes auprès des boutiques liées à PRO.GA : récapitulatif et réservation de stock de quinze minutes. Fermée par défaut ; chaque décision exige un motif et est inscrite au journal.",
+    "linkHint": "L’ouverture seule ne rend aucune commande possible : le catalogue doit être ouvert et la boutique liée à PRO.GA avec la permission de recevoir des commandes. Aucun paiement n’en découle.",
+    "existingHint": "La fermeture bloque toute nouvelle préparation sans rien effacer ; les réservations déjà posées suivent leur échéance.",
+    "enabled": "Préparation des commandes ouverte par la plateforme",
+    "disabled": "Préparation des commandes fermée",
+    "enable": "Ouvrir la préparation des commandes",
+    "disable": "Fermer la préparation des commandes",
+    "updated": "Dernière décision le"
+  }
+}

@@ -1,6 +1,6 @@
 // @vitest-environment edge-runtime
 // Dupliqué de socle/convex/modules/reseauPersonnel/groupesThematiques.test.ts @ ad2e7fdc2 — adaptations : personnes et réseaux (graine des fondations) ; codes de refus au lieu des libellés ; effectif lu dans l'agrégat ; cas de suspension (ADR-0087) rendus au statut d'adhésion par le constructeur ; cascade de suppression vérifiée jusqu'à la ligne d'analyse et au blob (D10) ; mur à curseur composite ; tests neufs : un groupe d'un autre réseau est introuvable, la découverte par pays, une clé rejouée ailleurs est refusée, la lacune du vivier.
-import { engineErrorCode, engineErrorRule } from "@antia/social-contracts/errors"
+import { engineErrorCode, engineErrorRule } from "@antsia/social-contracts/errors"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 import { api, internal } from "../../_generated/api"

@@ -14,10 +14,10 @@
  *  · `startAdHoc` — des personnes choisies une à une, joignables dans le réseau ;
  *  · `addInvitee` — l'ajout en cours d'appel, qui PROMEUT un tête-à-tête.
  */
-import { GROUP_CALL_INVITES_SCAN, GROUP_CALL_MAX_PARTICIPANTS, GROUP_CALL_MIN_OTHERS, countReservedSeats, normalizeGroupInvitees, summarizeGroupCall } from "@antia/social-contracts/callGroup"
-import type { CounterpartLabel } from "@antia/social-contracts/counterpart"
-import type { CallAdmissionReason, CallMediaType, GroupCallInviteStatus } from "@antia/social-domain/callJournal"
-import { isTerminalCallStatus } from "@antia/social-domain/callJournal"
+import { GROUP_CALL_INVITES_SCAN, GROUP_CALL_MAX_PARTICIPANTS, GROUP_CALL_MIN_OTHERS, countReservedSeats, normalizeGroupInvitees, summarizeGroupCall } from "@antsia/social-contracts/callGroup"
+import type { CounterpartLabel } from "@antsia/social-contracts/counterpart"
+import type { CallAdmissionReason, CallMediaType, GroupCallInviteStatus } from "@antsia/social-domain/callJournal"
+import { isTerminalCallStatus } from "@antsia/social-domain/callJournal"
 import { v } from "convex/values"
 
 import type { Doc, Id } from "../../_generated/dataModel"
@@ -43,6 +43,7 @@ import {
   requireCallParticipant,
 } from "./access"
 import { photographedGroupCallCapacity } from "./capacity"
+import { isConversationCall } from "./conversation"
 import { evaluateCallAdmission } from "./evaluate"
 import { scheduleIncomingCallPush } from "./push"
 import { scheduleRingingExpiry } from "./ringExpiry"
@@ -252,6 +253,8 @@ export const addInvitee = networkMutation({
     await enforceRateLimit(ctx, "call.invite", me)
     // Refus UNIQUE : appel inconnu, terminé, ou dont je ne suis pas dans la salle — même réponse.
     const { call, participation } = await requireCallParticipant(ctx, ctx.networkId, args.callId, me)
+    // Une conversation (contact commercial P10, conversation contextuelle CC-4) reste un tête-à-tête : ni invitation ni promotion.
+    if (isConversationCall(call)) return notFound()
     if (call.status !== "active" || isTerminalCallStatus(call.callStatus) || !isPresent(participation)) return notFound()
     if (args.personId === me) return failRule("GROUP_CALL_ALREADY_IN")
 

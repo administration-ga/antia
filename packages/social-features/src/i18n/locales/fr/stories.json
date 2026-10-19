@@ -1,0 +1,142 @@
+{
+  "storiesTray": {
+    "unknownAuthor": "Membre du réseau",
+    "age": {
+      "justNow": "à l'instant",
+      "expired": "expirée",
+      "minutes": "il y a {{minutes}} min",
+      "hours": "il y a {{hours}} h"
+    },
+    "tile": {
+      "own": "Votre actu",
+      "author": "Actus de {{name}}",
+      "storyCount_one": "{{count}} actu",
+      "storyCount_other": "{{count}} actus",
+      "unseenCount_one": "{{count}} non vue",
+      "unseenCount_other": "{{count}} non vues"
+    },
+    "label": "Actus",
+    "create": "Publier une actu",
+    "createShort": "Créer une actu",
+    "you": "Vous"
+  },
+  "storiesViewer": {
+    "label": {
+      "direct": "Conférence de {{host}} : {{title}}",
+      "stories": "Actus de {{name}}"
+    }
+  },
+  "storyCreate": {
+    "units": {
+      "megabytes": "{{value}} Mo",
+      "minutes_one": "{{count}} minute",
+      "minutes_other": "{{count}} minutes",
+      "seconds_one": "{{count}} seconde",
+      "seconds_other": "{{count}} secondes"
+    },
+    "refusal": {
+      "notMedia": "« {{name}} » n'est ni une image acceptée (JPEG, PNG, WebP ou GIF), ni une vidéo.",
+      "empty": "« {{name}} » est vide.",
+      "imageTooLarge": "« {{name}} » dépasse {{size}}.",
+      "videoTooLarge": "« {{name}} » est trop lourde. Une vidéo est limitée à {{size}}."
+    }
+  },
+  "storyVideoPolicy": {
+    "refusal": {
+      "notDecodable": "« {{name}} » ne peut pas être lu par ce navigateur — publiez depuis Safari, ou exportez la vidéo en MP4 (H.264).",
+      "tooLong": "« {{name}} » est trop longue. Une vidéo dure au plus {{duration}}.",
+      "tooLongToConvert": "« {{name}} » doit être convertie pour être lisible partout, et la conversion se fait ici, en temps réel : au-delà de {{duration}} elle est trop longue à attendre. Exportez-la en MP4 (H.264) — elle partira alors sans conversion.",
+      "noEncoder": "Ce navigateur ne sait pas convertir « {{name}} » — exportez la vidéo en MP4 (H.264) avant de la publier."
+    }
+  },
+  "storyProgressBar": {
+    "segmentLabel": "Actu {{position}} sur {{total}}"
+  },
+  "storyOverlay": {
+    "close": "Fermer les actus"
+  },
+  "liveDirectSlide": {
+    "live": "En direct",
+    "admittedViewers_one": "{{count}} spectateur admis",
+    "admittedViewers_other": "{{count}} spectateurs admis",
+    "resumeMine": "Reprendre ma conférence",
+    "join": "Rejoindre",
+    "close": "Fermer les actus"
+  },
+  "storyViewersSheet": {
+    "title": "Vu par",
+    "close": "Fermer",
+    "empty": "Personne n'a encore regardé cette story.",
+    "more": "Voir plus"
+  },
+  "storyViewer": {
+    "unavailable": {
+      "title": "Actus indisponibles",
+      "text": "Cette personne n'a pas publié de profil de réseau : ses actus ne peuvent pas être ouvertes."
+    },
+    "loadFailed": {
+      "title": "Cette série n'a pas pu charger",
+      "text": "Le réseau n'a pas répondu. Glissez vers l'écran suivant, ou revenez au fil."
+    },
+    "loading": "Chargement…",
+    "nothingLeft": {
+      "title": "Plus rien à voir",
+      "text": "Ces actus ont expiré ou ont été retirées."
+    },
+    "failed": {
+      "video": "Cette vidéo ne peut pas être lue par ce navigateur",
+      "media": "Ce média ne peut pas être affiché",
+      "text": "Demandez un export MP4 à son auteur, ou glissez vers l'écran suivant."
+    },
+    "backToFeed": "Revenir au fil",
+    "imageAlt": "Actu de {{name}}",
+    "play": "Lire la vidéo",
+    "unmute": "Activer le son",
+    "mute": "Couper le son",
+    "seenBy_one": "Vu par {{count}} personne",
+    "seenBy_other": "Vu par {{count}} personnes",
+    "removed": "Actu retirée.",
+    "removeFailed": "Le retrait n'a pas abouti.",
+    "confirmRemove": "Confirmer le retrait",
+    "remove": "Retirer"
+  },
+  "storiesViewerPage": {
+    "error": {
+      "title": "Le lecteur n'a pas pu charger",
+      "text": "Le réseau n'a pas répondu. Réessayez, ou revenez au fil."
+    },
+    "retry": "Réessayer",
+    "backToFeed": "Revenir au fil",
+    "loading": "Chargement…",
+    "empty": {
+      "title": "Aucune actu pour l'instant",
+      "text": "Les actus de vos relations apparaissent ici pendant vingt-quatre heures, et les conférences en direct passent devant. Publiez la première."
+    },
+    "publish": "Publier une actu",
+    "pagerLabel": "Actus et conférences",
+    "pagerLabelWithItem": "Actus et conférences — {{item}}"
+  },
+  "storyCreateSheet": {
+    "title": "Publier une actu",
+    "close": "Fermer",
+    "refused": "Fichier refusé",
+    "takePhoto": "Prendre une photo",
+    "chooseFromGallery": "Choisir dans la galerie",
+    "probing": "Analyse de la vidéo…",
+    "converting": "Conversion de la vidéo en cours…",
+    "keepTabVisible": "Elle se fait ici, en temps réel : gardez cet onglet visible jusqu'au bout.",
+    "previewAlt": "Aperçu",
+    "captionLabel": "Légende (facultative)",
+    "captionPlaceholder": "Un mot sur ce moment…",
+    "charactersLeft_one": "{{count}} caractère restant",
+    "charactersLeft_other": "{{count}} caractères restants",
+    "audienceLabel": "Qui peut la voir",
+    "publishing": "Publication…",
+    "publish": "Publier l'actu",
+    "published": "Actu publiée — visible pendant vingt-quatre heures.",
+    "publishFailed": "La publication n'a pas abouti.",
+    "uploadFailed": "Le téléversement a échoué.",
+    "convertedTooLarge": "La vidéo convertie reste trop lourde. {{reason}} Raccourcissez-la, ou exportez-la en MP4 (H.264) avant de la publier.",
+    "conversionFailed": "La conversion de la vidéo a échoué — exportez-la en MP4 (H.264) et réessayez."
+  }
+}

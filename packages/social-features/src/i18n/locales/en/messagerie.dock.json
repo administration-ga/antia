@@ -1,0 +1,158 @@
+{
+  "icomViews": {
+    "title": "Messages",
+    "navigation": "Messaging views",
+    "conversations": "Conversations",
+    "calls": "Calls",
+    "contacts": "Contacts",
+    "backToFeed": "Back to feed",
+    "myProfile": "My profile",
+    "chooseConversation": "Choose a conversation",
+    "chooseConversationBody": "Find your conversations on the left, or start a new message with one of your connections.",
+    "loadedWindow": "Search and filters cover loaded conversations. Load more for older direct conversations. Groups are limited to the first 50 returned by the server.",
+    "loadedGroupsWindow": "Search and filters cover loaded conversations. Groups are limited to the first 50 returned by the server.",
+    "noFilteredConversations": "No matching conversation among those already loaded.",
+    "unread_one": "{{count}} unread message",
+    "unread_other": "{{count}} unread messages"
+  },
+  "conversationFilters": {
+    "all": "All",
+    "unread": "Unread",
+    "groups": "Groups"
+  },
+  "icomBrickHeader": {
+    "collapse": "Collapse {{title}}",
+    "detach": "Detach iCom into a window",
+    "expand": "Expand {{title}}",
+    "unread_one": "{{count}} unread message",
+    "unread_other": "{{count}} unread messages"
+  },
+  "icomDock": {
+    "tabs": {
+      "actus": {
+        "description": "Statuses from your network",
+        "label": "Statuses"
+      },
+      "iappel": {
+        "description": "Call a connection",
+        "label": "iAppel"
+      },
+      "ichat": {
+        "description": "My conversations",
+        "label": "iChat"
+      },
+      "icontact": {
+        "description": "My connections",
+        "label": "Connections"
+      }
+    }
+  },
+  "icomMobileTabBar": {
+    "navLabel": "iCom navigation",
+    "subtabsLabel": "iCom sections"
+  },
+  "icomMobileTabs": {
+    "menu": {
+      "label": "Back to the main menu",
+      "shortLabel": "Menu"
+    },
+    "subtabLabel": "{{label}} — {{description}}",
+    "unreadMessages_one": "{{count}} unread message",
+    "unreadMessages_other": "{{count}} unread messages",
+    "unseenStatuses_one": "{{count}} unseen status",
+    "unseenStatuses_other": "{{count}} unseen statuses"
+  },
+  "messagerieComposeView": {
+    "back": "Back to the conversation list",
+    "foundRelations": "Connections found",
+    "handle": "@{{handle}}",
+    "loadMore": "See more connections",
+    "loading": "Loading your connections…",
+    "loadingMore": "Loading more connections…",
+    "myRelations": "My connections",
+    "noLoadedMatch": "No loaded connection matches “{{term}}”. Type at least two characters to search all your connections, or load more.",
+    "noMatch": "No connection matches “{{term}}”.",
+    "noRelations": "You don't have any connections yet. Send a request from the network's “Connections” to start a conversation.",
+    "relationsErrorMessage": "Your connections could not be loaded.",
+    "relationsErrorTitle": "Connections unavailable",
+    "searchErrorMessage": "Searching your connections failed. Connections already loaded are still listed.",
+    "searchErrorTitle": "Search unavailable",
+    "searchLabel": "Find someone to write to",
+    "searchPlaceholder": "Name or @handle",
+    "searching": "Searching your connections…",
+    "title": "New message",
+    "unnamedRelation": "Network member",
+    "unpublished": "{{name}} no longer has a published network profile",
+    "unpublishedProfile": "Network profile not published",
+    "writeTo": "Write to {{name}}"
+  },
+  "messagerieDesktopPage": {
+    "opening": "Opening iCom…"
+  },
+  "messagerieDock": {
+    "collapse": "Collapse iCom",
+    "detach": "Detach iCom into a window",
+    "dragHelp": "Arrow keys to move, Shift for a bigger step, Home and End for the corners, Escape to cancel the current gesture and double-click to return to the original position.",
+    "expand": "Expand iCom",
+    "floatingLabel": "iCom — detached window",
+    "moveWindow": "Move the iCom window",
+    "reattach": "Dock iCom back into the column",
+    "title": "iCom",
+    "unreadAnnouncement_one": "{{count}} unread message",
+    "unreadAnnouncement_other": "{{count}} unread messages"
+  },
+  "messagerieErreur": {
+    "generic": "Sending failed. Try again in a moment."
+  },
+  "messagerieListPage": {
+    "title": "iCom"
+  },
+  "messagerieListView": {
+    "callInProgress": "Call in progress…",
+    "errorMessage": "Your conversations could not be loaded.",
+    "errorTitle": "Conversations unavailable",
+    "filterAll": "All",
+    "filterDirects": "Direct",
+    "filterDirectsLabel": "Direct conversations",
+    "filterDirectsUnread_one": "Direct conversations, {{count}} unread message",
+    "filterDirectsUnread_other": "Direct conversations, {{count}} unread messages",
+    "filterGroups": "Groups",
+    "filterGroupsLabel": "Group conversations",
+    "filterGroupsUnread_one": "Group conversations, {{count}} unread message",
+    "filterGroupsUnread_other": "Group conversations, {{count}} unread messages",
+    "filterLabel": "Filter conversations",
+    "groupButton": "Group",
+    "loadMore": "Load more conversations",
+    "loadMoreToSearch": "Load more to search",
+    "loading": "Loading…",
+    "newGroup": "New group",
+    "newMessage": "New message",
+    "noDirects": "No direct conversations yet.",
+    "noGroups": "No groups yet. Use “Group” to create one.",
+    "noMatch": "No conversation matches “{{term}}”.",
+    "noMatchLoaded": "No conversation among those already loaded matches “{{term}}”.",
+    "partialErrorMessage": "The last update of your conversations failed. What is shown may be out of date.",
+    "partialErrorTitle": "Conversations partly up to date",
+    "searchAll": "Search for a conversation",
+    "searchDirects": "Search direct messages",
+    "searchGroups": "Search for a group",
+    "titleCompact": "iChat",
+    "titlePage": "Messages",
+    "unknownCounterpart": "Network member",
+    "unread_one": "{{count}} unread",
+    "unread_other": "{{count}} unread"
+  },
+  "messagerieListe": {
+    "attachments_one": "{{count}} attachment",
+    "attachments_other": "{{count}} attachments",
+    "call": "Call",
+    "deleted": "Message deleted",
+    "empty": "No conversations. Use “New message” to write to one of your connections, or “New group” to bring several connections together.",
+    "fromMe": "You: {{text}}",
+    "noMessageYet": "No messages yet",
+    "voiceNote": "Voice message"
+  },
+  "messagesRoute": {
+    "loading": "Loading messages…"
+  }
+}

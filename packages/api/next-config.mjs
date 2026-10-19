@@ -32,27 +32,34 @@ export function readEnvFile(file) {
 }
 
 /**
- * Configuration Next.js commune aux applications du moteur (antia_ga,
- * admin_antia_ga, et les applications externes comme diasporale_com).
+ * Configuration Next.js commune aux applications du moteur (antsia_ga,
+ * admin_antsia_ga, et les applications externes comme diasporale_com).
  *
  * - Racine de résolution et de traçage = ECOSYSTEMES : toutes les applications
  *   se construisent dans ce contexte (Dockerfile en contexte ECOSYSTEMES).
  * - En développement, le déploiement Convex courant est lu dans le
- *   `.env.local` QUE `bun run dev:convex` ÉCRIT LUI-MÊME à la racine d'ANTIA
+ *   `.env.local` QUE `bun run dev:convex` ÉCRIT LUI-MÊME à la racine d'ANTSIA
  *   (`CONVEX_URL`, `CONVEX_SITE_URL`) : une seule source, aucun fichier
  *   d'environnement à recopier par application.
  * - En production, les valeurs arrivent par les ARG du Dockerfile (catalogue).
  *
- * @param {{ appDir: string, engineRoot?: string, transpilePackages?: string[] }} options
+ * @param {{ appDir: string, engineRoot?: string, transpilePackages?: string[], usageAnalytics?: { host?: string, projectToken?: string, euRelayOrigin?: string } }} options
  * @returns {import("next").NextConfig}
  */
 export function createEngineNextConfig(options) {
   const isDev = process.env.NODE_ENV !== "production"
   const ecosystemsRoot = path.resolve(options.appDir, "../../..")
-  const engineRoot = options.engineRoot ?? path.join(ecosystemsRoot, "ANTIA")
+  const engineRoot = options.engineRoot ?? path.join(ecosystemsRoot, "ANTSIA")
   const local = isDev ? readEnvFile(path.join(engineRoot, ".env.local")) : {}
   const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL ?? local.CONVEX_URL ?? ""
   const convexSiteUrl = process.env.CONVEX_SITE_URL ?? local.CONVEX_SITE_URL ?? ""
+  // Serveur média des appels : sa seule trace côté application est la CSP (le
+  // client reçoit l'URL avec son jeton d'appel). Posée par le propriétaire avec les
+  // clés LiveKit du déploiement — sans elle, aucune origine média n'est ouverte.
+  const livekitUrl = process.env.LIVEKIT_WS_URL ?? local.LIVEKIT_WS_URL ?? ""
+  const analyticsKey = options.usageAnalytics?.projectToken ?? ""
+  const analyticsHost = options.usageAnalytics?.host ?? ""
+  const analyticsOrigin = optionalAnalyticsOrigin(analyticsHost, analyticsKey, options.usageAnalytics?.euRelayOrigin)
 
   return {
     output: "standalone",
@@ -61,11 +68,11 @@ export function createEngineNextConfig(options) {
     reactCompiler: false,
     poweredByHeader: false,
     transpilePackages: [
-      "@antia/api",
-      "@antia/social-contracts",
-      "@antia/social-domain",
-      "@antia/social-features",
-      "@antia/ui",
+      "@antsia/api",
+      "@antsia/social-contracts",
+      "@antsia/social-domain",
+      "@antsia/social-features",
+      "@antsia/ui",
       ...(options.transpilePackages ?? []),
     ],
     typescript: {
@@ -77,7 +84,25 @@ export function createEngineNextConfig(options) {
       CONVEX_SITE_URL: convexSiteUrl,
     },
     async headers() {
-      return [{ source: "/(.*)", headers: securityHeaders({ convexUrl, isDev }) }]
+      return [{ source: "/(.*)", headers: securityHeaders({ convexUrl, livekitUrl, isDev, extraConnect: analyticsOrigin ? [analyticsOrigin] : [] }) }]
     },
   }
+}
+
+/** Configuration facultative : aucune origine ajoutée sans clé publique admise.
+ * @param {string} host
+ * @param {string} projectToken
+ * @param {string | undefined} [euRelayOrigin]
+ * @returns {string | null}
+ */
+export function optionalAnalyticsOrigin(host, projectToken, euRelayOrigin) {
+  if (!/^phc_[A-Za-z0-9]{20,128}$/.test(projectToken) || /^phc_(?:placeholder|replace|example|your|insert|change|todo|test)/i.test(projectToken) || !host || host.trim() !== host || /\s/.test(host)) return null
+  try {
+    const url = new URL(host)
+    if (url.protocol !== "https:" || url.username || url.password || url.search || url.hash || url.pathname !== "/") return null
+    // La CSP et le transport imposent la même admission UE. Un relais est
+    // une déclaration explicite du propriétaire, pas une preuve de résidence.
+    if (url.origin !== "https://eu.i.posthog.com" && euRelayOrigin !== url.origin) return null
+    return url.origin
+  } catch { return null }
 }

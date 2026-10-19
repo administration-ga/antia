@@ -4,13 +4,13 @@
  * Le profil social d'une personne dans le moteur : publier, retirer, mode
  * privé, annuaire du réseau, images de profil, fiche publique, mentions.
  */
-import { engineErrorCode, engineErrorRule } from "@antia/social-contracts/errors"
+import { engineErrorCode, engineErrorRule } from "@antsia/social-contracts/errors"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 import { api, internal } from "../../_generated/api"
 import type { Id } from "../../_generated/dataModel"
 import { SEED_CONFIRMATION } from "../../seeds/foundations"
-import { testConvex } from "../../test.setup"
+import { createTestOperatorProof, testConvex } from "../../test.setup"
 import { miniProfileCache, publishedMiniProfile, resolveMentionedPersonIds } from "./miniProfile"
 
 type T = ReturnType<typeof testConvex>
@@ -128,6 +128,7 @@ describe("annuaire du réseau", () => {
     await t.run(async (ctx) => {
       await ctx.db.insert("operators", { personId: operator.personId, role: "platform_operator", grantedAt: Date.now() })
     })
+    await createTestOperatorProof(t, operator.as, operator.personId)
     await operator.as.mutation(api.modules.people.memberships.suspendEverywhere, { personId: paul.personId, reason: "Signalements répétés et confirmés." })
     expect(await lynda.as.query(api.modules.people.directory.searchPeople, { networkId: root, query: "paul" })).toEqual([])
     expect(await lynda.as.query(api.modules.people.directory.searchPeople, { networkId: testClosed, query: "paul" })).toEqual([])

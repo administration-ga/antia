@@ -1,4 +1,4 @@
-// Dupliqué de socle/convex/modules/reseauPages/admin.ts @ ad2e7fdc2 — adaptations : réécrit (owner map §6.15) — la console du moteur (`operatorMutation`, opérateur de plateforme vivant) au lieu du superadmin ; plus d'ACTIVATION pour une organisation : la console CRÉE une page d'institution « Officiel » (décision tracée, idempotente par référence d'import), pose la confiance (`isTrustAllowedForOwner` : « Officiel » n'appartient qu'à une institution), retire ou rétablit une page, change son adresse (l'ancienne dans l'historique d'identité) et habilite un premier administrateur (invitation à accepter, identité forte exigée pour une page officielle) ; motif de décision borné ; chaque geste qui ÉCRIT laisse sa ligne au journal du moteur (`appendAudit`, au lieu d'`appendContextAudit`), un geste qui ne change rien n'écrit rien ; avertissement « module Actualités » et fermeture des directs retirés (plus d'organisation ; le direct d'une page viendra avec le module `live`) ; liste paginée au lieu de 100 lignes.
+// Dupliqué de socle/convex/modules/reseauPages/admin.ts @ ad2e7fdc2 — adaptations : réécrit (owner map §6.15) — la console du moteur (`operatorMutation`, opérateur de plateforme vivant) au lieu du superadmin ; plus d'ACTIVATION pour une organisation : la console CRÉE une page d'institution « Officiel » (décision tracée, idempotente par référence d'import), pose la confiance (`isTrustAllowedForOwner` : « Officiel » n'appartient qu'à une institution), retire ou rétablit une page, change son adresse (l'ancienne dans l'historique d'identité) et habilite un premier administrateur (invitation à accepter, identité forte exigée pour une page officielle) ; motif de décision borné ; chaque geste qui ÉCRIT laisse sa ligne au journal du moteur (`appendAudit`, au lieu d'`appendContextAudit`), un geste qui ne change rien n'écrit rien ; avertissement « module Actualités » retiré ; fermeture des directs de la page RÉTABLIE avec le module `live` (lot 16 : le retrait planifie `live/revocation.closePageDirects`, comme `deactivate` au socle) ; liste paginée au lieu de 100 lignes.
 /**
  * La CONSOLE des pages — les décisions qui ne se prennent pas depuis une page.
  *
@@ -7,8 +7,8 @@
  * « Officiel ». Retirer une page ne supprime rien : ses publications cessent
  * d'être servies, ses abonnements demeurent, une réactivation rend tout.
  */
-import { assertDecisionReason } from "@antia/social-domain/audit"
-import { assertCountryCode } from "@antia/social-domain/content"
+import { assertDecisionReason } from "@antsia/social-domain/audit"
+import { assertCountryCode } from "@antsia/social-domain/content"
 import {
   assertPageHandle,
   assertPageName,
@@ -16,15 +16,18 @@ import {
   normalizePageDescription,
   normalizePageShortName,
   pageTrustRank,
-} from "@antia/social-domain/pages"
+} from "@antsia/social-domain/pages"
 import { paginationOptsValidator, type PaginationResult } from "convex/server"
 import { v } from "convex/values"
 
+import { internal } from "../../_generated/api"
 import type { Doc } from "../../_generated/dataModel"
 import { checked, failRule, notFound } from "../../lib/errors"
 import { operatorMutation, operatorQuery } from "../../lib/functions"
+import { requirePlatformAdmin } from "../../lib/operatorIdentity"
 import { enforceRateLimit } from "../../lib/rateLimit"
 import { contentVisibilityValidator, pageTrustValidator } from "../../lib/validators"
+import { assertNativePageManagement } from "../federation/mirrorAccess"
 import { hasStrongIdentityFor } from "../people/persons"
 import { appendAudit, operatorCapacity } from "../platform/audit"
 import { assertPageHandleFree, isPageOnRoot, pageSearchText, signatoryRowOf } from "./access"
@@ -67,6 +70,7 @@ export const createInstitutionPage = operatorMutation({
   },
   returns: v.object({ pageId: v.id("pages"), handle: v.string(), created: v.boolean() }),
   handler: async (ctx, args) => {
+    requirePlatformAdmin(ctx)
     await enforceRateLimit(ctx, "operator.page", ctx.person._id)
     const motive = checked(() => assertDecisionReason(args.reason, 10))
     const network = await ctx.db.get(args.networkId)
@@ -76,7 +80,10 @@ export const createInstitutionPage = operatorMutation({
         .query("pages")
         .withIndex("by_network_importRef", (q) => q.eq("networkId", network._id).eq("importRef", args.importRef))
         .unique()
-      if (existing) return { pageId: existing._id, handle: existing.handle, created: false }
+      if (existing) {
+        await assertNativePageManagement(ctx, existing._id)
+        return { pageId: existing._id, handle: existing.handle, created: false }
+      }
     }
     const name = checked(() => assertPageName(args.name))
     const handle = checked(() => assertPageHandle(args.handle ?? name))
@@ -126,10 +133,12 @@ export const setPageTrust = operatorMutation({
   args: { pageId: v.id("pages"), trust: pageTrustValidator, reason: v.string() },
   returns: v.object({ changed: v.boolean() }),
   handler: async (ctx, args) => {
+    requirePlatformAdmin(ctx)
     await enforceRateLimit(ctx, "operator.page", ctx.person._id)
     const motive = checked(() => assertDecisionReason(args.reason, 10))
     const page = await ctx.db.get(args.pageId)
     if (!page) return notFound()
+    await assertNativePageManagement(ctx, page._id)
     checked(() => assertTrustAllowedForOwner(page.ownerKind, args.trust))
     if (page.trust === args.trust) return { changed: false }
     const now = Date.now()
@@ -156,6 +165,7 @@ export const setPageStatus = operatorMutation({
   args: { pageId: v.id("pages"), status: pageStatusValidator, reason: v.string() },
   returns: v.object({ changed: v.boolean() }),
   handler: async (ctx, args) => {
+    requirePlatformAdmin(ctx)
     await enforceRateLimit(ctx, "operator.page", ctx.person._id)
     const motive = checked(() => assertDecisionReason(args.reason, 10))
     const page = await ctx.db.get(args.pageId)
@@ -163,6 +173,7 @@ export const setPageStatus = operatorMutation({
     if (page.status === args.status) return { changed: false }
     const now = Date.now()
     await ctx.db.patch(page._id, { status: args.status, deactivatedAt: args.status === "inactive" ? now : undefined, updatedAt: now })
+    if (args.status === "inactive") await ctx.scheduler.runAfter(0, internal.modules.live.revocation.closePageDirects, { pageId: page._id, cursor: null, revokedAt: now })
     await appendAudit(ctx, {
       action: "page.status_set",
       capacity: operatorCapacity(ctx.operator),
@@ -186,10 +197,12 @@ export const setPageHandle = operatorMutation({
   args: { pageId: v.id("pages"), handle: v.string(), reason: v.string() },
   returns: v.object({ handle: v.string() }),
   handler: async (ctx, args) => {
+    requirePlatformAdmin(ctx)
     await enforceRateLimit(ctx, "operator.page", ctx.person._id)
     const motive = checked(() => assertDecisionReason(args.reason, 10))
     const page = await ctx.db.get(args.pageId)
     if (!page) return notFound()
+    await assertNativePageManagement(ctx, page._id)
     const handle = checked(() => assertPageHandle(args.handle))
     if (handle === page.handle) return { handle }
     await assertPageHandleFree(ctx, handle, page._id)
@@ -219,11 +232,13 @@ export const grantPageAdmin = operatorMutation({
   args: { pageId: v.id("pages"), personId: v.id("persons"), reason: v.string() },
   returns: v.object({ invited: v.boolean() }),
   handler: async (ctx, args) => {
+    requirePlatformAdmin(ctx)
     await enforceRateLimit(ctx, "operator.page", ctx.person._id)
     const motive = checked(() => assertDecisionReason(args.reason, 10))
     const page = await ctx.db.get(args.pageId)
     const person = await ctx.db.get(args.personId)
     if (!page || page.status !== "active" || !person) return notFound()
+    await assertNativePageManagement(ctx, page._id)
     if (page.trust === "official" && !(await hasStrongIdentityFor(ctx, person._id))) return failRule("PAGE_SIGNATORY_IDENTITY_REQUIRED")
     const existing = await signatoryRowOf(ctx, page._id, person._id)
     if (existing?.role === "admin") return { invited: existing.acceptedAt === undefined }

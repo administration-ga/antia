@@ -1,0 +1,92 @@
+{
+  "reseauMenu": {
+    "badge": {
+      "invitations_one": "{{count}} invitation en attente",
+      "invitations_many": "{{count}} invitations en attente",
+      "invitations_other": "{{count}} invitations en attente"
+    }
+  },
+  "reseauMenuRail": {
+    "navLabel": "Menu du réseau",
+    "showMore": "Voir plus",
+    "showLess": "Voir moins",
+    "myProfile": "Mon profil",
+    "settings": "Paramètres",
+    "shortcuts": "Vos raccourcis"
+  },
+  "reseauDesktopIcomLink": {
+    "label": "iCom",
+    "open": "Ouvrir iCom",
+    "openWithUnread_one": "Ouvrir iCom — {{count}} conversation non lue",
+    "openWithUnread_many": "Ouvrir iCom — {{count}} conversations non lues",
+    "openWithUnread_other": "Ouvrir iCom — {{count}} conversations non lues"
+  },
+  "reseauAgentPage": {
+    "title": "Réseau",
+    "railStartLabel": "Navigation du réseau",
+    "railEndLabel": "iCom et découverte du réseau",
+    "tabsLabel": "Volets du réseau",
+    "publish": "Publier",
+    "searchLabel": "Chercher dans les publications",
+    "searchPlaceholder": "Chercher dans les publications…",
+    "searchSubmit": "Chercher",
+    "scopeLabel": "Portée du fil",
+    "seeRequests": "Voir les demandes",
+    "postUnavailable": "Cette publication n'est plus accessible.",
+    "searchEmpty": "Aucune publication ne correspond à cette recherche.",
+    "loadMore": "Voir plus de publications"
+  },
+  "reseauMobileHeader": {
+    "wordmark": "Réseau",
+    "searchLabel": "Chercher dans les publications",
+    "searchPlaceholder": "Rechercher…",
+    "searchSubmit": "Lancer la recherche",
+    "searchClose": "Fermer la recherche",
+    "searchEdit": "Modifier la recherche",
+    "searchOpen": "Ouvrir la recherche",
+    "icomOpen": "Ouvrir iCom",
+    "icomOpenWithUnread_one": "Ouvrir iCom — {{count}} conversation non lue",
+    "icomOpenWithUnread_many": "Ouvrir iCom — {{count}} conversations non lues",
+    "icomOpenWithUnread_other": "Ouvrir iCom — {{count}} conversations non lues",
+    "profileLink": "Voir mon profil"
+  },
+  "reseauMobileFeed": {
+    "seeRequests": "Voir les demandes",
+    "composerFallbackName": "Moi",
+    "composerPrompt": "Partager une information…",
+    "composerPromptNamed": "Partager une information, {{name}} ?",
+    "scopeLabel": "Portée du fil",
+    "postUnavailable": "Cette publication n'est plus accessible.",
+    "searchEmpty": "Aucune publication ne correspond à cette recherche.",
+    "loadMore": "Voir plus de publications"
+  },
+  "reseauMobilePage": {
+    "title": "Réseau"
+  },
+  "reseauMobileTabBar": {
+    "navLabel": "Navigation du réseau",
+    "menu": "Menu",
+    "menuLabel": "Ouvrir le menu principal",
+    "subtabsLabel": "Sous-menus du réseau"
+  },
+  "reseauMobileMenuSheet": {
+    "title": "Menu principal",
+    "close": "Fermer le menu"
+  },
+  "reseauMobileCreateButton": {
+    "create": "Créer",
+    "formats": "Formats"
+  },
+  "reseauDestinations": {
+    "navLabel": "Navigation principale",
+    "fil": "Fil",
+    "decouvrir": "Découvrir",
+    "creer": "Créer",
+    "messages": "Messages",
+    "profil": "Profil",
+    "messagesUnread_one": "{{count}} conversation non lue",
+    "messagesUnread_many": "{{count}} conversations non lues",
+    "messagesUnread_other": "{{count}} conversations non lues",
+    "voletsTitle": "Dans le réseau"
+  }
+}

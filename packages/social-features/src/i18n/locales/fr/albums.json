@@ -1,0 +1,133 @@
+{
+  "albumModel": {
+    "steps": {
+      "identite": "Titre et audience",
+      "photos": "Photos",
+      "ordre": "Ordre et couverture",
+      "apercu": "Aperçu"
+    },
+    "blocker": {
+      "titleRequired": "Donnez un titre à cet album.",
+      "titleTooLong": "Le titre est limité à {{max}} caractères.",
+      "photoRequired": "Ajoutez au moins une photo."
+    },
+    "progress": {
+      "none": "Aucune photo sélectionnée.",
+      "done_one": "{{count}} photo envoyée.",
+      "done_other": "{{count}} photos envoyées.",
+      "partial": "{{uploaded}} sur {{total}} envoyées, {{failed}} à reprendre. Les photos déjà envoyées ne repartiront pas.",
+      "running": "Envoi en cours : {{uploaded}} sur {{total}}."
+    },
+    "move": {
+      "named": "« {{caption}} » est en position {{position}} sur {{total}}.",
+      "unnamed": "La photo est en position {{position}} sur {{total}}."
+    },
+    "reencode": {
+      "gifRefused": "Le format GIF n'est pas accepté dans un album : la mise au format n'en garderait que la première image.",
+      "failed": "« {{name}} » n'a pas pu être préparée : elle n'a pas été envoyée. Réessayez ou choisissez une autre photo."
+    },
+    "audience": {
+      "public": "Tout le réseau",
+      "connections": "Mes connexions"
+    },
+    "audienceHint": {
+      "public": "Toute personne connectée au réseau. Cet album ne sort pas de la plateforme.",
+      "connections": "Seules les personnes avec qui vous êtes connecté."
+    },
+    "status": {
+      "draft": "Brouillon",
+      "published": "Publié",
+      "withdrawn": "Retiré"
+    },
+    "withdrawNotice": "Le retrait referme l'album pour les autres. Une copie déjà téléchargée ne peut pas être rappelée.",
+    "empty": {
+      "self": "Vous n'avez pas encore d'album. Rassemblez vos photos de terrain, de mission ou de cérémonie en une collection.",
+      "other": "Aucun album ne vous est ouvert ici."
+    },
+    "count": {
+      "none": "Aucune photo",
+      "photos_one": "{{count}} photo",
+      "photos_other": "{{count}} photos"
+    }
+  },
+  "albumComposer": {
+    "title": "Nouvel album",
+    "tooMany": "Un album porte au plus {{max}} photos.",
+    "addedAnnouncement": "{{photos}} dans l'album.",
+    "notDuplicated": "Les photos déjà envoyées n'ont pas été redoublées.",
+    "uploadFailed": "L'envoi a échoué. Les photos déjà envoyées sont conservées.",
+    "published": "Album publié.",
+    "publishFailed": "La publication a échoué.",
+    "refusedTitle": "Action refusée",
+    "rejectedTitle": "Photo écartée",
+    "titleLabel": "Titre de l'album",
+    "titlePlaceholder": "Mission de terrain à Oyem",
+    "descriptionLabel": "Description (facultative)",
+    "audienceLegend": "Qui verra cet album une fois publié ?",
+    "nothingVisible": "Rien n'est visible tant que vous n'avez pas publié.",
+    "choosePhotos": "Choisir des photos",
+    "photosHint_one": "{{photos}} — encore {{count}} possible. Les informations de date et de lieu enregistrées par l'appareil sont retirées avant l'envoi.",
+    "photosHint_other": "{{photos}} — encore {{count}} possibles. Les informations de date et de lieu enregistrées par l'appareil sont retirées avant l'envoi.",
+    "uploadState": {
+      "uploaded": "Envoyée",
+      "failed": "À reprendre",
+      "pending": "En attente"
+    },
+    "removeFile": "Retirer {{name}}",
+    "remove": "Retirer",
+    "sending": "Envoi…",
+    "send": "Envoyer les photos",
+    "continue": "Continuer",
+    "orderHint": "Rangez les photos et choisissez la couverture. Les commandes fonctionnent au clavier comme au doigt.",
+    "photoPosition": "Photo {{position}} sur {{total}}",
+    "cover": "Couverture",
+    "captionLabel": "Légende de la photo {{position}}",
+    "captionPlaceholder": "Légende (facultative)",
+    "captionFailed": "La légende n'a pas pu être enregistrée.",
+    "moveUp": "Monter",
+    "moveUpLabel": "Monter la photo {{position}}",
+    "moveDown": "Descendre",
+    "moveDownLabel": "Descendre la photo {{position}}",
+    "setCoverLabel": "Définir la photo {{position}} comme couverture",
+    "beforePublishTitle": "Avant de publier",
+    "beforePublishText": "Une fois publié, cet album peut être retiré à tout moment. En revanche, une copie déjà téléchargée par un lecteur ne peut pas être rappelée.",
+    "back": "Retour",
+    "cancel": "Annuler",
+    "publishing": "Publication…",
+    "publish": "Publier l'album",
+    "resumeTitle": "Modifier l’album",
+    "editingPublished": "Cet album est déjà publié. Enregistrer vos changements modifie ce que ses lecteurs voient.",
+    "saveDraft": "Enregistrer le brouillon",
+    "saveChanges": "Enregistrer les modifications",
+    "saving": "Enregistrement…",
+    "saved": "Album enregistré.",
+    "saveFailed": "L’enregistrement a échoué. Vos changements sont conservés ici."
+  },
+  "albumPage": {
+    "errorTitle": "Album indisponible",
+    "errorMessage": "Cet album n'a pas pu être chargé.",
+    "inaccessibleTitle": "Cet album n'est pas accessible",
+    "inaccessibleText": "Il n'existe pas, il n'est plus publié, ou il ne vous est pas ouvert.",
+    "backToProfileAction": "Revenir au profil",
+    "backToProfile": "Retour au profil",
+    "unknownOwner": "Membre du réseau",
+    "withdrawTitle": "Retirer cet album",
+    "withdraw": "Retirer cet album",
+    "withdrawing": "Retrait…",
+    "withdrawn": "Album retiré.",
+    "withdrawFailed": "Le retrait n'a pas abouti.",
+    "empty": "Cet album ne contient aucune photo.",
+    "photoUnavailable": "Photo indisponible.",
+    "edit": "Modifier l’album",
+    "close": "Fermer",
+    "confirmWithdraw": "Confirmer le retrait"
+  },
+  "albumsSection": {
+    "errorTitle": "Albums indisponibles",
+    "errorMessage": "Les albums n'ont pas pu être chargés.",
+    "create": "Créer un album",
+    "photosHint": "Ouvrez un album pour voir toutes ses photos.",
+    "loadMore": "Voir plus d’albums",
+    "loadingMore": "Chargement…"
+  }
+}

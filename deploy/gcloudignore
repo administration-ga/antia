@@ -1,14 +1,14 @@
 # Liste blanche du contexte ECOSYSTEMES pour Cloud Build (`gcloud builds submit
-# --ignore-file`), commune à toutes les applications du catalogue : ANTIA et
-# DIASPORALE partent (la racine d'ANTIA dépend du domaine pur de DIASPORALE, et
+# --ignore-file`), commune à toutes les applications du catalogue : ANTSIA et
+# DIASPORALE partent (la racine d'ANTSIA dépend du domaine pur de DIASPORALE, et
 # diasporale_com se construit dans ce même contexte), sans node_modules, sans
 # sorties, sans secrets. Syntaxe gitignore : un dossier exclu ne se ré-inclut
 # pas par morceaux, d'où `!DIASPORALE` entier puis ses exclusions.
 *
-!ANTIA
+!ANTSIA
 !DIASPORALE
-ANTIA/.git
-ANTIA/.convex
+ANTSIA/.git
+ANTSIA/.convex
 DIASPORALE/.git
 DIASPORALE/docs
 **/node_modules

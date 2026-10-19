@@ -1,6 +1,6 @@
 // @vitest-environment edge-runtime
 // Dupliqué de socle/convex/modules/reseauPersonnel/evenements.test.ts @ ad2e7fdc2 — adaptations : personnes et réseaux (graine des fondations) ; codes et règles au lieu des libellés ; comptes publics sans objet (remplacé par l'adhésion exigée, D15) ; décomptes lus dans l'agrégat ; participants paginés hors de la fiche ; cas iCal différés avec l'export ; tests neufs : clé rejouée dans un autre réseau, évènement d'un autre réseau introuvable, relation exigée DANS le réseau, fuseau de la personne par défaut, agenda qui dit sa lacune.
-import { engineErrorCode, engineErrorRule } from "@antia/social-contracts/errors"
+import { engineErrorCode, engineErrorRule } from "@antsia/social-contracts/errors"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 import { api, internal } from "../../_generated/api"

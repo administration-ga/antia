@@ -3,11 +3,11 @@ import { describe, expect, it } from "vitest"
 import { effectiveVisibility, isValidNetworkSlug, ROOT_NETWORK_SLUG, validateNetworkShape } from "./network"
 
 describe("isValidNetworkSlug", () => {
-  it.each(["antia", "diasporale", "test-closed", "a1b"])("accepte %s", (slug) => {
+  it.each(["antsia", "diasporale", "test-closed", "a1b"])("accepte %s", (slug) => {
     expect(isValidNetworkSlug(slug)).toBe(true)
   })
 
-  it.each(["", "ab", "Antia", "1abc", "abc-", "a--b", "a_b", "a".repeat(33)])("refuse « %s »", (slug) => {
+  it.each(["", "ab", "Antsia", "1abc", "abc-", "a--b", "a_b", "a".repeat(33)])("refuse « %s »", (slug) => {
     expect(isValidNetworkSlug(slug)).toBe(false)
   })
 
@@ -46,8 +46,10 @@ describe("validateNetworkShape", () => {
 describe("effectiveVisibility — invariant 4 (contexte séparé)", () => {
   const closed = { networkKind: "closed" as const, ruleVisibility: "network" as const }
 
-  it("dans la racine, tout est `network`", () => {
-    expect(effectiveVisibility({ networkKind: "root", audienceIsPublic: true, authorRequestedRoot: true, ruleVisibility: "root" })).toBe("network")
+  it("dans la racine, seule l'audience publique et un geste ouvrent sans compte", () => {
+    expect(effectiveVisibility({ networkKind: "root", audienceIsPublic: true, authorRequestedRoot: true, ruleVisibility: "network" })).toBe("root")
+    expect(effectiveVisibility({ networkKind: "root", audienceIsPublic: true, authorRequestedRoot: false, ruleVisibility: "root" })).toBe("network")
+    expect(effectiveVisibility({ networkKind: "root", audienceIsPublic: false, authorRequestedRoot: true, ruleVisibility: "root" })).toBe("network")
   })
 
   it("`root` exige une audience publique, même si l'auteur le demande", () => {

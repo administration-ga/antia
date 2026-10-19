@@ -9,9 +9,12 @@
  * refuserait `import.meta.glob` (piège payé par PRO.GA).
  */
 import aggregateTest from "@convex-dev/aggregate/test"
+import betterAuthTest from "@convex-dev/better-auth/test"
 import rateLimiterTest from "@convex-dev/rate-limiter/test"
-import { convexTest } from "convex-test"
+import { convexTest, type TestConvex } from "convex-test"
 
+import { api, components, internal } from "./_generated/api"
+import type { Id } from "./_generated/dataModel"
 import schema from "./schema"
 
 // `import.meta.glob` est une primitive de Vite (vitest), remplacée au transform.
@@ -40,10 +43,91 @@ export const modules = import.meta.glob([
  * le VRAI limiteur de débit et les VRAIS agrégats (composants montés) : les
  * tests exercent les seuils et les décomptes, ils ne les neutralisent pas.
  */
-export function testConvex() {
+type BackendTest = TestConvex<typeof schema>
+
+const TEST_SESSION_TTL_MS = 7 * 24 * 60 * 60 * 1000
+
+/** Une vraie ligne du composant, utilisable avec un claim `sessionId` explicite. */
+export async function createTestSession(t: BackendTest, userId: string, expiresAt = Date.now() + TEST_SESSION_TTL_MS): Promise<string> {
+  const now = Date.now()
+  const session: unknown = await t.mutation(components.betterAuth.adapter.create, {
+    input: {
+      model: "session",
+      data: { userId, expiresAt, token: `test-session-${crypto.randomUUID()}`, createdAt: now, updatedAt: now },
+    },
+  })
+  if (typeof session !== "object" || session === null || !("_id" in session) || typeof session._id !== "string") {
+    throw new Error("Le composant Better Auth n'a pas créé la session de test")
+  }
+  return session._id
+}
+
+/** Fixture explicite PA7 : vraie session, compte IDN, preuve interne et lien vivant. */
+export async function createTestOperatorProof(t: BackendTest, as: ReturnType<BackendTest["withIdentity"]>, personId: Id<"persons">, loa: 1 | 2 | 3 = 2): Promise<void> {
+  const identity = await as.run(async (ctx) => ctx.auth.getUserIdentity())
+  if (!identity || typeof identity.sessionId !== "string") throw new Error("Session de fixture opérateur absente")
+  const idnSubject = "idn-operator-fixture-" + personId
+  const now = Date.now()
+  const accounts = await t.query(components.betterAuth.adapter.findMany, { model: "account", where: [{ field: "userId", value: identity.subject }, { field: "providerId", value: "idn" }], paginationOpts: { cursor: null, numItems: 2 } })
+  const subject = accounts.page[0]?.accountId ?? idnSubject
+  if (!accounts.page.length) await t.mutation(components.betterAuth.adapter.create, { input: { model: "account", data: { userId: identity.subject, providerId: "idn", accountId: subject, createdAt: now, updatedAt: now } } })
+  await t.mutation(internal.modules.people.identity.recordIdnProof, { subject, loa })
+  await t.run(async (ctx) => {
+    const existing = await ctx.db.query("identityLinks").withIndex("by_person_and_provider", (q) => q.eq("personId", personId).eq("provider", "idn")).unique()
+    if (existing) await ctx.db.patch(existing._id, { subject, loa, revokedAt: undefined, linkedAt: now })
+    else await ctx.db.insert("identityLinks", { personId, provider: "idn", subject, loa, linkedAt: now })
+  })
+  await t.mutation(internal.modules.platform.operatorAccess.recordIdnSession, { sessionId: identity.sessionId, authUserId: identity.subject, idnSubject: subject, loa })
+  if (loa >= 2) await as.mutation(api.modules.platform.operatorAccess.recordAccess, {})
+}
+
+/**
+ * Les fixtures sociales antérieures à PA4 donnent seulement un `subject`.
+ * Leur session est provisionnée une seule fois, dans le VRAI composant,
+ * avant la première exécution. Une session supprimée n'est jamais recréée.
+ * Les tests de sécurité utilisent `automaticSessions: false` ou un claim
+ * explicite : aucune correction de leurs identités n'est alors faite.
+ */
+export function testConvex({ automaticSessions = true }: { automaticSessions?: boolean } = {}) {
   const t = convexTest(schema, modules)
+  betterAuthTest.register(t, "betterAuth")
   rateLimiterTest.register(t, "rateLimiter")
   aggregateTest.register(t, "followerCounts")
   aggregateTest.register(t, "engineCounters")
-  return t
+  if (!automaticSessions) return t
+
+  const sessions = new Map<string, Promise<string>>()
+  return new Proxy(t, {
+    get(target, property, receiver) {
+      if (property !== "withIdentity") return Reflect.get(target, property, receiver)
+      return (identity: Parameters<typeof t.withIdentity>[0]): ReturnType<typeof t.withIdentity> => {
+        const raw = t.withIdentity(identity)
+        if ("sessionId" in identity) return raw
+
+        let authenticated: Promise<ReturnType<typeof t.withIdentity>> | undefined
+        const withSession = () => authenticated ??= (async () => {
+          const resolved = await raw.run(async (ctx) => ctx.auth.getUserIdentity())
+          if (!resolved) throw new Error("Identité de test absente")
+          let session = sessions.get(resolved.subject)
+          if (!session) {
+            session = createTestSession(t, resolved.subject)
+            sessions.set(resolved.subject, session)
+          }
+          return t.withIdentity({ ...resolved, sessionId: await session })
+        })()
+
+        return new Proxy(raw, {
+          get(accessor, method, accessorReceiver) {
+            if (!["query", "mutation", "action", "run", "fetch"].includes(String(method))) {
+              return Reflect.get(accessor, method, accessorReceiver)
+            }
+            return async (...args: unknown[]) => {
+              const ready = await withSession()
+              return Reflect.apply(Reflect.get(ready, method), ready, args)
+            }
+          },
+        })
+      }
+    },
+  })
 }

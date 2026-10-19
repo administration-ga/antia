@@ -1,0 +1,192 @@
+{
+  "peoplePanel": {
+    "views": {
+      "relations": "My relations",
+      "suggestions": "Suggestions",
+      "invitations": "Invitations"
+    },
+    "viewsLabel": "Relations sub-views",
+    "invitationsBadge_one": "{{count}} invitation received",
+    "invitationsBadge_many": "{{count}} invitations received",
+    "invitationsBadge_other": "{{count}} invitations received",
+    "invitationsBadgeAtLeast_one": "At least {{count}} invitation received",
+    "invitationsBadgeAtLeast_many": "At least {{count}} invitations received",
+    "invitationsBadgeAtLeast_other": "At least {{count}} invitations received",
+    "loading": "Loading…",
+    "unnamed": "Network member",
+    "unpublished": "Profile not published",
+    "profileOf": "{{name}}'s profile",
+    "profile": "Profile",
+    "write": "Message",
+    "call": "Call",
+    "callLabel": "Call {{name}}",
+    "search": {
+      "title": "Find someone",
+      "hint": "By published name or public handle. Only people who have published a network profile appear.",
+      "hintCompact": "By published name or public handle. Only people who have published their profile appear.",
+      "formLabel": "Find a person",
+      "inputLabel": "Search for a person",
+      "placeholder": "Name or @handle",
+      "submit": "Search",
+      "errorTitle": "Search unavailable",
+      "errorMessage": "The search could not be completed.",
+      "loading": "Searching…",
+      "messageLabel": "Connection message (optional)",
+      "messagePlaceholder": "Hello, we are working on the same topic…",
+      "follow": "Follow",
+      "connectionSent": "Connection request sent.",
+      "followDone": "You are now following this person.",
+      "actionFailed": "This action is not possible for this person."
+    },
+    "pending": {
+      "title": "Invitations received",
+      "errorTitle": "Invitations unavailable",
+      "errorMessage": "Your invitations could not be loaded.",
+      "quotedMessage": "“{{message}}”",
+      "accept": "Accept",
+      "decline": "Decline",
+      "accepted": "Connection accepted.",
+      "declined": "Invitation declined.",
+      "respondFailed": "Your answer could not be saved.",
+      "loadMore": "See more invitations",
+      "loadingMore": "Loading earlier invitations…"
+    },
+    "sent": {
+      "title": "Invitations sent",
+      "errorTitle": "Sent invitations unavailable",
+      "errorMessage": "Your pending requests could not be loaded.",
+      "awaiting": "Awaiting a reply.",
+      "loadMore": "See more sent invitations",
+      "cancel": "Cancel request",
+      "cancelled": "Request cancelled.",
+      "cancelFailed": "The request could not be cancelled.",
+      "cancelLabel": "Cancel the request sent to {{name}}"
+    },
+    "catalogue": {
+      "title": "People to discover",
+      "showDismissed": "Show dismissed suggestions",
+      "showDismissedCount": "Show dismissed suggestions ({{count}})",
+      "showDismissedCountCapped": "Show dismissed suggestions ({{count}}+)",
+      "hideDismissed": "Hide dismissed suggestions",
+      "errorTitle": "Suggestions unavailable",
+      "errorMessage": "People to discover could not be loaded.",
+      "listLabel": "Suggested people",
+      "answer": "Reply",
+      "restore": "Show again",
+      "dismiss": "Hide",
+      "dismissLabel": "Hide the suggestion {{name}}",
+      "loadMore": "See more people",
+      "dismissFailed": "Hiding could not be saved.",
+      "restoreFailed": "The suggestion could not be shown again."
+    },
+    "connections": {
+      "title": "My connections",
+      "errorTitle": "Connections unavailable",
+      "errorMessage": "Your connections could not be loaded.",
+      "loadMore": "See more connections",
+      "loadingMore": "Loading earlier connections…"
+    },
+    "follows": {
+      "title": "People you follow",
+      "followers_one": "{{count}} person follows your posts.",
+      "followers_many": "{{count}} people follow your posts.",
+      "followers_other": "{{count}} people follow your posts.",
+      "errorTitle": "People you follow unavailable",
+      "errorMessage": "The people you follow could not be loaded.",
+      "unfollow": "Unfollow",
+      "unfollowed": "You no longer follow this person.",
+      "unfollowFailed": "Unfollowing could not be saved.",
+      "loadMore": "See more people you follow"
+    },
+    "blocks": {
+      "title": "Blocked people",
+      "globalScope": "These blocks apply across all your ANTSIA networks. Unblocking does not create a new connection. Existing follows are kept.",
+      "neutral": "Blocked person",
+      "blockedAt": "Blocked on {{date}}",
+      "empty": "You have not blocked anyone.",
+      "loadMore": "See more blocks",
+      "errorTitle": "Blocks unavailable",
+      "errorMessage": "Your blocks could not be loaded.",
+      "unblock": "Unblock",
+      "confirmTitle": "Unblock this person?",
+      "confirmBody": "The block you set will be removed across all your ANTSIA networks. No new connection is created. Existing follows are kept.",
+      "cancel": "Cancel",
+      "close": "Close confirmation",
+      "unblocked": "Block removed.",
+      "unblockFailed": "The block could not be removed."
+    }
+  },
+  "suggestionsActions": {
+    "connect": "Connect",
+    "connecting": "Connecting…",
+    "requestSent": "Request sent",
+    "invitationReceived": "Invitation received"
+  },
+  "suggestionsPanel": {
+    "title": "People to discover",
+    "unavailable": "People to discover are temporarily unavailable.",
+    "retry": "Try again",
+    "empty": "No new people to suggest for now. Your connections and the profiles you already follow remain available in Relations.",
+    "seeAll": "See all",
+    "listLabel": "Suggested people",
+    "dismissLabel": "Hide the suggestion {{name}}",
+    "profileOf": "{{name}}'s profile",
+    "connectionSent": "Connection request sent.",
+    "actionFailed": "This action is not possible for this person.",
+    "dismissFailed": "Hiding could not be saved."
+  },
+  "relationPicker": {
+    "searchLabel": "Search my relations",
+    "placeholder": "Name or @handle",
+    "searchFailed": "The search did not complete. Relations already loaded remain displayed.",
+    "retry": "Try again",
+    "searching": "Searching…",
+    "close": "Close",
+    "status": {
+      "member": "Already a member",
+      "invited": "Invitation pending"
+    },
+    "selectionNone": "No one selected",
+    "selection_one": "{{count}} person selected",
+    "selection_many": "{{count}} people selected",
+    "selection_other": "{{count}} people selected",
+    "defaultVerb": "Invite",
+    "submitWithCount_one": "{{verb}} {{count}} person",
+    "submitWithCount_many": "{{verb}} {{count}} people",
+    "submitWithCount_other": "{{verb}} {{count}} people",
+    "noMatch": "No relation matches.",
+    "searchContinues": "No loaded relation matches — the search continues."
+  },
+  "contactsRail": {
+    "title": "Contacts",
+    "filterLabel": "Filter my contacts",
+    "errorTitle": "Contacts unavailable",
+    "errorMessage": "Your contacts could not be loaded.",
+    "noHandle": "This person has not published a network profile.",
+    "noMatch": "No contact matches this search.",
+    "empty": "Your connections will appear here. Find people from the Relations panel.",
+    "countNone": "No contacts",
+    "count_one": "{{count}} contact",
+    "count_many": "{{count}} contacts",
+    "count_other": "{{count}} contacts",
+    "unnamed": "Network member"
+  },
+  "emptyStates": {
+    "text": {
+      "signets": "No saved posts.",
+      "conferencesEnDirect": "No one is live right now.",
+      "conferencesEnDirectAvecRediffusions": "No live conference; replays are further down.",
+      "rediffusions": "No replay available for now.",
+      "relationsConnexions": "No connections.",
+      "relationsAbonnements": "You are not following anyone.",
+      "relationsInvitationsRecues": "No pending invitations.",
+      "relationsDemandesEnvoyees": "No request awaiting a reply.",
+      "relationsRecherche": "No one found.",
+      "suggestions": "No new people to suggest for now."
+    },
+    "action": {
+      "openFeed": "Open the feed",
+      "seeSuggestions": "See suggestions"
+    }
+  }
+}

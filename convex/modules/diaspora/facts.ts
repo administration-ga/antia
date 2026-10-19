@@ -9,8 +9,8 @@
  * - Les niveaux fins de la facette et le niveau d'annuaire vivent dans
  *   `memberPrivacy` ; les valeurs de la facette, dans `personFacets` du moteur.
  */
-import { type ConsentPurpose, isConsentInForce } from "@antia/social-domain/consent"
-import { effectiveAccessStatus, isActiveStatus, type MembershipStatus } from "@antia/social-domain/membership"
+import { type ConsentPurpose, isConsentInForce } from "@antsia/social-domain/consent"
+import { effectiveAccessStatus, isActiveStatus, type MembershipStatus, type VerificationSource } from "@antsia/social-domain/membership"
 import {
   DEFAULT_DIRECTORY_VISIBILITY,
   DEFAULT_FACET_VISIBILITY,
@@ -29,7 +29,7 @@ import type { Doc, Id } from "../../_generated/dataModel"
 import type { MutationCtx, QueryCtx } from "../../_generated/server"
 import { getMembership } from "../../lib/access"
 import { notFound } from "../../lib/errors"
-import { setDirectoryListed, setMembershipStatus } from "../people/admission"
+import { promoteDerivedRootMembership, setDirectoryListed, setMembershipStatus } from "../people/admission"
 import { liveIdentityLinks } from "../people/persons"
 
 /** Le réseau est-il celui que la tranche gouverne, et actif ? */
@@ -112,12 +112,16 @@ export async function applyDerivedStatus(
     })
     return "suspendue"
   }
+  const verifiedBy: VerificationSource | undefined = derived === "verifiee" ? (engineVerificationSource(grounds, now) ?? undefined) : undefined
   const extra = {
-    verifiedBy: derived === "verifiee" ? (engineVerificationSource(grounds, now) ?? undefined) : undefined,
+    verifiedBy,
     sponsorPersonId: sponsor,
   }
   if (derived === membership.status) await ctx.db.patch(membership._id, extra)
   else await setMembershipStatus(ctx, membership, derived, extra)
+  if (derived === "verifiee" && verifiedBy !== undefined) {
+    await promoteDerivedRootMembership(ctx, membership.personId, membership.networkId, verifiedBy)
+  }
   return derived
 }
 

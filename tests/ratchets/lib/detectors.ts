@@ -267,44 +267,119 @@ export const PUBLIC_BUILDERS = new Set([
  */
 export const PUBLIC_PROJECTION_TAG = /@(?:publicProjection|selfScoped)\s+\S.{14,}/
 
+/** Noms importés renommés, résolus pour les appels du fichier seulement. */
+export function importedNames(source: ts.SourceFile): Map<string, string> {
+  const names = new Map<string, string>()
+  for (const statement of source.statements) {
+    if (!ts.isImportDeclaration(statement)) continue
+    const bindings = statement.importClause?.namedBindings
+    if (!bindings || !ts.isNamedImports(bindings)) continue
+    for (const element of bindings.elements) names.set(element.name.text, element.propertyName?.text ?? element.name.text)
+  }
+  return names
+}
+
+/** Seuls les appels de l'AST comptent : un commentaire ou une chaîne n'est pas une garde. */
+export function calledNames(node: ts.Node, names: ReadonlyMap<string, string>): Set<string> {
+  const calls = new Set<string>()
+  walk(node, (child) => {
+    if (ts.isCallExpression(child) && ts.isIdentifier(child.expression)) calls.add(names.get(child.expression.text) ?? child.expression.text)
+  })
+  return calls
+}
+
+/** Appels exportés directement ou par `export { local as publicName }`, sans parcourir les barrels distants. */
+export function exportedCalls(source: ts.SourceFile): { name: string; node: ts.Node; statement: ts.Statement; call: ts.CallExpression }[] {
+  const variables = new Map<string, { node: ts.VariableDeclaration; statement: ts.VariableStatement }>()
+  const exports: { local: string; name: string }[] = []
+  for (const statement of source.statements) {
+    if (ts.isVariableStatement(statement)) {
+      for (const node of statement.declarationList.declarations) {
+        if (!ts.isIdentifier(node.name)) continue
+        variables.set(node.name.text, { node, statement })
+        if (statement.modifiers?.some((modifier) => modifier.kind === ts.SyntaxKind.ExportKeyword)) exports.push({ local: node.name.text, name: node.name.text })
+      }
+    } else if (ts.isExportDeclaration(statement) && !statement.moduleSpecifier && statement.exportClause && ts.isNamedExports(statement.exportClause)) {
+      for (const element of statement.exportClause.elements) if (!element.isTypeOnly) exports.push({ local: element.propertyName?.text ?? element.name.text, name: element.name.text })
+    } else if (ts.isExportAssignment(statement) && ts.isIdentifier(statement.expression)) {
+      exports.push({ local: statement.expression.text, name: "default" })
+    }
+  }
+  const resolve = (local: string, seen = new Set<string>()): { node: ts.VariableDeclaration; statement: ts.VariableStatement; call: ts.CallExpression } | undefined => {
+    if (seen.has(local)) return undefined
+    seen.add(local)
+    const definition = variables.get(local)
+    const initializer = definition?.node.initializer
+    if (!definition || !initializer) return undefined
+    if (ts.isCallExpression(initializer)) return { ...definition, call: initializer }
+    return ts.isIdentifier(initializer) ? resolve(initializer.text, seen) : undefined
+  }
+  return exports.flatMap(({ local, name }) => {
+    const definition = resolve(local)
+    return definition ? [{ ...definition, name }] : []
+  })
+}
+
+/** Patron explicite : la garde est attendue dans le handler, avec son contexte et son argument réseau. */
+function hasMembershipGuard(config: ts.Expression | undefined, names: ReadonlyMap<string, string>): boolean {
+  if (!config || !ts.isObjectLiteralExpression(config)) return false
+  const property = config.properties.find((item) => ts.isPropertyAssignment(item) && item.name.getText() === "handler")
+  if (!property || !ts.isPropertyAssignment(property)) return false
+  const handler = property.initializer
+  if (!ts.isArrowFunction(handler) && !ts.isFunctionExpression(handler)) return false
+  const context = handler.parameters[0]?.name
+  const args = handler.parameters[1]?.name
+  if (!context || !args || !ts.isIdentifier(context) || !ts.isIdentifier(args)) return false
+  let guarded = false
+  const visit = (node: ts.Node): void => {
+    // La définition d'un helper imbriqué ne prouve pas son exécution.
+    if (ts.isFunctionDeclaration(node) || ts.isArrowFunction(node) || ts.isFunctionExpression(node)) return
+    if (ts.isAwaitExpression(node) && ts.isCallExpression(node.expression)) {
+      const call = node.expression
+      const [ctx, network] = call.arguments
+      if (
+        ts.isIdentifier(call.expression) && (names.get(call.expression.text) ?? call.expression.text) === "requireMembership" &&
+        ctx && ts.isIdentifier(ctx) && ctx.text === context.text && network &&
+        ts.isPropertyAccessExpression(network) && ts.isIdentifier(network.expression) && network.expression.text === args.text && network.name.text === "networkId"
+      ) guarded = true
+    }
+    ts.forEachChild(node, visit)
+  }
+  visit(handler.body)
+  return guarded
+}
+
 export function detectUnscopedFunctions(file: string, text: string): Finding[] {
   const findings: Finding[] = []
   const source = parseSource(file, text)
-  for (const statement of source.statements) {
-    if (!ts.isVariableStatement(statement)) continue
-    const exported = statement.modifiers?.some((modifier) => modifier.kind === ts.SyntaxKind.ExportKeyword)
-    if (!exported) continue
-    for (const declaration of statement.declarationList.declarations) {
-      const initializer = declaration.initializer
-      if (!initializer || !ts.isCallExpression(initializer) || !ts.isIdentifier(initializer.expression)) continue
-      const builder = initializer.expression.text
-      if (NETWORK_SCOPED_BUILDERS.has(builder) || !PUBLIC_BUILDERS.has(builder)) continue
-      const name = declaration.name.getText(source)
-      const line = lineOf(source, declaration.getStart(source))
-      const docs = leadingCommentText(source, statement)
-        .replace(/\/\*\*?|\*\/|^\s*\*|\/\//gm, " ")
-        .replace(/\s+/g, " ")
-      if (PUBLIC_PROJECTION_TAG.test(docs)) continue
-      const body = initializer.getText(source)
-      const callsGuard = /\brequireMembership\s*\(/.test(body)
-      const config = initializer.arguments[0]
-      const declaresNetwork =
-        config !== undefined &&
-        ts.isObjectLiteralExpression(config) &&
-        config.properties.some(
-          (property) =>
-            ts.isPropertyAssignment(property) &&
-            property.name.getText(source) === "args" &&
-            ts.isObjectLiteralExpression(property.initializer) &&
-            property.initializer.properties.some((arg) => arg.name?.getText(source) === "networkId"),
-        )
-      if (!callsGuard || !declaresNetwork) {
-        findings.push({
-          file,
-          line,
-          message: `fonction publique « ${name} » (${builder}) sans ${!declaresNetwork ? "argument networkId" : ""}${!declaresNetwork && !callsGuard ? " ni " : ""}${!callsGuard ? "requireMembership" : ""} — utiliser networkQuery/networkMutation, ou justifier par @publicProjection / @selfScoped`,
-        })
-      }
+  const names = importedNames(source)
+  for (const { name, node, statement, call } of exportedCalls(source)) {
+    if (!ts.isIdentifier(call.expression)) continue
+    const builder = names.get(call.expression.text) ?? call.expression.text
+    if (NETWORK_SCOPED_BUILDERS.has(builder) || !PUBLIC_BUILDERS.has(builder)) continue
+    const line = lineOf(source, node.getStart(source))
+    const docs = leadingCommentText(source, statement)
+      .replace(/\/\*\*?|\*\/|^\s*\*|\/\//gm, " ")
+      .replace(/\s+/g, " ")
+    if (PUBLIC_PROJECTION_TAG.test(docs)) continue
+    const config = call.arguments[0]
+    const callsGuard = hasMembershipGuard(config, names)
+    const declaresNetwork =
+      config !== undefined &&
+      ts.isObjectLiteralExpression(config) &&
+      config.properties.some(
+        (property) =>
+          ts.isPropertyAssignment(property) &&
+          property.name.getText(source) === "args" &&
+          ts.isObjectLiteralExpression(property.initializer) &&
+          property.initializer.properties.some((arg) => arg.name?.getText(source) === "networkId"),
+      )
+    if (!callsGuard || !declaresNetwork) {
+      findings.push({
+        file,
+        line,
+        message: `fonction publique « ${name} » (${builder}) sans ${!declaresNetwork ? "argument networkId" : ""}${!declaresNetwork && !callsGuard ? " ni " : ""}${!callsGuard ? "requireMembership" : ""} — utiliser networkQuery/networkMutation, ou justifier par @publicProjection / @selfScoped`,
+      })
     }
   }
   return findings
@@ -391,16 +466,50 @@ export const FILE_DELIVERY_GATE = "convex/modules/files/storageGuard.ts"
 /** Le SEUL fichier du moteur qui appelle `ctx.storage.generateUploadUrl` : la politique de dépôt. */
 export const UPLOAD_POLICY_GATE = "convex/lib/uploadPolicy.ts"
 
+function memberName(expression: ts.Expression): string | undefined {
+  if (ts.isPropertyAccessExpression(expression)) return expression.name.text
+  if (ts.isElementAccessExpression(expression) && ts.isStringLiteralLike(expression.argumentExpression)) return expression.argumentExpression.text
+  return undefined
+}
+
+function receiverOf(expression: ts.Expression): ts.Expression | undefined {
+  return ts.isPropertyAccessExpression(expression) || ts.isElementAccessExpression(expression) ? expression.expression : undefined
+}
+
+/** Accès directs, crochets et alias locaux de stockage/méthode, sans confondre un homonyme hors stockage. */
 function callsOf(file: string, text: string, method: string, message: string): Finding[] {
   const findings: Finding[] = []
   const source = parseSource(file, text)
-  walk(source, (node) => {
-    if (ts.isCallExpression(node) && ts.isPropertyAccessExpression(node.expression) && node.expression.name.text === method) {
-      const target = node.expression.expression
-      if (ts.isPropertyAccessExpression(target) && target.name.text === "storage") {
-        findings.push({ file, line: lineOf(source, node.getStart(source)), message })
+  const declarations: ts.VariableDeclaration[] = []
+  walk(source, (node) => { if (ts.isVariableDeclaration(node)) declarations.push(node) })
+  const storageAliases = new Set<string>()
+  const methodAliases = new Set<string>()
+  const isStorage = (expression: ts.Expression): boolean => memberName(expression) === "storage" || (ts.isIdentifier(expression) && storageAliases.has(expression.text))
+  const isMethod = (expression: ts.Expression): boolean => {
+    const receiver = receiverOf(expression)
+    return (memberName(expression) === method && receiver !== undefined && isStorage(receiver)) || (ts.isIdentifier(expression) && methodAliases.has(expression.text))
+  }
+  for (let changed = true; changed; ) {
+    changed = false
+    const add = (aliases: Set<string>, name: string): void => { if (!aliases.has(name)) { aliases.add(name); changed = true } }
+    for (const declaration of declarations) {
+      const initializer = declaration.initializer
+      if (!initializer) continue
+      if (ts.isIdentifier(declaration.name)) {
+        if (isStorage(initializer)) add(storageAliases, declaration.name.text)
+        if (isMethod(initializer)) add(methodAliases, declaration.name.text)
+      } else if (ts.isObjectBindingPattern(declaration.name)) {
+        for (const element of declaration.name.elements) {
+          if (!ts.isIdentifier(element.name)) continue
+          const property = element.propertyName ? (ts.isIdentifier(element.propertyName) || ts.isStringLiteralLike(element.propertyName) ? element.propertyName.text : undefined) : element.name.text
+          if (property === "storage") add(storageAliases, element.name.text)
+          if (property === method && isStorage(initializer)) add(methodAliases, element.name.text)
+        }
       }
     }
+  }
+  walk(source, (node) => {
+    if (ts.isCallExpression(node) && isMethod(node.expression)) findings.push({ file, line: lineOf(source, node.getStart(source)), message })
   })
   return findings
 }

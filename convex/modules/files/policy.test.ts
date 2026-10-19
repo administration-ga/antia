@@ -1,4 +1,4 @@
-// Dupliqué de socle/convex/modules/fileGuard/policy.test.ts @ ad2e7fdc2 — adaptations : interrupteurs d'exploitation seulement (la servabilité est testée dans `@antia/social-domain`) ; le coupe-circuit SUSPEND au lieu d'ouvrir ; triage IA retiré.
+// Dupliqué de socle/convex/modules/fileGuard/policy.test.ts @ ad2e7fdc2 — adaptations : interrupteurs d'exploitation seulement (la servabilité est testée dans `@antsia/social-domain`) ; le coupe-circuit SUSPEND au lieu d'ouvrir ; triage IA retiré.
 import { describe, expect, it } from "vitest"
 
 import { FILE_GUARD_QUARANTINE_RETENTION_DAYS_DEFAULT, isKillSwitched, quarantineRetentionDays } from "./policy"

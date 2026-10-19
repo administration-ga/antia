@@ -1,4 +1,4 @@
-// Dupliqué de socle/convex/modules/reseauPersonnel/groupes.ts (l. 2145-2637 : `inviteOrNull`, `activeGroupInviteLinkOrNull`, `insertGroupInviteLink`, `requireActiveGroupInviteLink`, `getOrCreateGroupInviteLink`, `resetGroupInviteLink`, `previewGroupInvite`, `joinGroupViaInviteLink`, `inviteToGroup`, `respondGroupInvite`, `myGroupInvites`) @ ad2e7fdc2 — adaptations : invitation et lien PAR RÉSEAU (un jeton d'un autre réseau se dit comme un jeton inconnu) ; admissibilité = relation acceptée de l'INVITANT dans le réseau, sans blocage ; « comptes publics » sans objet ; plafond jugé par le contrat sur l'effectif de l'agrégat (D02) ; arrivée commune (`admitMember` : appartenance ranimée ou créée, curseur à l'arrivée, compteur à zéro, effectif, message système) ; cloche `group_added` par la porte du moteur, RÉSOLUE à la réponse comme à l'entrée par le lien ; `myGroupInvites` paginée par réseau ; refus à code ; débit.
+// Dupliqué de socle/convex/modules/reseauPersonnel/groupes.ts (l. 2145-2637 : `inviteOrNull`, `activeGroupInviteLinkOrNull`, `insertGroupInviteLink`, `requireActiveGroupInviteLink`, `getOrCreateGroupInviteLink`, `resetGroupInviteLink`, `previewGroupInvite`, `joinGroupViaInviteLink`, `inviteToGroup`, `respondGroupInvite`, `myGroupInvites`) @ ad2e7fdc2 — adaptations : invitation et lien PAR RÉSEAU (un jeton d'un autre réseau se dit comme un jeton inconnu) ; admissibilité = relation acceptée de l'INVITANT dans le réseau, sans blocage ; « comptes publics » sans objet ; plafond jugé par le contrat sur l'effectif de l'agrégat (D02) ; arrivée commune (`admitMember` : appartenance ranimée ou créée, curseur à l'arrivée, compteur à zéro, effectif, message système) ; cloche `group_added` par la porte du moteur, RÉSOLUE à la réponse comme à l'entrée par le lien ; `myGroupInvites` paginée par réseau ; l. 2089-2143 `listMyConnectionsForGroup` (qui inviter) : relations acceptées DANS le réseau, membres actifs au profil publié, sans blocage, bornées à 200 et triées par nom — la même admissibilité que `createGroup` et `inviteToGroup` ; refus à code ; débit.
 /**
  * Entrer dans un groupe : par INVITATION (l'invité décide) ou par LIEN (le
  * lien porte le consentement du groupe : aucune relation n'est exigée).
@@ -6,18 +6,20 @@
  * Une appartenance naît à l'ACCEPTATION, jamais à l'invitation : ajouter
  * quelqu'un d'office le ferait sonner pour un groupe qu'il n'a pas rejoint.
  */
-import type { CounterpartLabel } from "@antia/social-contracts/counterpart"
-import { assertGroupHasRoom } from "@antia/social-contracts/groupCapacity"
-import { canInviteToGroupThread } from "@antia/social-domain/groupThreads"
+import type { CounterpartLabel } from "@antsia/social-contracts/counterpart"
+import { assertGroupHasRoom } from "@antsia/social-contracts/groupCapacity"
+import { canInviteToGroupThread } from "@antsia/social-domain/groupThreads"
 import { paginationOptsValidator, type PaginationResult } from "convex/server"
 import { v } from "convex/values"
 
 import type { Doc, Id } from "../../_generated/dataModel"
 import type { MutationCtx, QueryCtx } from "../../_generated/server"
+import { isActiveMember } from "../../lib/access"
 import { checked, fail, failRule, notFound } from "../../lib/errors"
 import { networkMutation, networkQuery } from "../../lib/functions"
 import { enforceRateLimit } from "../../lib/rateLimit"
 import { resolveFileDelivery } from "../files/storageGuard"
+import { acceptedCounterpartIds, blockedCounterpartIds } from "../graph/graph"
 import { counterpartOf } from "../messaging/participation"
 import { notifyPerson, resolveNotifications } from "../notifications/notify"
 import { findPublishedPersonByHandle, miniProfileCache } from "../people/miniProfile"
@@ -284,5 +286,57 @@ export const joinGroupViaInviteLink = networkMutation({
     await resolveNotifications(ctx, { networkId: ctx.networkId, recipientPersonId: ctx.person._id, kind: "group_added", subject: { groupThread: thread._id }, resolution: "accepted", at: now })
     await admitMember(ctx, thread, ctx.person._id, now)
     return { threadId: thread._id, joined: true }
+  },
+})
+
+// ═══════════════════════════════════════════════════════════════
+// Qui inviter
+// ═══════════════════════════════════════════════════════════════
+
+/** Relations proposées à la composition d'un groupe : la liste tient en mémoire, le filtre par texte est au client. */
+const CONNECTIONS_FOR_GROUP_MAX = 200
+
+export type ConnectionForGroupDto = {
+  personId: Id<"persons">
+  handle: string
+  displayName: string
+  headline: string | null
+  avatarUrl: string | null
+}
+
+const connectionForGroupValidator = v.object({
+  personId: v.id("persons"),
+  handle: v.string(),
+  displayName: v.string(),
+  headline: v.union(v.string(), v.null()),
+  avatarUrl: v.union(v.string(), v.null()),
+})
+
+/**
+ * MES relations ÉLIGIBLES à un groupe — exactement celles que `createGroup` et
+ * `inviteToGroup` accepteront : relation acceptée DANS ce réseau, sans blocage
+ * (dans un sens ou dans l'autre, tous réseaux), membre active au profil publié
+ * (l'identifiant est l'adresse que la création demande). Offrir plus large que
+ * ce que la création accepte, ce serait fabriquer des refus ; ce n'est donc PAS
+ * l'annuaire du réseau.
+ */
+export const listMyConnectionsForGroup = networkQuery({
+  args: {},
+  returns: v.array(connectionForGroupValidator),
+  handler: async (ctx): Promise<ConnectionForGroupDto[]> => {
+    const me = ctx.person._id
+    const [accepted, blocked] = await Promise.all([acceptedCounterpartIds(ctx, ctx.networkId, me), blockedCounterpartIds(ctx, me)])
+    const profileOf = miniProfileCache(ctx)
+    const items: ConnectionForGroupDto[] = []
+    for (const key of accepted.ids) {
+      if (items.length >= CONNECTIONS_FOR_GROUP_MAX) break
+      if (blocked.ids.has(key)) continue
+      const personId = key as Id<"persons">
+      const person = await profileOf(personId)
+      if (!person.hasPublishedProfile || person.handle === null || person.displayName === null) continue
+      if (!(await isActiveMember(ctx, ctx.networkId, personId))) continue
+      items.push({ personId, handle: person.handle, displayName: person.displayName, headline: person.headline, avatarUrl: person.avatarUrl })
+    }
+    return items.sort((a, b) => a.displayName.localeCompare(b.displayName, "fr"))
   },
 })

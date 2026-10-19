@@ -1,0 +1,110 @@
+// @vitest-environment jsdom
+import { act, StrictMode } from "react"
+import { createRoot } from "react-dom/client"
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
+
+const mocks = vi.hoisted(() => ({ token: vi.fn(), cookie: vi.fn(), request: vi.fn(), generation: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa" }))
+vi.mock("convex/react", () => ({ useConvexAuth: () => ({ isAuthenticated: true, isLoading: false }) }))
+vi.mock("react-i18next", () => ({ useTranslation: () => ({ t: (key: string) => key }) }))
+vi.mock("@/lib/auth-client", () => ({ authClient: { getCookie: mocks.cookie, convex: { token: mocks.token } } }))
+vi.mock("@/lib/session-bridge-client", () => ({ clearLocalSessionForAnonymousBridge: () => true, currentSessionBridgeGeneration: () => mocks.generation, requestSessionBridge: mocks.request, rotateSessionBridgeFence: () => mocks.generation }))
+vi.mock("@antsia/api/sign-out-everywhere", () => ({ isSigningOutEverywhere: () => false }))
+import { SessionBridge } from "./session-bridge"
+import { BRIDGE_CLIENT_TIMEOUT_MS, BRIDGE_TIMEOUT_MS } from "@/lib/session-bridge"
+
+const sid = "abcdefghijklmnopqrstuv.signature1234567890="
+const sessionCookie = `better-auth.session_token=${encodeURIComponent(sid)}`
+beforeEach(() => {
+  vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true)
+  mocks.generation = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"
+  mocks.cookie.mockReturnValue(sessionCookie)
+  mocks.request.mockResolvedValue(true)
+})
+afterEach(() => { vi.useRealTimers(); vi.unstubAllGlobals(); mocks.token.mockReset(); mocks.cookie.mockReset(); mocks.request.mockReset() })
+describe("confirmation de session bornée", () => {
+  it("laisse le premier jeton finir de se préparer au-delà du délai de vérification serveur", async () => {
+    vi.useFakeTimers()
+    mocks.token.mockImplementation(() => new Promise((resolve) => {
+      setTimeout(() => resolve({ data: { token: "verified-jwt" }, error: null }), BRIDGE_TIMEOUT_MS + 1_000)
+    }))
+    const host = document.createElement("div"), root = createRoot(host)
+    try {
+      await act(async () => { root.render(<SessionBridge><p>private-content</p></SessionBridge>) })
+      await act(async () => { await vi.advanceTimersByTimeAsync(BRIDGE_TIMEOUT_MS + 1) })
+      expect(host.textContent).toBe("session.confirming")
+      expect(mocks.request).not.toHaveBeenCalled()
+      await act(async () => { await vi.advanceTimersByTimeAsync(1_000) })
+      expect(host.textContent).toBe("private-content")
+      expect(mocks.request).toHaveBeenCalledTimes(1)
+    } finally { await act(async () => root.unmount()) }
+  })
+  it("une génération remplacée pendant l'attente reste refusée sans admission", async () => {
+    let finish: (value: { data: { token: string }; error: null }) => void = () => undefined
+    mocks.token.mockImplementation(() => new Promise((resolve) => { finish = resolve }))
+    const host = document.createElement("div"), root = createRoot(host)
+    try {
+      await act(async () => { root.render(<SessionBridge><p>private-content</p></SessionBridge>) })
+      mocks.generation = "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb"
+      await act(async () => { finish({ data: { token: "verified-jwt" }, error: null }) })
+      expect(host.textContent).toContain("session.unavailable")
+      expect(host.textContent).not.toContain("private-content")
+      expect(mocks.request).not.toHaveBeenCalled()
+    } finally { await act(async () => root.unmount()) }
+  })
+  it("le rejeu des effets StrictMode ignore l'annulation initiale et confirme la session courante", async () => {
+    mocks.token.mockImplementation(({ fetchOptions }: { fetchOptions: { signal: AbortSignal } }) => new Promise((resolve, reject) => {
+      fetchOptions.signal.addEventListener("abort", () => reject(new Error("aborted")), { once: true })
+      queueMicrotask(() => resolve({ data: { token: "verified-jwt" }, error: null }))
+    }))
+    const host = document.createElement("div"), root = createRoot(host)
+    try {
+      await act(async () => { root.render(<StrictMode><SessionBridge><p>private-content</p></SessionBridge></StrictMode>) })
+      expect(host.textContent).toBe("private-content")
+      expect(mocks.request).toHaveBeenCalledTimes(1)
+    } finally { await act(async () => root.unmount()) }
+  })
+  it("confirme la même session quand le renouvellement du JWT modifie un cookie auxiliaire", async () => {
+    const before = `${sessionCookie}; better-auth.convex_jwt=expired`
+    mocks.cookie.mockReturnValue(before)
+    mocks.token.mockImplementation(async () => {
+      mocks.cookie.mockReturnValue(`better-auth.convex_jwt=renewed; ${sessionCookie}`)
+      return { data: { token: "verified-jwt" }, error: null }
+    })
+    const host = document.createElement("div"), root = createRoot(host)
+    try {
+      await act(async () => { root.render(<SessionBridge><p>private-content</p></SessionBridge>) })
+      expect(mocks.request).toHaveBeenCalledWith("POST", { generation: mocks.generation, cookie: before, jwt: "verified-jwt" }, fetch, expect.any(AbortSignal))
+      expect(host.textContent).toBe("private-content")
+    } finally { await act(async () => root.unmount()) }
+  })
+  it.each([
+    ["remplacée", "better-auth.session_token=anotherSessionValue12345.signature0987654321"],
+    ["absente", "better-auth.convex_jwt=renewed"],
+    ["ambiguë", `${sessionCookie}; ${sessionCookie}`],
+    ["autre nom", `__Secure-${sessionCookie}`],
+  ])("refuse une session %s pendant le renouvellement du JWT", async (_reason, changedCookie) => {
+    mocks.token.mockImplementation(async () => {
+      mocks.cookie.mockReturnValue(changedCookie)
+      return { data: { token: "verified-jwt" }, error: null }
+    })
+    const host = document.createElement("div"), root = createRoot(host)
+    try {
+      await act(async () => { root.render(<SessionBridge><p>private-content</p></SessionBridge>) })
+      expect(host.textContent).toContain("session.unavailable")
+      expect(host.textContent).not.toContain("private-content")
+      expect(mocks.request).not.toHaveBeenCalled()
+    } finally { await act(async () => root.unmount()) }
+  })
+  it("un SDK de jeton bloqué rend une erreur réessayable, aucun contenu privé et aucune admission", async () => {
+    vi.useFakeTimers()
+    mocks.token.mockImplementation(() => new Promise(() => undefined))
+    const host = document.createElement("div"), root = createRoot(host)
+    await act(async () => { root.render(<SessionBridge><p>private-content</p></SessionBridge>) })
+    expect(host.textContent).toContain("session.confirming")
+    await act(async () => { await vi.advanceTimersByTimeAsync(BRIDGE_CLIENT_TIMEOUT_MS + 1) })
+    expect(host.textContent).toContain("session.unavailable")
+    expect(host.textContent).not.toContain("private-content")
+    expect(mocks.request).not.toHaveBeenCalled()
+    await act(async () => root.unmount())
+  })
+})

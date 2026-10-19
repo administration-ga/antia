@@ -4,7 +4,7 @@
  * ont publié », cinq au plus, les plus récents d'abord. Une note aux abonnés
  * (`followers`) n'est pas un rappel public : elle se lit dans le fil.
  */
-import { followedUpdateExcerpt, PAGES_FEED_MAX } from "@antia/social-domain/pages"
+import { followedUpdateExcerpt, PAGES_FEED_MAX } from "@antsia/social-domain/pages"
 import { type Infer, v } from "convex/values"
 
 import type { Doc } from "../../_generated/dataModel"

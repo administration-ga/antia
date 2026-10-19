@@ -19,5 +19,6 @@
   "pageRoleRequired": "Cette action est réservée aux signataires de la page.",
   "mediaServerNotConfigured": "Les appels ne sont pas encore disponibles sur ce service.",
   "mediaServerUnavailable": "Le serveur des appels ne répond pas. Réessayez dans un instant.",
-  "mediaServerNoCapacity": "Le serveur des appels est momentanément saturé. Réessayez dans quelques minutes."
+  "mediaServerNoCapacity": "Le serveur des appels est momentanément saturé. Réessayez dans quelques minutes.",
+  "liveRoleRequired": "Votre rôle dans cette conférence ne permet pas ce geste."
 }

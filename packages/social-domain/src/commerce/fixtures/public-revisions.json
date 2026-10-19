@@ -1,0 +1,203 @@
+{
+  "contract": "PRO-COMMERCE-PUBLIC-V1",
+  "description": "decideCommercePublicRevision(head, incoming) : ordre métier indépendant de l'eventId et de l'ordre d'arrivée.",
+  "cases": [
+    {
+      "name": "première révision",
+      "head": null,
+      "incoming": {
+        "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "effect": "upsert",
+        "revision": 1
+      },
+      "expect": {
+        "action": "apply",
+        "gap": false,
+        "state": "active"
+      }
+    },
+    {
+      "name": "révision retardée",
+      "head": {
+        "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "revision": 3,
+        "state": "active"
+      },
+      "incoming": {
+        "digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "effect": "upsert",
+        "revision": 2
+      },
+      "expect": {
+        "action": "stale"
+      }
+    },
+    {
+      "name": "doublon exact",
+      "head": {
+        "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "revision": 3,
+        "state": "active"
+      },
+      "incoming": {
+        "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "effect": "upsert",
+        "revision": 3
+      },
+      "expect": {
+        "action": "duplicate"
+      }
+    },
+    {
+      "name": "même révision, autre contenu",
+      "head": {
+        "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "revision": 3,
+        "state": "active"
+      },
+      "incoming": {
+        "digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "effect": "upsert",
+        "revision": 3
+      },
+      "expect": {
+        "action": "conflict",
+        "reason": "revision_conflict"
+      }
+    },
+    {
+      "name": "trou de révisions",
+      "head": {
+        "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "revision": 2,
+        "state": "active"
+      },
+      "incoming": {
+        "digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "effect": "upsert",
+        "revision": 5
+      },
+      "expect": {
+        "action": "apply",
+        "gap": true,
+        "state": "active"
+      }
+    },
+    {
+      "name": "retrait reçu avant la création",
+      "head": null,
+      "incoming": {
+        "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "effect": "withdraw",
+        "revision": 4
+      },
+      "expect": {
+        "action": "apply",
+        "gap": false,
+        "state": "withdrawn"
+      }
+    },
+    {
+      "name": "ancien upsert après la tombe",
+      "head": {
+        "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "revision": 4,
+        "state": "withdrawn"
+      },
+      "incoming": {
+        "digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "effect": "upsert",
+        "revision": 3
+      },
+      "expect": {
+        "action": "stale"
+      }
+    },
+    {
+      "name": "republication après la tombe",
+      "head": {
+        "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "revision": 4,
+        "state": "withdrawn"
+      },
+      "incoming": {
+        "digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "effect": "upsert",
+        "revision": 5
+      },
+      "expect": {
+        "action": "apply",
+        "gap": false,
+        "state": "active"
+      }
+    },
+    {
+      "name": "upsert après fermeture définitive",
+      "head": {
+        "digest": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+        "revision": 6,
+        "state": "closed"
+      },
+      "incoming": {
+        "digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "effect": "upsert",
+        "revision": 7
+      },
+      "expect": {
+        "action": "conflict",
+        "reason": "terminal_object"
+      }
+    },
+    {
+      "name": "retrait après fermeture définitive",
+      "head": {
+        "digest": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+        "revision": 6,
+        "state": "closed"
+      },
+      "incoming": {
+        "digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "effect": "withdraw",
+        "revision": 7
+      },
+      "expect": {
+        "action": "conflict",
+        "reason": "terminal_object"
+      }
+    },
+    {
+      "name": "fermeture après retrait",
+      "head": {
+        "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "revision": 4,
+        "state": "withdrawn"
+      },
+      "incoming": {
+        "digest": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+        "effect": "close",
+        "revision": 5
+      },
+      "expect": {
+        "action": "apply",
+        "gap": false,
+        "state": "closed"
+      }
+    },
+    {
+      "name": "doublon d'une fermeture",
+      "head": {
+        "digest": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+        "revision": 6,
+        "state": "closed"
+      },
+      "incoming": {
+        "digest": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+        "effect": "close",
+        "revision": 6
+      },
+      "expect": {
+        "action": "duplicate"
+      }
+    }
+  ]
+}

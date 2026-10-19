@@ -2,7 +2,7 @@
 /**
  * Messagerie PERSONNELLE d'un réseau — fils 1:1 entre deux personnes.
  */
-import { MESSAGE_REACTION_KINDS } from "@antia/social-contracts/messageReactions"
+import { MESSAGE_REACTION_KINDS } from "@antsia/social-contracts/messageReactions"
 import { defineTable } from "convex/server"
 import { v } from "convex/values"
 
@@ -71,6 +71,8 @@ export const messagingTables = {
     attachmentFiles: v.optional(v.array(storedAttachmentValidator)),
     /** Le message CITÉ — référence seule, l'extrait est RELU à la lecture. */
     replyToMessageId: v.optional(v.id("personalMessages")),
+    /** R9 : la citation demeure anonyme après purge physique, sans ID de message ni d'auteur. */
+    replyToDeletedAccount: v.optional(v.boolean()),
     reactionCounts: v.optional(messageReactionCountsValidator),
     /** Suppression POUR MOI : liste bornée par construction (deux participants). */
     hiddenForPersonIds: v.optional(v.array(v.id("persons"))),

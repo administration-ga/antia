@@ -1,4 +1,4 @@
-// Dupliqué de socle/convex/modules/reseauPersonnel/media.ts @ ad2e7fdc2 — adaptations : garde des fichiers du moteur (fraîcheur, puis admission SOUS LA POLITIQUE de l'usage — l'exception `media_social` du socle disparaît, D36 : les usages suivent désormais les bornes du domaine) ; déclaration du client confrontée au stockage (type et poids) ; URL d'upload sous adhésion, usage déclaré et débit ; DTO du contrat `@antia/social-contracts/media` avec la retenue nommée (fail-closed) au lieu d'omettre le média ; personnes et réseaux.
+// Dupliqué de socle/convex/modules/reseauPersonnel/media.ts @ ad2e7fdc2 — adaptations : garde des fichiers du moteur (fraîcheur, puis admission SOUS LA POLITIQUE de l'usage — l'exception `media_social` du socle disparaît, D36 : les usages suivent désormais les bornes du domaine) ; déclaration du client confrontée au stockage (type et poids) ; URL d'upload sous adhésion, usage déclaré et débit ; DTO du contrat `@antsia/social-contracts/media` avec la retenue nommée (fail-closed) au lieu d'omettre le média ; personnes et réseaux.
 /**
  * Médias des publications, stories et albums — la doctrine des octets.
  *
@@ -13,8 +13,8 @@
  * (`admitStoredUpload`). Les bornes fines par nature (vidéo seule, durée,
  * texte alternatif) restent au domaine, chez l'appelant (`assertPostMedia`…).
  */
-import type { MediaWithheld, PostMediaDto } from "@antia/social-contracts/media"
-import type { UploadUsage } from "@antia/social-domain/uploadPolicy"
+import type { MediaWithheld, PostMediaDto } from "@antsia/social-contracts/media"
+import type { UploadUsage } from "@antsia/social-domain/uploadPolicy"
 import { type Infer, v } from "convex/values"
 
 import type { Id } from "../../_generated/dataModel"
@@ -83,7 +83,8 @@ export const NETWORK_MEDIA_USAGES = ["media_social", "story_media", "album_image
  * visibilité est déjà jugée. Un média retenu par la garde garde sa place, sans
  * URL, avec la raison : l'écran montre « analyse en cours » ou « bloqué ».
  */
-export async function resolvePostMediaDtos(ctx: Pick<QueryCtx, "db" | "storage">, media: readonly StoredMedia[] | undefined): Promise<PostMediaDto[]> {
+export async function resolvePostMediaDtos(ctx: Pick<QueryCtx, "db" | "storage">, media: readonly StoredMedia[] | undefined, importing?: { status: "pending" | "failed"; items: readonly Omit<StoredMedia, "storageId" | "sizeBytes">[] }): Promise<PostMediaDto[]> {
+  if (importing) return importing.items.map((item) => ({ ...item, url: null, withheld: importing.status === "pending" ? "fileScanPending" as const : "fileQuarantined" as const }))
   if (!media || media.length === 0) return []
   const resolved: PostMediaDto[] = []
   for (const item of media) {

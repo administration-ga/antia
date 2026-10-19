@@ -1,4 +1,4 @@
-// Dupliqué de socle/convex/modules/reseauPersonnel/posts.ts @ ad2e7fdc2 — adaptations : PAR RÉSEAU — tout se lit DEPUIS le réseau de la fonction appelée (une publication `network` d'un réseau fermé n'est rendue par aucune lecture de la racine, R4 ; la racine lit ses natifs et les `root` de tous les réseaux par l'index `onRoot`), adhésion par le constructeur au lieu d'`assertNotSuspended` ; fenêtres par auteur, fusion k-voies, curseur composite et deux phases GARDÉS, lecteurs de fenêtre factorisés (réseau, racine, auteur) ; portée « mon_administration », collègues, organisations et notes de service retirés (l. 1059-1061, 1079-1081, 1221-1224, 1253) ; PAGES rebranchées sur les pages du moteur (lot 13 : fenêtre par page suivie dans « Pour vous », admission propre `pageFeedAdmissionFor` — ni la connexion au signataire, ni la sourdine, ni le blocage entre personnes ne s'y appliquent —, carte de la page dans le DTO avec `author` pour signataire, aucune publication de page sur un mur personnel ni dans « mes publications », autorité ACTUELLE du signataire pour retirer ou éditer) ; direct et évènement (l. 550-598) au lot de leurs modules ; BLOCAGE exclu du fil, de la recherche et du mur (il l'emporte sur toute audience) ; lacune des ensembles bornés RENDUE (`lacunar`, D19, D24) ; une seule garde dans la recherche (D25) ; partages comptés par agrégat ; cloche du partage et des citations par la porte unique ; portée et pays ; épingle par réseau (sur l'adhésion) rendue avec le mur ; `myPosts` paginé (`paginateMyPosts`) ; le fil « Récents » natif `feed` de la tranche verticale GARDÉ (compatibilité des écrans), DTO étendu ; débit sur publier, éditer, retirer ; fil par VOIES (portée, pays facultatif) que compose une application servie (le hub d'un pays, « toute la diaspora »), fusionnées par date ; fenêtres bornées fusionnées sous FRONTIÈRE (une fenêtre pleine n'ouvre plus de trou dans « Pour vous »).
+// Dupliqué de socle/convex/modules/reseauPersonnel/posts.ts @ ad2e7fdc2 — adaptations : PAR RÉSEAU — tout se lit DEPUIS le réseau de la fonction appelée (une publication `network` d'un réseau fermé n'est rendue par aucune lecture de la racine, R4 ; la racine lit ses natifs et les `root` de tous les réseaux par l'index `onRoot`), adhésion par le constructeur au lieu d'`assertNotSuspended` ; fenêtres par auteur, fusion k-voies, curseur composite et deux phases GARDÉS, lecteurs de fenêtre factorisés (réseau, racine, auteur) ; portée « mon_administration », collègues, organisations et notes de service retirés (l. 1059-1061, 1079-1081, 1221-1224, 1253) ; PAGES rebranchées sur les pages du moteur (lot 13 : fenêtre par page suivie dans « Pour vous », admission propre `pageFeedAdmissionFor` — ni la connexion au signataire, ni la sourdine, ni le blocage entre personnes ne s'y appliquent —, carte de la page dans le DTO avec `author` pour signataire, aucune publication de page sur un mur personnel ni dans « mes publications », autorité ACTUELLE du signataire pour retirer ou éditer) ; évènement (l. 564-598) au lot de son module ; DIRECT annoncé (l. 545-562, `resolveDirectProjection`) rebranché au lot 16 : la carte porte `live` (session relue à chaque lecture : identifiant, statut, titre), FACULTATIVE dans le DTO (absente quand la publication n'annonce rien ou que la session n'existe plus) ; BLOCAGE exclu du fil, de la recherche et du mur (il l'emporte sur toute audience) ; lacune des ensembles bornés RENDUE (`lacunar`, D19, D24) ; une seule garde dans la recherche (D25) ; partages comptés par agrégat ; cloche du partage et des citations par la porte unique ; portée et pays ; épingle par réseau (sur l'adhésion) rendue avec le mur ; `myPosts` paginé (`paginateMyPosts`) ; le fil « Récents » natif `feed` de la tranche verticale GARDÉ (compatibilité des écrans), DTO étendu ; débit sur publier, éditer, retirer ; fil par VOIES (portée, pays facultatif) que compose une application servie (le hub d'un pays, « toute la diaspora »), fusionnées par date ; fenêtres bornées fusionnées sous FRONTIÈRE (une fenêtre pleine n'ouvre plus de trou dans « Pour vous »).
 /**
  * Publications d'un réseau — publier, partager, éditer, retirer, épingler ;
  * lire le fil, le mur d'une personne, une publication ; chercher.
@@ -24,14 +24,13 @@ import {
   FEED_SCOPES,
   type FeedLane,
   type FeedReason,
-  feedAdmissionFor,
   groupViewingReasonFor,
   isPersonalPostVisibleTo,
   normalizeFeedLanes,
   type PersonalPostAudience,
   viewingReasonFor,
   addedMentionedIds,
-} from "@antia/social-domain/content"
+} from "@antsia/social-domain/content"
 import {
   boundedFeedSourceIds,
   cursorForFeedPost,
@@ -39,18 +38,25 @@ import {
   isLacunarFeedWindow,
   mergeFeedWindows,
   PERSONAL_FEED_AUTHORS_MAX,
+  materializedCursorMatches,
+  shouldMaterializeFeed,
+  MATERIALIZED_FEED_REBUILD_MS,
   type PersonalFeedCursor,
-} from "@antia/social-domain/feedScale"
-import { effectiveVisibility } from "@antia/social-domain/network"
-import { pageFeedAdmissionFor, PAGES_FEED_MAX } from "@antia/social-domain/pages"
-import { extractHashtags } from "@antia/social-domain/richText"
-import { buildSearchableText, foldSearchQuery } from "@antia/social-domain/searchText"
+} from "@antsia/social-domain/feedScale"
+import { DIRECT_STATUSES } from "@antsia/social-domain/live/domain"
+import { effectiveVisibility } from "@antsia/social-domain/network"
+import { PROVINCE_SLUGS } from "@antsia/social-domain/provinces"
+import { PAGES_FEED_MAX } from "@antsia/social-domain/pages"
+import { extractHashtags } from "@antsia/social-domain/richText"
+import { buildSearchableText, foldSearchQuery } from "@antsia/social-domain/searchText"
 import { type IndexRange, paginationOptsValidator } from "convex/server"
 import { type Infer, v } from "convex/values"
 
+import { canReadModeratedContent, moderateContentWrite } from "../moderation/policy"
 import type { Doc, Id } from "../../_generated/dataModel"
 import type { QueryCtx } from "../../_generated/server"
 import { checked, fail, notFound } from "../../lib/errors"
+import { isActiveMember } from "../../lib/access"
 import { networkMutation, networkQuery } from "../../lib/functions"
 import { enforceRateLimit } from "../../lib/rateLimit"
 import {
@@ -71,11 +77,14 @@ import { liveSignatoryRole, pageCardCache } from "../pages/access"
 import { type BoundedPageIds, followedPageIds, isFollowingPage } from "../pages/follows"
 import { type PageCard, pageCardValidator } from "../pages/validators"
 import { findPublishedPersonByHandle, miniProfileCache, resolveMentionedPersonIds } from "../people/miniProfile"
-import { requireLiveThematicGroupMembership } from "../thematicGroups/access"
+import { canAccessAssociationGroupPost, requireLiveThematicGroupMembership } from "../thematicGroups/access"
 import { assertVisiblePost, canSeePostDoc, isInReadingContext, type ReaderContext } from "./access"
 import { markPostRemoved } from "./contentRemoval"
 import { countComments, countShares, summarizeReactions } from "./counters"
-import { notifyMentions, writePost } from "./postWrite"
+import { notifyMentions, withdrawPostRootVisibility, writePost } from "./postWrite"
+import { hasNativePostAuthor, requireNativePostAuthor, type NativePersonAuthoredPost } from "./nativeAuthor"
+import { exactFeedHidden, exactFeedMuted, feedAccessVersion, feedPreparationKey, liveFeedReason } from "./feedPolicy"
+import { feedState, materializedPostCursor, materializedWindow, type MaterializedWindow } from "./feedRead"
 
 type ReadCtx = Pick<QueryCtx, "db">
 
@@ -105,7 +114,8 @@ export const clampLimit = (limit: number | undefined) => Math.min(Math.max(Math.
 // ═══════════════════════════════════════════════════════════════
 
 const authorValidator = v.object({
-  personId: v.id("persons"),
+  isDeleted: v.optional(v.boolean()),
+  personId: v.union(v.id("persons"), v.null()),
   handle: v.union(v.string(), v.null()),
   displayName: v.union(v.string(), v.null()),
   headline: v.union(v.string(), v.null()),
@@ -134,8 +144,13 @@ const sharedPostValidator = v.union(
 /** Le réseau d'ORIGINE d'une publication lue ailleurs (pastille « Diaspora » du fil de la racine). */
 const originValidator = v.union(v.object({ networkId: v.id("networks"), slug: v.string(), name: v.string() }), v.null())
 
+/** Le DIRECT annoncé, tel qu'il est MAINTENANT — une référence, son statut et son titre, rien d'autre. */
+const liveAnnounceValidator = v.object({ sessionId: v.id("liveSessions"), status: literals(DIRECT_STATUSES), title: v.string() })
+
 export const feedItemValidator = v.object({
   _id: v.id("posts"),
+  /** Galerie collective ; ne pas présenter l'éditeur des publications personnelles. */
+  eventGalleryId: v.optional(v.id("events")),
   body: v.string(),
   audience: postAudienceValidator,
   visibility: contentVisibilityValidator,
@@ -155,6 +170,15 @@ export const feedItemValidator = v.object({
   /** L'évènement ANNONCÉ par la publication, relu à chaque lecture (statut, MA réponse). */
   event: v.union(eventCardValidator, v.null()),
   /**
+   * Le DIRECT annoncé par la publication — statut RELU à chaque lecture, jamais
+   * figé : la carte dit « en direct » ou « terminé » selon l'instant, pas selon
+   * l'annonce. L'audience de la session est EXACTEMENT celle de la publication,
+   * dans le même réseau (invariant d'écriture) : voir l'annonce, c'est avoir le
+   * droit de savoir que le direct existe. Absent : la publication n'annonce
+   * rien, ou la session n'existe plus — la carte redevient ordinaire.
+   */
+  live: v.optional(liveAnnounceValidator),
+  /**
    * La PAGE au nom de laquelle la publication parle — l'en-tête à afficher ;
    * `author` est alors son SIGNATAIRE (« signé par »), et `isMine` reste faux :
    * la publication appartient à la page. `null` pour une publication de personne.
@@ -162,6 +186,9 @@ export const feedItemValidator = v.object({
   page: v.union(pageCardValidator, v.null()),
   reach: v.union(v.string(), v.null()),
   country: v.union(v.string(), v.null()),
+  province: v.optional(v.union(literals(PROVINCE_SLUGS), v.null())),
+  /** Seul l'indicateur est publié ; les données de l'offre restent derrière leur porte propre. */
+  hasCommerceOffer: v.optional(v.boolean()),
   origin: originValidator,
   /** Pourquoi cette ligne est là — l'écran le dit, il ne le devine pas. */
   reason: literals(FEED_REASONS),
@@ -170,10 +197,11 @@ export const feedItemValidator = v.object({
 })
 
 export type FeedItem = Infer<typeof feedItemValidator>
+export type FeedResult = { items: FeedItem[]; nextCursor: PersonalFeedCursor<Id<"posts">> | null; lacunar: boolean; materializedSince?: number; preparing?: boolean; preparationKey?: string }
 type SharedPostProjection = Infer<typeof sharedPostValidator>
 type FeedOrigin = NonNullable<Infer<typeof originValidator>>
 
-export const cursorValidator = v.object({ publishedAt: v.number(), postId: v.id("posts") })
+export const cursorValidator = v.object({ publishedAt: v.number(), postId: v.id("posts"), strategy: v.optional(v.union(v.literal("legacy"), v.literal("materialized"))), generation: v.optional(v.number()), windowStart: v.optional(v.number()), postCreationTime: v.optional(v.number()) })
 
 export type Enrichment = {
   profileOf: ReturnType<typeof miniProfileCache>
@@ -208,48 +236,64 @@ async function resolveShareProjection(ctx: QueryCtx, post: Doc<"posts">, reader:
   if (!original || !(await canSeePostDoc(ctx, reader, original))) return { available: false }
   const page = original.pageId === undefined ? null : await enrich.pageOf(original.pageId)
   if (original.pageId !== undefined && page === null) return { available: false }
-  const author = await enrich.profileOf(original.authorPersonId)
+  const author = hasNativePostAuthor(original) ? await enrich.profileOf(original.authorPersonId) : null
   return {
     available: true,
     postId: original._id,
-    author: { displayName: author.displayName, handle: author.handle, avatarUrl: author.avatarUrl },
+    author: { displayName: author?.displayName ?? null, handle: author?.handle ?? null, avatarUrl: author?.avatarUrl ?? null },
     page,
     body: original.body,
-    media: await resolvePostMediaDtos(ctx, original.media),
+    media: await resolvePostMediaDtos(ctx, original.media, original.federationMedia),
     publishedAt: original.publishedAt,
   }
 }
 
+/**
+ * Le DIRECT annoncé, tel qu'il est MAINTENANT. Statut relu à chaque lecture —
+ * une annonce n'est pas un état, c'est un pointeur. Session disparue : rien, la
+ * carte redevient une publication ordinaire.
+ */
+async function resolveDirectProjection(ctx: ReadCtx, post: Doc<"posts">): Promise<Infer<typeof liveAnnounceValidator> | null> {
+  if (post.liveSessionId === undefined) return null
+  const session = await ctx.db.get(post.liveSessionId)
+  if (session === null) return null
+  return { sessionId: session._id, status: session.status, title: session.title }
+}
+
 /** LA projection d'une publication — le fil, le mur, la recherche et la lecture unitaire rendent la même carte. */
 export async function toFeedItem(ctx: QueryCtx, post: Doc<"posts">, reader: ReaderContext, reason: FeedReason, enrich: Enrichment): Promise<FeedItem> {
-  const [author, reactions, commentCount, shareCount, media, share, origin, event, page] = await Promise.all([
-    enrich.profileOf(post.authorPersonId),
+  if (post.pageId === undefined && !hasNativePostAuthor(post)) return notFound()
+  const [author, reactions, commentCount, shareCount, media, share, origin, event, page, live] = await Promise.all([
+    hasNativePostAuthor(post) ? enrich.profileOf(post.authorPersonId) : Promise.resolve(null),
     summarizeReactions(ctx, post._id, reader.personId),
     countComments(ctx, post._id),
     countShares(ctx, post._id),
-    resolvePostMediaDtos(ctx, post.media),
+    resolvePostMediaDtos(ctx, post.media, post.federationMedia),
     resolveShareProjection(ctx, post, reader, enrich),
     post.networkId === reader.network._id ? Promise.resolve(null) : enrich.originOf(post.networkId),
     eventCardOf(ctx, post.eventId, reader.personId),
     post.pageId === undefined ? Promise.resolve(null) : enrich.pageOf(post.pageId),
+    resolveDirectProjection(ctx, post),
   ])
   // Une publication de page ne retombe JAMAIS sur l'identité de son signataire : page retirée, contenu indisponible.
   if (post.pageId !== undefined && page === null) return notFound()
   return {
     _id: post._id,
+    ...(post.pageEventGalleryId === undefined ? {} : { eventGalleryId: post.pageEventGalleryId }),
     body: post.body,
     audience: post.audience,
     visibility: post.visibility,
     publishedAt: post.publishedAt,
     editedAt: post.editedAt ?? null,
-    isMine: post.pageId === undefined && post.authorPersonId === reader.personId,
+    isMine: post.pageId === undefined && hasNativePostAuthor(post) && post.authorPersonId === reader.personId,
     author: {
-      personId: author.personId,
-      handle: author.handle,
-      displayName: author.displayName,
-      headline: author.headline,
-      avatarUrl: author.avatarUrl,
-      badges: author.badges,
+      personId: author?.personId ?? null,
+      handle: author?.handle ?? null,
+      displayName: author?.displayName ?? null,
+      headline: author?.headline ?? null,
+      avatarUrl: author?.avatarUrl ?? null,
+      badges: author?.badges ?? [],
+      ...(author?.isDeleted ? { isDeleted: true } : {}),
     },
     reactions,
     commentCount,
@@ -259,9 +303,12 @@ export async function toFeedItem(ctx: QueryCtx, post: Doc<"posts">, reader: Read
     tags: post.tags ?? [],
     groupId: post.groupId ?? null,
     event,
+    ...(live === null ? {} : { live }),
     page,
     reach: post.reach ?? null,
     country: post.country ?? null,
+    province: post.province ?? null,
+    ...(post.commerceOffer === undefined ? {} : { hasCommerceOffer: true }),
     origin,
     reason,
     viewer: { bookmarked: enrich.marks.bookmarked.has(post._id), notifying: enrich.marks.notifying.has(post._id) },
@@ -443,17 +490,7 @@ async function readerGraph(ctx: ReadCtx, reader: ReaderContext): Promise<ReaderG
   return { connections, follows, blocked }
 }
 
-/**
- * Blocage avec l'auteur ? L'ensemble lu une fois suffit, SAUF s'il est tronqué :
- * alors on relit la paire — le blocage est une protection, jamais une lacune.
- */
-async function isBlockedWithAuthor(ctx: ReadCtx, reader: ReaderContext, graph: ReaderGraph, authorPersonId: Id<"persons">): Promise<boolean> {
-  if (authorPersonId === reader.personId) return false
-  if (graph.blocked.ids.has(authorPersonId)) return true
-  return graph.blocked.truncated ? await isBlockedBetween(ctx, reader.personId, authorPersonId) : false
-}
-
-const readerOf = (ctx: { person: Doc<"persons">; network: Doc<"networks"> }): ReaderContext => ({ personId: ctx.person._id, network: ctx.network })
+export const readerOf = (ctx: { person: Doc<"persons">; network: Doc<"networks"> }): ReaderContext => ({ personId: ctx.person._id, network: ctx.network })
 
 /** Ce que le lecteur est pour les PAGES : celles qu'il suit (ensemble borné), et ses faits par page, lus une fois. */
 export type ReaderPages = {
@@ -482,18 +519,6 @@ export async function readerPages(ctx: ReadCtx, reader: ReaderContext): Promise<
   }
 }
 
-/**
- * Admission d'une publication de PAGE au fil — sa propre règle
- * (`pageFeedAdmissionFor`). Ni la connexion au signataire (elle n'ouvre pas la
- * parole de la page), ni la sourdine, ni le blocage entre personnes (ils visent
- * une personne, et c'est la page qui parle). Page retirée : n'entre nulle part.
- */
-async function admitPagePost(pages: ReaderPages, post: Doc<"posts">, pageId: Id<"pages">, scope: "pour_vous" | "recents"): Promise<FeedReason | null> {
-  const facts = await pages.factsOf(pageId)
-  if (!facts.live) return null
-  return pageFeedAdmissionFor({ scope, isSignatory: facts.isSignatory, isFollowedPage: facts.isFollowedPage, isRestrictedToFollowers: post.audience === "followers" })
-}
-
 /** Le titre de LECTURE d'une publication de page (mur, recherche, lien) : la signer, la suivre, ou la découvrir. */
 export async function pageViewingReason(ctx: ReadCtx, reader: ReaderContext, pageId: Id<"pages">): Promise<FeedReason> {
   const page = await ctx.db.get(pageId)
@@ -511,8 +536,8 @@ export async function pageViewingReason(ctx: ReadCtx, reader: ReaderContext, pag
  * idempotence (rejouer la clé rend la publication EXISTANTE) ; forme et
  * appartenance au groupe ; partage par la garde de visibilité (aplati sur
  * l'original) ; vérité du STOCKAGE pour les médias ; le domaine juge l'ensemble.
- * `alsoOnRoot` est le geste explicite « publier aussi sur ANTIA », qui ne vaut
- * que pour une audience publique dans un réseau fermé.
+ * `alsoOnRoot` est le geste explicite « publier aussi sur ANTSIA », qui ne vaut
+ * que pour une audience publique ; à la racine, il ouvre explicitement la lecture sans compte.
  */
 export const publish = networkMutation({
   minStatus: "declaree",
@@ -525,6 +550,7 @@ export const publish = networkMutation({
     sharedPostId: v.optional(v.id("posts")),
     reach: v.optional(v.string()),
     country: v.optional(v.string()),
+    province: v.optional(literals(PROVINCE_SLUGS)),
     alsoOnRoot: v.optional(v.boolean()),
     idempotencyKey: v.optional(v.string()),
   },
@@ -538,14 +564,21 @@ export const publish = networkMutation({
         .withIndex("by_author_and_idempotencyKey", (q) => q.eq("authorPersonId", ctx.person._id).eq("idempotencyKey", args.idempotencyKey))
         .unique()
       // Une clé rejouée dans un AUTRE réseau ne publie pas ici : la clé appartient à son composeur.
-      if (replay) return replay.networkId === ctx.networkId ? { postId: replay._id, created: false } : fail("conflict")
+      if (replay) {
+        if (!(await canAccessAssociationGroupPost(ctx, replay, ctx.person._id, ctx.networkId))) return notFound()
+        return replay.networkId === ctx.networkId ? { postId: replay._id, created: false } : fail("conflict")
+      }
     }
 
     const audience: PersonalPostAudience = args.audience ?? "public"
     checked(() => assertGroupAudienceShape({ audience, hasGroup: args.groupId !== undefined }))
+    let associationGroup = false
     if (args.groupId !== undefined) {
       checked(() => assertShareOutsideGroup({ hasGroup: true, hasShare: args.sharedPostId !== undefined }))
-      await requireLiveThematicGroupMembership(ctx, ctx.networkId, args.groupId, ctx.person._id)
+      const { group } = await requireLiveThematicGroupMembership(ctx, ctx.networkId, args.groupId, ctx.person._id)
+      associationGroup = group.associationPageId !== undefined
+      if (associationGroup && args.alsoOnRoot === true) return fail("invalidArgument", { field: "alsoOnRoot" })
+      if (associationGroup && args.reach !== undefined && args.reach !== "diaspora") return fail("invalidArgument", { field: "reach" })
     }
 
     // Partage : TOUJOURS par la garde ; partager un partage pointe l'ORIGINAL, re-gardé lui aussi.
@@ -572,12 +605,12 @@ export const publish = networkMutation({
     const body = checked(() => assertPostContent({ body: args.body, mediaCount: media.length, isShare: shared !== null }))
     const placed = checked(() =>
       assertPostReach({
-        ...(args.reach !== undefined ? { reach: args.reach } : {}),
+        ...(associationGroup ? { reach: "diaspora" } : args.reach !== undefined ? { reach: args.reach } : {}),
         ...(args.country !== undefined ? { country: args.country } : {}),
         reachValues: ctx.network.reachValues,
       }),
     )
-    const visibility = effectiveVisibility({
+    const visibility = associationGroup ? "network" as const : effectiveVisibility({
       networkKind: ctx.network.kind,
       audienceIsPublic: audience === "public",
       authorRequestedRoot: args.alsoOnRoot ?? false,
@@ -594,11 +627,12 @@ export const publish = networkMutation({
       ...(media.length > 0 ? { media } : {}),
       ...(shared ? { sharedPostId: shared._id } : {}),
       ...placed,
+      ...(args.province !== undefined ? { province: args.province } : {}),
       ...(args.idempotencyKey !== undefined ? { idempotencyKey: args.idempotencyKey } : {}),
     })
 
     // L'auteur de l'ORIGINAL apprend le partage — le sujet est SA publication.
-    if (shared) {
+    if (shared && hasNativePostAuthor(shared) && (await canReadModeratedContent(ctx, "post", postId, shared.authorPersonId))) {
       await notifyPerson(ctx, { networkId: ctx.networkId, recipientPersonId: shared.authorPersonId, actorPersonId: ctx.person._id, kind: "post_share", subject: { post: shared._id } })
     }
     return { postId, created: true }
@@ -610,14 +644,15 @@ export const publish = networkMutation({
  * comme l'inventée). Une publication de PAGE n'est « mienne » que tant que j'en
  * suis signataire VIVANT : le signataire historique ne garde rien.
  */
-async function myPostFrom(ctx: ReadCtx, reader: ReaderContext, postId: Id<"posts">): Promise<Doc<"posts">> {
+async function myPostFrom(ctx: ReadCtx, reader: ReaderContext, postId: Id<"posts">): Promise<NativePersonAuthoredPost> {
   const post = await ctx.db.get(postId)
   if (!post || post.authorPersonId !== reader.personId || !isInReadingContext(post, reader.network)) return notFound()
+  if (!(await canAccessAssociationGroupPost(ctx, post, reader.personId, reader.network._id))) return notFound()
   if (post.pageId !== undefined) {
     const page = await ctx.db.get(post.pageId)
     if (!page || (await liveSignatoryRole(ctx, page, reader.personId)) === null) return notFound()
   }
-  return post
+  return requireNativePostAuthor(post)
 }
 
 /**
@@ -634,6 +669,26 @@ export const remove = networkMutation({
     const post = await myPostFrom(ctx, readerOf(ctx), args.postId)
     await markPostRemoved(ctx, post, Date.now())
     return { removed: true as const }
+  },
+})
+
+/** Retirer seulement la lecture sans compte ; l'origine conserve sa publication et ses lecteurs membres. */
+export const withdrawFromRoot = networkMutation({
+  args: { postId: v.id("posts") }, returns: v.object({ withdrawn: v.literal(true) }),
+  handler: async (ctx, args) => {
+    await enforceRateLimit(ctx, "post.remove", ctx.person._id)
+    const post = await ctx.db.get(args.postId)
+    if (!post) return notFound()
+    if (!(await canAccessAssociationGroupPost(ctx, post, ctx.person._id, ctx.networkId))) return notFound()
+    requireNativePostAuthor(post)
+    const origin = await ctx.db.get(post.networkId)
+    if (!origin || origin.status !== "active" || (origin._id !== ctx.networkId && (ctx.network.kind !== "root" || origin.kind !== "closed" || origin.parentId !== ctx.networkId))) return notFound()
+    if (post.pageId !== undefined) {
+      const page = await ctx.db.get(post.pageId)
+      if (!page || page.networkId !== origin._id || await liveSignatoryRole(ctx, page, ctx.person._id) === null) return notFound()
+    } else if (post.authorPersonId !== ctx.person._id || !await isActiveMember(ctx, origin._id, ctx.person._id)) return notFound()
+    await withdrawPostRootVisibility(ctx, post, origin, ctx.person._id)
+    return { withdrawn: true as const }
   },
 })
 
@@ -658,7 +713,8 @@ export const edit = networkMutation({
       editedAt: now,
       updatedAt: now,
     })
-    await notifyMentions(ctx, post, addedMentionedIds(post.mentionedPersonIds, mentioned))
+    const admitted = await moderateContentWrite(ctx, { networkId: post.networkId, ownerPersonId: ctx.person._id, kind: "post", id: post._id, text: body })
+    if (admitted) await notifyMentions(ctx, post, addedMentionedIds(post.mentionedPersonIds, mentioned))
     return { editedAt: now }
   },
 })
@@ -679,6 +735,7 @@ export const pinOnMyWall = networkMutation({
 })
 
 export const unpinMyWall = networkMutation({
+  writeBucket: "post.unpin",
   minStatus: "en_attente",
   args: {},
   returns: v.object({ pinned: v.literal(false) }),
@@ -725,9 +782,7 @@ export const feed = networkQuery({
             .withIndex("by_network_status_publishedAt", (q) => q.eq("networkId", ctx.networkId).eq("status", "published"))
             .order("desc")
             .paginate(opts)
-    const [graph, pages, hidden, muted, marks] = await Promise.all([
-      readerGraph(ctx, reader),
-      readerPages(ctx, reader),
+    const [hidden, muted, marks] = await Promise.all([
       hiddenPostIds(ctx, ctx.networkId, ctx.person._id),
       mutedPersonIds(ctx, ctx.networkId, ctx.person._id),
       readerMarks(ctx, ctx.networkId, ctx.person._id),
@@ -735,21 +790,9 @@ export const feed = networkQuery({
     const enrich = enrichment(ctx, marks)
     const page: FeedItem[] = []
     for (const post of result.page) {
-      if (post.pageId !== undefined) {
-        const pageReason = await admitPagePost(pages, post, post.pageId, "recents")
-        if (pageReason === null || hidden.ids.has(post._id)) continue
-        page.push(await toFeedItem(ctx, post, reader, pageReason, enrich))
-        continue
-      }
-      if (await isBlockedWithAuthor(ctx, reader, graph, post.authorPersonId)) continue
-      const reason = feedAdmissionFor({
-        scope: "recents",
-        isAuthor: post.authorPersonId === reader.personId,
-        isConnected: graph.connections.ids.has(post.authorPersonId),
-        isFollowing: graph.follows.ids.has(post.authorPersonId),
-        audience: post.audience,
-      })
-      if (reason === null || hidden.ids.has(post._id) || muted.ids.has(post.authorPersonId)) continue
+      const reason = await liveFeedReason(ctx, reader, post, "recents")
+      if (reason === null || hidden.ids.has(post._id) || (hidden.truncated && await exactFeedHidden(ctx, ctx.networkId, reader.personId, post._id))) continue
+      if (post.pageId === undefined && hasNativePostAuthor(post) && (muted.ids.has(post.authorPersonId) || (muted.truncated && await exactFeedMuted(ctx, ctx.networkId, reader.personId, post.authorPersonId)))) continue
       page.push(await toFeedItem(ctx, post, reader, reason, enrich))
     }
     return { ...result, page }
@@ -781,8 +824,8 @@ export const myFeed = networkQuery({
      */
     lanes: v.optional(v.array(v.object({ reach: v.string(), country: v.optional(v.string()) }))),
   },
-  returns: v.object({ items: v.array(feedItemValidator), nextCursor: v.union(cursorValidator, v.null()), lacunar: v.boolean() }),
-  handler: async (ctx, args) => {
+  returns: v.object({ items: v.array(feedItemValidator), nextCursor: v.union(cursorValidator, v.null()), lacunar: v.boolean(), materializedSince: v.optional(v.number()), preparing: v.optional(v.boolean()), preparationKey: v.optional(v.string()) }),
+  handler: async (ctx, args): Promise<FeedResult> => {
     const reader = readerOf(ctx)
     const limit = clampLimit(args.limit)
     const cursor = args.cursor
@@ -801,10 +844,27 @@ export const myFeed = networkQuery({
     ])
 
     const authorWindow = lanes === null && scope === "pour_vous"
+    const state = authorWindow ? await feedState(ctx, reader) : null
+    const version = authorWindow ? await feedAccessVersion(ctx, reader) : null
+    const stateReady = state !== null && state.status === "ready" && state.accessVersion === version && (state.completedAt ?? 0) > Date.now() - MATERIALIZED_FEED_REBUILD_MS
+    const backlog = authorWindow ? await ctx.db.query("feedFanoutJobs").withIndex("by_network_status", q => q.eq("networkId", ctx.networkId).eq("status", "pending")).first() !== null : false
+    const wantsMaterialization = authorWindow && shouldMaterializeFeed({
+      personSources: new Set([...graph.connections.ids, ...graph.follows.ids, ctx.person._id]).size,
+      pageSources: pages.followed.ids.size,
+      truncated: graph.connections.truncated || graph.follows.truncated || pages.followed.truncated,
+    })
+    const useMaterialized = authorWindow && (cursor?.strategy === "materialized" || (cursor === undefined && wantsMaterialization && stateReady))
+    // La stratégie est fixée par la première page : une ancienne chaîne reste legacy.
+    if (cursor?.strategy === "materialized" && (!authorWindow || !stateReady || !materializedCursorMatches(cursor, state))) return { items: [], nextCursor: null, lacunar: true, preparing: true, ...(version === null ? {} : { preparationKey: await feedPreparationKey(version, state?.generation ?? 0) }) }
+    let materialized: MaterializedWindow | null = null
     let sourceWasFull = false
     let sourcesTruncated = false
     let candidates: Doc<"posts">[]
-    if (lanes !== null) {
+    if (useMaterialized && state !== null) {
+      materialized = await materializedWindow(ctx, reader, state, cursor)
+      candidates = materialized.rows
+      sourceWasFull = materialized.wasFull
+    } else if (lanes !== null) {
       // Une fenêtre par voie, fusionnées sous la FRONTIÈRE de la plus courte des fenêtres pleines.
       const merged = mergeFeedWindows(await Promise.all(lanes.map((lane) => feedWindow(laneReader(ctx, ctx.networkId, lane), FEED_SCAN, cursor, cursorCreationTime))))
       candidates = merged.rows
@@ -839,26 +899,11 @@ export const myFeed = networkQuery({
     let lastExamined: Doc<"posts"> | null = null
     for (const post of candidates) {
       lastExamined = post
-      if (post.pageId !== undefined) {
-        const pageReason = await admitPagePost(pages, post, post.pageId, scope)
-        // Le masquage s'applique ; la sourdine non (elle vise une personne, c'est la page qui parle).
-        if (pageReason === null || hidden.ids.has(post._id)) continue
-        if (tag !== undefined && !(post.tags ?? []).includes(tag)) continue
-        selected.push({ post, reason: pageReason })
-        if (selected.length >= limit) break
-        continue
-      }
-      if (await isBlockedWithAuthor(ctx, reader, graph, post.authorPersonId)) continue
-      const reason = feedAdmissionFor({
-        scope,
-        isAuthor: post.authorPersonId === reader.personId,
-        isConnected: graph.connections.ids.has(post.authorPersonId),
-        isFollowing: graph.follows.ids.has(post.authorPersonId),
-        audience: post.audience,
-      })
+      const reason = await liveFeedReason(ctx, reader, post, scope)
       if (reason === null) continue
       // Masquage et sourdine APRÈS la garde, et au FIL seul.
-      if (hidden.ids.has(post._id) || muted.ids.has(post.authorPersonId)) continue
+      if (hidden.ids.has(post._id) || (hidden.truncated && await exactFeedHidden(ctx, ctx.networkId, reader.personId, post._id))) continue
+      if (post.pageId === undefined && hasNativePostAuthor(post) && (muted.ids.has(post.authorPersonId) || (muted.truncated && await exactFeedMuted(ctx, ctx.networkId, reader.personId, post.authorPersonId)))) continue
       if (tag !== undefined && !(post.tags ?? []).includes(tag)) continue
       selected.push({ post, reason })
       if (selected.length >= limit) break
@@ -872,16 +917,19 @@ export const myFeed = networkQuery({
     // Un curseur dans DEUX cas : fenêtre pleine (il reste peut-être derrière), ou sortie à `limit` (il reste devant).
     const stoppedEarly = selected.length >= limit
     const windowLacuna = !authorWindow && lanes === null && isLacunarFeedWindow({ candidatesLength: candidates.length, scanLimit: FEED_SCAN, selectedLength: selected.length, pageLimit: limit })
+    const nextCursor = materialized !== null && state !== null
+      ? (stoppedEarly && lastExamined !== null ? materializedPostCursor(lastExamined, state) : sourceWasFull ? materialized.tail : null)
+      : (sourceWasFull || stoppedEarly) && lastExamined !== null ? cursorForFeedPost(lastExamined) : null
     return {
       items,
-      nextCursor: (sourceWasFull || stoppedEarly) && lastExamined !== null ? cursorForFeedPost(lastExamined) : null,
+      nextCursor,
+      ...(materialized === null ? {} : { materializedSince: materialized.historyStart }),
+      ...(wantsMaterialization && !useMaterialized ? { preparing: true, preparationKey: await feedPreparationKey(version ?? "", state?.generation ?? 0) } : {}),
       lacunar:
+        backlog ||
+        (materialized !== null && !stoppedEarly) ||
         windowLacuna ||
-        sourcesTruncated ||
-        graph.connections.truncated ||
-        graph.follows.truncated ||
-        hidden.truncated ||
-        muted.truncated,
+        (!useMaterialized && (sourcesTruncated || graph.connections.truncated || graph.follows.truncated || wantsMaterialization)),
     }
   },
 })
@@ -928,6 +976,7 @@ export const search = networkQuery({
         items.push(await toFeedItem(ctx, post, reader, await pageViewingReason(ctx, reader, post.pageId), enrich))
         continue
       }
+      if (!hasNativePostAuthor(post)) continue
       const isAuthor = post.authorPersonId === reader.personId
       const reason =
         post.audience === "group"
@@ -976,11 +1025,12 @@ export const paginateMyPosts = networkQuery({
     for (const post of result.page) {
       // Une publication de PAGE appartient à la page : elle se gère depuis la page, pas depuis « mes publications ».
       if (post.pageId !== undefined) continue
+      if (!(await canAccessAssociationGroupPost(ctx, post, ctx.person._id, ctx.networkId))) continue
       const [reactions, commentCount, shareCount, media] = await Promise.all([
         summarizeReactions(ctx, post._id, ctx.person._id),
         countComments(ctx, post._id),
         countShares(ctx, post._id),
-        resolvePostMediaDtos(ctx, post.media),
+        resolvePostMediaDtos(ctx, post.media, post.federationMedia),
       ])
       page.push({
         postId: post._id,
@@ -1052,6 +1102,7 @@ export const personPosts = networkQuery({
         // une publication de PAGE non plus — pas même sur celui de son signataire.
         if (post.audience === "group" || post.pageId !== undefined) continue
         if (pinnedPost && post._id === pinnedPost._id) continue
+        if (!(await canReadModeratedContent(ctx, "post", post._id, reader.personId))) continue
         const admitted = isPersonalPostVisibleTo({ audience: post.audience, status: post.status, isAuthor, isConnected, isGroupMember: false, isBlockedWithAuthor: false, isPageAudience: false })
         if (!admitted) continue
         visible.push(post)
@@ -1092,7 +1143,7 @@ export const getPost = networkQuery({
   handler: async (ctx, args) => {
     const reader = readerOf(ctx)
     const post = await assertVisiblePost(ctx, reader, args.postId)
-    const isAuthor = post.authorPersonId === reader.personId
+    const isAuthor = hasNativePostAuthor(post) && post.authorPersonId === reader.personId
     const [bookmark, notify] = await Promise.all(
       (["bookmark", "notify"] as const).map(
         async (kind) =>
@@ -1108,9 +1159,10 @@ export const getPost = networkQuery({
     })
     if (post.audience === "group") return await toFeedItem(ctx, post, reader, groupViewingReasonFor({ isAuthor }), enrich)
     if (post.pageId !== undefined) return await toFeedItem(ctx, post, reader, await pageViewingReason(ctx, reader, post.pageId), enrich)
+    const nativePost = requireNativePostAuthor(post)
     const [isConnected, isFollowing] = isAuthor
       ? [false, false]
-      : await Promise.all([isConnectedTo(ctx, post.networkId, reader.personId, post.authorPersonId), isFollowingPerson(ctx, ctx.networkId, reader.personId, post.authorPersonId)])
+      : await Promise.all([isConnectedTo(ctx, post.networkId, reader.personId, nativePost.authorPersonId), isFollowingPerson(ctx, ctx.networkId, reader.personId, nativePost.authorPersonId)])
     return await toFeedItem(ctx, post, reader, viewingReasonFor({ isAuthor, isConnected, isFollowing }), enrich)
   },
 })

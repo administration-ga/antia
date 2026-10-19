@@ -18,6 +18,13 @@ steps:
       - NEXT_PUBLIC_SITE_URL=${_NEXT_PUBLIC_SITE_URL}
       - --build-arg
       - NEXT_PUBLIC_BUILD_SHA=${_NEXT_PUBLIC_BUILD_SHA}
+      # Mesure facultative d'antsia_ga : valeurs vides quand elle est désactivée.
+      - --build-arg
+      - NEXT_PUBLIC_POSTHOG_KEY=${_NEXT_PUBLIC_POSTHOG_KEY}
+      - --build-arg
+      - NEXT_PUBLIC_POSTHOG_HOST=${_NEXT_PUBLIC_POSTHOG_HOST}
+      - --build-arg
+      - NEXT_PUBLIC_POSTHOG_EU_RELAY_ORIGIN=${_NEXT_PUBLIC_POSTHOG_EU_RELAY_ORIGIN}
       # Variables propres à diasporale_com : vides pour les autres applications
       # (le plan les passe toutes ; un ARG absent du Dockerfile est ignoré).
       - --build-arg

@@ -1,7 +1,7 @@
 // @vitest-environment edge-runtime
 // Dupliqué de socle/convex/modules/reseauPersonnel/reseauPersonnel.test.ts (cas des publications, l. 215-560 et 991-2225 ; avec feedScale.test.ts, l. 80-185) @ ad2e7fdc2 — adaptations : personnes et réseaux (graine des fondations) ; fil, mur, recherche et lecture LUS DEPUIS un réseau ; séries de publications insérées directement (le débit de `publish` est réel dans le harnais) ; cas d'organisation, de page, de direct et de suspension (ADR-0087) retirés ; blob déguisé jugé sur son POIDS réel (le harnais n'enregistre pas de type) ; tests neufs : contexte de lecture (R4, `root` lu depuis la racine avec son origine), blocage qui l'emporte sur `public`, portée et pays, groupe, épingle par réseau, lacune signalée, fil natif compatible.
-import { engineErrorCode, engineErrorRule } from "@antia/social-contracts/errors"
-import { compareFeedPosts } from "@antia/social-domain/feedScale"
+import { engineErrorCode, engineErrorRule } from "@antsia/social-contracts/errors"
+import { compareFeedPosts } from "@antsia/social-domain/feedScale"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 import { api, internal } from "../../_generated/api"
@@ -192,12 +192,12 @@ describe("contexte de lecture — un réseau fermé et la racine (R4)", () => {
     expect((await bob.as.query(api.modules.posts.posts.personPosts, { networkId: root, handle: "alice" })).items).toEqual([])
   })
 
-  it("« aussi sur ANTIA » : lue dans le fil de la racine avec son origine, et dans son réseau ; retirée, elle disparaît des deux", async () => {
+  it("« aussi sur ANTSIA » : lue dans le fil de la racine avec son origine, et dans son réseau ; retirée, elle disparaît des deux", async () => {
     const t = testConvex()
     const { root, testClosed } = await seed(t)
     const alice = await enter(t, root, "alice", testClosed)
     const bob = await enter(t, root, "bob")
-    const { postId } = await alice.as.mutation(api.modules.posts.posts.publish, { networkId: testClosed, body: "Bonjour ANTIA", alsoOnRoot: true })
+    const { postId } = await alice.as.mutation(api.modules.posts.posts.publish, { networkId: testClosed, body: "Bonjour ANTSIA", alsoOnRoot: true })
     const [atRoot] = (await myFeed(bob, root, { scope: "recents" })).items
     expect(atRoot).toMatchObject({ _id: postId, visibility: "root", origin: { networkId: testClosed, slug: "test-closed" } })
     expect((await bob.as.query(api.modules.posts.posts.feed, { networkId: root, paginationOpts: { numItems: 10, cursor: null } })).page.map((item) => item._id)).toEqual([postId])
@@ -208,12 +208,12 @@ describe("contexte de lecture — un réseau fermé et la racine (R4)", () => {
     expect((await myFeed(alice, testClosed, { scope: "recents" })).items).toEqual([])
   })
 
-  it("une publication native de la racine ne se lit pas depuis un réseau fermé ; « aussi sur ANTIA » n'a pas d'effet à la racine", async () => {
+  it("un geste explicite ouvre une native publique sans ouvrir le réseau fermé", async () => {
     const t = testConvex()
     const { root, testClosed } = await seed(t)
     const alice = await enter(t, root, "alice", testClosed)
     const { postId } = await alice.as.mutation(api.modules.posts.posts.publish, { networkId: root, body: "Native de la racine", alsoOnRoot: true })
-    expect((await getPost(alice, root, postId)).visibility).toBe("network")
+    expect((await getPost(alice, root, postId)).visibility).toBe("root")
     expect(await codeOf(getPost(alice, testClosed, postId))).toBe("notFound")
   })
 })

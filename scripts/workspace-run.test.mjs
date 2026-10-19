@@ -1,4 +1,4 @@
-// Dupliqué de scripts/workspace-run.test.mjs @ ad2e7fdc2 — adaptations : provenance ; le test du « dépôt réel » vise les scripts et paquets du moteur ANTIA (typecheck et lint passent par le lanceur ; le typage d'antia-ga tire @antia/ui) ; message des tâches persistantes.
+// Dupliqué de scripts/workspace-run.test.mjs @ ad2e7fdc2 — adaptations : provenance ; le test du « dépôt réel » vise les scripts et paquets du moteur ANTSIA (typecheck et lint passent par le lanceur ; le typage d'antsia-ga tire @antsia/ui) ; message des tâches persistantes.
 /**
  * Le lanceur d'espaces de travail qui remplace turbo à la racine (CH-072).
  *
@@ -165,15 +165,15 @@ describe("exécution", () => {
   test("le dépôt réel : le typage d'une application tire les paquets du moteur, et aucun turbo à la racine", () => {
     const root = join(import.meta.dir, "..");
     const scripts = JSON.parse(readFileSync(join(root, "package.json"), "utf8")).scripts;
-    for (const name of ["typecheck", "lint", "dev:antia", "dev:admin", "build:antia", "build:admin"]) {
+    for (const name of ["typecheck", "lint", "dev:antsia", "dev:admin", "build:antsia", "build:admin"]) {
       expect(scripts[name]).toContain("scripts/workspace-run.mjs");
       expect(scripts[name]).not.toMatch(/(^|&& )turbo /);
     }
     expect(scripts.verify).not.toMatch(/(^|&& )turbo /);
     const { packages } = discoverWorkspaces(root);
-    const antia = planTask(packages, "typecheck", { filters: ["antia-ga"] });
-    expect(antia.unknown).toEqual([]);
-    expect(antia.steps.map((step) => step.name)).toContain("@antia/ui");
-    expect(antia.steps.map((step) => step.name)).toContain("@antia/social-features");
+    const antsia = planTask(packages, "typecheck", { filters: ["antsia-ga"] });
+    expect(antsia.unknown).toEqual([]);
+    expect(antsia.steps.map((step) => step.name)).toContain("@antsia/ui");
+    expect(antsia.steps.map((step) => step.name)).toContain("@antsia/social-features");
   });
 });

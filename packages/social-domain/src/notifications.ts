@@ -1,4 +1,4 @@
-// Dupliqué de socle/convex/modules/reseauPersonnel/notifications.ts (l. 54-126, genres, résolutions et clé de sujet) @ ad2e7fdc2 — adaptations : règles PURES sorties du backend ; genres du moteur (le direct s'appelle `live`, l'évènement personnel `event`, l'avis de la garde des fichiers `file_withheld`) ; sujet en forme générique `{ kind, id }`.
+// Dupliqué de socle/convex/modules/reseauPersonnel/notifications.ts (l. 54-126, genres, résolutions et clé de sujet) @ ad2e7fdc2 — adaptations : règles PURES sorties du backend ; genres du moteur (le direct s'appelle `live`, l'évènement personnel `event`, l'avis de la garde des fichiers `file_withheld`) ; sujet en forme générique `{ kind, id }` ; sujet « session de direct » (`liveSession`, le `subjectDirectSessionId` du socle) rétabli avec le module `live` (lot 16).
 /**
  * La cloche sociale — genres, résolutions et clés de dédoublonnage.
  *
@@ -23,6 +23,14 @@ export const NOTIFICATION_KINDS = [
   "new_follower",
   /** Conversation de groupe : le sujet est le FIL, jamais un message. */
   "group_message",
+  "commercial_contact",
+  /**
+   * Conversation contextuelle (CC-1, ADR-0025) : un nouveau message. Le sujet est le FIL ;
+   * en voix de page, aucun acteur (la page parle, le signataire n'est jamais montré au demandeur).
+   */
+  "contextual_message",
+  /** Conversation contextuelle : un côté a clos le fil (D12). Les transitions de l'objet gardent leurs propres avis. */
+  "contextual_closed",
   "group_added",
   /** Un direct a COMMENCÉ (jamais à la programmation). */
   "live_started",
@@ -31,6 +39,8 @@ export const NOTIFICATION_KINDS = [
   "live_replay_published",
   "thematic_group_invite",
   "event_invite",
+  /** Rappel personnel d'un événement de page, sans contenu dans la notification. */
+  "association_event_reminder",
   /** Une page que je suis a publié : le sujet est la PUBLICATION, sans acteur (c'est la page qui parle). */
   "page_post",
   /** Une personne que je suis a publié un album (première publication seulement) : le sujet est l'ALBUM. */
@@ -55,6 +65,9 @@ export const NOTIFICATION_KINDS = [
   "attestation_verified",
   /** L'attestation n'a pas confirmé — sans acteur, sans aucune raison consulaire. */
   "attestation_not_confirmed",
+  "membership_changed",
+  "badge_changed",
+  "moderation_decision",
 ] as const
 
 export type NotificationKind = (typeof NOTIFICATION_KINDS)[number]
@@ -68,8 +81,13 @@ export const NOTIFICATION_RESOLUTIONS = ["accepted", "declined", "maybe", "cance
 
 export type NotificationResolution = (typeof NOTIFICATION_RESOLUTIONS)[number]
 
-/** Les natures de SUJET d'une notification — une référence, jamais un contenu. */
-export const NOTIFICATION_SUBJECT_KINDS = ["post", "connection", "fileScan", "thematicGroup", "groupThread", "event", "album", "call", "voicemail"] as const
+/**
+ * Les natures de SUJET d'une notification — une référence, jamais un contenu.
+ * `liveSession` : la session de direct que désignent `live_started`,
+ * `live_invite`, `live_antenna_invite` et `live_replay_published` — relue avec
+ * sa garde à l'ouverture (la page de conférence sert le direct ou sa rediffusion).
+ */
+export const NOTIFICATION_SUBJECT_KINDS = ["post", "connection", "fileScan", "thematicGroup", "groupThread", "commercialThread", "contextualThread", "event", "album", "call", "voicemail", "liveSession", "report"] as const
 
 export type NotificationSubjectKind = (typeof NOTIFICATION_SUBJECT_KINDS)[number]
 

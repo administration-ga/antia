@@ -1,20 +1,20 @@
-# ANTIA — Le moteur social national et le réseau social public gabonais
+# ANTSIA — Le moteur social national et le réseau social public gabonais
 
-> Nom à confirmer par le propriétaire (« ANTIA » saisi, « A-N-T-S-A » épelé). Le nom
-> `antia.ga` figure déjà au registre de ses dépôts GitHub ; ce dossier retient **ANTIA** et le
-> domaine `antia.ga`. Dans le code, le nom est un jeton de marque unique
-> (`packages/social-contracts/src/brand.ts`).
+> **ANTSIA** est le nom confirmé explicitement par le propriétaire le 16/10/2026.
+> Le domaine cible est `antsia.ga` ; son attribution et sa configuration restent au propriétaire.
+> Le renommage local ne vaut pas renommage d’un dépôt ni d’un domaine externe historique.
+> Dans le code, le nom est un jeton de marque unique (`packages/social-contracts/src/brand.ts`).
 
 Deux objets dans un dépôt :
 
 - **Le moteur social national** : le backend Convex et les paquets (`social-domain`,
   `social-contracts`, `social-features`, `ui`, `api`) qui servent **tous** les réseaux de
-  l'écosystème — ANTIA, DIASPORALE, et demain d'autres. Il est construit par **duplication** du
+  l'écosystème — ANTSIA, DIASPORALE, et demain d'autres. Il est construit par **duplication** du
   réseau social de l'espace agent d'administration.ga (iRéseau, iCom, stories, albums, direct,
   notifications), selon les dix règles de duplication de PRO.GA, et rendu **multi-réseaux par
   construction** (table `networks`, clé `networkId` partout, une personne unique, identités
   externes, modération par réseau, fédération entrante par contrats signés).
-- **Le réseau public ANTIA** : réseau **racine**, ouvert à toute personne, structuré par la
+- **Le réseau public ANTSIA** : réseau **racine**, ouvert à toute personne, structuré par la
   confiance (Officiel · Vérifié · Agent public · Communauté), qui **contient** les réseaux
   fermés : DIASPORALE (diaspora) et le miroir de l'iRéseau de l'administration (reflets des
   pages vérifiées et des publications déclarées publiques).
@@ -23,30 +23,44 @@ Deux objets dans un dépôt :
 d'identité unique du programme. Licence : voir `LICENSE` et `NOTICE` (AGPL-3.0, héritée du socle
 dont le code est dupliqué — à confirmer par le propriétaire).
 
-## État (15 octobre 2026)
+## État (18 octobre 2026)
 
-PA0 (scaffold), PA1 (owner map de duplication, `docs/02`) et PA2 (fondations multi-réseaux,
-domaine pur) sont clos ; une **tranche verticale testable** tourne sur antia.ga : entrer par code
-à usage unique, choisir son nom et son identifiant, rejoindre le réseau `antia`, publier, lire le
-fil, réagir. DIASPORALE est câblé comme application externe (installation unique ici).
+La refonte commerciale P10–P12 ajoute le contact avec PRO.GA, les préparations de commandes
+et le suivi privé des paiements. La retenue ANTSIA et la part vendeur sont paramétrables,
+avec fonds en attente de réception et preuve de reversement distincte. **P12 reste partiel :
+aucun connecteur, paiement ou reversement réel activé.** Génération et vérifications sont
+différées ; [rapport P12](docs/etudes/2026-10-18-social-commerce/rapports/P12_PAIEMENT.md)
+et [rapport P10](docs/21_CONTACT_COMMERCIAL_PRO_GA.md).
+
+Les lots PA0 à PA8 disposent de rapports de réalisation et de preuves locales datées. PA9
+(fédération administrative) et PA10 (échelle/préparation au lancement) sont implémentés dans
+les sources partagées ; leur configuration, génération et vérification restent ouvertes.
+PA10 ajoute le fil personnel matérialisé, la distribution et le rattrapage par lots, les
+retraits sous garde vivante, la rétention, les accès indexés d'effacement du fil, la purge
+des téléversements abandonnés et le suivi opérationnel dans la console.
+**Les vérifications sont différées à la demande du propriétaire : aucune charge, restauration,
+recette ni publication n'a été exécutée pour ces nouveaux lots.** DIASPORALE est une application
+externe du même moteur (installation unique ici).
 L'avancement prompt par prompt est tenu dans l'encart « État » de
-[`docs/01_PLAN_IMPLEMENTATION_PROMPTS_ANTIA.md`](docs/01_PLAN_IMPLEMENTATION_PROMPTS_ANTIA.md).
+[`docs/01_PLAN_IMPLEMENTATION_PROMPTS_ANTSIA.md`](docs/01_PLAN_IMPLEMENTATION_PROMPTS_ANTSIA.md).
 
 | Document | Rôle |
 |---|---|
-| [`docs/00_CAHIER_DES_CHARGES_ANTIA.md`](docs/00_CAHIER_DES_CHARGES_ANTIA.md) | cahier des charges du moteur (partie A) et du réseau public (partie B) : exigences `EXF-AN` / `EXT-AN`, lots A0–A6, parcours R1–R10, arbitrages A1–A10 |
-| [`docs/01_PLAN_IMPLEMENTATION_PROMPTS_ANTIA.md`](docs/01_PLAN_IMPLEMENTATION_PROMPTS_ANTIA.md) | onze prompts PA0 → PA10 et leur état ; **DIASPORALE PD0 → PD6 s'exécute entre PA7 et PA8** |
+| [`docs/00_CAHIER_DES_CHARGES_ANTSIA.md`](docs/00_CAHIER_DES_CHARGES_ANTSIA.md) | cahier des charges du moteur (partie A) et du réseau public (partie B) : exigences `EXF-AN` / `EXT-AN`, lots A0–A6, parcours R1–R10, arbitrages A1–A10 |
+| [`docs/01_PLAN_IMPLEMENTATION_PROMPTS_ANTSIA.md`](docs/01_PLAN_IMPLEMENTATION_PROMPTS_ANTSIA.md) | onze prompts PA0 → PA10 et leur état ; **DIASPORALE PD0 → PD6 s'exécute entre PA7 et PA8** |
 | [`docs/adr/`](docs/adr/) | décisions d'architecture du moteur |
+| [`docs/06_RAPPORT_LANCEMENT.md`](docs/06_RAPPORT_LANCEMENT.md) | état des sources, preuves historiques, vérifications différées, risques et passation PA10 |
+| [`docs/20_EXPLOITATION_ECHELLE_ET_RESTAURATION_PA10.md`](docs/20_EXPLOITATION_ECHELLE_ET_RESTAURATION_PA10.md) | procédures de charge, restauration sur cible jetable et observabilité ; aucune exécutée |
 | `../../../Documentation/RESEAUX_SOCIAUX/` | plan de pilotage « réseaux dans le réseau » et annexes A–D |
 | `../DIASPORALE/docs/00_CAHIER_DES_CHARGES_DIASPORALE.md` | le premier réseau servi par le moteur |
 
 ## Le dépôt
 
 ```text
-ANTIA/
+ANTSIA/
 ├── apps/
-│   ├── antia_ga             # antia.ga — réseau public (Next.js 16, port 3030)
-│   └── admin_antia_ga       # console du moteur (Next.js 16, port 3032)
+│   ├── antsia_ga             # antsia.ga — réseau public (Next.js 16, port 3030)
+│   └── admin_antsia_ga       # console du moteur (Next.js 16, port 3032)
 ├── packages/
 │   ├── social-domain        # SSOT : règles pures (TS pur, zéro dépendance)
 │   ├── social-contracts     # types, modules purs et codes serveur partagés front/back (+ leurs traductions)
@@ -73,7 +87,7 @@ racine).
 ```bash
 bun install
 bun run dev:convex         # backend Convex de développement (garder ouvert)
-bun run dev:antia          # http://localhost:3030
+bun run dev:antsia          # http://localhost:3030
 bun run dev:admin          # http://localhost:3032
 bun run verify             # OBLIGATOIRE avant tout commit
 ```
@@ -81,12 +95,12 @@ bun run verify             # OBLIGATOIRE avant tout commit
 `bun run verify` = `codegen` + typage du backend (tsgo) + typage des cliquets + tests convex-test +
 cliquets + tests des scripts + typage, tests et lint de chaque espace de travail. Autres
 commandes : `bun run test:domain`, `bun run test:ratchets`, `bun run deploy:check` (contrôle du
-catalogue, sans réseau), `bun run deploy:antia` (affiche le plan de publication ; rien ne part
+catalogue, sans réseau), `bun run deploy:antsia` (affiche le plan de publication ; rien ne part
 sans `--execute` et la décision du propriétaire).
 
 ### Déploiement Convex de développement
 
-Tant que le projet Convex `antia` du propriétaire n'existe pas, le moteur tourne sur un
+Tant que le projet Convex `antsia` du propriétaire n'existe pas, le moteur tourne sur un
 **déploiement local anonyme** (backend Convex sur cette machine, port 3210, aucun compte, aucun
 nuage). Première fois :
 
@@ -94,8 +108,8 @@ nuage). Première fois :
 CONVEX_AGENT_MODE=anonymous bun run dev:convex
 ```
 
-Le CLI écrit `ANTIA/.env.local` (non versionné) ; les applications le lisent d'elles-mêmes en
-développement. Quand le projet `antia` existera : `bunx convex dev --configure` pour s'y
+Le CLI écrit `ANTSIA/.env.local` (non versionné) ; les applications le lisent d'elles-mêmes en
+développement. Quand le projet `antsia` existera : `bunx convex dev --configure` pour s'y
 rattacher, puis `bunx convex env set …` pour ses variables (voir `.env.example`).
 
 ### Tester la tranche verticale en local
@@ -105,13 +119,13 @@ Une fois par déploiement local (le propriétaire l'a autorisé pour le déploie
 ```bash
 openssl rand -base64 32 | bunx convex env set BETTER_AUTH_SECRET
 bunx convex env set SITE_URL http://localhost:3030
-bunx convex env set ANTIA_DEV_TOOLS true
-bunx convex run seeds/foundations:run '{"confirmNonProduction":"ANTIA_SEEDS_HORS_PRODUCTION"}'
+bunx convex env set ANTSIA_DEV_TOOLS true
+bunx convex run seeds/foundations:run '{"confirmNonProduction":"ANTSIA_SEEDS_HORS_PRODUCTION"}'
 ```
 
-Puis `bun run dev:convex` et `bun run dev:antia`, et ouvrir http://localhost:3030 → « Entrer ».
+Puis `bun run dev:convex` et `bun run dev:antsia`, et ouvrir http://localhost:3030 → « Entrer ».
 Sans service de courriel, le code à usage unique s'affiche sur l'écran de connexion — seulement
-quand `ANTIA_DEV_TOOLS=true` ET que le backend est local (double garde, `convex/lib/devTools.ts`) ;
+quand `ANTSIA_DEV_TOOLS=true` ET que le backend est local (double garde, `convex/lib/devTools.ts`) ;
 ailleurs, aucun code n'est lu ni écrit.
 
 ## Invariants non négociables

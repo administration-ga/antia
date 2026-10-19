@@ -1,0 +1,1892 @@
+{
+  "contract": "PRO-COMMERCE-COMMAND-V1",
+  "description": "parseCommerceCommandResponse(rawBody, { request, requestSha256 }, nowMs) : `requestCase` désigne une demande nominale de command-requests.json, dont `requestSha256` est l'empreinte des octets canoniques ; corrélation exacte, arithmétique entière, issues fermées.",
+  "cases": [
+    {
+      "name": "link.confirm accordé en partie",
+      "nowMs": 1792285200000,
+      "requestCase": "link.confirm nominal",
+      "requestSha256": "ca163742ebb2cbe61768836c650e4287714c6506c19260d2f1f0e75115282139",
+      "response": {
+        "command": "link.confirm",
+        "contract": "PRO-COMMERCE-COMMAND-V1",
+        "outcome": "accepted",
+        "requestId": "antsia-req-000001",
+        "requestSha256": "ca163742ebb2cbe61768836c650e4287714c6506c19260d2f1f0e75115282139",
+        "respondedAt": 1792285200000,
+        "version": 1,
+        "result": {
+          "grantedPermissions": [
+            "catalog_drafts",
+            "publish_catalog",
+            "receive_inquiries"
+          ],
+          "linkRef": "pro.ga:commerce_link:01JA00000000000000000000K1",
+          "linkedAt": 1792285200000,
+          "shopRef": "pro.ga:structure:01JA00000000000000000000S1",
+          "state": "active"
+        }
+      },
+      "expect": {
+        "ok": true,
+        "outcome": "accepted"
+      }
+    },
+    {
+      "name": "catalog.draft.save création",
+      "nowMs": 1792285200000,
+      "requestCase": "catalog.draft.save création",
+      "requestSha256": "7c420fe195029b87d1799c662918031ec997da1733e923d1ffe9088cd0745281",
+      "response": {
+        "command": "catalog.draft.save",
+        "contract": "PRO-COMMERCE-COMMAND-V1",
+        "outcome": "accepted",
+        "requestId": "antsia-req-000002",
+        "requestSha256": "7c420fe195029b87d1799c662918031ec997da1733e923d1ffe9088cd0745281",
+        "respondedAt": 1792285200000,
+        "version": 1,
+        "result": {
+          "draftRevision": 1,
+          "offerRef": "pro.ga:offer:01JA00000000000000000000F3",
+          "status": "draft"
+        }
+      },
+      "expect": {
+        "ok": true,
+        "outcome": "accepted"
+      }
+    },
+    {
+      "name": "catalog.draft.save mise à jour",
+      "nowMs": 1792285200000,
+      "requestCase": "catalog.draft.save mise à jour",
+      "requestSha256": "534a931c93f8db5415283e546fc723536687a129f4faa356436bb7875d82c4fa",
+      "response": {
+        "command": "catalog.draft.save",
+        "contract": "PRO-COMMERCE-COMMAND-V1",
+        "outcome": "accepted",
+        "requestId": "antsia-req-000003",
+        "requestSha256": "534a931c93f8db5415283e546fc723536687a129f4faa356436bb7875d82c4fa",
+        "respondedAt": 1792285200000,
+        "version": 1,
+        "result": {
+          "draftRevision": 5,
+          "offerRef": "pro.ga:offer:01JA00000000000000000000F3",
+          "status": "draft"
+        }
+      },
+      "expect": {
+        "ok": true,
+        "outcome": "accepted"
+      }
+    },
+    {
+      "name": "inquiry.submit enregistrée",
+      "nowMs": 1792285200000,
+      "requestCase": "inquiry.submit demande de devis",
+      "requestSha256": "47d78e824f8a67a39d3685ca4a1aebe3d586a7c7c631a339c887a4864f71ca94",
+      "response": {
+        "command": "inquiry.submit",
+        "contract": "PRO-COMMERCE-COMMAND-V1",
+        "outcome": "accepted",
+        "requestId": "antsia-req-000004",
+        "requestSha256": "47d78e824f8a67a39d3685ca4a1aebe3d586a7c7c631a339c887a4864f71ca94",
+        "respondedAt": 1792285200000,
+        "version": 1,
+        "result": {
+          "inquiryRef": "pro.ga:inquiry:01JA00000000000000000000N1",
+          "state": "submitted",
+          "submittedAt": 1792285200000
+        }
+      },
+      "expect": {
+        "ok": true,
+        "outcome": "accepted"
+      }
+    },
+    {
+      "name": "quote.accept acceptée",
+      "nowMs": 1792285200000,
+      "requestCase": "quote.accept nominal",
+      "requestSha256": "0f722f25e9e1ed22b447d921aeb581c0579768056602a1870e2f53227cfad4b1",
+      "response": {
+        "command": "quote.accept",
+        "contract": "PRO-COMMERCE-COMMAND-V1",
+        "outcome": "accepted",
+        "requestId": "antsia-req-000005",
+        "requestSha256": "0f722f25e9e1ed22b447d921aeb581c0579768056602a1870e2f53227cfad4b1",
+        "respondedAt": 1792285200000,
+        "version": 1,
+        "result": {
+          "acceptedAt": 1792285200000,
+          "orderRef": "pro.ga:order:01JA00000000000000000000R1",
+          "quoteRef": "pro.ga:quote:01JA00000000000000000000Q1",
+          "quoteVersion": 2,
+          "state": "accepted"
+        }
+      },
+      "expect": {
+        "ok": true,
+        "outcome": "accepted"
+      }
+    },
+    {
+      "name": "quote.accept nouvelle version à reconfirmer",
+      "nowMs": 1792285200000,
+      "requestCase": "quote.accept nominal",
+      "requestSha256": "0f722f25e9e1ed22b447d921aeb581c0579768056602a1870e2f53227cfad4b1",
+      "response": {
+        "command": "quote.accept",
+        "contract": "PRO-COMMERCE-COMMAND-V1",
+        "outcome": "reconfirm_required",
+        "requestId": "antsia-req-000005",
+        "requestSha256": "0f722f25e9e1ed22b447d921aeb581c0579768056602a1870e2f53227cfad4b1",
+        "respondedAt": 1792285200000,
+        "version": 1,
+        "result": {
+          "currentTotal": {
+            "amount": 90000,
+            "currency": "XAF"
+          },
+          "currentVersion": 3,
+          "quoteRef": "pro.ga:quote:01JA00000000000000000000Q1",
+          "state": "reconfirm"
+        }
+      },
+      "expect": {
+        "ok": true,
+        "outcome": "reconfirm_required"
+      }
+    },
+    {
+      "name": "checkout.prepare retrait réservé",
+      "nowMs": 1792285200000,
+      "requestCase": "checkout.prepare retrait",
+      "requestSha256": "8d160a5baa721877897800396f93f0184a1ca7b096d5cc6c61a0913d0d191a5e",
+      "response": {
+        "command": "checkout.prepare",
+        "contract": "PRO-COMMERCE-COMMAND-V1",
+        "outcome": "accepted",
+        "requestId": "antsia-req-000006",
+        "requestSha256": "8d160a5baa721877897800396f93f0184a1ca7b096d5cc6c61a0913d0d191a5e",
+        "respondedAt": 1792285200000,
+        "version": 1,
+        "result": {
+          "checkoutRef": "pro.ga:checkout:01JA00000000000000000000H1",
+          "expiresAt": 1792286100000,
+          "fees": [],
+          "lines": [
+            {
+              "catalogRevision": 3,
+              "label": "Robe Nyota",
+              "lineAmount": {
+                "amount": 25000,
+                "currency": "XAF"
+              },
+              "offerRef": "pro.ga:offer:01JA00000000000000000000F1",
+              "quantity": 1,
+              "unitAmount": {
+                "amount": 25000,
+                "currency": "XAF"
+              }
+            },
+            {
+              "catalogRevision": 5,
+              "label": "Robe Ewaka — M / Bleu",
+              "lineAmount": {
+                "amount": 56000,
+                "currency": "XAF"
+              },
+              "offerRef": "pro.ga:offer:01JA00000000000000000000F2",
+              "quantity": 2,
+              "unitAmount": {
+                "amount": 28000,
+                "currency": "XAF"
+              },
+              "variantRef": "pro.ga:offer_variant:01JA00000000000000000000V1"
+            }
+          ],
+          "state": "held",
+          "total": {
+            "amount": 81000,
+            "currency": "XAF"
+          }
+        }
+      },
+      "expect": {
+        "ok": true,
+        "outcome": "accepted"
+      }
+    },
+    {
+      "name": "checkout.prepare livraison avec frais",
+      "nowMs": 1792285200000,
+      "requestCase": "checkout.prepare livraison vendeur",
+      "requestSha256": "c16a812ebcfa0e5adae78303e5587b4bd3514db5ffae3735f06a04fc65db35d3",
+      "response": {
+        "command": "checkout.prepare",
+        "contract": "PRO-COMMERCE-COMMAND-V1",
+        "outcome": "accepted",
+        "requestId": "antsia-req-000007",
+        "requestSha256": "c16a812ebcfa0e5adae78303e5587b4bd3514db5ffae3735f06a04fc65db35d3",
+        "respondedAt": 1792285200000,
+        "version": 1,
+        "result": {
+          "checkoutRef": "pro.ga:checkout:01JA00000000000000000000H1",
+          "expiresAt": 1792286100000,
+          "fees": [
+            {
+              "amount": {
+                "amount": 1000,
+                "currency": "XAF"
+              },
+              "kind": "delivery",
+              "label": "Livraison Libreville"
+            }
+          ],
+          "lines": [
+            {
+              "catalogRevision": 3,
+              "label": "Robe Nyota",
+              "lineAmount": {
+                "amount": 25000,
+                "currency": "XAF"
+              },
+              "offerRef": "pro.ga:offer:01JA00000000000000000000F1",
+              "quantity": 1,
+              "unitAmount": {
+                "amount": 25000,
+                "currency": "XAF"
+              }
+            },
+            {
+              "catalogRevision": 5,
+              "label": "Robe Ewaka — M / Bleu",
+              "lineAmount": {
+                "amount": 56000,
+                "currency": "XAF"
+              },
+              "offerRef": "pro.ga:offer:01JA00000000000000000000F2",
+              "quantity": 2,
+              "unitAmount": {
+                "amount": 28000,
+                "currency": "XAF"
+              },
+              "variantRef": "pro.ga:offer_variant:01JA00000000000000000000V1"
+            }
+          ],
+          "state": "held",
+          "total": {
+            "amount": 82000,
+            "currency": "XAF"
+          }
+        }
+      },
+      "expect": {
+        "ok": true,
+        "outcome": "accepted"
+      }
+    },
+    {
+      "name": "checkout.prepare prix changé à reconfirmer",
+      "nowMs": 1792285200000,
+      "requestCase": "checkout.prepare retrait",
+      "requestSha256": "8d160a5baa721877897800396f93f0184a1ca7b096d5cc6c61a0913d0d191a5e",
+      "response": {
+        "command": "checkout.prepare",
+        "contract": "PRO-COMMERCE-COMMAND-V1",
+        "outcome": "reconfirm_required",
+        "requestId": "antsia-req-000006",
+        "requestSha256": "8d160a5baa721877897800396f93f0184a1ca7b096d5cc6c61a0913d0d191a5e",
+        "respondedAt": 1792285200000,
+        "version": 1,
+        "result": {
+          "checkoutRef": "pro.ga:checkout:01JA00000000000000000000H1",
+          "expiresAt": 1792286100000,
+          "fees": [],
+          "lines": [
+            {
+              "catalogRevision": 3,
+              "label": "Robe Nyota",
+              "lineAmount": {
+                "amount": 25000,
+                "currency": "XAF"
+              },
+              "offerRef": "pro.ga:offer:01JA00000000000000000000F1",
+              "quantity": 1,
+              "unitAmount": {
+                "amount": 25000,
+                "currency": "XAF"
+              }
+            },
+            {
+              "catalogRevision": 6,
+              "label": "Robe Ewaka — M / Bleu",
+              "lineAmount": {
+                "amount": 58000,
+                "currency": "XAF"
+              },
+              "offerRef": "pro.ga:offer:01JA00000000000000000000F2",
+              "quantity": 2,
+              "unitAmount": {
+                "amount": 29000,
+                "currency": "XAF"
+              },
+              "variantRef": "pro.ga:offer_variant:01JA00000000000000000000V1"
+            }
+          ],
+          "state": "held",
+          "total": {
+            "amount": 83000,
+            "currency": "XAF"
+          },
+          "changes": [
+            {
+              "field": "catalog_revision",
+              "offerRef": "pro.ga:offer:01JA00000000000000000000F2",
+              "variantRef": "pro.ga:offer_variant:01JA00000000000000000000V1"
+            },
+            {
+              "field": "unit_amount",
+              "offerRef": "pro.ga:offer:01JA00000000000000000000F2",
+              "variantRef": "pro.ga:offer_variant:01JA00000000000000000000V1"
+            }
+          ]
+        }
+      },
+      "expect": {
+        "ok": true,
+        "outcome": "reconfirm_required"
+      }
+    },
+    {
+      "name": "checkout.prepare quantité réduite à reconfirmer",
+      "nowMs": 1792285200000,
+      "requestCase": "checkout.prepare retrait",
+      "requestSha256": "8d160a5baa721877897800396f93f0184a1ca7b096d5cc6c61a0913d0d191a5e",
+      "response": {
+        "command": "checkout.prepare",
+        "contract": "PRO-COMMERCE-COMMAND-V1",
+        "outcome": "reconfirm_required",
+        "requestId": "antsia-req-000006",
+        "requestSha256": "8d160a5baa721877897800396f93f0184a1ca7b096d5cc6c61a0913d0d191a5e",
+        "respondedAt": 1792285200000,
+        "version": 1,
+        "result": {
+          "checkoutRef": "pro.ga:checkout:01JA00000000000000000000H1",
+          "expiresAt": 1792286100000,
+          "fees": [],
+          "lines": [
+            {
+              "catalogRevision": 3,
+              "label": "Robe Nyota",
+              "lineAmount": {
+                "amount": 25000,
+                "currency": "XAF"
+              },
+              "offerRef": "pro.ga:offer:01JA00000000000000000000F1",
+              "quantity": 1,
+              "unitAmount": {
+                "amount": 25000,
+                "currency": "XAF"
+              }
+            },
+            {
+              "catalogRevision": 5,
+              "label": "Robe Ewaka — M / Bleu",
+              "lineAmount": {
+                "amount": 28000,
+                "currency": "XAF"
+              },
+              "offerRef": "pro.ga:offer:01JA00000000000000000000F2",
+              "quantity": 1,
+              "unitAmount": {
+                "amount": 28000,
+                "currency": "XAF"
+              },
+              "variantRef": "pro.ga:offer_variant:01JA00000000000000000000V1"
+            }
+          ],
+          "state": "held",
+          "total": {
+            "amount": 53000,
+            "currency": "XAF"
+          },
+          "changes": [
+            {
+              "field": "quantity",
+              "offerRef": "pro.ga:offer:01JA00000000000000000000F2",
+              "variantRef": "pro.ga:offer_variant:01JA00000000000000000000V1"
+            }
+          ]
+        }
+      },
+      "expect": {
+        "ok": true,
+        "outcome": "reconfirm_required"
+      }
+    },
+    {
+      "name": "payment.start redirection prestataire",
+      "nowMs": 1792285200000,
+      "requestCase": "payment.start nominal",
+      "requestSha256": "3562fdd61e3e2a2e42e8e1b0c9b2ad70ccbd4a7d21b3039e45c1963e9b92d12e",
+      "response": {
+        "command": "payment.start",
+        "contract": "PRO-COMMERCE-COMMAND-V1",
+        "outcome": "accepted",
+        "requestId": "antsia-req-000008",
+        "requestSha256": "3562fdd61e3e2a2e42e8e1b0c9b2ad70ccbd4a7d21b3039e45c1963e9b92d12e",
+        "respondedAt": 1792285200000,
+        "version": 1,
+        "result": {
+          "action": {
+            "kind": "provider_redirect",
+            "url": "https://paiement.exemple.invalid/session/abc123?retour=antsia"
+          },
+          "amount": {
+            "amount": 82000,
+            "currency": "XAF"
+          },
+          "checkoutRef": "pro.ga:checkout:01JA00000000000000000000H1",
+          "orderRef": "pro.ga:order:01JA00000000000000000000R1",
+          "paymentRef": "pro.ga:payment_intent:01JA00000000000000000000P1",
+          "state": "requires_action"
+        }
+      },
+      "expect": {
+        "ok": true,
+        "outcome": "accepted"
+      }
+    },
+    {
+      "name": "payment.start confirmation sur téléphone",
+      "nowMs": 1792285200000,
+      "requestCase": "payment.start nominal",
+      "requestSha256": "3562fdd61e3e2a2e42e8e1b0c9b2ad70ccbd4a7d21b3039e45c1963e9b92d12e",
+      "response": {
+        "command": "payment.start",
+        "contract": "PRO-COMMERCE-COMMAND-V1",
+        "outcome": "accepted",
+        "requestId": "antsia-req-000008",
+        "requestSha256": "3562fdd61e3e2a2e42e8e1b0c9b2ad70ccbd4a7d21b3039e45c1963e9b92d12e",
+        "respondedAt": 1792285200000,
+        "version": 1,
+        "result": {
+          "action": {
+            "kind": "await_provider_confirmation"
+          },
+          "amount": {
+            "amount": 82000,
+            "currency": "XAF"
+          },
+          "checkoutRef": "pro.ga:checkout:01JA00000000000000000000H1",
+          "orderRef": "pro.ga:order:01JA00000000000000000000R1",
+          "paymentRef": "pro.ga:payment_intent:01JA00000000000000000000P1",
+          "state": "requires_action"
+        }
+      },
+      "expect": {
+        "ok": true,
+        "outcome": "accepted"
+      }
+    },
+    {
+      "name": "order.cancel.request annulée, remboursement demandé",
+      "nowMs": 1792285200000,
+      "requestCase": "order.cancel.request nominal",
+      "requestSha256": "e66991ed90be4aa18ceb67e39d9c58ebb9b165ab12c3a2d0bf7021a7ecf53aaf",
+      "response": {
+        "command": "order.cancel.request",
+        "contract": "PRO-COMMERCE-COMMAND-V1",
+        "outcome": "accepted",
+        "requestId": "antsia-req-000009",
+        "requestSha256": "e66991ed90be4aa18ceb67e39d9c58ebb9b165ab12c3a2d0bf7021a7ecf53aaf",
+        "respondedAt": 1792285200000,
+        "version": 1,
+        "result": {
+          "cancellation": "accepted",
+          "orderRef": "pro.ga:order:01JA00000000000000000000R1",
+          "orderRevision": 3,
+          "orderState": "cancelled",
+          "refund": "requested"
+        }
+      },
+      "expect": {
+        "ok": true,
+        "outcome": "accepted"
+      }
+    },
+    {
+      "name": "booking.request en attente de confirmation",
+      "nowMs": 1792285200000,
+      "requestCase": "booking.request nominal",
+      "requestSha256": "0f733d1d240fa9ce126d6eefb5d5c7bfddd4b95104f89e799cd865b8fcf2e534",
+      "response": {
+        "command": "booking.request",
+        "contract": "PRO-COMMERCE-COMMAND-V1",
+        "outcome": "accepted",
+        "requestId": "antsia-req-000010",
+        "requestSha256": "0f733d1d240fa9ce126d6eefb5d5c7bfddd4b95104f89e799cd865b8fcf2e534",
+        "respondedAt": 1792285200000,
+        "version": 1,
+        "result": {
+          "appointmentRef": "pro.ga:appointment:01JA00000000000000000000A1",
+          "endAt": 1792461600000,
+          "holdExpiresAt": 1792292400000,
+          "startAt": 1792458000000,
+          "state": "requested",
+          "timeZone": "Africa/Libreville"
+        }
+      },
+      "expect": {
+        "ok": true,
+        "outcome": "accepted"
+      }
+    },
+    {
+      "name": "application.submit reçue",
+      "nowMs": 1792285200000,
+      "requestCase": "application.submit nominal",
+      "requestSha256": "3c29a51cf997b0cfe59d7a778afa88925d4d7767e89a8da13b7aa2d35edd76ba",
+      "response": {
+        "command": "application.submit",
+        "contract": "PRO-COMMERCE-COMMAND-V1",
+        "outcome": "accepted",
+        "requestId": "antsia-req-000011",
+        "requestSha256": "3c29a51cf997b0cfe59d7a778afa88925d4d7767e89a8da13b7aa2d35edd76ba",
+        "respondedAt": 1792285200000,
+        "version": 1,
+        "result": {
+          "applicationRef": "pro.ga:job_application:01JA00000000000000000000T1",
+          "state": "received",
+          "submittedAt": 1792285200000
+        }
+      },
+      "expect": {
+        "ok": true,
+        "outcome": "accepted"
+      }
+    },
+    {
+      "name": "request.status terminée",
+      "nowMs": 1792285200000,
+      "requestCase": "request.status nominal",
+      "requestSha256": "647135b8c3f851d97d5dd2da0fda3d3f7d4a7c84a643f3810f9a524b374d449c",
+      "response": {
+        "command": "request.status",
+        "contract": "PRO-COMMERCE-COMMAND-V1",
+        "outcome": "accepted",
+        "requestId": "antsia-req-000012",
+        "requestSha256": "647135b8c3f851d97d5dd2da0fda3d3f7d4a7c84a643f3810f9a524b374d449c",
+        "respondedAt": 1792285200000,
+        "version": 1,
+        "result": {
+          "current": [
+            {
+              "objectKind": "checkout",
+              "objectRef": "pro.ga:checkout:01JA00000000000000000000H1",
+              "revision": 1,
+              "state": "held",
+              "updatedAt": 1792285200000
+            },
+            {
+              "objectKind": "order",
+              "objectRef": "pro.ga:order:01JA00000000000000000000R1",
+              "revision": 1,
+              "state": "pending",
+              "updatedAt": 1792285200000
+            },
+            {
+              "objectKind": "payment_intent",
+              "objectRef": "pro.ga:payment_intent:01JA00000000000000000000P1",
+              "revision": 2,
+              "state": "requires_action",
+              "updatedAt": 1792285200000
+            }
+          ],
+          "recordedResponse": "{\"command\":\"checkout.prepare\",\"contract\":\"PRO-COMMERCE-COMMAND-V1\",\"outcome\":\"accepted\",\"requestId\":\"antsia-req-000006\",\"requestSha256\":\"8d160a5baa721877897800396f93f0184a1ca7b096d5cc6c61a0913d0d191a5e\",\"respondedAt\":1792285200000,\"result\":{\"checkoutRef\":\"pro.ga:checkout:01JA00000000000000000000H1\",\"expiresAt\":1792286100000,\"fees\":[],\"lines\":[{\"catalogRevision\":3,\"label\":\"Robe Nyota\",\"lineAmount\":{\"amount\":25000,\"currency\":\"XAF\"},\"offerRef\":\"pro.ga:offer:01JA00000000000000000000F1\",\"quantity\":1,\"unitAmount\":{\"amount\":25000,\"currency\":\"XAF\"}},{\"catalogRevision\":5,\"label\":\"Robe Ewaka — M / Bleu\",\"lineAmount\":{\"amount\":56000,\"currency\":\"XAF\"},\"offerRef\":\"pro.ga:offer:01JA00000000000000000000F2\",\"quantity\":2,\"unitAmount\":{\"amount\":28000,\"currency\":\"XAF\"},\"variantRef\":\"pro.ga:offer_variant:01JA00000000000000000000V1\"}],\"state\":\"held\",\"total\":{\"amount\":81000,\"currency\":\"XAF\"}},\"version\":1}",
+          "recordedResponseSha256": "4ba26df5f7a4b6f18537caa0d5ace0c351ef4184b450353f7210ed11b8f45cb7",
+          "state": "completed",
+          "targetRequestId": "antsia-req-000006"
+        }
+      },
+      "expect": {
+        "ok": true,
+        "outcome": "accepted"
+      }
+    },
+    {
+      "name": "request.status inconnue",
+      "nowMs": 1792285200000,
+      "requestCase": "request.status nominal",
+      "requestSha256": "647135b8c3f851d97d5dd2da0fda3d3f7d4a7c84a643f3810f9a524b374d449c",
+      "response": {
+        "command": "request.status",
+        "contract": "PRO-COMMERCE-COMMAND-V1",
+        "outcome": "accepted",
+        "requestId": "antsia-req-000012",
+        "requestSha256": "647135b8c3f851d97d5dd2da0fda3d3f7d4a7c84a643f3810f9a524b374d449c",
+        "respondedAt": 1792285200000,
+        "version": 1,
+        "result": {
+          "current": [],
+          "state": "unknown",
+          "targetRequestId": "antsia-req-000006"
+        }
+      },
+      "expect": {
+        "ok": true,
+        "outcome": "accepted"
+      }
+    },
+    {
+      "name": "request.status en cours",
+      "nowMs": 1792285200000,
+      "requestCase": "request.status nominal",
+      "requestSha256": "647135b8c3f851d97d5dd2da0fda3d3f7d4a7c84a643f3810f9a524b374d449c",
+      "response": {
+        "command": "request.status",
+        "contract": "PRO-COMMERCE-COMMAND-V1",
+        "outcome": "accepted",
+        "requestId": "antsia-req-000012",
+        "requestSha256": "647135b8c3f851d97d5dd2da0fda3d3f7d4a7c84a643f3810f9a524b374d449c",
+        "respondedAt": 1792285200000,
+        "version": 1,
+        "result": {
+          "current": [
+            {
+              "objectKind": "checkout",
+              "objectRef": "pro.ga:checkout:01JA00000000000000000000H1",
+              "revision": 1,
+              "state": "held",
+              "updatedAt": 1792285200000
+            }
+          ],
+          "state": "in_progress",
+          "targetRequestId": "antsia-req-000006"
+        }
+      },
+      "expect": {
+        "ok": true,
+        "outcome": "accepted"
+      }
+    },
+    {
+      "name": "refus rupture de stock",
+      "nowMs": 1792285200000,
+      "requestCase": "checkout.prepare retrait",
+      "requestSha256": "8d160a5baa721877897800396f93f0184a1ca7b096d5cc6c61a0913d0d191a5e",
+      "response": {
+        "command": "checkout.prepare",
+        "contract": "PRO-COMMERCE-COMMAND-V1",
+        "outcome": "rejected",
+        "requestId": "antsia-req-000006",
+        "requestSha256": "8d160a5baa721877897800396f93f0184a1ca7b096d5cc6c61a0913d0d191a5e",
+        "respondedAt": 1792285200000,
+        "version": 1,
+        "reason": "out_of_stock"
+      },
+      "expect": {
+        "ok": true,
+        "outcome": "rejected"
+      }
+    },
+    {
+      "name": "conflit d'idempotence",
+      "nowMs": 1792285200000,
+      "requestCase": "checkout.prepare retrait",
+      "requestSha256": "8d160a5baa721877897800396f93f0184a1ca7b096d5cc6c61a0913d0d191a5e",
+      "response": {
+        "command": "checkout.prepare",
+        "contract": "PRO-COMMERCE-COMMAND-V1",
+        "outcome": "conflict",
+        "requestId": "antsia-req-000006",
+        "requestSha256": "8d160a5baa721877897800396f93f0184a1ca7b096d5cc6c61a0913d0d191a5e",
+        "respondedAt": 1792285200000,
+        "version": 1,
+        "reason": "idempotency_conflict"
+      },
+      "expect": {
+        "ok": true,
+        "outcome": "conflict"
+      }
+    },
+    {
+      "name": "prestataire indisponible",
+      "nowMs": 1792285200000,
+      "requestCase": "payment.start nominal",
+      "requestSha256": "3562fdd61e3e2a2e42e8e1b0c9b2ad70ccbd4a7d21b3039e45c1963e9b92d12e",
+      "response": {
+        "command": "payment.start",
+        "contract": "PRO-COMMERCE-COMMAND-V1",
+        "outcome": "unavailable",
+        "requestId": "antsia-req-000008",
+        "requestSha256": "3562fdd61e3e2a2e42e8e1b0c9b2ad70ccbd4a7d21b3039e45c1963e9b92d12e",
+        "respondedAt": 1792285200000,
+        "version": 1,
+        "reason": "provider_unavailable",
+        "retryAfterMs": 30000
+      },
+      "expect": {
+        "ok": true,
+        "outcome": "unavailable"
+      }
+    },
+    {
+      "name": "traitement en cours",
+      "nowMs": 1792285200000,
+      "requestCase": "payment.start nominal",
+      "requestSha256": "3562fdd61e3e2a2e42e8e1b0c9b2ad70ccbd4a7d21b3039e45c1963e9b92d12e",
+      "response": {
+        "command": "payment.start",
+        "contract": "PRO-COMMERCE-COMMAND-V1",
+        "outcome": "in_progress",
+        "requestId": "antsia-req-000008",
+        "requestSha256": "3562fdd61e3e2a2e42e8e1b0c9b2ad70ccbd4a7d21b3039e45c1963e9b92d12e",
+        "respondedAt": 1792285200000,
+        "version": 1,
+        "reason": "in_progress",
+        "retryAfterMs": 2000
+      },
+      "expect": {
+        "ok": true,
+        "outcome": "in_progress"
+      }
+    },
+    {
+      "name": "ligne mal calculée",
+      "nowMs": 1792285200000,
+      "requestCase": "checkout.prepare retrait",
+      "requestSha256": "8d160a5baa721877897800396f93f0184a1ca7b096d5cc6c61a0913d0d191a5e",
+      "response": {
+        "command": "checkout.prepare",
+        "contract": "PRO-COMMERCE-COMMAND-V1",
+        "outcome": "accepted",
+        "requestId": "antsia-req-000006",
+        "requestSha256": "8d160a5baa721877897800396f93f0184a1ca7b096d5cc6c61a0913d0d191a5e",
+        "respondedAt": 1792285200000,
+        "version": 1,
+        "result": {
+          "checkoutRef": "pro.ga:checkout:01JA00000000000000000000H1",
+          "expiresAt": 1792286100000,
+          "fees": [],
+          "lines": [
+            {
+              "catalogRevision": 3,
+              "label": "Robe Nyota",
+              "lineAmount": {
+                "amount": 24000,
+                "currency": "XAF"
+              },
+              "offerRef": "pro.ga:offer:01JA00000000000000000000F1",
+              "quantity": 1,
+              "unitAmount": {
+                "amount": 25000,
+                "currency": "XAF"
+              }
+            },
+            {
+              "catalogRevision": 5,
+              "label": "Robe Ewaka — M / Bleu",
+              "lineAmount": {
+                "amount": 56000,
+                "currency": "XAF"
+              },
+              "offerRef": "pro.ga:offer:01JA00000000000000000000F2",
+              "quantity": 2,
+              "unitAmount": {
+                "amount": 28000,
+                "currency": "XAF"
+              },
+              "variantRef": "pro.ga:offer_variant:01JA00000000000000000000V1"
+            }
+          ],
+          "state": "held",
+          "total": {
+            "amount": 80000,
+            "currency": "XAF"
+          }
+        }
+      },
+      "expect": {
+        "ok": false,
+        "reason": "total_mismatch",
+        "path": "$.result.lines[0].lineAmount"
+      }
+    },
+    {
+      "name": "total mal calculé",
+      "nowMs": 1792285200000,
+      "requestCase": "checkout.prepare retrait",
+      "requestSha256": "8d160a5baa721877897800396f93f0184a1ca7b096d5cc6c61a0913d0d191a5e",
+      "response": {
+        "command": "checkout.prepare",
+        "contract": "PRO-COMMERCE-COMMAND-V1",
+        "outcome": "accepted",
+        "requestId": "antsia-req-000006",
+        "requestSha256": "8d160a5baa721877897800396f93f0184a1ca7b096d5cc6c61a0913d0d191a5e",
+        "respondedAt": 1792285200000,
+        "version": 1,
+        "result": {
+          "checkoutRef": "pro.ga:checkout:01JA00000000000000000000H1",
+          "expiresAt": 1792286100000,
+          "fees": [],
+          "lines": [
+            {
+              "catalogRevision": 3,
+              "label": "Robe Nyota",
+              "lineAmount": {
+                "amount": 25000,
+                "currency": "XAF"
+              },
+              "offerRef": "pro.ga:offer:01JA00000000000000000000F1",
+              "quantity": 1,
+              "unitAmount": {
+                "amount": 25000,
+                "currency": "XAF"
+              }
+            },
+            {
+              "catalogRevision": 5,
+              "label": "Robe Ewaka — M / Bleu",
+              "lineAmount": {
+                "amount": 56000,
+                "currency": "XAF"
+              },
+              "offerRef": "pro.ga:offer:01JA00000000000000000000F2",
+              "quantity": 2,
+              "unitAmount": {
+                "amount": 28000,
+                "currency": "XAF"
+              },
+              "variantRef": "pro.ga:offer_variant:01JA00000000000000000000V1"
+            }
+          ],
+          "state": "held",
+          "total": {
+            "amount": 90000,
+            "currency": "XAF"
+          }
+        }
+      },
+      "expect": {
+        "ok": false,
+        "reason": "total_mismatch",
+        "path": "$.result.total"
+      }
+    },
+    {
+      "name": "prix changé annoncé comme accepté",
+      "nowMs": 1792285200000,
+      "requestCase": "checkout.prepare retrait",
+      "requestSha256": "8d160a5baa721877897800396f93f0184a1ca7b096d5cc6c61a0913d0d191a5e",
+      "response": {
+        "command": "checkout.prepare",
+        "contract": "PRO-COMMERCE-COMMAND-V1",
+        "outcome": "accepted",
+        "requestId": "antsia-req-000006",
+        "requestSha256": "8d160a5baa721877897800396f93f0184a1ca7b096d5cc6c61a0913d0d191a5e",
+        "respondedAt": 1792285200000,
+        "version": 1,
+        "result": {
+          "checkoutRef": "pro.ga:checkout:01JA00000000000000000000H1",
+          "expiresAt": 1792286100000,
+          "fees": [],
+          "lines": [
+            {
+              "catalogRevision": 3,
+              "label": "Robe Nyota",
+              "lineAmount": {
+                "amount": 25000,
+                "currency": "XAF"
+              },
+              "offerRef": "pro.ga:offer:01JA00000000000000000000F1",
+              "quantity": 1,
+              "unitAmount": {
+                "amount": 25000,
+                "currency": "XAF"
+              }
+            },
+            {
+              "catalogRevision": 6,
+              "label": "Robe Ewaka — M / Bleu",
+              "lineAmount": {
+                "amount": 58000,
+                "currency": "XAF"
+              },
+              "offerRef": "pro.ga:offer:01JA00000000000000000000F2",
+              "quantity": 2,
+              "unitAmount": {
+                "amount": 29000,
+                "currency": "XAF"
+              },
+              "variantRef": "pro.ga:offer_variant:01JA00000000000000000000V1"
+            }
+          ],
+          "state": "held",
+          "total": {
+            "amount": 83000,
+            "currency": "XAF"
+          }
+        }
+      },
+      "expect": {
+        "ok": false,
+        "reason": "correlation_mismatch",
+        "path": "$.result.changes"
+      }
+    },
+    {
+      "name": "reconfirmation sans écart déclaré",
+      "nowMs": 1792285200000,
+      "requestCase": "checkout.prepare retrait",
+      "requestSha256": "8d160a5baa721877897800396f93f0184a1ca7b096d5cc6c61a0913d0d191a5e",
+      "response": {
+        "command": "checkout.prepare",
+        "contract": "PRO-COMMERCE-COMMAND-V1",
+        "outcome": "reconfirm_required",
+        "requestId": "antsia-req-000006",
+        "requestSha256": "8d160a5baa721877897800396f93f0184a1ca7b096d5cc6c61a0913d0d191a5e",
+        "respondedAt": 1792285200000,
+        "version": 1,
+        "result": {
+          "checkoutRef": "pro.ga:checkout:01JA00000000000000000000H1",
+          "expiresAt": 1792286100000,
+          "fees": [],
+          "lines": [
+            {
+              "catalogRevision": 3,
+              "label": "Robe Nyota",
+              "lineAmount": {
+                "amount": 25000,
+                "currency": "XAF"
+              },
+              "offerRef": "pro.ga:offer:01JA00000000000000000000F1",
+              "quantity": 1,
+              "unitAmount": {
+                "amount": 25000,
+                "currency": "XAF"
+              }
+            },
+            {
+              "catalogRevision": 6,
+              "label": "Robe Ewaka — M / Bleu",
+              "lineAmount": {
+                "amount": 58000,
+                "currency": "XAF"
+              },
+              "offerRef": "pro.ga:offer:01JA00000000000000000000F2",
+              "quantity": 2,
+              "unitAmount": {
+                "amount": 29000,
+                "currency": "XAF"
+              },
+              "variantRef": "pro.ga:offer_variant:01JA00000000000000000000V1"
+            }
+          ],
+          "state": "held",
+          "total": {
+            "amount": 83000,
+            "currency": "XAF"
+          }
+        }
+      },
+      "expect": {
+        "ok": false,
+        "reason": "correlation_mismatch",
+        "path": "$.result.changes"
+      }
+    },
+    {
+      "name": "écart déclaré inexistant",
+      "nowMs": 1792285200000,
+      "requestCase": "checkout.prepare retrait",
+      "requestSha256": "8d160a5baa721877897800396f93f0184a1ca7b096d5cc6c61a0913d0d191a5e",
+      "response": {
+        "command": "checkout.prepare",
+        "contract": "PRO-COMMERCE-COMMAND-V1",
+        "outcome": "reconfirm_required",
+        "requestId": "antsia-req-000006",
+        "requestSha256": "8d160a5baa721877897800396f93f0184a1ca7b096d5cc6c61a0913d0d191a5e",
+        "respondedAt": 1792285200000,
+        "version": 1,
+        "result": {
+          "checkoutRef": "pro.ga:checkout:01JA00000000000000000000H1",
+          "expiresAt": 1792286100000,
+          "fees": [],
+          "lines": [
+            {
+              "catalogRevision": 3,
+              "label": "Robe Nyota",
+              "lineAmount": {
+                "amount": 25000,
+                "currency": "XAF"
+              },
+              "offerRef": "pro.ga:offer:01JA00000000000000000000F1",
+              "quantity": 1,
+              "unitAmount": {
+                "amount": 25000,
+                "currency": "XAF"
+              }
+            },
+            {
+              "catalogRevision": 6,
+              "label": "Robe Ewaka — M / Bleu",
+              "lineAmount": {
+                "amount": 58000,
+                "currency": "XAF"
+              },
+              "offerRef": "pro.ga:offer:01JA00000000000000000000F2",
+              "quantity": 2,
+              "unitAmount": {
+                "amount": 29000,
+                "currency": "XAF"
+              },
+              "variantRef": "pro.ga:offer_variant:01JA00000000000000000000V1"
+            }
+          ],
+          "state": "held",
+          "total": {
+            "amount": 83000,
+            "currency": "XAF"
+          },
+          "changes": [
+            {
+              "field": "catalog_revision",
+              "offerRef": "pro.ga:offer:01JA00000000000000000000F2",
+              "variantRef": "pro.ga:offer_variant:01JA00000000000000000000V1"
+            },
+            {
+              "field": "unit_amount",
+              "offerRef": "pro.ga:offer:01JA00000000000000000000F2",
+              "variantRef": "pro.ga:offer_variant:01JA00000000000000000000V1"
+            },
+            {
+              "field": "quantity",
+              "offerRef": "pro.ga:offer:01JA00000000000000000000F1"
+            }
+          ]
+        }
+      },
+      "expect": {
+        "ok": false,
+        "reason": "correlation_mismatch",
+        "path": "$.result.changes"
+      }
+    },
+    {
+      "name": "nombre de lignes différent",
+      "nowMs": 1792285200000,
+      "requestCase": "checkout.prepare retrait",
+      "requestSha256": "8d160a5baa721877897800396f93f0184a1ca7b096d5cc6c61a0913d0d191a5e",
+      "response": {
+        "command": "checkout.prepare",
+        "contract": "PRO-COMMERCE-COMMAND-V1",
+        "outcome": "accepted",
+        "requestId": "antsia-req-000006",
+        "requestSha256": "8d160a5baa721877897800396f93f0184a1ca7b096d5cc6c61a0913d0d191a5e",
+        "respondedAt": 1792285200000,
+        "version": 1,
+        "result": {
+          "checkoutRef": "pro.ga:checkout:01JA00000000000000000000H1",
+          "expiresAt": 1792286100000,
+          "fees": [],
+          "lines": [
+            {
+              "catalogRevision": 3,
+              "label": "Robe Nyota",
+              "lineAmount": {
+                "amount": 25000,
+                "currency": "XAF"
+              },
+              "offerRef": "pro.ga:offer:01JA00000000000000000000F1",
+              "quantity": 1,
+              "unitAmount": {
+                "amount": 25000,
+                "currency": "XAF"
+              }
+            }
+          ],
+          "state": "held",
+          "total": {
+            "amount": 25000,
+            "currency": "XAF"
+          }
+        }
+      },
+      "expect": {
+        "ok": false,
+        "reason": "correlation_mismatch",
+        "path": "$.result.lines"
+      }
+    },
+    {
+      "name": "quantité supérieure à la demande",
+      "nowMs": 1792285200000,
+      "requestCase": "checkout.prepare retrait",
+      "requestSha256": "8d160a5baa721877897800396f93f0184a1ca7b096d5cc6c61a0913d0d191a5e",
+      "response": {
+        "command": "checkout.prepare",
+        "contract": "PRO-COMMERCE-COMMAND-V1",
+        "outcome": "reconfirm_required",
+        "requestId": "antsia-req-000006",
+        "requestSha256": "8d160a5baa721877897800396f93f0184a1ca7b096d5cc6c61a0913d0d191a5e",
+        "respondedAt": 1792285200000,
+        "version": 1,
+        "result": {
+          "checkoutRef": "pro.ga:checkout:01JA00000000000000000000H1",
+          "expiresAt": 1792286100000,
+          "fees": [],
+          "lines": [
+            {
+              "catalogRevision": 3,
+              "label": "Robe Nyota",
+              "lineAmount": {
+                "amount": 25000,
+                "currency": "XAF"
+              },
+              "offerRef": "pro.ga:offer:01JA00000000000000000000F1",
+              "quantity": 1,
+              "unitAmount": {
+                "amount": 25000,
+                "currency": "XAF"
+              }
+            },
+            {
+              "catalogRevision": 5,
+              "label": "Robe Ewaka — M / Bleu",
+              "lineAmount": {
+                "amount": 84000,
+                "currency": "XAF"
+              },
+              "offerRef": "pro.ga:offer:01JA00000000000000000000F2",
+              "quantity": 3,
+              "unitAmount": {
+                "amount": 28000,
+                "currency": "XAF"
+              },
+              "variantRef": "pro.ga:offer_variant:01JA00000000000000000000V1"
+            }
+          ],
+          "state": "held",
+          "total": {
+            "amount": 109000,
+            "currency": "XAF"
+          },
+          "changes": [
+            {
+              "field": "quantity",
+              "offerRef": "pro.ga:offer:01JA00000000000000000000F2",
+              "variantRef": "pro.ga:offer_variant:01JA00000000000000000000V1"
+            }
+          ]
+        }
+      },
+      "expect": {
+        "ok": false,
+        "reason": "correlation_mismatch",
+        "path": "$.result.lines[1].quantity"
+      }
+    },
+    {
+      "name": "paiement annoncé réussi au démarrage",
+      "nowMs": 1792285200000,
+      "requestCase": "payment.start nominal",
+      "requestSha256": "3562fdd61e3e2a2e42e8e1b0c9b2ad70ccbd4a7d21b3039e45c1963e9b92d12e",
+      "response": {
+        "command": "payment.start",
+        "contract": "PRO-COMMERCE-COMMAND-V1",
+        "outcome": "accepted",
+        "requestId": "antsia-req-000008",
+        "requestSha256": "3562fdd61e3e2a2e42e8e1b0c9b2ad70ccbd4a7d21b3039e45c1963e9b92d12e",
+        "respondedAt": 1792285200000,
+        "version": 1,
+        "result": {
+          "action": {
+            "kind": "provider_redirect",
+            "url": "https://paiement.exemple.invalid/session/abc123?retour=antsia"
+          },
+          "amount": {
+            "amount": 82000,
+            "currency": "XAF"
+          },
+          "checkoutRef": "pro.ga:checkout:01JA00000000000000000000H1",
+          "orderRef": "pro.ga:order:01JA00000000000000000000R1",
+          "paymentRef": "pro.ga:payment_intent:01JA00000000000000000000P1",
+          "state": "succeeded"
+        }
+      },
+      "expect": {
+        "ok": false,
+        "reason": "invalid_payload",
+        "path": "$.result.state"
+      }
+    },
+    {
+      "name": "montant de paiement différent",
+      "nowMs": 1792285200000,
+      "requestCase": "payment.start nominal",
+      "requestSha256": "3562fdd61e3e2a2e42e8e1b0c9b2ad70ccbd4a7d21b3039e45c1963e9b92d12e",
+      "response": {
+        "command": "payment.start",
+        "contract": "PRO-COMMERCE-COMMAND-V1",
+        "outcome": "accepted",
+        "requestId": "antsia-req-000008",
+        "requestSha256": "3562fdd61e3e2a2e42e8e1b0c9b2ad70ccbd4a7d21b3039e45c1963e9b92d12e",
+        "respondedAt": 1792285200000,
+        "version": 1,
+        "result": {
+          "action": {
+            "kind": "provider_redirect",
+            "url": "https://paiement.exemple.invalid/session/abc123?retour=antsia"
+          },
+          "amount": {
+            "amount": 81000,
+            "currency": "XAF"
+          },
+          "checkoutRef": "pro.ga:checkout:01JA00000000000000000000H1",
+          "orderRef": "pro.ga:order:01JA00000000000000000000R1",
+          "paymentRef": "pro.ga:payment_intent:01JA00000000000000000000P1",
+          "state": "requires_action"
+        }
+      },
+      "expect": {
+        "ok": false,
+        "reason": "correlation_mismatch",
+        "path": "$.result.amount"
+      }
+    },
+    {
+      "name": "redirection non HTTPS",
+      "nowMs": 1792285200000,
+      "requestCase": "payment.start nominal",
+      "requestSha256": "3562fdd61e3e2a2e42e8e1b0c9b2ad70ccbd4a7d21b3039e45c1963e9b92d12e",
+      "response": {
+        "command": "payment.start",
+        "contract": "PRO-COMMERCE-COMMAND-V1",
+        "outcome": "accepted",
+        "requestId": "antsia-req-000008",
+        "requestSha256": "3562fdd61e3e2a2e42e8e1b0c9b2ad70ccbd4a7d21b3039e45c1963e9b92d12e",
+        "respondedAt": 1792285200000,
+        "version": 1,
+        "result": {
+          "action": {
+            "kind": "provider_redirect",
+            "url": "http://paiement.exemple.invalid/session/abc123"
+          },
+          "amount": {
+            "amount": 82000,
+            "currency": "XAF"
+          },
+          "checkoutRef": "pro.ga:checkout:01JA00000000000000000000H1",
+          "orderRef": "pro.ga:order:01JA00000000000000000000R1",
+          "paymentRef": "pro.ga:payment_intent:01JA00000000000000000000P1",
+          "state": "requires_action"
+        }
+      },
+      "expect": {
+        "ok": false,
+        "reason": "invalid_payload",
+        "path": "$.result.action.url"
+      }
+    },
+    {
+      "name": "redirection sans action attendue",
+      "nowMs": 1792285200000,
+      "requestCase": "payment.start nominal",
+      "requestSha256": "3562fdd61e3e2a2e42e8e1b0c9b2ad70ccbd4a7d21b3039e45c1963e9b92d12e",
+      "response": {
+        "command": "payment.start",
+        "contract": "PRO-COMMERCE-COMMAND-V1",
+        "outcome": "accepted",
+        "requestId": "antsia-req-000008",
+        "requestSha256": "3562fdd61e3e2a2e42e8e1b0c9b2ad70ccbd4a7d21b3039e45c1963e9b92d12e",
+        "respondedAt": 1792285200000,
+        "version": 1,
+        "result": {
+          "action": {
+            "kind": "provider_redirect",
+            "url": "https://paiement.exemple.invalid/session/abc123?retour=antsia"
+          },
+          "amount": {
+            "amount": 82000,
+            "currency": "XAF"
+          },
+          "checkoutRef": "pro.ga:checkout:01JA00000000000000000000H1",
+          "orderRef": "pro.ga:order:01JA00000000000000000000R1",
+          "paymentRef": "pro.ga:payment_intent:01JA00000000000000000000P1",
+          "state": "pending"
+        }
+      },
+      "expect": {
+        "ok": false,
+        "reason": "invalid_response",
+        "path": "$.result.state"
+      }
+    },
+    {
+      "name": "empreinte de demande différente",
+      "nowMs": 1792285200000,
+      "requestCase": "checkout.prepare retrait",
+      "requestSha256": "8d160a5baa721877897800396f93f0184a1ca7b096d5cc6c61a0913d0d191a5e",
+      "response": {
+        "command": "checkout.prepare",
+        "contract": "PRO-COMMERCE-COMMAND-V1",
+        "outcome": "accepted",
+        "requestId": "antsia-req-000006",
+        "requestSha256": "0000000000000000000000000000000000000000000000000000000000000000",
+        "respondedAt": 1792285200000,
+        "version": 1,
+        "result": {
+          "checkoutRef": "pro.ga:checkout:01JA00000000000000000000H1",
+          "expiresAt": 1792286100000,
+          "fees": [],
+          "lines": [
+            {
+              "catalogRevision": 3,
+              "label": "Robe Nyota",
+              "lineAmount": {
+                "amount": 25000,
+                "currency": "XAF"
+              },
+              "offerRef": "pro.ga:offer:01JA00000000000000000000F1",
+              "quantity": 1,
+              "unitAmount": {
+                "amount": 25000,
+                "currency": "XAF"
+              }
+            },
+            {
+              "catalogRevision": 5,
+              "label": "Robe Ewaka — M / Bleu",
+              "lineAmount": {
+                "amount": 56000,
+                "currency": "XAF"
+              },
+              "offerRef": "pro.ga:offer:01JA00000000000000000000F2",
+              "quantity": 2,
+              "unitAmount": {
+                "amount": 28000,
+                "currency": "XAF"
+              },
+              "variantRef": "pro.ga:offer_variant:01JA00000000000000000000V1"
+            }
+          ],
+          "state": "held",
+          "total": {
+            "amount": 81000,
+            "currency": "XAF"
+          }
+        }
+      },
+      "expect": {
+        "ok": false,
+        "reason": "correlation_mismatch",
+        "path": "$.requestSha256"
+      }
+    },
+    {
+      "name": "identifiant de demande différent",
+      "nowMs": 1792285200000,
+      "requestCase": "checkout.prepare retrait",
+      "requestSha256": "8d160a5baa721877897800396f93f0184a1ca7b096d5cc6c61a0913d0d191a5e",
+      "response": {
+        "command": "checkout.prepare",
+        "contract": "PRO-COMMERCE-COMMAND-V1",
+        "outcome": "accepted",
+        "requestId": "antsia-req-999999",
+        "requestSha256": "8d160a5baa721877897800396f93f0184a1ca7b096d5cc6c61a0913d0d191a5e",
+        "respondedAt": 1792285200000,
+        "version": 1,
+        "result": {
+          "checkoutRef": "pro.ga:checkout:01JA00000000000000000000H1",
+          "expiresAt": 1792286100000,
+          "fees": [],
+          "lines": [
+            {
+              "catalogRevision": 3,
+              "label": "Robe Nyota",
+              "lineAmount": {
+                "amount": 25000,
+                "currency": "XAF"
+              },
+              "offerRef": "pro.ga:offer:01JA00000000000000000000F1",
+              "quantity": 1,
+              "unitAmount": {
+                "amount": 25000,
+                "currency": "XAF"
+              }
+            },
+            {
+              "catalogRevision": 5,
+              "label": "Robe Ewaka — M / Bleu",
+              "lineAmount": {
+                "amount": 56000,
+                "currency": "XAF"
+              },
+              "offerRef": "pro.ga:offer:01JA00000000000000000000F2",
+              "quantity": 2,
+              "unitAmount": {
+                "amount": 28000,
+                "currency": "XAF"
+              },
+              "variantRef": "pro.ga:offer_variant:01JA00000000000000000000V1"
+            }
+          ],
+          "state": "held",
+          "total": {
+            "amount": 81000,
+            "currency": "XAF"
+          }
+        }
+      },
+      "expect": {
+        "ok": false,
+        "reason": "correlation_mismatch",
+        "path": "$.requestId"
+      }
+    },
+    {
+      "name": "refus hors liste de la commande",
+      "nowMs": 1792285200000,
+      "requestCase": "checkout.prepare retrait",
+      "requestSha256": "8d160a5baa721877897800396f93f0184a1ca7b096d5cc6c61a0913d0d191a5e",
+      "response": {
+        "command": "checkout.prepare",
+        "contract": "PRO-COMMERCE-COMMAND-V1",
+        "outcome": "rejected",
+        "requestId": "antsia-req-000006",
+        "requestSha256": "8d160a5baa721877897800396f93f0184a1ca7b096d5cc6c61a0913d0d191a5e",
+        "respondedAt": 1792285200000,
+        "version": 1,
+        "reason": "job_closed"
+      },
+      "expect": {
+        "ok": false,
+        "reason": "invalid_response",
+        "path": "$.reason"
+      }
+    },
+    {
+      "name": "succès avec raison",
+      "nowMs": 1792285200000,
+      "requestCase": "checkout.prepare retrait",
+      "requestSha256": "8d160a5baa721877897800396f93f0184a1ca7b096d5cc6c61a0913d0d191a5e",
+      "response": {
+        "command": "checkout.prepare",
+        "contract": "PRO-COMMERCE-COMMAND-V1",
+        "outcome": "accepted",
+        "requestId": "antsia-req-000006",
+        "requestSha256": "8d160a5baa721877897800396f93f0184a1ca7b096d5cc6c61a0913d0d191a5e",
+        "respondedAt": 1792285200000,
+        "version": 1,
+        "reason": "out_of_stock",
+        "result": {
+          "checkoutRef": "pro.ga:checkout:01JA00000000000000000000H1",
+          "expiresAt": 1792286100000,
+          "fees": [],
+          "lines": [
+            {
+              "catalogRevision": 3,
+              "label": "Robe Nyota",
+              "lineAmount": {
+                "amount": 25000,
+                "currency": "XAF"
+              },
+              "offerRef": "pro.ga:offer:01JA00000000000000000000F1",
+              "quantity": 1,
+              "unitAmount": {
+                "amount": 25000,
+                "currency": "XAF"
+              }
+            },
+            {
+              "catalogRevision": 5,
+              "label": "Robe Ewaka — M / Bleu",
+              "lineAmount": {
+                "amount": 56000,
+                "currency": "XAF"
+              },
+              "offerRef": "pro.ga:offer:01JA00000000000000000000F2",
+              "quantity": 2,
+              "unitAmount": {
+                "amount": 28000,
+                "currency": "XAF"
+              },
+              "variantRef": "pro.ga:offer_variant:01JA00000000000000000000V1"
+            }
+          ],
+          "state": "held",
+          "total": {
+            "amount": 81000,
+            "currency": "XAF"
+          }
+        }
+      },
+      "expect": {
+        "ok": false,
+        "reason": "invalid_response",
+        "path": "$.result"
+      }
+    },
+    {
+      "name": "reconfirmation d'un paiement",
+      "nowMs": 1792285200000,
+      "requestCase": "payment.start nominal",
+      "requestSha256": "3562fdd61e3e2a2e42e8e1b0c9b2ad70ccbd4a7d21b3039e45c1963e9b92d12e",
+      "response": {
+        "command": "payment.start",
+        "contract": "PRO-COMMERCE-COMMAND-V1",
+        "outcome": "reconfirm_required",
+        "requestId": "antsia-req-000008",
+        "requestSha256": "3562fdd61e3e2a2e42e8e1b0c9b2ad70ccbd4a7d21b3039e45c1963e9b92d12e",
+        "respondedAt": 1792285200000,
+        "version": 1,
+        "result": {
+          "action": {
+            "kind": "provider_redirect",
+            "url": "https://paiement.exemple.invalid/session/abc123?retour=antsia"
+          },
+          "amount": {
+            "amount": 82000,
+            "currency": "XAF"
+          },
+          "checkoutRef": "pro.ga:checkout:01JA00000000000000000000H1",
+          "orderRef": "pro.ga:order:01JA00000000000000000000R1",
+          "paymentRef": "pro.ga:payment_intent:01JA00000000000000000000P1",
+          "state": "requires_action"
+        }
+      },
+      "expect": {
+        "ok": false,
+        "reason": "invalid_response",
+        "path": "$.outcome"
+      }
+    },
+    {
+      "name": "annulation acceptée sans commande annulée",
+      "nowMs": 1792285200000,
+      "requestCase": "order.cancel.request nominal",
+      "requestSha256": "e66991ed90be4aa18ceb67e39d9c58ebb9b165ab12c3a2d0bf7021a7ecf53aaf",
+      "response": {
+        "command": "order.cancel.request",
+        "contract": "PRO-COMMERCE-COMMAND-V1",
+        "outcome": "accepted",
+        "requestId": "antsia-req-000009",
+        "requestSha256": "e66991ed90be4aa18ceb67e39d9c58ebb9b165ab12c3a2d0bf7021a7ecf53aaf",
+        "respondedAt": 1792285200000,
+        "version": 1,
+        "result": {
+          "cancellation": "accepted",
+          "orderRef": "pro.ga:order:01JA00000000000000000000R1",
+          "orderRevision": 3,
+          "orderState": "in_progress",
+          "refund": "none"
+        }
+      },
+      "expect": {
+        "ok": false,
+        "reason": "invalid_response",
+        "path": "$.result.orderState"
+      }
+    },
+    {
+      "name": "révision de commande non avancée",
+      "nowMs": 1792285200000,
+      "requestCase": "order.cancel.request nominal",
+      "requestSha256": "e66991ed90be4aa18ceb67e39d9c58ebb9b165ab12c3a2d0bf7021a7ecf53aaf",
+      "response": {
+        "command": "order.cancel.request",
+        "contract": "PRO-COMMERCE-COMMAND-V1",
+        "outcome": "accepted",
+        "requestId": "antsia-req-000009",
+        "requestSha256": "e66991ed90be4aa18ceb67e39d9c58ebb9b165ab12c3a2d0bf7021a7ecf53aaf",
+        "respondedAt": 1792285200000,
+        "version": 1,
+        "result": {
+          "cancellation": "pending_review",
+          "orderRef": "pro.ga:order:01JA00000000000000000000R1",
+          "orderRevision": 2,
+          "orderState": "in_progress",
+          "refund": "none"
+        }
+      },
+      "expect": {
+        "ok": false,
+        "reason": "correlation_mismatch",
+        "path": "$.result.orderRevision"
+      }
+    },
+    {
+      "name": "statut terminé sans réponse enregistrée",
+      "nowMs": 1792285200000,
+      "requestCase": "request.status nominal",
+      "requestSha256": "647135b8c3f851d97d5dd2da0fda3d3f7d4a7c84a643f3810f9a524b374d449c",
+      "response": {
+        "command": "request.status",
+        "contract": "PRO-COMMERCE-COMMAND-V1",
+        "outcome": "accepted",
+        "requestId": "antsia-req-000012",
+        "requestSha256": "647135b8c3f851d97d5dd2da0fda3d3f7d4a7c84a643f3810f9a524b374d449c",
+        "respondedAt": 1792285200000,
+        "version": 1,
+        "result": {
+          "current": [],
+          "state": "completed",
+          "targetRequestId": "antsia-req-000006"
+        }
+      },
+      "expect": {
+        "ok": false,
+        "reason": "invalid_response",
+        "path": "$.result.state"
+      }
+    },
+    {
+      "name": "état privé inconnu",
+      "nowMs": 1792285200000,
+      "requestCase": "request.status nominal",
+      "requestSha256": "647135b8c3f851d97d5dd2da0fda3d3f7d4a7c84a643f3810f9a524b374d449c",
+      "response": {
+        "command": "request.status",
+        "contract": "PRO-COMMERCE-COMMAND-V1",
+        "outcome": "accepted",
+        "requestId": "antsia-req-000012",
+        "requestSha256": "647135b8c3f851d97d5dd2da0fda3d3f7d4a7c84a643f3810f9a524b374d449c",
+        "respondedAt": 1792285200000,
+        "version": 1,
+        "result": {
+          "current": [
+            {
+              "objectKind": "order",
+              "objectRef": "pro.ga:order:01JA00000000000000000000R1",
+              "revision": 1,
+              "state": "paid",
+              "updatedAt": 1792285200000
+            }
+          ],
+          "state": "in_progress",
+          "targetRequestId": "antsia-req-000006"
+        }
+      },
+      "expect": {
+        "ok": false,
+        "reason": "unknown_state",
+        "path": "$.result.current[0].state"
+      }
+    },
+    {
+      "name": "référence d'un autre type d'objet",
+      "nowMs": 1792285200000,
+      "requestCase": "request.status nominal",
+      "requestSha256": "647135b8c3f851d97d5dd2da0fda3d3f7d4a7c84a643f3810f9a524b374d449c",
+      "response": {
+        "command": "request.status",
+        "contract": "PRO-COMMERCE-COMMAND-V1",
+        "outcome": "accepted",
+        "requestId": "antsia-req-000012",
+        "requestSha256": "647135b8c3f851d97d5dd2da0fda3d3f7d4a7c84a643f3810f9a524b374d449c",
+        "respondedAt": 1792285200000,
+        "version": 1,
+        "result": {
+          "current": [
+            {
+              "objectKind": "order",
+              "objectRef": "pro.ga:payment_intent:01JA00000000000000000000P1",
+              "revision": 1,
+              "state": "pending",
+              "updatedAt": 1792285200000
+            }
+          ],
+          "state": "in_progress",
+          "targetRequestId": "antsia-req-000006"
+        }
+      },
+      "expect": {
+        "ok": false,
+        "reason": "invalid_reference",
+        "path": "$.result.current[0].objectRef"
+      }
+    },
+    {
+      "name": "permission accordée non demandée",
+      "nowMs": 1792285200000,
+      "requestCase": "link.confirm nominal",
+      "requestSha256": "ca163742ebb2cbe61768836c650e4287714c6506c19260d2f1f0e75115282139",
+      "response": {
+        "command": "link.confirm",
+        "contract": "PRO-COMMERCE-COMMAND-V1",
+        "outcome": "accepted",
+        "requestId": "antsia-req-000001",
+        "requestSha256": "ca163742ebb2cbe61768836c650e4287714c6506c19260d2f1f0e75115282139",
+        "respondedAt": 1792285200000,
+        "version": 1,
+        "result": {
+          "grantedPermissions": [
+            "catalog_drafts",
+            "publish_jobs"
+          ],
+          "linkRef": "pro.ga:commerce_link:01JA00000000000000000000K1",
+          "linkedAt": 1792285200000,
+          "shopRef": "pro.ga:structure:01JA00000000000000000000S1",
+          "state": "active"
+        }
+      },
+      "expect": {
+        "ok": false,
+        "reason": "correlation_mismatch",
+        "path": "$.result.grantedPermissions"
+      }
+    },
+    {
+      "name": "demande de rendez-vous sans rétention",
+      "nowMs": 1792285200000,
+      "requestCase": "booking.request nominal",
+      "requestSha256": "0f733d1d240fa9ce126d6eefb5d5c7bfddd4b95104f89e799cd865b8fcf2e534",
+      "response": {
+        "command": "booking.request",
+        "contract": "PRO-COMMERCE-COMMAND-V1",
+        "outcome": "accepted",
+        "requestId": "antsia-req-000010",
+        "requestSha256": "0f733d1d240fa9ce126d6eefb5d5c7bfddd4b95104f89e799cd865b8fcf2e534",
+        "respondedAt": 1792285200000,
+        "version": 1,
+        "result": {
+          "appointmentRef": "pro.ga:appointment:01JA00000000000000000000A1",
+          "endAt": 1792461600000,
+          "startAt": 1792458000000,
+          "state": "requested",
+          "timeZone": "Africa/Libreville"
+        }
+      },
+      "expect": {
+        "ok": false,
+        "reason": "invalid_response",
+        "path": "$.result.holdExpiresAt"
+      }
+    },
+    {
+      "name": "délai de reprise sur un succès",
+      "nowMs": 1792285200000,
+      "requestCase": "inquiry.submit demande de devis",
+      "requestSha256": "47d78e824f8a67a39d3685ca4a1aebe3d586a7c7c631a339c887a4864f71ca94",
+      "response": {
+        "command": "inquiry.submit",
+        "contract": "PRO-COMMERCE-COMMAND-V1",
+        "outcome": "accepted",
+        "requestId": "antsia-req-000004",
+        "requestSha256": "47d78e824f8a67a39d3685ca4a1aebe3d586a7c7c631a339c887a4864f71ca94",
+        "respondedAt": 1792285200000,
+        "version": 1,
+        "result": {
+          "inquiryRef": "pro.ga:inquiry:01JA00000000000000000000N1",
+          "state": "submitted",
+          "submittedAt": 1792285200000
+        },
+        "retryAfterMs": 2000
+      },
+      "expect": {
+        "ok": false,
+        "reason": "invalid_response",
+        "path": "$.retryAfterMs"
+      }
+    },
+    {
+      "name": "réponse datée du futur",
+      "nowMs": 1792285200000,
+      "requestCase": "inquiry.submit demande de devis",
+      "requestSha256": "47d78e824f8a67a39d3685ca4a1aebe3d586a7c7c631a339c887a4864f71ca94",
+      "response": {
+        "command": "inquiry.submit",
+        "contract": "PRO-COMMERCE-COMMAND-V1",
+        "outcome": "accepted",
+        "requestId": "antsia-req-000004",
+        "requestSha256": "47d78e824f8a67a39d3685ca4a1aebe3d586a7c7c631a339c887a4864f71ca94",
+        "respondedAt": 1792285600000,
+        "version": 1,
+        "result": {
+          "inquiryRef": "pro.ga:inquiry:01JA00000000000000000000N1",
+          "state": "submitted",
+          "submittedAt": 1792285200000
+        }
+      },
+      "expect": {
+        "ok": false,
+        "reason": "invalid_time",
+        "path": "$.respondedAt"
+      }
+    },
+    {
+      "name": "identifiant interne dans le résultat",
+      "nowMs": 1792285200000,
+      "requestCase": "link.confirm nominal",
+      "requestSha256": "ca163742ebb2cbe61768836c650e4287714c6506c19260d2f1f0e75115282139",
+      "response": {
+        "command": "link.confirm",
+        "contract": "PRO-COMMERCE-COMMAND-V1",
+        "outcome": "accepted",
+        "requestId": "antsia-req-000001",
+        "requestSha256": "ca163742ebb2cbe61768836c650e4287714c6506c19260d2f1f0e75115282139",
+        "respondedAt": 1792285200000,
+        "version": 1,
+        "result": {
+          "grantedPermissions": [
+            "catalog_drafts"
+          ],
+          "linkRef": "pro.ga:commerce_link:01JA00000000000000000000K1",
+          "linkedAt": 1792285200000,
+          "personId": "jh7person",
+          "shopRef": "pro.ga:structure:01JA00000000000000000000S1",
+          "state": "active"
+        }
+      },
+      "expect": {
+        "ok": false,
+        "reason": "forbidden_field",
+        "path": "$.result.personId"
+      }
+    },
+    {
+      "name": "reconfirmation sans changement",
+      "nowMs": 1792285200000,
+      "requestCase": "quote.accept nominal",
+      "requestSha256": "0f722f25e9e1ed22b447d921aeb581c0579768056602a1870e2f53227cfad4b1",
+      "response": {
+        "command": "quote.accept",
+        "contract": "PRO-COMMERCE-COMMAND-V1",
+        "outcome": "reconfirm_required",
+        "requestId": "antsia-req-000005",
+        "requestSha256": "0f722f25e9e1ed22b447d921aeb581c0579768056602a1870e2f53227cfad4b1",
+        "respondedAt": 1792285200000,
+        "version": 1,
+        "result": {
+          "currentTotal": {
+            "amount": 85000,
+            "currency": "XAF"
+          },
+          "currentVersion": 2,
+          "quoteRef": "pro.ga:quote:01JA00000000000000000000Q1",
+          "state": "reconfirm"
+        }
+      },
+      "expect": {
+        "ok": false,
+        "reason": "correlation_mismatch",
+        "path": "$.result"
+      }
+    },
+    {
+      "name": "réponse non canonique",
+      "nowMs": 1792285200000,
+      "requestCase": "inquiry.submit demande de devis",
+      "requestSha256": "47d78e824f8a67a39d3685ca4a1aebe3d586a7c7c631a339c887a4864f71ca94",
+      "rawResponse": "{\n  \"command\": \"inquiry.submit\",\n  \"contract\": \"PRO-COMMERCE-COMMAND-V1\",\n  \"outcome\": \"accepted\",\n  \"requestId\": \"antsia-req-000004\",\n  \"requestSha256\": \"47d78e824f8a67a39d3685ca4a1aebe3d586a7c7c631a339c887a4864f71ca94\",\n  \"respondedAt\": 1792285200000,\n  \"version\": 1,\n  \"result\": {\n    \"inquiryRef\": \"pro.ga:inquiry:01JA00000000000000000000N1\",\n    \"state\": \"submitted\",\n    \"submittedAt\": 1792285200000\n  }\n}",
+      "expect": {
+        "ok": false,
+        "reason": "not_canonical",
+        "path": "$"
+      }
+    }
+  ]
+}

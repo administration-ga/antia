@@ -1,4 +1,4 @@
-import { NETWORK_SLICES } from "@antia/social-domain/network"
+import { NETWORK_SLICES } from "@antsia/social-domain/network"
 import { describe, expect, it } from "vitest"
 
 import { detectUnscopedFunctions } from "./lib/detectors"
@@ -20,6 +20,8 @@ export const SOCIAL_MODULE_DIRECTORIES: readonly string[] = [
   "convex/modules/networks",
   "convex/modules/people",
   "convex/modules/posts",
+  "convex/modules/public",
+  "convex/modules/discovery",
   "convex/modules/engagement",
   "convex/modules/media",
   "convex/modules/graph",
@@ -28,13 +30,18 @@ export const SOCIAL_MODULE_DIRECTORIES: readonly string[] = [
   "convex/modules/marks",
   "convex/modules/moderation",
   "convex/modules/messaging",
+  "convex/modules/commercialMessaging",
+  // CC-2b (ADR-0025) : conversations contextuelles, ouvertes et fermées par un objet déjà accepté.
+  "convex/modules/contextualMessaging",
   "convex/modules/groups",
   "convex/modules/events",
   "convex/modules/stories",
   "convex/modules/suggestions",
   "convex/modules/pages",
+  "convex/modules/shops",
   "convex/modules/albums",
   "convex/modules/calls",
+  "convex/modules/live",
   "convex/modules/diaspora",
 ]
 
@@ -42,8 +49,13 @@ export const SOCIAL_MODULE_DIRECTORIES: readonly string[] = [
  * Modules du moteur qui ne sont PAS sociaux (aucun contenu, aucune adhésion) :
  * `files` est l'infrastructure de garde des fichiers — ses lectures publiques
  * sont bornées une à une (réseau, déposant, modérateur, opérateur).
+ * `federation` garde le transport système : émetteurs/receipts/DLQ réservés
+ * aux opérateurs, inbox HMAC avec réseau issu du registre serveur et admission
+ * AST contrôlée par rate-limited-writes. PA9C ajoute agents.ts exclusivement
+ * personQuery/personMutation @selfScoped ; les handlers vérifient le grant,
+ * l'identité, les réseaux/source et les pages avant tout effet social.
  */
-export const NON_SOCIAL_MODULE_DIRECTORIES: readonly string[] = ["convex/modules/platform", "convex/modules/files"]
+export const NON_SOCIAL_MODULE_DIRECTORIES: readonly string[] = ["convex/modules/platform", "convex/modules/files", "convex/modules/federation"]
 
 describe("network-scoped-functions — toute fonction sociale est bornée par le réseau (R10)", () => {
   it("chaque fonction publique des modules sociaux exige un réseau et une adhésion", () => {
@@ -84,5 +96,26 @@ describe("network-scoped-functions — toute fonction sociale est bornée par le
     ].join("\n")
     const findings = detectUnscopedFunctions("convex/modules/posts/posts.ts", source)
     expect(findings.map((finding) => finding.line)).toEqual([1, 13])
+  })
+
+  it("test du test : imports renommés et exports locaux restent gardés ; citer une garde ne suffit pas", () => {
+    const source = [
+      'import { query as read } from "../../_generated/server"',
+      'import { networkQuery as scoped, requireMembership as membership } from "../../lib/functions"',
+      'export const aliasLeak = read({ args: {}, handler: async () => null })',
+      'const localLeak = read({ args: {}, handler: async () => null })',
+      'export { localLeak as separatedLeak }',
+      'export const copiedLeak = localLeak',
+      'export const fakeGuard = read({ args: { networkId: v.id("networks") }, handler: async () => { /* requireMembership(ctx, id) */ return "requireMembership(" } })',
+      'export const wrongNetwork = read({ args: { networkId: v.id("networks") }, handler: async (ctx, args) => { await membership(ctx, args.otherId, "declaree"); return null } })',
+      'export const unawaited = read({ args: { networkId: v.id("networks") }, handler: async (ctx, args) => { membership(ctx, args.networkId, "declaree"); return null } })',
+      'export const nestedOnly = read({ args: { networkId: v.id("networks") }, handler: async (ctx, args) => { const ignored = async () => { await membership(ctx, args.networkId, "declaree") }; return null } })',
+      'export const scopedAlias = scoped({ args: {}, handler: async () => null })',
+      'const localOk = read({ args: { networkId: v.id("networks") }, handler: async (ctx, args) => { await membership(ctx, args.networkId, "declaree"); return null } })',
+      'export { localOk as separatedOk }',
+      'const hidden = read({ args: {}, handler: async () => null })',
+    ].join("\n")
+    const findings = detectUnscopedFunctions("convex/modules/posts/fixture.ts", source)
+    expect(findings.map((finding) => finding.message.match(/« (.*?) »/)?.[1])).toEqual(["aliasLeak", "separatedLeak", "copiedLeak", "fakeGuard", "wrongNetwork", "unawaited", "nestedOnly"])
   })
 })

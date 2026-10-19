@@ -1,7 +1,0 @@
-@import "tailwindcss";
-@import "@antia/ui/styles.css";
-@import "@antia/ui/themes/antia.css";
-
-/* Les classes utilisées par les paquets du moteur doivent être générées pour
-   cette application : Tailwind ne parcourt que le dossier de l'application. */
-@source "../../../../packages/*/src";

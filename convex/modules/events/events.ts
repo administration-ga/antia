@@ -11,8 +11,8 @@
  * d'autre — refus INDISTINCT. Un évènement ANNULÉ reste visible de ses
  * participants : disparaître en silence laisserait chacun s'y présenter.
  */
-import type { CounterpartLabel } from "@antia/social-contracts/counterpart"
-import { assertPersonalPostBody, assertPostReach, PERSONAL_REACH_AUDIENCES } from "@antia/social-domain/content"
+import type { CounterpartLabel } from "@antsia/social-contracts/counterpart"
+import { assertPersonalPostBody, assertPostReach, PERSONAL_REACH_AUDIENCES } from "@antsia/social-domain/content"
 import {
   assertPersonalEventDescription,
   assertPersonalEventLocation,
@@ -23,12 +23,13 @@ import {
   type PersonalEventParticipationStatus,
   type PersonalEventResponse,
   type PersonalEventStatus,
-} from "@antia/social-domain/events"
-import { effectiveVisibility } from "@antia/social-domain/network"
+} from "@antsia/social-domain/events"
+import { effectiveVisibility } from "@antsia/social-domain/network"
 import { paginationOptsValidator, type PaginationResult } from "convex/server"
 import { v } from "convex/values"
 
 import { internal } from "../../_generated/api"
+import { canReadModeratedContent, contentState, moderateContentWrite } from "../moderation/policy"
 import type { Doc, Id } from "../../_generated/dataModel"
 import { internalMutation, type MutationCtx, type QueryCtx } from "../../_generated/server"
 import { checked, fail, failRule, notFound } from "../../lib/errors"
@@ -41,11 +42,16 @@ import { notifyPerson, resolveNotifications } from "../notifications/notify"
 import { findPublishedPersonByHandle, miniProfileCache } from "../people/miniProfile"
 import { engineCounters } from "../posts/counters"
 import { writePost } from "../posts/postWrite"
+import { pageEventAccess } from "./pageEventAccess"
+import { readableGalleryEvent } from "./pageEventGalleryAccess"
 
 type ReadCtx = Pick<QueryCtx, "db">
 
 /** Mon agenda, lu en fenêtres bornées (organisés, puis participations). */
 const AGENDA_SCAN = 200
+/** Pagination exhaustive : une seule page native, avant les gardes de contenu. */
+const AGENDA_PAGE_MAX = 40
+const AGENDA_PAGE_BYTES = 256 * 1024
 /** Participations `pending` relues par exécution du job d'annulation. */
 export const CANCEL_RESOLVE_BATCH = 100
 /** Participants par page, plafond dur. */
@@ -67,7 +73,7 @@ async function countAccepted(ctx: Pick<QueryCtx, "runQuery">, eventId: Id<"event
 }
 
 /** Une ligne de participation compte (une entrée par ligne) ; acceptée, elle compte aussi parmi les venues. */
-async function recordParticipation(ctx: MutationCtx, row: { _id: Id<"eventParticipants">; eventId: Id<"events"> }, accepted: boolean | null): Promise<void> {
+export async function recordParticipation(ctx: MutationCtx, row: { _id: Id<"eventParticipants">; eventId: Id<"events"> }, accepted: boolean | null): Promise<void> {
   await engineCounters.insertIfDoesNotExist(ctx, { namespace: participantsOf(row.eventId), key: 0, id: row._id })
   if (accepted === true) await engineCounters.insertIfDoesNotExist(ctx, { namespace: acceptedOf(row.eventId), key: 0, id: row._id })
   if (accepted === false) await engineCounters.deleteIfExists(ctx, { namespace: acceptedOf(row.eventId), key: 0, id: row._id })
@@ -98,6 +104,12 @@ export async function requireEventAccess(
 ): Promise<{ event: Doc<"events">; participation: Doc<"eventParticipants"> | null; isOrganizer: boolean }> {
   const event = await ctx.db.get(eventId)
   if (!event || event.networkId !== networkId) return notFound()
+  if (event.organizerPageId !== undefined) {
+    const access = await pageEventAccess(ctx, event, personId)
+    if (!access) return notFound()
+    return { event, participation: await participationOf(ctx, eventId, personId), isOrganizer: access.canManage }
+  }
+  if (!event.organizerPersonId || !(await canReadModeratedContent(ctx, "event", event._id, personId))) return notFound()
   const isOrganizer = event.organizerPersonId === personId
   const participation = isOrganizer ? null : await participationOf(ctx, eventId, personId)
   if (!isOrganizer && !participation) return notFound()
@@ -107,6 +119,7 @@ export async function requireEventAccess(
 /** L'évènement de l'organisateur appelant — un participant voit la fiche, il n'en dispose pas. */
 async function requireOrganizedEvent(ctx: MutationCtx & { networkId: Id<"networks">; person: Doc<"persons"> }, eventId: Id<"events">): Promise<Doc<"events">> {
   const { event, isOrganizer } = await requireEventAccess(ctx, ctx.networkId, eventId, ctx.person._id)
+  if (event.organizerPageId !== undefined) return notFound()
   if (!isOrganizer) return fail("eventOrganizerRequired")
   return event
 }
@@ -162,6 +175,7 @@ export const create = networkMutation({
       createdAt: now,
       updatedAt: now,
     })
+    await moderateContentWrite(ctx, { networkId: ctx.networkId, ownerPersonId: ctx.person._id, kind: "event", id: eventId, text: `${title} ${description ?? ""} ${location ?? ""}` })
     return { eventId, created: true }
   },
 })
@@ -180,6 +194,7 @@ export const invite = networkMutation({
   handler: async (ctx, args) => {
     await enforceRateLimit(ctx, "event.invite", ctx.person._id)
     const event = await requireOrganizedEvent(ctx, args.eventId)
+    if ((await contentState(ctx, "event", event._id))?.status === "pending_review") return fail("policyRefused")
     if (event.status === "cancelled") return failRule("EVENT_CANCELLED")
     const found = await findPublishedPersonByHandle(ctx, ctx.networkId, args.handle)
     if (!found || found._id === ctx.person._id) return notFound()
@@ -222,7 +237,9 @@ export const respond = networkMutation({
     const participation = await ctx.db.get(args.participationId)
     if (!participation || participation.personId !== ctx.person._id || participation.networkId !== ctx.networkId) return notFound()
     const event = await ctx.db.get(participation.eventId)
-    if (!event) return notFound()
+    // Les inscriptions collectives passent uniquement par pageEvents : aucun
+    // ancien lien d'invitation ne contourne l'audience ou la date d'ouverture.
+    if (!event || event.networkId !== ctx.networkId || event.organizerPageId !== undefined) return notFound()
     if (!canRespondToPersonalEvent({ eventStatus: event.status, isOwnParticipation: true })) return failRule("EVENT_CANCELLED")
     const now = Date.now()
     await resolveNotifications(ctx, { networkId: ctx.networkId, recipientPersonId: ctx.person._id, kind: "event_invite", subject: { event: event._id }, resolution: args.response, at: now })
@@ -299,6 +316,7 @@ export const announce = networkMutation({
   returns: v.object({ postId: v.id("posts"), created: v.boolean() }),
   handler: async (ctx, args) => {
     const event = await requireOrganizedEvent(ctx, args.eventId)
+    if ((await contentState(ctx, "event", event._id))?.status === "pending_review") return fail("policyRefused")
     if (event.status === "cancelled") return failRule("EVENT_CANCELLED")
     if (event.announcePostId !== undefined && (await ctx.db.get(event.announcePostId)) !== null) return { postId: event.announcePostId, created: false }
     await enforceRateLimit(ctx, "post.publish", ctx.person._id)
@@ -343,12 +361,35 @@ export type EventDto = {
   createdAt: number
 }
 
+/** DG-023 : projection collective séparée, sans organisateur personnel ni liste d'inscrits. */
+export type AssociationAgendaDto = {
+  kind: "association"
+  eventId: Id<"events">
+  pageId: Id<"pages">
+  title: string
+  description: string | null
+  location: string | null
+  startAt: number
+  endAt: number
+  timeZone: string
+  status: PersonalEventStatus
+  cancelledAt: number | null
+  version: number
+  organizer: { name: string; handle: string }
+  registration: "confirmed" | "waitlisted"
+}
+
+/** Les objets personnels restent identiques ; le collectif a sa propre projection. */
+export type AgendaRowDto = { kind: "personal"; event: EventDto } | { kind: "association"; event: AssociationAgendaDto }
+
 async function toEventDto(
   ctx: QueryCtx,
   event: Doc<"events">,
   input: { isOrganizer: boolean; participation: Doc<"eventParticipants"> | null; profileOf: ReturnType<typeof miniProfileCache> },
 ): Promise<EventDto> {
-  const [organizer, participantCount, acceptedCount] = await Promise.all([counterpartOf(ctx, event.organizerPersonId, input.profileOf), countParticipants(ctx, event._id), countAccepted(ctx, event._id)])
+  const organizerPersonId = event.organizerPersonId
+  if (event.organizerPageId !== undefined || organizerPersonId === undefined) return notFound()
+  const [organizer, participantCount, acceptedCount] = await Promise.all([counterpartOf(ctx, organizerPersonId, input.profileOf), countParticipants(ctx, event._id), countAccepted(ctx, event._id)])
   return {
     eventId: event._id,
     title: event.title,
@@ -361,7 +402,7 @@ async function toEventDto(
     cancelledAt: event.cancelledAt ?? null,
     isOrganizer: input.isOrganizer,
     myParticipation: input.participation ? { participationId: input.participation._id, status: input.participation.status } : null,
-    organizer: { ...organizer, personId: event.organizerPersonId },
+    organizer: { ...organizer, personId: organizerPersonId },
     participantCount,
     acceptedCount,
     announcePostId: event.announcePostId ?? null,
@@ -373,13 +414,14 @@ async function toEventDto(
  * MON agenda dans ce réseau — ce que j'organise ET ce où je suis invité (tout
  * statut : décliné et annulé RESTENT visibles, l'écran choisit). Fenêtre
  * facultative sur le début ; sans fenêtre, les prochains passent d'abord, puis
- * l'historique le plus récent. Borné, et `truncated` dit la lacune. `now` vient
- * du client : une query ne lit pas l'horloge.
+ * l'historique le plus récent. Borné, et `truncated` dit la lacune. `now` choisit
+ * la fenêtre ; les droits des événements associatifs sont relus à l'acte.
  */
 export const myAgenda = networkQuery({
-  args: { now: v.number(), from: v.optional(v.number()), to: v.optional(v.number()) },
-  handler: async (ctx, args): Promise<{ items: EventDto[]; truncated: boolean }> => {
+  args: { now: v.number(), from: v.optional(v.number()), to: v.optional(v.number()), expectedReaderPersonId: v.optional(v.id("persons")) },
+  handler: async (ctx, args): Promise<{ items: EventDto[]; associationItems: AssociationAgendaDto[]; truncated: boolean }> => {
     const me = ctx.person._id
+    if (args.expectedReaderPersonId !== undefined && args.expectedReaderPersonId !== me) return notFound()
     const profileOf = miniProfileCache(ctx)
     let truncated = false
     const organized = await ctx.db
@@ -424,13 +466,116 @@ export const myAgenda = networkQuery({
         : []
     if (participationsPast.length > 0 && participationsPast.length >= AGENDA_SCAN - participations.length) truncated = true
     const items: EventDto[] = []
-    for (const event of [...organizedPast, ...organized]) items.push(await toEventDto(ctx, event, { isOrganizer: true, participation: null, profileOf }))
+    const associationItems: AssociationAgendaDto[] = []
+    const associationSeen = new Set<Id<"events">>()
+    for (const event of [...organizedPast, ...organized]) if (event.organizerPageId === undefined && await canReadModeratedContent(ctx, "event", event._id, me)) items.push(await toEventDto(ctx, event, { isOrganizer: true, participation: null, profileOf }))
     for (const participation of [...participationsPast, ...participations]) {
       const event = await ctx.db.get(participation.eventId)
-      if (event) items.push(await toEventDto(ctx, event, { isOrganizer: false, participation, profileOf }))
+      // La branche personnelle et son DTO restent identiques.
+      if (event && event.networkId === ctx.networkId && event.organizerPageId === undefined && event.organizerPersonId !== undefined && await canReadModeratedContent(ctx, "event", event._id, me)) items.push(await toEventDto(ctx, event, { isOrganizer: false, participation, profileOf }))
+      if (!event || event.networkId !== ctx.networkId || event.organizerPageId === undefined || participation.networkId !== ctx.networkId || associationSeen.has(event._id)) continue
+      const confirmed = participation.status === "accepted"
+      const waitlisted = participation.status === "pending" && participation.pageRegistrationSequence !== undefined && Number.isSafeInteger(participation.pageRegistrationSequence) && participation.pageRegistrationSequence > 0
+      if (!confirmed && !waitlisted) continue
+      if (!Number.isFinite(event.startAt) || !Number.isFinite(event.endAt) || event.endAt <= event.startAt) continue
+      if ((args.from !== undefined && event.startAt < args.from) || (args.to !== undefined && event.startAt > args.to)) continue
+      const access = await readableGalleryEvent(ctx, ctx.networkId, event._id, me, { allowCancelled: true })
+      if (!access) continue
+      associationSeen.add(event._id)
+      associationItems.push({
+        kind: "association", eventId: event._id, pageId: access.page._id, title: event.title,
+        description: event.description ?? null, location: event.location ?? null,
+        startAt: event.startAt, endAt: event.endAt, timeZone: event.timeZone,
+        status: event.status, cancelledAt: event.cancelledAt ?? null, version: event.version ?? 1,
+        organizer: { name: access.page.name, handle: access.page.handle }, registration: confirmed ? "confirmed" : "waitlisted",
+      })
     }
     items.sort((a, b) => a.startAt - b.startAt)
-    return { items, truncated }
+    associationItems.sort((a, b) => a.startAt - b.startAt)
+    return { items, associationItems, truncated }
+  },
+})
+
+/**
+ * Un flux de l'agenda, exhaustif par curseurs natifs. L'ancre fixe seulement la
+ * période ; elle ne donne aucun droit. Une page filtrée vide garde sa suite et
+ * les indications de découpage de Convex : jamais de rattrapage dans cet appel.
+ */
+export const paginateMyAgenda = networkQuery({
+  args: {
+    source: literals(["organized", "participations"] as const),
+    period: literals(["upcoming", "history"] as const),
+    anchor: v.number(),
+    expectedReaderPersonId: v.id("persons"),
+    paginationOpts: paginationOptsValidator,
+  },
+  handler: async (ctx, args): Promise<PaginationResult<AgendaRowDto>> => {
+    const me = ctx.person._id
+    if (args.expectedReaderPersonId !== me || !Number.isFinite(args.anchor)) return notFound()
+    const requested = args.paginationOpts.numItems
+    const requestedBytes = args.paginationOpts.maximumBytesRead
+    const requestedRows = args.paginationOpts.maximumRowsRead
+    const numItems = Number.isFinite(requested) ? Math.min(Math.max(Math.trunc(requested), 1), AGENDA_PAGE_MAX) : 20
+    const maximumBytesRead = requestedBytes === undefined || !Number.isFinite(requestedBytes) ? AGENDA_PAGE_BYTES : Math.min(Math.max(Math.trunc(requestedBytes), 1), AGENDA_PAGE_BYTES)
+    // Un endCursor réactif peut dépasser numItems ; borner aussi la lecture brute.
+    const maximumRowsRead = requestedRows === undefined || !Number.isFinite(requestedRows) ? AGENDA_PAGE_MAX : Math.min(Math.max(Math.trunc(requestedRows), 1), AGENDA_PAGE_MAX)
+    const paginationOpts = { ...args.paginationOpts, numItems, maximumBytesRead, maximumRowsRead }
+    const order = args.period === "upcoming" ? "asc" : "desc"
+    const profileOf = miniProfileCache(ctx)
+    const seen = new Set<Id<"events">>()
+    const page: AgendaRowDto[] = []
+    const inPeriod = (event: Doc<"events">) => Number.isFinite(event.startAt) && (args.period === "upcoming" ? event.startAt >= args.anchor : event.startAt < args.anchor)
+
+    if (args.source === "organized") {
+      const result = await ctx.db.query("events")
+        .withIndex("by_network_organizer_startAt", (q) => {
+          const base = q.eq("networkId", ctx.networkId).eq("organizerPersonId", me)
+          return args.period === "upcoming" ? base.gte("startAt", args.anchor) : base.lt("startAt", args.anchor)
+        })
+        .order(order).paginate(paginationOpts)
+      for (const event of result.page) {
+        if (event.networkId !== ctx.networkId || event.organizerPageId !== undefined || event.organizerPersonId !== me || seen.has(event._id) || !inPeriod(event)) continue
+        if (!(await canReadModeratedContent(ctx, "event", event._id, me))) continue
+        seen.add(event._id)
+        page.push({ kind: "personal", event: await toEventDto(ctx, event, { isOrganizer: true, participation: null, profileOf }) })
+      }
+      return { ...result, page }
+    }
+
+    const result = await ctx.db.query("eventParticipants")
+      .withIndex("by_network_person_eventStartAt", (q) => {
+        const base = q.eq("networkId", ctx.networkId).eq("personId", me)
+        return args.period === "upcoming" ? base.gte("eventStartAt", args.anchor) : base.lt("eventStartAt", args.anchor)
+      })
+      .order(order).paginate(paginationOpts)
+    for (const participation of result.page) {
+      if (participation.networkId !== ctx.networkId || participation.personId !== me) continue
+      const event = await ctx.db.get(participation.eventId)
+      if (!event || event.networkId !== ctx.networkId || seen.has(event._id) || !inPeriod(event)) continue
+      if (event.organizerPageId === undefined) {
+        if (event.organizerPersonId === undefined || event.organizerPersonId === me || !(await canReadModeratedContent(ctx, "event", event._id, me))) continue
+        seen.add(event._id)
+        page.push({ kind: "personal", event: await toEventDto(ctx, event, { isOrganizer: false, participation, profileOf }) })
+        continue
+      }
+      const confirmed = participation.status === "accepted"
+      const waitlisted = participation.status === "pending" && participation.pageRegistrationSequence !== undefined && Number.isSafeInteger(participation.pageRegistrationSequence) && participation.pageRegistrationSequence > 0
+      if ((!confirmed && !waitlisted) || !Number.isFinite(event.endAt) || event.endAt <= event.startAt) continue
+      const access = await readableGalleryEvent(ctx, ctx.networkId, event._id, me, { allowCancelled: true })
+      if (!access) continue
+      seen.add(event._id)
+      page.push({
+        kind: "association",
+        event: {
+          kind: "association", eventId: event._id, pageId: access.page._id, title: event.title,
+          description: event.description ?? null, location: event.location ?? null,
+          startAt: event.startAt, endAt: event.endAt, timeZone: event.timeZone,
+          status: event.status, cancelledAt: event.cancelledAt ?? null, version: event.version ?? 1,
+          organizer: { name: access.page.name, handle: access.page.handle }, registration: confirmed ? "confirmed" : "waitlisted",
+        },
+      })
+    }
+    return { ...result, page }
   },
 })
 
@@ -439,6 +584,7 @@ export const getEvent = networkQuery({
   args: { eventId: v.id("events") },
   handler: async (ctx, args): Promise<EventDto> => {
     const { event, participation, isOrganizer } = await requireEventAccess(ctx, ctx.networkId, args.eventId, ctx.person._id)
+    if (event.organizerPageId !== undefined) return notFound()
     return await toEventDto(ctx, event, { isOrganizer, participation, profileOf: miniProfileCache(ctx) })
   },
 })
@@ -453,7 +599,9 @@ export type EventParticipantDto = {
 export const paginateEventParticipants = networkQuery({
   args: { eventId: v.id("events"), paginationOpts: paginationOptsValidator },
   handler: async (ctx, args): Promise<PaginationResult<EventParticipantDto>> => {
-    await requireEventAccess(ctx, ctx.networkId, args.eventId, ctx.person._id)
+    const { event } = await requireEventAccess(ctx, ctx.networkId, args.eventId, ctx.person._id)
+    // Les événements associatifs ne publient aucune liste de personnes.
+    if (event.organizerPageId !== undefined) return notFound()
     const result = await ctx.db
       .query("eventParticipants")
       .withIndex("by_event_status", (q) => q.eq("eventId", args.eventId))

@@ -1,5 +1,5 @@
 /**
- * L'IDENTITÉ d'une page — nom, sigle, description, pays, règle de visibilité,
+ * L'IDENTITÉ d'une page — nom, sigle, description, pays, ville, classification, règle de visibilité,
  * logo et bannière — tenue par ses ADMINISTRATEURS vivants.
  *
  * Écrit à neuf (owner map §6.15) : le socle DÉRIVAIT l'identité d'une page de
@@ -14,10 +14,12 @@
  * l'analyse, délivrance par `resolveFileDelivery` ; l'image remplacée ou retirée
  * est PURGÉE (elle n'appartient qu'à cette page).
  */
-import { assertCountryCode } from "@antia/social-domain/content"
-import { assertPageName, normalizePageDescription, normalizePageShortName } from "@antia/social-domain/pages"
+import { assertCountryCode } from "@antsia/social-domain/content"
+import { assertPageName, normalizePageDescription, normalizePageShortName } from "@antsia/social-domain/pages"
+import { normalizePageAssociationType, normalizePageCity, normalizePageSector } from "@antsia/social-domain/pagePresentation"
 import { v } from "convex/values"
 
+import { moderateContentWrite } from "../moderation/policy"
 import type { Doc, Id } from "../../_generated/dataModel"
 import type { MutationCtx } from "../../_generated/server"
 import { checked } from "../../lib/errors"
@@ -29,6 +31,7 @@ import { admitStoredUpload, assertFreshUpload, findScanByStorageId } from "../fi
 import { purgeStoredFile } from "../files/purge"
 import { resolveFileDelivery, withheldCodeOf, withheldCodeValidator } from "../files/storageGuard"
 import { isPageOnRoot, pageSearchText, requireManagedPage } from "./access"
+import { pageAssociationTypeValidator, pageSectorValidator } from "./validators"
 
 const imageSlotValidator = v.union(v.literal("logo"), v.literal("banner"))
 
@@ -49,6 +52,9 @@ export const updatePageIdentity = networkMutation({
     shortName: v.optional(v.union(v.string(), v.null())),
     description: v.optional(v.union(v.string(), v.null())),
     country: v.optional(v.union(v.string(), v.null())),
+    city: v.optional(v.union(v.string(), v.null())),
+    associationType: v.optional(v.union(pageAssociationTypeValidator, v.literal(""), v.null())),
+    sector: v.optional(v.union(pageSectorValidator, v.literal(""), v.null())),
     visibility: v.optional(contentVisibilityValidator),
   },
   returns: v.object({ changed: v.boolean() }),
@@ -85,6 +91,27 @@ export const updatePageIdentity = networkMutation({
         previous.country = page.country ?? null
       }
     }
+    if (args.city !== undefined) {
+      const city = checked(() => normalizePageCity(args.city))
+      if (city !== page.city) {
+        patch.city = city
+        previous.city = page.city ?? null
+      }
+    }
+    if (args.associationType !== undefined) {
+      const associationType = checked(() => normalizePageAssociationType(page.ownerKind, args.associationType))
+      if (associationType !== page.associationType) {
+        patch.associationType = associationType
+        previous.associationType = page.associationType ?? null
+      }
+    }
+    if (args.sector !== undefined) {
+      const sector = checked(() => normalizePageSector(page.ownerKind, args.sector))
+      if (sector !== page.sector) {
+        patch.sector = sector
+        previous.sector = page.sector ?? null
+      }
+    }
     if (args.visibility !== undefined && ctx.network.kind !== "root" && args.visibility !== page.visibility) {
       patch.visibility = args.visibility
       patch.onRoot = isPageOnRoot(ctx.network, args.visibility)
@@ -94,6 +121,11 @@ export const updatePageIdentity = networkMutation({
     const now = Date.now()
     const name = patch.name ?? page.name
     const shortName = "shortName" in patch ? patch.shortName : page.shortName
+    const description = "description" in patch ? patch.description : page.description
+    const city = "city" in patch ? patch.city : page.city
+    const associationType = "associationType" in patch ? patch.associationType : page.associationType
+    const sector = "sector" in patch ? patch.sector : page.sector
+    await moderateContentWrite(ctx, { networkId: ctx.networkId, ownerPersonId: ctx.person._id, kind: "page", id: page._id, text: `${name} ${description ?? ""} ${city ?? ""} ${associationType ?? ""} ${sector ?? ""}` })
     await ctx.db.patch(page._id, { ...patch, searchText: pageSearchText({ name, ...(shortName !== undefined ? { shortName } : {}), handle: page.handle }), updatedAt: now })
     await ctx.db.insert("pageIdentityHistory", { networkId: page.networkId, pageId: page._id, actorPersonId: ctx.person._id, previous, at: now })
     return { changed: true }

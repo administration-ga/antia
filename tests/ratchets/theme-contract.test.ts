@@ -9,6 +9,7 @@ import { isTestFile, listFiles, readRepoFile, REPO_ROOT, workspaceDirectories } 
 const CHARTE = "packages/ui/src/styles/charte.css"
 const THEME_LAYER = "packages/ui/src/styles/theme.css"
 const THEMES_DIR = "packages/ui/src/themes"
+const STYLES_DIR = "packages/ui/src/styles"
 /** Espaces de noms des jetons générés par Tailwind v4 (thème et utilitaires). */
 const TAILWIND_NAMESPACES = /^--(tw-|color-|spacing|font-|radius-|text-|container-|breakpoint-|shadow-|ease-|animate-|leading-|tracking-|default-)/
 
@@ -43,13 +44,21 @@ describe("theme-contract — un thème ne redéclare que les jetons de la charte
   })
 
   it("aucun jeton fantôme : tout var(--x) lu par les écrans est déclaré quelque part", () => {
-    const declared = new Set([...contract, ...declaredCustomProperties(readRepoFile(THEME_LAYER))])
+    // Déclarés : le contrat (charte), la couche Tailwind, et les feuilles de jetons
+    // du paquet d'interface (`packages/ui/src/styles/*.css`, ex. la couche de
+    // communication) — seules feuilles où une valeur littérale peut exister.
+    const styleSheets = listFiles([STYLES_DIR], [".css"]).filter((file) => file !== CHARTE && file !== THEME_LAYER)
+    const declared = new Set([...contract, ...declaredCustomProperties(readRepoFile(THEME_LAYER)), ...styleSheets.flatMap((file) => [...declaredCustomProperties(readRepoFile(file))])])
     const directories = [...workspaceDirectories("apps"), ...workspaceDirectories("packages")].map((dir) => `${dir}/src`)
     const phantoms: string[] = []
     for (const file of listFiles(directories, [".ts", ".tsx", ".css"])) {
       if (isTestFile(file)) continue
-      for (const token of usedCustomProperties(readRepoFile(file))) {
-        if (!declared.has(token) && !TAILWIND_NAMESPACES.test(token)) phantoms.push(`${file} : ${token}`)
+      const text = readRepoFile(file)
+      // Un jeton LOCAL (déclaré par la feuille même qui le lit, ex. `--icom-anchored-height`
+      // dans la feuille de la messagerie) est déclaré : il n'a rien d'un fantôme.
+      const local = declaredCustomProperties(text)
+      for (const token of usedCustomProperties(text)) {
+        if (!declared.has(token) && !local.has(token) && !TAILWIND_NAMESPACES.test(token)) phantoms.push(`${file} : ${token}`)
       }
     }
     expect(phantoms).toEqual([])

@@ -1,4 +1,4 @@
-// Dupliqué de socle/convex/modules/fileGuard/mutations.ts @ ad2e7fdc2 — adaptations : table `fileScans` ; quarantaine iDocument et triage IA retirés (le statut bloquant EST la retenue ; l'avis part par la cloche sociale, `notify.ts`) ; libération par un MODÉRATEUR du réseau du fichier ou un opérateur (au lieu de `settings.manage` d'une administration), relance par un opérateur (au lieu du superadmin) ; `logAudit` (journal de l'archive iDocument) remplacé par le journal du moteur (`appendAudit` : libération, relance, purge, avec la qualité de l'acteur) ; débit sur les gestes humains ; coupe-circuit respecté par l'analyse et le balayeur (fail-closed) ; purge indexée sur `blobPurgedAt` (D31 : une ligne purgée ne bloque plus la file) ; `_ageScanForTests` non recopiée (les tests vieillissent la ligne eux-mêmes) ; refus à code du moteur.
+// Dupliqué de socle/convex/modules/fileGuard/mutations.ts @ ad2e7fdc2 — adaptations : table `fileScans` ; quarantaine iDocument et triage IA retirés (le statut bloquant EST la retenue ; l'avis part par la cloche sociale, `notify.ts`) ; libération par un MODÉRATEUR du réseau du fichier ou un opérateur (au lieu de `settings.manage` d'une administration), relance par un opérateur (au lieu du superadmin) ; `logAudit` (journal de l'archive iDocument) remplacé par le journal du moteur (`appendAudit` : libération, relance, purge, avec la qualité de l'acteur) ; débit sur les gestes humains ; coupe-circuit respecté par l'analyse et le balayeur (fail-closed) ; purge indexée sur `blobPurgedAt` (D31 : une ligne purgée ne bloque plus la file) ; `_ageScanForTests` non recopiée (les tests vieillissent la ligne eux-mêmes) ; refus à code du moteur. ; `_markRunning` rend la taille STOCKÉE (`sizeBytes`, table `_storage`) pour que l'analyse écarte un fichier trop gros AVANT de le télécharger (lot 16) ; lots pleins poursuivis par chaîne pour la relance et la purge (lot 17).
 /**
  * Garde des fichiers — MUTATIONS.
  *
@@ -13,7 +13,7 @@
  * d'analyse ; tout échec après `_markRunning` finit dans `_record`. Le balayeur
  * `retryStale` rattrape le crash pur du runtime.
  */
-import { type AuditCapacity, assertDecisionReason } from "@antia/social-domain/audit"
+import { type AuditCapacity, assertDecisionReason } from "@antsia/social-domain/audit"
 import { v } from "convex/values"
 
 import { internal } from "../../_generated/api"
@@ -46,6 +46,8 @@ export const scanFactsValidator = v.object({
   filename: v.union(v.string(), v.null()),
   declaredMimeType: v.union(v.string(), v.null()),
   attempts: v.number(),
+  /** La taille STOCKÉE (table `_storage`), lue avant tout téléchargement ; `null` : inconnue. */
+  sizeBytes: v.union(v.number(), v.null()),
 })
 
 /**
@@ -63,12 +65,14 @@ export const _markRunning = internalMutation({
     const now = Date.now()
     const attempts = scan.attempts + 1
     await ctx.db.patch(scan._id, { status: "running", attempts, startedAt: now, updatedAt: now })
+    const stored = await ctx.db.system.get(scan.storageId)
     return {
       scanId: scan._id,
       storageId: scan.storageId,
       filename: scan.filename ?? null,
       declaredMimeType: scan.declaredMimeType ?? null,
       attempts,
+      sizeBytes: stored?.size ?? null,
     }
   },
 })
@@ -110,6 +114,11 @@ export const _record = internalMutation({
     if (scan.status !== "running") return null
     const now = Date.now()
     const { outcome } = args
+
+    if (scan.requiresFullScan && (outcome.kind === "skipped" || (outcome.kind === "verdict" && outcome.status === "clean" && outcome.av?.verdict !== "clean"))) {
+      await settleError(ctx, scan, "FEDERATED_FULL_SCAN_REQUIRED")
+      return null
+    }
 
     if (outcome.kind === "skipped") {
       await ctx.db.patch(scan._id, {
@@ -245,11 +254,13 @@ export const retryStale = internalMutation({
     if (isKillSwitched(process.env)) return 0
     const threshold = Date.now() - FILE_GUARD_RUNNING_STALE_MS
     let touched = 0
+    let saturated = false
     for (const status of ["pending", "running"] as const) {
       const stale = await ctx.db
         .query("fileScans")
         .withIndex("by_status_updatedAt", (q) => q.eq("status", status).lt("updatedAt", threshold))
         .take(SWEEP_TAKE)
+      if (stale.length === SWEEP_TAKE) saturated = true
       for (const scan of stale) {
         touched += 1
         const now = Date.now()
@@ -263,6 +274,8 @@ export const retryStale = internalMutation({
         await ctx.scheduler.runAfter(0, internal.modules.files.scan.runScan, { scanId: scan._id })
       }
     }
+    // Chaque ligne a changé d'état ou d'updatedAt, donc sort de la file périmée.
+    if (saturated) await ctx.scheduler.runAfter(0, internal.modules.files.mutations.retryStale, {})
     return touched
   },
 })
@@ -299,6 +312,9 @@ export const purgeQuarantinedBlobs = internalMutation({
         at: now,
       })
     }
+    // blobPurgedAt fait sortir les lignes traitées de cet index ; aucun ancien
+    // verdict ne peut retenir la tête de la file jusqu'au cron du lendemain.
+    if (candidates.length === PURGE_TAKE) await ctx.scheduler.runAfter(0, internal.modules.files.mutations.purgeQuarantinedBlobs, {})
     return candidates.length
   },
 })

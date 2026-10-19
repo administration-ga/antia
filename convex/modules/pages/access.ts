@@ -7,14 +7,16 @@
  * nom » : deux définitions divergeraient au premier oubli, et c'est sur cette
  * différence que reposerait une fuite depuis une page retirée.
  */
-import { computePageBadge } from "@antia/social-domain/badges"
-import { derivePageHandle, PAGE_SIGNATORIES_MAX, type PageRole } from "@antia/social-domain/pages"
-import { buildSearchableText } from "@antia/social-domain/searchText"
+import { computePageBadge } from "@antsia/social-domain/badges"
+import { derivePageHandle, PAGE_SIGNATORIES_MAX, type PageRole } from "@antsia/social-domain/pages"
+import { buildSearchableText } from "@antsia/social-domain/searchText"
 
+import { canReadModeratedContent } from "../moderation/policy"
 import type { Doc, Id } from "../../_generated/dataModel"
 import type { QueryCtx } from "../../_generated/server"
 import { isActiveMember } from "../../lib/access"
 import { fail, notFound } from "../../lib/errors"
+import { assertNativePageManagement, isFederatedPage, isFederatedContentAvailable } from "../federation/mirrorAccess"
 import { servableUrl } from "../files/storageGuard"
 import { hasStrongIdentityFor } from "../people/persons"
 import type { PageCard } from "./validators"
@@ -42,9 +44,10 @@ export function isPageInReadingContext(page: Doc<"pages">, network: Doc<"network
  * Page inconnue, retirée, ou d'un autre réseau : le même `null`. Distinguer
  * dirait à qui cherche qu'une organisation a « déjà eu » une page.
  */
-export async function readablePageOrNull(ctx: ReadCtx, network: Doc<"networks">, pageId: Id<"pages">): Promise<Doc<"pages"> | null> {
+export async function readablePageOrNull(ctx: ReadCtx, network: Doc<"networks">, pageId: Id<"pages">, readerPersonId?: Id<"persons">): Promise<Doc<"pages"> | null> {
   const page = await ctx.db.get(pageId)
-  if (!page || page.status !== "active" || !isPageInReadingContext(page, network)) return null
+  if (!page || page.status !== "active" || !isPageInReadingContext(page, network) || !(await canReadModeratedContent(ctx, "page", page._id, readerPersonId))) return null
+  if (!(await isFederatedContentAvailable(ctx, "pages", page._id))) return null
   return page
 }
 
@@ -62,9 +65,10 @@ export async function findPageByHandle(ctx: ReadCtx, rawHandle: string): Promise
     .unique()
 }
 
-export async function readablePageByHandle(ctx: ReadCtx, network: Doc<"networks">, rawHandle: string): Promise<Doc<"pages"> | null> {
+export async function readablePageByHandle(ctx: ReadCtx, network: Doc<"networks">, rawHandle: string, readerPersonId?: Id<"persons">): Promise<Doc<"pages"> | null> {
   const page = await findPageByHandle(ctx, rawHandle)
-  if (!page || page.status !== "active" || !isPageInReadingContext(page, network)) return null
+  if (!page || page.status !== "active" || !isPageInReadingContext(page, network) || !(await canReadModeratedContent(ctx, "page", page._id, readerPersonId))) return null
+  if (!(await isFederatedContentAvailable(ctx, "pages", page._id))) return null
   return page
 }
 
@@ -111,6 +115,7 @@ export async function signatoryRowOf(ctx: ReadCtx, pageId: Id<"pages">, personId
  */
 export async function liveSignatoryRole(ctx: ReadCtx, page: Doc<"pages">, personId: Id<"persons">): Promise<PageRole | null> {
   if (page.status !== "active") return null
+  if (await isFederatedPage(ctx, page._id)) return null
   const row = await signatoryRowOf(ctx, page._id, personId)
   if (!row || row.acceptedAt === undefined) return null
   if (!(await isActiveMember(ctx, page.networkId, personId))) return null
@@ -120,6 +125,7 @@ export async function liveSignatoryRole(ctx: ReadCtx, page: Doc<"pages">, person
 
 /** Exige un rôle vivant (`signatory` : tout signataire ; `admin` : un administrateur). */
 export async function requirePageRole(ctx: ReadCtx, page: Doc<"pages">, personId: Id<"persons">, min: PageRole): Promise<PageRole> {
+  await assertNativePageManagement(ctx, page._id)
   const role = await liveSignatoryRole(ctx, page, personId)
   if (role === null || (min === "admin" && role !== "admin")) return fail("pageRoleRequired")
   return role
@@ -197,7 +203,7 @@ export function pageCardCache(ctx: UrlCtx): (pageId: Id<"pages">) => Promise<Pag
     const hit = cache.get(pageId)
     if (hit !== undefined) return hit
     const page = await ctx.db.get(pageId)
-    const card = page && page.status === "active" ? await pageCardOf(ctx, page) : null
+    const card = page && page.status === "active" && await isFederatedContentAvailable(ctx, "pages", page._id) ? await pageCardOf(ctx, page) : null
     cache.set(pageId, card)
     return card
   }

@@ -1,4 +1,4 @@
-// Dupliqué de socle/convex/lib/uploadPolicy.ts @ ad2e7fdc2 — adaptations : lecture de `_storage` seulement, les règles vivent dans `@antia/social-domain/uploadPolicy` ; refus à code (`notFound` indistinct pour un fichier absent, règles `UPLOAD_*` en `invalidArgument`) ; `tryStoredUpload` retiré (aucun import en masse dans le moteur).
+// Dupliqué de socle/convex/lib/uploadPolicy.ts @ ad2e7fdc2 — adaptations : lecture de `_storage` seulement, les règles vivent dans `@antsia/social-domain/uploadPolicy` ; refus à code (`notFound` indistinct pour un fichier absent, règles `UPLOAD_*` en `invalidArgument`) ; `tryStoredUpload` retiré (aucun import en masse dans le moteur).
 /**
  * Politique de dépôt — les deux temps côté backend.
  *
@@ -12,7 +12,7 @@
  * publique passe d'ailleurs par `admitStoredUpload` (garde des fichiers), qui
  * appelle ce temps 2 puis inscrit le fichier à l'analyse.
  */
-import { checkStoredUpload, type DeclaredUpload, type StoredUpload, UPLOAD_USAGES, type UploadUsage } from "@antia/social-domain/uploadPolicy"
+import { checkStoredUpload, type DeclaredUpload, type StoredUpload, UPLOAD_USAGES, type UploadUsage } from "@antsia/social-domain/uploadPolicy"
 
 import type { Id } from "../_generated/dataModel"
 import type { MutationCtx, QueryCtx } from "../_generated/server"

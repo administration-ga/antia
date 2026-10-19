@@ -63,7 +63,7 @@ export type ConnectionView<ConnectionId extends string = string> =
   | { state: "requested_by_them"; connectionId: ConnectionId; message?: string }
   | { state: "connected"; connectionId: ConnectionId; since: number }
   | { state: "declined"; connectionId: ConnectionId }
-  | { state: "blocked_by_me"; connectionId: ConnectionId }
+  | { state: "blocked_by_me"; connectionId: ConnectionId | null }
 
 export interface ConnectionViewFacts<PersonId extends string, ConnectionId extends string> extends ConnectionRowFacts<PersonId> {
   _id: ConnectionId

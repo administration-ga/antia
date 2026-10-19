@@ -11,8 +11,8 @@
  */
 import { describe, expect, it } from "vitest"
 
-import { detectRawUploadUrl, UPLOAD_POLICY_GATE } from "./lib/detectors"
-import { type Finding, formatFindings, isTestFile, listFiles, readRepoFile } from "./lib/source-files"
+import { calledNames, detectRawUploadUrl, importedNames, UPLOAD_POLICY_GATE } from "./lib/detectors"
+import { type Finding, formatFindings, isTestFile, listFiles, parseSource, readRepoFile } from "./lib/source-files"
 
 const BACKEND = listFiles(["convex"], [".ts"]).filter((file) => !isTestFile(file) && !file.endsWith(".setup.ts"))
 
@@ -34,9 +34,10 @@ describe("upload-policy — toute URL de dépôt déclare son usage (temps 1) et
     const admitting = new Set<string>()
     for (const file of BACKEND) {
       if (file === UPLOAD_POLICY_GATE) continue
-      const text = readRepoFile(file)
-      if (/\bguardUploadUrl\s*\(/.test(text)) delivering.add(moduleOf(file))
-      if (/\b(admitStoredUpload|admitPosedUploads)\s*\(/.test(text)) admitting.add(moduleOf(file))
+      const source = parseSource(file, readRepoFile(file))
+      const calls = calledNames(source, importedNames(source))
+      if (calls.has("guardUploadUrl")) delivering.add(moduleOf(file))
+      if (calls.has("admitStoredUpload") || calls.has("admitPosedUploads")) admitting.add(moduleOf(file))
     }
     expect([...delivering].filter((module) => !admitting.has(module))).toEqual([])
   })
@@ -45,5 +46,20 @@ describe("upload-policy — toute URL de dépôt déclare son usage (temps 1) et
     const source = "export const upload = mutation({ handler: async (ctx) => await ctx.storage.generateUploadUrl() })"
     expect(detectRawUploadUrl("convex/modules/posts/media.ts", source)).toHaveLength(1)
     expect(detectRawUploadUrl(UPLOAD_POLICY_GATE, source)).toEqual([])
+  })
+
+  it("test du test : crochets et alias locaux du stockage ne contournent pas la porte", () => {
+    const source = [
+      'ctx.storage["generateUploadUrl"](id)',
+      'ctx["storage"].generateUploadUrl(id)',
+      'const store = ctx.storage; store.generateUploadUrl(id)',
+      'const { storage: bucket } = ctx; bucket.generateUploadUrl(id)',
+      'const { generateUploadUrl: read } = ctx.storage; read(id)',
+      'const direct = ctx.storage.generateUploadUrl; direct(id)',
+      'map["generateUploadUrl"](id)',
+      'const other = map; other.generateUploadUrl(id)',
+      '// ctx.storage.generateUploadUrl(id)',
+    ].join("\n")
+    expect(detectRawUploadUrl("convex/modules/media/fixture.ts", source).map((finding) => finding.line)).toEqual([1, 2, 3, 4, 5, 6])
   })
 })

@@ -5,7 +5,7 @@
  * (IDN `loa ≥ 2` obligatoire, double validation des actes irréversibles)
  * arrive au prompt PA7 ; son journal est la lecture de `engineAudit`.
  */
-import { AUDIT_ACTIONS, AUDIT_CAPACITIES, AUDIT_SUBJECT_TABLES } from "@antia/social-domain/audit"
+import { AUDIT_ACTIONS, AUDIT_CAPACITIES, AUDIT_SUBJECT_TABLES } from "@antsia/social-domain/audit"
 import { defineTable } from "convex/server"
 import { v } from "convex/values"
 
@@ -18,6 +18,13 @@ export const auditSubjectTableValidator = literals(AUDIT_SUBJECT_TABLES)
 export const auditDetailsValidator = v.record(v.string(), v.union(v.string(), v.number(), v.boolean(), v.null()))
 
 export const platformTables = {
+  operatorSessionProofs: defineTable({
+    sessionId: v.string(), authUserId: v.string(), idnSubject: v.string(),
+    loa: v.union(v.literal(1), v.literal(2), v.literal(3)),
+    personId: v.optional(v.id("persons")), observedAt: v.number(), expiresAt: v.number(),
+    accessLoggedAt: v.optional(v.number()),
+  }).index("by_session", ["sessionId"]).index("by_person", ["personId"]).index("by_expiry", ["expiresAt"]),
+
   operators: defineTable({
     personId: v.id("persons"),
     role: v.union(v.literal("platform_operator"), v.literal("platform_admin")),

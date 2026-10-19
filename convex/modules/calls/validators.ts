@@ -1,5 +1,5 @@
-// Dupliqué de socle/convex/modules/iappel/validators.ts @ ad2e7fdc2 — adaptations : validateurs PRÉCIS dérivés des listes du domaine (`@antia/social-domain/callJournal`, une seule source pour les littéraux) ; portées (`dndScope`, `callScope`), environnement, politique et autorité de poste, horaires et priorité retirés ; raison d'admission sans `outside_hours` ni `secretariat_unavailable` ; « ne pas déranger » et silence de réunion sans portée ; bornes de saisie déplacées dans le contrat `@antia/social-contracts/calls` (l'écran les lit aussi).
-import { RELATION_PRESENCE_STATUSES } from "@antia/social-contracts/calls"
+// Dupliqué de socle/convex/modules/iappel/validators.ts @ ad2e7fdc2 — adaptations : validateurs PRÉCIS dérivés des listes du domaine (`@antsia/social-domain/callJournal`, une seule source pour les littéraux) ; portées (`dndScope`, `callScope`), environnement, politique et autorité de poste, horaires et priorité retirés ; raison d'admission sans `outside_hours` ni `secretariat_unavailable` ; « ne pas déranger » et silence de réunion sans portée ; bornes de saisie déplacées dans le contrat `@antsia/social-contracts/calls` (l'écran les lit aussi).
+import { RELATION_PRESENCE_STATUSES } from "@antsia/social-contracts/calls"
 import {
   CALL_ADMISSION_REASONS,
   CALL_END_REASONS,
@@ -8,7 +8,7 @@ import {
   CALL_MEDIA_TYPES,
   CALL_STATUSES,
   GROUP_CALL_INVITE_STATUSES,
-} from "@antia/social-domain/callJournal"
+} from "@antsia/social-domain/callJournal"
 import { v } from "convex/values"
 
 import { literals } from "../../lib/validators"

@@ -9,7 +9,7 @@
  * saisies, invitations, liens, cloches, photo et le fil — en une transaction
  * pour un petit groupe, par continuations chaînées pour un historique lourd.
  */
-import { canDeleteGroupThread } from "@antia/social-domain/groupThreads"
+import { canDeleteGroupThread } from "@antsia/social-domain/groupThreads"
 import { type Infer, v } from "convex/values"
 
 import { internal } from "../../_generated/api"

@@ -6,13 +6,18 @@
  * (raccrocher, refuser, expirer, nettoyer, quitter un fil). Une fin d'appel
  * écrite à deux endroits divergerait au premier oubli.
  */
-import { groupCallShouldEnd } from "@antia/social-contracts/callGroup"
-import type { CallEndReason } from "@antia/social-domain/callJournal"
+import { groupCallShouldEnd } from "@antsia/social-contracts/callGroup"
+import type { CallEndReason } from "@antsia/social-domain/callJournal"
+import { makeFunctionReference } from "convex/server"
 
 import type { Doc, Id } from "../../_generated/dataModel"
 import type { MutationCtx } from "../../_generated/server"
 import { notFound } from "../../lib/errors"
 import { inviteOf, invitesOf, liveThreadCall, loadGroupParticipants, participationOf, participationsOf } from "./access"
+import { isConversationCall } from "./conversation"
+
+/** La salle d'un appel de CONVERSATION (P10 ou contextuelle) est fermée par le serveur multimédia à la fin : un jeton émis ne la garde pas ouverte. */
+const closeConversationRoom = makeFunctionReference<"action", { roomName: string }, null>("modules/live/livekitActions:closeDirectRoom")
 
 /** Comment un appel finit : l'état terminal, la raison, et le mot laissé à l'appelant le cas échéant. */
 export type CallEnd = { callStatus: "ended" | "missed" | "declined"; endReason: CallEndReason; declineNote?: string }
@@ -37,6 +42,8 @@ export async function finishCall(ctx: MutationCtx, call: Doc<"calls">, end: Call
   for (const invite of await invitesOf(ctx, call._id)) {
     if (invite.status === "ringing") await ctx.db.patch(invite._id, { status: "missed", respondedAt: at })
   }
+  // CC-4 : le sélecteur unique — toute conversation (P10, contextuelle, ou incohérente) ferme sa salle.
+  if (isConversationCall(call)) await ctx.scheduler.runAfter(0, closeConversationRoom, { roomName: call.roomName })
 }
 
 /**

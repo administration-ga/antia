@@ -1,7 +1,8 @@
-// Dupliqué de socle/packages/api/src/stable-convex-better-auth-provider.tsx @ ad2e7fdc2 — adaptations : textes d'attente et d'échec reçus de l'application (`labels`, déjà traduits) au lieu de phrases en dur ; classes de la charte du moteur.
+// Dupliqué de socle/packages/api/src/stable-convex-better-auth-provider.tsx @ ad2e7fdc2 — adaptations : textes d'attente et d'échec reçus de l'application (`labels`, déjà traduits) ; classes de la charte ; session absente montée sous un fournisseur anonyme qui ne relit aucun cookie.
 "use client"
 
 import { ConvexBetterAuthProvider } from "@convex-dev/better-auth/react"
+import { ConvexProviderWithAuth } from "convex/react"
 import type { ComponentProps, ReactNode } from "react"
 import { useEffect, useState } from "react"
 
@@ -31,6 +32,16 @@ type BootstrapState = { status: "loading" } | { status: "ready"; token: string |
  * développement.
  */
 const bootstrapByClient = new WeakMap<object, Promise<SessionBootstrapResult>>()
+
+const anonymousAuth = {
+  isLoading: false,
+  isAuthenticated: false,
+  fetchAccessToken: async () => null,
+}
+
+function useAnonymousAuth() {
+  return anonymousAuth
+}
 
 function bootstrapOnce(authClient: RefreshableCrossDomainAuthClient): Promise<SessionBootstrapResult> {
   const existing = bootstrapByClient.get(authClient)
@@ -110,6 +121,13 @@ export function StableConvexBetterAuthProvider({ children, client, authClient, i
         </button>
       </div>
     )
+  }
+
+  if (state.token === null) {
+    // initialToken:null ne ferme pas useSession chez Better Auth : un ancien
+    // cookie HTTP pourrait réauthentifier l'origine malgré notre conclusion.
+    // Une connexion réussie fait une navigation complète et réamorce le client.
+    return <ConvexProviderWithAuth client={client} useAuth={useAnonymousAuth}>{children}</ConvexProviderWithAuth>
   }
 
   return (

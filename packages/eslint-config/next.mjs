@@ -5,7 +5,7 @@ import nextTs from "eslint-config-next/typescript"
 
 /**
  * Config ESLint partagée (flat) pour les applications Next et les paquets React
- * du moteur ANTIA (antia_ga, admin_antia_ga, social-features, ui, api, et les
+ * du moteur ANTSIA (antsia_ga, admin_antsia_ga, social-features, ui, api, et les
  * applications externes comme diasporale_com).
  *
  * = preset Next officiel (core-web-vitals + typescript) — qui enregistre déjà le

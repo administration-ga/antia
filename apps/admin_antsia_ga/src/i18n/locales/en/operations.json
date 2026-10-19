@@ -1,0 +1,386 @@
+{
+  "common": {
+    "loading": "Loading authorised data…",
+    "empty": "There are no items in this list.",
+    "emptyWindow": "There are no items in this window. The next page may contain results.",
+    "pagination": "List pagination",
+    "previous": "Previous",
+    "next": "Next",
+    "failed": "The operation could not be completed. Your input is preserved; you can retry.",
+    "saved": "Decision recorded in the audit log.",
+    "saving": "Saving…",
+    "reason": "Decision reason",
+    "reasonHint": "Explain the decision without copying contact details, secrets or private content.",
+    "reasonInvalid": "The reason must contain between {{min}} and 500 characters.",
+    "confirmAction": "Confirm: {{action}}",
+    "confirm": "Confirm decision",
+    "cancel": "Cancel",
+    "active": "Active",
+    "inactive": "Inactive",
+    "adminRequired": "This configuration requires the platform administrator role.",
+    "selectNetwork": "Select a network to open these tools.",
+    "draftNotice": "Unsaved input or pending decisions are present. Complete or cancel them before changing sections or networks.",
+    "discardDraftConfirm": "This change may discard unsaved input. Continue?",
+    "pendingChangeBlocked": "A decision is pending. Wait for its result before changing views."
+  },
+  "surfaces": {
+    "all": "All surfaces",
+    "post": "Posts",
+    "comment": "Comments",
+    "groupMessage": "Group messages",
+    "event": "Events",
+    "page": "Pages",
+    "person": "Profiles",
+    "live": "Live sessions",
+    "story": "Stories",
+    "album": "Albums",
+    "serviceReview": "Service reviews",
+    "serviceReviewReply": "Service review replies",
+    "commerceOffer": "Store offers",
+    "commercialMessage": "Commercial message",
+    "contextualMessage": "Request conversation messages",
+    "commerceJob": "Job openings",
+    "diasporaAidQuestion": "DIASPORALE mutual aid questions",
+    "diasporaAidAnswer": "DIASPORALE mutual aid answers",
+    "diasporaAidMission": "DIASPORALE volunteer missions",
+    "diasporaMentorProfile": "DIASPORALE mentor profiles",
+    "diasporaMentoringRequest": "DIASPORALE mentoring requests",
+    "diasporaKitResource": "DIASPORALE arrival kit resources",
+    "diasporaJobOffer": "DIASPORALE job offers",
+    "diasporaTalentProfile": "DIASPORALE talent profiles",
+    "diasporaJobApplication": "DIASPORALE job applications"
+  },
+  "teams": {
+    "title": "Moderation teams",
+    "lead": "Capabilities are rechecked in the network. Members who are unpublished or no longer listed in the directory are shown with a neutral label.",
+    "create": "Create team",
+    "name": "Team name",
+    "nameInvalid": "The name must contain between 2 and 100 characters.",
+    "scope": "Moderation surface",
+    "handle": "Member handle",
+    "handleHint": "Look up a published network member; a technical ID grants no access.",
+    "handleInvalid": "Enter a handle between 1 and 64 characters.",
+    "find": "Find member",
+    "notFound": "No visible member matches this handle.",
+    "neutralMember": "Hidden member",
+    "memberHandle": "@{{handle}}",
+    "add": "Add to team",
+    "remove": "Remove from team",
+    "noMembers": "There are no members in this team."
+  },
+  "appeals": {
+    "title": "Platform appeals",
+    "lead": "Open appeals for the selected network. Every decision is recorded in the audit log.",
+    "independence": "The person filing the appeal and the operator who made the original decision cannot decide this appeal.",
+    "uphold": "Uphold decision",
+    "overturn": "Overturn decision"
+  },
+  "federation": {
+    "title": "Federation",
+    "lead": "Emitters, receipts, media transfers and dead letters for this network. Technical receipt does not prove that a mirror was applied.",
+    "emitters": "Emitters",
+    "configureEmitter": "Configure emitter",
+    "editEmitter": "Edit configuration",
+    "newEmitter": "Configure another emitter",
+    "slug": "Emitter identifier",
+    "slugInvalid": "Use 2 to 64 lowercase letters, digits or hyphens, starting with a letter.",
+    "environment": "Environment",
+    "sandbox": "Sandbox",
+    "production": "Production",
+    "keyReference": "Key environment variable name",
+    "keyHint": "Enter only the ANTSIA_FEDERATION_…_KEY reference. The key itself is configured outside the console and is never displayed.",
+    "keyInvalid": "The reference must follow ANTSIA_FEDERATION_…_KEY, with uppercase letters, digits or underscores (160 characters maximum).",
+    "contracts": "Allowed contracts",
+    "contractsHint": "One contract per line. Allowing a contract does not create its business handler.",
+    "contractsInvalid": "Enter up to 32 distinct contracts in CONTRACT-V1 format, with at most 100 characters each.",
+    "enabled": "Enable this emitter",
+    "saveEmitter": "Save configuration",
+    "revision": "Revision {{revision}}",
+    "noContracts": "No allowed contracts.",
+    "receipts": "Receipts",
+    "pageSyncTitle": "Official administration pages and posts",
+    "pageSyncHint": "The connection supports official page identity and withdrawal, posts declared public, their withdrawals and media imports under the file guard. Voluntary agents will be connected later. An authorised emitter, its key and media origins must be configured.",
+    "mediaTransfers": "Media transfers",
+    "mediaTransfersHint": "These states track file imports. Transferred media remain subject to file analysis before delivery.",
+    "mediaReference": "{{kind}} · {{reference}}",
+    "mediaKind": {
+      "pages": "Page",
+      "posts": "Post"
+    },
+    "mediaStatus": {
+      "pending": "Waiting for transfer",
+      "running": "Transfer in progress",
+      "attached": "Transferred · file analysis required",
+      "failed": "Transfer failed"
+    },
+    "mediaFailure": {
+      "configuration": "Media origins are missing or invalid in the server configuration. They must be configured before retrying.",
+      "download": "The download was refused or interrupted.",
+      "obsolete": "The revision was withdrawn or its source object became unavailable.",
+      "admission": "A file was refused by the admission policy."
+    },
+    "mediaRetry": "Retry transfer",
+    "mediaRetryQueued": "Retry scheduled. Files will remain subject to analysis.",
+    "deadLetters": "Dead letters",
+    "replayHint": "Replay preserves the receipt and its envelope. A contract without a business handler will still fail.",
+    "replay": "Request replay",
+    "attempts_one": "{{count}} attempt",
+    "attempts_other": "{{count}} attempts",
+    "receiptStatus": {
+      "received": "Received, processing not confirmed",
+      "applied": "Applied",
+      "dead_letter": "Dead letter",
+      "discarded": "Personal event discarded, body not retained"
+    },
+    "failure": {
+      "unsupported_contract": "Business handler unavailable",
+      "contract_not_allowed": "Contract not allowed in this network",
+      "invalid_payload": "Invalid synchronisation data",
+      "unsupported_event": "Update type not supported",
+      "unsupported_media": "Remote image support pending",
+      "source_conflict": "Conflicting source reference or revision",
+      "consent_required": "Current personal consent required",
+      "identity_not_linked": "IDN identity not correlated or access unavailable"
+    },
+    "outcome": {
+      "deduplicated": "The receipt is already applied. No additional processing was performed.",
+      "still_failing": "The replay was recorded, but processing still fails. No mirror was applied.",
+      "applied": "The update was processed and the dead letter is resolved.",
+      "discarded": "The personal body was redacted without applying it. A new event tied to current consent is required."
+    }
+  },
+  "pages": {
+    "title": "Pages and trust",
+    "lead": "Trust levels come from the engine. Official status is reserved for institutions and a recorded administrative decision.",
+    "create": "Create institutional page",
+    "creationHint": "This creates an Official institutional page. Visibility stays within the network; it grants no badge to a person.",
+    "name": "Institution name",
+    "nameInvalid": "The name must contain between 1 and 120 characters.",
+    "handle": "Page address",
+    "handleInvalid": "Enter 3 to 60 lowercase characters: letters, digits, dots, hyphens or underscores, starting and ending with a letter or digit.",
+    "country": "Country (optional)",
+    "countryHint": "Two uppercase ISO letters, for example GA.",
+    "countryInvalid": "Use two uppercase country letters or leave this field empty.",
+    "filter": "Page status",
+    "address": "Address: {{handle}}",
+    "deactivate": "Withdraw page",
+    "reactivate": "Restore page",
+    "trust": {
+      "official": "Official",
+      "verified": "Verified",
+      "community": "Community"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Withdrawn"
+    }
+  },
+  "incidents": {
+    "title": "Incidents",
+    "lead": "Dated operational tracking. Incidents are resolved without deleting their audit history.",
+    "create": "Open incident",
+    "networkScope": "The incident will belong to the selected network.",
+    "globalScope": "The incident will belong to the platform.",
+    "name": "Incident title",
+    "titleHint": "Describe the operational issue without personal data.",
+    "titleInvalid": "The title must contain between 2 and 160 characters.",
+    "severity": "Severity",
+    "level": {
+      "info": "Information",
+      "warning": "Warning",
+      "critical": "Critical"
+    },
+    "status": {
+      "open": "Open",
+      "resolved": "Resolved"
+    },
+    "resolve": "Resolve incident"
+  },
+  "audit": {
+    "title": "Decision audit log",
+    "networkLead": "Recorded decisions in the selected network, newest first.",
+    "globalLead": "Recorded decisions across the platform, newest first.",
+    "subjectLead": "History of the selected subject. No technical details or private content are exported.",
+    "system": "System",
+    "hiddenActor": "Hidden actor",
+    "subjectType": "Subject type: {{table}}",
+    "subjectHistory": "View subject history",
+    "back": "Return to audit log"
+  },
+  "health": {
+    "title": "Network health",
+    "lead": "Materialised queue and member counts. These numbers describe the engine; they do not prove provider availability.",
+    "notGenerated": "No counts have been generated yet. Request a calculation to obtain a dated state.",
+    "building": "Calculation is running in batches. Incomplete values are not shown as a final state.",
+    "generated": "Calculation completed on",
+    "dateMissing": "The date of this count is unavailable.",
+    "refresh": "Refresh counters",
+    "queued": "Calculation requested. Wait for the new dated state.",
+    "snapshotHint": "Calculation spans several batches; this is a dated state, not an atomic snapshot of every table.",
+    "operational": {
+      "title": "Engine scheduled jobs",
+      "lead": "Technical observation shared by all networks, limited to job documents retained by Convex. Function names, arguments and error text are not retained in this dashboard.",
+      "notGenerated": "No observation is available. The scheduled observer must be connected and complete a pass.",
+      "observed": "Observed on",
+      "window": "Window:",
+      "scanned": "{{count}} documents examined, capped at {{limit}} per observation.",
+      "complete": "All job documents currently retained by Convex have been examined. This does not cover every function error or records already purged by Convex.",
+      "bounded": "The read reached a limit. Counts describe only the examined slice; zero failures does not prove that no other failures occurred.",
+      "stale": "This observation is more than fifteen minutes old. Dashboard freshness is no longer guaranteed.",
+      "warning": "{{count}} failed job(s) observed in the window. Use authorised Convex tools for diagnosis; private error text is not copied here.",
+      "noneObserved": "No failure observed in this slice and window. This result is not an availability guarantee.",
+      "synchronousNotMeasured": "Errors from synchronous queries and mutations are not measured here. Monitoring them requires a log drain configured by the owner. This dashboard sends no external notification.",
+      "metrics": {
+        "failed": "Failed",
+        "pending": "Pending",
+        "inProgress": "In progress",
+        "successful": "Completed",
+        "canceled": "Cancelled"
+      }
+    },
+    "metrics": {
+      "members": "Active members",
+      "openReports": "Open reports",
+      "openAppeals": "Open appeals",
+      "pendingFiles": "Files awaiting scan",
+      "deadLetters": "Dead letters"
+    }
+  },
+  "export": {
+    "title": "Aggregate export",
+    "lead": "At most twelve periods, without identities or free text. Privacy threshold: {{threshold}} cases and distinct authors.",
+    "suppressionHint": "Small cohorts and sub-cohorts are suppressed. A suppressed value is not zero and is not reconstructed in the export.",
+    "suppressed": "Suppressed",
+    "columns": {
+      "cases": "Cases",
+      "actioned": "Actioned decisions",
+      "dismissed": "Dismissed cases"
+    },
+    "json": "Download aggregate JSON",
+    "csv": "Download aggregate CSV",
+    "downloaded": "Aggregate export download requested.",
+    "failed": "The file could not be downloaded. You can retry.",
+    "invalid": "This aggregate projection cannot be exported; download is blocked."
+  },
+  "commercialContact": {
+    "title": "Commercial contact",
+    "lead": "This channel stays closed until the network and shop enable it. Personal conversations stay separate.",
+    "enabled": "Channel enabled",
+    "disabled": "Channel disabled",
+    "enable": "Enable channel",
+    "disable": "Disable channel"
+  },
+  "contextualPolicy": {
+    "title": "Request conversations",
+    "lead": "Opens or closes, for this network and for each kind, the private conversations that start from a service request, an accepted mentorship or a shortlisted application. Closed by default; every decision requires a reason and is recorded in the log.",
+    "existingHint": "Closing blocks any opening, message and call; the history stays readable to the parties. Personal messaging stays separate.",
+    "enabled": "Conversations open for this kind",
+    "disabled": "Conversations closed for this kind",
+    "enable": "Open conversations of this kind",
+    "disable": "Close conversations of this kind",
+    "updated": "Last decision on",
+    "kinds": {
+      "diasporaServiceRequest": "Service requests (DIASPORALE)",
+      "diasporaMentoring": "Accepted mentorships (DIASPORALE)",
+      "diasporaJobApplication": "Shortlisted applications (DIASPORALE)"
+    }
+  },
+  "paymentPolicy": {
+    "title": "New payments",
+    "lead": "Allow or close new payment starts for this network. Every decision requires a reason and is recorded in the audit log.",
+    "providerHint": "Enabling this policy alone does not configure a provider or make payment available. PRO.GA configuration and authorisations are still required.",
+    "existingHint": "Closing this policy keeps tracking and reconciliation of existing payments accessible. It does not cancel or refund a payment.",
+    "enabled": "New payment starts allowed by the platform",
+    "disabled": "New payment starts closed",
+    "enable": "Allow new payments",
+    "disable": "Close new payments",
+    "updated": "Last decision on"
+  },
+  "servicePolicy": {
+    "title": "Quotes, appointments and services",
+    "lead": "Open or close, for this network, quote, appointment and fixed-price service requests to shops linked to PRO.GA. Every decision requires a reason and is recorded in the audit log.",
+    "linkHint": "Opening this policy alone makes no service available: each shop must be linked to PRO.GA with the matching permission, and PRO.GA re-checks its mandate on every request.",
+    "existingHint": "Closing this policy keeps existing appointments and orders viewable and cancellable. It cancels no appointment.",
+    "enabled": "Service requests opened by the platform",
+    "disabled": "Service requests closed",
+    "enable": "Open service requests",
+    "disable": "Close service requests",
+    "updated": "Last decision on"
+  },
+  "jobPolicy": {
+    "title": "Job openings and applications",
+    "lead": "Open or close, for this network, the display of job openings received from PRO.GA and the sending of applications. Closed by default; every decision requires a reason and is recorded in the audit log.",
+    "linkHint": "Opening this policy alone publishes no opening: the employer must agree to publication in PRO.GA and link its shop with the matching permissions. PRO.GA re-checks the mandate on every application.",
+    "jobsEnabled": "Job openings shown in this network",
+    "jobsDisabled": "Job openings hidden in this network",
+    "applicationsEnabled": "Applications through ANTSIA open",
+    "applicationsDisabled": "Applications through ANTSIA closed",
+    "enableJobs": "Show job openings",
+    "disableJobs": "Hide job openings (and close applications)",
+    "enableApplications": "Open applications",
+    "disableApplications": "Close applications",
+    "updated": "Last decision on"
+  },
+  "storefrontPolicy": {
+    "title": "Storefront publication",
+    "lead": "Sets, for this network, how declared storefronts are published: closed (drafts only) or reviewed admission, one storefront at a time. Closed by default; every decision requires a reason and is recorded in the audit log.",
+    "closeHint": "Closing immediately removes storefronts from discovery without erasing anything; queued requests stay and can still be rejected, but no longer admitted.",
+    "autoHint": "Automatic admission of verified memberships is not offered here: it awaits approval of the list of restricted sectors.",
+    "updated": "Last decision on",
+    "state": {
+      "closed": "Storefront publication closed",
+      "review": "Reviewed admission, one storefront at a time",
+      "auto_verified": "Automatic admission of verified memberships (in force)"
+    },
+    "openReview": "Open reviewed admission",
+    "backToReview": "Return to reviewed admission",
+    "close": "Close storefront publication",
+    "queue": {
+      "title": "Admission queue",
+      "lead": "Publication requests, oldest first. Admitting publishes the storefront and creates its page if it has none; the reason for a rejection is shown to the managers.",
+      "closedHint": "Publication is closed: requests can be rejected, not admitted.",
+      "unnamed": "Unnamed storefront",
+      "page": "Page: {{handle}}",
+      "preparer": "Prepared by {{name}}",
+      "preparerWithHandle": "Prepared by {{name}} (@{{handle}})",
+      "noPreparer": "Preparer not disclosed",
+      "requested": "Requested on",
+      "admit": "Admit the storefront",
+      "reject": "Reject the storefront",
+      "model": {
+        "products": "Products",
+        "quote_services": "Services on quote"
+      },
+      "membership": {
+        "en_attente": "Membership pending",
+        "declaree": "Declared membership",
+        "verifiee": "Verified membership",
+        "suspendue": "Suspended membership",
+        "partie": "Left the network",
+        "none": "No membership"
+      }
+    }
+  },
+  "catalogPolicy": {
+    "title": "Shop catalogs",
+    "lead": "Open or close, for this network, the display of catalogs received from PRO.GA: offers, product pages and post slots. Closed by default; every decision requires a reason and is recorded in the audit log.",
+    "linkHint": "Opening this policy alone shows no offer: each shop must be linked to PRO.GA with the permission to publish its catalog, then attached to its emitter by a separate decision.",
+    "existingHint": "Closing immediately removes offers from every read without erasing the received copies; a new order preparation requires an open catalog.",
+    "enabled": "Catalogs shown in this network",
+    "disabled": "Catalogs closed",
+    "enable": "Open catalogs",
+    "disable": "Close catalogs",
+    "updated": "Last decision on"
+  },
+  "checkoutPolicy": {
+    "title": "Order preparation",
+    "lead": "Open or close, for this network, the private preparation of orders with shops linked to PRO.GA: summary and a fifteen-minute stock hold. Closed by default; every decision requires a reason and is recorded in the audit log.",
+    "linkHint": "Opening this policy alone makes no order possible: the catalog must be open and the shop linked to PRO.GA with the permission to receive orders. No payment follows from it.",
+    "existingHint": "Closing blocks any new preparation without erasing anything; holds already placed run to their expiry.",
+    "enabled": "Order preparation opened by the platform",
+    "disabled": "Order preparation closed",
+    "enable": "Open order preparation",
+    "disable": "Close order preparation",
+    "updated": "Last decision on"
+  }
+}

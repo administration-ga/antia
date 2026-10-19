@@ -14,7 +14,7 @@ import { defineTable } from "convex/server"
 import { v } from "convex/values"
 
 import { contentVisibilityValidator, pageOwnerKindValidator, pageTrustValidator } from "../../lib/validators"
-import { pageClaimStatusValidator, pageRoleValidator, pageStatusValidator } from "./validators"
+import { pageAssociationTypeValidator, pageClaimStatusValidator, pageRoleValidator, pageSectorValidator, pageStatusValidator } from "./validators"
 
 export const pagesTables = {
   pages: defineTable({
@@ -32,6 +32,8 @@ export const pagesTables = {
     /** Images de la page, ADMISES par la garde des fichiers (usage `page_logo`/`page_banner`, source `page`). */
     logoStorageId: v.optional(v.id("_storage")),
     bannerStorageId: v.optional(v.id("_storage")),
+    /** Annonce choisie par un signataire vivant ; sa visibilité est relue avant chaque affichage. */
+    pinnedPostId: v.optional(v.id("posts")),
     ownerKind: pageOwnerKindValidator,
     /** Posée par décision tracée (console, revendication validée, import, fédération) — jamais par un signataire. */
     trust: pageTrustValidator,
@@ -39,6 +41,11 @@ export const pagesTables = {
     trustRank: v.number(),
     /** Pays (ISO alpha-2) : celui des publications locales de la page (EXF-DG-23). */
     country: v.optional(v.string()),
+    /** Implantation publique facultative, sans adresse ni coordonnée de contact. */
+    city: v.optional(v.string()),
+    /** Précisions propres à la nature de la page ; jamais une identité de personne. */
+    associationType: v.optional(pageAssociationTypeValidator),
+    sector: v.optional(pageSectorValidator),
     /** La RÈGLE de la page : `root` → ses communiqués sont lus aussi depuis la racine. */
     visibility: contentVisibilityValidator,
     /** Lisible depuis la racine : page de la racine, ou règle `root` (dénormalisé à chaque écriture). */
@@ -155,6 +162,9 @@ export const pagesTables = {
       description: v.optional(v.union(v.string(), v.null())),
       handle: v.optional(v.string()),
       country: v.optional(v.union(v.string(), v.null())),
+      city: v.optional(v.union(v.string(), v.null())),
+      associationType: v.optional(v.union(pageAssociationTypeValidator, v.null())),
+      sector: v.optional(v.union(pageSectorValidator, v.null())),
       visibility: v.optional(contentVisibilityValidator),
       logoChanged: v.optional(v.boolean()),
       bannerChanged: v.optional(v.boolean()),

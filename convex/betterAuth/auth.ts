@@ -1,30 +1,32 @@
-// Dupliqué de socle/convex/betterAuth/auth.ts @ ad2e7fdc2 — adaptations : comptes LÉGERS par code à usage unique seulement (ni mot de passe, ni PIN, ni session bureau) ; IDN (`genericOAuth`) et SMS reportés au prompt PA4 ; origines lues dans SITE_URL et TRUSTED_ORIGINS sans repli en dur ; code de développement lisible à l'écran en local (`modules/platform/devTools`) ; limitation de débit par les seaux du moteur ; refus sans phrase (codes).
+// Dupliqué de socle/convex/betterAuth/auth.ts @ ad2e7fdc2 — adaptations : PA4, IDN avec PKCE et preuve serveur minimale, comptes légers par OTP e-mail/SMS, aucune route de mot de passe ; origines du catalogue et de l'environnement ; session sept jours et JWT trente minutes avec sessionId contrôlé côté serveur ; OTT trois minutes ; délivrance locale bornée ou transport configuré, erreurs et limitation de débit du moteur.
 /**
  * Better Auth du moteur — l'émetteur UNIQUE des jetons Convex (ADR-0002).
  *
  * Les applications parlent à Better Auth par leur propre origine (proxy Next
  * `/api/auth/*` → actions HTTP Convex) ; le greffon `crossDomain` garde la
  * session par origine et `oneTimeToken` prépare le passage entre applications
- * (PA4).
+ * avec un jeton à usage unique de trois minutes.
  */
 import { createClient, type GenericCtx } from "@convex-dev/better-auth"
 import { convex, crossDomain } from "@convex-dev/better-auth/plugins"
 import type { BetterAuthPlugin } from "better-auth"
 import { APIError, createAuthMiddleware } from "better-auth/api"
 import { betterAuth } from "better-auth/minimal"
-import { emailOTP, oneTimeToken } from "better-auth/plugins"
+import { bearer, emailOTP, genericOAuth, oneTimeToken, phoneNumber } from "better-auth/plugins"
+import { idn } from "@idn-ga/better-auth"
 
-import { BRAND_NAME } from "@antia/social-contracts/brand"
+import { BRAND_NAME } from "@antsia/social-contracts/brand"
 
 import { components, internal } from "../_generated/api"
 import type { DataModel } from "../_generated/dataModel"
 import authConfig from "../auth.config"
 import { devToolsAllowed } from "../lib/devTools"
+import { deliverOtp } from "./delivery"
+import { authenticationConfiguration, idnConfiguration, idnProfileProof, isE164Phone, trustedOrigins } from "./settings"
+
+export { parseOriginList, trustedOrigins } from "./settings"
 
 export const authComponent = createClient<DataModel>(components.betterAuth)
-
-/** Ports des applications du moteur en développement (antia.ga, diasporale.com, console). */
-const DEV_APP_PORTS = [3030, 3031, 3032] as const
 
 /** Durée de vie d'un code à usage unique : cinq minutes. */
 export const OTP_TTL_SECONDS = 300
@@ -34,34 +36,6 @@ function primarySiteUrl(): string {
   const siteUrl = process.env.SITE_URL
   if (!siteUrl) throw new Error("[Auth] SITE_URL manquant : variable du déploiement Convex.")
   return new URL(siteUrl).origin
-}
-
-/** Origines valides d'une liste brute (séparateurs : virgules ou espaces). */
-export function parseOriginList(raw: string | undefined): string[] {
-  const origins: string[] = []
-  for (const part of (raw ?? "").split(/[\s,]+/)) {
-    if (!part) continue
-    try {
-      const url = new URL(part)
-      if (url.protocol === "https:" || url.protocol === "http:") origins.push(url.origin)
-    } catch {
-      // une entrée illisible est ignorée, jamais devinée
-    }
-  }
-  return origins
-}
-
-/**
- * Origines de confiance : l'origine principale, celles des applications
- * déclarées (TRUSTED_ORIGINS) et, en développement local seulement, les ports
- * des applications du moteur.
- */
-export function trustedOrigins(env: Record<string, string | undefined> = process.env): string[] {
-  const origins = [...(env.SITE_URL ? parseOriginList(env.SITE_URL) : []), ...parseOriginList(env.TRUSTED_ORIGINS)]
-  if (devToolsAllowed(env)) {
-    for (const port of DEV_APP_PORTS) origins.push(`http://localhost:${port}`, `http://127.0.0.1:${port}`)
-  }
-  return Array.from(new Set(origins))
 }
 
 /**
@@ -96,18 +70,63 @@ function canRunMutation(ctx: unknown): ctx is RunMutationCtx {
 
 // Limitation de débit : avant l'envoi d'un code et avant une connexion. Clé =
 // adresse normalisée ; au-delà du quota, 429 avec le code `rateLimited`.
-const RL_LOGIN_PATHS = new Set<string>(["/sign-in/email-otp"])
-const RL_OTP_SEND_PATHS = new Set<string>(["/email-otp/send-verification-otp"])
+const RL_LOGIN_PATHS = new Set<string>(["/sign-in/email-otp", "/phone-number/verify"])
+const RL_OTP_SEND_PATHS = new Set<string>(["/email-otp/send-verification-otp", "/phone-number/send-otp"])
+// Les plugins OTP exposent aussi des réinitialisations capables de créer un
+// compte `credential`, même si emailAndPassword.enabled est false.
+const PASSWORD_PATHS = new Set([
+  "/sign-in/email", "/sign-up/email", "/sign-in/phone-number",
+  "/request-password-reset", "/reset-password", "/change-password", "/verify-password", "/set-password",
+  "/email-otp/request-password-reset", "/email-otp/reset-password", "/forget-password/email-otp",
+  "/phone-number/request-password-reset", "/phone-number/reset-password",
+])
+
+function isPasswordRequest(hookCtx: { path?: string; body?: unknown }): boolean {
+  const path = hookCtx.path ?? ""
+  if (PASSWORD_PATHS.has(path) || path.startsWith("/reset-password/")) return true
+  return path === "/email-otp/send-verification-otp" && typeof hookCtx.body === "object" && hookCtx.body !== null && "type" in hookCtx.body && hookCtx.body.type === "forget-password"
+}
+
+type DeliveryState = { attempted: boolean; delivered: boolean }
+function deliveryState(context: unknown): DeliveryState | null {
+  if (!context || typeof context !== "object" || !("engineOtpDelivery" in context)) return null
+  const state = context.engineOtpDelivery
+  return state && typeof state === "object" && "attempted" in state && "delivered" in state && typeof state.attempted === "boolean" && typeof state.delivered === "boolean" ? state as DeliveryState : null
+}
 
 const rateLimitPlugin = (ctx: GenericCtx<DataModel>): BetterAuthPlugin => ({
   id: "engine-auth-rate-limit",
   hooks: {
     before: [
       {
+        matcher: (hookCtx) => Boolean(hookCtx.headers?.get("origin")),
+        handler: createAuthMiddleware(async (hookCtx) => {
+          const origin = hookCtx.headers?.get("origin")
+          if (origin && !trustedOrigins().includes(origin)) throw new APIError("FORBIDDEN", { message: "INVALID_ORIGIN", code: "INVALID_ORIGIN" })
+        }),
+      },
+      {
+        matcher: isPasswordRequest,
+        handler: createAuthMiddleware(async () => {
+          throw new APIError("NOT_FOUND", { message: "passwordSignInDisabled", code: "passwordSignInDisabled" })
+        }),
+      },
+      {
+        matcher: (hookCtx) => RL_OTP_SEND_PATHS.has(hookCtx.path ?? ""),
+        handler: createAuthMiddleware(async (hookCtx) => {
+          const available = authenticationConfiguration()
+          if (hookCtx.path === "/phone-number/send-otp" ? !available.smsOtp : !available.emailOtp) throw new APIError("SERVICE_UNAVAILABLE", { message: "otpDeliveryUnavailable", code: "otpDeliveryUnavailable" })
+          // Le dispatcher fusionne ce retour dans le contexte de l'endpoint :
+          // les données partagées avec le callback vivent dans .context.
+          return { context: { context: { engineOtpDelivery: { attempted: false, delivered: false } satisfies DeliveryState } } }
+        }),
+      },
+      {
         matcher: (hookCtx) => RL_LOGIN_PATHS.has(hookCtx.path ?? "") || RL_OTP_SEND_PATHS.has(hookCtx.path ?? ""),
         handler: createAuthMiddleware(async (hookCtx) => {
-          const body = (hookCtx as { body?: { email?: unknown } }).body ?? {}
-          const key = typeof body.email === "string" ? body.email.trim().toLowerCase() : ""
+          const body = (hookCtx as { body?: { email?: unknown; phoneNumber?: unknown } }).body ?? {}
+          const identifier = body.email ?? body.phoneNumber
+          const key = typeof identifier === "string" ? identifier.trim().toLowerCase() : ""
           if (!key || !canRunMutation(ctx)) return
           const bucket = RL_OTP_SEND_PATHS.has(hookCtx.path ?? "") ? "auth.otp.send" : "auth.login"
           const result = (await ctx.runMutation(
@@ -118,6 +137,15 @@ const rateLimitPlugin = (ctx: GenericCtx<DataModel>): BetterAuthPlugin => ({
         }),
       },
     ],
+    after: [{
+      matcher: (hookCtx) => RL_OTP_SEND_PATHS.has(hookCtx.path ?? ""),
+      handler: createAuthMiddleware(async (hookCtx) => {
+        const state = deliveryState(hookCtx.context)
+        // Better Auth masque les erreurs d'envoi e-mail ; restaurer un refus
+        // explicite quand le transport a réellement échoué, sans détails privés.
+        if (state?.attempted && !state.delivered) throw new APIError("SERVICE_UNAVAILABLE", { message: "otpDeliveryUnavailable", code: "otpDeliveryUnavailable" })
+      }),
+    }],
   },
 })
 
@@ -159,43 +187,102 @@ export const createAuth = (ctx: GenericCtx<DataModel>, requestOrigin?: string | 
   const siteUrl = primarySiteUrl()
   const allowedOrigins = trustedOrigins()
   const isLocalDev = devToolsAllowed()
+  const idnOptions = idnConfiguration()
+  // Propre à CETTE requête : seul le profil du callback OIDC peut sceller
+  // la nouvelle session. Un lien de compte ou un OTP ne le peuvent pas.
+  let idnLoginProof: ReturnType<typeof idnProfileProof> | null = null
+  type OAuthConfig = Parameters<typeof genericOAuth>[0]["config"][number]
+  const idnProvider: OAuthConfig[] = idnOptions ? [{
+    ...idn({ ...idnOptions, scopes: ["openid", "profile", "email"] }),
+    // Callback central stable, aussi pendant l'échange sans en-tête Origin.
+    redirectURI: `${siteUrl}/api/auth/oauth2/callback/idn`,
+    mapProfileToUser: async (profile: Record<string, unknown>) => {
+      if (!canRunMutation(ctx)) throw new APIError("SERVICE_UNAVAILABLE", { message: "idnUnavailable", code: "idnUnavailable" })
+      const proof = idnProfileProof(profile)
+      await ctx.runMutation(internal.modules.people.identity.recordIdnProof as never, proof as never)
+      idnLoginProof = proof
+      // Le nom social est choisi à l'accueil ; aucun état civil n'est recopié.
+      return { email: String(profile.email).trim().toLowerCase(), emailVerified: true, name: BRAND_NAME }
+    },
+  } as OAuthConfig] : []
 
   return betterAuth({
     appName: BRAND_NAME,
     baseURL: siteUrl,
     secret: validateAuthSecret(),
     session: {
-      // Sept jours, rafraîchis chaque jour ; le JWT Convex (30 minutes) reste la
-      // vraie frontière d'autorisation et la fenêtre de révocation.
+      // Sept jours, rafraîchis chaque jour ; le JWT Convex se renouvelle en
+      // trente minutes et porte sessionId. La garde relit la session serveur :
+      // une révocation refuse immédiatement même un JWT encore valide.
       expiresIn: 60 * 60 * 24 * 7,
       updateAge: 60 * 60 * 24,
     },
     trustedOrigins: allowedOrigins,
     database: authComponent.adapter(adapterContext(ctx)),
+    emailAndPassword: { enabled: false },
+    account: {
+      accountLinking: {
+        enabled: true,
+        trustedProviders: ["idn"],
+        disableImplicitLinking: true,
+        allowDifferentEmails: true,
+        // Le compte SMS porte un email technique non vérifié. Le rattachement
+        // est explicite et exige sa session OTP + l'authentification chez IDN.
+        requireLocalEmailVerified: false,
+      },
+    },
     advanced: {
       // Le proxy de développement parle en http://localhost : cookies non sécurisés en local seulement.
       useSecureCookies: isLocalDev ? false : undefined,
     },
     plugins: [
+      {
+        id: "engine-idn-session-proof",
+        hooks: { after: [{
+          matcher: () => idnLoginProof !== null,
+          handler: createAuthMiddleware(async (hookCtx) => {
+            const proof = idnLoginProof
+            const session = hookCtx.context.newSession?.session
+            if (!proof || proof.loa === undefined || !session) return
+            if (!canRunMutation(ctx)) throw new APIError("SERVICE_UNAVAILABLE", { message: "idnUnavailable", code: "idnUnavailable" })
+            await ctx.runMutation(internal.modules.platform.operatorAccess.recordIdnSession as never, {
+              sessionId: session.id, authUserId: session.userId, idnSubject: proof.subject, loa: proof.loa,
+            } as never)
+          }),
+        }] },
+      },
       convex({ authConfig, jwt: { expirationSeconds: 60 * 30 } }) as unknown as BetterAuthPlugin,
       crossDomain({ siteUrl: resolveSiteUrl(requestOrigin, allowedOrigins, siteUrl) }),
       oneTimeToken({ expiresIn: 3, storeToken: "plain" }),
+      bearer(),
+      ...(idnProvider.length ? [genericOAuth({ config: idnProvider })] : []),
       rateLimitPlugin(ctx),
       emailOTP({
         otpLength: 6,
         expiresIn: OTP_TTL_SECONDS,
-        async sendVerificationOTP({ email, otp }) {
-          if (isLocalDev && canRunMutation(ctx)) {
-            await ctx.runMutation(
-              internal.modules.platform.devTools.recordOtp as never,
-              { email, code: otp, expiresAt: Date.now() + OTP_TTL_SECONDS * 1000 } as never,
-            )
-            return
+        allowedAttempts: 3,
+        storeOTP: "hashed",
+        async sendVerificationOTP({ email, otp }, endpoint) {
+          const state = deliveryState(endpoint?.context)
+          if (state) state.attempted = true
+          try {
+            await deliverOtp(ctx, "email", email, otp)
+            if (state) state.delivered = true
+          } catch (error) {
+            if (!state) throw error
           }
-          // L'envoi par courriel (Resend, adresse d'expédition du déploiement)
-          // arrive avec les comptes légers complets (PA4) : d'ici là, hors
-          // développement local, aucun code ne part — refus explicite.
-          throw new APIError("SERVICE_UNAVAILABLE", { message: "otpDeliveryUnavailable", code: "otpDeliveryUnavailable" })
+        },
+      }),
+      phoneNumber({
+        otpLength: 6,
+        expiresIn: OTP_TTL_SECONDS,
+        allowedAttempts: 3,
+        requireVerification: true,
+        phoneNumberValidator: isE164Phone,
+        sendOTP: async ({ phoneNumber: phone, code }) => deliverOtp(ctx, "phone", phone, code),
+        signUpOnVerification: {
+          getTempEmail: (phone) => `${phone.replace(/\D/g, "")}@phone.antsia.invalid`,
+          getTempName: () => BRAND_NAME,
         },
       }),
     ],

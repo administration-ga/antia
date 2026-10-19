@@ -7,10 +7,11 @@
  * passage unique ; une connexion rompue, un départ de groupe ou un blocage
  * referme aussitôt le fil de commentaires qu'ils ouvraient.
  */
-import { addedMentionedIds, assertPersonalCommentBody } from "@antia/social-domain/content"
+import { addedMentionedIds, assertPersonalCommentBody } from "@antsia/social-domain/content"
 import { paginationOptsValidator, type PaginationResult } from "convex/server"
 import { v } from "convex/values"
 
+import { canReadModeratedContent, moderateContentWrite } from "../moderation/policy"
 import type { Doc, Id } from "../../_generated/dataModel"
 import type { QueryCtx } from "../../_generated/server"
 import { checked, notFound } from "../../lib/errors"
@@ -24,6 +25,7 @@ import { assertVisiblePost, type ReaderContext } from "../posts/access"
 import { markCommentRemoved } from "../posts/contentRemoval"
 import { applyReactionDelta, countReplies, recordComment } from "../posts/counters"
 import { notifyAboutPost } from "../posts/postNotify"
+import { hasNativePostAuthor } from "../posts/nativeAuthor"
 
 /** Réponses montrées sous une racine dans la page des commentaires ; la suite se pagine. */
 const REPLIES_PREVIEW = 3
@@ -65,7 +67,7 @@ export const toggleReaction = networkMutation({
       await ctx.db.insert("postReactions", { networkId: ctx.networkId, postId, personId: ctx.person._id, kind, createdAt: Date.now() })
     }
     await applyReactionDelta(ctx, postId, ctx.person._id, kind, 1)
-    await notifyAboutPost(ctx, post, { recipientPersonId: post.authorPersonId, actorPersonId: ctx.person._id, kind: "post_reaction" })
+    if (hasNativePostAuthor(post)) await notifyAboutPost(ctx, post, { recipientPersonId: post.authorPersonId, actorPersonId: ctx.person._id, kind: "post_reaction" })
     return { mine: kind }
   },
 })
@@ -96,7 +98,7 @@ export const comment = networkMutation({
     let answeredPersonId: Id<"persons"> | undefined
     if (args.parentCommentId !== undefined) {
       const parent = await ctx.db.get(args.parentCommentId)
-      if (!parent || parent.postId !== post._id || parent.status !== "published") return notFound()
+      if (!parent || parent.postId !== post._id || parent.status !== "published" || !(await canReadModeratedContent(ctx, "comment", parent._id, ctx.person._id))) return notFound()
       // Répondre à une réponse range sous SA racine : une racine retirée (dont les réponses partent par lots) n'en reçoit plus.
       if (parent.parentCommentId !== undefined) {
         const head = await ctx.db.get(parent.parentCommentId)
@@ -119,10 +121,12 @@ export const comment = networkMutation({
       createdAt: now,
       updatedAt: now,
     })
+    const admitted = await moderateContentWrite(ctx, { networkId: post.networkId, ownerPersonId: ctx.person._id, kind: "comment", id: commentId, text: body })
+    if (!admitted) return { commentId }
     await recordComment(ctx, { _id: commentId, postId: post._id, ...(parentCommentId !== undefined ? { parentCommentId } : {}), createdAt: now })
 
     // L'auteur de la publication, la personne à qui l'on répond, les personnes citées : chacun s'il peut ouvrir la publication.
-    await notifyAboutPost(ctx, post, { recipientPersonId: post.authorPersonId, actorPersonId: ctx.person._id, kind: "post_comment" })
+    if (hasNativePostAuthor(post)) await notifyAboutPost(ctx, post, { recipientPersonId: post.authorPersonId, actorPersonId: ctx.person._id, kind: "post_comment" })
     if (answeredPersonId !== undefined && answeredPersonId !== post.authorPersonId) {
       await notifyAboutPost(ctx, post, { recipientPersonId: answeredPersonId, actorPersonId: ctx.person._id, kind: "post_comment" })
     }
@@ -148,7 +152,7 @@ export const removeComment = networkMutation({
     if (!comment) return notFound()
     // La garde de visibilité d'abord : on ne raisonne pas sur un commentaire porté par une publication invisible.
     const post = await assertVisiblePost(ctx, readerOf(ctx), comment.postId)
-    if (comment.authorPersonId !== ctx.person._id && post.authorPersonId !== ctx.person._id) return notFound()
+    if (comment.authorPersonId !== ctx.person._id && (!hasNativePostAuthor(post) || post.authorPersonId !== ctx.person._id)) return notFound()
     await markCommentRemoved(ctx, comment, Date.now())
     return { removed: true as const }
   },
@@ -168,6 +172,8 @@ export const editComment = networkMutation({
     const mentioned = (await resolveMentionedPersonIds(ctx, post.networkId, body)).filter((id) => id !== ctx.person._id)
     const now = Date.now()
     await ctx.db.patch(comment._id, { body, mentionedPersonIds: mentioned.length > 0 ? mentioned : undefined, editedAt: now, updatedAt: now })
+    const admitted = await moderateContentWrite(ctx, { networkId: post.networkId, ownerPersonId: ctx.person._id, kind: "comment", id: comment._id, text: body })
+    if (!admitted) return { editedAt: now }
     for (const personId of addedMentionedIds(comment.mentionedPersonIds, mentioned)) {
       await notifyAboutPost(ctx, post, { recipientPersonId: personId, actorPersonId: ctx.person._id, kind: "mention" })
     }
@@ -233,14 +239,14 @@ export const paginateComments = networkQuery({
     const profileOf = miniProfileCache(ctx)
     const page: CommentDto[] = []
     for (const root of result.page) {
-      if (await isBlocked(root.authorPersonId)) continue
+      if (await isBlocked(root.authorPersonId) || !(await canReadModeratedContent(ctx, "comment", root._id, reader.personId))) continue
       const preview = await ctx.db
         .query("postComments")
         .withIndex("by_post_parent_status_createdAt", (q) => q.eq("postId", args.postId).eq("parentCommentId", root._id).eq("status", "published"))
         .take(REPLIES_PREVIEW)
       const replies: ReplyDto[] = []
       for (const reply of preview) {
-        if (await isBlocked(reply.authorPersonId)) continue
+        if (await isBlocked(reply.authorPersonId) || !(await canReadModeratedContent(ctx, "comment", reply._id, reader.personId))) continue
         replies.push(toReply(reply, await profileOf(reply.authorPersonId), reader))
       }
       page.push({ ...toReply(root, await profileOf(root.authorPersonId), reader), replyCount: await countReplies(ctx, root._id), replies })
@@ -256,7 +262,7 @@ export const paginateReplies = networkQuery({
     const reader = readerOf(ctx)
     await assertVisiblePost(ctx, reader, args.postId)
     const root = await ctx.db.get(args.commentId)
-    if (!root || root.postId !== args.postId || root.parentCommentId !== undefined || root.status !== "published") return notFound()
+    if (!root || root.postId !== args.postId || root.parentCommentId !== undefined || root.status !== "published" || !(await canReadModeratedContent(ctx, "comment", root._id, reader.personId))) return notFound()
     const result = await ctx.db
       .query("postComments")
       .withIndex("by_post_parent_status_createdAt", (q) => q.eq("postId", args.postId).eq("parentCommentId", root._id).eq("status", "published"))
@@ -265,7 +271,7 @@ export const paginateReplies = networkQuery({
     const profileOf = miniProfileCache(ctx)
     const page: ReplyDto[] = []
     for (const reply of result.page) {
-      if (await isBlocked(reply.authorPersonId)) continue
+      if (await isBlocked(reply.authorPersonId) || !(await canReadModeratedContent(ctx, "comment", reply._id, reader.personId))) continue
       page.push(toReply(reply, await profileOf(reply.authorPersonId), reader))
     }
     return { ...result, page }

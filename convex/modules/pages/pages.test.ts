@@ -1,12 +1,12 @@
 // @vitest-environment edge-runtime
 // Dupliqué de socle/convex/modules/reseauPages/pages.test.ts @ ad2e7fdc2 — adaptations : personnes et réseaux (graine des fondations) ; l'ACTIVATION par le superadmin remplacée par la CRÉATION par un membre vérifié et par la console (page d'institution « Officiel ») ; l'accord `communication.publish` remplacé par le SIGNATAIRE VIVANT (habilitation acceptée) ; la note de service (`organisation`) devenue la note aux abonnés (`followers`) ; la portée « mon_administration » retirée (ses cas deviennent ceux des voies et de la lecture depuis la racine) ; avertissement « module Actualités » sans objet ; compteurs lus dans l'agrégat ; codes et règles au lieu des libellés ; tests neufs : pays et portée d'une publication de page, règle `root`, page d'un réseau fermé lue depuis la racine, cloche des abonnés, signets d'une publication de page, identité modifiée avec historique, retour à la réactivation.
-import { engineErrorCode, engineErrorRule } from "@antia/social-contracts/errors"
+import { engineErrorCode, engineErrorRule } from "@antsia/social-contracts/errors"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 import { api, internal } from "../../_generated/api"
 import type { Id } from "../../_generated/dataModel"
 import { SEED_CONFIRMATION } from "../../seeds/foundations"
-import { testConvex } from "../../test.setup"
+import { createTestOperatorProof, testConvex } from "../../test.setup"
 
 type T = ReturnType<typeof testConvex>
 type Person = { as: ReturnType<T["withIdentity"]>; personId: Id<"persons">; handle: string }
@@ -57,8 +57,9 @@ async function setStatus(t: T, networkId: Id<"networks">, person: Person, status
 
 async function makeOperator(t: T, person: Person): Promise<void> {
   await t.run(async (ctx) => {
-    await ctx.db.insert("operators", { personId: person.personId, role: "platform_operator", grantedAt: 1 })
+    await ctx.db.insert("operators", { personId: person.personId, role: "platform_admin", grantedAt: 1 })
   })
+  await createTestOperatorProof(t, person.as, person.personId)
 }
 
 async function connect(t: T, networkId: Id<"networks">, a: Person, b: Person): Promise<void> {
@@ -188,7 +189,7 @@ describe("création d'une page", () => {
     expect(await alice.as.query(P.getPage, { networkId: root, handle: first.handle })).toMatchObject({ badge: "official", ownerKind: "institution", viewer: { role: null } })
     expect(await operator.as.mutation(ADMIN.createInstitutionPage, args)).toEqual({ pageId: first.pageId, handle: first.handle, created: false })
     const journal = await t.run(async (ctx) => await ctx.db.query("engineAudit").withIndex("by_subject_at", (q) => q.eq("subjectTable", "pages").eq("subjectId", first.pageId)).take(5))
-    expect(journal).toMatchObject([{ action: "page.create_official", capacity: "platform_operator", actorPersonId: operator.personId }])
+    expect(journal).toMatchObject([{ action: "page.create_official", capacity: "platform_admin", actorPersonId: operator.personId }])
   })
 })
 
@@ -455,7 +456,7 @@ describe("les publications de page dans le fil", () => {
     expect((await bob.as.query(POSTS.search, { networkId: root, query: "guichet" })).items.map((item) => item._id)).toEqual([postId])
   })
 
-  it("ses abonnés sont prévenus par la cloche (`page_post`, sans acteur, diffusion par lots) ; un non-abonné non", async () => {
+  it("ses abonnés sont prévenus par la cloche (`page_post`, sans acteur, diffusion par lots) ; un non-abonné non — la ligne NOMME la page et son badge calculé, jusqu'à son retrait", async () => {
     const t = testConvex()
     const { root, alice, pageId, handle } = await pageWithPost(t)
     // La diffusion de la première publication s'achève avant tout abonnement.
@@ -466,8 +467,13 @@ describe("les publications de page dans le fil", () => {
     const { postId } = await publishAs(alice, root, pageId, "Nouvelle annonce")
     await t.finishAllScheduledFunctions(vi.runAllTimers)
     const bell = async (person: Person) => (await person.as.query(api.modules.notifications.bell.paginateNotifications, { networkId: root, paginationOpts: { numItems: 10, cursor: null } })).page
-    expect(await bell(bob)).toMatchObject([{ kind: "page_post", subject: { kind: "post", id: postId }, actor: null }])
+    expect(await bell(bob)).toMatchObject([{ kind: "page_post", subject: { kind: "post", id: postId }, actor: null, page: { pageId, handle, name: "Direction des Impôts", badge: "community" } }])
     expect(await bell(carol)).toEqual([])
+    // Une page retirée ne parle plus : la ligne reste, sans carte (jamais l'identité d'un signataire).
+    const operator = await enter(t, root, "operatrice")
+    await makeOperator(t, operator)
+    await operator.as.mutation(ADMIN.setPageStatus, { pageId, status: "inactive", reason: "Retrait après signalements." })
+    expect(await bell(bob)).toMatchObject([{ kind: "page_post", page: null }])
   })
 })
 

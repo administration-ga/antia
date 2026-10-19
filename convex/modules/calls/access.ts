@@ -6,7 +6,7 @@
  * d'apprendre qu'il existe : appel inconnu, d'un autre réseau, dont je n'ai pas
  * de ligne, ou d'un fil que j'ai quitté — la même réponse.
  */
-import { GROUP_CALL_INVITES_SCAN, type GroupParticipantView, participantStateOf } from "@antia/social-contracts/callGroup"
+import { GROUP_CALL_INVITES_SCAN, type GroupParticipantView, participantStateOf } from "@antsia/social-contracts/callGroup"
 
 import type { Doc, Id } from "../../_generated/dataModel"
 import type { QueryCtx } from "../../_generated/server"
@@ -14,6 +14,7 @@ import { memberHasStatus } from "../../lib/access"
 import { notFound } from "../../lib/errors"
 import { liveMembershipOrNull } from "../groups/access"
 import { findPublishedPersonByHandle, livePersonProfile } from "../people/miniProfile"
+import { canParticipateConversationCall } from "./conversationAccess"
 
 type ReadCtx = Pick<QueryCtx, "db">
 
@@ -96,8 +97,14 @@ export async function invitesOf(ctx: ReadCtx, callId: Id<"calls">): Promise<Doc<
  * l'appel ne part pas d'un fil ; `false` ferme l'accès, même quand une ancienne
  * ligne de participation demeure (le membre a quitté le fil, le fil est fermé ou
  * en suppression). Le serveur multimédia n'est jamais la source du droit.
+ *
+ * CC-4 : un appel de CONVERSATION (contact commercial P10 ou conversation
+ * contextuelle) relit la règle de SA famille par le sélecteur unique
+ * (`conversationAccess.ts`) ; les deux contextes à la fois ferment l'accès.
  */
 export async function isLiveMemberOfThreadCall(ctx: ReadCtx, call: Doc<"calls">, personId: Id<"persons">): Promise<boolean | null> {
+  const conversation = await canParticipateConversationCall(ctx, call, personId)
+  if (conversation !== null) return conversation
   if (call.groupThreadId === undefined) return null
   const thread = await ctx.db.get(call.groupThreadId)
   if (!thread || thread.closedAt !== undefined || thread.deletingAt !== undefined) return false

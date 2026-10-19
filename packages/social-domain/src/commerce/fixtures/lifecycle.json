@@ -1,0 +1,698 @@
+{
+  "description": "Transitions (autorisées ou non), capacités brouillon/vitrine/contact/achat, cohérences commande/paiement et règlement tardif.",
+  "transitions": [
+    {
+      "machine": "link",
+      "from": "pending",
+      "to": "active",
+      "allowed": true
+    },
+    {
+      "machine": "link",
+      "from": "suspended",
+      "to": "active",
+      "allowed": true
+    },
+    {
+      "machine": "link",
+      "from": "revoked",
+      "to": "active",
+      "allowed": false
+    },
+    {
+      "machine": "link",
+      "from": "expired",
+      "to": "active",
+      "allowed": false
+    },
+    {
+      "machine": "publication",
+      "from": "absent",
+      "to": "withdrawn",
+      "allowed": true
+    },
+    {
+      "machine": "publication",
+      "from": "withdrawn",
+      "to": "published",
+      "allowed": true
+    },
+    {
+      "machine": "publication",
+      "from": "published",
+      "to": "published",
+      "allowed": false
+    },
+    {
+      "machine": "publication",
+      "from": "closed",
+      "to": "published",
+      "allowed": false
+    },
+    {
+      "machine": "inquiry",
+      "from": "submitted",
+      "to": "acknowledged",
+      "allowed": true
+    },
+    {
+      "machine": "inquiry",
+      "from": "acknowledged",
+      "to": "quoted",
+      "allowed": true
+    },
+    {
+      "machine": "inquiry",
+      "from": "quoted",
+      "to": "acknowledged",
+      "allowed": false
+    },
+    {
+      "machine": "inquiry",
+      "from": "declined",
+      "to": "submitted",
+      "allowed": false
+    },
+    {
+      "machine": "checkout",
+      "from": "held",
+      "to": "consumed",
+      "allowed": true
+    },
+    {
+      "machine": "checkout",
+      "from": "held",
+      "to": "expired",
+      "allowed": true
+    },
+    {
+      "machine": "checkout",
+      "from": "expired",
+      "to": "consumed",
+      "allowed": false
+    },
+    {
+      "machine": "checkout",
+      "from": "released",
+      "to": "held",
+      "allowed": false
+    },
+    {
+      "machine": "booking",
+      "from": "requested",
+      "to": "confirmed",
+      "allowed": true
+    },
+    {
+      "machine": "booking",
+      "from": "requested",
+      "to": "no_show",
+      "allowed": false
+    },
+    {
+      "machine": "booking",
+      "from": "confirmed",
+      "to": "honored",
+      "allowed": true
+    },
+    {
+      "machine": "booking",
+      "from": "honored",
+      "to": "cancelled_by_client",
+      "allowed": false
+    },
+    {
+      "machine": "payment",
+      "from": "pending",
+      "to": "succeeded",
+      "allowed": true
+    },
+    {
+      "machine": "payment",
+      "from": "requires_action",
+      "to": "processing",
+      "allowed": true
+    },
+    {
+      "machine": "payment",
+      "from": "succeeded",
+      "to": "failed",
+      "allowed": false
+    },
+    {
+      "machine": "payment",
+      "from": "failed",
+      "to": "pending",
+      "allowed": false
+    },
+    {
+      "machine": "order",
+      "from": "pending",
+      "to": "confirmed",
+      "allowed": true
+    },
+    {
+      "machine": "order",
+      "from": "pending",
+      "to": "shipped",
+      "allowed": false
+    },
+    {
+      "machine": "order",
+      "from": "in_progress",
+      "to": "ready",
+      "allowed": true
+    },
+    {
+      "machine": "order",
+      "from": "delivered",
+      "to": "disputed",
+      "allowed": true
+    },
+    {
+      "machine": "order",
+      "from": "completed",
+      "to": "cancelled",
+      "allowed": false
+    },
+    {
+      "machine": "order",
+      "from": "paid",
+      "to": "confirmed",
+      "allowed": false
+    },
+    {
+      "machine": "refund",
+      "from": "requested",
+      "to": "processing",
+      "allowed": true
+    },
+    {
+      "machine": "refund",
+      "from": "processing",
+      "to": "succeeded",
+      "allowed": true
+    },
+    {
+      "machine": "refund",
+      "from": "failed",
+      "to": "processing",
+      "allowed": false
+    },
+    {
+      "machine": "refund",
+      "from": "rejected",
+      "to": "requested",
+      "allowed": false
+    },
+    {
+      "machine": "quote",
+      "from": "sent",
+      "to": "accepted",
+      "allowed": true
+    },
+    {
+      "machine": "quote",
+      "from": "accepted",
+      "to": "rejected",
+      "allowed": false
+    },
+    {
+      "machine": "application",
+      "from": "received",
+      "to": "interview",
+      "allowed": true
+    },
+    {
+      "machine": "application",
+      "from": "interview",
+      "to": "received",
+      "allowed": false
+    },
+    {
+      "machine": "offer",
+      "from": "draft",
+      "to": "published",
+      "allowed": true
+    },
+    {
+      "machine": "offer",
+      "from": "published",
+      "to": "published",
+      "allowed": false
+    },
+    {
+      "machine": "offer",
+      "from": "archived",
+      "to": "draft",
+      "allowed": false
+    }
+  ],
+  "terminal": [
+    {
+      "machine": "order",
+      "state": "completed",
+      "expect": true
+    },
+    {
+      "machine": "order",
+      "state": "delivered",
+      "expect": false
+    },
+    {
+      "machine": "payment",
+      "state": "succeeded",
+      "expect": true
+    },
+    {
+      "machine": "link",
+      "state": "revoked",
+      "expect": true
+    },
+    {
+      "machine": "publication",
+      "state": "withdrawn",
+      "expect": false
+    },
+    {
+      "machine": "publication",
+      "state": "closed",
+      "expect": true
+    },
+    {
+      "machine": "refund",
+      "state": "paid",
+      "expect": false
+    }
+  ],
+  "capabilities": [
+    {
+      "name": "membre déclaré, vitrine non admise",
+      "input": {
+        "contactEnabled": true,
+        "link": null,
+        "memberStatus": "active",
+        "networkCommerceEnabled": true,
+        "proShop": null,
+        "shopRemoved": false,
+        "storefrontAdmitted": false
+      },
+      "expect": {
+        "booking": false,
+        "catalog": false,
+        "contact": false,
+        "draft": true,
+        "jobs": false,
+        "purchase": false,
+        "quote": false,
+        "storefront": false
+      }
+    },
+    {
+      "name": "vitrine admise sans liaison",
+      "input": {
+        "contactEnabled": true,
+        "link": null,
+        "memberStatus": "active",
+        "networkCommerceEnabled": true,
+        "proShop": null,
+        "shopRemoved": false,
+        "storefrontAdmitted": true
+      },
+      "expect": {
+        "booking": false,
+        "catalog": false,
+        "contact": true,
+        "draft": true,
+        "jobs": false,
+        "purchase": false,
+        "quote": false,
+        "storefront": true
+      }
+    },
+    {
+      "name": "vendeur lié, structure vérifiée",
+      "input": {
+        "contactEnabled": true,
+        "link": "active",
+        "memberStatus": "active",
+        "networkCommerceEnabled": true,
+        "proShop": {
+          "capabilities": [
+            "catalog",
+            "checkout",
+            "quote"
+          ],
+          "sellerVerification": "verified",
+          "state": "active"
+        },
+        "shopRemoved": false,
+        "storefrontAdmitted": true
+      },
+      "expect": {
+        "booking": false,
+        "catalog": true,
+        "contact": true,
+        "draft": true,
+        "jobs": false,
+        "purchase": true,
+        "quote": true,
+        "storefront": true
+      }
+    },
+    {
+      "name": "vérification commerciale en attente",
+      "input": {
+        "contactEnabled": true,
+        "link": "active",
+        "memberStatus": "active",
+        "networkCommerceEnabled": true,
+        "proShop": {
+          "capabilities": [
+            "catalog",
+            "checkout",
+            "quote"
+          ],
+          "sellerVerification": "pending",
+          "state": "active"
+        },
+        "shopRemoved": false,
+        "storefrontAdmitted": true
+      },
+      "expect": {
+        "booking": false,
+        "catalog": true,
+        "contact": true,
+        "draft": true,
+        "jobs": false,
+        "purchase": false,
+        "quote": true,
+        "storefront": true
+      }
+    },
+    {
+      "name": "liaison suspendue",
+      "input": {
+        "contactEnabled": true,
+        "link": "suspended",
+        "memberStatus": "active",
+        "networkCommerceEnabled": true,
+        "proShop": {
+          "capabilities": [
+            "catalog",
+            "checkout",
+            "quote"
+          ],
+          "sellerVerification": "verified",
+          "state": "active"
+        },
+        "shopRemoved": false,
+        "storefrontAdmitted": true
+      },
+      "expect": {
+        "booking": false,
+        "catalog": false,
+        "contact": true,
+        "draft": true,
+        "jobs": false,
+        "purchase": false,
+        "quote": false,
+        "storefront": true
+      }
+    },
+    {
+      "name": "membre suspendu",
+      "input": {
+        "contactEnabled": true,
+        "link": "active",
+        "memberStatus": "suspended",
+        "networkCommerceEnabled": true,
+        "proShop": {
+          "capabilities": [
+            "catalog",
+            "checkout",
+            "quote"
+          ],
+          "sellerVerification": "verified",
+          "state": "active"
+        },
+        "shopRemoved": false,
+        "storefrontAdmitted": true
+      },
+      "expect": {
+        "booking": false,
+        "catalog": false,
+        "contact": false,
+        "draft": false,
+        "jobs": false,
+        "purchase": false,
+        "quote": false,
+        "storefront": false
+      }
+    },
+    {
+      "name": "boutique retirée par la modération",
+      "input": {
+        "contactEnabled": true,
+        "link": "active",
+        "memberStatus": "active",
+        "networkCommerceEnabled": true,
+        "proShop": {
+          "capabilities": [
+            "catalog",
+            "checkout",
+            "quote"
+          ],
+          "sellerVerification": "verified",
+          "state": "active"
+        },
+        "shopRemoved": true,
+        "storefrontAdmitted": true
+      },
+      "expect": {
+        "booking": false,
+        "catalog": false,
+        "contact": false,
+        "draft": false,
+        "jobs": false,
+        "purchase": false,
+        "quote": false,
+        "storefront": false
+      }
+    },
+    {
+      "name": "interrupteur commercial du réseau fermé",
+      "input": {
+        "contactEnabled": true,
+        "link": "active",
+        "memberStatus": "active",
+        "networkCommerceEnabled": false,
+        "proShop": {
+          "capabilities": [
+            "catalog",
+            "checkout",
+            "quote"
+          ],
+          "sellerVerification": "verified",
+          "state": "active"
+        },
+        "shopRemoved": false,
+        "storefrontAdmitted": true
+      },
+      "expect": {
+        "booking": false,
+        "catalog": false,
+        "contact": true,
+        "draft": true,
+        "jobs": false,
+        "purchase": false,
+        "quote": false,
+        "storefront": true
+      }
+    },
+    {
+      "name": "boutique retirée côté PRO.GA",
+      "input": {
+        "contactEnabled": true,
+        "link": "active",
+        "memberStatus": "active",
+        "networkCommerceEnabled": true,
+        "proShop": {
+          "capabilities": [
+            "catalog",
+            "checkout",
+            "quote"
+          ],
+          "sellerVerification": "verified",
+          "state": "withdrawn"
+        },
+        "shopRemoved": false,
+        "storefrontAdmitted": true
+      },
+      "expect": {
+        "booking": false,
+        "catalog": false,
+        "contact": true,
+        "draft": true,
+        "jobs": false,
+        "purchase": false,
+        "quote": false,
+        "storefront": true
+      }
+    },
+    {
+      "name": "contact fermé par le vendeur",
+      "input": {
+        "contactEnabled": false,
+        "link": "active",
+        "memberStatus": "active",
+        "networkCommerceEnabled": true,
+        "proShop": {
+          "capabilities": [
+            "catalog",
+            "checkout",
+            "quote"
+          ],
+          "sellerVerification": "verified",
+          "state": "active"
+        },
+        "shopRemoved": false,
+        "storefrontAdmitted": true
+      },
+      "expect": {
+        "booking": false,
+        "catalog": true,
+        "contact": false,
+        "draft": true,
+        "jobs": false,
+        "purchase": true,
+        "quote": true,
+        "storefront": true
+      }
+    },
+    {
+      "name": "rendez-vous et emploi admis",
+      "input": {
+        "contactEnabled": true,
+        "link": "active",
+        "memberStatus": "active",
+        "networkCommerceEnabled": true,
+        "proShop": {
+          "capabilities": [
+            "booking",
+            "jobs"
+          ],
+          "sellerVerification": "verified",
+          "state": "active"
+        },
+        "shopRemoved": false,
+        "storefrontAdmitted": true
+      },
+      "expect": {
+        "booking": true,
+        "catalog": false,
+        "contact": true,
+        "draft": true,
+        "jobs": true,
+        "purchase": false,
+        "quote": false,
+        "storefront": true
+      }
+    }
+  ],
+  "linkEvidence": [
+    {
+      "kind": "double_proof_pkce",
+      "expect": true
+    },
+    {
+      "kind": "email_match",
+      "expect": false
+    },
+    {
+      "kind": "phone_match",
+      "expect": false
+    },
+    {
+      "kind": "handle_match",
+      "expect": false
+    },
+    {
+      "kind": "badge",
+      "expect": false
+    },
+    {
+      "kind": "name_match",
+      "expect": false
+    }
+  ],
+  "orderPayment": [
+    {
+      "order": "pending",
+      "payment": null,
+      "expect": "coherent"
+    },
+    {
+      "order": "pending",
+      "payment": "succeeded",
+      "expect": "incoherent"
+    },
+    {
+      "order": "confirmed",
+      "payment": "succeeded",
+      "expect": "coherent"
+    },
+    {
+      "order": "shipped",
+      "payment": "processing",
+      "expect": "incoherent"
+    },
+    {
+      "order": "delivered",
+      "payment": null,
+      "expect": "incoherent"
+    },
+    {
+      "order": "cancelled",
+      "payment": "succeeded",
+      "expect": "refund_required"
+    },
+    {
+      "order": "cancelled",
+      "payment": "pending",
+      "expect": "incoherent"
+    },
+    {
+      "order": "cancelled",
+      "payment": "failed",
+      "expect": "coherent"
+    }
+  ],
+  "settlement": [
+    {
+      "checkout": "held",
+      "payment": "succeeded",
+      "expect": "consume_reservation"
+    },
+    {
+      "checkout": "expired",
+      "payment": "succeeded",
+      "expect": "reacquire_or_refund"
+    },
+    {
+      "checkout": "released",
+      "payment": "succeeded",
+      "expect": "reacquire_or_refund"
+    },
+    {
+      "checkout": "consumed",
+      "payment": "succeeded",
+      "expect": "none"
+    },
+    {
+      "checkout": "held",
+      "payment": "pending",
+      "expect": "none"
+    }
+  ]
+}

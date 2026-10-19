@@ -5,7 +5,7 @@
  * dont je ne suis pas membre ou que j'ai quitté : le MÊME refus — distinguer
  * révélerait qu'un fil existe entre des tiers.
  */
-import { GROUP_MEMBERS_MAX } from "@antia/social-contracts/groupCapacity"
+import { GROUP_MEMBERS_MAX } from "@antsia/social-contracts/groupCapacity"
 
 import type { Doc, Id } from "../../_generated/dataModel"
 import type { MutationCtx, QueryCtx } from "../../_generated/server"

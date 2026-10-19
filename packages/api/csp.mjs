@@ -10,8 +10,17 @@
  *
  * ⚠️ Palier PA0 : `script-src` tolère encore `'unsafe-inline'` (scripts
  * d'hydratation de Next). La CSP à jeton (nonce par requête, EXT-AN-02) arrive
- * avec la mise en ligne publique (PA8/PA10).
+ * avec la mise en ligne publique (PA8/PA10). Un seul script en ligne appartient
+ * aux applications : l'amorçage de l'apparence (ADR-0026), qui reçoit déjà le
+ * nonce de `CSP_NONCE_HEADER` quand la requête en porte un.
  */
+
+/**
+ * En-tête de REQUÊTE qui portera le nonce de la CSP à jeton : le proxy qui le tire
+ * par requête le pose (avec la politique), la mise en page le relit pour les
+ * scripts en ligne de l'application. Absent aujourd'hui : rien n'est changé.
+ */
+export const CSP_NONCE_HEADER = "x-nonce"
 
 /**
  * Origines HTTP et WebSocket d'un déploiement Convex, déduites de son URL.
@@ -43,7 +52,29 @@ export function convexOrigins(convexUrl) {
 }
 
 /**
- * @param {{ convexUrl?: string, isDev: boolean, extraConnect?: string[] }} options
+ * Origines d'un serveur média LiveKit, déduites de son URL de signalisation
+ * (`wss://media.exemple.ga` → wss://media.exemple.ga et https://media.exemple.ga,
+ * que le client interroge aussi pour la région). Aucune URL par défaut : sans
+ * variable, la couche d'appel n'ouvre aucune connexion (au socle, une URL de
+ * serveur du programme était écrite dans `livekit/csp.mjs` — retirée, owner map §7.4).
+ * @param {string | undefined} livekitUrl
+ * @returns {string[]}
+ */
+export function livekitOrigins(livekitUrl) {
+  if (!livekitUrl) return []
+  let url
+  try {
+    url = new URL(livekitUrl)
+  } catch {
+    return []
+  }
+  if (!["wss:", "ws:", "https:", "http:"].includes(url.protocol)) return []
+  const secure = url.protocol === "wss:" || url.protocol === "https:"
+  return [`${secure ? "wss:" : "ws:"}//${url.host}`, `${secure ? "https:" : "http:"}//${url.host}`]
+}
+
+/**
+ * @param {{ convexUrl?: string, livekitUrl?: string, isDev: boolean, extraConnect?: string[] }} options
  * @returns {string}
  */
 export function buildContentSecurityPolicy(options) {
@@ -51,6 +82,7 @@ export function buildContentSecurityPolicy(options) {
   const connect = [
     "'self'",
     ...backend,
+    ...livekitOrigins(options.livekitUrl),
     ...(options.extraConnect ?? []),
     ...(options.isDev ? ["ws://localhost:*", "ws://127.0.0.1:*", "http://127.0.0.1:*"] : []),
   ]
@@ -61,7 +93,8 @@ export function buildContentSecurityPolicy(options) {
     `img-src 'self' data: blob: ${backend.filter((o) => o.startsWith("http")).join(" ")}`.trim(),
     "font-src 'self' data:",
     `connect-src ${connect.join(" ")}`,
-    "media-src 'self' blob:",
+    // Messages vocaux et messagerie vocale : servis par le stockage du déploiement.
+    `media-src 'self' blob: ${backend.filter((o) => o.startsWith("http")).join(" ")}`.trim(),
     "worker-src 'self' blob:",
     "frame-ancestors 'none'",
     "object-src 'none'",
@@ -73,7 +106,7 @@ export function buildContentSecurityPolicy(options) {
 
 /**
  * En-têtes de sécurité statiques communs aux applications du moteur.
- * @param {{ convexUrl?: string, isDev: boolean }} options
+ * @param {{ convexUrl?: string, livekitUrl?: string, isDev: boolean, extraConnect?: string[] }} options
  * @returns {{ key: string, value: string }[]}
  */
 export function securityHeaders(options) {

@@ -10,14 +10,14 @@
  * - Un réseau gouverné par une tranche (`networks.managedBy`) n'entre que par
  *   elle (aides partagées : `./admission`) ; le quitter reste toujours possible.
  */
-import { assertDecisionReason } from "@antia/social-domain/audit"
-import { missingConsentsToJoin } from "@antia/social-domain/consent"
-import { type EntryEvidence, entryStatusFor, leaveCascades, nextMembershipStatus } from "@antia/social-domain/membership"
+import { assertDecisionReason } from "@antsia/social-domain/audit"
+import { missingConsentsToJoin } from "@antsia/social-domain/consent"
+import { type EntryEvidence, entryStatusFor, leaveCascades, nextMembershipStatus } from "@antsia/social-domain/membership"
 import { v } from "convex/values"
 
 import type { Doc } from "../../_generated/dataModel"
 import { query } from "../../_generated/server"
-import { getCurrentPerson, getMembership, getRootNetwork } from "../../lib/access"
+import { effectiveMembershipStatus, getCurrentPerson, getMembership, getRootNetwork } from "../../lib/access"
 import { checked, fail, notFound } from "../../lib/errors"
 import { operatorMutation, personMutation } from "../../lib/functions"
 import { enforceRateLimit } from "../../lib/rateLimit"
@@ -29,8 +29,10 @@ import {
   networkKindValidator,
 } from "../../lib/validators"
 import { appendAudit, operatorCapacity } from "../platform/audit"
+import { revokeAdministrationForPerson } from "../federation/agentLifecycle"
 import { admitToNetwork, setMembershipStatus, writeNetworkFacet } from "./admission"
 import { hasStrongIdentityFor } from "./persons"
+import { refreshReaderContexts, scheduleReaderRefresh } from "../posts/feedMaterialization"
 
 const facetInputValidator = v.object({
   values: v.record(v.string(), facetValueValidator),
@@ -73,6 +75,7 @@ export const joinNetwork = personMutation({
 
     const admitted = await admitToNetwork(ctx, { personId: ctx.person._id, network, root, entry, evidence })
     await writeNetworkFacet(ctx, network, ctx.person._id, facet)
+    await refreshReaderContexts(ctx, network._id, ctx.person._id)
     return admitted
   },
 })
@@ -90,6 +93,9 @@ export const leaveNetwork = personMutation({
     if (!network) return notFound()
     const membership = await getMembership(ctx, network._id, ctx.person._id)
     if (!membership) return notFound()
+    if (network.kind === "root" || (network.slug === "administration" && network.membershipPolicy === "mirror")) {
+      await revokeAdministrationForPerson(ctx, ctx.person._id)
+    }
     if (nextMembershipStatus(membership.status, { kind: "leave" }) === null) {
       return membership.status === "suspendue" ? fail("membershipSuspended") : fail("conflict")
     }
@@ -152,6 +158,7 @@ export const liftSuspension = operatorMutation({
     if (!membership || membership.status !== "suspendue") return notFound()
     const restoreTo = membership.statusBeforeSuspension ?? "declaree"
     await setMembershipStatus(ctx, membership, restoreTo, { statusBeforeSuspension: undefined, suspendedUntil: undefined })
+    await scheduleReaderRefresh(ctx, personId)
     await appendAudit(ctx, {
       action: "membership.lift_suspension",
       capacity: operatorCapacity(ctx.operator),
@@ -203,7 +210,7 @@ export const myMemberships = query({
         slug: network.slug,
         name: network.name,
         kind: network.kind,
-        status: row.status,
+        status: network.kind === "root" ? (effectiveMembershipStatus(row) ?? row.status) : row.status,
         role: row.role,
         ...(row.derivedFrom ? { derivedFrom: row.derivedFrom } : {}),
       })
