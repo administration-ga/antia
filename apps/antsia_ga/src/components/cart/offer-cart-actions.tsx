@@ -32,7 +32,8 @@ function OfferCartSelection({ offer }: { offer: CatalogOffer }) {
   })}>
     {offer.variants.length ? <Field id={`${id}-variant`} label={t("variant")} error={form.formState.errors.variantRef?.message}><select id={`${id}-variant`} className={SHOP_SELECT_CLASS} {...form.register("variantRef")}><option value="">{t("choose")}</option>{offer.variants.map((variant) => <option key={variant.variantRef} value={variant.variantRef}>{variant.label}</option>)}</select></Field> : null}
     <Field id={`${id}-quantity`} label={t("quantity")} error={form.formState.errors.quantity?.message}><TextInput id={`${id}-quantity`} inputMode="numeric" autoComplete="off" {...form.register("quantity")} /></Field>
-    <div className="flex flex-wrap gap-2"><Button type="submit" disabled={!cart.ready || !!cart.draft?.submitted}>{t("add")}</Button><ShopLink href={routes.cart()}>{t("open")}</ShopLink></div>
+    {/* Ajouter au panier : couleur du commerce (ADR-0027). */}
+    <div className="flex flex-wrap gap-2"><Button type="submit" variant="commerce" disabled={!cart.ready || !!cart.draft?.submitted}>{t("add")}</Button><ShopLink href={routes.cart()}>{t("open")}</ShopLink></div>
     {message ? <p role="status" className="text-sm">{t(message)}</p> : null}
   </form>
 }

@@ -10,12 +10,13 @@ import Link from "next/link"
 import { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 
-import { Button } from "@/components/shared/controls"
+import { Button, buttonClassName } from "@/components/shared/controls"
 import { ShopLink, useShopAction } from "@/components/shops/shop-ui"
 import { routes } from "@/lib/routes"
 import { serviceAmount } from "./service-model"
 
-const ACTION_LINK = "inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+// Devis, créneau, prestation : couleur du commerce (ADR-0027), sur la facture commune des boutons.
+const ACTION_LINK = buttonClassName("commerce")
 
 /**
  * Les parcours d'une offre de SERVICE, tels que PRO.GA les sert pour cette personne : devis,

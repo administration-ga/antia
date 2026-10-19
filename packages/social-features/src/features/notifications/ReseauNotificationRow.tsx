@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/notifications/ReseauNotificationRow.tsx @ ad2e7fdc2 — adaptations : ligne = le DTO de la cloche du moteur (`notifications.bell.paginateNotifications`, type tiré de l'API : sujet `{ kind, id }`, acteur par mini-profil au nom NULLABLE, état vivant d'une invitation et d'un fichier retenu) au lieu de la forme à colonnes `subject…Id` ; phrase de TOUS les genres du moteur (`notificationRowSentence` : ceux de `shared.notificationSentence` et ceux que le moteur ajoute, nom neutre sans profil publié ; la page d'un `page_post` NOMMÉE avec son badge calculé) ; ligne de résultat par `notificationRowNote` (invitation tranchée, fichier libéré ou de nouveau analysé) ; cible composée sur les adresses injectées (`useRoutes()`) ; rappel de l'hôte par `targetCallback` (plus de cible « direct ») ; décision d'invitation sur `graph.connections.{pendingState, respondToConnection}` du réseau courant (`useNetwork()`), un refus qui ne dit rien de l'invitation (débit, adhésion) se dit par son code (`errors:<code>`) et garde les boutons ; libellés, dates relatives et refus traduits (espace `notifications`, clés `reseauNotificationRow.…`) ; commentaires sans l'onglet « Administration » ni le volet « Activité » de l'espace agent. ; PA6 : dates et jours civils dans le fuseau personnel du lecteur (repli appareil).
+// Dupliqué de socle/packages/agent-features/src/features/notifications/ReseauNotificationRow.tsx @ ad2e7fdc2 — adaptations : ligne = le DTO de la cloche du moteur (`notifications.bell.paginateNotifications`, type tiré de l'API : sujet `{ kind, id }`, acteur par mini-profil au nom NULLABLE, état vivant d'une invitation et d'un fichier retenu) au lieu de la forme à colonnes `subject…Id` ; phrase de TOUS les genres du moteur (`notificationRowSentence` : ceux de `shared.notificationSentence` et ceux que le moteur ajoute, nom neutre sans profil publié ; la page d'un `page_post` NOMMÉE avec son badge calculé) ; ligne de résultat par `notificationRowNote` (invitation tranchée, fichier libéré ou de nouveau analysé) ; cible composée sur les adresses injectées (`useRoutes()`) ; rappel de l'hôte par `targetCallback` (plus de cible « direct ») ; décision d'invitation sur `graph.connections.{pendingState, respondToConnection}` du réseau courant (`useNetwork()`), un refus qui ne dit rien de l'invitation (débit, adhésion) se dit par son code (`errors:<code>`) et garde les boutons ; libellés, dates relatives et refus traduits (espace `notifications`, clés `reseauNotificationRow.…`) ; commentaires sans l'onglet « Administration » ni le volet « Activité » de l'espace agent. ; PA6 : dates et jours civils dans le fuseau personnel du lecteur (repli appareil) ; couleurs par fonction (ADR-0027) : Accepter une relation en variante `social`.
 "use client"
 
 /**
@@ -285,8 +285,10 @@ export function ConnectionInviteActions({
 
 	return (
 		<div style={{ display: "flex", gap: 8, marginTop: 6 }}>
+			{/* Accepter : couleur des relations (ADR-0027). */}
 			<Button
 				size="sm"
+				variant="social"
 				disabled={busy}
 				onClick={() => void decide(true)}
 			>

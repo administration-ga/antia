@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/messagerie/messagerie-styles.tsx @ ad2e7fdc2 — adaptations : fenêtre détachée au format téléphone UNIQUE du moteur, 440 × 956 (largeur suivant la hauteur disponible — formule de la fenêtre d'appel flottante —, hauteur dérivée ; l'iCom flottant du socle était en 390 × 844) ; plus aucune couleur littérale : ombre de déplacement et contraste obligé du code QR par jetons (`--icom-float-drag-shadow`, `--qr-code-surface`, `--qr-code-ink`) ; règles du sur-titre de fonction des fils de poste (`.msg-row-eyebrow`) retirées avec la branche poste ; feuille portée par la constante exportée `MESSAGERIE_STYLES_CSS` (le gabarit n'est plus un texte enfant du JSX) ; doc : cliquet de couleur du moteur, pile z sans iAsted. ; contour des surfaces posées sur la page lu dans --esp-surface-border, filet d'origine en repli (aucun contour quand le thème distingue déjà la carte du fond). ; système épuré (ADR-0027) : filtres en puces grises sans filet (`--esp-chip-*`), filtre actif et onglet actif en pastille tonale (`--esp-tab-active-*`), décompte des non-lus aux couleurs des réactions (`--role-react-*`), facture d'origine en repli. ; réactions de message (`data-mine`) à la teinte des réactions (`--role-react-soft`).
+// Dupliqué de socle/packages/agent-features/src/features/messagerie/messagerie-styles.tsx @ ad2e7fdc2 — adaptations : fenêtre détachée au format téléphone UNIQUE du moteur, 440 × 956 (largeur suivant la hauteur disponible — formule de la fenêtre d'appel flottante —, hauteur dérivée ; l'iCom flottant du socle était en 390 × 844) ; plus aucune couleur littérale : ombre de déplacement et contraste obligé du code QR par jetons (`--icom-float-drag-shadow`, `--qr-code-surface`, `--qr-code-ink`) ; règles du sur-titre de fonction des fils de poste (`.msg-row-eyebrow`) retirées avec la branche poste ; feuille portée par la constante exportée `MESSAGERIE_STYLES_CSS` (le gabarit n'est plus un texte enfant du JSX) ; doc : cliquet de couleur du moteur, pile z sans iAsted. ; contour des surfaces posées sur la page lu dans --esp-surface-border, filet d'origine en repli (aucun contour quand le thème distingue déjà la carte du fond). ; système épuré (ADR-0027) : filtres en puces grises sans filet (`--esp-chip-*`), filtre actif et onglet actif en pastille tonale (`--esp-tab-active-*`), décompte des non-lus aux couleurs des réactions (`--role-react-*`), facture d'origine en repli. ; réactions de message (`data-mine`) à la teinte des réactions (`--role-react-soft`) ; couleurs par fonction (ADR-0027) : « Écrire » d'une relation (`data-role="message"`) et bouton d'envoi du composeur aux couleurs des messages (`--role-message-*`), pastille de non-lus `.msg-badge` aux couleurs des réactions (`--role-react-*`), facture d'origine en repli.
 "use client"
 
 /**
@@ -235,6 +235,13 @@ export const MESSAGERIE_STYLES_CSS = `
         }
         .icom-action-group-btn[data-primary="true"] {
           color: var(--primary-800);
+        }
+        /* Écrire : couleur des messages (ADR-0027), tonal d'identité en repli. */
+        .icom-action-group-btn[data-role="message"][data-primary="true"]::before {
+          background: var(--role-message-soft, var(--primary-100));
+        }
+        .icom-action-group-btn[data-role="message"][data-primary="true"] {
+          color: var(--role-message-ink, var(--primary-800));
         }
         .icom-action-group-btn[data-live="true"] {
           color: var(--success);
@@ -528,8 +535,9 @@ export const MESSAGERIE_STYLES_CSS = `
           height: 20px;
           padding: 0 6px;
           border-radius: 999px;
-          background: var(--danger-fill);
-          color: var(--on-fill);
+          /* Décompte des non-lus aux couleurs des réactions (ADR-0027), danger en repli. */
+          background: var(--role-react-fill, var(--danger-fill));
+          color: var(--role-react-on, var(--on-fill));
           font-family: var(--font-mono);
           font-size: 11px;
           font-weight: 700;
@@ -1185,8 +1193,9 @@ export const MESSAGERIE_STYLES_CSS = `
           height: 30px;
           border: none;
           border-radius: 999px;
-          background: var(--primary-fill);
-          color: var(--on-fill);
+          /* Envoyer : couleur des messages (ADR-0027), aplat d'identité en repli. */
+          background: var(--role-message-fill, var(--primary-fill));
+          color: var(--role-message-on, var(--on-fill));
           cursor: pointer;
         }
         .msg-send-btn:disabled { opacity: .45; cursor: default; }

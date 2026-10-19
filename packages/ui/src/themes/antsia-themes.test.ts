@@ -204,7 +204,7 @@ describe("les sept thèmes d'antsia.ga (ADR-0027)", () => {
       ["../../../social-features/src/shell/ReseauMenuRail.tsx", 'background: "var(--role-react-fill, var(--primary-50))"', 1],
       ["../../../social-features/src/shell/ReseauDesktopIcomLink.tsx", 'background: "var(--role-react-fill, var(--danger-fill))"', 1],
       ["../../../social-features/src/features/messagerie/messagerie-styles.tsx", "background: var(--role-react-soft, var(--primary-50));", 2],
-      ["../../../social-features/src/features/messagerie/messagerie-styles.tsx", "background: var(--role-react-fill, var(--danger-fill));", 1],
+      ["../../../social-features/src/features/messagerie/messagerie-styles.tsx", "background: var(--role-react-fill, var(--danger-fill));", 2],
     ]
     for (const [path, expression, count] of REACT_SITES) expect(read(path).split(expression).length - 1, `${path} : ${expression}`).toBe(count)
   })

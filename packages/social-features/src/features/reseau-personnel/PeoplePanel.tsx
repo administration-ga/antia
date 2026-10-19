@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/PeoplePanel.tsx @ ad2e7fdc2 — adaptations : fonctions du moteur, réseau courant par `useNetwork()` — recherche dans l'annuaire du réseau (`people.directory.searchPeople`), demandes par identifiant (`graph.connections.requestConnection({ handle, message? })`), réponses (`graph.connections.respondToConnection`), suivis (`graph.follows.{follow, unfollow, paginateMyFollows, myFollowerCount}`), catalogue de suggestions (`suggestions.suggestions.{paginate, dismiss, restore, paginateDismissed, paginateSentInvitations}`) ; listes paginées nativement par une chaîne de pages à curseur (invitations envoyées, suivis — la pagination numérotée des suivis devient « Voir plus » —, catalogue), décomptes PLANCHERS marqués « + » quand une page reste ; ligne « fonction » réduite au titre publié (poste et administration retirés) ; personnes au DTO du moteur (`otherPersonId`, nom nullable rendu par le libellé neutre) ; appel d'une relation par `useRingRelation` de la brique d'appel (`features/iappel`, `calls.direct.callMember({ target: { personId } })`) ; adresses par la table de routes injectée (`useRoutes()` : profil, messagerie, page réseau) ; textes par l'i18n (espace `reseau`, clés `peoplePanel.*`) et refus du moteur dits par leur code ; « Agents à découvrir » devient « Personnes à découvrir » ; feuille du volet sortie du JSX dans une constante de module (`PEOPLE_PANEL_CSS`) — un littéral enfant de `<style>` passerait pour une chaîne d'interface —, règles inchangées ; primitives de `@antsia/ui` et kit d'espace de `@antsia/ui/espace-kit` (onglets « chemise », état vide ; la pagination numérotée n'est plus employée), surfaces de la coque ; Suivre, Se connecter et Accepter en variante `social`, couleur des relations (ADR-0027), Se connecter neutre une fois la demande envoyée ou reçue.
+// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/PeoplePanel.tsx @ ad2e7fdc2 — adaptations : fonctions du moteur, réseau courant par `useNetwork()` — recherche dans l'annuaire du réseau (`people.directory.searchPeople`), demandes par identifiant (`graph.connections.requestConnection({ handle, message? })`), réponses (`graph.connections.respondToConnection`), suivis (`graph.follows.{follow, unfollow, paginateMyFollows, myFollowerCount}`), catalogue de suggestions (`suggestions.suggestions.{paginate, dismiss, restore, paginateDismissed, paginateSentInvitations}`) ; listes paginées nativement par une chaîne de pages à curseur (invitations envoyées, suivis — la pagination numérotée des suivis devient « Voir plus » —, catalogue), décomptes PLANCHERS marqués « + » quand une page reste ; ligne « fonction » réduite au titre publié (poste et administration retirés) ; personnes au DTO du moteur (`otherPersonId`, nom nullable rendu par le libellé neutre) ; appel d'une relation par `useRingRelation` de la brique d'appel (`features/iappel`, `calls.direct.callMember({ target: { personId } })`) ; adresses par la table de routes injectée (`useRoutes()` : profil, messagerie, page réseau) ; textes par l'i18n (espace `reseau`, clés `peoplePanel.*`) et refus du moteur dits par leur code ; « Agents à découvrir » devient « Personnes à découvrir » ; feuille du volet sortie du JSX dans une constante de module (`PEOPLE_PANEL_CSS`) — un littéral enfant de `<style>` passerait pour une chaîne d'interface —, règles inchangées ; primitives de `@antsia/ui` et kit d'espace de `@antsia/ui/espace-kit` (onglets « chemise », état vide ; la pagination numérotée n'est plus employée), surfaces de la coque ; Suivre, Se connecter et Accepter en variante `social`, couleur des relations (ADR-0027), Se connecter neutre une fois la demande envoyée ou reçue ; « Écrire » d'une carte de relation à la couleur des messages (`.rp-person-action--message`, `--role-message-*`), lien d'origine en repli.
 "use client"
 
 /**
@@ -295,6 +295,11 @@ const PEOPLE_PANEL_CSS = `
         font-size: 12px;
         font-weight: 700;
         text-decoration: none;
+      }
+      /* Écrire : couleur des messages (ADR-0027), lien d'origine en repli. */
+      .rp-person-action--message {
+        background: var(--role-message-soft, transparent);
+        color: var(--role-message-ink, var(--primary-600));
       }
       .rp-person-action:focus-visible {
         outline: 2px solid var(--ring);
@@ -1424,7 +1429,8 @@ function PersonActions({
         {t("peoplePanel.profile")}
       </Link>
       {brouillon ? (
-        <Link href={brouillon} className="rp-person-action">
+        // Écrire : couleur des messages (ADR-0027).
+        <Link href={brouillon} className="rp-person-action rp-person-action--message">
           {t("peoplePanel.write")}
         </Link>
       ) : null}
