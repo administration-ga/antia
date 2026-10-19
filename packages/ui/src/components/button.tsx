@@ -1,10 +1,16 @@
-// Dupliqué de socle/packages/ui-v2/src/components/button.tsx @ ad2e7fdc2 — adaptations : aucune (copie textuelle) ; en-tête de provenance.
+// Dupliqué de socle/packages/ui-v2/src/components/button.tsx @ ad2e7fdc2 — adaptations : en-tête de provenance ; système épuré et couleurs par fonction (ADR-0027) lus dans des jetons à `initial`, repli sur les valeurs d'origine (rayon `--ui2-button-radius`, neutre « outline » et secondaire sans filet, texte de l'aplat d'identité `--primary-fill-on`, variantes `social`, `message`, `react`, `commerce`).
 "use client"
 
 import type { ButtonHTMLAttributes, CSSProperties, ReactNode, Ref } from "react"
 import { Icon, type IconName } from "./icon"
 
-type Variant = "primary" | "secondary" | "ghost" | "outline" | "danger" | "success" | "link"
+/**
+ * `social` (Suivre), `message` (Écrire, tonal), `react` (J'aime) et `commerce`
+ * (Acheter, Participer) prennent la couleur de leur fonction quand le thème la
+ * déclare (ADR-0027) ; sinon, ils retombent sur l'identité (`primary`) ou, pour
+ * `message`, sur le secondaire.
+ */
+type Variant = "primary" | "secondary" | "ghost" | "outline" | "danger" | "success" | "link" | "social" | "message" | "react" | "commerce"
 type Size = "sm" | "md" | "lg"
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
@@ -40,7 +46,8 @@ const BASE: CSSProperties = {
   // Une propriété personnalisée, elle, se résout par la cascade — une requête
   // média peut la déplacer, ce qu'un style en ligne ne saurait faire.
   minHeight: "var(--ui2-button-min-h, 36px)",
-  borderRadius: 6,
+  // Un angle par élément (ADR-0027) : la pilule des thèmes ANTSIA, 6 px ailleurs.
+  borderRadius: "var(--ui2-button-radius, 6px)",
   border: "1px solid transparent",
   cursor: "pointer",
   whiteSpace: "nowrap",
@@ -51,16 +58,23 @@ const BASE: CSSProperties = {
 const VARIANTS: Record<Variant, CSSProperties> = {
   primary: {
     background: "var(--primary-fill)",
-    color: "var(--on-fill)",
+    // Une identité claire (turquoise, mandarine) porte un texte foncé : jeton propre à l'aplat.
+    color: "var(--primary-fill-on, var(--on-fill))",
     border: "1px solid var(--primary-fill)",
   },
+  // Contour seulement à couleur égale : les thèmes ANTSIA en font un bouton tonal sans filet.
   secondary: {
-    background: "var(--ink-0)",
-    color: "var(--primary-500)",
-    border: "1px solid var(--primary-500)",
+    background: "var(--ui2-button-secondary-bg, var(--ink-0))",
+    color: "var(--ui2-button-secondary-fg, var(--primary-500))",
+    border: "1px solid var(--ui2-button-secondary-border, var(--primary-500))",
   },
   ghost: { background: "transparent", color: "var(--ink-700)", border: "1px solid transparent" },
-  outline: { background: "var(--ink-0)", color: "var(--ink-800)", border: "1px solid var(--ink-300)" },
+  // Le neutre (Annuler) : gris, sans filet, dans les thèmes ANTSIA.
+  outline: {
+    background: "var(--ui2-button-outline-bg, var(--ink-0))",
+    color: "var(--ink-800)",
+    border: "1px solid var(--ui2-button-outline-border, var(--ink-300))",
+  },
   danger: {
     background: "var(--danger-fill)",
     color: "var(--on-fill)",
@@ -81,6 +95,27 @@ const VARIANTS: Record<Variant, CSSProperties> = {
     // tactile quoi que dise la feuille de style.
     padding: "var(--ui2-button-link-pad, 0px)",
     minHeight: "var(--ui2-button-link-min-h, auto)",
+  },
+  // ── Une couleur par fonction (ADR-0027) ──
+  social: {
+    background: "var(--role-social-fill, var(--primary-fill))",
+    color: "var(--role-social-on, var(--primary-fill-on, var(--on-fill)))",
+    border: "1px solid transparent",
+  },
+  message: {
+    background: "var(--role-message-soft, var(--ui2-button-secondary-bg, var(--ink-0)))",
+    color: "var(--role-message-ink, var(--ui2-button-secondary-fg, var(--primary-500)))",
+    border: "1px solid var(--role-message-soft, var(--ui2-button-secondary-border, var(--primary-500)))",
+  },
+  react: {
+    background: "var(--role-react-fill, var(--primary-fill))",
+    color: "var(--role-react-on, var(--primary-fill-on, var(--on-fill)))",
+    border: "1px solid transparent",
+  },
+  commerce: {
+    background: "var(--role-commerce-fill, var(--primary-fill))",
+    color: "var(--role-commerce-on, var(--primary-fill-on, var(--on-fill)))",
+    border: "1px solid transparent",
   },
 }
 

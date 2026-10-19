@@ -15,6 +15,7 @@ import { toast } from "sonner"
 import { z } from "zod"
 
 import { Button, Card, Field, TextInput } from "./shared/controls"
+import { MotifPicker } from "./motif-picker"
 import { ThemePicker } from "./theme-picker"
 import { engineErrorMessage } from "@/lib/engine-errors"
 
@@ -181,6 +182,9 @@ export function PreferencesControls() {
         </div>
         <div className="min-w-0 border-t border-border pt-4">
           <ThemePicker />
+        </div>
+        <div className="min-w-0 border-t border-border pt-4">
+          <MotifPicker />
         </div>
       </div>
     </Card>

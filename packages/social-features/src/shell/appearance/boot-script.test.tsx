@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 // ADR-0026 : l'amorçage pose sur <html> exactement ce que le fournisseur posera, et le fournisseur ne le défait jamais en hydratant.
+// ADR-0027 : même parité pour le motif de fond (`data-motif`), absent par défaut.
 import { act, cleanup, render } from "@testing-library/react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
@@ -14,12 +15,13 @@ const THEMES: readonly AppearanceTheme[] = [
   { id: "lagon", charte: "antsia-lagon" },
 ]
 const SERVER_CHARTE = "antsia"
+const MOTIFS = ["points", "quadrillage"] as const
 
 type Stored = string | null
 type StorageCase = "ok" | "getItem refusé" | "absent"
 type SystemCase = "clair" | "sombre" | "sans API" | "API en erreur"
 
-interface Scenario { theme: Stored; appearance: Stored; storage: StorageCase; system: SystemCase }
+interface Scenario { theme: Stored; appearance: Stored; storage: StorageCase; system: SystemCase; motif?: Stored }
 
 const THEME_VALUES: readonly Stored[] = [null, "foret", "origine", "inconnu", "__proto__"]
 const APPEARANCE_VALUES: readonly Stored[] = [null, "light", "dark", "system", "inattendu"]
@@ -30,18 +32,20 @@ const SCENARIOS: Scenario[] = THEME_VALUES.flatMap((theme) =>
   APPEARANCE_VALUES.flatMap((appearance) => STORAGES.flatMap((storage) => SYSTEMS.map((system) => ({ theme, appearance, storage, system })))),
 )
 
-/** <html> tel que le serveur le rend : la charte d'origine, ni `.dark` ni `color-scheme`. */
+/** <html> tel que le serveur le rend : la charte d'origine, ni `.dark`, ni `color-scheme`, ni motif. */
 function serverHtml(charte = SERVER_CHARTE) {
   const html = document.documentElement
   html.setAttribute("data-charte", charte)
+  html.removeAttribute("data-motif")
   html.classList.remove("dark")
   html.style.removeProperty("color-scheme")
 }
 
-function prepare({ theme, appearance, storage, system }: Scenario) {
+function prepare({ theme, appearance, storage, system, motif = null }: Scenario) {
   const memory = createMemoryStorage()
   if (theme !== null) memory.setItem(`${PREFIX}theme`, theme)
   if (appearance !== null) memory.setItem(`${PREFIX}appearance`, appearance)
+  if (motif !== null) memory.setItem(`${PREFIX}motif`, motif)
   if (storage === "getItem refusé") vi.spyOn(memory, "getItem").mockImplementation(() => { throw new Error("SecurityError") })
   vi.stubGlobal("localStorage", storage === "absent" ? undefined : memory)
   if (system === "sans API") vi.stubGlobal("matchMedia", undefined)
@@ -54,19 +58,23 @@ function htmlState() {
   return { charte: html.getAttribute("data-charte"), dark: html.classList.contains("dark"), scheme: html.style.colorScheme }
 }
 
-function runBoot(themes: readonly AppearanceTheme[] = THEMES, prefix = PREFIX) {
-  new Function(appearanceBootScript({ storagePrefix: prefix, themes }))()
+function motifState() {
+  return document.documentElement.getAttribute("data-motif")
 }
 
-function mountProvider(themes: readonly AppearanceTheme[] | undefined = THEMES) {
-  render(<AppearanceProvider storagePrefix={PREFIX} themes={themes}><span /></AppearanceProvider>)
+function runBoot(themes: readonly AppearanceTheme[] = THEMES, prefix = PREFIX, motifs?: readonly string[]) {
+  new Function(appearanceBootScript({ storagePrefix: prefix, themes, motifs }))()
+}
+
+function mountProvider(themes: readonly AppearanceTheme[] | undefined = THEMES, motifs?: readonly string[]) {
+  render(<AppearanceProvider storagePrefix={PREFIX} themes={themes} motifs={motifs}><span /></AppearanceProvider>)
 }
 
 /** Toutes les valeurs prises par les attributs de <html> pendant `run`, la dernière comprise. */
 function valuesTakenDuring(run: () => void) {
   const html = document.documentElement
   const observer = new MutationObserver(() => undefined)
-  observer.observe(html, { attributes: true, attributeOldValue: true, attributeFilter: ["data-charte", "class", "style"] })
+  observer.observe(html, { attributes: true, attributeOldValue: true, attributeFilter: ["data-charte", "data-motif", "class", "style"] })
   run()
   const records = observer.takeRecords()
   observer.disconnect()
@@ -138,21 +146,73 @@ describe("hydratation : le fournisseur ne défait pas l'amorçage", () => {
   })
 })
 
+describe("amorçage du motif de fond — parité avec le fournisseur (ADR-0027)", () => {
+  const MOTIF_VALUES: readonly Stored[] = [null, "points", "quadrillage", "inconnu", "__proto__", ""]
+  const MOTIF_SCENARIOS = MOTIF_VALUES.flatMap((motif) => STORAGES.flatMap((storage) => [true, false].map((offered) => ({ motif, storage, offered }))))
+
+  it.each(MOTIF_SCENARIOS)("motif $motif, stockage $storage, motifs proposés : $offered", ({ motif, storage, offered }) => {
+    const motifs = offered ? MOTIFS : []
+    const scenario: Scenario = { theme: null, appearance: null, storage, system: "clair", motif }
+    prepare(scenario)
+    runBoot(THEMES, PREFIX, motifs)
+    const booted = motifState()
+    // Seul un motif proposé, lu sans erreur, est posé ; tout le reste laisse le fond uni.
+    expect(booted).toBe(offered && storage === "ok" && (motif === "points" || motif === "quadrillage") ? motif : null)
+
+    cleanup()
+    serverHtml()
+    prepare(scenario)
+    act(() => mountProvider(THEMES, motifs))
+    expect(motifState()).toBe(booted)
+  })
+
+  it.each([
+    { motif: "points", theme: "foret", appearance: "dark" },
+    { motif: "quadrillage", theme: null, appearance: null },
+  ] as const)("motif $motif : le fournisseur n'efface jamais en hydratant le motif posé avant l'affichage", (scenario) => {
+    prepare({ ...scenario, storage: "ok", system: "clair" })
+    runBoot(THEMES, PREFIX, MOTIFS)
+    expect(motifState()).toBe(scenario.motif)
+    const taken = valuesTakenDuring(() => act(() => mountProvider(THEMES, MOTIFS)))
+    expect(motifState()).toBe(scenario.motif)
+    expect(taken["data-motif"] ?? new Set([scenario.motif])).toEqual(new Set([scenario.motif]))
+  })
+
+  it("sans motifs proposés, la clé n'est pas lue et le `data-motif` de la page reste intact", () => {
+    prepare({ theme: null, appearance: null, storage: "ok", system: "clair", motif: "points" })
+    const getItem = vi.spyOn(window.localStorage, "getItem")
+    document.documentElement.setAttribute("data-motif", "page")
+    runBoot(THEMES, PREFIX, [])
+    expect(motifState()).toBe("page")
+    expect(getItem).not.toHaveBeenCalledWith(`${PREFIX}motif`)
+  })
+
+  it("lit la clé du préfixe du réseau, jamais celle d'un autre réseau", () => {
+    prepare({ theme: null, appearance: null, storage: "ok", system: "clair" })
+    window.localStorage.setItem("antsia:autre:motif", "points")
+    runBoot(THEMES, PREFIX, MOTIFS)
+    expect(motifState()).toBeNull()
+  })
+})
+
 describe("texte du script", () => {
   it("stable pour une configuration donnée (empreinte CSP possible) et sans valeur de requête", () => {
-    const first = appearanceBootScript({ storagePrefix: PREFIX, themes: THEMES })
-    expect(appearanceBootScript({ storagePrefix: PREFIX, themes: [...THEMES] })).toBe(first)
+    const first = appearanceBootScript({ storagePrefix: PREFIX, themes: THEMES, motifs: MOTIFS })
+    expect(appearanceBootScript({ storagePrefix: PREFIX, themes: [...THEMES], motifs: [...MOTIFS] })).toBe(first)
     expect(first).not.toMatch(/nonce|cookie|location/)
   })
 
   it("une configuration hostile ne referme jamais l'élément script et reste lue telle quelle", () => {
     const prefix = "antsia:</script><script>alert(1)</script><!--:"
-    const script = appearanceBootScript({ storagePrefix: prefix, themes: THEMES })
+    const motifs = ["points", "</script><script>alert(2)</script>"]
+    const script = appearanceBootScript({ storagePrefix: prefix, themes: THEMES, motifs })
     expect(script).not.toMatch(/<\/script|<!--/i)
     prepare({ theme: null, appearance: null, storage: "ok", system: "clair" })
     window.localStorage.setItem(`${prefix}theme`, "lagon")
     window.localStorage.setItem(`${prefix}appearance`, "dark")
-    runBoot(THEMES, prefix)
+    window.localStorage.setItem(`${prefix}motif`, motifs[1]!)
+    runBoot(THEMES, prefix, motifs)
     expect(htmlState()).toEqual({ charte: "antsia-lagon", dark: true, scheme: "dark" })
+    expect(motifState()).toBe(motifs[1])
   })
 })

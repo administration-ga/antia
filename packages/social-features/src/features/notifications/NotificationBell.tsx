@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/notifications/NotificationBell.tsx @ ad2e7fdc2 — adaptations : UNE seule source, la cloche sociale du réseau (`notifications.bell.unreadCount`, réseau courant de `useNetwork()`) — le second décompte de la table centrale (`notificationCenter.queries.unreadCountForEspace`) et leur addition retirés ; pastille et nom accessible instruits de la LACUNE du décompte (`capped`, par `tabBadge` / `unreadLabel`) ; la carte flottante de la coque porte la charte de `<html>` (relecture de `data-charte` sur le déclencheur et prop `charte` retirées : plus de charte de poste) ; prop `reseauBaseHref` retirée (les cibles se composent sur `useRoutes()`) ; pastille de la variante coque sans jeton de poste (`--poste-chip`) et texte sur le jeton déclaré `--destructive-foreground` ; libellés traduits (espace `notifications`, clés `notificationBell.…`) ; commentaires sans iRéseau, l'espace agent ni l'onglet « Administration ».
+// Dupliqué de socle/packages/agent-features/src/features/notifications/NotificationBell.tsx @ ad2e7fdc2 — adaptations : UNE seule source, la cloche sociale du réseau (`notifications.bell.unreadCount`, réseau courant de `useNetwork()`) — le second décompte de la table centrale (`notificationCenter.queries.unreadCountForEspace`) et leur addition retirés ; pastille et nom accessible instruits de la LACUNE du décompte (`capped`, par `tabBadge` / `unreadLabel`) ; la carte flottante de la coque porte la charte de `<html>` (relecture de `data-charte` sur le déclencheur et prop `charte` retirées : plus de charte de poste) ; prop `reseauBaseHref` retirée (les cibles se composent sur `useRoutes()`) ; pastille de la variante coque sans jeton de poste (`--poste-chip`) et texte sur le jeton déclaré `--destructive-foreground` ; libellés traduits (espace `notifications`, clés `notificationBell.…`) ; commentaires sans iRéseau, l'espace agent ni l'onglet « Administration » ; système épuré (ADR-0027) : rond gris de l'en-tête (`--esp-header-icon-*`) et pastille de non-lus aux couleurs des réactions (`--role-react-*`), valeurs d'origine en repli.
 "use client"
 
 /**
@@ -92,7 +92,7 @@ function noCardHost(): symbol | null {
 }
 
 const CHROME_CLASS =
-	"relative grid size-[38px] place-items-center rounded-[var(--esp-r-chrome)] bg-[var(--esp-neutral-chip)] text-muted-foreground transition-colors hover:bg-[var(--esp-neutral-hover)] hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none"
+	"relative grid size-[38px] place-items-center rounded-[var(--esp-header-icon-radius,var(--esp-r-chrome))] bg-[var(--esp-header-icon-bg,var(--esp-neutral-chip))] text-muted-foreground transition-colors hover:bg-[var(--esp-neutral-hover)] hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none"
 
 export function NotificationBell({
 	fullHref,
@@ -164,7 +164,7 @@ export function NotificationBell({
 						{badge ? (
 							<span
 								aria-hidden="true"
-								className="absolute -top-1.5 -right-1.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-destructive px-1 text-[9px] font-bold tabular-nums text-[var(--destructive-foreground)]"
+								className="absolute -top-1.5 -right-1.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-[var(--role-react-fill,var(--destructive))] px-1 text-[9px] font-bold tabular-nums text-[color:var(--role-react-on,var(--destructive-foreground))]"
 							>
 								{badge}
 							</span>

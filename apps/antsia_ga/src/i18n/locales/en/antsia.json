@@ -246,18 +246,27 @@
     "appearanceHint": "Appearance changes immediately. This choice is saved for this network on this device.",
     "theme": {
       "label": "Theme",
-      "hint": "The theme sets the color of main buttons, links and selections. Backgrounds stay light or dark according to your appearance setting. The change is immediate and saved to your account, so you find it on your other devices.",
-      "hintDevice": "The theme sets the color of main buttons, links and selections. Backgrounds stay light or dark according to your appearance setting. The change is immediate and saved for this network on this device.",
+      "hint": "Each theme has three colors, one for each family of actions: posting, following and writing, reacting and joining. Backgrounds stay light or dark according to your appearance setting. The change is immediate and saved to your account, so you find it on your other devices.",
+      "hintDevice": "Each theme has three colors, one for each family of actions: posting, following and writing, reacting and joining. Backgrounds stay light or dark according to your appearance setting. The change is immediate and saved for this network on this device.",
       "saveFailed": "The theme could not be saved to your account. {{reason}}",
       "options": {
-        "antsia": { "name": "Plum", "description": "The network’s original theme." },
-        "atlantique": { "name": "Atlantic", "description": "Bright blue on very light gray." },
-        "indigo": { "name": "Indigo", "description": "Indigo on a white background." },
-        "hibiscus": { "name": "Hibiscus", "description": "Vivid pink-red on a white background." },
-        "encre": { "name": "Ink", "description": "Black and white, no accent color." },
-        "foret": { "name": "Forest", "description": "Deep green on light beige." },
-        "lagon": { "name": "Lagoon", "description": "Teal on very light gray." },
-        "mandarine": { "name": "Tangerine", "description": "Deep orange on light beige." }
+        "gaboma": { "name": "Gaboma", "description": "Green, yellow and blue of the flag. The network’s theme." },
+        "soleil": { "name": "Sun", "description": "Tangerine, azure and poppy red." },
+        "foret": { "name": "Forest", "description": "Forest green, olive and honey." },
+        "corail": { "name": "Coral", "description": "Coral pink, tangerine and lilac." },
+        "lagon": { "name": "Lagoon", "description": "Turquoise, coral and Naples yellow." },
+        "electrique": { "name": "Electric", "description": "Blue, pink and lime." }
+      }
+    },
+    "motif": {
+      "label": "Background pattern",
+      "hint": "By default the background is plain. A pattern stays subtle behind the content and applies to this device only.",
+      "options": {
+        "none": "None",
+        "points": "Dots",
+        "quadrillage": "Grid",
+        "grain": "Grain",
+        "projecteur": "Spotlight"
       }
     },
     "unsaved": "Your changes have not been saved. Save your preferences before leaving this page.",

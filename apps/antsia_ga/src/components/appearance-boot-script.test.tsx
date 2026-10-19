@@ -1,4 +1,4 @@
-// ADR-0026 : l'amorçage de l'apparence d'antsia.ga, prêt pour la CSP à jeton.
+// ADR-0026 : l'amorçage de l'apparence d'antsia.ga, prêt pour la CSP à jeton ; ADR-0027 : six thèmes et motifs de fond.
 import { readFileSync } from "node:fs"
 
 import { appearanceBootScript } from "@antsia/social-features/shell/appearance/boot-script"
@@ -21,14 +21,20 @@ describe("AppearanceBootScript", () => {
     expect(html).toBe(`<script>${APPEARANCE_BOOT_SCRIPT}</script>`)
   })
 
-  it("rejoue la configuration du fournisseur d'antsia.ga : préfixe du réseau racine et huit thèmes", () => {
+  it("rejoue la configuration du fournisseur d'antsia.ga : préfixe du réseau racine, six thèmes et motifs de fond", () => {
     expect(APPEARANCE.storagePrefix).toBe("antsia:antsia:")
     // Dérivée du contrat pur (module serveur), la liste reste exactement le registre des chartes d'@antsia/ui.
     expect(APPEARANCE.themes).toEqual(ANTSIA_THEMES)
-    expect(APPEARANCE_BOOT_SCRIPT).toBe(appearanceBootScript({ storagePrefix: "antsia:antsia:", themes: ANTSIA_THEMES }))
+    // ADR-0027 : motifs proposés, aucun par défaut.
+    expect([...APPEARANCE.motifs]).toEqual(["points", "quadrillage", "grain", "projecteur"])
+    expect(APPEARANCE_BOOT_SCRIPT).toBe(appearanceBootScript({ storagePrefix: "antsia:antsia:", themes: ANTSIA_THEMES, motifs: APPEARANCE.motifs }))
     expect(APPEARANCE_BOOT_SCRIPT).toContain('"t":"antsia:antsia:theme"')
     expect(APPEARANCE_BOOT_SCRIPT).toContain('"a":"antsia:antsia:appearance"')
-    expect(APPEARANCE_BOOT_SCRIPT).toContain('"d":"antsia"')
+    // Gaboma, le thème par défaut, habille la page de la charte du réseau.
+    expect(APPEARANCE_BOOT_SCRIPT).toContain('"d":"gaboma"')
+    expect(APPEARANCE_BOOT_SCRIPT).toContain('"gaboma":"antsia"')
+    expect(APPEARANCE_BOOT_SCRIPT).toContain('"f":"antsia:antsia:motif"')
+    expect(APPEARANCE_BOOT_SCRIPT).toContain('"g":["points","quadrillage","grain","projecteur"]')
   })
 
   it("reste importable par la mise en page serveur : ni « use client » ni index d'@antsia/ui (crochets React)", () => {

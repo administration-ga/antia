@@ -1,0 +1,262 @@
+/*
+ * Thème « Électrique » du réseau ANTSIA (`data-charte="antsia-electrique"`) : bleu 21st, rose et citron vert, fond blanc pur et noir zinc.
+ * Un des six thèmes que le membre choisit dans Préférences > Thème (ADR-0027, 19/10/2026).
+ *
+ * Le bleu publie, suit et écrit ; le rose réagit ; le citron vert fait participer et acheter. Cartes et fond ont la même couleur : elles gardent un filet (contour à couleur égale).
+ *
+ * Trois couleurs par thème, chacune avec ses fonctions (jetons `--role-*`), plus le succès et le
+ * danger, retours visuels communs. `--primary` reste une ENCRE lisible en texte ; l'aplat du bouton
+ * est `--primary-fill`, avec son propre texte `--primary-fill-on`. Fond neutre de la troisième série
+ * (« Zinc » : Blanc pur · noir zinc), sans motif : les motifs sont un réglage du membre.
+ *
+ * Système épuré : un angle par élément (pilule, badge 6, puce 10, page 12, champ 14, média 16,
+ * Créer 18, carte 24, barre d'onglets 28), contour seulement à couleur égale, barre flottante.
+ * Généré par le script de la série 3 ; contrastes recalculés à travers la cascade complète par
+ * `antsia-themes.test.ts`. Même structure que les autres thèmes (cliquet `theme-contract`).
+ */
+
+[data-charte="antsia-electrique"] {
+  /* ── 1. Primitives du contrat, réaccordées au thème ── */
+  --esp-neutral-900: #09090b; /* texte principal clair */
+  --esp-neutral-600: #67676f; /* texte secondaire clair */
+  --esp-neutral-rule: #e4e4e7; /* séparateur décoratif */
+  --esp-neutral-field: #8b8b94; /* contour de contrôle clair, ≥ 3:1 sur la carte et le creux */
+  --esp-night-bg: #09090b;
+  --esp-night-card: #09090b;
+  --esp-night-chip: #18181b;
+  --esp-night-border: #27272a;
+  --esp-night-input: #71717a;
+  --esp-night-soft: #a1a1aa;
+
+  /* ── 2. Identité (encre), succès, danger — thème clair ── */
+  --primary-50: #e0e7ff;
+  --primary-100: #ccd6ff;
+  --primary-200: #adbeff;
+  --primary-300: #3860ff;
+  --primary-400: #1947ff;
+  --primary-500: #0033ff;
+  --primary-600: #002de0;
+  --primary-700: #0027c2;
+  --primary-800: #00209e;
+  --success-50: #e8f2ec;
+  --success-100: #d0e6d8;
+  --success-500: #157f3c;
+  --success-600: #126e35;
+  --danger-50: #fce9e9;
+  --danger-100: #f8d4d4;
+  --danger-500: #d52525;
+  --danger-600: #c81e1e;
+  --danger-700: #a01818;
+
+  /* ── 3. Rôles du thème clair ── */
+  --background: #ffffff;
+  --foreground: var(--esp-neutral-900);
+  --card: #ffffff;
+  --popover: #ffffff;
+  --muted: #f4f4f5; /* creux : bouton neutre, puce, champ, survol */
+  --muted-foreground: var(--esp-neutral-600);
+  --border: var(--esp-neutral-rule);
+  --input: var(--esp-neutral-field);
+  --on-fill: #ffffff; /* texte blanc sur l'accent, le succès et le danger */
+  --esp-banner: linear-gradient(135deg, var(--primary-700) 0%, var(--primary-500) 100%);
+  --role-social-fill: #0033ff;
+  --role-social-on: #ffffff;
+  --role-social-ink: #0033ff;
+  --role-message-fill: #0033ff;
+  --role-message-on: #ffffff;
+  --role-message-ink: #0033ff;
+  --role-react-fill: #f43f5e;
+  --role-react-on: #2a0510;
+  --role-react-ink: #e11d48;
+  --role-commerce-fill: #84cc16;
+  --role-commerce-on: #0e1a02;
+  --role-commerce-ink: #4a7700;
+  --role-message-soft: #d9e0ff; /* fond tonal du bouton Écrire */
+  --role-react-soft: #fde4e8; /* fond de l'action réagie */
+  --primary-fill: #0033ff; /* aplat d'identité : bouton Publier, Créer, interrupteur */
+  --primary-fill-hover: #002ee6;
+  --primary-fill-on: #ffffff; /* texte posé sur l'aplat d'identité */
+  --ui2-button-secondary-bg: #d9e0ff; /* bouton secondaire tonal, sans filet */
+  --ui2-button-secondary-fg: #0033ff;
+  --esp-mobilebar-bg: rgb(255 255 255 / 0.9); /* barre flottante, translucide au-dessus du fil */
+  --esp-fab-shadow: 0 10px 20px -8px rgb(0 51 255 / 0.55);
+  --esp-tab-active-bg: #d6deff; /* onglet actif : pastille tonale */
+  --esp-tab-active-fg: #0033ff;
+
+  /* Géométrie et typographie, valables dans les deux thèmes. */
+  --radius-xl: 12px;
+  --rp-surface-radius: 24px; /* cartes du fil et surfaces de premier niveau */
+  --esp-inline-link-decoration: underline;
+  --esp-sticky-header-inset: 4rem; /* barre de membre collante (P18b, A13) */
+  --body-font-size: 16px;
+  --font-sans: "Inter", system-ui, sans-serif;
+  --font-display: var(--font-familjen-grotesk, "Familjen Grotesk Variable"), "Inter", system-ui, sans-serif;
+
+  /* Ombres teintées de l'encre du thème. */
+  --shadow-xs: 0 1px 2px rgb(9 9 11 / 0.05);
+  --shadow-sm: 0 1px 3px rgb(9 9 11 / 0.08), 0 1px 2px rgb(9 9 11 / 0.04);
+  --shadow-md: 0 4px 12px rgb(9 9 11 / 0.08), 0 2px 4px rgb(9 9 11 / 0.04);
+  --shadow-lg: 0 12px 32px rgb(9 9 11 / 0.12), 0 4px 12px rgb(9 9 11 / 0.06);
+  --shadow-xl: 0 20px 40px rgb(9 9 11 / 0.16), 0 8px 16px rgb(9 9 11 / 0.08);
+  --icom-float-drag-shadow: 0 18px 54px rgb(9 9 11 / 0.3);
+}
+
+.dark[data-charte="antsia-electrique"],
+.dark [data-charte="antsia-electrique"] {
+  /* ── Identité (encre), succès, danger — thème sombre ── */
+  --primary-50: #272c41;
+  --primary-100: #323954;
+  --primary-200: #40496d;
+  --primary-300: #7585c9;
+  --primary-400: #8598e7;
+  --primary-500: #93a8ff;
+  --primary-600: #a6b8ff;
+  --primary-700: #b8c6ff;
+  --primary-800: #c9d4ff;
+  --success-50: #123127;
+  --success-100: #154233;
+  --success-500: #34d399;
+  --success-600: #34d399;
+  --danger-50: #391e1f;
+  --danger-100: #4c2628;
+  --danger-500: #f87171;
+  --danger-600: #fc9595;
+  --danger-700: #fdb5b5;
+
+  /* ── Rôles du thème sombre ── */
+  --background: var(--esp-night-bg);
+  --foreground: #fafafa;
+  --card: var(--esp-night-card);
+  --popover: var(--esp-night-chip);
+  --muted: var(--esp-night-chip); /* se lève au-dessus de la carte */
+  --muted-foreground: var(--esp-night-soft);
+  --border: var(--esp-night-border);
+  --input: var(--esp-night-input);
+  --on-fill: #001c10; /* encre sombre sur les aplats éclaircis */
+  --esp-banner: linear-gradient(135deg, var(--primary-100) 0%, var(--primary-50) 100%);
+  --role-social-fill: #4060ff;
+  --role-social-on: #ffffff;
+  --role-social-ink: #93a8ff;
+  --role-message-fill: #4060ff;
+  --role-message-on: #ffffff;
+  --role-message-ink: #93a8ff;
+  --role-react-fill: #fb7185;
+  --role-react-on: #2a0510;
+  --role-react-ink: #fb7185;
+  --role-commerce-fill: #84cc16;
+  --role-commerce-on: #0e1a02;
+  --role-commerce-ink: #84cc16;
+  --role-message-soft: #111630; /* fond tonal du bouton Écrire */
+  --role-react-soft: #2b181c; /* fond de l'action réagie */
+  --primary-fill: #4060ff; /* aplat d'identité : bouton Publier, Créer, interrupteur */
+  --primary-fill-hover: #3a56e6;
+  --primary-fill-on: #ffffff; /* texte posé sur l'aplat d'identité */
+  --ui2-button-secondary-bg: #111630; /* bouton secondaire tonal, sans filet */
+  --ui2-button-secondary-fg: #93a8ff;
+  --esp-mobilebar-bg: rgb(9 9 11 / 0.9); /* barre flottante, translucide au-dessus du fil */
+  --esp-fab-shadow: 0 10px 20px -8px rgb(64 96 255 / 0.45);
+  --esp-tab-active-bg: #121732; /* onglet actif : pastille tonale */
+  --esp-tab-active-fg: #93a8ff;
+}
+
+[data-charte="antsia-electrique"],
+.dark[data-charte="antsia-electrique"],
+.dark [data-charte="antsia-electrique"] {
+  /* ── Surfaces : la même paire fond/carte partout ── */
+  --background-dashboard: var(--background);
+  --card-foreground: var(--foreground);
+  --popover-foreground: var(--foreground);
+  --secondary: var(--card);
+  --secondary-foreground: var(--muted-foreground);
+  --esp-surface-card: var(--card);
+  --esp-surface-raised: var(--popover);
+  --esp-surface-border: var(--border); /* carte et fond de même couleur : un filet */
+  --esp-neutral-chip: var(--muted);
+  --esp-neutral-hover: var(--muted);
+  --esp-mobilebar-border: var(--border);
+  --sidebar: var(--card);
+  --sidebar-foreground: var(--foreground);
+  --sidebar-border: var(--border);
+  --sidebar-muted: var(--muted-foreground);
+  --ui2-scrim: rgb(9 9 11 / 0.55);
+
+  /* ── Identité : encre en texte, aplat dans les blocs clair et sombre ── */
+  --primary: var(--primary-500);
+  --primary-foreground: var(--on-fill);
+  --primary-light: var(--primary-100);
+  --accent: var(--primary-500);
+  --accent-foreground: var(--on-fill);
+  --accent-purple: var(--primary-500);
+  --chart-1: var(--primary-500);
+  --sidebar-primary: var(--primary-500);
+  --sidebar-primary-foreground: var(--on-fill);
+  --sidebar-accent: var(--primary-50);
+  --sidebar-accent-foreground: var(--primary-700);
+  --esp-accent-soft: var(--primary-50);
+  --esp-accent-deep: var(--primary-700);
+  --info-50: var(--primary-50);
+  --info-100: var(--primary-100);
+  --info-500: var(--primary-500);
+  --info-600: var(--primary-600);
+  --status-active: var(--primary-500);
+  --status-active-bg: var(--primary-50);
+  --ring: var(--primary-500);
+  --sidebar-ring: var(--ring);
+  --shadow-focus: 0 0 0 2px var(--background), 0 0 0 4px var(--ring);
+  --outline-ring: var(--ring);
+
+  /* ── Succès et danger : icône + texte, jamais la couleur seule ── */
+  --success: var(--success-500);
+  --success-light: var(--success-50);
+  --success-fill: var(--success-500);
+  --success-fill-hover: var(--success-600);
+  --esp-green-strong: var(--success-500);
+  --status-archived: var(--success-500);
+  --status-archived-bg: var(--success-50);
+  --destructive: var(--danger-500);
+  --destructive-light: var(--danger-50);
+  --danger-fill: var(--danger-500);
+  --danger-fill-hover: var(--danger-600);
+  --status-error: var(--danger-500);
+  --status-error-bg: var(--danger-50);
+  --status-semi: var(--muted-foreground);
+  --status-semi-bg: var(--muted);
+  --status-inactive: var(--input);
+  --status-inactive-bg: var(--muted);
+
+  /* ── Échelle d'encre d'ui-v2, attribuée rôle par rôle ── */
+  --ink-900: var(--foreground);
+  --ink-800: var(--foreground);
+  --ink-700: var(--foreground);
+  --ink-600: var(--muted-foreground);
+  --ink-500: var(--muted-foreground);
+  --ink-400: var(--muted-foreground);
+  --ink-300: var(--input);
+  --ink-200: var(--border);
+  --ink-150: var(--muted);
+  --ink-100: var(--background);
+  --ink-50: var(--popover);
+  --ink-0: var(--card);
+
+  /* ── Système épuré : un angle par élément, contour seulement à couleur égale ── */
+  --ui2-button-radius: 999px; /* boutons d'action en pilule */
+  --ui2-badge-radius: 6px;
+  --ui2-card-radius: 24px; /* cartes d'ui-v2, comme les surfaces du réseau */
+  --esp-chip-radius: 10px;
+  --esp-avatar-page-radius: 12px; /* les pages en carré arrondi, les personnes en rond */
+  --esp-field-radius: 14px;
+  --esp-media-radius: 16px; /* un média dans une carte : plus petit que la carte */
+  --esp-fab-radius: 18px;
+  --esp-mobilebar-radius: 28px;
+  --ui2-button-outline-bg: var(--muted); /* bouton neutre (Annuler) : gris, sans filet */
+  --ui2-button-outline-border: transparent;
+  --ui2-button-secondary-border: transparent;
+  --esp-chip-bg: var(--muted);
+  --esp-chip-border: transparent;
+  --esp-header-icon-bg: var(--muted); /* icônes de l'en-tête dans des ronds gris */
+  --esp-header-icon-radius: 999px;
+  --role-react-label: var(--foreground); /* libellé de l'action réagie : encre de texte */
+  --esp-theme-swatch-1: #0033ff; /* Bleu 21st */
+  --esp-theme-swatch-2: #f43f5e; /* Rose */
+  --esp-theme-swatch-3: #84cc16; /* Citron vert */
+}

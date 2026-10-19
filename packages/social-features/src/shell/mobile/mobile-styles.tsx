@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/mobile/mobile-styles.tsx @ ad2e7fdc2 — adaptations : feuille sortie du JSX dans une constante de module exportée (`RESEAU_MOBILE_CSS`) — un littéral enfant de `<style>` passerait pour une chaîne d'interface ; AUCUNE couleur littérale — le masque du débordement des sous-menus lit un jeton opaque de la charte (`--foreground`) au lieu d'un mot-clé de couleur, la valeur hexadécimale citée en commentaire est retirée ; commentaires rapportés à la coque légère du moteur (scroller de l'hôte, cliquets `no-hardcoded-colors` et `theme-contract`, classes `.esp-*` fournies par `@antsia/ui`) ; règles, sélecteurs et paliers inchangés ; déplacé dans la coque (`shell/mobile/`).
+// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/mobile/mobile-styles.tsx @ ad2e7fdc2 — adaptations : feuille sortie du JSX dans une constante de module exportée (`RESEAU_MOBILE_CSS`) — un littéral enfant de `<style>` passerait pour une chaîne d'interface ; AUCUNE couleur littérale — le masque du débordement des sous-menus lit un jeton opaque de la charte (`--foreground`) au lieu d'un mot-clé de couleur, la valeur hexadécimale citée en commentaire est retirée ; commentaires rapportés à la coque légère du moteur (scroller de l'hôte, cliquets `no-hardcoded-colors` et `theme-contract`, classes `.esp-*` fournies par `@antsia/ui`) ; règles, sélecteurs et paliers inchangés ; déplacé dans la coque (`shell/mobile/`) ; système épuré (ADR-0027) : déclencheur du composeur et puces de portée sans filet (`--esp-chip-*`), onglet actif en pastille tonale (`--esp-tab-active-*`), pastille de décompte aux couleurs des réactions (`--role-react-*`), motif de fond de page en option, valeurs d'origine en repli.
 "use client"
 
 /**
@@ -39,6 +39,11 @@ export const RESEAU_MOBILE_CSS = `
         flex: 1 1 auto;
         flex-direction: column;
         background: var(--background);
+        /* Motif de fond, en option (ADR-0027) : aucun par défaut ; fixé à la
+           fenêtre pour se raccorder à celui du corps de la page. */
+        background-image: var(--esp-motif-image, none);
+        background-size: var(--esp-motif-size, auto);
+        background-attachment: fixed;
       }
       /* Le contenu. Il porte le conteneur nommé « rp-page » pour que les
          requêtes @container déjà écrites par les panneaux du réseau
@@ -127,9 +132,9 @@ export const RESEAU_MOBILE_CSS = `
         align-items: center;
         gap: 10px;
         padding: 10px 14px;
-        border: 1px solid var(--border);
+        border: 1px solid var(--esp-chip-border, var(--border));
         border-radius: 999px;
-        background: var(--card);
+        background: var(--esp-chip-bg, var(--card));
         color: var(--muted-foreground);
         font: inherit;
         font-size: 14px;
@@ -153,9 +158,9 @@ export const RESEAU_MOBILE_CSS = `
         flex: 0 0 auto;
         min-height: 44px;
         padding: 7px 15px;
-        border: 1px solid var(--border);
-        border-radius: 999px;
-        background: var(--card);
+        border: 1px solid var(--esp-chip-border, var(--border));
+        border-radius: var(--esp-chip-radius, 999px);
+        background: var(--esp-chip-bg, var(--card));
         color: var(--muted-foreground);
         font: inherit;
         font-size: 13px;
@@ -164,9 +169,9 @@ export const RESEAU_MOBILE_CSS = `
         cursor: pointer;
       }
       .rm-scope-chip[aria-pressed="true"] {
-        border-color: var(--primary);
-        background: var(--primary);
-        color: var(--primary-foreground);
+        border-color: var(--primary-fill);
+        background: var(--primary-fill);
+        color: var(--primary-fill-on, var(--primary-foreground));
       }
       .rm-scope-note {
         margin: 6px 2px 0;
@@ -317,7 +322,7 @@ export const RESEAU_MOBILE_CSS = `
         height: 28px;
         align-items: center;
         justify-content: center;
-        border-radius: 10px;
+        border-radius: var(--esp-chip-radius, 10px);
       }
       /* ⚠️ La pastille de l'onglet actif porte --accent en FOND : son premier
          plan doit donc être --accent-foreground, jamais la couleur héritée du
@@ -327,8 +332,8 @@ export const RESEAU_MOBILE_CSS = `
          entière, ou pas du tout.
          (Aucun accent grave dans ce bloc : il vit dans un template literal.) */
       .rm-tab[aria-current="page"] .rm-tab-icon {
-        background: var(--accent);
-        color: var(--accent-foreground);
+        background: var(--esp-tab-active-bg, var(--accent));
+        color: var(--esp-tab-active-fg, var(--accent-foreground));
       }
       .rm-tab-label {
         max-width: 100%;
@@ -351,8 +356,8 @@ export const RESEAU_MOBILE_CSS = `
         justify-content: center;
         padding: 0 4px;
         border-radius: 999px;
-        background: var(--primary);
-        color: var(--primary-foreground);
+        background: var(--role-react-fill, var(--primary));
+        color: var(--role-react-on, var(--primary-foreground));
         font-family: var(--font-mono);
         font-size: 9px;
         font-weight: 700;

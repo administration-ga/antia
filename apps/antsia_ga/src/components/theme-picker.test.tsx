@@ -86,14 +86,18 @@ afterEach(async () => {
 })
 
 describe("ThemePicker", () => {
-  it("propose la charte d'origine et les sept thèmes, chacun peint dans sa propre charte", async () => {
+  it("propose les six thèmes, Gaboma par défaut, chacun peint dans sa propre charte", async () => {
     await mount("fr")
     expect(container.querySelector("legend")?.textContent).toBe("Thème")
-    expect(radios()).toHaveLength(8)
+    expect(radios()).toHaveLength(6)
     expect(radios().map((radio) => radio.closest("label")?.dataset.charte)).toEqual(ANTSIA_THEMES.map((theme) => theme.charte))
     const names = radios().map((radio) => radio.closest("label")?.querySelector(".truncate")?.textContent)
-    expect(names).toEqual(["Prune", "Atlantique", "Indigo", "Hibiscus", "Encre", "Forêt", "Lagon", "Mandarine"])
+    expect(names).toEqual(["Gaboma", "Soleil", "Forêt", "Corail", "Lagon", "Électrique"])
     expect(radios()[0]?.checked).toBe(true)
+    // Gaboma est la charte du réseau : son option est peinte en `antsia`.
+    expect(radios()[0]?.closest("label")?.dataset.charte).toBe("antsia")
+    // Chaque option montre les trois couleurs de son thème (ADR-0027).
+    for (const radio of radios()) expect(radio.closest("label")?.querySelectorAll("[class*='esp-theme-swatch']")).toHaveLength(3)
     for (const radio of radios()) expect(radio.getAttribute("aria-describedby")).toBe(container.querySelector("fieldset p")?.id)
   })
 
@@ -110,7 +114,7 @@ describe("ThemePicker", () => {
   it("les libellés existent aussi en anglais", async () => {
     await mount("en")
     expect(container.querySelector("legend")?.textContent).toBe("Theme")
-    expect(container.textContent).toContain("The network’s original theme.")
+    expect(container.textContent).toContain("Green, yellow and blue of the flag. The network’s theme.")
   })
 
   it("ne s'affiche pas quand l'application ne propose aucun thème", async () => {
@@ -140,7 +144,7 @@ describe("ThemePicker — hors session et sur le compte", () => {
   })
 
   it("en session : le choix s'applique tout de suite et s'enregistre sur le compte", async () => {
-    await mount("fr", true, { accountTheme: "antsia" })
+    await mount("fr", true, { accountTheme: "gaboma" })
     expect(hint()).toContain("enregistré sur votre compte")
     await act(async () => radios().find((radio) => radio.value === "foret")!.click())
     expect(document.documentElement.dataset.charte).toBe("antsia-foret")
@@ -153,34 +157,42 @@ describe("ThemePicker — hors session et sur le compte", () => {
   })
 
   it("le thème du compte s'applique à l'appareil et y reste en cache pour le prochain affichage", async () => {
-    await mount("fr", true, { accountTheme: "mandarine" })
-    expect(document.documentElement.dataset.charte).toBe("antsia-mandarine")
-    expect(window.localStorage.getItem("antsia:antsia:theme")).toBe("mandarine")
-    expect(radios().find((radio) => radio.checked)?.value).toBe("mandarine")
-    await accountNow("indigo")
-    expect(document.documentElement.dataset.charte).toBe("antsia-indigo")
+    await mount("fr", true, { accountTheme: "corail" })
+    expect(document.documentElement.dataset.charte).toBe("antsia-corail")
+    expect(window.localStorage.getItem("antsia:antsia:theme")).toBe("corail")
+    expect(radios().find((radio) => radio.checked)?.value).toBe("corail")
+    await accountNow("soleil")
+    expect(document.documentElement.dataset.charte).toBe("antsia-soleil")
     expect(state.save).not.toHaveBeenCalled()
   })
 
   it("un compte sans thème laisse celui de l'appareil", async () => {
-    window.localStorage.setItem("antsia:antsia:theme", "encre")
+    window.localStorage.setItem("antsia:antsia:theme", "electrique")
     await mount("fr", true, { accountTheme: undefined })
-    expect(document.documentElement.dataset.charte).toBe("antsia-encre")
+    expect(document.documentElement.dataset.charte).toBe("antsia-electrique")
+    expect(state.save).not.toHaveBeenCalled()
+  })
+
+  it("un ancien thème mémorisé sur l'appareil (ADR-0027) retombe sur Gaboma", async () => {
+    window.localStorage.setItem("antsia:antsia:theme", "mandarine")
+    await mount("fr", true, { accountTheme: undefined })
+    expect(document.documentElement.dataset.charte).toBe("antsia")
+    expect(radios().find((radio) => radio.checked)?.value).toBe("gaboma")
     expect(state.save).not.toHaveBeenCalled()
   })
 
   it("un enregistrement refusé rend le thème du compte et l'annonce en français et en anglais", async () => {
     state.save.mockRejectedValue({ data: { code: "rateLimited" } })
-    await mount("fr", true, { accountTheme: "atlantique" })
-    await act(async () => radios().find((radio) => radio.value === "hibiscus")!.click())
-    expect(document.documentElement.dataset.charte).toBe("antsia-atlantique")
-    expect(radios().find((radio) => radio.checked)?.value).toBe("atlantique")
+    await mount("fr", true, { accountTheme: "lagon" })
+    await act(async () => radios().find((radio) => radio.value === "soleil")!.click())
+    expect(document.documentElement.dataset.charte).toBe("antsia-lagon")
+    expect(radios().find((radio) => radio.checked)?.value).toBe("lagon")
     expect(state.failure).toHaveBeenCalledWith("Le thème n’a pas pu être enregistré sur votre compte. Trop de tentatives. Réessayez dans quelques instants.")
     await act(async () => root?.unmount())
     root = undefined
     container.remove()
-    await mount("en", true, { accountTheme: "atlantique" })
-    await act(async () => radios().find((radio) => radio.value === "hibiscus")!.click())
+    await mount("en", true, { accountTheme: "lagon" })
+    await act(async () => radios().find((radio) => radio.value === "soleil")!.click())
     expect(state.failure).toHaveBeenLastCalledWith(expect.stringMatching(/^The theme could not be saved to your account\. /))
   })
 })

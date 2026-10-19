@@ -606,6 +606,76 @@
   /* Trait des liens du TEXTE COURANT (mots-dièse et mentions d'une publication
      ou d'un commentaire), jamais des liens de navigation : aucun par défaut. */
   --esp-inline-link-decoration: none;
+
+  /* ── Couleurs par fonction et système épuré (ADR-0027, 19/10/2026) ──
+     Tous à `initial` : chaque site retombe sur SA valeur historique, écrite en
+     repli là où il les lit (`var(--role-react-fill, var(--primary-fill))`,
+     `var(--ui2-button-radius, 6px)`…). Seuls les thèmes qui les redéclarent
+     (antsia-*.css) changent d'aspect ; DIASPORALE et la console ne bougent pas. */
+  /* Texte posé sur l'aplat d'identité (`--primary-fill`). Une identité claire
+     (turquoise, mandarine) y porte un texte foncé, alors que succès et danger
+     gardent `--on-fill`. Repli : `--on-fill`. */
+  --primary-fill-on: initial;
+  /* Une couleur par fonction : aplat (`-fill`), texte sur l'aplat (`-on`) et
+     encre en texte ou en icône sur une carte (`-ink`). Relations (Suivre),
+     messages (Écrire, bouton tonal), réactions (J'aime, pastilles de non-lus),
+     commerce (Acheter, Participer). Repli : l'identité. */
+  --role-social-fill: initial;
+  --role-social-on: initial;
+  --role-social-ink: initial;
+  --role-message-fill: initial;
+  --role-message-on: initial;
+  --role-message-ink: initial;
+  /* Fond tonal du bouton Écrire : 15 % de l'aplat des messages sur la carte. */
+  --role-message-soft: initial;
+  --role-react-fill: initial;
+  --role-react-on: initial;
+  --role-react-ink: initial;
+  /* Action réagie (J'aime) : fond teinté et libellé. L'encre des réactions est
+     calibrée pour une ICÔNE (3:1) : le libellé garde une encre de texte. */
+  --role-react-soft: initial;
+  --role-react-label: initial;
+  --role-commerce-fill: initial;
+  --role-commerce-on: initial;
+  --role-commerce-ink: initial;
+  /* Les trois couleurs d'un thème, pour son aperçu dans Préférences > Thème. */
+  --esp-theme-swatch-1: initial;
+  --esp-theme-swatch-2: initial;
+  --esp-theme-swatch-3: initial;
+  /* Un angle par élément : bouton (repli 6 px), badge (999 px), carte d'ui-v2
+     (`--radius-lg`), puce de filtre, champ, média dans une carte, bouton Créer,
+     avatar d'une page, barre d'onglets flottante (repli `--radius-2xl`). */
+  --ui2-button-radius: initial;
+  --ui2-badge-radius: initial;
+  --ui2-card-radius: initial;
+  --esp-chip-radius: initial;
+  --esp-field-radius: initial;
+  --esp-media-radius: initial;
+  --esp-fab-radius: initial;
+  --esp-avatar-page-radius: initial;
+  --esp-mobilebar-radius: initial;
+  /* Contour seulement à couleur égale : bouton neutre (« outline », Annuler) et
+     bouton secondaire en aplat sans filet, puces creusées sans filet. Les CHAMPS
+     gardent leur filet `--input` : de la couleur de la carte qui les porte, ils
+     relèvent de la règle, et WCAG 1.4.11 l'exige (P18b). Replis : les fonds et
+     filets historiques. */
+  --ui2-button-outline-bg: initial;
+  --ui2-button-outline-border: initial;
+  --ui2-button-secondary-bg: initial;
+  --ui2-button-secondary-border: initial;
+  --ui2-button-secondary-fg: initial;
+  --esp-chip-bg: initial;
+  --esp-chip-border: initial;
+  /* Onglet actif de la barre d'onglets : pastille tonale et encre (replis
+     `--accent`, `--accent-foreground`). */
+  --esp-tab-active-bg: initial;
+  --esp-tab-active-fg: initial;
+  /* Boutons icônes de l'en-tête (recherche, cloche, messages) : rond gris
+     (replis : la puce neutre et l'angle des chromes). */
+  --esp-header-icon-bg: initial;
+  --esp-header-icon-radius: initial;
+  /* Ombre du bouton Créer, qui flotte : elle prend sa couleur. */
+  --esp-fab-shadow: initial;
 }
 
 /* Au téléphone et sur les petites tablettes, les commandes d'ui-v2 rejoignent

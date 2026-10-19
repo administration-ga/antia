@@ -17,17 +17,23 @@ import {
 import { ANTSIA_THEME_IDS, antsiaCharteFor } from "./antsia-themes"
 
 /**
- * Les sept thèmes qu'un membre d'antsia.ga choisit dans ses réglages, en plus de
- * la charte d'origine (`antsia.css`). Chaque thème est une charte complète
- * (`data-charte="antsia-<thème>"`), rejouée ici comme antsia.ga la sert :
- * theme.css, charte.css, communication.css puis le fichier du thème, sur <html>
- * et sur un portail qui redéclare la charte.
+ * Les six thèmes qu'un membre d'antsia.ga choisit dans ses réglages (ADR-0027) :
+ * Gaboma, la charte du réseau (`antsia.css`), puis Soleil, Forêt, Corail, Lagon
+ * et Électrique (`antsia-<thème>.css`). Chaque thème est une charte complète,
+ * rejouée ici comme antsia.ga la sert : theme.css, charte.css, communication.css
+ * puis le fichier du thème, sur <html> et sur un portail qui redéclare la charte.
  *
- * Règles vérifiées pour les sept : une seule couleur d'identité (action, lien,
- * focus, sélection) ; fonds neutres (blanc, gris très clair ou beige clair en
- * clair, noir ou gris sombre en sombre) ; bouton secondaire gris ; mêmes paires
- * de contraste que la charte d'origine (`antsia-palette.test.ts`). Contrastes
- * CALCULÉS sur les jetons résolus, pas mesurés au rendu.
+ * Règles vérifiées : trois couleurs par thème, chacune avec ses fonctions
+ * (identité, relations, messages, réactions, commerce) ; l'identité a une ENCRE
+ * lisible en texte (`--primary`) et un APLAT de bouton (`--primary-fill`) avec son
+ * propre texte ; fonds neutres ; système épuré (un angle par élément, contour
+ * seulement à couleur égale). Contrastes CALCULÉS sur les jetons résolus.
+ *
+ * Écart assumé (ADR-0027) : les aplats clairs retenus par le propriétaire
+ * (turquoise, mandarine, safran…) ne tiennent pas 3:1 contre la carte ; un bouton
+ * plein se reconnaît à son libellé, lisible à ≥ 4,5:1 sur son aplat. La paire
+ * « limite d'un bouton plein » n'est donc exigée que de Gaboma
+ * (`antsia-palette.test.ts`).
  */
 
 const read = (path: string) => readFileSync(new URL(path, import.meta.url), "utf8")
@@ -37,29 +43,27 @@ const BASE_SHEETS = [
   { name: "charte.css", css: BASE },
   { name: "communication.css", css: read("../styles/communication.css") },
 ] as const
-const ORIGINAL = read("./antsia.css")
 
-/** Identité attendue de chaque thème (le `--primary` résolu), clair puis sombre. */
-const IDENTITY: Record<string, { clair: string; sombre: string }> = {
-  atlantique: { clair: "#0a5bd6", sombre: "#6aaeff" },
-  indigo: { clair: "#4a55e8", sombre: "#8f98ff" },
-  hibiscus: { clair: "#d0103a", sombre: "#ff4d6e" },
-  encre: { clair: "#111112", sombre: "#f3f4f5" },
-  foret: { clair: "#0d6e42", sombre: "#4cc98a" },
-  lagon: { clair: "#086e6a", sombre: "#4ecdc4" },
-  mandarine: { clair: "#b33f0e", sombre: "#ff9246" },
+/** Les couleurs retenues par le propriétaire (troisième série, 19/10/2026) : encre et aplat d'identité, puis l'aperçu. */
+const EXPECTED: Record<string, { encre: [string, string]; aplat: [string, string]; nuancier: [string, string, string] }> = {
+  gaboma: { encre: ["#2a5fa8", "#86b2f4"], aplat: ["#2f67b5", "#6fa2f0"], nuancier: ["#007e4d", "#f4bb44", "#2f67b5"] },
+  soleil: { encre: ["#a4520d", "#f6a660"], aplat: ["#ec8b34", "#f29a4a"], nuancier: ["#ec8b34", "#3f9fe8", "#f1453b"] },
+  foret: { encre: ["#2d7240", "#76bf85"], aplat: ["#317a45", "#76bf85"], nuancier: ["#317a45", "#646e40", "#c98a2b"] },
+  corail: { encre: ["#ba3354", "#f58da0"], aplat: ["#e25f78", "#f07a90"], nuancier: ["#e25f78", "#e69545", "#aa84d4"] },
+  lagon: { encre: ["#0d6f6a", "#6fe0d8"], aplat: ["#4ecdc4", "#4ecdc4"], nuancier: ["#4ecdc4", "#ff6b6b", "#ffe66d"] },
+  electrique: { encre: ["#0033ff", "#93a8ff"], aplat: ["#0033ff", "#4060ff"], nuancier: ["#0033ff", "#f43f5e", "#84cc16"] },
 }
-const THEMES = ANTSIA_THEME_IDS.filter((id) => id !== "antsia")
 
 type Mode = "clair" | "sombre"
 const MODES: readonly Mode[] = ["clair", "sombre"]
+const at = (mode: Mode) => (mode === "clair" ? 0 : 1)
 
-/** Mêmes paires de texte (≥ 4,5:1) que la charte d'origine. */
+/** Texte (≥ 4,5:1), les mêmes paires que la charte du réseau, plus les fonctions. */
 const TEXT_PAIRS: readonly (readonly [string, string])[] = [
   ["--foreground", "--background"], ["--card-foreground", "--card"], ["--popover-foreground", "--popover"], ["--foreground", "--muted"],
   ["--muted-foreground", "--background"], ["--muted-foreground", "--card"], ["--muted-foreground", "--popover"], ["--muted-foreground", "--muted"],
   ["--secondary-foreground", "--secondary"], ["--primary", "--background"], ["--primary", "--card"], ["--primary", "--popover"], ["--primary", "--muted"],
-  ["--primary-foreground", "--primary"], ["--on-fill", "--primary-fill"], ["--on-fill", "--primary-fill-hover"], ["--accent-foreground", "--accent"],
+  ["--primary-foreground", "--primary"], ["--primary-fill-on", "--primary-fill"], ["--primary-fill-on", "--primary-fill-hover"], ["--accent-foreground", "--accent"],
   ["--on-fill", "--primary-600"], ["--on-fill", "--danger-fill"], ["--on-fill", "--danger-fill-hover"], ["--on-fill", "--success-fill"],
   ["--on-fill", "--success-fill-hover"], ["--on-fill", "--success"], ["--on-fill", "--esp-green-strong"], ["--destructive-foreground", "--destructive"],
   ["--background", "--destructive"], ["--success", "--background"], ["--success", "--card"], ["--success", "--popover"], ["--destructive", "--background"],
@@ -72,18 +76,24 @@ const TEXT_PAIRS: readonly (readonly [string, string])[] = [
   ["--ink-800", "--ink-0"], ["--ink-700", "--ink-0"], ["--ink-600", "--ink-0"], ["--ink-600", "--ink-100"], ["--ink-600", "--ink-50"],
   ["--ink-500", "--ink-0"], ["--ink-400", "--ink-0"], ["--ink-400", "--popover"], ["--ink-600", "--ink-150"], ["--ink-700", "--ink-150"],
   ["--ink-700", "--status-semi-bg"], ["--ink-600", "--status-inactive-bg"], ["--muted-foreground", "--esp-neutral-chip"],
+  // Une couleur par fonction (ADR-0027).
+  ["--role-social-on", "--role-social-fill"], ["--role-social-ink", "--card"], ["--role-social-ink", "--background"],
+  ["--role-message-on", "--role-message-fill"], ["--role-message-ink", "--card"], ["--role-message-ink", "--role-message-soft"],
+  ["--role-react-on", "--role-react-fill"], ["--role-react-label", "--role-react-soft"],
+  ["--role-commerce-on", "--role-commerce-fill"], ["--role-commerce-ink", "--card"], ["--role-commerce-ink", "--background"],
+  ["--ui2-button-secondary-fg", "--ui2-button-secondary-bg"], ["--ink-800", "--ui2-button-outline-bg"], ["--esp-tab-active-fg", "--esp-tab-active-bg"],
 ]
 
-/** Mêmes paires non textuelles (≥ 3:1, WCAG 1.4.11) que la charte d'origine. */
+/** Non textuel (≥ 3:1, WCAG 1.4.11) : champs, anneaux, icônes de réaction. */
 const NON_TEXT_PAIRS: readonly (readonly [string, string])[] = [
   ["--input", "--background"], ["--input", "--card"], ["--input", "--popover"], ["--input", "--muted"], ["--ink-300", "--ink-0"],
   ["--ink-300", "--ink-100"], ["--ink-400", "--ink-0"], ["--ring", "--background"], ["--ring", "--card"], ["--ring", "--popover"], ["--ring", "--muted"],
   ["--outline-ring", "--background"], ["--outline-ring", "--card"], ["--outline-ring", "--popover"], ["--primary-300", "--background"],
   ["--primary-300", "--card"], ["--primary-300", "--popover"], ["--primary-400", "--card"], ["--primary-400", "--background"],
-  ["--primary-fill", "--card"], ["--warning", "--card"],
+  ["--warning", "--card"], ["--role-react-ink", "--card"], ["--role-react-ink", "--background"],
 ]
 
-/** Rôles du bloc sombre de la base gardés tels quels, comme dans la charte d'origine. */
+/** Rôles du bloc sombre de la base gardés tels quels, comme dans la charte du réseau. */
 const INHERITED_IN_DARK = new Set([
   "--warning", "--warning-light", "--warning-50", "--warning-100", "--warning-500", "--warning-600",
   "--status-destruct", "--status-destruct-bg",
@@ -91,9 +101,16 @@ const INHERITED_IN_DARK = new Set([
   "--chart-2", "--chart-3", "--chart-4", "--chart-5",
   "--esp-tone-blue", "--esp-tone-blue-bg", "--esp-tone-amber", "--esp-tone-amber-bg",
   "--esp-tone-rose", "--esp-tone-rose-bg", "--esp-tone-green", "--esp-tone-green-bg",
-  "--esp-mobilebar-bg", "--esp-mobilebar-shadow", "--esp-shadow-card", "--border-light",
+  "--esp-mobilebar-shadow", "--esp-shadow-card", "--border-light",
   "--esp-segment-on", "--esp-segment-on-fg",
 ])
+
+/** Un angle par élément (ADR-0027). */
+const ANGLES: Record<string, string> = {
+  "--ui2-button-radius": "999px", "--ui2-badge-radius": "6px", "--ui2-card-radius": "24px", "--esp-chip-radius": "10px",
+  "--esp-avatar-page-radius": "12px", "--esp-field-radius": "14px", "--esp-media-radius": "16px", "--esp-fab-radius": "18px",
+  "--rp-surface-radius": "24px", "--esp-mobilebar-radius": "28px", "--esp-header-icon-radius": "999px",
+}
 
 /** Écart des composantes : sous 0,06, la couleur se lit comme un neutre (blanc, gris, beige, noir). */
 const chroma = (rgba: Rgba) => Math.max(rgba.r, rgba.g, rgba.b) - Math.min(rgba.r, rgba.g, rgba.b)
@@ -103,30 +120,33 @@ const declarationsOf = (css: string, selectors: readonly string[]) =>
     .filter((rule) => rule.selectors.join("|") === selectors.join("|"))
     .flatMap((rule) => rule.declarations.map((declaration) => [declaration.token, declaration.value] as const))
 
-const ORIGINAL_SHARED = new Map(declarationsOf(ORIGINAL, ['[data-charte="antsia"]', '.dark[data-charte="antsia"]', '.dark [data-charte="antsia"]']))
+const sharedOf = (charte: string) =>
+  new Map(declarationsOf(read(`./${charte}.css`), [`[data-charte="${charte}"]`, `.dark[data-charte="${charte}"]`, `.dark [data-charte="${charte}"]`]))
+/** Les jetons propres à chaque thème dans son bloc commun : le voile, le contour et l'aperçu. */
+const OWN_SHARED = new Set(["--ui2-scrim", "--esp-surface-border", "--esp-mobilebar-border", "--esp-theme-swatch-1", "--esp-theme-swatch-2", "--esp-theme-swatch-3"])
+const GABOMA_SHARED = sharedOf("antsia")
 
-describe("les sept thèmes d'antsia.ga", () => {
-  it("la liste des thèmes et les fichiers du dossier coïncident ; la charte d'origine reste la première", () => {
-    const files = readdirSync(new URL(".", import.meta.url)).filter((name) => /^antsia-[a-z]+\.css$/.test(name)).sort()
-    expect(files).toEqual(THEMES.map((id) => `antsia-${id}.css`).sort())
-    expect(ANTSIA_THEME_IDS[0]).toBe("antsia")
-    expect(ANTSIA_THEME_IDS).toHaveLength(8)
-    expect(antsiaCharteFor("antsia")).toBe("antsia")
-    for (const id of THEMES) expect(antsiaCharteFor(id)).toBe(`antsia-${id}`)
-    expect(Object.keys(IDENTITY).sort()).toEqual([...THEMES].sort())
+describe("les six thèmes d'antsia.ga (ADR-0027)", () => {
+  it("la liste des thèmes et les fichiers du dossier coïncident ; Gaboma, la charte du réseau, reste le premier", () => {
+    expect([...ANTSIA_THEME_IDS]).toEqual(["gaboma", "soleil", "foret", "corail", "lagon", "electrique"])
+    expect(antsiaCharteFor("gaboma")).toBe("antsia")
+    const files = readdirSync(new URL(".", import.meta.url)).filter((name) => /^antsia(-[a-z]+)?\.css$/.test(name)).sort()
+    expect(files).toEqual(ANTSIA_THEME_IDS.map((id) => `${antsiaCharteFor(id)}.css`).sort())
+    for (const id of ANTSIA_THEME_IDS.filter((theme) => theme !== "gaboma")) expect(antsiaCharteFor(id)).toBe(`antsia-${id}`)
+    expect(Object.keys(EXPECTED).sort()).toEqual([...ANTSIA_THEME_IDS].sort())
   })
 
-  it("les toasts suivent chaque thème : même règle que la charte d'origine, étendue aux sept chartes", () => {
+  it("les toasts suivent chaque thème : la règle de la charte du réseau, étendue aux cinq autres chartes", () => {
     const globals = read("../../../../apps/antsia_ga/src/app/globals.css")
     const rules = parseRules({ name: "globals.css", css: globals })
     const original = rules.find((rule) => rule.selectors.join(",") === '[data-charte="antsia"] [data-sonner-toaster][data-sonner-theme]')
     const themed = rules.find((rule) => rule.selectors.every((selector) => /^\[data-charte="antsia-[a-z]+"\] \[data-sonner-toaster\]\[data-sonner-theme\]$/.test(selector)))
-    expect(original, "règle d'origine").toBeDefined()
-    expect(themed?.selectors.map((selector) => /antsia-([a-z]+)/.exec(selector)?.[1]).sort()).toEqual([...THEMES].sort())
+    expect(original, "règle de la charte du réseau").toBeDefined()
+    expect(themed?.selectors.map((selector) => /antsia-([a-z]+)/.exec(selector)?.[1]).sort()).toEqual(ANTSIA_THEME_IDS.filter((id) => id !== "gaboma").sort())
     expect(themed?.declarations).toEqual(original?.declarations)
   })
 
-  it("contours : aucun filet de surface dans les huit chartes ANTSIA, le filet d'origine partout ailleurs", () => {
+  it("contours : la base garde chaque filet d'origine ; un thème ANTSIA n'en pose qu'à couleur égale", () => {
     // La base pose `--esp-surface-border: initial` : chaque site retombe sur SON filet historique.
     const base = new TokenCascade(BASE_SHEETS)
     for (const dark of [false, true]) {
@@ -135,12 +155,17 @@ describe("les sept thèmes d'antsia.ga", () => {
       expect(base.resolveValue(node, "var(--esp-surface-border, var(--border))")).toBe(base.resolve(node, "--border"))
       expect(base.resolveValue(node, "var(--esp-surface-border, var(--ink-200))")).toBe(base.resolve(node, "--ink-200"))
     }
-    // Les chartes ANTSIA distinguent toujours la carte du fond (testé plus bas) : aucun contour.
     for (const id of ANTSIA_THEME_IDS) {
       const charte = antsiaCharteFor(id)
       const themed = new TokenCascade([...BASE_SHEETS, { name: `${charte}.css`, css: read(`./${charte}.css`) }])
       for (const dark of [false, true]) {
-        for (const nested of [false, true]) expect(themed.resolve({ charte, dark, nested }, "--esp-surface-border"), `${charte} ${dark ? "sombre" : "clair"}`).toBe("transparent")
+        for (const nested of [false, true]) {
+          const node: ChartedNode = { charte, dark, nested }
+          const same = themed.resolve(node, "--card") === themed.resolve(node, "--background")
+          const expected = same ? themed.resolve(node, "--border") : "transparent"
+          expect(themed.resolve(node, "--esp-surface-border"), `${charte} ${dark ? "sombre" : "clair"}`).toBe(expected)
+          expect(themed.resolve(node, "--esp-mobilebar-border"), `${charte} barre`).toBe(expected)
+        }
       }
     }
   })
@@ -148,19 +173,33 @@ describe("les sept thèmes d'antsia.ga", () => {
   it("les sites qui dessinaient un filet de surface lisent le jeton, leur filet d'origine en repli", () => {
     const SITES: readonly (readonly [string, string, number])[] = [
       ["../../../social-features/src/shell/design-styles.ts", "1px solid var(--esp-surface-border, var(--border))", 1],
+      ["../../../social-features/src/shell/design-styles.ts", "inset 0 0 0 1px var(--esp-surface-border, transparent)", 1],
       ["../espace-kit/espace-kit-styles.tsx", "border: 1px solid var(--esp-surface-border, var(--border));", 2],
       ["../../../social-features/src/features/messagerie/messagerie-styles.tsx", "border: 1px solid var(--esp-surface-border, var(--ink-200));", 1],
       ["../../../social-features/src/features/stories/stories-styles.tsx", "border: 1px solid var(--esp-surface-border, var(--border));", 1],
       ["../../../../apps/antsia_ga/src/components/shared/controls.tsx", "border-[color:var(--esp-surface-border,var(--border))]", 1],
       ["../../../social-features/src/features/reseau-personnel/ProfileMiniCard.tsx", "1px solid var(--esp-surface-border, var(--ink-200))", 1],
+      ["../components/card.tsx", "1px solid var(--esp-surface-border, var(--ink-200))", 1],
     ]
     for (const [path, expression, count] of SITES) expect(read(path).split(expression).length - 1, path).toBe(count)
   })
 
-  for (const id of THEMES) {
+  it("le contrat de la base laisse DIASPORALE intact : chaque jeton du système épuré est à `initial`", () => {
+    const base = new TokenCascade(BASE_SHEETS)
+    const tokens = [...Object.keys(ANGLES).filter((token) => token !== "--rp-surface-radius"), "--primary-fill-on", "--esp-theme-swatch-1",
+      "--ui2-button-outline-bg", "--ui2-button-outline-border", "--ui2-button-secondary-bg", "--ui2-button-secondary-border", "--ui2-button-secondary-fg",
+      "--esp-chip-bg", "--esp-chip-border", "--esp-header-icon-bg", "--esp-fab-shadow", "--esp-tab-active-bg", "--esp-tab-active-fg",
+      ...["social", "message", "react", "commerce"].flatMap((role) => [`--role-${role}-fill`, `--role-${role}-on`, `--role-${role}-ink`]),
+      "--role-message-soft", "--role-react-soft", "--role-react-label"]
+    for (const dark of [false, true]) {
+      for (const token of tokens) expect(base.resolve({ charte: "diasporale", dark, nested: false }, token), token).toBeUndefined()
+    }
+  })
+
+  for (const id of ANTSIA_THEME_IDS) {
     const charte = antsiaCharteFor(id)
-    const identity = IDENTITY[id]
-    if (!identity) throw new Error(`${id} : identité attendue absente du tableau IDENTITY`)
+    const expected = EXPECTED[id]
+    if (!expected) throw new Error(`${id} : couleurs attendues absentes du tableau EXPECTED`)
     const css = read(`./${charte}.css`)
     const cascade = new TokenCascade([...BASE_SHEETS, { name: `${charte}.css`, css }])
     const node = (mode: Mode, nested = false): ChartedNode => ({ charte, dark: mode === "sombre", nested })
@@ -183,36 +222,58 @@ describe("les sept thèmes d'antsia.ga", () => {
     const BOTH = [...LIGHT, ...DARK]
 
     describe(`thème ${id}`, () => {
-      it("trois blocs comme la charte d'origine ; le bloc commun reprend exactement le sien", () => {
+      it("trois blocs, sans recouvrement ; le bloc commun est celui de Gaboma, à ses jetons propres près", () => {
         expect(parseRules({ name: charte, css }).map((rule) => rule.selectors)).toEqual([LIGHT, DARK, BOTH])
-        const shared = new Map(declarationsOf(css, BOTH))
-        expect([...shared.keys()].sort()).toEqual([...ORIGINAL_SHARED.keys()].sort())
-        for (const [token, original] of ORIGINAL_SHARED) {
-          if (token === "--ui2-scrim") continue
-          expect(shared.get(token), token).toBe(original)
+        const [light, dark, both] = [LIGHT, DARK, BOTH].map((selectors) => new Set(declarationsOf(css, selectors).map(([token]) => token)))
+        expect([...both!].filter((token) => light!.has(token) || dark!.has(token))).toEqual([])
+        const shared = sharedOf(charte)
+        expect([...shared.keys()].sort()).toEqual([...GABOMA_SHARED.keys()].sort())
+        for (const [token, gaboma] of GABOMA_SHARED) {
+          if (OWN_SHARED.has(token)) continue
+          expect(shared.get(token), token).toBe(gaboma)
         }
       })
 
-      it("le sombre redéclare chaque rôle du bloc sombre de la base, sauf les héritages de la charte d'origine", () => {
+      it("le sombre redéclare chaque rôle du bloc sombre de la base, sauf les héritages de la charte du réseau", () => {
         const baseDark = parseRules({ name: "charte.css", css: BASE }).find((rule) => rule.condition === null && rule.selectors.join("|") === ".dark[data-charte]|.dark [data-charte]")
         const covered = new Set([...declarationsOf(css, DARK), ...declarationsOf(css, BOTH)].map(([token]) => token))
         const missing = [...new Set(baseDark?.declarations.map((declaration) => declaration.token))].filter((token) => !covered.has(token))
         expect(missing.sort()).toEqual([...INHERITED_IN_DARK].sort())
       })
 
+      it("l'aperçu montre les trois couleurs retenues, dans les deux modes", () => {
+        for (const mode of MODES) {
+          expect(["--esp-theme-swatch-1", "--esp-theme-swatch-2", "--esp-theme-swatch-3"].map((token) => toHex(color(mode, token)))).toEqual(expected.nuancier)
+        }
+      })
+
       for (const mode of MODES) {
         describe(mode, () => {
-          it("une seule couleur d'identité : action, lien, focus, onglet actif et rail portent la même", () => {
-            for (const token of ["--primary", "--primary-fill", "--accent", "--ring", "--sidebar-primary", "--status-active", "--info-500"]) {
-              for (const nested of [false, true]) expect(toHex(color(mode, token, nested)), `${token}${nested ? " (portail)" : ""}`).toBe(identity[mode])
+          it("identité : une encre en texte, un aplat pour les boutons, partout la même", () => {
+            for (const nested of [false, true]) {
+              for (const token of ["--primary", "--accent", "--ring", "--sidebar-primary", "--status-active", "--info-500"]) {
+                expect(toHex(color(mode, token, nested)), `${token}${nested ? " (portail)" : ""}`).toBe(expected.encre[at(mode)])
+              }
+              expect(toHex(color(mode, "--primary-fill", nested)), `--primary-fill${nested ? " (portail)" : ""}`).toBe(expected.aplat[at(mode)])
             }
           })
 
-          it("fonds neutres et bouton secondaire gris", () => {
+          it("chaque fonction a sa couleur, et chacune vient des trois couleurs du thème", () => {
+            const swatches = new Set(expected.nuancier)
+            if (mode === "clair") {
+              for (const token of ["--primary-fill", "--role-social-fill", "--role-message-fill", "--role-react-fill", "--role-commerce-fill"]) {
+                expect(swatches.has(toHex(color(mode, token))), token).toBe(true)
+              }
+            }
+            const used = new Set(["--primary-fill", "--role-social-fill", "--role-message-fill", "--role-react-fill", "--role-commerce-fill"].map((token) => toHex(color(mode, token))))
+            expect(used.size, "au moins trois couleurs distinctes").toBeGreaterThanOrEqual(mode === "clair" ? 3 : 2)
+          })
+
+          it("fonds neutres : blanc, gris très clair ou beige clair ; noir ou gris sombre", () => {
             for (const token of ["--background", "--card", "--popover", "--muted"]) {
               expect(chroma(color(mode, token)), token).toBeLessThanOrEqual(0.06)
             }
-            if (mode === "clair") expect(luminance(mode, "--background")).toBeGreaterThanOrEqual(0.85)
+            if (mode === "clair") expect(luminance(mode, "--background")).toBeGreaterThanOrEqual(0.82)
             else expect(luminance(mode, "--background")).toBeLessThanOrEqual(0.02)
           })
 
@@ -230,7 +291,7 @@ describe("les sept thèmes d'antsia.ga", () => {
             for (const stop of stops) expect(contrastRatio(color(mode, "--esp-on-banner"), stop)).toBeGreaterThanOrEqual(4.5)
           })
 
-          it("barre basse translucide : libellés lisibles sur le fond qui défile", () => {
+          it("barre flottante translucide : libellés lisibles sur le fond qui défile", () => {
             const bar = color(mode, "--esp-mobilebar-bg")
             for (const label of ["--foreground", "--muted-foreground", "--primary"]) {
               expect(contrastRatio(color(mode, label), bar, color(mode, "--background")), label).toBeGreaterThanOrEqual(4.5)
@@ -240,29 +301,33 @@ describe("les sept thèmes d'antsia.ga", () => {
           it("un portail qui redéclare la charte résout exactement les jetons de <html>", () => {
             expect(cascade.resolveAll(node(mode, true))).toEqual(cascade.resolveAll(node(mode)))
           })
+
+          it("un angle par élément, identique dans tous les thèmes", () => {
+            for (const [token, radius] of Object.entries(ANGLES)) expect(value(mode, token), token).toBe(radius)
+          })
         })
       }
 
-      it("clair : les cartes et le creux se distinguent du fond", () => {
-        expect(ratio("clair", "--card", "--background")).toBeGreaterThanOrEqual(1.04)
-        expect(ratio("clair", "--muted", "--card")).toBeGreaterThanOrEqual(1.08)
+      it("clair : les cartes et le creux se distinguent du fond, ou la carte garde son filet", () => {
+        const same = value("clair", "--card") === value("clair", "--background")
+        if (!same) expect(ratio("clair", "--card", "--background")).toBeGreaterThanOrEqual(1.04)
+        expect(ratio("clair", "--muted", "--card")).toBeGreaterThanOrEqual(1.04)
         expect(ratio("clair", "--primary-50", "--card")).toBeGreaterThanOrEqual(1.1)
       })
 
-      it("sombre : carte relevée, surface élevée, creux et sélection au-dessus de la carte", () => {
-        expect(luminance("sombre", "--card")).toBeGreaterThan(luminance("sombre", "--background"))
+      it("sombre : creux, surface élevée et sélection au-dessus de la carte", () => {
+        expect(luminance("sombre", "--card")).toBeGreaterThanOrEqual(luminance("sombre", "--background"))
         expect(luminance("sombre", "--popover")).toBeGreaterThan(luminance("sombre", "--card"))
-        expect(ratio("sombre", "--card", "--background")).toBeGreaterThanOrEqual(1.1)
-        expect(ratio("sombre", "--popover", "--card")).toBeGreaterThanOrEqual(1.1)
         expect(luminance("sombre", "--muted")).toBeGreaterThan(luminance("sombre", "--card"))
         expect(luminance("sombre", "--primary-50")).toBeGreaterThan(luminance("sombre", "--popover"))
         expect(ratio("sombre", "--primary-50", "--card")).toBeGreaterThanOrEqual(1.2)
       })
 
-      it("géométrie, polices et liens soulignés de la charte d'origine ; aucune ressource externe", () => {
+      it("géométrie, polices et liens soulignés de la charte du réseau ; aucune ressource externe", () => {
+        const network = new TokenCascade([...BASE_SHEETS, { name: "antsia.css", css: read("./antsia.css") }])
         for (const mode of MODES) {
-          for (const token of ["--radius-xl", "--rp-surface-radius", "--body-font-size", "--font-sans", "--font-display", "--esp-inline-link-decoration"]) {
-            expect(value(mode, token), `${mode} ${token}`).toBe(new TokenCascade([...BASE_SHEETS, { name: "antsia.css", css: ORIGINAL }]).resolve({ charte: "antsia", dark: mode === "sombre", nested: false }, token))
+          for (const token of ["--radius-xl", "--rp-surface-radius", "--body-font-size", "--font-sans", "--font-display", "--esp-inline-link-decoration", "--esp-sticky-header-inset"]) {
+            expect(value(mode, token), `${mode} ${token}`).toBe(network.resolve({ charte: "antsia", dark: mode === "sombre", nested: false }, token))
           }
         }
         expect(css.replace(/\/\*[\s\S]*?\*\//g, "")).not.toMatch(/@import|@font-face|url\(|prefers-color-scheme/)

@@ -23,7 +23,7 @@ import {
   localeValidator,
   membershipRoleValidator,
   membershipStatusValidator,
-  memberThemeValidator,
+  storedMemberThemeValidator,
   verificationSourceValidator,
 } from "../../lib/validators"
 
@@ -48,7 +48,7 @@ export const peopleTables = {
     locale: v.optional(localeValidator),
     timeZone: v.optional(v.string()),
     /** Thème choisi en session (Préférences > Thème) ; absent tant que la personne n'en a choisi aucun. */
-    theme: v.optional(memberThemeValidator),
+    theme: v.optional(storedMemberThemeValidator),
     deletionRequestedAt: v.optional(v.number()),
     /** Marque anonyme commune aux références conservées après effacement. */
     erasedAt: v.optional(v.number()),

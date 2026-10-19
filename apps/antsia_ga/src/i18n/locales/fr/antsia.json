@@ -246,18 +246,27 @@
     "appearanceHint": "L’apparence change immédiatement. Ce choix est conservé pour ce réseau sur cet appareil.",
     "theme": {
       "label": "Thème",
-      "hint": "Le thème donne sa couleur aux boutons principaux, aux liens et aux sélections. Les fonds restent clairs ou sombres selon l’apparence. Le changement est immédiat et enregistré sur votre compte : vous le retrouvez sur vos autres appareils.",
-      "hintDevice": "Le thème donne sa couleur aux boutons principaux, aux liens et aux sélections. Les fonds restent clairs ou sombres selon l’apparence. Le changement est immédiat et conservé pour ce réseau sur cet appareil.",
+      "hint": "Chaque thème a trois couleurs, chacune pour une famille d’actions : publier, suivre et écrire, réagir et participer. Les fonds restent clairs ou sombres selon l’apparence. Le changement est immédiat et enregistré sur votre compte : vous le retrouvez sur vos autres appareils.",
+      "hintDevice": "Chaque thème a trois couleurs, chacune pour une famille d’actions : publier, suivre et écrire, réagir et participer. Les fonds restent clairs ou sombres selon l’apparence. Le changement est immédiat et conservé pour ce réseau sur cet appareil.",
       "saveFailed": "Le thème n’a pas pu être enregistré sur votre compte. {{reason}}",
       "options": {
-        "antsia": { "name": "Prune", "description": "Le thème d’origine du réseau." },
-        "atlantique": { "name": "Atlantique", "description": "Bleu franc sur gris très clair." },
-        "indigo": { "name": "Indigo", "description": "Indigo sur fond blanc." },
-        "hibiscus": { "name": "Hibiscus", "description": "Rose rouge vif sur fond blanc." },
-        "encre": { "name": "Encre", "description": "Noir et blanc, sans couleur d’action." },
-        "foret": { "name": "Forêt", "description": "Vert profond sur beige clair." },
-        "lagon": { "name": "Lagon", "description": "Sarcelle sur gris très clair." },
-        "mandarine": { "name": "Mandarine", "description": "Orange profond sur beige clair." }
+        "gaboma": { "name": "Gaboma", "description": "Vert, jaune et bleu du drapeau. Le thème du réseau." },
+        "soleil": { "name": "Soleil", "description": "Mandarine, azur et coquelicot." },
+        "foret": { "name": "Forêt", "description": "Vert forêt, olive et miel." },
+        "corail": { "name": "Corail", "description": "Rose corail, mandarine et lilas." },
+        "lagon": { "name": "Lagon", "description": "Turquoise, corail et jaune de Naples." },
+        "electrique": { "name": "Électrique", "description": "Bleu, rose et citron vert." }
+      }
+    },
+    "motif": {
+      "label": "Motif de fond",
+      "hint": "Par défaut, le fond est uni. Un motif reste discret derrière le contenu et ne s’applique qu’à cet appareil.",
+      "options": {
+        "none": "Aucun",
+        "points": "Points",
+        "quadrillage": "Quadrillage",
+        "grain": "Grain",
+        "projecteur": "Projecteur"
       }
     },
     "unsaved": "Vos modifications ne sont pas enregistrées. Enregistrez vos préférences avant de quitter cette page.",
