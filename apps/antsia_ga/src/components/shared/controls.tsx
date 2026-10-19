@@ -70,7 +70,7 @@ export function Field(props: { id: string; label: string; hint?: string; error?:
 }
 
 export function Card({ className, children }: { className?: string; children: ReactNode }) {
-  return <section className={cn("rounded-2xl border border-border bg-card p-5 text-card-foreground shadow-sm sm:p-6", className)}>{children}</section>
+  return <section className={cn("rounded-2xl border border-[color:var(--esp-surface-border,var(--border))] bg-card p-5 text-card-foreground shadow-sm sm:p-6", className)}>{children}</section>
 }
 
 export function CenteredStatus({ label }: { label: string }) {

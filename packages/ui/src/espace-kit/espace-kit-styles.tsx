@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/components/espace-kit/espace-kit-styles.tsx @ ad2e7fdc2 — adaptations : feuille sortie du JSX dans une constante de module (`ESPACE_KIT_CSS`) — un littéral enfant de `<style>` passerait pour une chaîne d'interface ; pont du Poste retiré (sélecteurs `[data-charte="espace-structure"]`, `.poste-workspace` et jetons `--poste-radius-*`, absents du moteur) ; AUCUNE couleur littérale — jetons de la charte seulement, y compris dans les commentaires ; commentaires rapportés au moteur (cliquets `no-hardcoded-colors` et `theme-contract`) ; règles, sélecteurs et paliers du kit inchangés.
+// Dupliqué de socle/packages/agent-features/src/components/espace-kit/espace-kit-styles.tsx @ ad2e7fdc2 — adaptations : feuille sortie du JSX dans une constante de module (`ESPACE_KIT_CSS`) — un littéral enfant de `<style>` passerait pour une chaîne d'interface ; pont du Poste retiré (sélecteurs `[data-charte="espace-structure"]`, `.poste-workspace` et jetons `--poste-radius-*`, absents du moteur) ; AUCUNE couleur littérale — jetons de la charte seulement, y compris dans les commentaires ; commentaires rapportés au moteur (cliquets `no-hardcoded-colors` et `theme-contract`) ; règles, sélecteurs et paliers du kit inchangés. ; contour des surfaces posées sur la page lu dans --esp-surface-border, filet d'origine en repli (aucun contour quand le thème distingue déjà la carte du fond).
 "use client"
 
 /**
@@ -29,7 +29,7 @@
 const ESPACE_KIT_CSS = `
       .esk-card {
         background: var(--esp-surface-card, var(--secondary));
-        border: 1px solid var(--border);
+        border: 1px solid var(--esp-surface-border, var(--border));
         border-radius: 18px;
         box-shadow: none;
       }
@@ -202,7 +202,7 @@ const ESPACE_KIT_CSS = `
 
       /* -- Etat vide -- */
       .esk-empty {
-        border: 1px solid var(--border);
+        border: 1px solid var(--esp-surface-border, var(--border));
         border-radius: 18px;
         background: var(--esp-surface-card, var(--secondary));
         padding: 24px;
@@ -332,7 +332,7 @@ const ESPACE_KIT_CSS = `
         max-height: min(calc(100dvh - 32px), 896px);
         min-width: 0;
         overflow: hidden;
-        background: var(--esp-surface-card, var(--secondary));
+        background: var(--esp-surface-raised, var(--esp-surface-card, var(--secondary)));
         border: 1px solid var(--border);
         border-radius: 18px;
         box-shadow: none;

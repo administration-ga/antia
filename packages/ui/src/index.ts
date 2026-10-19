@@ -6,7 +6,7 @@
  * écran (`@antsia/ui/overlay`) ont leur propre point d'entrée.
  */
 export { cn } from "./lib/cn"
-export { APPLICATION_THEMES, type ApplicationTheme } from "./themes"
+export { APPLICATION_THEMES, type ApplicationTheme, ANTSIA_THEME_IDS, ANTSIA_THEMES, antsiaCharteFor, type AntsiaThemeId } from "./themes"
 
 export { Icon } from "./components/icon"
 export type { IconName, IconProps } from "./components/icon"

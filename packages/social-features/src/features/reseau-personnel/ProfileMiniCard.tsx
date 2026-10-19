@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/ProfileMiniCard.tsx @ ad2e7fdc2 — adaptations : feuille sortie du JSX dans une constante de module (`PROFILE_MINI_CARD_CSS`, hauteur de bannière lue dans `RESEAU_COVER_HEIGHT`) — un littéral enfant de `<style>` passerait pour une chaîne d'interface ; ma personne lue sur le moteur (`people.persons.getMyPerson`, sur soi) — l'identité ne se rend que d'un profil PUBLIÉ (identifiant et nom choisis), photo et couverture servies par la garde des fichiers (une image retenue retombe sur le repli) ; adresses par `useRoutes()` — ma fiche `profile(handle)` au lieu du dossier de l'espace, et le geste du rappel mène à la gestion de mon profil sur ma fiche (`profileManageHref`) ou, sans profil publié, aux réglages de l'application quand elle en sert (`settings?.()`, sinon pas de bouton) ; étapes du rappel relues sans identifiant provisoire (rien n'est publié d'office) ; textes par l'i18n (`reseau:profileMiniCard.*`, `profileOnboardingCopy(step, t)`) ; renvois au parchemin iProfil, au dossier `MonProfilPage` et au compte plateforme du socle retirés des commentaires.
+// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/ProfileMiniCard.tsx @ ad2e7fdc2 — adaptations : feuille sortie du JSX dans une constante de module (`PROFILE_MINI_CARD_CSS`, hauteur de bannière lue dans `RESEAU_COVER_HEIGHT`) — un littéral enfant de `<style>` passerait pour une chaîne d'interface ; ma personne lue sur le moteur (`people.persons.getMyPerson`, sur soi) — l'identité ne se rend que d'un profil PUBLIÉ (identifiant et nom choisis), photo et couverture servies par la garde des fichiers (une image retenue retombe sur le repli) ; adresses par `useRoutes()` — ma fiche `profile(handle)` au lieu du dossier de l'espace, et le geste du rappel mène à la gestion de mon profil sur ma fiche (`profileManageHref`) ou, sans profil publié, aux réglages de l'application quand elle en sert (`settings?.()`, sinon pas de bouton) ; étapes du rappel relues sans identifiant provisoire (rien n'est publié d'office) ; textes par l'i18n (`reseau:profileMiniCard.*`, `profileOnboardingCopy(step, t)`) ; renvois au parchemin iProfil, au dossier `MonProfilPage` et au compte plateforme du socle retirés des commentaires. ; contour des surfaces posées sur la page lu dans --esp-surface-border, filet d'origine en repli (aucun contour quand le thème distingue déjà la carte du fond).
 "use client"
 
 /**
@@ -319,6 +319,9 @@ export function ProfileMiniCard({
            le Card reste sur son fond par défaut et cette carte est la seule
            de la page à ne pas porter la surface commune. */
         background: "var(--esp-surface-card, var(--ink-0))",
+        /* Carte posée sur la page : aucun filet quand le thème la distingue
+           déjà du fond (`--esp-surface-border`), le filet du Card sinon. */
+        border: "1px solid var(--esp-surface-border, var(--ink-200))",
       }}
     >
       <style href="rp-minicard" precedence="default">

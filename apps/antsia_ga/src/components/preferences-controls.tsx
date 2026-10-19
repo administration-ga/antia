@@ -15,6 +15,7 @@ import { toast } from "sonner"
 import { z } from "zod"
 
 import { Button, Card, Field, TextInput } from "./shared/controls"
+import { ThemePicker } from "./theme-picker"
 import { engineErrorMessage } from "@/lib/engine-errors"
 
 /** La même validation et canonisation que le provider ; le serveur reste l'arbitre. */
@@ -177,6 +178,9 @@ export function PreferencesControls() {
         <div className="min-w-0 border-t border-border pt-4">
           <AppearanceControl />
           <p className="mt-1 text-xs text-muted-foreground">{t("preferences.appearanceHint")}</p>
+        </div>
+        <div className="min-w-0 border-t border-border pt-4">
+          <ThemePicker />
         </div>
       </div>
     </Card>

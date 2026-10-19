@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/stories/stories-styles.tsx @ ad2e7fdc2 — adaptations : règles et sélecteurs inchangés (jetons de rôle seulement, aucune couleur littérale) ; feuille sortie du JSX dans une constante de module (`STORIES_CSS`) — un littéral enfant de `<style>` passerait pour une chaîne d'interface ; commentaires rapportés au cliquet `no-hardcoded-colors` et à la couche de communication de `@antsia/ui` (`communication.css` : classes `.esp-story-*`, `.esp-live-pill`, et le jeton de scène `--esp-immersive-on-ink` lu ici).
+// Dupliqué de socle/packages/agent-features/src/features/stories/stories-styles.tsx @ ad2e7fdc2 — adaptations : règles et sélecteurs inchangés (jetons de rôle seulement, aucune couleur littérale) ; feuille sortie du JSX dans une constante de module (`STORIES_CSS`) — un littéral enfant de `<style>` passerait pour une chaîne d'interface ; commentaires rapportés au cliquet `no-hardcoded-colors` et à la couche de communication de `@antsia/ui` (`communication.css` : classes `.esp-story-*`, `.esp-live-pill`, et le jeton de scène `--esp-immersive-on-ink` lu ici). ; contour des surfaces posées sur la page lu dans --esp-surface-border, filet d'origine en repli (aucun contour quand le thème distingue déjà la carte du fond).
 "use client"
 
 /**
@@ -148,8 +148,12 @@ const STORIES_CSS = `
            border-box (preflight Tailwind) fait que le 1 px ne deplace rien.
 
            NB : ce fichier EST un litteral de gabarit — pas d'accent grave
-           dans ces commentaires, il fermerait la chaine. */
-        border: 1px solid var(--border);
+           dans ces commentaires, il fermerait la chaine.
+
+           Une charte dont la carte se distingue du fond pose
+           --esp-surface-border a transparent : la tuile se lit alors par son
+           remplissage, sans contour. */
+        border: 1px solid var(--esp-surface-border, var(--border));
       }
       .st-tray-create .st-card-media {
         inset: 0 0 auto;

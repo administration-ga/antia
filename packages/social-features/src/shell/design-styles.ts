@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/design-styles.ts @ ad2e7fdc2 — adaptations : déplacé dans la coque (`shell/`) ; styles inchangés, jetons de la charte de base du moteur (`--esp-surface-card`, jetons shadcn) et rayon des surfaces du réseau (`--rp-surface-radius`, couche de communication) ; commentaires rapportés au réseau (plus de maquette iProfil ni de charte de l'espace personnel).
+// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/design-styles.ts @ ad2e7fdc2 — adaptations : déplacé dans la coque (`shell/`) ; styles inchangés, jetons de la charte de base du moteur (`--esp-surface-card`, jetons shadcn) et rayon des surfaces du réseau (`--rp-surface-radius`, couche de communication) ; commentaires rapportés au réseau (plus de maquette iProfil ni de charte de l'espace personnel). ; contour des surfaces posées sur la page lu dans --esp-surface-border, filet d'origine en repli (aucun contour quand le thème distingue déjà la carte du fond).
 import type { CSSProperties } from "react"
 
 /**
@@ -9,7 +9,8 @@ import type { CSSProperties } from "react"
  */
 export const RESEAU_SURFACE_STYLE = {
   background: "var(--esp-surface-card, var(--secondary))",
-  border: "1px solid var(--border)",
+  /* Aucun filet quand le thème distingue déjà la carte du fond (`--esp-surface-border`). */
+  border: "1px solid var(--esp-surface-border, var(--border))",
   /* La page réseau du bureau pose son rayon de surface sur .rp-scope. Le repli
      conserve le contrat historique pour les composants rendus hors page. */
   borderRadius: "var(--rp-surface-radius, 18px)",
