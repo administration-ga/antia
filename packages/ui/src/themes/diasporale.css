@@ -35,6 +35,9 @@
  * Les contrastes (texte ≥ 4,5:1, contours et focus ≥ 3:1) sont recalculés dans les
  * deux thèmes, à travers la cascade complète base + thème, par le cliquet
  * `engine-theme-contrast.test.ts` de DIASPORALE.
+ * Version 3.3 (17/10/2026, correction du propriétaire sur le fil clair) :
+ * inversion des surfaces claires — fond papier, cartes sable. Les rôles du
+ * moteur et d'iCom suivent la même hiérarchie ; le sombre reste inchangé.
  */
 
 [data-charte="diasporale"] {
@@ -154,8 +157,8 @@
   --esp-seg-on-fg: #f9f8f5;
   --esp-night-seg-on: #e9e7e1;
   --esp-night-seg-on-fg: #151311;
-  /* Reliefs v2 : presque rien. La carte se détache par la clarté (papier sur
-     sable, encre sur nuit), sans filet ; l'ombre n'est qu'un souffle, à peine
+  /* Reliefs : presque rien. La carte se détache par la clarté (sable sur
+     papier en clair, carte éclaircie sur nuit en sombre), sans filet ; l'ombre n'est qu'un souffle, à peine
      plus marqué pour ce qui passe DEVANT la page (carte flottante, barre basse). */
   --esp-shadow: 0 1px 2px rgb(20 19 15 / 0.05);
   --esp-night-shadow: 0 1px 1px rgb(0 0 0 / 0.25);
@@ -165,19 +168,19 @@
 
   /* ── 2. Rôles — thème clair ── */
 
-  --background: var(--esp-neutral-100);
-  --background-dashboard: var(--esp-neutral-100);
+  --background: var(--esp-neutral-0);
+  --background-dashboard: var(--esp-neutral-0);
   --foreground: var(--esp-neutral-900);
-  --card: var(--esp-neutral-0);
+  --card: var(--esp-neutral-100);
   --card-foreground: var(--esp-neutral-900);
-  --popover: var(--esp-neutral-0);
+  --popover: var(--esp-neutral-100);
   --popover-foreground: var(--esp-neutral-900);
   --primary: var(--esp-blue-500);
   --primary-foreground: var(--esp-neutral-0);
   --primary-light: var(--esp-blue-50);
-  --secondary: var(--esp-neutral-0);
+  --secondary: var(--esp-neutral-100);
   --secondary-foreground: var(--esp-neutral-600);
-  --esp-surface-card: var(--esp-neutral-0);
+  --esp-surface-card: var(--esp-neutral-100);
   --muted: var(--esp-neutral-150);
   --muted-foreground: var(--esp-neutral-600);
   --accent: var(--esp-neutral-200);
@@ -226,9 +229,9 @@
   --primary-fill: var(--esp-blue-500);
   --primary-fill-hover: var(--esp-blue-600);
   --on-fill: var(--esp-neutral-0);
-  --ink-0: var(--esp-neutral-0);
+  --ink-0: var(--card);
   --ink-50: var(--esp-neutral-50);
-  --ink-100: var(--esp-neutral-100);
+  --ink-100: var(--background);
   --ink-150: var(--esp-neutral-150);
   --ink-200: var(--esp-neutral-rule);
   --ink-300: var(--esp-neutral-300);
@@ -298,7 +301,7 @@
   --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
 
   --esp-shadow-card: var(--esp-shadow);
-  --esp-mobilebar-bg: color-mix(in srgb, var(--esp-neutral-0) 94%, transparent);
+  --esp-mobilebar-bg: color-mix(in srgb, var(--card) 94%, transparent);
   --esp-mobilebar-border: var(--esp-neutral-rule);
   --esp-mobilebar-shadow: var(--esp-shadow-float);
   --esp-segment-on: var(--esp-seg-on);
