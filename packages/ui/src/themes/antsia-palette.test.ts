@@ -70,14 +70,19 @@ const PALETTE: readonly { role: string; clair: string; sombre: string; tokens: r
   { role: "encre d'action et lien (bleu)", clair: "#2a5fa8", sombre: "#86b2f4", tokens: ["--primary", "--primary-500", "--accent", "--sidebar-primary", "--info-500", "--status-active"] },
   { role: "aplat d'action : Publier, Écrire (bleu)", clair: "#2f67b5", sombre: "#6fa2f0", tokens: ["--primary-fill", "--role-message-fill"] },
   { role: "texte sur l'aplat d'action", clair: "#ffffff", sombre: "#06142e", tokens: ["--primary-fill-on", "--role-message-on"] },
-  { role: "texte sur l'encre, le succès et le danger", clair: "#ffffff", sombre: "#03210f", tokens: ["--primary-foreground", "--on-fill", "--accent-foreground", "--sidebar-primary-foreground"] },
+  { role: "texte sur l'encre d'action", clair: "#ffffff", sombre: "#03210f", tokens: ["--primary-foreground", "--on-fill", "--accent-foreground", "--sidebar-primary-foreground"] },
   { role: "relations : Suivre (vert)", clair: "#007e4d", sombre: "#2fcb86", tokens: ["--role-social-fill"] },
   { role: "réactions et commerce : J'aime, Participer (safran)", clair: "#f4bb44", sombre: "#f4bb44", tokens: ["--role-react-fill", "--role-commerce-fill"] },
   { role: "séparateur", clair: "#e6e6e6", sombre: "#262626", tokens: ["--border", "--ink-200", "--sidebar-border"] },
   { role: "contour de contrôle", clair: "#878787", sombre: "#707070", tokens: ["--input", "--ink-300"] },
   { role: "focus", clair: "#2a5fa8", sombre: "#86b2f4", tokens: ["--ring", "--sidebar-ring", "--outline-ring"] },
-  { role: "succès", clair: "#007a4a", sombre: "#2fcb86", tokens: ["--success", "--success-fill", "--success-500", "--esp-green-strong", "--status-archived"] },
-  { role: "danger", clair: "#c8102e", sombre: "#ff6b7a", tokens: ["--destructive", "--danger-fill", "--danger-500", "--status-error"] },
+  // Valider et Supprimer, chacun ses trois couleurs comme dans les chartes (19/10/2026).
+  { role: "Valider : aplat (Accepter, Décrocher)", clair: "#00804e", sombre: "#2fcb86", tokens: ["--role-success-fill", "--success-fill", "--success-500", "--esp-green-strong", "--status-archived"] },
+  { role: "Valider : texte sur l'aplat", clair: "#ffffff", sombre: "#03210f", tokens: ["--role-success-on"] },
+  { role: "Valider : encre (confirmation)", clair: "#006b42", sombre: "#4ad898", tokens: ["--role-success-ink", "--success", "--success-600"] },
+  { role: "Supprimer : aplat (Supprimer, Raccrocher)", clair: "#c8102e", sombre: "#ff6b7a", tokens: ["--role-danger-fill", "--danger-fill", "--danger-500", "--status-error"] },
+  { role: "Supprimer : texte sur l'aplat", clair: "#ffffff", sombre: "#2a0509", tokens: ["--role-danger-on"] },
+  { role: "Supprimer : encre (erreur)", clair: "#b50e29", sombre: "#ff8592", tokens: ["--role-danger-ink", "--destructive", "--danger-600"] },
 ]
 
 /** Texte (≥ 4,5:1) : [premier plan, fond, où l'écran les associe]. */
@@ -114,7 +119,10 @@ const TEXT_PAIRS: readonly (readonly [string, string, string])[] = [
   ["--destructive", "--background", "erreur sur le fond"],
   ["--destructive", "--card", "erreur de formulaire dans une carte"],
   ["--destructive", "--popover", "erreur dans un menu"],
-  ["--danger-500", "--ink-0", "astérisque et erreur de champ"],
+  ["--danger-500", "--ink-0", "astérisque et erreur de champ (repli)"],
+  ["--role-danger-ink", "--ink-0", "astérisque et erreur de champ"],
+  ["--role-success-on", "--role-success-fill", "Valider, Décrocher, Reprendre"],
+  ["--role-danger-on", "--role-danger-fill", "Supprimer, Raccrocher, pastille « En direct »"],
   ["--danger-600", "--ink-0", "action grave d'un menu"],
   ["--danger-600", "--danger-50", "badge de danger"],
   ["--danger-700", "--danger-50", "action sensible d'iCom"],
@@ -349,8 +357,14 @@ describe("charte ANTSIA servie par le moteur — cascade base + thème", () => {
     }
   })
 
-  it("aucune police ni infrastructure d'apparence ajoutée : Inter et le choix système/clair/sombre existant", () => {
-    expect(value("clair", "--font-sans").startsWith('"Inter"')).toBe(true)
+  it("texte courant en Inter, embarquée comme Familjen Grotesk ; aucune infrastructure d'apparence ajoutée", () => {
+    // Inter n'était qu'un nom de famille sans fichier : le texte tombait sur la police du système.
+    const imported = /@import "(@fontsource-variable\/inter)";/.exec(read("../styles.css"))?.[1]
+    expect(imported).toBe("@fontsource-variable/inter")
+    const faces = new Set([...read(`../../node_modules/${imported}/index.css`).matchAll(/font-family: '([^']+)'/g)].map((match) => match[1]))
+    const first = /^"([^"]+)"/.exec(value("clair", "--font-sans"))?.[1]
+    expect(first).toBe("Inter Variable")
+    expect(faces.has(first)).toBe(true)
     expect(value("sombre", "--font-sans")).toBe(value("clair", "--font-sans"))
     expect(THEME.replace(/\/\*[\s\S]*?\*\//g, "")).not.toMatch(/@import|@font-face|url\(|prefers-color-scheme/)
   })

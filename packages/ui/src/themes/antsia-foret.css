@@ -20,7 +20,7 @@
   --esp-neutral-900: #1e1b16; /* texte principal clair */
   --esp-neutral-600: #655e52; /* texte secondaire clair */
   --esp-neutral-rule: #e3dccf; /* séparateur décoratif */
-  --esp-neutral-field: #8b8272; /* contour de contrôle clair, ≥ 3:1 sur la carte et le creux */
+  --esp-neutral-field: #8c8373; /* contour de contrôle clair, ≥ 3:1 sur la carte et le creux */
   --esp-night-bg: #141312;
   --esp-night-card: #1e1d1b;
   --esp-night-chip: #282624;
@@ -40,7 +40,7 @@
   --primary-800: #1c4728;
   --success-50: #eaf0e7;
   --success-100: #d6e3d5;
-  --success-500: #2e7341;
+  --success-500: #317a45;
   --success-600: #28723d;
   --danger-50: #f7e8e3;
   --danger-100: #f0d2cd;
@@ -53,7 +53,7 @@
   --foreground: var(--esp-neutral-900);
   --card: #fffdf9;
   --popover: #ffffff;
-  --muted: #ebe6dd; /* creux : bouton neutre, puce, champ, survol */
+  --muted: #ece6db; /* creux : bouton neutre, puce, champ, survol */
   --muted-foreground: var(--esp-neutral-600);
   --border: var(--esp-neutral-rule);
   --input: var(--esp-neutral-field);
@@ -70,7 +70,14 @@
   --role-react-ink: #a0670f;
   --role-commerce-fill: #c98a2b;
   --role-commerce-on: #2a1a00;
-  --role-commerce-ink: #8d5b00;
+  --role-commerce-ink: #946000;
+  /* Valider et Supprimer, chacun ses trois couleurs comme dans les chartes : aplat, texte sur l'aplat, encre en texte. */
+  --role-success-fill: #317a45;
+  --role-success-on: #ffffff;
+  --role-success-ink: #28723d;
+  --role-danger-fill: #b3261e;
+  --role-danger-on: #ffffff;
+  --role-danger-ink: #a3221b;
   --role-message-soft: #e8e8dd; /* fond tonal du bouton Écrire */
   --role-react-soft: #f7eddc; /* fond de l'action réagie */
   --primary-fill: #317a45; /* aplat d'identité : bouton Publier, Créer, interrupteur */
@@ -89,7 +96,7 @@
   --esp-inline-link-decoration: underline;
   --esp-sticky-header-inset: 4rem; /* barre de membre collante (P18b, A13) */
   --body-font-size: 16px;
-  --font-sans: "Inter", system-ui, sans-serif;
+  --font-sans: "Inter Variable", "Inter", system-ui, sans-serif; /* Inter embarquée (`styles.css`) */
   --font-display: var(--font-familjen-grotesk, "Familjen Grotesk Variable"), "Inter", system-ui, sans-serif;
 
   /* Ombres teintées de l'encre du thème. */
@@ -146,6 +153,13 @@
   --role-commerce-fill: #e5b04f;
   --role-commerce-on: #2a1a00;
   --role-commerce-ink: #ebb85e;
+  /* Valider et Supprimer, chacun ses trois couleurs comme dans les chartes : aplat, texte sur l'aplat, encre en texte. */
+  --role-success-fill: #76bf85;
+  --role-success-on: #031c09;
+  --role-success-ink: #76bf85;
+  --role-danger-fill: #f0897e;
+  --role-danger-on: #2a0603;
+  --role-danger-ink: #f59a90;
   --role-message-soft: #313227; /* fond tonal du bouton Écrire */
   --role-react-soft: #3a3222; /* fond de l'action réagie */
   --primary-fill: #76bf85; /* aplat d'identité : bouton Publier, Créer, interrupteur */
@@ -207,16 +221,16 @@
   --outline-ring: var(--ring);
 
   /* ── Succès et danger : icône + texte, jamais la couleur seule ── */
-  --success: var(--success-500);
+  --success: var(--role-success-ink); /* encre en texte, distincte de l'aplat (chartes) */
   --success-light: var(--success-50);
-  --success-fill: var(--success-500);
+  --success-fill: var(--role-success-fill);
   --success-fill-hover: var(--success-600);
   --esp-green-strong: var(--success-500);
   --status-archived: var(--success-500);
   --status-archived-bg: var(--success-50);
-  --destructive: var(--danger-500);
+  --destructive: var(--role-danger-ink); /* encre en texte, distincte de l'aplat (chartes) */
   --destructive-light: var(--danger-50);
-  --danger-fill: var(--danger-500);
+  --danger-fill: var(--role-danger-fill);
   --danger-fill-hover: var(--danger-600);
   --status-error: var(--danger-500);
   --status-error-bg: var(--danger-50);

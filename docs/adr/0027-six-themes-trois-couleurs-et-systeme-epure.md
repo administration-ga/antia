@@ -118,6 +118,27 @@ Nous allons :
    - le motif est posé par `data-motif` sur `<html>` dès le script d'amorçage, donc avant
      l'affichage ;
    - il est peint sur le fond de la page, jamais sur les cartes.
+7. **Appliquer les chartes à la lettre** (avenant du 19/10/2026 au soir, demandé par le propriétaire :
+   « applique les sept chartes dans le code »). Une mesure dans l'application avait montré 341
+   couleurs sur 392 identiques aux maquettes, 27 écarts nets (tous sur Valider et Supprimer) et une
+   police de texte jamais chargée :
+   - **Valider et Supprimer deviennent deux fonctions** comme les autres : `--role-success-*` et
+     `--role-danger-*` (aplat, texte sur l'aplat, encre), à `initial` dans la base et déclarés par
+     les sept thèmes aux valeurs des chartes. Dans ces thèmes, `--success` et `--destructive` se
+     lisent en encre (messages de confirmation et d'erreur), `--success-fill` et `--danger-fill` en
+     aplat. Les boutons Valider et Supprimer, Décrocher, Reprendre, Raccrocher, Refuser et la
+     pastille « En direct » lisent l'aplat et le texte de leur fonction ; l'erreur et l'astérisque
+     d'un champ, l'encre. Avant, en sombre, le texte d'un bouton Supprimer prenait le vert foncé du
+     succès (`--on-fill` commun). DIASPORALE et la console ne changent pas (replis d'origine).
+   - **Inter est embarquée** (`@fontsource-variable/inter`, importée par `styles.css` comme
+     Familjen Grotesk) : le texte courant s'affichait dans la police du système.
+   - **Valeurs exactes des chartes** partout où le contrôle AA les accepte : 385 sur 392. Les sept
+     autres (encres d'identité de Forêt et de Lagon, contours de champ de Gaboma, Corail et Lagon,
+     tous trop faibles sur le creux) gardent la valeur du code ; la liste est dans
+     `docs/22_THEMES_ET_OPTIONS_ANTSIA.md`. Le creux du fond Lin (Forêt, `#ECE6DB`) entre tel quel :
+     le seuil de neutralité des fonds passe de 0,06 à 0,07.
+   - **Gardés par décision du propriétaire** : cibles de 44 px, contour des champs (§3) et motif de
+     fond commun aux thèmes (§6).
 
 ## Conséquences
 

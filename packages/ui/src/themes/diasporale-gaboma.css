@@ -13,7 +13,7 @@
  *
  * Valeurs reprises d'`antsia.css` (troisième série, 19/10/2026) : encre #2a5fa8 en clair,
  * #86b2f4 en sombre ; fond #ffffff / #000000 ; carte #f7f7f7 / #141414 ; creux #eeeeee ; champ
- * #878787 / #707070 ; succès #007a4a ; danger #c8102e ; nuancier vert #007e4d, safran #f4bb44,
+ * #878787 / #707070 ; succès #00804e ; danger #c8102e ; nuancier vert #007e4d, safran #f4bb44,
  * bleu #2f67b5.
  *
  * Règles (cliquet `theme-contract` du moteur) : uniquement des jetons du contrat de la charte de
@@ -94,7 +94,7 @@
   --esp-green-bg: #e1f0e8;
   --esp-green-dark: #2fcb86;
   --esp-green-bg-dark: #16352a;
-  --esp-green-strong: #007a4a;
+  --esp-green-strong: #00804e; /* aplat de succès de la charte du réseau (chartes, 19/10/2026) */
 
   --esp-on-avatar: #ffffff;
   --esp-ava-1: #2971d5;

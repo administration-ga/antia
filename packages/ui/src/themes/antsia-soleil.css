@@ -44,7 +44,7 @@
   --success-600: #1b6434;
   --danger-50: #faebe9;
   --danger-100: #f4d6d2;
-  --danger-500: #c6321f;
+  --danger-500: #c8331f;
   --danger-600: #b42d1b;
   --danger-700: #902416;
 
@@ -71,6 +71,13 @@
   --role-commerce-fill: #ec8b34;
   --role-commerce-on: #1f1300;
   --role-commerce-ink: #a4520d;
+  /* Valider et Supprimer, chacun ses trois couleurs comme dans les chartes : aplat, texte sur l'aplat, encre en texte. */
+  --role-success-fill: #237a40;
+  --role-success-on: #ffffff;
+  --role-success-ink: #1b6434;
+  --role-danger-fill: #c8331f;
+  --role-danger-on: #ffffff;
+  --role-danger-ink: #b42d1b;
   --role-message-soft: #e2f1fc; /* fond tonal du bouton Écrire */
   --role-react-soft: #fde5e4; /* fond de l'action réagie */
   --primary-fill: #ec8b34; /* aplat d'identité : bouton Publier, Créer, interrupteur */
@@ -89,7 +96,7 @@
   --esp-inline-link-decoration: underline;
   --esp-sticky-header-inset: 4rem; /* barre de membre collante (P18b, A13) */
   --body-font-size: 16px;
-  --font-sans: "Inter", system-ui, sans-serif;
+  --font-sans: "Inter Variable", "Inter", system-ui, sans-serif; /* Inter embarquée (`styles.css`) */
   --font-display: var(--font-familjen-grotesk, "Familjen Grotesk Variable"), "Inter", system-ui, sans-serif;
 
   /* Ombres teintées de l'encre du thème. */
@@ -146,6 +153,13 @@
   --role-commerce-fill: #f29a4a;
   --role-commerce-on: #1f1300;
   --role-commerce-ink: #f6a660;
+  /* Valider et Supprimer, chacun ses trois couleurs comme dans les chartes : aplat, texte sur l'aplat, encre en texte. */
+  --role-success-fill: #5cc584;
+  --role-success-on: #062612;
+  --role-success-ink: #6bd192;
+  --role-danger-fill: #ff7b66;
+  --role-danger-on: #2a0700;
+  --role-danger-ink: #ff8b78;
   --role-message-soft: #1f2e3a; /* fond tonal du bouton Écrire */
   --role-react-soft: #351d1d; /* fond de l'action réagie */
   --primary-fill: #f29a4a; /* aplat d'identité : bouton Publier, Créer, interrupteur */
@@ -207,16 +221,16 @@
   --outline-ring: var(--ring);
 
   /* ── Succès et danger : icône + texte, jamais la couleur seule ── */
-  --success: var(--success-500);
+  --success: var(--role-success-ink); /* encre en texte, distincte de l'aplat (chartes) */
   --success-light: var(--success-50);
-  --success-fill: var(--success-500);
+  --success-fill: var(--role-success-fill);
   --success-fill-hover: var(--success-600);
   --esp-green-strong: var(--success-500);
   --status-archived: var(--success-500);
   --status-archived-bg: var(--success-50);
-  --destructive: var(--danger-500);
+  --destructive: var(--role-danger-ink); /* encre en texte, distincte de l'aplat (chartes) */
   --destructive-light: var(--danger-50);
-  --danger-fill: var(--danger-500);
+  --danger-fill: var(--role-danger-fill);
   --danger-fill-hover: var(--danger-600);
   --status-error: var(--danger-500);
   --status-error-bg: var(--danger-50);

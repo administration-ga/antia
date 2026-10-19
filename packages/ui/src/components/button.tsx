@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/ui-v2/src/components/button.tsx @ ad2e7fdc2 — adaptations : en-tête de provenance ; système épuré et couleurs par fonction (ADR-0027) lus dans des jetons à `initial`, repli sur les valeurs d'origine (rayon `--ui2-button-radius`, neutre « outline » et secondaire sans filet, texte de l'aplat d'identité `--primary-fill-on`, variantes `social`, `message`, `react`, `commerce`).
+// Dupliqué de socle/packages/ui-v2/src/components/button.tsx @ ad2e7fdc2 — adaptations : en-tête de provenance ; système épuré et couleurs par fonction (ADR-0027) lus dans des jetons à `initial`, repli sur les valeurs d'origine (rayon `--ui2-button-radius`, neutre « outline » et secondaire sans filet, texte de l'aplat d'identité `--primary-fill-on`, variantes `social`, `message`, `react`, `commerce` ; texte posé sur Valider et Supprimer `--role-success-on`, `--role-danger-on`).
 "use client"
 
 import type { ButtonHTMLAttributes, CSSProperties, ReactNode, Ref } from "react"
@@ -75,14 +75,16 @@ const VARIANTS: Record<Variant, CSSProperties> = {
     color: "var(--ink-800)",
     border: "1px solid var(--ui2-button-outline-border, var(--ink-300))",
   },
+  // Valider et Supprimer : chacun son texte sur l'aplat (ADR-0027) ; l'aplat est déjà
+  // celui de la fonction dans les thèmes ANTSIA (`--danger-fill`, `--success-fill`).
   danger: {
     background: "var(--danger-fill)",
-    color: "var(--on-fill)",
+    color: "var(--role-danger-on, var(--on-fill))",
     border: "1px solid var(--danger-fill)",
   },
   success: {
     background: "var(--success-fill)",
-    color: "var(--on-fill)",
+    color: "var(--role-success-on, var(--on-fill))",
     border: "1px solid var(--success-fill)",
   },
   link: {

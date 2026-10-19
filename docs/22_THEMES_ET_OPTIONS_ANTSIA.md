@@ -9,15 +9,16 @@
 > - Décisions : [ADR-0027](adr/0027-six-themes-trois-couleurs-et-systeme-epure.md) (thèmes, système
 >   épuré, motifs) ; ADR-0026 (thème du compte, apparence posée avant l'affichage).
 > - Maquettes : artifact privé « Chartes ANTSIA », version 7
->   (<https://claude.ai/artifact/Arc4fsUDikm3DRHuZNr35u>). Ses valeurs peuvent différer de quelques
->   unités du code, recalculé pour les contrastes au moment du portage.
+>   (<https://claude.ai/artifact/Arc4fsUDikm3DRHuZNr35u>). Depuis le 19/10/2026 au soir, le code
+>   reprend ses valeurs EXACTES partout où le contrôle AA les accepte : 385 couleurs sur 392 ; les
+>   sept autres sont listées dans « Écarts retenus » ci-dessous.
 
 ## En bref
 
 - **Sept thèmes** : Gaboma (par défaut), Soleil, Forêt, Corail, Lagon, Électrique et Sable.
 - **Trois couleurs vives par thème**, une par famille d'actions : publier ; suivre et écrire ;
-  réagir et participer. Valider (vert) et Supprimer (rouge) restent hors de ces trois couleurs ;
-  Annuler est un bouton gris.
+  réagir et participer. Valider (vert) et Supprimer (rouge) restent hors de ces trois couleurs,
+  chacun avec son aplat, son texte sur l'aplat et son encre ; Annuler est un bouton gris.
 - **Chaque thème a son fond**, neutre, en clair et en sombre : le membre choisit le thème, pas le fond.
 - **Trois options d'affichage** : l'apparence (système, clair, sombre), le thème et le motif de fond.
 
@@ -72,7 +73,10 @@ Identique dans tous les thèmes ; seules les couleurs changent.
 **Couleurs par fonction.** Chaque thème déclare un aplat, un texte posé sur l'aplat et une encre
 lisible en texte pour chaque fonction : Principal (`--primary-fill`, `--primary-fill-on`,
 `--primary`), Relations, Messages, Réactions et Commerce (`--role-<fonction>-fill`, `-on`,
-`-ink`), Validation (`--success-*`) et Danger (`--danger-*`). Écrire est un bouton **tonal**
+`-ink`), Validation et Danger (`--role-success-*` et `--role-danger-*` : Valider, Décrocher,
+Reprendre ; Supprimer, Raccrocher, Refuser, pastille « En direct »). Le succès (`--success`) et
+le danger (`--destructive`) se lisent en ENCRE (texte de confirmation, message d'erreur),
+distincte de leur aplat (`--success-fill`, `--danger-fill`). Écrire est un bouton **tonal**
 (`--role-message-soft`), l'action réagie a son fond doux (`--role-react-soft`).
 
 **Angles : un par élément.**
@@ -99,12 +103,35 @@ boutons colorés et gris n'en ont jamais. Seuls l'anneau de focus et le champ ac
 ombre ; celle du bouton prend sa couleur. Les ombres sont teintées de l'encre du thème.
 
 **Espaces et typographie.** Échelle de 4 (16 px dans une carte, 12 px entre deux cartes, 24 px
-entre deux blocs) ; boutons de 40 px, puces de 32 px. Titres en Familjen Grotesk, texte en Inter,
-corps de 16 px.
+entre deux blocs). Au téléphone, boutons, puces et ronds de l'en-tête ont des cibles de 44 px
+(les chartes dessinent 40 et 32 px) : choix d'accessibilité gardé par le propriétaire le
+19/10/2026. Titres en Familjen Grotesk, texte en Inter, corps de 16 px ; les deux polices sont
+embarquées (`@fontsource-variable`, importées par `packages/ui/src/styles.css`) : jusqu'au
+19/10/2026, Inter n'était qu'un nom sans fichier et le texte s'affichait dans la police du système.
 
 **Retours visuels.** Succès et danger s'affichent toujours avec une icône et un texte, jamais la
 couleur seule. Les toasts (sonner) suivent les jetons du thème
 (`apps/antsia_ga/src/app/globals.css`).
+
+## Écarts retenus par rapport aux chartes
+
+Mesurés dans l'application le 19/10/2026 (couleurs calculées sur la page, 7 thèmes × clair et
+sombre, 392 valeurs) : 385 sont exactement celles des chartes. Les sept autres sont refusées
+par le contrôle AA d'`antsia-themes.test.ts` et gardent la valeur du code :
+
+| Thème | Couleur | Chartes | Code | Raison |
+|---|---|---|---|---|
+| Forêt | encre d'identité (clair) | `#307944` | `#2D7240` | 4,28:1 sur le creux, 4,5 exigé |
+| Lagon | encre d'identité, des relations et des messages (clair) | `#0E7570` | `#0D6F6A` | 4,27:1 sur le creux |
+| Gaboma | contour de champ (clair) | `#8A8A8A` | `#878787` | 2,98:1 sur le creux, 3 exigé |
+| Corail | contour de champ (clair) | `#87878F` | `#83838B` | 2,97:1 sur le creux |
+| Lagon | contour de champ (clair) | `#88857D` | `#817F77` | 2,85:1 sur le creux |
+
+Hors des couleurs mesurées, le badge de danger de Sable en sombre (`--danger-600` sur
+`--danger-50`) garde `#F39D95` : l'encre des chartes (`#E18C85`) n'y tient que 4,4:1 ; elle reste
+celle des messages d'erreur. Gardés aussi par décision du propriétaire (19/10/2026) : les cibles
+de 44 px, le contour des champs (WCAG 1.4.11) et le motif de fond commun aux sept thèmes (les
+chartes donnaient à chaque fond sa propre texture).
 
 ## Vue d'ensemble des sept thèmes
 
@@ -155,10 +182,10 @@ Le thème du réseau et le **choix par défaut** (l'ancien « Tricolore » des m
 | Principal | Publier, Créer | `#2F67B5` · `#FFFFFF` · `#2A5FA8` | `#6FA2F0` · `#06142E` · `#86B2F4` |
 | Relations | Suivre, se connecter | `#007E4D` · `#FFFFFF` · `#006B42` | `#2FCB86` · `#03210F` · `#4AD898` |
 | Messages | Écrire | `#2F67B5` · `#FFFFFF` · `#2A5FA8` | `#6FA2F0` · `#06142E` · `#9DC0F6` |
-| Réactions | J'aime, réactions | `#F4BB44` · `#1F1400` · `#AD7E00` | `#F4BB44` · `#1F1400` · `#F4BB44` |
+| Réactions | J'aime, réactions | `#F4BB44` · `#1F1400` · `#AF7F00` | `#F4BB44` · `#1F1400` · `#F4BB44` |
 | Commerce | Acheter, Participer | `#F4BB44` · `#1F1400` · `#8A6400` | `#F4BB44` · `#1F1400` · `#F4BB44` |
-| Validation | Accepter, Confirmer | `#007A4A` · `#FFFFFF` · `#007A4A` | `#2FCB86` · `#03210F` · `#2FCB86` |
-| Danger | Supprimer, Signaler | `#C8102E` · `#FFFFFF` · `#C8102E` | `#FF6B7A` · `#03210F` · `#FF6B7A` |
+| Validation | Accepter, Confirmer | `#00804E` · `#FFFFFF` · `#006B42` | `#2FCB86` · `#03210F` · `#4AD898` |
+| Danger | Supprimer, Signaler | `#C8102E` · `#FFFFFF` · `#B50E29` | `#FF6B7A` · `#2A0509` · `#FF8592` |
 | Neutre | Annuler, Plus tard | gris du creux, sans contour | gris du creux, sans contour |
 
 ### 2. Soleil
@@ -196,8 +223,8 @@ La mandarine, l'azur d'un ciel d'été (à l'opposé de la mandarine sur le cerc
 | Messages | Écrire | `#3F9FE8` · `#00182B` · `#006CAC` | `#54B3FD` · `#00182B` · `#54B3FD` |
 | Réactions | J'aime, réactions | `#F1453B` · `#290B09` · `#F1453B` | `#F1453B` · `#290B09` · `#F1453B` |
 | Commerce | Acheter, Participer | `#EC8B34` · `#1F1300` · `#A4520D` | `#F29A4A` · `#1F1300` · `#F6A660` |
-| Validation | Accepter, Confirmer | `#237A40` · `#FFFFFF` · `#237A40` | `#5CC584` · `#062612` · `#5CC584` |
-| Danger | Supprimer, Signaler | `#C6321F` · `#FFFFFF` · `#C6321F` | `#FF7B66` · `#062612` · `#FF7B66` |
+| Validation | Accepter, Confirmer | `#237A40` · `#FFFFFF` · `#1B6434` | `#5CC584` · `#062612` · `#6BD192` |
+| Danger | Supprimer, Signaler | `#C8331F` · `#FFFFFF` · `#B42D1B` | `#FF7B66` · `#2A0700` · `#FF8B78` |
 | Neutre | Annuler, Plus tard | gris du creux, sans contour | gris du creux, sans contour |
 
 ### 3. Forêt
@@ -220,11 +247,11 @@ Un vert forêt vif, l'olive et le miel. Fond beige lin, noir légèrement chaud 
 |---|---|---|
 | Fond de page | `#F4EFE7` | `#141312` |
 | Carte | `#FFFDF9` | `#1E1D1B` |
-| Creux (puce, champ, bouton Annuler) | `#EBE6DD` | `#282624` |
+| Creux (puce, champ, bouton Annuler) | `#ECE6DB` | `#282624` |
 | Texte | `#1E1B16` | `#EFEBE4` |
 | Texte secondaire | `#655E52` | `#ACA69C` |
 | Filet décoratif | `#E3DCCF` | `#33312D` |
-| Contour de champ | `#8B8272` | `#86817A` |
+| Contour de champ | `#8C8373` | `#86817A` |
 
 **Couleur de chaque fonction** (aplat · texte sur l'aplat · encre en texte)
 
@@ -234,9 +261,9 @@ Un vert forêt vif, l'olive et le miel. Fond beige lin, noir légèrement chaud 
 | Relations | Suivre, se connecter | `#646E40` · `#FFFFFF` · `#535C33` | `#9AA66A` · `#141A08` · `#B0BC80` |
 | Messages | Écrire | `#646E40` · `#FFFFFF` · `#4A5330` | `#9AA66A` · `#141A08` · `#BDC88F` |
 | Réactions | J'aime, réactions | `#C98A2B` · `#2A1A00` · `#A0670F` | `#E5B04F` · `#2A1A00` · `#EBB85E` |
-| Commerce | Acheter, Participer | `#C98A2B` · `#2A1A00` · `#8D5B00` | `#E5B04F` · `#2A1A00` · `#EBB85E` |
-| Validation | Accepter, Confirmer | `#2E7341` · `#FFFFFF` · `#2E7341` | `#76BF85` · `#031C09` · `#76BF85` |
-| Danger | Supprimer, Signaler | `#B3261E` · `#FFFFFF` · `#B3261E` | `#F0897E` · `#031C09` · `#F0897E` |
+| Commerce | Acheter, Participer | `#C98A2B` · `#2A1A00` · `#946000` | `#E5B04F` · `#2A1A00` · `#EBB85E` |
+| Validation | Accepter, Confirmer | `#317A45` · `#FFFFFF` · `#28723D` | `#76BF85` · `#031C09` · `#76BF85` |
+| Danger | Supprimer, Signaler | `#B3261E` · `#FFFFFF` · `#A3221B` | `#F0897E` · `#2A0603` · `#F59A90` |
 | Neutre | Annuler, Plus tard | gris du creux, sans contour | gris du creux, sans contour |
 
 ### 4. Corail
@@ -270,12 +297,12 @@ Le rose corail, la mandarine et le lilas, les trois couleurs d'un coucher de sol
 | Fonction | Gestes | Clair | Sombre |
 |---|---|---|---|
 | Principal | Publier, Créer | `#E25F78` · `#2B0711` · `#BA3354` | `#F07A90` · `#2B0711` · `#F58DA0` |
-| Relations | Suivre, se connecter | `#AA84D4` · `#1B0F28` · `#7C57A2` | `#BD97E8` · `#1B0F28` · `#BD97E8` |
-| Messages | Écrire | `#AA84D4` · `#1B0F28` · `#7C57A2` | `#BD97E8` · `#1B0F28` · `#BD97E8` |
+| Relations | Suivre, se connecter | `#AA84D4` · `#1B0F28` · `#7D58A4` | `#BD97E8` · `#1B0F28` · `#BD97E8` |
+| Messages | Écrire | `#AA84D4` · `#1B0F28` · `#7D58A4` | `#BD97E8` · `#1B0F28` · `#BD97E8` |
 | Réactions | J'aime, réactions | `#E25F78` · `#2B0711` · `#D04565` | `#F58DA0` · `#2B0711` · `#F79BAC` |
 | Commerce | Acheter, Participer | `#E69545` · `#2A1300` · `#9C520C` | `#F0A55C` · `#2A1300` · `#F2AE6C` |
-| Validation | Accepter, Confirmer | `#2B764A` · `#FFFFFF` · `#2B764A` | `#6FCF97` · `#062614` · `#6FCF97` |
-| Danger | Supprimer, Signaler | `#B42335` · `#FFFFFF` · `#B42335` | `#FF8A8A` · `#062614` · `#FF8A8A` |
+| Validation | Accepter, Confirmer | `#2E7D4F` · `#FFFFFF` · `#22603C` | `#6FCF97` · `#062614` · `#7DD8A3` |
+| Danger | Supprimer, Signaler | `#B42335` · `#FFFFFF` · `#A81F31` | `#FF8A8A` · `#2A0505` · `#FF9A9A` |
 | Neutre | Annuler, Plus tard | gris du creux, sans contour | gris du creux, sans contour |
 
 ### 5. Lagon
@@ -312,9 +339,9 @@ Le turquoise, le corail Bittersweet (réservé aux réactions et aux notificatio
 | Relations | Suivre, se connecter | `#4ECDC4` · `#0B2D2A` · `#0D6F6A` | `#4ECDC4` · `#0B2D2A` · `#7FE6DF` |
 | Messages | Écrire | `#4ECDC4` · `#0B2D2A` · `#0D6F6A` | `#4ECDC4` · `#0B2D2A` · `#7FE6DF` |
 | Réactions | J'aime, réactions | `#FF6B6B` · `#2B0505` · `#E04848` | `#FF6B6B` · `#2B0505` · `#FF8585` |
-| Commerce | Acheter, Participer | `#FFE66D` · `#1B1600` · `#736300` | `#FFE66D` · `#1B1600` · `#FFE66D` |
-| Validation | Accepter, Confirmer | `#1C7149` · `#FFFFFF` · `#1C7149` | `#5FD39A` · `#062614` · `#5FD39A` |
-| Danger | Supprimer, Signaler | `#BB2D2D` · `#FFFFFF` · `#BB2D2D` | `#FF7B72` · `#062614` · `#FF7B72` |
+| Commerce | Acheter, Participer | `#FFE66D` · `#1B1600` · `#7C6A00` | `#FFE66D` · `#1B1600` · `#FFE66D` |
+| Validation | Accepter, Confirmer | `#1E7A4F` · `#FFFFFF` · `#17633F` | `#5FD39A` · `#062614` · `#6FDCA6` |
+| Danger | Supprimer, Signaler | `#C93030` · `#FFFFFF` · `#B82B2B` | `#FF7B72` · `#2A0505` · `#FF8F87` |
 | Neutre | Annuler, Plus tard | gris du creux, sans contour | gris du creux, sans contour |
 
 ### 6. Électrique
@@ -352,8 +379,8 @@ Le bleu de 21st.dev, le rose et le citron vert, presque à égale distance sur l
 | Messages | Écrire | `#0033FF` · `#FFFFFF` · `#0033FF` | `#4060FF` · `#FFFFFF` · `#93A8FF` |
 | Réactions | J'aime, réactions | `#F43F5E` · `#2A0510` · `#E11D48` | `#FB7185` · `#2A0510` · `#FB7185` |
 | Commerce | Acheter, Participer | `#84CC16` · `#0E1A02` · `#4A7700` | `#84CC16` · `#0E1A02` · `#84CC16` |
-| Validation | Accepter, Confirmer | `#157F3C` · `#FFFFFF` · `#157F3C` | `#34D399` · `#001C10` · `#34D399` |
-| Danger | Supprimer, Signaler | `#D52525` · `#FFFFFF` · `#D52525` | `#F87171` · `#001C10` · `#F87171` |
+| Validation | Accepter, Confirmer | `#15803D` · `#FFFFFF` · `#126E35` | `#34D399` · `#001C10` · `#34D399` |
+| Danger | Supprimer, Signaler | `#DC2626` · `#FFFFFF` · `#C81E1E` | `#F87171` · `#2A0505` · `#FC9595` |
 | Neutre | Annuler, Plus tard | gris du creux, sans contour | gris du creux, sans contour |
 
 ### 7. Sable
@@ -391,7 +418,7 @@ Le bleu de 21st.dev, le rose et le citron vert, presque à égale distance sur l
 | Messages | Écrire | `#0167A8` · `#FFFFFF` · `#01619E` | `#5BA5E5` · `#151311` · `#7EC2FF` |
 | Réactions | J'aime, réactions | `#D7AD63` · `#25211E` · `#A1782D` | `#D7AD63` · `#151311` · `#D7AD63` |
 | Commerce | Acheter, Participer | `#D7AD63` · `#25211E` · `#7A5A22` | `#D7AD63` · `#151311` · `#D7AD63` |
-| Validation | Accepter, Confirmer | `#14743A` · `#FFFFFF` · `#14743A` | `#6EBE85` · `#151311` · `#6EBE85` |
+| Validation | Accepter, Confirmer | `#14743A` · `#FFFFFF` · `#0F5F2F` | `#6EBE85` · `#151311` · `#6EBE85` |
 | Danger | Supprimer, Signaler | `#B3261E` · `#FFFFFF` · `#B3261E` | `#E18C85` · `#151311` · `#E18C85` |
 | Neutre | Annuler, Plus tard | gris du creux, sans contour | gris du creux, sans contour |
 

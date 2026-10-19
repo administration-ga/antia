@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/iappel/HeldCallChips.tsx @ ad2e7fdc2 — adaptations : libellés et noms accessibles traduits (i18n `iappel`, nom interpolé).
+// Dupliqué de socle/packages/agent-features/src/features/iappel/HeldCallChips.tsx @ ad2e7fdc2 — adaptations : libellés et noms accessibles traduits (i18n `iappel`, nom interpolé) ; ronds Reprendre et Raccrocher à l'aplat et au texte de Valider et de Supprimer (`--role-success-*`, `--role-danger-*`, ADR-0027), facture d'origine en repli.
 "use client"
 
 /**
@@ -64,7 +64,7 @@ export function HeldCallChips({ calls, onResume, onHangUp }: HeldCallChipsProps)
 						onClick={() => onResume(call.meetingId)}
 						aria-label={t("heldCallChips.resume", { name: call.name })}
 						className="inline-flex h-7 w-7 items-center justify-center rounded-full"
-						style={{ background: "var(--success)", color: "var(--on-fill, var(--esp-immersive-on-ink))" }}
+						style={{ background: "var(--role-success-fill, var(--success))", color: "var(--role-success-on, var(--on-fill, var(--esp-immersive-on-ink)))" }}
 					>
 						<Play aria-hidden="true" className="h-3.5 w-3.5" />
 					</button>
@@ -74,8 +74,8 @@ export function HeldCallChips({ calls, onResume, onHangUp }: HeldCallChipsProps)
 						aria-label={t("heldCallChips.hangUp", { name: call.name })}
 						className="inline-flex h-7 w-7 items-center justify-center rounded-full"
 						style={{
-							background: "var(--destructive)",
-							color: "var(--destructive-foreground)",
+							background: "var(--role-danger-fill, var(--destructive))",
+							color: "var(--role-danger-on, var(--destructive-foreground))",
 						}}
 					>
 						<PhoneOff aria-hidden="true" className="h-3.5 w-3.5" />

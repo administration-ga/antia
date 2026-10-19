@@ -21,6 +21,7 @@
   },
   "dependencies": {
     "@fontsource-variable/familjen-grotesk": "catalog:",
+    "@fontsource-variable/inter": "catalog:",
     "@fontsource/dm-mono": "catalog:",
     "class-variance-authority": "catalog:",
     "clsx": "catalog:",

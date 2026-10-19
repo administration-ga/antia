@@ -1,4 +1,4 @@
-/* Dupliqué de socle/packages/ui/src/styles/globals.css (l. 1914-2125 classes `.esp-*` des surfaces immersives, des barres basses et des stories ; l. 2544-4095 couche d'appel `.call-*`, `.av-ring`, `.iappel-*`, carte Conférence) @ ad2e7fdc2 — adaptations : feuille DÉDIÉE à la couche de communication du moteur (iCom, iAppel, stories), importée par `styles.css` après la charte ; jetons qu'elle lit et que la charte de base ne déclare pas (`--esp-immersive-ink`, `--esp-immersive-on-ink`, ombres `--shadow-*`, `--destructive-foreground`, rayon des surfaces du réseau, ombre de la carte iCom déplacée, encre et fond du code QR) déclarés ici, en tête, valeurs du socle ; bannière `.esp-banner` gardée (repli de couverture du profil, de la mini-carte et des albums, lot F2) ; barre de défilement fine `.citizen-scrollbar` ajoutée (socle `dashboard-v2.css` l. 990-1003, hors de `.dash-v2`, teinte du rôle `--foreground`) ; carte de l'espace structure et filet tricolore retirés (coque de l'espace agent, non reprise) ; règles du lanceur de poste conservées (le sélecteur d'invités de la messagerie emploie ses classes) ; le reste tel quel ; couleurs par fonction (ADR-0027) : « Écrire » et « Message » de la couche d'appel (`.iappel-ctl[data-tone="message"]`, `.iappel-soft-action[data-role="message"]`) à l'aplat des messages (`--role-message-*`), facture neutre d'origine en repli, survol compris ; bannière d'appel entrant au bureau (`.iappel-banner`, posée sur `--card`) : son rond neutre et ce repli à l'encre de la carte (`--card-foreground` à 12 %, 18 % au survol), le rond de la scène y étant blanc sur blanc en clair.
+/* Dupliqué de socle/packages/ui/src/styles/globals.css (l. 1914-2125 classes `.esp-*` des surfaces immersives, des barres basses et des stories ; l. 2544-4095 couche d'appel `.call-*`, `.av-ring`, `.iappel-*`, carte Conférence) @ ad2e7fdc2 — adaptations : feuille DÉDIÉE à la couche de communication du moteur (iCom, iAppel, stories), importée par `styles.css` après la charte ; jetons qu'elle lit et que la charte de base ne déclare pas (`--esp-immersive-ink`, `--esp-immersive-on-ink`, ombres `--shadow-*`, `--destructive-foreground`, rayon des surfaces du réseau, ombre de la carte iCom déplacée, encre et fond du code QR) déclarés ici, en tête, valeurs du socle ; bannière `.esp-banner` gardée (repli de couverture du profil, de la mini-carte et des albums, lot F2) ; barre de défilement fine `.citizen-scrollbar` ajoutée (socle `dashboard-v2.css` l. 990-1003, hors de `.dash-v2`, teinte du rôle `--foreground`) ; carte de l'espace structure et filet tricolore retirés (coque de l'espace agent, non reprise) ; règles du lanceur de poste conservées (le sélecteur d'invités de la messagerie emploie ses classes) ; le reste tel quel ; couleurs par fonction (ADR-0027) : « Écrire » et « Message » de la couche d'appel (`.iappel-ctl[data-tone="message"]`, `.iappel-soft-action[data-role="message"]`) à l'aplat des messages (`--role-message-*`), facture neutre d'origine en repli, survol compris ; bannière d'appel entrant au bureau (`.iappel-banner`, posée sur `--card`) : son rond neutre et ce repli à l'encre de la carte (`--card-foreground` à 12 %, 18 % au survol), le rond de la scène y étant blanc sur blanc en clair ; pastille « En direct », Décrocher et Raccrocher à l'aplat et au texte de Valider et de Supprimer (`--role-success-*`, `--role-danger-*`), facture d'origine en repli.
 
    ═════════════════════════════════════════════════════════════════════════
    COUCHE DE COMMUNICATION — iCom, iAppel, stories
@@ -275,8 +275,10 @@ body,
    genre veut ce rouge — un direct signalé en bleu ne se distingue pas d'une
    vignette de plus. */
 .esp-live-pill {
-  background: var(--destructive);
-  color: var(--background);
+  /* Aplat et texte de Supprimer dans les thèmes ANTSIA (ADR-0027) : leur danger
+     se lit sinon en ENCRE ; facture d'origine en repli. */
+  background: var(--role-danger-fill, var(--destructive));
+  color: var(--role-danger-on, var(--background));
 }
 
 @layer components {
@@ -768,13 +770,15 @@ body,
   .iappel-ctl[data-blocked="true"] {
     opacity: 0.5;
   }
+  /* Décrocher et Raccrocher : aplat et texte de Valider et de Supprimer
+     (ADR-0027), facture d'origine en repli. */
   .iappel-ctl[data-tone="answer"] {
-    background: var(--success);
-    color: var(--on-fill, var(--esp-immersive-on-ink));
+    background: var(--role-success-fill, var(--success));
+    color: var(--role-success-on, var(--on-fill, var(--esp-immersive-on-ink)));
   }
   .iappel-ctl[data-tone="hangup"] {
-    background: var(--destructive);
-    color: var(--destructive-foreground);
+    background: var(--role-danger-fill, var(--destructive));
+    color: var(--role-danger-on, var(--destructive-foreground));
   }
   /* Écrire (pendant l'appel, refuser avec un message) : aplat des messages
      (ADR-0027). Le repli est le rond NEUTRE, survol compris — la règle de

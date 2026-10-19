@@ -56,6 +56,21 @@ const EXPECTED: Record<string, { encre: [string, string]; aplat: [string, string
   sable: { encre: ["#01609c", "#7ec2ff"], aplat: ["#0167a8", "#5ba5e5"], nuancier: ["#238090", "#d7ad63", "#0167a8"] },
 }
 
+/**
+ * Valider (succès) et Supprimer (danger) dans les chartes « Chartes ANTSIA » v7 : aplat,
+ * texte sur l'aplat, encre en texte — chacun le sien, valeurs exactes des chartes.
+ */
+type Triple = readonly [fill: string, on: string, ink: string]
+const STATES: Record<string, Record<"clair" | "sombre", { success: Triple; danger: Triple }>> = {
+  gaboma: { clair: { success: ["#00804e", "#ffffff", "#006b42"], danger: ["#c8102e", "#ffffff", "#b50e29"] }, sombre: { success: ["#2fcb86", "#03210f", "#4ad898"], danger: ["#ff6b7a", "#2a0509", "#ff8592"] } },
+  soleil: { clair: { success: ["#237a40", "#ffffff", "#1b6434"], danger: ["#c8331f", "#ffffff", "#b42d1b"] }, sombre: { success: ["#5cc584", "#062612", "#6bd192"], danger: ["#ff7b66", "#2a0700", "#ff8b78"] } },
+  foret: { clair: { success: ["#317a45", "#ffffff", "#28723d"], danger: ["#b3261e", "#ffffff", "#a3221b"] }, sombre: { success: ["#76bf85", "#031c09", "#76bf85"], danger: ["#f0897e", "#2a0603", "#f59a90"] } },
+  corail: { clair: { success: ["#2e7d4f", "#ffffff", "#22603c"], danger: ["#b42335", "#ffffff", "#a81f31"] }, sombre: { success: ["#6fcf97", "#062614", "#7dd8a3"], danger: ["#ff8a8a", "#2a0505", "#ff9a9a"] } },
+  lagon: { clair: { success: ["#1e7a4f", "#ffffff", "#17633f"], danger: ["#c93030", "#ffffff", "#b82b2b"] }, sombre: { success: ["#5fd39a", "#062614", "#6fdca6"], danger: ["#ff7b72", "#2a0505", "#ff8f87"] } },
+  electrique: { clair: { success: ["#15803d", "#ffffff", "#126e35"], danger: ["#dc2626", "#ffffff", "#c81e1e"] }, sombre: { success: ["#34d399", "#001c10", "#34d399"], danger: ["#f87171", "#2a0505", "#fc9595"] } },
+  sable: { clair: { success: ["#14743a", "#ffffff", "#0f5f2f"], danger: ["#b3261e", "#ffffff", "#b3261e"] }, sombre: { success: ["#6ebe85", "#151311", "#6ebe85"], danger: ["#e18c85", "#151311", "#e18c85"] } },
+}
+
 type Mode = "clair" | "sombre"
 const MODES: readonly Mode[] = ["clair", "sombre"]
 const at = (mode: Mode) => (mode === "clair" ? 0 : 1)
@@ -84,6 +99,10 @@ const TEXT_PAIRS: readonly (readonly [string, string])[] = [
   ["--role-react-on", "--role-react-fill"], ["--role-react-label", "--role-react-soft"],
   ["--role-commerce-on", "--role-commerce-fill"], ["--role-commerce-ink", "--card"], ["--role-commerce-ink", "--background"],
   ["--ui2-button-secondary-fg", "--ui2-button-secondary-bg"], ["--ink-800", "--ui2-button-outline-bg"], ["--esp-tab-active-fg", "--esp-tab-active-bg"],
+  // Valider et Supprimer, chacun ses trois couleurs (chartes du 19/10/2026).
+  ["--role-success-on", "--role-success-fill"], ["--role-success-ink", "--card"], ["--role-success-ink", "--background"], ["--role-success-ink", "--popover"],
+  ["--role-danger-on", "--role-danger-fill"], ["--role-danger-ink", "--card"], ["--role-danger-ink", "--background"], ["--role-danger-ink", "--popover"],
+  ["--role-danger-ink", "--ink-0"],
 ]
 
 /** Non textuel (≥ 3:1, WCAG 1.4.11) : champs, anneaux, icônes de réaction. */
@@ -114,8 +133,12 @@ const ANGLES: Record<string, string> = {
   "--rp-surface-radius": "24px", "--esp-mobilebar-radius": "28px", "--esp-header-icon-radius": "999px",
 }
 
-/** Écart des composantes : sous 0,06, la couleur se lit comme un neutre (blanc, gris, beige, noir). */
+/**
+ * Écart des composantes : sous 0,07, la couleur se lit comme un neutre (blanc, gris, beige, noir).
+ * Le plus coloré des fonds des chartes est le creux du fond Lin (Forêt, #ece6db) : 0,067.
+ */
 const chroma = (rgba: Rgba) => Math.max(rgba.r, rgba.g, rgba.b) - Math.min(rgba.r, rgba.g, rgba.b)
+const NEUTRAL_CHROMA = 0.07
 
 const declarationsOf = (css: string, selectors: readonly string[]) =>
   parseRules({ name: "thème", css })
@@ -136,6 +159,7 @@ describe("les sept thèmes d'antsia.ga (ADR-0027)", () => {
     expect(files).toEqual(ANTSIA_THEME_IDS.map((id) => `${antsiaCharteFor(id)}.css`).sort())
     for (const id of ANTSIA_THEME_IDS.filter((theme) => theme !== "gaboma")) expect(antsiaCharteFor(id)).toBe(`antsia-${id}`)
     expect(Object.keys(EXPECTED).sort()).toEqual([...ANTSIA_THEME_IDS].sort())
+    expect(Object.keys(STATES).sort()).toEqual([...ANTSIA_THEME_IDS].sort())
   })
 
   it("les toasts suivent chaque thème : la règle de la charte du réseau, étendue aux six autres chartes", () => {
@@ -295,12 +319,36 @@ describe("les sept thèmes d'antsia.ga (ADR-0027)", () => {
     for (const [path, count] of PARTICIPATION_SITES) expect(read(path).split('variant="commerce"').length - 1, path).toBe(count)
   })
 
+  it("Valider et Supprimer : les aplats lisent la couleur de leur fonction et son texte, leur facture d'origine en repli", () => {
+    const STATE_SITES: readonly (readonly [string, string, number])[] = [
+      ["../components/button.tsx", 'color: "var(--role-danger-on, var(--on-fill))"', 1],
+      ["../components/button.tsx", 'color: "var(--role-success-on, var(--on-fill))"', 1],
+      ["../components/form.tsx", "var(--role-danger-ink, var(--danger-500))", 2],
+      ["../styles/communication.css", "background: var(--role-danger-fill, var(--destructive));", 2],
+      ["../styles/communication.css", "color: var(--role-danger-on, var(--background));", 1],
+      ["../styles/communication.css", "color: var(--role-danger-on, var(--destructive-foreground));", 1],
+      ["../styles/communication.css", "background: var(--role-success-fill, var(--success));", 1],
+      ["../styles/communication.css", "color: var(--role-success-on, var(--on-fill, var(--esp-immersive-on-ink)));", 1],
+      ["../../../social-features/src/features/iappel/CallWaitingChip.tsx", 'background: "var(--role-danger-fill, var(--destructive))"', 1],
+      ["../../../social-features/src/features/iappel/CallMinimizedPill.tsx", 'background: "var(--role-danger-fill, var(--destructive))"', 1],
+      ["../../../social-features/src/features/iappel/CallMinimizedPill.tsx", 'background: "var(--role-success-fill, var(--success))"', 1],
+      ["../../../social-features/src/features/iappel/HeldCallChips.tsx", 'background: "var(--role-danger-fill, var(--destructive))"', 1],
+      ["../../../social-features/src/features/iappel/HeldCallChips.tsx", 'background: "var(--role-success-fill, var(--success))"', 1],
+    ]
+    for (const [path, expression, count] of STATE_SITES) expect(read(path).split(expression).length - 1, `${path} : ${expression}`).toBe(count)
+    // Plus aucun aplat de succès ou de danger peint directement avec l'encre.
+    for (const path of ["../styles/communication.css", "../../../social-features/src/features/iappel/CallWaitingChip.tsx", "../../../social-features/src/features/iappel/CallMinimizedPill.tsx", "../../../social-features/src/features/iappel/HeldCallChips.tsx"]) {
+      expect(read(path), path).not.toMatch(/background: "?var\(--(destructive|success)\)/)
+    }
+  })
+
   it("le contrat de la base laisse DIASPORALE intact : chaque jeton du système épuré est à `initial`", () => {
     const base = new TokenCascade(BASE_SHEETS)
     const tokens = [...Object.keys(ANGLES).filter((token) => token !== "--rp-surface-radius"), "--primary-fill-on", "--esp-theme-swatch-1",
       "--ui2-button-outline-bg", "--ui2-button-outline-border", "--ui2-button-secondary-bg", "--ui2-button-secondary-border", "--ui2-button-secondary-fg",
       "--esp-chip-bg", "--esp-chip-border", "--esp-header-icon-bg", "--esp-story-ring-fill", "--esp-fab-shadow", "--esp-tab-active-bg", "--esp-tab-active-fg",
       ...["social", "message", "react", "commerce"].flatMap((role) => [`--role-${role}-fill`, `--role-${role}-on`, `--role-${role}-ink`]),
+      ...["success", "danger"].flatMap((role) => [`--role-${role}-fill`, `--role-${role}-on`, `--role-${role}-ink`]),
       "--role-message-soft", "--role-react-soft", "--role-react-label"]
     for (const dark of [false, true]) {
       for (const token of tokens) expect(base.resolve({ charte: "diasporale", dark, nested: false }, token), token).toBeUndefined()
@@ -369,6 +417,24 @@ describe("les sept thèmes d'antsia.ga (ADR-0027)", () => {
             }
           })
 
+          it("Valider et Supprimer : aplat, texte sur l'aplat et encre des chartes ; le succès et le danger se lisent en encre", () => {
+            const states = STATES[id]?.[mode]
+            if (!states) throw new Error(`${id} : couleurs de Valider et Supprimer absentes de STATES`)
+            for (const nested of [false, true]) {
+              for (const role of ["success", "danger"] as const) {
+                const [fill, on, ink] = states[role]
+                const label = `${role}${nested ? " (portail)" : ""}`
+                expect(toHex(color(mode, `--role-${role}-fill`, nested)), `${label} aplat`).toBe(fill)
+                expect(toHex(color(mode, `--role-${role}-on`, nested)), `${label} texte sur l'aplat`).toBe(on)
+                expect(toHex(color(mode, `--role-${role}-ink`, nested)), `${label} encre`).toBe(ink)
+              }
+              expect(toHex(color(mode, "--success-fill", nested))).toBe(states.success[0])
+              expect(toHex(color(mode, "--danger-fill", nested))).toBe(states.danger[0])
+              expect(toHex(color(mode, "--success", nested))).toBe(states.success[2])
+              expect(toHex(color(mode, "--destructive", nested))).toBe(states.danger[2])
+            }
+          })
+
           it("chaque fonction a sa couleur, et chacune vient des trois couleurs du thème", () => {
             const swatches = new Set(expected.nuancier)
             if (mode === "clair") {
@@ -382,7 +448,7 @@ describe("les sept thèmes d'antsia.ga (ADR-0027)", () => {
 
           it("fonds neutres : blanc, gris très clair ou beige clair ; noir ou gris sombre", () => {
             for (const token of ["--background", "--card", "--popover", "--muted"]) {
-              expect(chroma(color(mode, token)), token).toBeLessThanOrEqual(0.06)
+              expect(chroma(color(mode, token)), token).toBeLessThanOrEqual(NEUTRAL_CHROMA)
             }
             if (mode === "clair") expect(luminance(mode, "--background")).toBeGreaterThanOrEqual(0.82)
             else expect(luminance(mode, "--background")).toBeLessThanOrEqual(0.02)
