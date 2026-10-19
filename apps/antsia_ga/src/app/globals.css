@@ -1,7 +1,7 @@
 @import "tailwindcss";
 @import "@antsia/ui/styles.css";
-/* Gaboma, la charte du réseau et le thème par défaut (`data-charte="antsia"`), puis les cinq
-   autres thèmes que le membre choisit dans Préférences > Thème (`data-charte="antsia-<thème>"`,
+/* Gaboma, la charte du réseau et le thème par défaut (`data-charte="antsia"`), puis les six
+   autres thèmes, dont Sable (la charte de DIASPORALE), que le membre choisit dans Préférences > Thème (`data-charte="antsia-<thème>"`,
    ADR-0027). */
 @import "@antsia/ui/themes/antsia.css";
 @import "@antsia/ui/themes/antsia-soleil.css";
@@ -9,6 +9,7 @@
 @import "@antsia/ui/themes/antsia-corail.css";
 @import "@antsia/ui/themes/antsia-lagon.css";
 @import "@antsia/ui/themes/antsia-electrique.css";
+@import "@antsia/ui/themes/antsia-sable.css";
 
 /* Les classes utilisées par les paquets du moteur doivent être générées pour
    cette application : Tailwind ne parcourt que le dossier de l'application.
@@ -58,14 +59,15 @@ html {
   --error-text: var(--danger-700);
 }
 
-/* Les mêmes toasts sous les cinq autres thèmes choisis dans les réglages :
+/* Les mêmes toasts sous les six autres thèmes choisis dans les réglages :
    déclarations identiques à la règle ci-dessus (parité vérifiée par
    `packages/ui/src/themes/antsia-themes.test.ts`). */
 [data-charte="antsia-soleil"] [data-sonner-toaster][data-sonner-theme],
 [data-charte="antsia-foret"] [data-sonner-toaster][data-sonner-theme],
 [data-charte="antsia-corail"] [data-sonner-toaster][data-sonner-theme],
 [data-charte="antsia-lagon"] [data-sonner-toaster][data-sonner-theme],
-[data-charte="antsia-electrique"] [data-sonner-toaster][data-sonner-theme] {
+[data-charte="antsia-electrique"] [data-sonner-toaster][data-sonner-theme],
+[data-charte="antsia-sable"] [data-sonner-toaster][data-sonner-theme] {
   --normal-bg: var(--popover);
   --normal-bg-hover: var(--primary-50);
   --normal-border: var(--border);

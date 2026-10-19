@@ -1,12 +1,13 @@
 /**
  * Les chartes qu'un membre d'antsia.ga choisit dans ses réglages (Préférences >
  * Thème, ADR-0027) : Gaboma, la charte du réseau (`antsia.css`, premier élément,
- * choix par défaut), puis cinq thèmes, chacun dans `antsia-<thème>.css`. Chaque
+ * choix par défaut), puis six thèmes, chacun dans `antsia-<thème>.css` — dont Sable,
+ * la charte de DIASPORALE portée dans le réseau (19/10/2026). Chaque
  * thème a trois couleurs, chacune avec ses fonctions, sur des fonds neutres ;
  * `antsia-themes.test.ts` vérifie que cette liste et les fichiers du dossier
  * coïncident.
  */
-export const ANTSIA_THEME_IDS = ["gaboma", "soleil", "foret", "corail", "lagon", "electrique"] as const
+export const ANTSIA_THEME_IDS = ["gaboma", "soleil", "foret", "corail", "lagon", "electrique", "sable"] as const
 export type AntsiaThemeId = (typeof ANTSIA_THEME_IDS)[number]
 
 /** La valeur de `data-charte` d'un thème : `antsia` pour Gaboma, la charte du réseau ; `antsia-<thème>` sinon. */

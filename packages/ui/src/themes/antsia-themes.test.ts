@@ -17,9 +17,9 @@ import {
 import { ANTSIA_THEME_IDS, antsiaCharteFor } from "./antsia-themes"
 
 /**
- * Les six thèmes qu'un membre d'antsia.ga choisit dans ses réglages (ADR-0027) :
- * Gaboma, la charte du réseau (`antsia.css`), puis Soleil, Forêt, Corail, Lagon
- * et Électrique (`antsia-<thème>.css`). Chaque thème est une charte complète,
+ * Les sept thèmes qu'un membre d'antsia.ga choisit dans ses réglages (ADR-0027) :
+ * Gaboma, la charte du réseau (`antsia.css`), puis Soleil, Forêt, Corail, Lagon,
+ * Électrique et Sable, la charte de DIASPORALE (`antsia-<thème>.css`). Chaque thème est une charte complète,
  * rejouée ici comme antsia.ga la sert : theme.css, charte.css, communication.css
  * puis le fichier du thème, sur <html> et sur un portail qui redéclare la charte.
  *
@@ -52,6 +52,8 @@ const EXPECTED: Record<string, { encre: [string, string]; aplat: [string, string
   corail: { encre: ["#ba3354", "#f58da0"], aplat: ["#e25f78", "#f07a90"], nuancier: ["#e25f78", "#e69545", "#aa84d4"] },
   lagon: { encre: ["#0d6f6a", "#6fe0d8"], aplat: ["#4ecdc4", "#4ecdc4"], nuancier: ["#4ecdc4", "#ff6b6b", "#ffe66d"] },
   electrique: { encre: ["#0033ff", "#93a8ff"], aplat: ["#0033ff", "#4060ff"], nuancier: ["#0033ff", "#f43f5e", "#84cc16"] },
+  // Sable, la charte de DIASPORALE (19/10/2026) : mêmes trois couleurs que le thème Sable de diasporale.com.
+  sable: { encre: ["#01609c", "#7ec2ff"], aplat: ["#0167a8", "#5ba5e5"], nuancier: ["#238090", "#d7ad63", "#0167a8"] },
 }
 
 type Mode = "clair" | "sombre"
@@ -126,9 +128,9 @@ const sharedOf = (charte: string) =>
 const OWN_SHARED = new Set(["--ui2-scrim", "--esp-surface-border", "--esp-mobilebar-border", "--esp-theme-swatch-1", "--esp-theme-swatch-2", "--esp-theme-swatch-3"])
 const GABOMA_SHARED = sharedOf("antsia")
 
-describe("les six thèmes d'antsia.ga (ADR-0027)", () => {
+describe("les sept thèmes d'antsia.ga (ADR-0027)", () => {
   it("la liste des thèmes et les fichiers du dossier coïncident ; Gaboma, la charte du réseau, reste le premier", () => {
-    expect([...ANTSIA_THEME_IDS]).toEqual(["gaboma", "soleil", "foret", "corail", "lagon", "electrique"])
+    expect([...ANTSIA_THEME_IDS]).toEqual(["gaboma", "soleil", "foret", "corail", "lagon", "electrique", "sable"])
     expect(antsiaCharteFor("gaboma")).toBe("antsia")
     const files = readdirSync(new URL(".", import.meta.url)).filter((name) => /^antsia(-[a-z]+)?\.css$/.test(name)).sort()
     expect(files).toEqual(ANTSIA_THEME_IDS.map((id) => `${antsiaCharteFor(id)}.css`).sort())
@@ -136,7 +138,7 @@ describe("les six thèmes d'antsia.ga (ADR-0027)", () => {
     expect(Object.keys(EXPECTED).sort()).toEqual([...ANTSIA_THEME_IDS].sort())
   })
 
-  it("les toasts suivent chaque thème : la règle de la charte du réseau, étendue aux cinq autres chartes", () => {
+  it("les toasts suivent chaque thème : la règle de la charte du réseau, étendue aux six autres chartes", () => {
     const globals = read("../../../../apps/antsia_ga/src/app/globals.css")
     const rules = parseRules({ name: "globals.css", css: globals })
     const original = rules.find((rule) => rule.selectors.join(",") === '[data-charte="antsia"] [data-sonner-toaster][data-sonner-theme]')

@@ -1,4 +1,4 @@
-// ADR-0026 : l'amorçage de l'apparence d'antsia.ga, prêt pour la CSP à jeton ; ADR-0027 : six thèmes et motifs de fond.
+// ADR-0026 : l'amorçage de l'apparence d'antsia.ga, prêt pour la CSP à jeton ; ADR-0027 : sept thèmes et motifs de fond.
 import { readFileSync } from "node:fs"
 
 import { appearanceBootScript } from "@antsia/social-features/shell/appearance/boot-script"
@@ -21,7 +21,7 @@ describe("AppearanceBootScript", () => {
     expect(html).toBe(`<script>${APPEARANCE_BOOT_SCRIPT}</script>`)
   })
 
-  it("rejoue la configuration du fournisseur d'antsia.ga : préfixe du réseau racine, six thèmes et motifs de fond", () => {
+  it("rejoue la configuration du fournisseur d'antsia.ga : préfixe du réseau racine, sept thèmes et motifs de fond", () => {
     expect(APPEARANCE.storagePrefix).toBe("antsia:antsia:")
     // Dérivée du contrat pur (module serveur), la liste reste exactement le registre des chartes d'@antsia/ui.
     expect(APPEARANCE.themes).toEqual(ANTSIA_THEMES)

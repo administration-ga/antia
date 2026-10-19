@@ -255,7 +255,8 @@
         "foret": { "name": "Forest", "description": "Forest green, olive and honey." },
         "corail": { "name": "Coral", "description": "Coral pink, tangerine and lilac." },
         "lagon": { "name": "Lagoon", "description": "Turquoise, coral and Naples yellow." },
-        "electrique": { "name": "Electric", "description": "Blue, pink and lime." }
+        "electrique": { "name": "Electric", "description": "Blue, pink and lime." },
+        "sable": { "name": "Sand", "description": "Gabon blue, teal and golden sand. DIASPORALE’s theme." }
       }
     },
     "motif": {

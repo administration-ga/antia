@@ -86,13 +86,13 @@ afterEach(async () => {
 })
 
 describe("ThemePicker", () => {
-  it("propose les six thèmes, Gaboma par défaut, chacun peint dans sa propre charte", async () => {
+  it("propose les sept thèmes, Gaboma par défaut, chacun peint dans sa propre charte", async () => {
     await mount("fr")
     expect(container.querySelector("legend")?.textContent).toBe("Thème")
-    expect(radios()).toHaveLength(6)
+    expect(radios()).toHaveLength(7)
     expect(radios().map((radio) => radio.closest("label")?.dataset.charte)).toEqual(ANTSIA_THEMES.map((theme) => theme.charte))
     const names = radios().map((radio) => radio.closest("label")?.querySelector(".truncate")?.textContent)
-    expect(names).toEqual(["Gaboma", "Soleil", "Forêt", "Corail", "Lagon", "Électrique"])
+    expect(names).toEqual(["Gaboma", "Soleil", "Forêt", "Corail", "Lagon", "Électrique", "Sable"])
     expect(radios()[0]?.checked).toBe(true)
     // Gaboma est la charte du réseau : son option est peinte en `antsia`.
     expect(radios()[0]?.closest("label")?.dataset.charte).toBe("antsia")
@@ -115,6 +115,7 @@ describe("ThemePicker", () => {
     await mount("en")
     expect(container.querySelector("legend")?.textContent).toBe("Theme")
     expect(container.textContent).toContain("Green, yellow and blue of the flag. The network’s theme.")
+    expect(container.textContent).toContain("Gabon blue, teal and golden sand. DIASPORALE’s theme.")
   })
 
   it("ne s'affiche pas quand l'application ne propose aucun thème", async () => {

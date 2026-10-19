@@ -255,7 +255,8 @@
         "foret": { "name": "Forêt", "description": "Vert forêt, olive et miel." },
         "corail": { "name": "Corail", "description": "Rose corail, mandarine et lilas." },
         "lagon": { "name": "Lagon", "description": "Turquoise, corail et jaune de Naples." },
-        "electrique": { "name": "Électrique", "description": "Bleu, rose et citron vert." }
+        "electrique": { "name": "Électrique", "description": "Bleu, rose et citron vert." },
+        "sable": { "name": "Sable", "description": "Bleu Gabon, sarcelle et sable doré. Le thème de DIASPORALE." }
       }
     },
     "motif": {
