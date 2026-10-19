@@ -1,6 +1,7 @@
 "use client"
 
 import { BRAND_NAME } from "@antsia/social-contracts/brand"
+import { AppearanceToggle } from "@antsia/social-features/shell/appearance"
 import Link from "next/link"
 import { useEffect } from "react"
 import { useTranslation } from "react-i18next"
@@ -32,7 +33,11 @@ export function AccessHomeScreen({ intent = "sign-in", signOutIncomplete = false
   }
 
   return (
-    <div className="esp-page-motif flex min-h-dvh flex-col bg-background text-foreground">
+    <div className="esp-page-motif relative flex min-h-dvh flex-col bg-background text-foreground">
+      {/* Le mode sombre en un appui, avant même la connexion (ADR-0027). */}
+      <div className="absolute top-[max(1rem,env(safe-area-inset-top))] right-[max(1rem,env(safe-area-inset-right))] z-10">
+        <AppearanceToggle />
+      </div>
       <div className="mx-auto grid w-full max-w-[1080px] flex-1 content-start items-start gap-7 px-4 pb-8 pt-10 sm:px-6 sm:pt-14 min-[960px]:grid-cols-[minmax(0,1fr)_400px] min-[960px]:content-center min-[960px]:items-center min-[960px]:gap-20 min-[960px]:py-20">
         <header className="mx-auto max-w-md text-center min-[960px]:mx-0 min-[960px]:max-w-none min-[960px]:pb-20 min-[960px]:text-left">
           <h1 translate="no" className="font-display text-5xl font-bold leading-none tracking-tight text-primary min-[960px]:text-[4.5rem]">

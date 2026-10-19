@@ -350,5 +350,46 @@
     "privacy": "Confidentialité",
     "french": "Français",
     "english": "English"
+  },
+  "demo": {
+    "title": "Comptes de démonstration",
+    "lead": "Développement local seulement : chaque compte entre par le vrai code à usage unique, lu ici pour vous, puis l’accueil se remplit tout seul.",
+    "signingIn": "Connexion en cours…",
+    "ready": "Compte de démonstration prêt : {{name}}.",
+    "failed": "La connexion de démonstration n’a pas abouti. Réessayez dans quelques instants.",
+    "actors": {
+      "membre": {
+        "title": "Membre",
+        "description": "Membre déclaré du réseau."
+      },
+      "verifie": {
+        "title": "Membre vérifié",
+        "description": "Identité IDN fictive : badge Vérifié."
+      },
+      "nouveau": {
+        "title": "Nouvel arrivant",
+        "description": "Compte neuf : l’accueil reste à remplir."
+      },
+      "presse": {
+        "title": "Presse",
+        "description": "Journaliste, administratrice d’un média vérifié."
+      },
+      "commercant": {
+        "title": "Commerçant",
+        "description": "Une boutique publiée et sa page d’entreprise."
+      },
+      "association": {
+        "title": "Association",
+        "description": "Présidente d’une association."
+      },
+      "administration": {
+        "title": "Administration",
+        "description": "Agent signataire de la page officielle d’une mairie."
+      },
+      "moderateur": {
+        "title": "Modération",
+        "description": "Modératrice du réseau."
+      }
+    }
   }
 }

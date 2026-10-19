@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/iappel/IappelJournal.tsx @ ad2e7fdc2 — adaptations : journal du moteur (`calls.history.listCallHistory` du réseau courant, `{ calls, truncated }`) passé tel quel à `groupCallJournal` — le serveur a classé, l'identité du lecteur n'est plus lue (`users.getMe` retiré) ; acquittement par `calls.preferences.markJournalSeen` (sur soi) ; branche poste élaguée (prop `scope`, fonction, renvoi au secrétariat, appel prioritaire, raisons « hors horaires » et « secrétariat indisponible ») ; correspondant nommé par son libellé (`counterpartLabel`, nom neutre traduit) ; libellés traduits (i18n `iappel`), dates dans la langue courante. ; PA6 : préférence de fuseau injectée, calendrier grégorien et caches langue/fuseau. ; CC-5 : une ligne d'appel contextuel se rappelle et s'écrit par sa conversation (`onContextualOpen`), jamais par l'appel personnel.
+// Dupliqué de socle/packages/agent-features/src/features/iappel/IappelJournal.tsx @ ad2e7fdc2 — adaptations : journal du moteur (`calls.history.listCallHistory` du réseau courant, `{ calls, truncated }`) passé tel quel à `groupCallJournal` — le serveur a classé, l'identité du lecteur n'est plus lue (`users.getMe` retiré) ; acquittement par `calls.preferences.markJournalSeen` (sur soi) ; branche poste élaguée (prop `scope`, fonction, renvoi au secrétariat, appel prioritaire, raisons « hors horaires » et « secrétariat indisponible ») ; correspondant nommé par son libellé (`counterpartLabel`, nom neutre traduit) ; libellés traduits (i18n `iappel`), dates dans la langue courante. ; PA6 : préférence de fuseau injectée, calendrier grégorien et caches langue/fuseau. ; CC-5 : une ligne d'appel contextuel se rappelle et s'écrit par sa conversation (`onContextualOpen`), jamais par l'appel personnel. ; couleurs par fonction (ADR-0027) : « Écrire à » en tonal des messages (`data-role="message"`, feuille de la messagerie), facture d'origine en repli.
 "use client"
 
 /**
@@ -323,6 +323,7 @@ export function IappelJournal({
 													type="button"
 													className="icom-relations-action"
 													data-icon="true"
+													data-role="message"
 													style={{ minHeight: 44 }}
 													disabled={contextualThreadId === undefined && commercialThreadId === undefined && entry.counterpartUserId === null}
 													aria-label={contextualThreadId !== undefined ? t("messagerie:contextualConversation.calls.writeFromJournal", { name }) : t("iappelJournal.write", { name })}

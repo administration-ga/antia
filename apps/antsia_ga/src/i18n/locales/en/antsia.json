@@ -350,5 +350,46 @@
     "privacy": "Privacy",
     "french": "Français",
     "english": "English"
+  },
+  "demo": {
+    "title": "Demo accounts",
+    "lead": "Local development only: each account signs in with the real one-time code, read here for you, then the welcome steps fill themselves in.",
+    "signingIn": "Signing in…",
+    "ready": "Demo account ready: {{name}}.",
+    "failed": "The demo sign-in did not go through. Try again in a moment.",
+    "actors": {
+      "membre": {
+        "title": "Member",
+        "description": "Declared member of the network."
+      },
+      "verifie": {
+        "title": "Verified member",
+        "description": "Fictitious IDN identity: Verified badge."
+      },
+      "nouveau": {
+        "title": "Newcomer",
+        "description": "Brand-new account: the welcome steps are left to fill in."
+      },
+      "presse": {
+        "title": "Press",
+        "description": "Journalist, administrator of a verified media page."
+      },
+      "commercant": {
+        "title": "Shopkeeper",
+        "description": "A published shop and its company page."
+      },
+      "association": {
+        "title": "Association",
+        "description": "President of an association."
+      },
+      "administration": {
+        "title": "Administration",
+        "description": "Officer signing for a town hall’s official page."
+      },
+      "moderateur": {
+        "title": "Moderation",
+        "description": "Moderator of the network."
+      }
+    }
   }
 }

@@ -5,6 +5,7 @@ import { BRAND_NAME } from "@antsia/social-contracts/brand"
 import type { CreationKind } from "@antsia/social-features/features/reseau-personnel/creation-controller"
 import { useCreationController } from "@antsia/social-features/features/reseau-personnel/use-creation-controller"
 import { NotificationBell } from "@antsia/social-features/notifications"
+import { AppearanceToggle } from "@antsia/social-features/shell/appearance"
 import { PostComposerSheet, ReseauMenuRail, ReseauMobileTabBar } from "@antsia/social-features/reseau-personnel"
 import { StoryCreateSheet } from "@antsia/social-features/stories"
 import { cn } from "@antsia/ui/lib/cn"
@@ -71,6 +72,7 @@ export function MemberTopBar({ onMobile = "visible" }: { onMobile?: "visible" | 
               <Link href={routes.moderation()} className={NAV_LINK} aria-label={tMember("nav.moderation")}><ShieldCheck aria-hidden="true" className="size-4" /><span className="hidden lg:inline">{tMember("nav.moderation")}</span></Link>
             </>
           )}
+          <AppearanceToggle />
           <NotificationBell />
           <IdentityTools />
           {destinations ? null : (

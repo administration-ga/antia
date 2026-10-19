@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 import { createAppI18n } from "@antsia/social-features/i18n"
+import { AppearanceProvider } from "@antsia/social-features/shell/appearance"
 import { BRAND_NAME } from "@antsia/social-contracts/brand"
 import { act, type ReactNode } from "react"
 import { createRoot, type Root } from "react-dom/client"
@@ -51,6 +52,21 @@ beforeEach(() => {
 afterEach(async () => { await act(async () => root?.unmount()); host?.remove(); root = undefined })
 
 describe("accueil ANTSIA — accès réel", () => {
+  it("propose le mode sombre en un appui, avant même la connexion (ADR-0027)", async () => {
+    const items = new Map<string, string>()
+    vi.stubGlobal("localStorage", { getItem: (key: string) => items.get(key) ?? null, setItem: (key: string, value: string) => { items.set(key, value) }, removeItem: (key: string) => { items.delete(key) } })
+    await mount(<AppearanceProvider storagePrefix="antsia:test:"><AccessHomeScreen /></AppearanceProvider>)
+    const toggle = host.querySelector<HTMLButtonElement>("[data-appearance-toggle]")
+    expect(toggle?.getAttribute("aria-label")).toBe("Mode sombre")
+    expect(toggle?.getAttribute("aria-pressed")).toBe("false")
+    await act(async () => toggle!.click())
+    expect(document.documentElement.classList.contains("dark")).toBe(true)
+    expect(items.get("antsia:test:appearance")).toBe("dark")
+    await act(async () => toggle!.click())
+    expect(document.documentElement.classList.contains("dark")).toBe(false)
+    vi.unstubAllGlobals()
+  })
+
   it("présente IDN et OTP avec une inscription distincte et les lectures publiques secondaires", async () => {
     await mount()
     expect(host.querySelector("h1")?.textContent).toBe(BRAND_NAME)

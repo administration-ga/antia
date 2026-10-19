@@ -1,4 +1,4 @@
-/* Dupliqué de socle/packages/ui/src/styles/globals.css (l. 1914-2125 classes `.esp-*` des surfaces immersives, des barres basses et des stories ; l. 2544-4095 couche d'appel `.call-*`, `.av-ring`, `.iappel-*`, carte Conférence) @ ad2e7fdc2 — adaptations : feuille DÉDIÉE à la couche de communication du moteur (iCom, iAppel, stories), importée par `styles.css` après la charte ; jetons qu'elle lit et que la charte de base ne déclare pas (`--esp-immersive-ink`, `--esp-immersive-on-ink`, ombres `--shadow-*`, `--destructive-foreground`, rayon des surfaces du réseau, ombre de la carte iCom déplacée, encre et fond du code QR) déclarés ici, en tête, valeurs du socle ; bannière `.esp-banner` gardée (repli de couverture du profil, de la mini-carte et des albums, lot F2) ; barre de défilement fine `.citizen-scrollbar` ajoutée (socle `dashboard-v2.css` l. 990-1003, hors de `.dash-v2`, teinte du rôle `--foreground`) ; carte de l'espace structure et filet tricolore retirés (coque de l'espace agent, non reprise) ; règles du lanceur de poste conservées (le sélecteur d'invités de la messagerie emploie ses classes) ; le reste tel quel.
+/* Dupliqué de socle/packages/ui/src/styles/globals.css (l. 1914-2125 classes `.esp-*` des surfaces immersives, des barres basses et des stories ; l. 2544-4095 couche d'appel `.call-*`, `.av-ring`, `.iappel-*`, carte Conférence) @ ad2e7fdc2 — adaptations : feuille DÉDIÉE à la couche de communication du moteur (iCom, iAppel, stories), importée par `styles.css` après la charte ; jetons qu'elle lit et que la charte de base ne déclare pas (`--esp-immersive-ink`, `--esp-immersive-on-ink`, ombres `--shadow-*`, `--destructive-foreground`, rayon des surfaces du réseau, ombre de la carte iCom déplacée, encre et fond du code QR) déclarés ici, en tête, valeurs du socle ; bannière `.esp-banner` gardée (repli de couverture du profil, de la mini-carte et des albums, lot F2) ; barre de défilement fine `.citizen-scrollbar` ajoutée (socle `dashboard-v2.css` l. 990-1003, hors de `.dash-v2`, teinte du rôle `--foreground`) ; carte de l'espace structure et filet tricolore retirés (coque de l'espace agent, non reprise) ; règles du lanceur de poste conservées (le sélecteur d'invités de la messagerie emploie ses classes) ; le reste tel quel ; couleurs par fonction (ADR-0027) : « Écrire » et « Message » de la couche d'appel (`.iappel-ctl[data-tone="message"]`, `.iappel-soft-action[data-role="message"]`) à l'aplat des messages (`--role-message-*`), facture neutre d'origine en repli, survol compris.
 
    ═════════════════════════════════════════════════════════════════════════
    COUCHE DE COMMUNICATION — iCom, iAppel, stories
@@ -776,6 +776,17 @@ body,
     background: var(--destructive);
     color: var(--destructive-foreground);
   }
+  /* Écrire (pendant l'appel, refuser avec un message) : aplat des messages
+     (ADR-0027). Le repli est le rond NEUTRE, survol compris — la règle de
+     survol est redite ici parce que celle-ci, de même poids et plus loin,
+     l'emporterait sinon sur `.iappel-ctl:hover`. */
+  .iappel-ctl[data-tone="message"] {
+    background: var(--role-message-fill, color-mix(in srgb, var(--esp-immersive-on-ink) 12%, transparent));
+    color: var(--role-message-on, var(--esp-immersive-on-ink));
+  }
+  .iappel-ctl[data-tone="message"]:hover {
+    background: var(--role-message-fill, color-mix(in srgb, var(--esp-immersive-on-ink) 18%, transparent));
+  }
   /* ⚠️ PAS de `.iappel-ctl:disabled` ici : cette classe est portée par un
      `<span>` à l'intérieur du bouton, et `:disabled` ne matche que les
      éléments de formulaire réellement désactivables. La règle n'aurait jamais
@@ -958,6 +969,16 @@ body,
   }
   .iappel-soft-action:hover {
     background: color-mix(in srgb, var(--esp-immersive-on-ink) 16%, transparent);
+  }
+  /* « Écrire » et « Message » : pilule à l'aplat des messages (ADR-0027) —
+     sur la scène sombre, le fond tonal des cartes (`--role-message-soft`)
+     n'a pas de sens. Repli : la pilule discrète d'origine, survol compris. */
+  .iappel-soft-action[data-role="message"] {
+    background: var(--role-message-fill, color-mix(in srgb, var(--esp-immersive-on-ink) 10%, transparent));
+    color: var(--role-message-on, var(--esp-immersive-on-ink));
+  }
+  .iappel-soft-action[data-role="message"]:hover {
+    background: var(--role-message-fill, color-mix(in srgb, var(--esp-immersive-on-ink) 16%, transparent));
   }
 
   /* Réduction plein écran → pilule. Le seul mouvement orchestré de l'écran :

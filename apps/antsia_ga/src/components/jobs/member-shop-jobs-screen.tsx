@@ -77,5 +77,5 @@ function JobApplicationSlot({ job }: { job: JobDto }) {
     return <div className="grid gap-2 border-t border-border pt-4"><p>{t("details.alreadyApplied")}</p><ShopLink href={routes.myApplications()}>{t("details.seeApplication")}</ShopLink></div>
   }
   if (!job.actions.apply) return job.status === "open" ? <p className="border-t border-border pt-4 text-sm text-muted-foreground">{t("details.applicationsClosed")}</p> : null
-  return <div className="grid gap-4 border-t border-border pt-4">{open ? <JobApplicationForm job={job} /> : <Button type="button" className="justify-self-start" onClick={() => setOpen(true)}>{t("details.apply")}</Button>}</div>
+  return <div className="grid gap-4 border-t border-border pt-4">{open ? <JobApplicationForm job={job} /> : <Button type="button" variant="commerce" className="justify-self-start" onClick={() => setOpen(true)}>{t("details.apply")}</Button>}</div>
 }

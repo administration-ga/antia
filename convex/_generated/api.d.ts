@@ -305,6 +305,7 @@ import type * as modules_platform_authRateLimit from "../modules/platform/authRa
 import type * as modules_platform_authentication from "../modules/platform/authentication.js";
 import type * as modules_platform_console from "../modules/platform/console.js";
 import type * as modules_platform_consoleTables from "../modules/platform/consoleTables.js";
+import type * as modules_platform_demoAccounts from "../modules/platform/demoAccounts.js";
 import type * as modules_platform_devTools from "../modules/platform/devTools.js";
 import type * as modules_platform_operationalHealth from "../modules/platform/operationalHealth.js";
 import type * as modules_platform_operationalTables from "../modules/platform/operationalTables.js";
@@ -711,6 +712,7 @@ declare const fullApi: ApiFromModules<{
   "modules/platform/authentication": typeof modules_platform_authentication;
   "modules/platform/console": typeof modules_platform_console;
   "modules/platform/consoleTables": typeof modules_platform_consoleTables;
+  "modules/platform/demoAccounts": typeof modules_platform_demoAccounts;
   "modules/platform/devTools": typeof modules_platform_devTools;
   "modules/platform/operationalHealth": typeof modules_platform_operationalHealth;
   "modules/platform/operationalTables": typeof modules_platform_operationalTables;

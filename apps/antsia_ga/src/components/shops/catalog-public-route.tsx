@@ -2,6 +2,7 @@ import { notFound } from "next/navigation"
 
 import { PublicShell, PUBLIC_LINK } from "@/components/public/public-shell"
 import { PublicStatus } from "@/components/public/public-status"
+import { buttonClassName } from "@/components/shared/button-class"
 import { getAppT } from "@/i18n/server"
 import { catalogFilters, catalogSearch } from "@/lib/catalog-search"
 import { loadPublicCatalog, loadPublicOffer } from "@/lib/public-catalog-data"
@@ -78,5 +79,5 @@ export async function PublicOfferScreen(props: Props) {
   if (!result.data) notFound()
   const contact = { kind: "shop_contact" as const, handle: result.data.shopHandle, offerRef: result.data.offerRef }
   const contactHref = result.viewer === "authenticated" ? routes.shopContact(contact.handle, contact.offerRef) : routes.signIn(undefined, undefined, undefined, contact)
-  return <PublicShell viewer={result.viewer}><div className="mx-auto grid w-full max-w-3xl gap-5"><Link href={routes.publicShopCatalog(handle)} prefetch={false} className={`${PUBLIC_LINK} justify-self-start`}>{t("shops:catalog.backToCatalog")}</Link><OfferDetails offer={result.data} audience="public" locale={locale} t={(key, options) => t(`shops:${key}`, options)} actionSlot={result.data.actions.contact ? <Link href={contactHref} prefetch={false} className={`${PUBLIC_LINK} justify-self-start`}>{t("shops:contact.ask")}</Link> : undefined} /></div></PublicShell>
+  return <PublicShell viewer={result.viewer}><div className="mx-auto grid w-full max-w-3xl gap-5"><Link href={routes.publicShopCatalog(handle)} prefetch={false} className={`${PUBLIC_LINK} justify-self-start`}>{t("shops:catalog.backToCatalog")}</Link><OfferDetails offer={result.data} audience="public" locale={locale} t={(key, options) => t(`shops:${key}`, options)} actionSlot={result.data.actions.contact ? <Link href={contactHref} prefetch={false} className={buttonClassName("message", "justify-self-start")}>{t("shops:contact.ask")}</Link> : undefined} /></div></PublicShell>
 }

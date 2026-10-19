@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/mobile/ReseauMobileHeader.tsx @ ad2e7fdc2 — adaptations : sans la coque de l'espace agent (`espace-mobile-volets` retiré) — la porte d'iCom mène à la messagerie en pages de l'application (`useRoutes().messages()`), la cloche du moteur montée sans base de l'espace (ses cibles se composent sur `useRoutes()`) ; `profileHref` devient `string | null` (un profil non publié n'a pas d'adresse : la pastille reste, sans lien) ; libellés par l'i18n (`reseau:reseauMobileHeader.*`, nom accessible d'iCom accordé par `count`) ; « iRéseau » devient « réseau » ; rendu, recherche à la demande et focus inchangés ; P02 (18/10/2026) : sous la navigation par destinations déclarée par l'application, la porte d'iCom et la pastille du profil quittent l'en-tête (Messages et Profil sont des destinations de la barre) — la recherche et la cloche restent.
+// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/mobile/ReseauMobileHeader.tsx @ ad2e7fdc2 — adaptations : sans la coque de l'espace agent (`espace-mobile-volets` retiré) — la porte d'iCom mène à la messagerie en pages de l'application (`useRoutes().messages()`), la cloche du moteur montée sans base de l'espace (ses cibles se composent sur `useRoutes()`) ; `profileHref` devient `string | null` (un profil non publié n'a pas d'adresse : la pastille reste, sans lien) ; libellés par l'i18n (`reseau:reseauMobileHeader.*`, nom accessible d'iCom accordé par `count`) ; « iRéseau » devient « réseau » ; rendu, recherche à la demande et focus inchangés ; P02 (18/10/2026) : sous la navigation par destinations déclarée par l'application, la porte d'iCom et la pastille du profil quittent l'en-tête (Messages et Profil sont des destinations de la barre) — la recherche et la cloche restent. ; bascule clair/sombre en un appui (`AppearanceToggle`) à côté de la cloche, au rond des icônes de l'en-tête.
 "use client"
 
 /**
@@ -32,6 +32,7 @@ import { type FormEvent, type KeyboardEvent, useEffect, useRef, useState } from 
 import { useTranslation } from "react-i18next"
 
 import { NotificationBell } from "../../features/notifications/NotificationBell"
+import { AppearanceToggle } from "../appearance/AppearanceToggle"
 import { Avatar } from "../../features/reseau-personnel/Avatar"
 import { formatUnreadBadge } from "../../features/reseau-personnel/shared"
 import { useReseauDestinationRoutes } from "../reseau-menu-destinations-ui"
@@ -190,6 +191,8 @@ export function ReseauMobileHeader({ onSearch, searchQuery, profileHref, avatarU
             aucune autre : sans elle, ce réseau serait le SEUL endroit sans
             accès aux notifications (R-03). Elle est posée ici, à la facture
             des onglets. */}
+        {/* Le mode sombre en un appui (ADR-0027), au rond des icônes de l'en-tête. */}
+        <AppearanceToggle className="rm-tab min-h-11 min-w-11" style={{ flex: "0 0 auto", width: 44 }} />
         <NotificationBell variant="reseau" />
         {destinations ? null : profileHref !== null ? (
           <Link href={profileHref} className="rm-avatar-link" aria-label={t("reseauMobileHeader.profileLink")}>

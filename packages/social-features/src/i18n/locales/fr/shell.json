@@ -3,7 +3,10 @@
     "label": "Apparence",
     "system": "Système",
     "light": "Clair",
-    "dark": "Sombre"
+    "dark": "Sombre",
+    "darkMode": "Mode sombre",
+    "toDark": "Passer en mode sombre",
+    "toLight": "Passer en mode clair"
   },
   "espaceFloatingCard": {
     "close": "Fermer",

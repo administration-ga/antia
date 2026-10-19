@@ -916,7 +916,7 @@ function CallStageView({
 					/>
 				)}
 				{onWrite && (
-					<CallControlButton icon={MessageSquare} label={t("callStage.write")} onClick={onWrite} />
+					<CallControlButton icon={MessageSquare} label={t("callStage.write")} onClick={onWrite} tone="message" />
 				)}
 				<CallControlButton
 					icon={PhoneOff}

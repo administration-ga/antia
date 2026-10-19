@@ -3,7 +3,10 @@
     "label": "Appearance",
     "system": "System",
     "light": "Light",
-    "dark": "Dark"
+    "dark": "Dark",
+    "darkMode": "Dark mode",
+    "toDark": "Switch to dark mode",
+    "toLight": "Switch to light mode"
   },
   "espaceFloatingCard": {
     "close": "Close",

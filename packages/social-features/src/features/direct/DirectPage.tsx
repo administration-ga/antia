@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/direct/DirectPage.tsx @ ad2e7fdc2 — adaptations : DTO moteur, préflight avant démarrage, studio consommant la salle persistante et gestion d’antenne par permissions serveur, i18n et routes injectées.
+// Dupliqué de socle/packages/agent-features/src/features/direct/DirectPage.tsx @ ad2e7fdc2 — adaptations : DTO moteur, préflight avant démarrage, studio consommant la salle persistante et gestion d’antenne par permissions serveur, i18n et routes injectées ; couleurs par fonction (ADR-0027) : « Rejoindre la salle » en participation (variante `commerce`, aplat d’identité en repli).
 "use client"
 
 import { api, type Id } from "@antsia/api/engine"
@@ -160,7 +160,7 @@ function DirectSessionView({ session }: { session: DirectSession }) {
               <label className="flex min-h-11 items-center gap-3"><input type="checkbox" checked={state.intent.micEnabled} disabled={pending || anotherRoom} onChange={(event) => directSessionStore.setIntent({ micEnabled: event.target.checked })} />{t("microphoneOn")}</label>
               <label className="flex min-h-11 items-center gap-3"><input type="checkbox" checked={state.intent.cameraEnabled && !state.intent.audioOnly} disabled={pending || anotherRoom} onChange={(event) => directSessionStore.setIntent({ cameraEnabled: event.target.checked, audioOnly: false })} />{t("cameraOn")}</label>
             </> : null}
-            <Button disabled={pending || anotherRoom || (held && (state.phase === "connecting" || state.phase === "reconnecting"))} onClick={() => void attempt(join)}>{pending || (held && state.phase === "connecting") ? t("pending") : t("join")}</Button>
+            <Button variant="commerce" disabled={pending || anotherRoom || (held && (state.phase === "connecting" || state.phase === "reconnecting"))} onClick={() => void attempt(join)}>{pending || (held && state.phase === "connecting") ? t("pending") : t("join")}</Button>
           </div>
         )}
         {held && state.credentials ? <div className="flex flex-wrap items-center gap-3">

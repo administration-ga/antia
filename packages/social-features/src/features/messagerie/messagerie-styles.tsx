@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/messagerie/messagerie-styles.tsx @ ad2e7fdc2 — adaptations : fenêtre détachée au format téléphone UNIQUE du moteur, 440 × 956 (largeur suivant la hauteur disponible — formule de la fenêtre d'appel flottante —, hauteur dérivée ; l'iCom flottant du socle était en 390 × 844) ; plus aucune couleur littérale : ombre de déplacement et contraste obligé du code QR par jetons (`--icom-float-drag-shadow`, `--qr-code-surface`, `--qr-code-ink`) ; règles du sur-titre de fonction des fils de poste (`.msg-row-eyebrow`) retirées avec la branche poste ; feuille portée par la constante exportée `MESSAGERIE_STYLES_CSS` (le gabarit n'est plus un texte enfant du JSX) ; doc : cliquet de couleur du moteur, pile z sans iAsted. ; contour des surfaces posées sur la page lu dans --esp-surface-border, filet d'origine en repli (aucun contour quand le thème distingue déjà la carte du fond). ; système épuré (ADR-0027) : filtres en puces grises sans filet (`--esp-chip-*`), filtre actif et onglet actif en pastille tonale (`--esp-tab-active-*`), décompte des non-lus aux couleurs des réactions (`--role-react-*`), facture d'origine en repli. ; réactions de message (`data-mine`) à la teinte des réactions (`--role-react-soft`) ; couleurs par fonction (ADR-0027) : « Écrire » d'une relation (`data-role="message"`) et bouton d'envoi du composeur aux couleurs des messages (`--role-message-*`), pastille de non-lus `.msg-badge` aux couleurs des réactions (`--role-react-*`), facture d'origine en repli.
+// Dupliqué de socle/packages/agent-features/src/features/messagerie/messagerie-styles.tsx @ ad2e7fdc2 — adaptations : fenêtre détachée au format téléphone UNIQUE du moteur, 440 × 956 (largeur suivant la hauteur disponible — formule de la fenêtre d'appel flottante —, hauteur dérivée ; l'iCom flottant du socle était en 390 × 844) ; plus aucune couleur littérale : ombre de déplacement et contraste obligé du code QR par jetons (`--icom-float-drag-shadow`, `--qr-code-surface`, `--qr-code-ink`) ; règles du sur-titre de fonction des fils de poste (`.msg-row-eyebrow`) retirées avec la branche poste ; feuille portée par la constante exportée `MESSAGERIE_STYLES_CSS` (le gabarit n'est plus un texte enfant du JSX) ; doc : cliquet de couleur du moteur, pile z sans iAsted. ; contour des surfaces posées sur la page lu dans --esp-surface-border, filet d'origine en repli (aucun contour quand le thème distingue déjà la carte du fond). ; système épuré (ADR-0027) : filtres en puces grises sans filet (`--esp-chip-*`), filtre actif et onglet actif en pastille tonale (`--esp-tab-active-*`), décompte des non-lus aux couleurs des réactions (`--role-react-*`), facture d'origine en repli. ; réactions de message (`data-mine`) à la teinte des réactions (`--role-react-soft`) ; couleurs par fonction (ADR-0027) : « Écrire » d'une relation (`data-role="message"`) et bouton d'envoi du composeur aux couleurs des messages (`--role-message-*`), pastille de non-lus `.msg-badge` aux couleurs des réactions (`--role-react-*`), facture d'origine en repli. ; « Écrire à » du journal d'appels (`.icom-relations-action[data-role="message"]`) en tonal des messages (`--role-message-soft`, `--role-message-ink`), facture d'origine en repli.
 "use client"
 
 /**
@@ -147,6 +147,14 @@ export const MESSAGERIE_STYLES_CSS = `
         .icom-relations-action[data-primary="true"] {
           border-color: var(--primary-600);
           color: var(--primary-600);
+        }
+        /* Écrire depuis le journal d'appels : tonal des messages (ADR-0027),
+           comme le bouton Écrire ; le filet prend le fond, donc s'efface. Repli :
+           la facture d'origine du bouton. */
+        .icom-relations-action[data-role="message"] {
+          border-color: var(--role-message-soft, var(--border));
+          background: var(--role-message-soft, var(--card));
+          color: var(--role-message-ink, var(--ink-900));
         }
         /* Variante à icône seule (appel vidéo) : carrée, et surtout au
            PLANCHER TACTILE. Un bouton de 24 px se rate une fois sur trois au
