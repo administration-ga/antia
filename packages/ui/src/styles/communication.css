@@ -200,16 +200,20 @@ body,
    ═════════════════════════════════════════════════════════════════════════ */
 
 /* L'anneau d'une vignette du plateau. Trois états, un seul dégradé conique :
-   il tourne du bleu d'action vers sa version claire, ce qui donne l'anneau
-   « non vu » du genre sans emprunter le violet-orange d'Instagram — la
-   plateforme reste institutionnelle. Les deux autres états n'ont pas de
-   dégradé : ils N'ATTIRENT PAS. */
+   par défaut, il tourne du bleu d'action vers sa version claire, ce qui donne
+   l'anneau « non vu » du genre sans emprunter le violet-orange d'Instagram — la
+   plateforme reste institutionnelle. Un thème à trois couleurs (ADR-0027) le
+   remplace par `--esp-story-ring-fill` : ses trois couleurs, celles du drapeau
+   dans Gaboma. Les deux autres états n'ont pas de dégradé : ils N'ATTIRENT PAS. */
 .esp-story-ring {
-  background: conic-gradient(
-    from 210deg,
-    var(--primary),
-    color-mix(in srgb, var(--primary) 45%, var(--background)),
-    var(--primary)
+  background: var(
+    --esp-story-ring-fill,
+    conic-gradient(
+      from 210deg,
+      var(--primary),
+      color-mix(in srgb, var(--primary) 45%, var(--background)),
+      var(--primary)
+    )
   );
 }
 

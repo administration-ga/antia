@@ -213,7 +213,7 @@ describe("les sept thèmes d'antsia.ga (ADR-0027)", () => {
     const base = new TokenCascade(BASE_SHEETS)
     const tokens = [...Object.keys(ANGLES).filter((token) => token !== "--rp-surface-radius"), "--primary-fill-on", "--esp-theme-swatch-1",
       "--ui2-button-outline-bg", "--ui2-button-outline-border", "--ui2-button-secondary-bg", "--ui2-button-secondary-border", "--ui2-button-secondary-fg",
-      "--esp-chip-bg", "--esp-chip-border", "--esp-header-icon-bg", "--esp-fab-shadow", "--esp-tab-active-bg", "--esp-tab-active-fg",
+      "--esp-chip-bg", "--esp-chip-border", "--esp-header-icon-bg", "--esp-story-ring-fill", "--esp-fab-shadow", "--esp-tab-active-bg", "--esp-tab-active-fg",
       ...["social", "message", "react", "commerce"].flatMap((role) => [`--role-${role}-fill`, `--role-${role}-on`, `--role-${role}-ink`]),
       "--role-message-soft", "--role-react-soft", "--role-react-label"]
     for (const dark of [false, true]) {

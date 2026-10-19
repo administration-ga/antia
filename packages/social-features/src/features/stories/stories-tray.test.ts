@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/stories/stories-tray.test.ts @ ad2e7fdc2 — adaptations : groupes au DTO du moteur (`personId`, `cover` toujours porté) ; cas du champ de compatibilité `coverUrl` et de la vignette absente retirés (le moteur écarte un groupe sans vignette) ; libellés lus par l'i18n du moteur (`t` français, mêmes phrases attendues) ; cas ajoutés : nom neutre d'un auteur sans nom, libellé anglais, instant arrondi des lectures.
+// Dupliqué de socle/packages/agent-features/src/features/stories/stories-tray.test.ts @ ad2e7fdc2 — adaptations : groupes au DTO du moteur (`personId`, `cover` toujours porté) ; cas du champ de compatibilité `coverUrl` et de la vignette absente retirés (le moteur écarte un groupe sans vignette) ; libellés lus par l'i18n du moteur (`t` français, mêmes phrases attendues) ; cas ajoutés : nom neutre d'un auteur sans nom, libellé anglais, instant arrondi des lectures, prénom d'un médaillon (présentation « rings »).
 import { describe, expect, it } from "vitest"
 
 import { createAppI18n } from "../../i18n"
@@ -8,6 +8,7 @@ import {
 	STORY_QUERY_STEP_MS,
 	storyAgeLabel,
 	storyAuthorName,
+	storyAuthorShortName,
 	storyQueryInstant,
 	trayCoverFor,
 	trayTileLabel,
@@ -261,6 +262,22 @@ describe("storyAuthorName — jamais un nom vide", () => {
 	it("rend le libellé neutre traduit sinon", () => {
 		expect(storyAuthorName(null, t)).toBe("Membre du réseau")
 		expect(storyAuthorName(null, tEn)).toBe("Network member")
+	})
+})
+
+describe("storyAuthorShortName — le prénom d'un médaillon (présentation « rings »)", () => {
+	it("retient le prénom, que le NOM en majuscules vienne avant ou après", () => {
+		expect(storyAuthorShortName("Awa NDONG", t)).toBe("Awa")
+		expect(storyAuthorShortName("NDONG MBA Awa", t)).toBe("Awa")
+		expect(storyAuthorShortName("Jean-Rémy ÉLOÏSE", t)).toBe("Jean-Rémy")
+		expect(storyAuthorShortName("  Clarisse   OBAME ", t)).toBe("Clarisse")
+	})
+
+	it("à défaut de prénom reconnaissable, le premier mot ; sans nom, le libellé neutre", () => {
+		expect(storyAuthorShortName("NDONG", t)).toBe("NDONG")
+		expect(storyAuthorShortName("Recette", t)).toBe("Recette")
+		expect(storyAuthorShortName(null, t)).toBe("Membre du réseau")
+		expect(storyAuthorShortName("   ", tEn)).toBe("Network member")
 	})
 })
 

@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/stories/StoriesTray.tsx @ ad2e7fdc2 — adaptations : branché sur `stories.stories.tray` du moteur (réseau de `useNetwork()`, instant ARRONDI des lectures tiré de l'horloge de l'écran — `storyQueryInstant` — et plateau du pas précédent gardé pendant que le pas suivant s'abonne : la rangée ne clignote pas) ; propriété `surface` (ADR-0079 du socle) retirée avec les surfaces du moteur ; vignette toujours portée (repli du champ `coverUrl` retiré) ; auteur au contrat `counterpartLabel` (`personId`, nom nullable dit par le libellé neutre) ; libellés traduits (clés `stories:storiesTray.*`).
+// Dupliqué de socle/packages/agent-features/src/features/stories/StoriesTray.tsx @ ad2e7fdc2 — adaptations : branché sur `stories.stories.tray` du moteur (réseau de `useNetwork()`, instant ARRONDI des lectures tiré de l'horloge de l'écran — `storyQueryInstant` — et plateau du pas précédent gardé pendant que le pas suivant s'abonne : la rangée ne clignote pas) ; propriété `surface` (ADR-0079 du socle) retirée avec les surfaces du moteur ; vignette toujours portée (repli du champ `coverUrl` retiré) ; auteur au contrat `counterpartLabel` (`personId`, nom nullable dit par le libellé neutre) ; libellés traduits (clés `stories:storiesTray.*`) ; présentation « rings » déclarée par l'application (`storiesPresentation`, ADR-0027) : médaillons ronds dans leur anneau et prénom dessous, « Vous » et son « + » en tête — les cartes restent le défaut.
 "use client"
 
 /**
@@ -51,6 +51,7 @@ import {
 	orderTray,
 	ringStateFor,
 	storyAuthorName,
+	storyAuthorShortName,
 	storyQueryInstant,
 	trayCoverFor,
 	trayTileLabel,
@@ -88,7 +89,9 @@ export function StoriesTray({
 	myAvatarUrl = null,
 }: StoriesTrayProps) {
 	const { t } = useTranslation("stories")
-	const { networkId, personId } = useNetwork()
+	const { networkId, personId, storiesPresentation } = useNetwork()
+	// Médaillons ronds si l'application les déclare (ADR-0027) ; sinon les cartes.
+	const rings = storiesPresentation === "rings"
 	const tray = useAuthenticatedConvexQuery(api.modules.stories.stories.tray, {
 		networkId,
 		now: storyQueryInstant(now),
@@ -121,7 +124,7 @@ export function StoriesTray({
 	const ordered = orderTray(groups, myHandle)
 
 	return (
-		<div className="st-tray" role="group" aria-label={t("storiesTray.label")}>
+		<div className="st-tray" data-presentation={storiesPresentation} role="group" aria-label={t("storiesTray.label")}>
 			{/* Si elle est autorisée, la carte de création précède les séries. */}
 			{canCreate ? (
 				<button
@@ -130,6 +133,27 @@ export function StoriesTray({
 					aria-label={t("storiesTray.create")}
 					onClick={onCreate}
 				>
+					{rings ? (
+						/* « Vous » : mon portrait (ou la silhouette) sans anneau, et son
+						   « + » à l'aplat d'identité — le point de départ de la rangée. */
+						<span className="st-ring-tile">
+							<span className="st-ring-self">
+								<span className="st-tray-disc">
+									{myAvatarUrl !== null ? (
+										<img className="st-tray-cover" src={myAvatarUrl} alt="" aria-hidden="true" />
+									) : (
+										<Icon name="user" size={24} />
+									)}
+								</span>
+								<span className="st-ring-plus" aria-hidden="true">
+									<Icon name="plus" size={14} />
+								</span>
+							</span>
+							<span className="st-ring-name" aria-hidden="true">
+								{t("storiesTray.you")}
+							</span>
+						</span>
+					) : (
 					<span className="st-card">
 						{myAvatarUrl !== null ? (
 							<img
@@ -148,6 +172,7 @@ export function StoriesTray({
 							</span>
 						</span>
 					</span>
+					)}
 				</button>
 			) : null}
 
@@ -163,6 +188,23 @@ export function StoriesTray({
 						aria-label={trayTileLabel(group, myHandle, now, t)}
 						onClick={() => onOpen(group.author.handle)}
 					>
+						{rings ? (
+							/* Le médaillon : le portrait de l'auteur dans l'anneau qui dit
+							   vu / pas vu / à moi, et son prénom dessous (la phrase entière
+							   reste dans `aria-label`). */
+							<span className="st-ring-tile">
+								<StoryRing
+									state={ring}
+									displayName={group.author.displayName ?? ""}
+									avatarUrl={group.author.avatarUrl}
+								/>
+								<span className="st-ring-name" aria-hidden="true">
+									{ring === "self"
+										? t("storiesTray.you")
+										: storyAuthorShortName(group.author.displayName, t)}
+								</span>
+							</span>
+						) : (
 						<span className="st-card">
 							{/* La VIGNETTE remplit la carte — l'élément suit le KIND
 							    (`trayCoverFor`) : une vidéo se rend en <video> muet qui
@@ -215,6 +257,7 @@ export function StoriesTray({
 									: storyAuthorName(group.author.displayName, t)}
 							</span>
 						</span>
+						)}
 					</button>
 				)
 			})}

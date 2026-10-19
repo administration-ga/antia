@@ -124,6 +124,21 @@ export type EnginePostPresentation = "classic" | "media"
  */
 export type EngineFeedPresentation = "list" | "immersive"
 
+/**
+ * La PRÉSENTATION DE LA RANGÉE D'ACTUS que l'application déclare — même famille
+ * que `postPresentation` et `feedPresentation`, jamais un droit :
+ *
+ *  · `"cards"` (défaut) : les cartes verticales où la vignette remplit le cadre
+ *    (arbitrage du 20/08/2026). Une application qui ne déclare rien (DIASPORALE)
+ *    la garde, sans aucun changement.
+ *  · `"rings"` : des médaillons ronds dans leur anneau, le prénom dessous, la
+ *    création en tête (« Vous » et son « + ») — la maquette de la série 3
+ *    (ADR-0027).
+ *
+ * Mêmes requêtes, même ordre, mêmes noms accessibles : seule la mise en page change.
+ */
+export type EngineStoriesPresentation = "cards" | "rings"
+
 /** P09 : rendu injecté par l'application, aucune dépendance du moteur vers son front. */
 export type EnginePostOfferRenderer = ComponentType<{ networkId: Id<"networks">; postId: Id<"posts"> }>
 
@@ -145,6 +160,13 @@ export interface NetworkContextValue {
   postPresentation: EnginePostPresentation
   /** La présentation du fil déclarée par l'application, `"list"` sauf opt-in explicite (P04). */
   feedPresentation: EngineFeedPresentation
+  /** La présentation de la rangée d'actus, `"cards"` sauf opt-in explicite (ADR-0027). */
+  storiesPresentation: EngineStoriesPresentation
+  /**
+   * Le nom affiché en tête de la coque du téléphone (la marque de l'application) ;
+   * `null` : le libellé neutre du moteur (« Réseau »). Un libellé VISUEL, jamais un titre.
+   */
+  wordmark: string | null
   PostOfferRenderer?: EnginePostOfferRenderer
   /** Contrat d'`OrgProvider` lu par les surfaces du socle : toujours l'espace personnel. */
   personalMode: true
@@ -182,6 +204,20 @@ export function resolveEngineFeedPresentation(requested: EngineFeedPresentation 
   return requested === "immersive" ? "immersive" : "list"
 }
 
+/**
+ * La présentation de la rangée d'actus RETENUE : `"rings"` seulement sur demande
+ * explicite. Rien de déclaré ou valeur inconnue : les cartes, à l'identique.
+ */
+export function resolveEngineStoriesPresentation(requested: EngineStoriesPresentation | undefined): EngineStoriesPresentation {
+  return requested === "rings" ? "rings" : "cards"
+}
+
+/** Le nom de tête RETENU : une chaîne non vide, sans blancs autour ; sinon le libellé neutre (`null`). */
+export function resolveEngineWordmark(requested: string | undefined): string | null {
+  const wordmark = requested?.trim() ?? ""
+  return wordmark.length > 0 ? wordmark : null
+}
+
 export function NetworkProvider(props: {
   networkId: Id<"networks">
   slug: string
@@ -195,6 +231,10 @@ export function NetworkProvider(props: {
   postPresentation?: EnginePostPresentation
   /** Opt-in du fil immersif (P04) ; absent = `"list"` (comportement historique). */
   feedPresentation?: EngineFeedPresentation
+  /** Opt-in de la rangée d'actus en médaillons (ADR-0027) ; absent = `"cards"` (comportement historique). */
+  storiesPresentation?: EngineStoriesPresentation
+  /** La marque affichée en tête de la coque du téléphone ; absente = le libellé neutre du moteur. */
+  wordmark?: string
   PostOfferRenderer?: EnginePostOfferRenderer
   children: ReactNode
 }) {
@@ -229,6 +269,8 @@ export function NetworkProvider(props: {
     navigation: resolveEngineNavigation(props.navigation, props.routes),
     postPresentation: resolveEnginePostPresentation(props.postPresentation),
     feedPresentation: resolveEngineFeedPresentation(props.feedPresentation),
+    storiesPresentation: resolveEngineStoriesPresentation(props.storiesPresentation),
+    wordmark: resolveEngineWordmark(props.wordmark),
     PostOfferRenderer: props.PostOfferRenderer,
     personalMode: true,
     personalSpaceIsElsewhere: false,

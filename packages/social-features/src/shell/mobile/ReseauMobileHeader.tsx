@@ -25,7 +25,7 @@
  * geste principal de l'en-tête.
  */
 
-import { useRoutes } from "@antsia/api/network"
+import { useNetwork, useRoutes } from "@antsia/api/network"
 import { Link } from "@antsia/api/routing"
 import { Icon, TextInput } from "@antsia/ui"
 import { type FormEvent, type KeyboardEvent, useEffect, useRef, useState } from "react"
@@ -55,6 +55,7 @@ export function ReseauMobileHeader({ onSearch, searchQuery, profileHref, avatarU
   /* Navigation par destinations : Messages et Profil sont des places de la
      barre basse — les répéter ici donnerait deux portes et deux pastilles. */
   const destinations = useReseauDestinationRoutes() !== null
+  const { wordmark } = useNetwork()
   /**
    * Le brouillon est LOCAL, semé par la recherche en cours. Remonter chaque
    * frappe au parent relancerait la query à chaque lettre : la recherche se
@@ -147,7 +148,12 @@ export function ReseauMobileHeader({ onSearch, searchQuery, profileHref, avatarU
           </form>
         ) : (
           <>
-            <p className="rm-wordmark">{t("reseauMobileHeader.wordmark")}</p>
+            {/* La marque de l'application quand elle la déclare (ADR-0027), et son
+                point d'identité ; sinon le libellé neutre du moteur. */}
+            <p className="rm-wordmark" data-brand={wordmark !== null ? "" : undefined}>
+              {wordmark ?? t("reseauMobileHeader.wordmark")}
+              {wordmark !== null ? <span className="rm-wordmark-dot" aria-hidden="true" /> : null}
+            </p>
             <button
               ref={searchButtonRef}
               type="button"
