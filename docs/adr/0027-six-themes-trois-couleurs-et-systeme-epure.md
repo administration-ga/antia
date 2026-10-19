@@ -11,7 +11,8 @@
   `@antsia/social-features`, application, cliquets). Observé dans le navigateur (serveur de
   développement, 19/10/2026) : six thèmes en clair et en sombre, motif de fond, largeur téléphone,
   couleurs par fonction (Se connecter, Suivre, J'aime), barre flottante, retour du thème du compte
-  sur un appareil vierge.
+  sur un appareil vierge. Verify complet (codegen compris) au code 0 le 19/10/2026, de 11 h 48 à
+  11 h 55, sur `ab813ec` et les commits de Sable.
 
 ## Contexte
 
@@ -106,8 +107,10 @@ Nous allons :
 
 - Retour arrière : remettre l'ancienne liste dans `MEMBER_THEME_IDS` et restaurer les fichiers de
   thème depuis Git ; les anciens identifiants n'ont jamais quitté la base.
-- Un septième thème, Sable (la charte de DIASPORALE), est prévu à la suite de ce lot sur le même
-  contrat : une charte `antsia-sable.css` et un identifiant de plus dans les deux listes.
+- Un septième thème, Sable, suit le même contrat : c'est la charte de DIASPORALE portée dans le
+  réseau, ajoutée le 19/10/2026 à la demande du propriétaire (`690b4c6`). Sa charte
+  `antsia-sable.css` est générée et contrôlée comme les six autres, et l'identifiant `sable` entre
+  dans `MEMBER_THEME_IDS` et `ANTSIA_THEME_IDS`. Gaboma reste le thème par défaut.
 - Les maquettes de la troisième série (version 6, 19/10/2026) restent la référence visuelle.
 
 ## Alternatives considérées
