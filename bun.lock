@@ -38,6 +38,7 @@
       "dependencies": {
         "@antsia/api": "workspace:*",
         "@antsia/social-contracts": "workspace:*",
+        "@antsia/social-domain": "workspace:*",
         "@antsia/social-features": "workspace:*",
         "@antsia/ui": "workspace:*",
         "@diasporale/domain": "workspace:*",
