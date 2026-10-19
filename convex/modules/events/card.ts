@@ -10,6 +10,8 @@ import { v } from "convex/values"
 
 import type { Id } from "../../_generated/dataModel"
 import type { QueryCtx } from "../../_generated/server"
+import { canReadModeratedContent } from "../moderation/policy"
+import { pageEventAccess } from "./pageEventAccess"
 import { eventParticipationStatusValidator, eventStatusValidator } from "./tables"
 
 export const eventCardValidator = v.object({
@@ -26,6 +28,9 @@ export async function eventCardOf(ctx: Pick<QueryCtx, "db">, eventId: Id<"events
   if (eventId === undefined) return null
   const event = await ctx.db.get(eventId)
   if (!event) return null
+  if (event.organizerPageId !== undefined) {
+    if (!(await pageEventAccess(ctx, event, readerPersonId))) return null
+  } else if (!(await canReadModeratedContent(ctx, "event", event._id, readerPersonId))) return null
   const participation = await ctx.db
     .query("eventParticipants")
     .withIndex("by_event_person", (q) => q.eq("eventId", event._id).eq("personId", readerPersonId))
