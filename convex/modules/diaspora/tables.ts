@@ -23,6 +23,15 @@ import { defineTable } from "convex/server"
 import { v } from "convex/values"
 
 import { literals } from "../../lib/validators"
+import { associationsTables } from "./associationsTables"
+import { serviceRequestsTables } from "./serviceRequestsTables"
+import { serviceReviewsTables } from "./serviceReviewsTables"
+import { mutualAidTables } from "./mutualAidTables"
+import { arrivalKitTables } from "./arrivalKitTables"
+import { mentoringTables } from "./mentoringTables"
+import { jobsTables } from "./jobsTables"
+import { pilotMetricsTables } from "./pilotMetricsTables"
+import { servicesTables } from "./servicesTables"
 
 /** Niveau fin de visibilité d'un champ de facette (`only_me` ⊂ `connections` ⊂ `country` ⊂ `network`). */
 export const fieldVisibilityValidator = literals(FIELD_VISIBILITY_LEVELS)
@@ -115,4 +124,15 @@ export const diasporaTables = {
     directoryVisibility: directoryVisibilityValidator,
     updatedAt: v.number(),
   }).index("by_network_and_person", ["networkId", "personId"]),
+
+  // Plan global (docs/14 de DIASPORALE) : chaque chantier tient ses tables dans son fichier.
+  ...servicesTables,
+  ...serviceRequestsTables,
+  ...associationsTables,
+  ...serviceReviewsTables,
+  ...mutualAidTables,
+  ...arrivalKitTables,
+  ...mentoringTables,
+  ...jobsTables,
+  ...pilotMetricsTables,
 }

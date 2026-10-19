@@ -14,6 +14,8 @@ import {
 import { v } from "convex/values"
 
 import { literals } from "../../lib/validators"
+import { pagePresentationFields } from "../pages/presentation"
+import { pageCardValidator } from "../pages/validators"
 import { directoryVisibilityValidator, facetLevelsValidator, fieldVisibilityValidator } from "./tables"
 
 export { directoryVisibilityValidator, facetLevelsValidator }
@@ -86,3 +88,36 @@ export const countryHubViewValidator = v.object({
   /** Dernier passage nocturne ; `null` tant qu'aucun n'a compté. */
   countersComputedAt: v.union(v.number(), v.null()),
 })
+
+/**
+ * Une page d'un hub pays (DG-007) : la CARTE allowlistée du moteur (logo par la
+ * garde des fichiers, badge calculé de la confiance), sa description, ses abonnés
+ * comptés par l'agrégat et sa revendicabilité jugée pour CE lecteur. Aucun
+ * signataire, aucun identifiant de stockage, aucune coordonnée.
+ */
+export const hubPageValidator = v.object({
+  ...pageCardValidator.fields,
+  ...pagePresentationFields,
+  description: v.union(v.string(), v.null()),
+  followerCount: v.number(),
+  claimable: v.boolean(),
+})
+
+/** Par nature de page : la fenêtre bornée n'a pas tout montré (la suite se cherche dans l'annuaire). */
+export const hubPagesMoreValidator = v.object({
+  officialPages: v.boolean(),
+  associations: v.boolean(),
+  companies: v.boolean(),
+})
+
+/** Les pages publiées et lisibles d'un pays, bornées par nature — jamais un comptage. */
+export const hubPagesViewValidator = v.object({
+  country: v.string(),
+  officialPages: v.array(hubPageValidator),
+  associations: v.array(hubPageValidator),
+  companies: v.array(hubPageValidator),
+  more: hubPagesMoreValidator,
+})
+
+/** Ce que la tranche ajoute à la fiche d'une page : sa revendicabilité, pour CE lecteur. */
+export const pageStandingValidator = v.object({ claimable: v.boolean() })

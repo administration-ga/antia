@@ -2,10 +2,14 @@
  * Hubs pays (EXF-DG-15, EXF-DG-17, EXT-DG-02).
  *
  * Les compteurs sont MATÉRIALISÉS par un passage nocturne paginé (cron
- * quotidien) : une lecture ne compte jamais rien. Le nombre de membres d'un pays
- * sous le seuil de publication ne quitte pas le serveur (anti-réidentification) :
- * la projection rend la PRÉSENTATION du compteur (`presentHubCounters`), jamais
- * le chiffre brut. L'ouverture d'un pays se lit dans `networks.openCountries`.
+ * quotidien) : une lecture ne compte jamais rien. Le passage compte d'abord les
+ * membres listés de chaque pays, puis les pages ACTIVES et lisibles du réseau,
+ * par pays et par nature (associations, entreprises — DG-007), chacune relue par
+ * LA garde des pages. Le nombre de membres d'un pays sous le seuil de publication
+ * ne quitte pas le serveur (anti-réidentification) : la projection rend la
+ * PRÉSENTATION du compteur (`presentHubCounters`), jamais le chiffre brut ; ce
+ * seuil ne concerne que les membres. L'ouverture d'un pays se lit dans
+ * `networks.openCountries` ; les pages elles-mêmes se lisent par `hubPages.ts`.
  */
 import {
   countsAsHubMember,
@@ -23,6 +27,7 @@ import type { Doc, Id } from "../../_generated/dataModel"
 import { internalMutation, type MutationCtx, query, type QueryCtx } from "../../_generated/server"
 import { notFound } from "../../lib/errors"
 import { networkQuery } from "../../lib/functions"
+import { readablePageOrNull } from "../pages/access"
 import { assertDiasporaNetwork, consentInForce, effectiveStatusIn, isDiasporaNetwork, privacyOf } from "./facts"
 import { countryHubViewValidator } from "./validators"
 
@@ -94,19 +99,46 @@ async function countsInHub(ctx: QueryCtx, network: Doc<"networks">, personId: Id
   })
 }
 
-/** Fin du passage : chaque hub connu, ouvert ou compté reçoit ses compteurs (zéro s'il n'a plus personne). */
-async function writeHubCounters(ctx: MutationCtx, network: Doc<"networks">, members: Record<string, number>, computedAt: number) {
+/** Ce que le passage accumule, par pays (ISO alpha-2). */
+type CountryTally = Record<string, number>
+
+interface HubPassCounts {
+  readonly members: CountryTally
+  readonly associations: CountryTally
+  readonly companies: CountryTally
+}
+
+/** Une page de passage, jamais plus large que `HUB_COUNTERS_PAGE_SIZE`. */
+function passPageSize(pageSize: number): number {
+  return Math.min(Math.max(1, Math.trunc(pageSize)), HUB_COUNTERS_PAGE_SIZE)
+}
+
+/** Fin du passage : chaque hub connu, ouvert ou compté reçoit ses compteurs (zéro s'il n'a plus rien). */
+async function writeHubCounters(ctx: MutationCtx, network: Doc<"networks">, counts: HubPassCounts, computedAt: number) {
   const existing = await ctx.db
     .query("countryHubs")
     .withIndex("by_network_and_country", (q) => q.eq("networkId", network._id))
     .take(COUNTRIES_MAX)
   const byCountry = new Map(existing.map((row) => [row.country, row]))
-  const countries = new Set([...byCountry.keys(), ...(network.openCountries ?? []), ...Object.keys(members)])
+  const countries = new Set([
+    ...byCountry.keys(),
+    ...(network.openCountries ?? []),
+    ...Object.keys(counts.members),
+    ...Object.keys(counts.associations),
+    ...Object.keys(counts.companies),
+  ])
   const now = Date.now()
   for (const country of countries) {
     if (!isResidenceCountry(country)) continue
-    // Associations, entreprises et évènements : leurs sources arrivent avec les pages (PD5) et les évènements (PD7).
-    const counters = { members: members[country] ?? 0, associations: 0, companies: 0, upcomingEvents: 0, countersComputedAt: computedAt, updatedAt: now }
+    // Les évènements à venir : leur source arrive avec les évènements (PD7) ; d'ici là, zéro mesuré.
+    const counters = {
+      members: counts.members[country] ?? 0,
+      associations: counts.associations[country] ?? 0,
+      companies: counts.companies[country] ?? 0,
+      upcomingEvents: 0,
+      countersComputedAt: computedAt,
+      updatedAt: now,
+    }
     const row = byCountry.get(country)
     if (row) await ctx.db.patch(row._id, counters)
     else await ctx.db.insert("countryHubs", { networkId: network._id, country, ...counters })
@@ -150,7 +182,7 @@ export const refreshHubCountersPage = internalMutation({
     const page = await ctx.db
       .query("personFacets")
       .withIndex("by_network_and_person", (q) => q.eq("networkId", network._id))
-      .paginate({ cursor: args.cursor, numItems: Math.min(Math.max(1, Math.trunc(args.pageSize)), HUB_COUNTERS_PAGE_SIZE) })
+      .paginate({ cursor: args.cursor, numItems: passPageSize(args.pageSize) })
     const members = { ...args.members }
     for (const facet of page.page) {
       const country = facet.values.countryOfResidence
@@ -161,7 +193,64 @@ export const refreshHubCountersPage = internalMutation({
       await ctx.scheduler.runAfter(0, internal.modules.diaspora.hubs.refreshHubCountersPage, { ...args, cursor: page.continueCursor, members })
       return null
     }
-    await writeHubCounters(ctx, network, members, args.startedAt)
+    // Les membres comptés, le passage continue par les pages du réseau (DG-007).
+    await ctx.scheduler.runAfter(0, internal.modules.diaspora.hubs.refreshHubPageCountersPage, {
+      networkId: network._id,
+      cursor: null,
+      members,
+      associations: {},
+      companies: {},
+      startedAt: args.startedAt,
+      pageSize: args.pageSize,
+    })
+    return null
+  },
+})
+
+/**
+ * Une page du passage sur les PAGES : les pages actives du réseau, par pays et
+ * par nature (associations, entreprises), chacune relue par LA garde des pages
+ * sans lecteur — une page retirée, ou retenue par la modération, ne compte pas.
+ * Une page sans pays, d'une autre nature ou d'un pays hors diaspora n'entre dans
+ * aucun hub. À la dernière page, les compteurs du passage sont écrits ensemble.
+ */
+export const refreshHubPageCountersPage = internalMutation({
+  args: {
+    networkId: v.id("networks"),
+    cursor: v.union(v.string(), v.null()),
+    members: v.record(v.string(), v.number()),
+    associations: v.record(v.string(), v.number()),
+    companies: v.record(v.string(), v.number()),
+    startedAt: v.number(),
+    pageSize: v.number(),
+  },
+  returns: v.null(),
+  handler: async (ctx, args): Promise<null> => {
+    const network = await ctx.db.get(args.networkId)
+    if (!isDiasporaNetwork(network)) return null
+    const page = await ctx.db
+      .query("pages")
+      .withIndex("by_network_status_trustRank_createdAt", (q) => q.eq("networkId", network._id).eq("status", "active"))
+      .paginate({ cursor: args.cursor, numItems: passPageSize(args.pageSize) })
+    const associations = { ...args.associations }
+    const companies = { ...args.companies }
+    for (const row of page.page) {
+      const tally = row.ownerKind === "association" ? associations : row.ownerKind === "company" ? companies : null
+      const country = row.country
+      if (tally === null || country === undefined || !isResidenceCountry(country)) continue
+      if (!(await readablePageOrNull(ctx, network, row._id))) continue
+      tally[country] = (tally[country] ?? 0) + 1
+    }
+    if (!page.isDone) {
+      await ctx.scheduler.runAfter(0, internal.modules.diaspora.hubs.refreshHubPageCountersPage, {
+        ...args,
+        cursor: page.continueCursor,
+        associations,
+        companies,
+      })
+      return null
+    }
+    await writeHubCounters(ctx, network, { members: args.members, associations, companies }, args.startedAt)
     return null
   },
 })
