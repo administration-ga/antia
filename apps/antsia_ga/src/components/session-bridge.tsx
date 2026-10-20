@@ -8,7 +8,7 @@ import { isSigningOutEverywhere } from "@antsia/api/sign-out-everywhere"
 import { authClient } from "@/lib/auth-client"
 import { buttonClassName } from "@/components/shared/button-class"
 import { BRIDGE_CLIENT_TIMEOUT_MS, BRIDGE_RESUME_EVENT, sdkSessionCookie } from "@/lib/session-bridge"
-import { clearLocalSessionForAnonymousBridge, currentSessionBridgeGeneration, requestSessionBridge, rotateSessionBridgeFence } from "@/lib/session-bridge-client"
+import { clearLocalSessionForAnonymousBridge, currentSessionBridgeGeneration, requestSessionBridge, rotateSessionBridgeFence, withSessionBridgeLock } from "@/lib/session-bridge-client"
 
 /** La génération ferme l'ancien reçu AVANT que le SDK ne consomme un éventuel OTT. */
 export function SessionBridgePreflight({ children }: { children: ReactNode }) {
@@ -20,11 +20,12 @@ export function SessionBridgePreflight({ children }: { children: ReactNode }) {
     // Seul le gestionnaire de sortie possède alors la génération et sa purge.
     if (isSigningOutEverywhere()) return
     let cancelled = false
-    if (!pending.current) pending.current = (async () => {
+    if (!pending.current) pending.current = withSessionBridgeLock(async () => {
+        if (isSigningOutEverywhere()) return false
         const generation = rotateSessionBridgeFence()
         // Pas de marque anonyme avant la purge/proof du SDK. Même un OTT sans API sera fermé.
         return requestSessionBridge("DELETE", { generation, anonymous: false })
-    })()
+    })
     void pending.current.then((cleared) => { if (!cancelled && !isSigningOutEverywhere()) setPhase(cleared ? "ready" : "error") }).catch(() => { if (!cancelled && !isSigningOutEverywhere()) setPhase("error") })
     return () => { cancelled = true }
   }, [])
@@ -52,8 +53,6 @@ export function SessionBridge({ children }: { children: ReactNode }) {
   }, [])
   useEffect(() => {
     if (isLoading || isSigningOutEverywhere()) return
-    const generation = resume ?? currentSessionBridgeGeneration()
-    if (!generation) { setPhase("error"); return }
     let cancelled = false
     const controller = new AbortController()
     setPhase("pending")
@@ -61,18 +60,25 @@ export function SessionBridge({ children }: { children: ReactNode }) {
       let admitted = false
       let timer: ReturnType<typeof setTimeout> | undefined
       try {
-        if (isAuthenticated) {
-          const cookie = authClient.getCookie()
-          const sessionCookie = sdkSessionCookie(cookie)
-          const result = await Promise.race([authClient.convex.token({ fetchOptions: { throw: false, signal: controller.signal } }), new Promise<never>((_resolve, reject) => { timer = setTimeout(() => { controller.abort(); reject(new Error("bridgeTimeout")) }, BRIDGE_CLIENT_TIMEOUT_MS) })])
-          // Le SDK renouvelle aussi des cookies auxiliaires (JWT/cache) : seul le SID signé porte la session.
-          const currentCookie = sdkSessionCookie(authClient.getCookie())
-          const sameSession = sessionCookie !== null && currentCookie?.name === sessionCookie.name && currentCookie.value === sessionCookie.value
-          if (!result.error && typeof result.data?.token === "string" && currentSessionBridgeGeneration() === generation && sameSession && !isSigningOutEverywhere()) admitted = await requestSessionBridge("POST", { generation: generation!, cookie, jwt: result.data.token }, fetch, controller.signal)
-        } else {
-          const anonymous = clearLocalSessionForAnonymousBridge()
-          admitted = await requestSessionBridge("DELETE", { generation: generation!, anonymous }) && anonymous
-        }
+        admitted = await withSessionBridgeLock(async () => {
+          if (cancelled || isSigningOutEverywhere()) return false
+          const generation = resume ?? currentSessionBridgeGeneration()
+          if (!generation) return false
+          if (isAuthenticated) {
+            const cookie = authClient.getCookie()
+            const sessionCookie = sdkSessionCookie(cookie)
+            const result = await Promise.race([authClient.convex.token({ fetchOptions: { throw: false, signal: controller.signal } }), new Promise<never>((_resolve, reject) => { timer = setTimeout(() => { controller.abort(); reject(new Error("bridgeTimeout")) }, BRIDGE_CLIENT_TIMEOUT_MS) })])
+            // Le SDK renouvelle aussi des cookies auxiliaires (JWT/cache) : seul le SID signé porte la session.
+            const currentCookie = sdkSessionCookie(authClient.getCookie())
+            const sameSession = sessionCookie !== null && currentCookie?.name === sessionCookie.name && currentCookie.value === sessionCookie.value
+            if (!result.error && typeof result.data?.token === "string" && currentSessionBridgeGeneration() === generation && sameSession && !isSigningOutEverywhere()) return requestSessionBridge("POST", { generation, cookie, jwt: result.data.token }, fetch, controller.signal)
+            return false
+          } else {
+            const anonymous = clearLocalSessionForAnonymousBridge()
+            if (!anonymous) return false
+            return requestSessionBridge("DELETE", { generation, anonymous: true }, fetch, controller.signal)
+          }
+        }, controller.signal)
       } catch { admitted = false }
       finally { if (timer !== undefined) clearTimeout(timer) }
       if (!cancelled && !isSigningOutEverywhere()) setPhase(admitted ? "ready" : "error")

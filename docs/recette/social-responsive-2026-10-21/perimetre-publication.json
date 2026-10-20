@@ -126,16 +126,29 @@
     "demo accounts/seeds"
   ],
   "productionBaseline": {
-    "version": "presence-logout-20261021-fb1f057a51a7bab5",
-    "deploymentId": "dpl_JDZo2WJXF1XuwNQcHwHr3YSJmVJd",
-    "url": "https://antsia-1y8ijnvmw-okatechs-projects-f0102678.vercel.app",
+    "version": "session-coordination-20261021-03548f8c8f01470e",
+    "deploymentId": "dpl_UxMyjdTakahwkCjfRSyy7PFF9gAL",
+    "url": "https://antsia-5383efgvc-okatechs-projects-f0102678.vercel.app",
     "backend": "diligent-avocet-585"
   },
   "preservedPublishedFiles": [
     "packages/social-features/src/shell/presence/use-presence-heartbeat.ts",
-    "packages/social-features/src/shell/presence/use-presence-heartbeat.test.tsx"
+    "packages/social-features/src/shell/presence/use-presence-heartbeat.test.tsx",
+    "apps/antsia_ga/src/components/identity-tools.tsx",
+    "apps/antsia_ga/src/components/session-bridge.tsx",
+    "apps/antsia_ga/src/components/session-bridge.test.tsx",
+    "apps/antsia_ga/src/lib/session-bridge-client.ts",
+    "apps/antsia_ga/src/lib/session-bridge-client.test.ts",
+    "apps/antsia_ga/src/lib/sign-out.ts",
+    "apps/antsia_ga/src/lib/sign-out.test.ts"
   ],
   "filteredTests": {
     "apps/antsia_ga/src/components/access-home-screen.test.tsx": "Seulement les deux attentes de lexique U01, présentes dans la vraie source ; couverture de démonstration publiée conservée."
+  },
+  "previousProductionBaseline": {
+    "version": "presence-logout-20261021-fb1f057a51a7bab5",
+    "deploymentId": "dpl_JDZo2WJXF1XuwNQcHwHr3YSJmVJd",
+    "url": "https://antsia-1y8ijnvmw-okatechs-projects-f0102678.vercel.app",
+    "backend": "diligent-avocet-585"
   }
 }
