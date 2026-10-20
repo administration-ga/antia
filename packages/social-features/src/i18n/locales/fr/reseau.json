@@ -1,4 +1,7 @@
 {
+  "connectionRequest": {
+    "wait": "Réessayez dans {{count}} s."
+  },
   "postIdentity": {
     "announcement": "{{name}}, {{badges}}"
   },

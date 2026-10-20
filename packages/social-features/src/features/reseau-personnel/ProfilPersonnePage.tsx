@@ -101,6 +101,7 @@ import {
   AlbumComposer,
   AlbumsSection,
 } from "../reseau-albums"
+import { useConnectionRequest } from "./use-connection-request"
 import { Avatar } from "./Avatar"
 import {
   RESEAU_ACTION_SHAPE_STYLE,
@@ -884,7 +885,7 @@ function ConnectionButton({
 }) {
   const { t } = useTranslation("reseau")
   const { networkId } = useNetwork()
-  const request = useMutation(api.modules.graph.connections.requestConnection)
+  const connectionRequest = useConnectionRequest()
   const respond = useMutation(api.modules.graph.connections.respondToConnection)
   const [pending, setPending] = useState(false)
 
@@ -972,21 +973,21 @@ function ConnectionButton({
           // Se connecter : couleur des relations (ADR-0027).
           variant="social"
           icon="userPlus"
-          disabled={pending}
+          disabled={pending || connectionRequest.disabled}
           style={RESEAU_PRIMARY_ACTION_STYLE}
           onClick={() => {
             setPending(true)
-            void request({ networkId, handle })
-              .then(() => toast.success(t("profilPersonnePage.toast.requestSent")))
+            void connectionRequest.send({ handle })
+              .then((sent) => { if (sent) toast.success(t("profilPersonnePage.toast.requestSent")) })
               .catch((err: unknown) =>
                 toast.error(gestureErrorText(err, "requestFailed", t)),
               )
               .finally(() => setPending(false))
           }}
         >
-          {pending
+          {connectionRequest.waitLabel ?? (pending
             ? t("profilPersonnePage.connection.sending")
-            : t("profilPersonnePage.connection.connect")}
+            : t("profilPersonnePage.connection.connect"))}
         </Button>
       )
   }
