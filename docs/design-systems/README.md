@@ -94,3 +94,8 @@ Les documents antérieurs [22](../22_THEMES_ET_OPTIONS_ANTSIA.md),
 [23](../23_APPLICATION_STRICTE_DES_CHARTES.md) et
 [24](../24_PUBLICATION_ET_RECETTE_CHARTES_2026-10-20.md) restent leurs rapports
 propres ; leurs preuves historiques ne sont pas réattribuées à cette livraison.
+
+## Suites du relevé
+
+- [Implémentation et recette locale](09_IMPLEMENTATION_ET_RECETTE.md).
+- [Publication ANTSIA et preuves en ligne](10_PUBLICATION_2026-10-20.md).
