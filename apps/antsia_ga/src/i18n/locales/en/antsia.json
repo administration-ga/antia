@@ -17,7 +17,7 @@
     "status": "The service will open in stages. This development version already lets you sign in, choose your handle, post and react.",
     "healthLink": "Service status",
     "enter": "Sign in",
-    "goToFeed": "Go to the feed"
+    "goToFeed": "Go Home"
   },
   "health": {
     "title": "Service status",
@@ -36,7 +36,7 @@
     "checking": "Checking your session…"
   },
   "nav": {
-    "feed": "Feed",
+    "feed": "Home",
     "signOut": "Sign out",
     "home": "Home",
     "messages": "Messages",
@@ -106,7 +106,7 @@
     "invalidTimeZone": "Enter a valid time zone."
   },
   "feed": {
-    "title": "The feed"
+    "title": "Home"
   },
   "feedPreferences": {
     "title": "My feed",
@@ -137,7 +137,7 @@
     "fallback": "View my notifications"
   },
   "stories": {
-    "title": "Statuses"
+    "title": "Stories"
   },
   "profile": {
     "title": "@{{handle}}'s profile"
@@ -163,7 +163,7 @@
   "personal": {
     "title": "My data and appeals",
     "lead": "Review decisions concerning you and stay in control of your data.",
-    "home": "Back to the feed",
+    "home": "Back home",
     "exportTitle": "Export my data",
     "exportLead": "A personal file contains your information and content. Authentication and notification credentials are excluded.",
     "export": "Download my export",
@@ -259,13 +259,34 @@
       "hintDevice": "Each theme has three colors, one for each family of actions: posting, following and writing, reacting and joining. Backgrounds stay light or dark according to your appearance setting. The change is immediate and saved for this network on this device.",
       "saveFailed": "The theme could not be saved to your account. {{reason}}",
       "options": {
-        "gaboma": { "name": "Gaboma", "description": "Green, yellow and blue of the flag. The network’s theme." },
-        "soleil": { "name": "Sun", "description": "Tangerine, azure and poppy red." },
-        "foret": { "name": "Forest", "description": "Forest green, olive and honey." },
-        "corail": { "name": "Coral", "description": "Coral pink, tangerine and lilac." },
-        "lagon": { "name": "Lagoon", "description": "Turquoise, coral and Naples yellow." },
-        "electrique": { "name": "Electric", "description": "Blue, pink and lime." },
-        "sable": { "name": "Sand", "description": "Gabon blue, teal and golden sand. DIASPORALE’s theme." }
+        "gaboma": {
+          "name": "Gaboma",
+          "description": "Green, yellow and blue of the flag. The network’s theme."
+        },
+        "soleil": {
+          "name": "Sun",
+          "description": "Tangerine, azure and poppy red."
+        },
+        "foret": {
+          "name": "Forest",
+          "description": "Forest green, olive and honey."
+        },
+        "corail": {
+          "name": "Coral",
+          "description": "Coral pink, tangerine and lilac."
+        },
+        "lagon": {
+          "name": "Lagoon",
+          "description": "Turquoise, coral and Naples yellow."
+        },
+        "electrique": {
+          "name": "Electric",
+          "description": "Blue, pink and lime."
+        },
+        "sable": {
+          "name": "Sand",
+          "description": "Gabon blue, teal and golden sand. DIASPORALE’s theme."
+        }
       }
     },
     "motif": {

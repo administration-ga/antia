@@ -16,7 +16,7 @@
  * §7.5) est porté tel quel, en constantes : `personalMode = true`,
  * `personalSpaceIsElsewhere = false`, `activeOrgId = null`.
  */
-import { createContext, useContext, useEffect, useState, type ComponentType, type ReactNode } from "react"
+import { createContext, useCallback, useContext, useEffect, useState, useSyncExternalStore, type ComponentType, type ReactNode } from "react"
 
 import type { Id } from "./engine"
 import { migrateNetworkStorage } from "./network-storage-migration"
@@ -65,6 +65,8 @@ export interface EngineRoutes {
    * garde sa navigation par volets.
    */
   me?: () => string
+  /** Annuaire des boutiques servi par l'application ; absent : aucun raccourci de rail inventé. */
+  shops?: () => string
   /** U04 : vrai lecteur vidéo ; le filtre auteur reste jugé par le serveur. */
   clips?: (handle?: string) => string
   /**
@@ -95,6 +97,9 @@ export interface EngineRoutes {
  *    sur ses volets.
  */
 export type EngineNavigation = "volets" | "destinations"
+
+/** U02 : géométrie de navigation, sur déclaration ; le moteur garde ses seuils historiques par défaut. */
+export type EngineNavigationLayout = "classic" | "adaptive"
 
 /**
  * La PRÉSENTATION des publications que l'application déclare — capacité de
@@ -173,6 +178,10 @@ export interface NetworkContextValue {
   liveAvailable: boolean
   /** La navigation déclarée par l'application, déjà rabattue sur `"volets"` si une destination manque. */
   navigation: EngineNavigation
+  /** U02 : absent dans les consommateurs historiques ; téléphone <768, rail compact <1200 sur opt-in. */
+  navigationLayout?: EngineNavigationLayout
+  /** Libellés d'entrées optionnelles traduits par l'application qui sert leurs routes. */
+  navigationLabels?: Readonly<{ shops?: string; clips?: string }>
   /** La présentation des publications déclarée par l'application, `"classic"` sauf opt-in explicite. */
   postPresentation: EnginePostPresentation
   /** La présentation du fil déclarée par l'application, `"list"` sauf opt-in explicite (P04). */
@@ -203,6 +212,40 @@ export function resolveEngineNavigation(requested: EngineNavigation | undefined,
   if (requested !== "destinations") return "volets"
   return routes.discover !== undefined && routes.me !== undefined ? "destinations" : "volets"
 }
+
+/** L'adaptation n'a de sens que si les destinations sont effectivement servies. */
+export function resolveEngineNavigationLayout(requested: EngineNavigationLayout | undefined, navigation: EngineNavigation): EngineNavigationLayout {
+  return navigation === "destinations" && requested === "adaptive" ? "adaptive" : "classic"
+}
+
+export function networkNavigationMobileQuery(layout: EngineNavigationLayout): string {
+  return layout === "adaptive" ? "(width < 768px)" : "(max-width: 959px)"
+}
+
+/**
+ * Un seul choix d'arbre pour la page réseau et les autres pages de membre.
+ * Le serveur et l'hydratation rendent null : jamais un faux format connu.
+ * 768→1200 reste le même arbre ; le rail se compose uniquement en CSS.
+ */
+export function useNetworkNavigationLayout(): { adaptive: boolean; mobile: boolean | null } {
+  const { navigation, navigationLayout } = useNetwork()
+  const layout = resolveEngineNavigationLayout(navigationLayout, navigation)
+  const query = networkNavigationMobileQuery(layout)
+  const subscribe = useCallback((notify: () => void) => {
+    if (typeof window === "undefined" || typeof window.matchMedia !== "function") return () => {}
+    const media = window.matchMedia(query)
+    media.addEventListener("change", notify)
+    return () => media.removeEventListener("change", notify)
+  }, [query])
+  const getSnapshot = useCallback((): boolean | null => {
+    if (typeof window === "undefined" || typeof window.matchMedia !== "function") return null
+    return window.matchMedia(query).matches
+  }, [query])
+  const mobile = useSyncExternalStore(subscribe, getSnapshot, navigationServerSnapshot)
+  return { adaptive: layout === "adaptive", mobile }
+}
+
+function navigationServerSnapshot(): null { return null }
 
 /**
  * La présentation RETENUE : `"media"` ou `"charte"` seulement sur demande
@@ -247,6 +290,9 @@ export function NetworkProvider(props: {
   liveAvailable?: boolean
   /** Opt-in de la navigation par destinations ; absent = `"volets"` (comportement historique). */
   navigation?: EngineNavigation
+  /** U02 : géométrie à trois formats, seulement sous destinations ; absent = seuil historique 960. */
+  navigationLayout?: EngineNavigationLayout
+  navigationLabels?: Readonly<{ shops?: string; clips?: string }>
   /** Opt-in de la présentation média ou charte des publications ; absent = `"classic"` (comportement historique). */
   postPresentation?: EnginePostPresentation
   /** Opt-in du fil immersif (P04) ; absent = `"list"` (comportement historique). */
@@ -292,6 +338,8 @@ export function NetworkProvider(props: {
     storagePrefix: `${storageNamespace}antsia:${props.slug}:`,
     liveAvailable: props.liveAvailable === true,
     navigation: resolveEngineNavigation(props.navigation, props.routes),
+    navigationLayout: resolveEngineNavigationLayout(props.navigationLayout, resolveEngineNavigation(props.navigation, props.routes)),
+    navigationLabels: props.navigationLabels,
     postPresentation: resolveEnginePostPresentation(props.postPresentation),
     feedPresentation: resolveEngineFeedPresentation(props.feedPresentation),
     storiesPresentation: resolveEngineStoriesPresentation(props.storiesPresentation),

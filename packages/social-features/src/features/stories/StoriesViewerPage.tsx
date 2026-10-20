@@ -83,9 +83,10 @@ export function StoriesViewerPage({
 	openCreate = false,
 	canCreate = true,
 }: StoriesViewerPageProps = {}) {
+	const { networkId, personId } = useNetwork()
 	return (
 		<Suspense fallback={null}>
-			<StoriesViewerInner openCreate={openCreate} canCreate={canCreate} />
+			<StoriesViewerInner key={`${networkId}:${personId}`} openCreate={openCreate} canCreate={canCreate} />
 		</Suspense>
 	)
 }

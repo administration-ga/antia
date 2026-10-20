@@ -1,7 +1,7 @@
 "use client"
 
 import { AppearanceControl } from "@antsia/social-features/shell/appearance"
-import { ArrowRight, LogOut, Settings } from "lucide-react"
+import { ArrowRight, LogOut, Settings, UserRound } from "lucide-react"
 import Link from "next/link"
 import { useId, useState } from "react"
 import { useTranslation } from "react-i18next"
@@ -12,7 +12,7 @@ import { useMemberSession } from "@/components/network-shell"
 import { Button, buttonClassName } from "@/components/shared/controls"
 import { routes } from "@/lib/routes"
 import { signOutAndRedirect } from "@/lib/sign-out"
-import { meEntriesIn, type MeEntry, type MeSection } from "./me-model"
+import { meActivityEntries, meEntriesIn, type MeEntry, type MeSection } from "./me-model"
 
 const ENTRY_LINK =
   "flex min-h-11 items-start justify-between gap-3 rounded-xl border border-border bg-card p-4 text-card-foreground hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
@@ -21,7 +21,7 @@ const ENTRY_LINK =
 export function EntryList({ entries }: { entries: readonly MeEntry[] }) {
   const { t } = useTranslation("antsia")
   return (
-    <ul className="grid gap-3">
+    <ul className="grid gap-3 sm:grid-cols-2">
       {entries.map((entry) => (
         <li key={entry.id}>
           <Link href={entry.href} className={ENTRY_LINK}>
@@ -68,16 +68,25 @@ export function MemberMeScreen() {
             </Link>
           </div>
           <p className="text-base text-muted-foreground">{t("me.lead")}</p>
-          {handle !== null ? (
-            <p className="text-sm text-muted-foreground">
-              <span className="font-semibold text-foreground">{person.displayName}</span> · @{handle}
-            </p>
-          ) : null}
         </header>
+
+        {handle !== null ? (
+          <section className="flex flex-wrap items-center justify-between gap-4 rounded-[var(--ui2-card-radius)] border border-[color:var(--esp-surface-border)] bg-card p-[var(--esp-card-padding,16px)] text-card-foreground">
+            <div className="flex min-w-0 flex-1 items-start gap-3">
+              <UserRound aria-hidden="true" className="mt-1 size-6 shrink-0 text-muted-foreground" />
+              <div className="min-w-0">
+                <h2 className="break-words text-lg font-semibold">{person.displayName}</h2>
+                <p className="break-all text-sm text-muted-foreground">@{handle}</p>
+                <p className="mt-2 text-sm text-muted-foreground">{t("me.profileHint")}</p>
+              </div>
+            </div>
+            <Link href={routes.profile(handle)} className={buttonClassName("outline")}>{t("me.profile")}</Link>
+          </section>
+        ) : null}
 
         <section aria-labelledby={titles.activity} className="flex flex-col gap-4">
           <h2 id={titles.activity} className="text-lg font-semibold">{t("me.activityTitle")}</h2>
-          <EntryList entries={meEntriesIn("activity", handle)} />
+          <EntryList entries={meActivityEntries(handle)} />
         </section>
 
         <section aria-labelledby={titles.preferences} className="flex flex-col gap-4">

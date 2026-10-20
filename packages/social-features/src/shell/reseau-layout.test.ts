@@ -7,6 +7,7 @@ import { describe, expect, it } from "vitest"
 import { storyComposePose } from "../features/stories/story-create"
 import { createAppI18n } from "../i18n"
 import { RESEAU_MOBILE_CSS } from "./mobile/mobile-styles"
+import { RESEAU_ADAPTIVE_CSS } from "./reseau-adaptive-styles"
 import {
   COLLAPSED_FEED_MIN,
   COLLAPSED_NAV_MIN,
@@ -203,6 +204,47 @@ describe("la grille implémente les paliers du module", () => {
   it("emploie la même gouttière latérale et aligne les cartes en tête", () => {
     expect(css).toContain(".rp-scope { padding: 14px 16px 0; }")
     expect(css).toContain("padding-top: 0;")
+  })
+
+  it("garde une hauteur définie et les scrollers historiques hors opt-in adaptatif", () => {
+    expect(codeOf("./ReseauAgentPage.tsx")).toMatch(
+      /<div\s+className="rp-scope"\s+data-navigation-layout=\{adaptive \? "adaptive" : undefined\}\s+style=\{adaptive \? undefined : \{\s*height:\s*"100%"/
+    )
+    expect(ruleBody(rules, ".rp-scope")).toContain("overflow: hidden")
+    const singleColumn = ruleBody(rules, ".rp-grid")
+    expect(singleColumn).toContain("flex: 1")
+    expect(singleColumn).toContain("min-height: 0")
+    expect(singleColumn).toContain("overflow-y: auto")
+
+    const twoColumns = [`@container rp-page (min-width: ${TWO_COLUMN_MIN}px)`]
+    const grid = ruleBody(rules, ".rp-grid", twoColumns)
+    expect(grid).toContain("height: 100%")
+    expect(grid).toContain("overflow: hidden")
+    for (const selector of [".rp-main-col", ".rp-grid .rp-rail-end"]) {
+      const column = ruleBody(rules, selector, twoColumns)
+      expect(column).toContain("overflow-y: auto")
+      expect(column).toContain("min-height: 0")
+      expect(column).toContain("padding-bottom: 48px")
+    }
+    const rightRail = ruleBody(rules, ".rp-grid .rp-rail-end", twoColumns)
+    expect(rightRail).toContain("max-height: 100%")
+    expect(rightRail).toContain("overflow-x: hidden")
+    const leftRail = ruleBody(rules, ".rp-rail-start", [`@container rp-page (min-width: ${COLLAPSED_NAV_MIN}px)`])
+    expect(leftRail).toContain("overflow-y: auto")
+    expect(leftRail).toContain("min-height: 0")
+    expect(leftRail).toContain("padding-bottom: 48px")
+  })
+
+  it("réserve le défilement du document à l'opt-in et borne seulement son rail", () => {
+    const adaptive = cssRules(cssOf(RESEAU_ADAPTIVE_CSS))
+    const scope = '.rp-scope[data-navigation-layout="adaptive"]'
+    expect(ruleBody(adaptive, scope)).toContain("height: auto")
+    expect(ruleBody(adaptive, scope)).toContain("overflow: visible")
+    expect(ruleBody(adaptive, `${scope} .rp-main-col`)).toContain("overflow: visible")
+    const rail = adaptive.find(rule => selectorParts(rule).includes(`${scope} .rp-rail-start`) && rule.body.includes("position: sticky"))?.body ?? ""
+    expect(rail).toContain("position: sticky")
+    expect(rail).toContain("overflow-y: auto")
+    expect(rail).toContain("max-height: calc(100dvh")
   })
 
   it("ne masque le rappel du profil à AUCUN palier", () => {

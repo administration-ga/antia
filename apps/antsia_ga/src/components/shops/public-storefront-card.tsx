@@ -17,7 +17,7 @@ export function PublicStorefrontCard({ storefront, locale, catalog }: { storefro
     { key: "hours", value: storefront.hours },
   ] as const
 
-  return <article className="mx-auto w-full max-w-3xl overflow-hidden rounded-2xl border border-border bg-card text-card-foreground">
+  return <article className="mx-auto w-full max-w-5xl overflow-hidden rounded-2xl border border-border bg-card text-card-foreground [overflow-wrap:anywhere]">
     {storefront.bannerUrl ? <div className="bg-muted"><Image unoptimized src={storefront.bannerUrl} width={1200} height={400} alt="" loading="lazy" className="aspect-[3/1] max-h-96 w-full object-cover" /></div> : null}
     <div className="flex flex-col gap-6 p-5 sm:p-8">
       <header className="flex flex-col gap-4">
@@ -36,6 +36,7 @@ export function PublicStorefrontCard({ storefront, locale, catalog }: { storefro
         </div>
         <p className="border-l-2 border-primary pl-3 text-sm text-muted-foreground">{t("shops:publicStorefront.origin", { name: storefront.origin.name })}</p>
         <p className="text-xs text-muted-foreground">{t("shops:publicStorefront.publicAudience")}</p>
+        {storefront.blocks.includes("catalog") || storefront.blocks.includes("services") ? <Link href={routes.publicShopCatalog(storefront.handle)} prefetch={false} className={`${PUBLIC_LINK} self-start`}>{t("commerceExperience:storefront.offers")}</Link> : null}
       </header>
 
       <section aria-labelledby="public-storefront-about" className="flex flex-col gap-4 border-t border-border pt-6">

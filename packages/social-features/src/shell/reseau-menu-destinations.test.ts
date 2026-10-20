@@ -44,6 +44,13 @@ function at(href: string, handle: string | null = "awa.ndong") {
 }
 
 describe("reseauDestinations — cinq destinations stables", () => {
+  it("active Clips seulement avec sa route et son libellé, sans laisser un lien Créer inerte", () => {
+    const withClips = { ...ROUTES, clips: () => "/clips-test", clipsLabel: "Clips" }
+    expect(reseauDestinations(withClips).map(destination => destination.id)).toEqual(["fil", "clips", "messages", "decouvrir", "profil"])
+    expect(reseauDestinations(withClips)[1]).toMatchObject({ label: "Clips", href: "/clips-test" })
+    expect(reseauDestinations({ ...ROUTES, clips: withClips.clips }).some(destination => destination.id === "clips")).toBe(false)
+    expect(activeReseauDestination({ pathname: "/clips-test", search: new URLSearchParams() }, withClips, null)).toEqual({ id: "clips", current: "page" })
+  })
 	it("Fil · Découvrir · Créer · Messages · Profil, dans cet ordre, traduites dans les deux langues", () => {
 		expect(RESEAU_DESTINATION_IDS).toEqual(["fil", "decouvrir", "creer", "messages", "profil"])
 		const destinations = reseauDestinations(ROUTES)

@@ -41,8 +41,10 @@
  * `SharePostDialog` en est un — il passe par un portail vers `document.body`,
  * et c'est un PRÉREQUIS de cette grille, pas un détail.
  *
- * ⚠️ Les colonnes défilent CHACUNE pour soi : la page se monte dans un
- * conteneur de hauteur DÉFINIE (la zone de contenu de l'application).
+ * ⚠️ Dans la pose HISTORIQUE, les colonnes défilent chacune pour soi : la page
+ * se monte dans un conteneur de hauteur définie. U02, sous opt-in adaptatif,
+ * conserve le document comme défileur des pages ordinaires ; le lecteur immersif
+ * garde son défileur dédié. Les deux feuilles ne changent pas le même consommateur.
  *
  * ── Le 2026-08-19 — en-tête compacte et onglets « chemise » ───────────────
  * Les volets sont rendus par `EspaceDossierTabs` (le kit d'espace,
@@ -54,10 +56,9 @@
  * porte la recherche et la portée.
  */
 
-import { useNetwork, useRoutes } from "@antsia/api/network"
+import { useNetwork, useNetworkNavigationLayout, useRoutes } from "@antsia/api/network"
 import { Alert, Button, Select, SkeletonCard, TextInput } from "@antsia/ui"
 import { EspaceDossierTabs, EspaceKitStyles } from "@antsia/ui/espace-kit"
-import { useIsReseauMobile } from "@antsia/ui/overlay"
 import { Search } from "lucide-react"
 import { Suspense, useCallback } from "react"
 import { useTranslation } from "react-i18next"
@@ -109,6 +110,7 @@ import {
 import { isServedReseauTab, servedReseauTab } from "./reseau-menu"
 import { ReseauDesktopIcomLink } from "./ReseauDesktopIcomLink"
 import { ReseauMenuRail } from "./ReseauMenuRail"
+import { RESEAU_ADAPTIVE_CSS } from "./reseau-adaptive-styles"
 
 /** Le paramètre du lecteur plein écran qui positionne l'entrée sur un auteur. */
 const STORIES_AUTHOR_PARAM = "auteur"
@@ -479,7 +481,7 @@ export function ReseauAgentPage() {
  * arbres partagent le hook, ils ne le montent pas ensemble.
  */
 function ReseauAgentPageSwitch() {
-  const mobile = useIsReseauMobile()
+  const { adaptive, mobile } = useNetworkNavigationLayout()
   if (mobile === null) {
     return (
       <div style={{ display: "grid", gap: 16, padding: "12px 14px" }}>
@@ -488,10 +490,10 @@ function ReseauAgentPageSwitch() {
       </div>
     )
   }
-  return mobile ? <ReseauMobilePage /> : <ReseauAgentPageInner />
+  return mobile ? <ReseauMobilePage /> : <ReseauAgentPageInner adaptive={adaptive} />
 }
 
-function ReseauAgentPageInner() {
+function ReseauAgentPageInner({ adaptive }: { adaptive: boolean }) {
   const { liveAvailable } = useNetwork()
   const { t } = useTranslation("reseau")
   const routes = useRoutes()
@@ -670,15 +672,17 @@ function ReseauAgentPageInner() {
   return (
     <div
       className="rp-scope"
-      style={{
-        height: "100%",
-      }}
+      data-navigation-layout={adaptive ? "adaptive" : undefined}
+      style={adaptive ? undefined : { height: "100%" }}
     >
       {/* `href` + `precedence` : React 19 hisse la balise dans `<head>` et la
           DÉDOUBLONNE si l'écran se remonte. */}
       <style href="rp-grid" precedence="default">
         {RESEAU_DESKTOP_CSS}
       </style>
+      {/* U02 : une feuille supplémentaire, strictement scoped ; l'historique
+          conserve ses seuils et ses défileurs hors de l'opt-in ANTSIA. */}
+      {adaptive ? <style href="rp-grid-adaptive-u02" precedence="default">{RESEAU_ADAPTIVE_CSS}</style> : null}
       {/* La feuille du kit d'espace — hissée et dédoublonnée par React 19,
           comme la feuille locale ci-dessus (même précédence "default"). */}
       <EspaceKitStyles />

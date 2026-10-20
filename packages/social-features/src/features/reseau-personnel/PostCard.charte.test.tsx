@@ -3,7 +3,7 @@
 import { fireEvent, render, screen, waitFor, within } from "@testing-library/react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
-import { EngineTestWrapper, renderWithEngine, TEST_NETWORK_ID } from "../../tests/engine-wrapper"
+import { EngineTestWrapper, renderWithEngine, TEST_NETWORK_ID, TEST_ROUTES } from "../../tests/engine-wrapper"
 
 const mocks = vi.hoisted(() => ({
   calls: [] as { ref: string; args: unknown }[],
@@ -79,6 +79,59 @@ beforeEach(() => {
 afterEach(() => vi.restoreAllMocks())
 
 describe("PostCard — présentation « charte » (ADR-0028)", () => {
+  it("en ANTSIA adaptive, place média et actions avant la légende, avec l'audience visible", () => {
+    const view = renderWithEngine(<PostCard post={base} now={NOW} />, {
+      postPresentation: "charte",
+      navigation: "destinations",
+      navigationLayout: "adaptive",
+      routes: { ...TEST_ROUTES, discover: () => "/decouvrir", me: () => "/moi" },
+    })
+    const article = view.container.querySelector("article")!
+    expect(article).toHaveAttribute("data-post-layout", "media-first")
+    const media = article.querySelector(".rpm-m")
+    const actions = within(article).getByRole("group", { name: "Actions sur la publication" })
+    const caption = article.querySelector(".rp-charte-caption")
+    expectBefore(media, actions)
+    expectBefore(actions, caption)
+    expect(caption).toHaveTextContent("Lever de soleil")
+    expect(article.querySelector(".rp-charte-audience")).toHaveTextContent("Tout le réseau")
+  })
+
+  it("le texte seul reste lisible avant les actions, sans cadre média vide", () => {
+    const body = "Texte sans média. ".repeat(35)
+    const view = renderWithEngine(<PostCard post={{ ...base, media: [], body }} now={NOW} />, {
+      postPresentation: "charte",
+      navigation: "destinations",
+      navigationLayout: "adaptive",
+      routes: { ...TEST_ROUTES, discover: () => "/decouvrir", me: () => "/moi" },
+    })
+    const article = view.container.querySelector("article")!
+    const text = within(article).getByText(body.trim())
+    const actions = within(article).getByRole("group", { name: "Actions sur la publication" })
+    expectBefore(text, actions)
+    expect(article.querySelector(".rpm-m")).toBeNull()
+    expect(article.querySelector(".rp-charte-caption")).toBeNull()
+  })
+
+  it("la légende longue s'ouvre puis se replie en conservant le focus sur sa commande", () => {
+    const body = "Une légende longue pour ce média. ".repeat(24)
+    renderWithEngine(<PostCard post={{ ...base, body }} now={NOW} />, {
+      postPresentation: "charte",
+      navigation: "destinations",
+      navigationLayout: "adaptive",
+      routes: { ...TEST_ROUTES, discover: () => "/decouvrir", me: () => "/moi" },
+    })
+    const more = screen.getByRole("button", { name: "Lire la suite" })
+    more.focus()
+    fireEvent.click(more)
+    expect(more).toHaveAttribute("aria-expanded", "true")
+    expect(more).toHaveFocus()
+    expect(more.closest("[data-post-caption]")).toHaveTextContent(body.trim())
+    fireEvent.click(screen.getByRole("button", { name: "Réduire" }))
+    expect(more).toHaveAttribute("aria-expanded", "false")
+    expect(more).toHaveFocus()
+  })
+
   it("suit l'écran des chartes : auteur, texte, média posé, puis la rangée d'icônes", () => {
     const view = renderCharte(base)
     const article = view.container.querySelector("article")!
@@ -177,7 +230,7 @@ describe("PostCard « charte » — l'évènement annoncé", () => {
   })
 
   it("un moteur qui ne sert pas encore l'identifiant de la ligne : aucune réponse proposée", () => {
-    const { myParticipationId: _omitted, ...previous } = event
+    const previous = Object.fromEntries(Object.entries(event).filter(([key]) => key !== "myParticipationId"))
     renderCharte({ ...base, media: [], event: previous as NonNullable<PostCardPost["event"]> })
     const card = screen.getByRole("region", { name: "Évènement annoncé" })
     expect(within(card).queryAllByRole("button")).toHaveLength(0)

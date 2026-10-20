@@ -18,6 +18,7 @@
  */
 
 import { Icon } from "@antsia/ui"
+import { useState, type ReactNode } from "react"
 import { initialsOf } from "../reseau-personnel/Avatar"
 import type { StoryRingState } from "./stories-tray"
 
@@ -45,23 +46,22 @@ export function StoryRing({
 	// c'est ce qui donne envie d'ouvrir. L'avatar n'est qu'un repli — une
 	// rangée de portraits ne dit pas ce qu'il y a derrière.
 	const image = coverUrl ?? avatarUrl ?? null
+	const fallback = displayName.trim().length > 0 ? <span style={{ fontSize: 18, fontWeight: 700, letterSpacing: "0.02em" }}>{initialsOf(displayName)}</span> : <Icon name="user" size={22} />
 
 	return (
-		<span className={`st-tray-ring ${RING_CLASS[state]}`}>
+		<span className={`st-tray-ring ${RING_CLASS[state]}`} aria-hidden="true">
 			<span className="st-tray-disc">
 				{image !== null ? (
-					<img className="st-tray-cover" src={image} alt="" aria-hidden="true" />
-				) : displayName.trim().length > 0 ? (
-					<span
-						aria-hidden="true"
-						style={{ fontSize: 18, fontWeight: 700, letterSpacing: "0.02em" }}
-					>
-						{initialsOf(displayName)}
-					</span>
-				) : (
-					<Icon name="user" size={22} />
-				)}
+					<RingImage key={image} url={image} fallback={fallback} />
+				) : fallback}
 			</span>
 		</span>
 	)
+}
+
+function RingImage({ url, fallback }: { url: string; fallback: ReactNode }) {
+	const [failed, setFailed] = useState(false)
+	if (failed) return fallback
+	// eslint-disable-next-line @next/next/no-img-element -- moteur indépendant de Next : URL délivrée par la garde, miniature au cadre déjà dimensionné.
+	return <img className="st-tray-cover" src={url} alt="" onError={() => setFailed(true)} />
 }

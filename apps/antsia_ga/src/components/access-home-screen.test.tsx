@@ -92,7 +92,7 @@ describe("accueil ANTSIA — accès réel", () => {
     expect(buttons.some((button) => button.textContent?.includes("Recevoir un code"))).toBe(true)
     const signup = host.querySelector(`a[href="${routes.signIn("sign-up")}"]`)
     expect(signup?.textContent).toBe("Créer un compte")
-    expect(host.querySelector(`a[href="${routes.discover()}"]`)?.textContent).toBe("Découvrir les publications publiques")
+    expect(host.querySelector(`a[href="${routes.discover()}"]`)?.textContent).toBe("Explorer les publications publiques")
     expect(host.querySelector(`h1 a[href="${routes.home()}"]`)?.textContent).toBe(BRAND_NAME)
     expect(host.querySelector(`footer a[href="${routes.about()}"]`)?.textContent).toBe("À propos")
     expect(host.querySelector(`footer a[href="${routes.legal()}"]`)).not.toBeNull()

@@ -1,0 +1,28 @@
+{
+  "baselineModules": 710,
+  "candidateModules": 711,
+  "added": [
+    "_deps/GQADDUZO.js",
+    "_deps/RLK5LVMM.js",
+    "modules/posts/mediaFeed.js"
+  ],
+  "changedSource": [
+    "betterAuth/auth.js",
+    "http.js",
+    "modules/people/dataInventory.js",
+    "modules/people/erasure.js"
+  ],
+  "removed": [
+    "_deps/2SKMAOVC.js",
+    "_deps/GON4BL67.js"
+  ],
+  "changedEnvironment": [],
+  "projectConfigUnchanged": true,
+  "nodeDependenciesUnchanged": true,
+  "udfVersionUnchanged": true,
+  "baselineConfirmedAgainstLiveBeforePublish": true,
+  "schemaBaselineHash": "043f59d99ff4766d3110fdbd0916f8d2d4741ac98012f0edff5e5d997454964e",
+  "convexConfigBaselineHash": "e863641586be8a91e4a17e84d45fcb7d32d1bce7078473105d58033e828c1ec0",
+  "sourceOnlyChange": "convex/modules/posts/mediaFeed.ts",
+  "bundlerOnlyChanges": "Deux chunks renommés, imports réordonnés ; fonctions existantes inchangées"
+}
