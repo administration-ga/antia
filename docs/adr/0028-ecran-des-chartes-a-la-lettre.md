@@ -76,6 +76,12 @@ Nous ajoutons au moteur une présentation **`postPresentation="charte"`**, décl
    surface.
 7. **Carte publique** (pages sans compte) : même ordre (texte, média posé, actions), avatars rond ou
    carré arrondi, carte à l'angle des surfaces.
+8. **Actus** (ajout du 20/10/2026, après recette du propriétaire : « Vous » apparaissait deux fois et
+   ma série portait un anneau gris pâle). Une seule tuile « Vous » en tête : sans actu en ligne, mon
+   portrait (ou la silhouette) et son « + » ; avec, ma série dans le dégradé du thème — le médaillon
+   l'ouvre, le « + », bouton frère à zone de toucher élargie, en publie une autre. Mesures de la
+   maquette : anneau de 60 px, 2,5 px d'anneau et 2,5 px de la couleur de page, « + » de 22 px,
+   prénom en 12 px. Les cartes (présentation par défaut, DIASPORALE) ne changent pas.
 
 ## Conséquences
 
@@ -133,5 +139,6 @@ Une réponse que la personne n'a pas donnée. Écartée : « Plus tard » ne ré
   `FeedPages.tsx`, `PostReactionControl.tsx`, `PostMedia*.tsx`,
   `packages/social-features/src/shell/mobile/ReseauMobileHeader.tsx`, `ReseauMobileFeed.tsx`,
   `mobile-styles.tsx`, `packages/social-features/src/features/feed-immersion/feed-mode.ts`,
+  `packages/social-features/src/features/stories/{StoriesTray.tsx,stories-tray.ts,stories-styles.tsx}`,
   `convex/modules/events/card.ts`, `apps/antsia_ga/src/components/network-shell.tsx`,
   `apps/antsia_ga/src/components/public/public-post-card.tsx`.
