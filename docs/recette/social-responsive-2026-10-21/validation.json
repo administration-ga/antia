@@ -84,5 +84,26 @@
     "appTests": 763,
     "build": "Next16.4.2 passed, TypeScript included",
     "lint": "6 ANTSIA workspaces passed, zero errors; historical warnings retained"
+  },
+  "releaseCommit": "68f8ad92bd6f87acc53a8ae85563bd781863c4fc",
+  "frontendPublication": {
+    "origin": "https://antsia.vercel.app",
+    "deploymentId": "dpl_57gtmHo6kvFvPqUBBym6VhxgExrX",
+    "health": {
+      "status": "ok",
+      "application": "antsia-ga",
+      "version": "social-responsive-20261021-e34875c094de4b4f",
+      "backend": "configured"
+    },
+    "checkedAt": "2026-10-20T23:15:59.177479+00:00",
+    "cspProductionBackend": true
+  },
+  "git": {
+    "branch": "codex/experience-sociale-responsive-20261021",
+    "featureCommit": "71c93a55eadff5da45ec9cf2010cef01b03c4b8b",
+    "sessionIntegrationCommit": "0c273d7a36051514ebbfe53f49c68bb344b7c9ba",
+    "performanceIntegrationCommit": "68f8ad92bd6f87acc53a8ae85563bd781863c4fc",
+    "remoteConfirmed": true,
+    "sharedHeadAndIndexPreserved": true
   }
 }

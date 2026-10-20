@@ -29,20 +29,13 @@ blanc avec cartes beige ; le sombre et les thèmes existants conservent leurs je
 translucide n'oblige pas à reproduire les teintes variables des vidéos. Les photos et vidéos
 restent la principale source de couleur.
 
-## État de cette demande
+## État au 21 octobre 2026
 
-- Analyse documentaire et visuelle locale : captures examinées, vidéos échantillonnées puis
-  vues ciblées des menus de création, notifications, republication, paramètres et messages.
-- U01 : libellés raccordés dans les ressources propres à ANTSIA, sans mutation des dictionnaires
-  partagés avec DIASPORALE. Scénarios de test écrits, non exécutés ; rendu non constaté. Les routes
-  et identifiants techniques restent stables.
-- U02 : [navigation adaptative raccordée en source](rapports/U02_NAVIGATION_RESPONSIVE_2026-10-20.md),
-  barre sous 768 px, rail compact jusqu'à 1199 px, nommé dès 1200 px ; pages de membre et Messages
-  intégrés. Scénarios écrits seulement, rendu non constaté.
-- U03–U08 : plan d'exécution, pas une refonte déjà rendue dans le navigateur. Le natif possède
-  actuellement un sous-ensemble de fonctions ; ce dossier distingue Web adaptatif et app native.
-- Aucune vérification applicative relancée : ni test, génération, typage, lint, build, serveur,
-  recette navigateur/appareil, configuration, activation, commit ou publication.
+- U01–U08 raccordés au Web ANTSIA et publiés sur https://antsia.vercel.app, version `social-responsive-20261021-e34875c094de4b4f`.
+- Navigation téléphone/tablette/ordinateur, cartes et Stories, Explorer/Clips, profils, Messages et commerce contextuel implémentés avec les gardes existantes.
+- Vérifications exécutées et corrections intégrées ; candidat final :763 tests application,4079 social-features, build Next16.4.2 et lint des six workspaces sans erreur. Résultats et reprises datés dans le [bilan U08](rapports/U08_LIVRAISON_2026-10-21.md).
+- Branche `codex/experience-sociale-responsive-20261021` poussée ; backend média et frontend publiés. Correctifs de session et performances de l’autre session conservés.
+- Contrôle global arrêté sur l’application externe DIASPORALE ; recette visuelle/authentifiée et appels physiques non exécutés. Le natif reste distinct du Web responsive et n’est pas publié par cette livraison.
 
 Les lectures de fichiers et l'extraction locale d'images vidéo servent l'analyse demandée ;
 elles ne constituent pas une recette de l'application. Les médias d'origine ne sont ni copiés
@@ -55,14 +48,14 @@ Repères de continuité : [étude initiale](../2026-10-18-social-commerce/README
 [exécution P00–P19](../2026-10-18-social-commerce/EXECUTION.md),
 [correctifs P19](../2026-10-18-social-commerce/rapports/P19_CORRECTIFS_AUTOMATIQUES_2026-10-20.md).
 
-## Raccord source U01 et passation
+## Raccord source U01 initial
 
 | Périmètre | Fichiers / effet |
 |---|---|
 | Composition Web | `apps/antsia_ga/src/i18n/resources.ts`, `compose-engine-overrides.ts`, `overrides/{fr,en}.json` : copies complètes des namespaces adaptés, fusion imbriquée immuable |
 | Traductions propres à l'app | `apps/antsia_ga/src/i18n/locales/{fr,en}/{antsia,memberNetwork,publicNetwork}.json` : navigation, titres, Stories, retours, invitation de connexion et description des boutiques |
 | Natif | `apps/antsia_mobile/src/i18n/{fr,en}.json` : uniquement les libellés existants navigation/titre du fil, Accueil/Home |
-| Scénarios | `apps/antsia_ga/src/i18n/resources.test.ts` : clés conservées, immutabilité, interpolations/pluriels, ressources serveur/client et différences de sens ; non exécutés |
+| Scénarios | `apps/antsia_ga/src/i18n/resources.test.ts` : clés conservées, immutabilité, interpolations/pluriels, ressources serveur/client et différences de sens ; exécutés dans le candidat Web |
 
 Les composants consommateurs emploient les ressources existantes ; aucun nouvel écran n'est
 créé pour le renommage. La description des boutiques ne dit plus « sans catalogue » et ne
@@ -70,6 +63,4 @@ promet pas l'ouverture des achats. Authentification, suivi unilatéral, statuts 
 audiences, routes et dictionnaires moteur restent tels quels. Les autres modifications déjà
 présentes dans ces fichiers partagés ne sont pas attribuées à U01 ni retirées.
 
-U02 est raccordé en source ; la prochaine tranche d'interface est **U03**, puis U04. Les modèles des captures sont
-analysés dans 01 ; les décisions de noms sont fixées dans 02 ; 03 porte la composition des
-écrans et 04 les huit prompts. Aucun lot U03–U08 n'est présenté comme implémenté ici.
+Les modèles des captures sont analysés dans01 ; les décisions de noms sont fixées dans02 ;03 porte la composition des écrans et04 les huit prompts. Les résultats U01–U08 et les limites de recette figurent dans le bilan final.
