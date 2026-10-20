@@ -1,6 +1,6 @@
 /** PA4 — configuration publique des portes, secrets lus uniquement par le serveur. */
 import catalog from "../../deploy/catalog.json"
-import { devToolsAllowed } from "../lib/devTools"
+import { demoAccountsAllowed, devToolsAllowed } from "../lib/devTools"
 
 type Env = Record<string, string | undefined>
 
@@ -62,12 +62,16 @@ export function smsConfiguration(env: Env = process.env) {
 
 export function authenticationConfiguration(env: Env = process.env) {
   const localCodes = devToolsAllowed(env)
+  // Les comptes de démonstration entrent par code e-mail même sans service de courriel :
+  // leur code s'affiche à l'écran (`demoCodeReadable`), toute autre adresse exige Resend.
+  const demoAccounts = demoAccountsAllowed(env)
   const allowed = trustedOrigins(env)
   return {
     idn: idnConfiguration(env) !== null,
-    emailOtp: localCodes || Boolean(env.RESEND_API_KEY?.trim() && env.RESEND_FROM_ADDRESS?.trim()),
+    emailOtp: localCodes || demoAccounts || Boolean(env.RESEND_API_KEY?.trim() && env.RESEND_FROM_ADDRESS?.trim()),
     smsOtp: localCodes || smsConfiguration(env) !== null,
     localCodes,
+    demoAccounts,
     trustedOrigins: allowed,
     applications: Object.entries(catalog.applications).map(([key, app]) => ({
       key,

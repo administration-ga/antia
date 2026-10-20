@@ -13,7 +13,7 @@ import { routes } from "@/lib/routes"
 const mocks = vi.hoisted(() => ({
   replace: vi.fn(),
   status: "signedOut",
-  configuration: { idn: true, emailOtp: true, smsOtp: true, localCodes: false },
+  configuration: { idn: true, emailOtp: true, smsOtp: true, localCodes: false, demoAccounts: false },
   authClient: {
     signIn: { oauth2: vi.fn(), emailOtp: vi.fn() },
     emailOtp: { sendVerificationOtp: vi.fn() },
@@ -26,6 +26,9 @@ vi.mock("@/components/use-session-state", () => ({ useSessionState: () => ({ sta
 vi.mock("convex/react", () => ({ useQuery: () => mocks.configuration }))
 vi.mock("@/lib/auth-client", () => ({ authClient: mocks.authClient }))
 vi.mock("@/lib/session-bridge-client", () => ({ fencedIdentityEntryClient: (client: unknown) => client }))
+vi.mock("@/components/demo-accounts-panel", () => ({
+  DemoAccountsPanel: ({ shared }: { shared?: boolean }) => <section data-demo-accounts={shared ? "shared" : "local"} />,
+}))
 
 import { AccessHomeScreen } from "./access-home-screen"
 
@@ -45,13 +48,24 @@ async function mount(children: ReactNode = <AccessHomeScreen />) {
 beforeEach(() => {
   vi.clearAllMocks()
   mocks.status = "signedOut"
-  mocks.configuration = { idn: true, emailOtp: true, smsOtp: true, localCodes: false }
+  mocks.configuration = { idn: true, emailOtp: true, smsOtp: true, localCodes: false, demoAccounts: false }
   mocks.authClient.emailOtp.sendVerificationOtp.mockResolvedValue({ data: { success: true }, error: null })
   window.history.replaceState({}, "", routes.home())
 })
 afterEach(async () => { await act(async () => root?.unmount()); host?.remove(); root = undefined })
 
 describe("accueil ANTSIA — accès réel", () => {
+  it("les comptes de démonstration n'apparaissent que si le serveur les annonce : local ou site de démonstration", async () => {
+    const update = await mount()
+    expect(host.querySelector("[data-demo-accounts]")).toBeNull()
+    mocks.configuration = { ...mocks.configuration, demoAccounts: true }
+    await update(<AccessHomeScreen />)
+    expect(host.querySelector("[data-demo-accounts]")?.getAttribute("data-demo-accounts")).toBe("shared")
+    mocks.configuration = { ...mocks.configuration, localCodes: true }
+    await update(<AccessHomeScreen />)
+    expect(host.querySelector("[data-demo-accounts]")?.getAttribute("data-demo-accounts")).toBe("local")
+  })
+
   it("propose le mode sombre en un appui, avant même la connexion (ADR-0027)", async () => {
     const items = new Map<string, string>()
     vi.stubGlobal("localStorage", { getItem: (key: string) => items.get(key) ?? null, setItem: (key: string, value: string) => { items.set(key, value) }, removeItem: (key: string) => { items.delete(key) } })

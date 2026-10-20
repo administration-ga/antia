@@ -7,7 +7,7 @@ import type { GenericCtx } from "@convex-dev/better-auth"
 
 import { components, internal } from "../_generated/api"
 import type { DataModel } from "../_generated/dataModel"
-import { devToolsAllowed } from "../lib/devTools"
+import { demoCodeReadable } from "../lib/devTools"
 import { DIASPORA_SLICE_MANIFEST } from "../modules/diaspora/manifest"
 import { type ApplicationKey, applicationOfOrigin, smsConfiguration } from "./settings"
 
@@ -42,7 +42,9 @@ function unavailable(): never {
 
 export async function deliverOtp(ctx: GenericCtx<DataModel>, channel: "email" | "phone", identifier: string, code: string, request: OtpRequest): Promise<void> {
   if (!("runMutation" in ctx)) return unavailable()
-  if (devToolsAllowed()) {
+  // Développement local : tout code s'affiche à l'écran. Démonstration déclarée :
+  // seuls ceux des adresses réservées (jamais routables), les autres partent normalement.
+  if (demoCodeReadable(identifier)) {
     await ctx.runMutation(internal.modules.platform.devTools.recordOtp, { email: identifier, code, expiresAt: Date.now() + 300_000 })
     return
   }

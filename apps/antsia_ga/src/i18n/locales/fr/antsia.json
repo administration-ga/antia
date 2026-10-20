@@ -354,6 +354,7 @@
   "demo": {
     "title": "Comptes de démonstration",
     "lead": "Développement local seulement : chaque compte entre par le vrai code à usage unique, lu ici pour vous, puis l’accueil se remplit tout seul.",
+    "leadShared": "Site de démonstration : comptes et contenus fictifs, partagés par tous les visiteurs. Un appui vous connecte par le vrai code à usage unique, lu ici pour vous, puis l’accueil se remplit tout seul.",
     "signingIn": "Connexion en cours…",
     "ready": "Compte de démonstration prêt : {{name}}.",
     "failed": "La connexion de démonstration n’a pas abouti. Réessayez dans quelques instants.",
