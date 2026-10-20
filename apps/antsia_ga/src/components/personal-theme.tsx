@@ -1,24 +1,22 @@
 "use client"
 
 import { isMemberThemeId, type MemberThemeId } from "@antsia/social-contracts/appearance"
-import { useOptionalAppearance } from "@antsia/social-features/shell/appearance"
+import { ThemeChoiceProvider, useOptionalAppearance } from "@antsia/social-features/shell/appearance"
 import { api } from "@convex/_generated/api"
 import { useMutation } from "convex/react"
-import { createContext, type ReactNode, useCallback, useContext, useEffect, useRef } from "react"
+import { type ReactNode, useCallback, useEffect, useRef } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 
 import { engineErrorMessage } from "@/lib/engine-errors"
 import { createThemeAccountSync, type ThemeAccountSync } from "@/lib/theme-account-sync"
 
-type ThemeChoice = (theme: string) => void
-
-const ThemeChoiceContext = createContext<ThemeChoice | null>(null)
-
-/** Choisir un thème EN SESSION : appliqué tout de suite, enregistré sur le compte. `null` hors session. */
-export function useThemeChoice(): ThemeChoice | null {
-  return useContext(ThemeChoiceContext)
-}
+/**
+ * Choisir un thème EN SESSION : appliqué tout de suite, enregistré sur le compte ; `null`
+ * hors session. Le contexte vit dans le moteur (ADR-0029) : le sélecteur du rail
+ * (`AppearanceControl`) s'en sert comme Préférences > Thème.
+ */
+export { useThemeChoice } from "@antsia/social-features/shell/appearance"
 
 /**
  * Le thème du compte, sous la session : il s'applique à l'appareil (et y reste en
@@ -59,5 +57,5 @@ export function PersonalTheme({ signedIn, accountTheme, children }: { signedIn: 
     if (isMemberThemeId(theme)) sync.current?.choose(theme)
   }, [])
 
-  return <ThemeChoiceContext.Provider value={signedIn ? choose : null}>{children}</ThemeChoiceContext.Provider>
+  return <ThemeChoiceProvider choose={signedIn ? choose : null}>{children}</ThemeChoiceProvider>
 }
