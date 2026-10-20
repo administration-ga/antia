@@ -354,6 +354,7 @@
   "demo": {
     "title": "Demo accounts",
     "lead": "Local development only: each account signs in with the real one-time code, read here for you, then the welcome steps fill themselves in.",
+    "leadShared": "Demo site: fictional accounts and content, shared by every visitor. One tap signs you in with the real one-time code, read here for you, then the welcome steps fill themselves in.",
     "signingIn": "Signing in…",
     "ready": "Demo account ready: {{name}}.",
     "failed": "The demo sign-in did not go through. Try again in a moment.",
