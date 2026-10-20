@@ -6,4 +6,4 @@ import { createEngineNextConfig } from "@antsia/api/next-config"
  * du moteur en sources, en-têtes de sécurité, déploiement Convex lu dans
  * `ANTSIA/.env.local` en développement et dans les ARG du Dockerfile en production.
  */
-export default createEngineNextConfig({ appDir: process.cwd(), usageAnalytics: { host: process.env.NEXT_PUBLIC_POSTHOG_HOST, projectToken: process.env.NEXT_PUBLIC_POSTHOG_KEY, euRelayOrigin: process.env.NEXT_PUBLIC_POSTHOG_EU_RELAY_ORIGIN } })
+export default createEngineNextConfig({ appDir: process.cwd(), developmentCacheGc: true, usageAnalytics: { host: process.env.NEXT_PUBLIC_POSTHOG_HOST, projectToken: process.env.NEXT_PUBLIC_POSTHOG_KEY, euRelayOrigin: process.env.NEXT_PUBLIC_POSTHOG_EU_RELAY_ORIGIN } })
