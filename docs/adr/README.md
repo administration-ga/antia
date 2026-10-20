@@ -35,3 +35,4 @@ réservent contre `origin/main` et les PR ouvertes de ce dépôt.
 | [0027](0027-six-themes-trois-couleurs-et-systeme-epure.md) | Six thèmes à trois couleurs, Gaboma par défaut, et système épuré | Proposé ; code et tests verts, observé dans le navigateur |
 | [0028](0028-ecran-des-chartes-a-la-lettre.md) | L'écran des chartes, à la lettre, dans le fil d'antsia.ga | Proposé ; code et tests verts, observé dans un banc de rendu (390, 834, 1 440 px, sept thèmes) |
 | [0029](0029-deploiement-de-demonstration-declare.md) | Un déploiement de démonstration déclaré, seul à ouvrir les comptes de démonstration en ligne | Proposé ; code et tests verts, déploiement de démonstration à créer par le propriétaire |
+| [0030](0030-bureau-au-systeme-des-chartes-et-theme-au-rail.md) | Le bureau d'antsia.ga au système des chartes, et le thème au rail | Proposé ; code et tests verts, observé dans l'application réelle (1 440 et 390 px, sept thèmes, clair et sombre) |

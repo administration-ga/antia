@@ -789,10 +789,12 @@ function ReseauAgentPageInner() {
                           placeholder={t("reseauAgentPage.searchPlaceholder")}
                           aria-label={t("reseauAgentPage.searchLabel")}
                           style={{
-                            border: "1px solid var(--ink-200)",
-                            // Pastille, comme le sélecteur de portée qui suit
-                            // sur la même ligne.
-                            borderRadius: 999,
+                            // Système épuré (ADR-0027, ADR-0030) : l'angle des champs
+                            // (14 px) et le contour de contrôle à 3:1 (`--input`,
+                            // gardé par décision du propriétaire) ; ailleurs, la
+                            // pastille d'origine.
+                            border: "1px solid var(--input)",
+                            borderRadius: "var(--esp-field-radius, 999px)",
                             background: "var(--ink-100)",
                             minHeight: 52,
                             // ⚠️ Les QUATRE retraits en toutes lettres, jamais le
@@ -842,8 +844,12 @@ function ReseauAgentPageInner() {
                         value={scope}
                         onChange={(event) => goToScope(parseFeedScope(event.target.value))}
                         style={{
-                          borderRadius: 999,
-                          background: "var(--ink-100)",
+                          // Un filtre du fil est une PUCE des chartes (ADR-0030) :
+                          // angle des puces, gris du creux, aucun filet dans les
+                          // thèmes ANTSIA ; la pastille d'origine en repli.
+                          border: "1px solid var(--esp-chip-border, var(--ink-300))",
+                          borderRadius: "var(--esp-chip-radius, 999px)",
+                          background: "var(--esp-chip-bg, var(--ink-100))",
                           paddingTop: 11,
                           paddingBottom: 11,
                           paddingLeft: 16,

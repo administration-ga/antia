@@ -10,7 +10,7 @@ import type { Locale } from "@antsia/social-features/i18n"
 import { I18nProvider } from "@antsia/social-features/i18n/client"
 import { api } from "@convex/_generated/api"
 import { useQuery } from "convex/react"
-import { type ReactNode, useEffect } from "react"
+import { type ReactNode, useCallback, useEffect } from "react"
 import { useTranslation } from "react-i18next"
 
 import { APP_NAMESPACE, appResources } from "@/i18n/resources"
@@ -72,13 +72,28 @@ export function SessionProviders({ children }: { children: ReactNode }) {
   )
 }
 
+/**
+ * L'apparence d'antsia.ga : ses thèmes, ses motifs, et le NOM de chaque thème dans la
+ * langue de la personne (ADR-0030) — le rail du moteur propose alors le thème à côté
+ * de l'apparence, avec les mêmes noms que Préférences > Thème.
+ */
+function AppAppearance({ children }: { children: ReactNode }) {
+  const { t } = useTranslation(APP_NAMESPACE)
+  const themeName = useCallback((id: string) => t(`preferences.theme.options.${id}.name`), [t])
+  return (
+    <AppearanceProvider storagePrefix={APPEARANCE.storagePrefix} themes={APPEARANCE.themes} motifs={APPEARANCE.motifs} themeName={themeName}>
+      {children}
+    </AppearanceProvider>
+  )
+}
+
 export function Providers({ locale, children }: { locale: Locale; children: ReactNode }) {
   return (
     <I18nProvider locale={locale} appResources={appResources} defaultNS={APP_NAMESPACE} defaultVariables={{ brand: BRAND_NAME }}>
-      <AppearanceProvider storagePrefix={APPEARANCE.storagePrefix} themes={APPEARANCE.themes} motifs={APPEARANCE.motifs}>
+      <AppAppearance>
         <UsagePermissionProvider>{children}</UsagePermissionProvider>
         <EngineToaster />
-      </AppearanceProvider>
+      </AppAppearance>
     </I18nProvider>
   )
 }

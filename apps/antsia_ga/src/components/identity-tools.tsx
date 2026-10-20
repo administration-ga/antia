@@ -58,7 +58,9 @@ export function IdentityTools() {
 
   return (
     <div ref={container} className="relative">
-      <Button variant="ghost" aria-label={t("identity.title")} aria-expanded={open} aria-controls={panelId} onClick={() => setOpen((value) => !value)}>
+      {/* Une icône de l'en-tête : un rond gris dans les thèmes ANTSIA (ADR-0027), comme la
+          cloche et le bouton clair/sombre ; la facture fantôme d'origine en repli. */}
+      <Button variant="ghost" className="min-w-11 px-0 rounded-[var(--esp-header-icon-radius,var(--ui2-button-radius,var(--radius-lg)))] bg-[var(--esp-header-icon-bg,transparent)]" aria-label={t("identity.title")} aria-expanded={open} aria-controls={panelId} onClick={() => setOpen((value) => !value)}>
         <ShieldCheck aria-hidden="true" className="size-4" />
       </Button>
       {open ? (
