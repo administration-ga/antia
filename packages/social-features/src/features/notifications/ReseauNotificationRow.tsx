@@ -19,6 +19,7 @@
  * (le DTO ne porte que le genre, l'acteur et une référence).
  */
 
+import { themedActionStyle } from "../themed-action-style"
 import { useViewerTimeZone } from "@antsia/api/viewer-preferences"
 import { api } from "@antsia/api/engine"
 import type { Id } from "@antsia/api/engine"
@@ -286,17 +287,17 @@ export function ConnectionInviteActions({
 	return (
 		<div style={{ display: "flex", gap: 8, marginTop: 6 }}>
 			{/* Accepter : couleur des relations (ADR-0027). */}
-			<Button
+			<Button style={themedActionStyle("success", "social")}
 				size="sm"
-				variant="social"
+				variant="success"
 				disabled={busy}
 				onClick={() => void decide(true)}
 			>
 				{t("reseauNotificationRow.accept")}
 			</Button>
-			<Button
+			<Button style={themedActionStyle("danger", "secondary")}
 				size="sm"
-				variant="secondary"
+				variant="danger"
 				disabled={busy}
 				onClick={() => void decide(false)}
 			>

@@ -50,9 +50,9 @@ export function JobFilesManager({ files, onUploaded }: { files: readonly JobFile
   return <section aria-labelledby={`${kindId}-title`} className="grid gap-3">
     <h3 id={`${kindId}-title`} className="text-base font-semibold">{t("files.title")}</h3>
     <p className="text-sm text-muted-foreground">{t("files.pdfOnly")}</p>
-    {files.length === 0 ? <p className="text-sm text-muted-foreground">{t("files.empty")}</p> : <ul className="grid gap-2">{files.map((file) => <li key={file.fileId} className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border p-3">
+    {files.length === 0 ? <p className="text-sm text-muted-foreground">{t("files.empty")}</p> : <ul className="grid gap-2">{files.map((file) => <li key={file.fileId} className="flex flex-wrap items-center justify-between gap-2 rounded-[var(--ui2-card-radius)] border border-border p-[var(--esp-card-padding,16px)]">
       <span className="grid min-w-0 gap-0.5"><span className="font-medium">{file.filename ?? t("files.unnamed")}</span><span className="text-sm text-muted-foreground">{t(`files.kind.${file.kind}`)} · {t("files.size", { size: jobFileSizeKb(file.byteSize) })} · {t(`files.scan.${file.scan}`)}</span></span>
-      <Button type="button" variant="ghost" pending={action.pending} onClick={() => { if (window.confirm(t("files.retireConfirm"))) void action.run(async () => await retireFile({ fileId: file.fileId }), () => { toast.success(t("files.retired")) }) }}><Trash2 aria-hidden="true" className="size-4" />{t("files.retire")}</Button>
+      <Button type="button" variant="danger" pending={action.pending} onClick={() => { if (window.confirm(t("files.retireConfirm"))) void action.run(async () => await retireFile({ fileId: file.fileId }), () => { toast.success(t("files.retired")) }) }}><Trash2 aria-hidden="true" className="size-4" />{t("files.retire")}</Button>
     </li>)}</ul>}
     <form noValidate onSubmit={(event) => { void upload(event) }} className="grid gap-3 sm:grid-cols-[minmax(0,12rem)_minmax(0,1fr)_auto] sm:items-end">
       <Field id={kindId} label={t("files.kindLabel")}><select id={kindId} className={SHOP_SELECT_CLASS} {...form.register("kind")}>{COMMERCE_JOBS_ATTACHMENT_KINDS.map((kind) => <option key={kind} value={kind}>{t(`files.kind.${kind}`)}</option>)}</select></Field>
@@ -116,13 +116,13 @@ export function JobApplicationForm({ job }: { job: JobDto }) {
     {preview ? <p className="text-sm" aria-live="polite">{t("apply.namePreview", { name: preview })}</p> : null}
     <Field id={ids.motivation} label={t("apply.motivation")} hint={t("apply.motivationHint")} error={errors.motivation?.message}><TextArea id={ids.motivation} aria-invalid={errors.motivation ? true : undefined} aria-describedby={errors.motivation ? `${ids.motivation}-error` : `${ids.motivation}-hint`} {...form.register("motivation")} /></Field>
     <fieldset className="grid gap-2"><legend className="text-sm font-medium">{t("apply.files")}</legend><p className="text-sm text-muted-foreground">{t("apply.filesHint")}</p>
-      {files.map((file) => <label key={file.fileId} className="flex min-h-11 items-center gap-3 rounded-lg border border-border px-3"><input type="checkbox" value={file.fileId} disabled={!(chosen ?? []).includes(file.fileId) && (chosen ?? []).length >= COMMERCE_JOBS_LIMITS.attachmentsMax} {...form.register("fileIds")} /><span>{file.filename ?? t("files.unnamed")} · {t(`files.kind.${file.kind}`)}</span></label>)}
+      {files.map((file) => <label key={file.fileId} className="flex min-h-11 items-center gap-3 rounded-[var(--ui2-card-radius)] border border-border px-3"><input type="checkbox" value={file.fileId} disabled={!(chosen ?? []).includes(file.fileId) && (chosen ?? []).length >= COMMERCE_JOBS_LIMITS.attachmentsMax} {...form.register("fileIds")} /><span>{file.filename ?? t("files.unnamed")} · {t(`files.kind.${file.kind}`)}</span></label>)}
       {errors.fileIds?.message ? <p role="alert" className="text-sm text-destructive">{errors.fileIds.message}</p> : null}
     </fieldset>
   </form>
     {/* HORS du formulaire de candidature : le dépôt de pièce a son propre formulaire (A19). */}
     <JobFilesManager files={filesQuery.data ?? []} />
-    <section className="grid gap-2 rounded-lg border border-border p-4"><h3 className="text-base font-semibold">{t("apply.consentTitle")}</h3><p className="text-sm">{t("apply.consentText")}</p>
+    <section className="grid gap-2 rounded-[var(--ui2-card-radius)] border border-border p-[var(--esp-card-padding,16px)]"><h3 className="text-base font-semibold">{t("apply.consentTitle")}</h3><p className="text-sm">{t("apply.consentText")}</p>
       <label htmlFor={ids.consent} className="flex min-h-11 items-center gap-3"><input id={ids.consent} form={ids.form} type="checkbox" aria-invalid={errors.consent ? true : undefined} {...form.register("consent")} /><span>{t("apply.consentLabel")}</span></label>
       {errors.consent?.message ? <p role="alert" className="text-sm text-destructive">{errors.consent.message}</p> : null}
     </section>

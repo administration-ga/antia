@@ -48,7 +48,7 @@ function Decisions() {
   const { results, status, loadMore } = usePaginatedQuery(api.modules.moderation.cases.myDecisions, {}, { initialNumItems: 10 })
   return <Card><h2 className="mb-4 text-xl font-semibold">{t("personal.decisionsTitle")}</h2>
     {status === "LoadingFirstPage" ? <p role="status">{t("personal.loading")}</p> : !results.length ? <p className="text-muted-foreground">{t("personal.noDecisions")}</p> : null}
-    <div className="flex flex-col gap-4">{results.map((decision) => <article key={decision.reportId} className="rounded-xl border border-border p-4">
+    <div className="flex flex-col gap-4">{results.map((decision) => <article key={decision.reportId} className="rounded-[var(--ui2-card-radius)] border border-border p-[var(--esp-card-padding,16px)]">
       <p className="font-medium">{t(`personal.statuses.${decision.status}`)}</p>
       {decision.decisionReason ? <p className="my-3 break-words text-sm">{decision.decisionReason}</p> : null}
       {decision.status === "actioned" && decision.appeals.length < 2 ? <AppealForm reportId={decision.reportId} /> : null}
@@ -120,7 +120,7 @@ function DataRights() {
         <Field id="erase-confirmation" label={t("personal.confirmLabel", { word })} error={form.formState.errors.confirmation?.message}>
           <TextInput id="erase-confirmation" autoComplete="off" disabled={form.formState.isSubmitting} aria-invalid={Boolean(form.formState.errors.confirmation)} {...form.register("confirmation")} />
         </Field>
-        <Button variant="outline" type="submit" pending={form.formState.isSubmitting}>{t("personal.erase")}</Button>
+        <Button variant="danger" type="submit" pending={form.formState.isSubmitting}>{t("personal.erase")}</Button>
       </form>}
     </Card>
   </>

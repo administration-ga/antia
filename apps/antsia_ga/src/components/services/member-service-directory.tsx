@@ -41,12 +41,12 @@ function ServiceWindows() {
     <div className="flex flex-col gap-2"><h2 id={titleId} className="text-lg font-semibold">{t("discover.title")}</h2><p className="text-sm text-muted-foreground">{t("discover.lead")}</p></div>
     {query.isError ? <p role="alert" className="text-sm">{t("discover.unavailable")}</p> : !result ? <p role="status" className="text-sm text-muted-foreground">{t("common.loading")}</p> : <>
       {result.page.length ? <ul className="grid gap-3 sm:grid-cols-2">{result.page.map((offer) => <li key={`${offer.shopHandle}:${offer.offerRef}`} className="min-w-0">
-        <Link href={routes.shopOffer(offer.shopHandle, offer.offerRef)} className="flex min-h-11 flex-col gap-1 rounded-xl border border-border bg-card p-4 text-card-foreground hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+        <Link href={routes.shopOffer(offer.shopHandle, offer.offerRef)} className="flex min-h-11 flex-col gap-1 rounded-[var(--ui2-card-radius)] border border-[color:var(--esp-surface-border)] bg-card p-[var(--esp-card-padding,16px)] text-card-foreground hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
           <span className="break-words font-semibold">{offer.title}</span>
           {offer.zone ? <span className="text-sm text-muted-foreground">{offer.zone}</span> : null}
           <span className="text-xs text-muted-foreground">{t("discover.byShop", { handle: offer.shopHandle })}</span>
         </Link>
-      </li>)}</ul> : <p role="status" className="rounded-xl border border-dashed border-border p-5 text-sm text-muted-foreground">{t("discover.filteredWindow")}</p>}
+      </li>)}</ul> : <p role="status" className="rounded-[var(--ui2-card-radius)] border border-dashed border-border p-[var(--esp-card-padding,16px)] text-sm text-muted-foreground">{t("discover.filteredWindow")}</p>}
       {cursors.length > 1 || (!result.isDone && result.continueCursor) ? <nav aria-label={t("discover.title")} className="flex flex-wrap gap-3">
         {cursors.length > 1 ? <Button variant="outline" onClick={() => setCursors((items) => items.slice(0, -1))}>{t("common.previous")}</Button> : null}
         {!result.isDone && result.continueCursor ? <Button variant="outline" onClick={() => setCursors((items) => [...items, result.continueCursor])}>{t("common.next")}</Button> : null}

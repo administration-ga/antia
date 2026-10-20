@@ -481,7 +481,7 @@ function StoryCreateForm({
 						style={{
 							position: "relative",
 							overflow: "hidden",
-							borderRadius: 14,
+							borderRadius: "var(--esp-primitive-media-radius, 14px)",
 							aspectRatio: "9 / 16",
 							maxHeight: "46dvh",
 							margin: "0 auto",

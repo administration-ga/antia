@@ -335,7 +335,7 @@ export const RESEAU_MOBILE_CSS = `
         gap: 2px;
         padding: 6px 2px;
         border: none;
-        border-radius: 12px;
+        border-radius: var(--esp-primitive-chip-radius, 12px);
         background: transparent;
         color: var(--muted-foreground);
         font: inherit;

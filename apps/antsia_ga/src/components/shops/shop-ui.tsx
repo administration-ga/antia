@@ -9,8 +9,8 @@ import { MemberPage } from "@/components/member-chrome"
 import { Button, buttonClassName, Card, type ButtonVariant } from "@/components/shared/controls"
 import { shopErrorText } from "./shop-model"
 
-export const SHOP_LINK_CLASS = "inline-flex min-h-11 items-center justify-center gap-2 rounded-lg px-3 text-sm font-medium text-primary underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-export const SHOP_SELECT_CLASS = "min-h-11 w-full rounded-lg border border-input bg-background px-3 py-2 text-base text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+export const SHOP_LINK_CLASS = "inline-flex min-h-11 items-center justify-center gap-2 rounded-[var(--ui2-button-radius)] px-3 text-sm font-medium text-primary underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+export const SHOP_SELECT_CLASS = "min-h-11 w-full rounded-[var(--esp-field-radius)] border border-input bg-muted px-3 py-2 text-base text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
 
 export function ShopFrame({ title, lead, children }: { title: string; lead?: string; children: ReactNode }) {
   return <MemberPage><div className="mx-auto flex w-full min-w-0 max-w-3xl flex-col gap-5 pb-24 [overflow-wrap:anywhere]"><header className="grid gap-2"><h1 className="text-2xl font-semibold tracking-tight">{title}</h1>{lead ? <p className="text-muted-foreground">{lead}</p> : null}</header>{children}</div></MemberPage>
@@ -24,9 +24,9 @@ export function ShopQueryFailure({ retry, href }: { retry?: () => void; href: st
 }
 export function ShopLogo({ url, name }: { url: string | null; name: string }) {
   const [failedUrl, setFailedUrl] = useState<string | null>(null)
-  if (!url || failedUrl === url) return <span aria-hidden="true" className="flex size-16 shrink-0 items-center justify-center rounded-xl bg-muted text-xl font-semibold">{Array.from(name).at(0) ?? ""}</span>
+  if (!url || failedUrl === url) return <span aria-hidden="true" className="flex size-16 shrink-0 items-center justify-center rounded-[var(--esp-avatar-page-radius)] bg-muted text-xl font-semibold">{Array.from(name).at(0) ?? ""}</span>
   // eslint-disable-next-line @next/next/no-img-element -- URL fournie par la garde du moteur, pas d'identifiant de stockage client.
-  return <img key={url} src={url} alt="" className="size-16 shrink-0 rounded-xl object-contain" onError={() => setFailedUrl(url)} />
+  return <img key={url} src={url} alt="" className="size-16 shrink-0 rounded-[var(--esp-avatar-page-radius)] object-contain" onError={() => setFailedUrl(url)} />
 }
 
 /** Chaque surface est remontée par réseau/personne/objet. Aucun effet tardif après sortie. */

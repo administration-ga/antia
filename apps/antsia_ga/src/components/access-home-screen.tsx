@@ -11,7 +11,7 @@ import { SignInCard } from "@/components/sign-in-screen"
 import type { ShopContactContinuation } from "@/lib/shop-contact-continuation"
 import { routes } from "@/lib/routes"
 
-const FOOTER_LINK = "inline-flex min-h-11 items-center rounded-md px-2 text-xs text-muted-foreground hover:text-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring"
+const FOOTER_LINK = "inline-flex min-h-11 items-center rounded-[var(--ui2-button-radius)] px-2 text-xs text-muted-foreground hover:text-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring"
 
 export type AccessHomeScreenProps = {
   intent?: "sign-in" | "sign-up"
@@ -41,7 +41,7 @@ export function AccessHomeScreen({ intent = "sign-in", signOutIncomplete = false
       <div className="mx-auto grid w-full max-w-[1080px] flex-1 content-start items-start gap-7 px-4 pb-8 pt-10 sm:px-6 sm:pt-14 min-[960px]:grid-cols-[minmax(0,1fr)_400px] min-[960px]:content-center min-[960px]:items-center min-[960px]:gap-20 min-[960px]:py-20">
         <header className="mx-auto max-w-md text-center min-[960px]:mx-0 min-[960px]:max-w-none min-[960px]:pb-20 min-[960px]:text-left">
           <h1 translate="no" className="font-display text-5xl font-bold leading-none tracking-tight text-primary min-[960px]:text-[4.5rem]">
-            <Link href={routes.home()} aria-label={`${BRAND_NAME} — ${t("nav.home")}`} style={{ textDecoration: "none" }} className="rounded-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring focus-visible:outline-offset-4">{BRAND_NAME}</Link>
+            <Link href={routes.home()} aria-label={`${BRAND_NAME} — ${t("nav.home")}`} style={{ textDecoration: "none" }} className="rounded-[var(--ui2-button-radius)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring focus-visible:outline-offset-4">{BRAND_NAME}</Link>
           </h1>
           <p className="mx-auto mt-4 max-w-xs text-xl font-medium leading-snug tracking-tight sm:max-w-md sm:text-2xl min-[960px]:mx-0 min-[960px]:mt-6 min-[960px]:max-w-lg min-[960px]:text-[2rem]">{t("access.headline")}</p>
           <p className="mt-4 hidden max-w-md text-lg leading-relaxed text-muted-foreground min-[960px]:block">{t("access.lead")}</p>
@@ -53,11 +53,11 @@ export function AccessHomeScreen({ intent = "sign-in", signOutIncomplete = false
             </main>
           </SessionProviders>
           <div className="mt-3 text-center">
-            <Link href={routes.discover()} prefetch={false} className="inline-flex min-h-11 items-center justify-center rounded-lg px-4 text-sm text-muted-foreground underline underline-offset-4 hover:text-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring">{t("access.discover")}</Link>
+            <Link href={routes.discover()} prefetch={false} className="inline-flex min-h-11 items-center justify-center rounded-[var(--ui2-button-radius)] px-4 text-sm text-muted-foreground underline underline-offset-4 hover:text-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring">{t("access.discover")}</Link>
           </div>
         </div>
       </div>
-      <footer className="border-t border-border bg-card px-4 py-4 min-[960px]:py-5">
+      <footer className="border-t border-[color:var(--esp-surface-border)] bg-card px-4 py-4 min-[960px]:py-5">
         <nav aria-label={t("access.footer")} className="mx-auto flex max-w-[1060px] flex-wrap items-center justify-center gap-x-2 min-[960px]:justify-start">
           <Link href={routes.about()} prefetch={false} className={FOOTER_LINK}>{t("access.about")}</Link>
           <Link href={routes.legal()} prefetch={false} className={FOOTER_LINK}>{t("access.legal")}</Link>

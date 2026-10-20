@@ -284,4 +284,33 @@ describe("StoriesTray — médaillons déclarés par l'application (ADR-0027)", 
 		expect([...document.querySelectorAll(".st-ring-name")].map((name) => name.textContent)).toEqual(["Vous"])
 		expect(document.querySelector(".st-ring-plus")).toBeNull()
 	})
+
+	it("sépare la cible de publication de sa pastille et du bouton de consultation, tous deux accessibles au clavier", () => {
+		const onOpen = vi.fn()
+		const onCreate = vi.fn()
+		mocks.byInstant.set(BASE, { groups: [group("moi")], truncated: false })
+		renderWithEngine(ringsTray(onOpen, onCreate))
+
+		const open = screen.getByRole("button", { name: /Votre actu/ })
+		const create = screen.getByRole("button", { name: "Publier une actu" })
+		const own = document.querySelector(".st-ring-own")!
+		const mark = create.querySelector("span.st-ring-plus")!
+		expect(own.querySelectorAll("button")).toHaveLength(2)
+		expect(own.querySelector("button button")).toBeNull()
+		expect(create.parentElement).toBe(open.parentElement)
+		expect(create).toHaveClass("st-ring-plus-button")
+		expect(create).not.toHaveClass("st-ring-plus")
+		expect(mark).toHaveAttribute("aria-hidden", "true")
+
+		open.focus()
+		expect(open).toHaveFocus()
+		create.focus()
+		expect(create).toHaveFocus()
+		fireEvent.click(mark)
+		expect(onCreate).toHaveBeenCalledTimes(1)
+		expect(onOpen).not.toHaveBeenCalled()
+		fireEvent.click(open)
+		expect(onOpen).toHaveBeenCalledExactlyOnceWith("moi")
+		expect(onCreate).toHaveBeenCalledTimes(1)
+	})
 })

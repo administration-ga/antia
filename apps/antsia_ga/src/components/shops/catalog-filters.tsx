@@ -21,7 +21,7 @@ export function CatalogFiltersForm({ handle, filters, collections, audience }: {
   const schema = z.object({ type: z.enum(["", "product", "service"]), collection: z.string().max(200), recherche: z.string().max(CATALOG_QUERY_MAX_LENGTH, t("catalog.queryTooLong", { max: CATALOG_QUERY_MAX_LENGTH })) })
   const form = useForm<z.infer<typeof schema>>({ resolver: zodResolver(schema), defaultValues: { type: filters.kind ?? "", collection: filters.collectionRef ?? "", recherche: filters.query ?? "" } })
   const action = audience === "public" ? routes.publicShopCatalog(handle) : routes.shopCatalog(handle)
-  return <form action={action} method="get" className="grid gap-4 rounded-2xl border border-border bg-card p-4 sm:grid-cols-2" onSubmit={form.handleSubmit((values) => {
+  return <form action={action} method="get" className="grid gap-4 rounded-[var(--ui2-card-radius)] border border-[color:var(--esp-surface-border)] bg-card p-[var(--esp-card-padding,16px)] sm:grid-cols-2" onSubmit={form.handleSubmit((values) => {
     const search = catalogSearch(values)
     if (!search) { form.setError("recherche", { message: t("catalog.invalidFilters") }); return }
     router.push(audience === "public" ? routes.publicShopCatalog(handle, search) : routes.shopCatalog(handle, search))

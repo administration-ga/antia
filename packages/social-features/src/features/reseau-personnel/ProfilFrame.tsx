@@ -51,9 +51,9 @@ const PROFIL_FRAME_CSS = `
            littéral de gabarit, où un backtick termine la chaîne et casse le
            fichier. */
         .pp-identity {
-          border: 1px solid var(--ink-200);
-          border-radius: 20px;
-          background: var(--ink-100);
+          border: 1px solid var(--esp-primitive-surface-border, var(--ink-200));
+          border-radius: var(--esp-primitive-card-radius, 20px);
+          background: var(--esp-surface-card, var(--ink-100));
           overflow: hidden;
         }
         .pp-banner { height: 128px; }
@@ -63,7 +63,7 @@ const PROFIL_FRAME_CSS = `
            une bande transparente au-dessus de la carte — un trou, la ou le
            repli sans couverture montre le degrade .esp-banner. */
         .pp-banner--photo { background-color: var(--ink-150); }
-        .pp-identity-body { padding: 0 22px 20px; }
+        .pp-identity-body { padding: 0 var(--esp-card-padding, 22px) var(--esp-card-padding, 20px); }
         .pp-avatar {
           /* À CHEVAL : c'est ce qui fait lire l'ensemble comme UNE carte
              d'identité, et non comme une image suivie d'un bloc de texte.
@@ -80,7 +80,7 @@ const PROFIL_FRAME_CSS = `
            évoquer — la monture suit son cadre plutôt que de l'arrondir en
            médaillon. */
         .pp-avatar--square {
-          border-radius: calc(var(--radius-lg) + 4px);
+          border-radius: var(--esp-primitive-avatar-page-radius, calc(var(--radius-lg) + 4px));
         }
         .pp-name-row {
           display: flex;

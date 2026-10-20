@@ -108,7 +108,7 @@ export function PostMedia({
           marginInline: -gutter,
           width: `calc(100% + ${gutter * 2}px)`,
           maxWidth: "none",
-          borderRadius: 0,
+          borderRadius: "var(--esp-primitive-media-radius, 0px)",
         }
       : null
 
@@ -146,7 +146,7 @@ export function PostMedia({
           // son contenu doivent rester entiers ; les bandes sont sombres).
           aspectRatio: STANDARD_RATIO,
           objectFit: "contain",
-          borderRadius: 8,
+          borderRadius: "var(--esp-primitive-media-radius, 8px)",
           background: "var(--ink-900)",
           display: "block",
           ...bleed,
@@ -173,7 +173,7 @@ export function PostMedia({
       style={{
         display: "grid",
         gap: 4,
-        borderRadius: 8,
+        borderRadius: "var(--esp-primitive-media-radius, 8px)",
         overflow: "hidden",
         ...layout,
         ...bleed,
@@ -200,7 +200,7 @@ function ImageCarousel({
     marginInline: number
     width: string
     maxWidth: string
-    borderRadius: number
+    borderRadius: number | string
   } | null
 }) {
   const { t } = useTranslation("reseau")
@@ -451,7 +451,7 @@ const POST_MEDIA_CSS = `
       .rpm-carousel {
         position: relative;
         overflow: hidden;
-        border-radius: var(--radius-lg);
+        border-radius: var(--esp-primitive-media-radius, var(--radius-lg));
         background: var(--ink-100);
       }
       .rpm-carousel-viewport {
@@ -507,10 +507,10 @@ const POST_MEDIA_CSS = `
         min-width: 44px;
         min-height: 44px;
         border: 1px solid var(--ink-200);
-        border-radius: var(--radius-lg);
+        border-radius: var(--esp-primitive-chip-radius, var(--radius-lg));
         background: var(--ink-0);
         color: var(--ink-900);
-        box-shadow: var(--shadow-sm);
+        box-shadow: var(--esp-surface-shadow, var(--shadow-sm));
         pointer-events: none;
       }
       .rpm-expand-hint { left: var(--sp-2); }
@@ -533,7 +533,7 @@ const POST_MEDIA_CSS = `
         border-radius: 999px;
         background: var(--ink-0);
         color: var(--ink-900);
-        box-shadow: var(--shadow-md);
+        box-shadow: var(--esp-surface-shadow, var(--shadow-md));
         cursor: pointer;
       }
       .rpm-carousel-arrow-previous { left: var(--sp-2); }
@@ -566,7 +566,7 @@ const POST_MEDIA_CSS = `
         border: 1px solid var(--ink-0);
         border-radius: 999px;
         background: var(--ink-300);
-        box-shadow: var(--shadow-xs);
+        box-shadow: var(--esp-surface-shadow, var(--shadow-xs));
       }
       .rpm-carousel-dot[aria-current="true"] .rpm-carousel-dot-mark {
         width: 9px;
@@ -601,7 +601,7 @@ const POST_MEDIA_CSS = `
         border-radius: 999px;
         background: var(--ink-0);
         color: var(--ink-900);
-        box-shadow: var(--shadow-sm);
+        box-shadow: var(--esp-surface-shadow, var(--shadow-sm));
         cursor: pointer;
       }
       .rpm-lightbox-stage {
@@ -671,7 +671,7 @@ function WithheldTile({
     marginInline: number
     width: string
     maxWidth: string
-    borderRadius: number
+    borderRadius: number | string
   } | null
   span?: number
 }) {
@@ -685,7 +685,7 @@ function WithheldTile({
         aspectRatio: ratio,
         padding: 16,
         textAlign: "center",
-        borderRadius: 8,
+        borderRadius: "var(--esp-primitive-media-radius, 8px)",
         background: "var(--ink-100)",
         color: "var(--ink-600)",
         fontSize: 13,

@@ -259,13 +259,55 @@
   --ui2-button-radius: 999px; /* boutons d'action en pilule */
   --ui2-badge-radius: 6px;
   --ui2-card-radius: 24px; /* cartes d'ui-v2, comme les surfaces du réseau */
+  --esp-card-padding: 16px;
+  --esp-card-gap: 12px;
+  --esp-surface-shadow: none;
+  --esp-raised-border: transparent;
+  --esp-alert-border: transparent;
+  --esp-alert-accent-width: 0px;
+  --esp-control-min-size: 44px;
+  --esp-primitive-card-radius: var(--ui2-card-radius);
+  --esp-primitive-button-radius: var(--ui2-button-radius);
+  --esp-primitive-badge-radius: var(--ui2-badge-radius);
+  --esp-primitive-chip-radius: var(--esp-chip-radius);
+  --esp-primitive-chip-bg: var(--esp-chip-bg);
+  --esp-primitive-chip-border: var(--esp-chip-border);
+  --esp-input-radius: var(--esp-field-radius);
+  --esp-primitive-surface-border: var(--esp-surface-border);
+  --esp-primitive-neutral-bg: var(--ui2-button-outline-bg);
+  --esp-primitive-neutral-border: var(--ui2-button-outline-border);
+  --esp-primitive-secondary-bg: var(--ui2-button-secondary-bg);
+  --esp-primitive-secondary-fg: var(--ui2-button-secondary-fg);
+  --esp-primitive-secondary-border: var(--ui2-button-secondary-border);
+  --esp-primitive-tab-bg: var(--esp-tab-active-bg);
+  --esp-primitive-tab-fg: var(--esp-tab-active-fg);
+  --esp-primitive-tab-border: var(--esp-chip-border);
+  --esp-primitive-icon-bg: var(--esp-header-icon-bg);
+  --esp-primitive-identity-fill: var(--esp-identity-fill);
+  --esp-primitive-fill-on: var(--primary-fill-on);
+  --esp-action-success-fill: var(--role-success-fill);
+  --esp-action-success-on: var(--role-success-on);
+  --esp-action-danger-fill: var(--role-danger-fill);
+  --esp-action-danger-on: var(--role-danger-on);
+  --esp-action-cancel-bg: var(--ui2-button-outline-bg);
+  --esp-action-cancel-fg: var(--ui2-button-outline-fg);
+  --esp-action-cancel-border: var(--ui2-button-outline-border);
+  --esp-primitive-media-radius: var(--esp-media-radius);
+  --esp-primitive-avatar-page-radius: var(--esp-avatar-page-radius);
+  --ui2-button-min-h: 44px;
+  --ui2-button-sm-min-h: 44px;
+  --ui2-button-link-min-h: 44px;
+  --ui2-field-min-h: 44px;
+  --ui2-tab-min-h: 44px;
   --esp-chip-radius: 10px;
   --esp-avatar-page-radius: 12px; /* les pages en carré arrondi, les personnes en rond */
   --esp-field-radius: 14px;
+  --esp-field-border: var(--input);
   --esp-media-radius: 16px; /* un média dans une carte : plus petit que la carte */
   --esp-fab-radius: 18px;
   --esp-mobilebar-radius: 28px;
   --ui2-button-outline-bg: var(--muted); /* bouton neutre (Annuler) : gris, sans filet */
+  --ui2-button-outline-fg: var(--foreground);
   --ui2-button-outline-border: transparent;
   --ui2-button-secondary-border: transparent;
   --esp-chip-bg: var(--muted);

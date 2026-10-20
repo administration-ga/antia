@@ -162,8 +162,8 @@ export function IdentityEntry({ authClient, callbackURL, onAuthenticated, config
         <Heading className={compact ? "text-xl font-semibold" : "text-3xl"}>{destination ? t("codeTitle") : title ?? t("title")}</Heading>
         {headingLead ? <p className={`break-words text-muted-foreground ${compact ? "text-sm" : ""}`}>{headingLead}</p> : null}
       </header>
-      {error ? <p role="alert" className="rounded-lg border border-destructive/40 bg-card px-4 py-3 text-sm text-destructive">{error}</p> : null}
-      {notice ? <p role="status" className="rounded-lg bg-muted px-4 py-3 text-sm">{notice}</p> : null}
+      {error ? <p role="alert" className="rounded-[var(--esp-primitive-card-radius,var(--radius-lg))] border border-[color:var(--esp-alert-border,color-mix(in_oklab,var(--destructive)_40%,transparent))] bg-card px-4 py-[var(--esp-card-padding,0.75rem)] text-sm text-destructive">{error}</p> : null}
+      {notice ? <p role="status" className="rounded-[var(--esp-primitive-card-radius,var(--radius-lg))] bg-muted px-4 py-[var(--esp-card-padding,0.75rem)] text-sm">{notice}</p> : null}
       {configuration === undefined ? <p role="status" className="text-sm text-muted-foreground">{t("loading")}</p> : null}
       {configuration === null ? <p role="alert" className="text-sm text-muted-foreground">{t("configurationUnavailable")}</p> : null}
       {!destination ? (

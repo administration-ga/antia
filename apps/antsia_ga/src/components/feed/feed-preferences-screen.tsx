@@ -15,7 +15,7 @@ export function FeedPreferencesScreen() {
   return (
     <MemberPage>
       <div className="mx-auto flex w-full max-w-3xl min-w-0 flex-col gap-5 pb-24">
-        <Link href={routes.feed()} className="inline-flex min-h-11 items-center gap-2 self-start rounded-lg px-3 text-sm font-medium underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+        <Link href={routes.feed()} className="inline-flex min-h-11 items-center gap-2 self-start rounded-[var(--ui2-button-radius)] px-3 text-sm font-medium underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
           <ArrowLeft aria-hidden="true" className="size-4" />
           {t("personal.home")}
         </Link>

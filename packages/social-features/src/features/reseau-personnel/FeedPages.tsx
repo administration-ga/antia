@@ -247,7 +247,7 @@ export function FeedPage({
     return <ReseauQueryError title={t("feedPages.errorTitle")} message={t("feedPages.errorMessage")} onRetry={() => { void page.refetch() }} />
   }
 
-  const lacuna = page.data?.lacunar ? <p role="status" className="rounded-xl border border-border bg-muted p-3 text-sm text-muted-foreground">{t("feedPages.incomplete")}</p> : null
+  const lacuna = page.data?.lacunar ? <p role="status" className="rounded-[var(--esp-primitive-card-radius,0.75rem)] border border-[var(--esp-primitive-surface-border,var(--border))] bg-muted p-[var(--esp-card-padding,0.75rem)] text-sm text-muted-foreground">{t("feedPages.incomplete")}</p> : null
   const preparation = isFirst && page.data?.preparing ? <p role="status" className="text-sm text-muted-foreground">{t("feedPages.preparing")}</p> : null
   const history = isFirst && page.data?.materializedSince !== undefined ? <p className="text-sm text-muted-foreground">{t("feedPages.historySince", { date: new Intl.DateTimeFormat(i18n.resolvedLanguage ?? i18n.language, { dateStyle: "medium" }).format(page.data.materializedSince) })}</p> : null
   if (items.length === 0) return <>{preparation}{history}{lacuna}{leadingSuggestion}{isFirst && !page.data?.lacunar && nextCursor === null ? emptyFallback : null}</>

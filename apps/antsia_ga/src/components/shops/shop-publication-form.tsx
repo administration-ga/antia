@@ -39,8 +39,8 @@ export function ShopPublicationForm({ shop, dirty, onDirty, onPrepare }: { shop:
     <h2 id={`${id}-title`} className="text-lg font-semibold">{t("steps.publish")}</h2>
     <p>{t("publication.summary", { name: shop.name ?? t("list.untitled"), model: t(`models.${shop.model}`) })}</p>
     <p className="font-medium">{t(`states.${shop.storefront.state}`)}</p>
-    {shop.storefront.decisionReason ? <p className="whitespace-pre-wrap rounded-xl bg-muted p-4">{shop.storefront.decisionReason}</p> : null}
-    <form noValidate className="grid gap-4 rounded-xl border border-border p-4" onSubmit={form.handleSubmit(async (values) => {
+    {shop.storefront.decisionReason ? <p className="whitespace-pre-wrap rounded-[var(--ui2-card-radius)] bg-muted p-[var(--esp-card-padding,16px)]">{shop.storefront.decisionReason}</p> : null}
+    <form noValidate className="grid gap-4 rounded-[var(--ui2-card-radius)] border border-border p-[var(--esp-card-padding,16px)]" onSubmit={form.handleSubmit(async (values) => {
       setNotice(null)
       await action.run(() => audience({ networkId, shopId: shop.shopId, publicListing: values.publicListing, ...(values.publicListing ? { textVersion: shop.audience.currentTextVersion } : {}), ...(!shop.audience.rootNetwork ? { visibility: values.visibility } : {}) }), () => { form.reset(values); setNotice(t("publication.audienceSaved")) })
     })}>
@@ -54,7 +54,7 @@ export function ShopPublicationForm({ shop, dirty, onDirty, onPrepare }: { shop:
       <Button type="submit" variant="outline" pending={action.pending} disabled={!form.formState.isDirty} className="justify-self-start">{t("publication.saveAudience")}</Button>
     </form>
     {shop.publication.gaps.length > 0 ? <div className="grid gap-2"><p>{t("publication.incomplete")}</p><ul className="list-inside list-disc">{shop.publication.gaps.map((gap) => <li key={gap}>{t(`publication.gaps.${gap}`)}</li>)}</ul><Button type="button" variant="outline" onClick={onPrepare} className="justify-self-start">{t("publication.prepare")}</Button></div> : null}
-    {shop.policy === "closed" ? <div className="grid gap-2 rounded-xl bg-muted p-4"><p>{t("publication.closed")}</p><Button type="button" variant="outline" onClick={onPrepare} className="justify-self-start">{t("publication.prepare")}</Button></div> : null}
+    {shop.policy === "closed" ? <div className="grid gap-2 rounded-[var(--ui2-card-radius)] bg-muted p-[var(--esp-card-padding,16px)]"><p>{t("publication.closed")}</p><Button type="button" variant="outline" onClick={onPrepare} className="justify-self-start">{t("publication.prepare")}</Button></div> : null}
     {dirty || form.formState.isDirty ? <p role="status" className="text-sm">{t("publication.saveFirst")}</p> : null}
     {shop.storefront.state === "suspended" ? <p>{t("publication.suspended")}</p> : null}
     {shop.storefront.state === "pending_review" ? <p>{t("publication.reviewPending")}</p> : null}

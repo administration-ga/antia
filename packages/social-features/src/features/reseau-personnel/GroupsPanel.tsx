@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/GroupsPanel.tsx @ ad2e7fdc2 — adaptations : groupes thématiques du réseau courant (`thematicGroups.thematicGroups.*`, `networkId` par `useNetwork()`) ; invitations reçues et membres PAGINÉS par le moteur (`paginateMyInvites`, `paginateMembers`, pannes dites par `ReseauPaginatedErrorBoundary`, « Voir plus ») ; `myGroups` borné qui dit sa lacune (`truncated`) ; vivier d'invitation `{ items, truncated }` du moteur passé tel quel au sélecteur ; mur à curseur COMPOSITE (`FeedCursor`, clé de page par `feedCursorKey`) et publications au DTO du fil (`_id`) rendues par `PostCard` ; membres et invitants nommés par la personne (`personId`, nom neutre quand le profil n'est pas publié) ; refus du moteur lus par code (`groupActionErrorText`), et le refus indistinct de la fiche (`notFound`) dit « plus accessible » ; états vides par `reseauEmptyState(id, home, t)` ; toutes les chaînes par l'i18n (espace `reseau`, clés `groupsPanel.*` et `groupesThematiques.*`) ; « agents » → le réseau ; primitives de `@antsia/ui`, kit d'espace de `@antsia/ui/espace-kit` (phrases de la pagination par `useEspacePaginationLabels`). ; couleurs par fonction (ADR-0027) : Rejoindre et Accepter l'invitation en variante `social`.
+// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/GroupsPanel.tsx @ ad2e7fdc2 — adaptations : groupes thématiques du réseau courant (`thematicGroups.thematicGroups.*`, `networkId` par `useNetwork()`) ; invitations reçues et membres PAGINÉS par le moteur (`paginateMyInvites`, `paginateMembers`, pannes dites par `ReseauPaginatedErrorBoundary`, « Voir plus ») ; `myGroups` borné qui dit sa lacune (`truncated`) ; vivier d'invitation `{ items, truncated }` du moteur passé tel quel au sélecteur ; mur à curseur COMPOSITE (`FeedCursor`, clé de page par `feedCursorKey`) et publications au DTO du fil (`_id`) rendues par `PostCard` ; membres et invitants nommés par la personne (`personId`, nom neutre quand le profil n'est pas publié) ; refus du moteur lus par code (`groupActionErrorText`), et le refus indistinct de la fiche (`notFound`) dit « plus accessible » ; états vides par `reseauEmptyState(id, home, t)` ; toutes les chaînes par l'i18n (espace `reseau`, clés `groupsPanel.*` et `groupesThematiques.*`) ; « agents » → le réseau ; primitives de `@antsia/ui`, kit d'espace de `@antsia/ui/espace-kit` (phrases de la pagination par `useEspacePaginationLabels`). ; couleurs par fonction (ADR-0027) : Rejoindre en variante `social`, Accepter en validation opt-in.
 "use client"
 
 /**
@@ -19,6 +19,7 @@
  * `var(--…)` uniquement (cliquet `no-hardcoded-colors`).
  */
 
+import { themedActionStyle } from "../themed-action-style"
 import { api, type Id } from "@antsia/api/engine"
 import { useAuthenticatedConvexQuery, useAuthenticatedPaginatedQuery } from "@antsia/api/hooks"
 import { useNetwork, useRoutes } from "@antsia/api/network"
@@ -98,7 +99,7 @@ function EmptyNote({ text }: { text: string }) {
         margin: 0,
         padding: 18,
         border: "1px dashed var(--ink-200)",
-        borderRadius: 8,
+        borderRadius: "var(--esp-primitive-card-radius, 8px)",
         color: "var(--ink-600)",
         fontSize: 13.5,
       }}
@@ -337,10 +338,10 @@ function GroupInvites({ onOpen }: { onOpen: (groupId: GroupId) => void }) {
               />
             </span>
             <span style={{ display: "inline-flex", gap: 8 }}>
-              <Button
+              <Button style={themedActionStyle("success", "social")}
                 size="sm"
-                // Accepter : couleur des relations (ADR-0027).
-                variant="social"
+                // Accepter : couleur de validation, relations en repli hors ANTSIA (ADR-0027).
+                variant="success"
                 onClick={() => {
                   void respondInvite({ networkId, inviteId: invite.inviteId, accept: true })
                     .then(() => {
@@ -352,9 +353,9 @@ function GroupInvites({ onOpen }: { onOpen: (groupId: GroupId) => void }) {
               >
                 {t("groupsPanel.invites.accept")}
               </Button>
-              <Button
+              <Button style={themedActionStyle("danger", "ghost")}
                 size="sm"
-                variant="ghost"
+                variant="danger"
                 onClick={() => {
                   void respondInvite({ networkId, inviteId: invite.inviteId, accept: false }).catch((error: unknown) =>
                     toast.error(groupActionErrorText(error, "reseau:groupsPanel.toast.inviteExpired", t)),
@@ -516,7 +517,7 @@ function CreateGroupCard({ onCreated }: { onCreated: (groupId: GroupId) => void 
         />
         <p style={MUTED_TEXT_STYLE}>{t("groupsPanel.create.visibility")}</p>
         <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
-          <Button type="button" variant="ghost" onClick={() => setOpen(false)}>
+          <Button style={themedActionStyle("cancel", "ghost")} type="button" variant="outline" onClick={() => setOpen(false)}>
             {t("groupsPanel.create.cancel")}
           </Button>
           <Button type="submit" disabled={submitting || validateGroupName(name, t) !== null} style={RESEAU_PRIMARY_ACTION_STYLE}>
@@ -639,8 +640,8 @@ function GroupPage({
               <Button
                 size="sm"
                 // Accepter l'invitation : couleur des relations (ADR-0027).
-                variant="social"
-                style={RESEAU_PRIMARY_ACTION_STYLE}
+                variant="success"
+                style={themedActionStyle("success", "social", RESEAU_PRIMARY_ACTION_STYLE)}
                 onClick={() => {
                   if (group.pendingInviteId === null) return
                   void respondInvite({ networkId, inviteId: group.pendingInviteId, accept: true })
@@ -1026,9 +1027,9 @@ function GroupWallPage({
                   {t("groupsPanel.wall.pin")}
                 </Button>
               ) : null}
-              <Button
+              <Button style={themedActionStyle("danger", "ghost")}
                 size="sm"
-                variant="ghost"
+                variant="danger"
                 onClick={() => {
                   void removePost({ networkId, postId: post._id })
                     .then(() => toast.success(t("groupsPanel.toast.postRemoved")))

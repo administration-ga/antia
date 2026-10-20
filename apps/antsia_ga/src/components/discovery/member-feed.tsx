@@ -59,7 +59,7 @@ export function ProvinceFilterForm({ current }: { current: string | undefined })
   return <form noValidate onSubmit={(event) => { void submit(event) }} className="flex flex-wrap items-end gap-3">
     <div className="min-w-0 flex-1">
       <Field id={id} label={t("discovery.provinceLabel")}>
-        <select id={id} className="min-h-11 w-full rounded-lg border border-input bg-background px-3 text-base text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" {...form.register("province")}>
+        <select id={id} className="min-h-11 w-full rounded-[var(--esp-field-radius)] border border-input bg-muted px-3 text-base text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" {...form.register("province")}>
           <option value="">{t("discovery.allProvinces")}</option>
           {GABON_PROVINCES.map((item) => <option key={item.slug} value={item.slug}>{item.name}</option>)}
         </select>
@@ -120,15 +120,15 @@ export function MemberDiscoveryFeed({ filter }: { filter: Extract<MemberFeedFilt
   const onMention = (handle: string) => router.push(routes.profile(handle))
 
   const header = <header className="flex flex-col gap-2">
-    <Link href={routes.feed()} className="inline-flex min-h-11 items-center self-start rounded-lg px-3 text-sm underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">{t("discovery.back")}</Link>
+    <Link href={routes.feed()} className="inline-flex min-h-11 items-center self-start rounded-[var(--ui2-button-radius)] px-3 text-sm underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">{t("discovery.back")}</Link>
     <h1 className="text-2xl font-semibold">{province ? t("discovery.provinceTitle", { name: province.name }) : filter.tag ? t("discovery.tagTitle", { tag: filter.tag }) : t("discovery.nationalTitle")}</h1>
     <p className="text-sm text-muted-foreground">{t("discovery.memberScope")}</p>
   </header>
   const provinceField = <ProvinceFilterForm current={filter.province} />
-  const publicLink = <Link href={routes.discover()} className="inline-flex min-h-11 items-center self-start rounded-lg px-3 text-sm underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">{t("discovery.publicDiscover")}</Link>
-  const emptyNote = page && page.page.length === 0 ? <p role="status" className="rounded-xl border border-border bg-card p-5 text-muted-foreground">{t(page.isDone ? "discovery.empty" : "discovery.emptyWindow")}</p> : null
+  const publicLink = <Link href={routes.discover()} className="inline-flex min-h-11 items-center self-start rounded-[var(--ui2-button-radius)] px-3 text-sm underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">{t("discovery.publicDiscover")}</Link>
+  const emptyNote = page && page.page.length === 0 ? <p role="status" className="rounded-[var(--ui2-card-radius)] border border-[color:var(--esp-surface-border)] bg-card p-[var(--esp-card-padding,16px)] text-muted-foreground">{t(page.isDone ? "discovery.empty" : "discovery.emptyWindow")}</p> : null
   const pagination = page ? <nav aria-label={t("discovery.pagination")} className="flex flex-wrap items-center justify-between gap-2">
-    {filter.cursor ? <Link href={routes.memberFeedWindow(filter)} className="inline-flex min-h-11 items-center rounded-lg border border-border px-4 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">{t("common.firstPage")}</Link> : <span />}
+    {filter.cursor ? <Link href={routes.memberFeedWindow(filter)} className="inline-flex min-h-11 items-center rounded-[var(--ui2-button-radius)] border border-border px-4 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">{t("common.firstPage")}</Link> : <span />}
     {!page.isDone ? <Button variant="outline" disabled={!page.continueCursor || page.continueCursor === filter.cursor} onClick={() => router.push(routes.memberFeedWindow(filter, page.continueCursor))}>{t("common.next")}</Button> : <p role="status" className="text-sm text-muted-foreground">{t("common.end")}</p>}
   </nav> : null
 
@@ -173,7 +173,7 @@ export function MemberDiscoveryFeed({ filter }: { filter: Extract<MemberFeedFilt
       {immersion !== null ? <div className="fil-mode-row"><FeedModeToggle state={immersion.mode} onChange={immersion.changeMode} /></div> : null}
       {provinceField}
       {publicLink}
-      {query.error ? <div role="alert" className="rounded-xl border border-destructive p-4"><p>{t("common.failed")}</p><Button variant="outline" onClick={() => void query.refetch()}>{t("common.retry")}</Button></div>
+      {query.error ? <div role="alert" className="rounded-[var(--ui2-card-radius)] border border-destructive p-[var(--esp-card-padding,16px)]"><p>{t("common.failed")}</p><Button variant="outline" onClick={() => void query.refetch()}>{t("common.retry")}</Button></div>
         : !page ? <p role="status">{t("common.loading")}</p>
           : immersion !== null ? <FeedSurfaceMemoryProvider value={immersion.surfaceMemory}>{listed}</FeedSurfaceMemoryProvider> : listed}
     </div>

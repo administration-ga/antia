@@ -164,7 +164,7 @@ export function NotificationBell({
 						{badge ? (
 							<span
 								aria-hidden="true"
-								className="absolute -top-1.5 -right-1.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-[var(--role-react-fill,var(--destructive))] px-1 text-[9px] font-bold tabular-nums text-[color:var(--role-react-on,var(--destructive-foreground))]"
+								className="absolute -top-1.5 -right-1.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-[var(--esp-primitive-badge-radius,999px)] bg-[var(--role-react-fill,var(--destructive))] px-1 text-[9px] font-bold tabular-nums text-[color:var(--role-react-on,var(--destructive-foreground))]"
 							>
 								{badge}
 							</span>

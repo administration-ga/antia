@@ -480,6 +480,7 @@ export function ReseauAgentPage() {
  */
 function ReseauAgentPageSwitch() {
   const mobile = useIsReseauMobile()
+  const creation = useCreationController()
   if (mobile === null) {
     return (
       <div style={{ display: "grid", gap: 16, padding: "12px 14px" }}>
@@ -488,7 +489,14 @@ function ReseauAgentPageSwitch() {
       </div>
     )
   }
-  return mobile ? <ReseauMobilePage /> : <ReseauAgentPageInner />
+  return (
+    <>
+      {mobile ? <ReseauMobilePage /> : <ReseauAgentPageInner />}
+      {/* Le champ de fichier doit survivre au remplacement de la coquille,
+          notamment quand le sélecteur natif est encore ouvert. */}
+      <PostComposerSheet open={creation.open === "publication"} onClose={creation.close} />
+    </>
+  )
 }
 
 function ReseauAgentPageInner() {
@@ -1026,7 +1034,6 @@ function ReseauAgentPageInner() {
           PORTAILLE elle-même vers body (ImmersiveOverlay) : le piège
           `container-type` de `.rp-scope` ne la concerne pas. */}
       <StoryCreateSheet open={creation.open === "actu"} onClose={creation.close} onPublished={creation.close} />
-      <PostComposerSheet open={creation.open === "publication"} onClose={creation.close} />
 
     </div>
   )

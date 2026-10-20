@@ -28,7 +28,7 @@ function MemberCatalogWindow({ handle, search, preview = false }: { handle: stri
   const { t, i18n } = useTranslation("shops")
   const filters = catalogFilters(search)
   const query = useAuthenticatedConvexQuery(api.modules.shops.catalog.list, { networkId, handle, ...filters, paginationOpts: { cursor: search.cursor, numItems: CATALOG_PAGE_SIZE } })
-  if (query.isError) return <div role="alert" className="grid gap-3 rounded-xl border border-border bg-card p-5"><p>{t("catalog.unavailable")}</p><Button variant="outline" pending={query.isFetching} onClick={() => { void query.refetch() }}>{t("common.retry")}</Button></div>
+  if (query.isError) return <div role="alert" className="grid gap-3 rounded-[var(--ui2-card-radius)] border border-[color:var(--esp-surface-border)] bg-card p-[var(--esp-card-padding,16px)] "><p>{t("catalog.unavailable")}</p><Button variant="outline" pending={query.isFetching} onClick={() => { void query.refetch() }}>{t("common.retry")}</Button></div>
   if (query.isPending || !query.data) return <p role="status" className="text-sm text-muted-foreground">{t("catalog.loading")}</p>
   const page: CatalogPage = query.data
   const translate = (key: string, options?: Record<string, unknown>) => t(key, options)

@@ -108,7 +108,7 @@ const SELECTED_LINK_ITEM_STYLE: CSSProperties = {
 const COUNT_BADGE_STYLE: CSSProperties = {
 	background: "var(--role-react-fill, var(--primary-50))",
 	color: "var(--role-react-on, var(--primary-600))",
-	borderRadius: 999,
+	borderRadius: "var(--esp-primitive-badge-radius, 999px)",
 }
 
 /** Le titre d'un groupe d'entrées du rail (« Vos raccourcis », « Dans le réseau »). */
@@ -207,7 +207,7 @@ export function ReseauMenuRail({
 					gap: 10,
 					minHeight: 44,
 					padding: "6px 10px",
-					borderRadius: 8,
+					borderRadius: "var(--esp-primitive-chip-radius, 8px)",
 					textDecoration: "none",
 					color: "inherit",
 				}}

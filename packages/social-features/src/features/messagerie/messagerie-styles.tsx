@@ -135,9 +135,9 @@ export const MESSAGERIE_STYLES_CSS = `
         }
         .icom-relations-action {
           appearance: none;
-          border: 1px solid var(--border);
-          background: var(--card);
-          border-radius: 8px;
+          border: 1px solid var(--esp-action-cancel-border, var(--border));
+          background: var(--esp-action-cancel-bg, var(--card));
+          border-radius: var(--esp-primitive-button-radius, 8px);
           padding: 5px 9px;
           font-size: 12px;
           font-weight: 700;
@@ -489,7 +489,7 @@ export const MESSAGERIE_STYLES_CSS = `
           width: 44px;
           height: 44px;
           border: none;
-          border-radius: 8px;
+          border-radius: var(--esp-primitive-button-radius, 8px);
           background: transparent;
           color: var(--ink-600);
           cursor: pointer;
@@ -510,7 +510,7 @@ export const MESSAGERIE_STYLES_CSS = `
           height: 44px;
           padding: 0 9px;
           border: none;
-          border-radius: 8px;
+          border-radius: var(--esp-primitive-button-radius, 8px);
           background: transparent;
           color: var(--ink-700);
           font: inherit;
@@ -528,7 +528,7 @@ export const MESSAGERIE_STYLES_CSS = `
         .msg-panel[data-variant="page"] .msg-icon-btn {
           width: 44px;
           height: 44px;
-          border-radius: 999px;
+          border-radius: var(--esp-primitive-button-radius, 999px);
         }
         .msg-collapse-icon { transition: transform 160ms ease; }
         .msg-collapse-btn[aria-expanded="true"] .msg-collapse-icon {
@@ -542,7 +542,7 @@ export const MESSAGERIE_STYLES_CSS = `
           min-width: 20px;
           height: 20px;
           padding: 0 6px;
-          border-radius: 999px;
+          border-radius: var(--esp-primitive-badge-radius, 999px);
           /* Décompte des non-lus aux couleurs des réactions (ADR-0027), danger en repli. */
           background: var(--role-react-fill, var(--danger-fill));
           color: var(--role-react-on, var(--on-fill));
@@ -619,7 +619,7 @@ export const MESSAGERIE_STYLES_CSS = `
           min-width: 19px;
           height: 19px;
           padding: 0 5px;
-          border-radius: 999px;
+          border-radius: var(--esp-primitive-badge-radius, 999px);
           /* Décompte des non-lus aux couleurs des réactions (ADR-0027), danger en repli. */
           background: var(--role-react-fill, var(--danger-fill));
           color: var(--role-react-on, var(--on-fill));
@@ -641,7 +641,7 @@ export const MESSAGERIE_STYLES_CSS = `
           margin: 8px 8px 0;
           padding: 7px 11px;
           /* L'angle des champs du système épuré (ADR-0030) ; la pastille d'origine en repli. */
-          border-radius: var(--esp-field-radius, 999px);
+          border-radius: var(--esp-input-radius, var(--esp-field-radius, 999px));
           background: var(--ink-100);
           color: var(--ink-600);
         }
@@ -673,7 +673,7 @@ export const MESSAGERIE_STYLES_CSS = `
           width: 100%;
           padding: 9px 8px;
           border: none;
-          border-radius: 10px;
+          border-radius: var(--esp-primitive-chip-radius, 10px);
           background: transparent;
           color: inherit;
           font: inherit;
@@ -748,7 +748,7 @@ export const MESSAGERIE_STYLES_CSS = `
           align-self: center;
           margin: 10px 0 6px;
           padding: 3px 12px;
-          border-radius: 999px;
+          border-radius: var(--esp-primitive-chip-radius, 999px);
           background: var(--ink-100);
           color: var(--ink-600);
           font-size: 11px;
@@ -887,9 +887,9 @@ export const MESSAGERIE_STYLES_CSS = `
           min-height: 44px;
           min-width: 44px;
           padding: 8px 14px;
-          border: 1px solid var(--input);
-          border-radius: 10px;
-          background: var(--card);
+          border: 1px solid var(--esp-action-cancel-border, var(--input));
+          border-radius: var(--esp-primitive-button-radius, 10px);
+          background: var(--esp-action-cancel-bg, var(--card));
           color: var(--card-foreground);
           font: inherit;
           font-size: 14px;
@@ -904,6 +904,35 @@ export const MESSAGERIE_STYLES_CSS = `
           outline: 2px solid var(--ring);
           outline-offset: 2px;
         }
+        /* Décisions explicites : les thèmes ANTSIA portent leur couleur de fonction.
+           Les replis conservent les gestes neutres des autres réseaux. */
+        .msg-tool-btn[data-role="success"] {
+          border-color: var(--esp-action-cancel-border, var(--input));
+          background: var(--esp-action-success-fill, var(--card));
+          color: var(--esp-action-success-on, var(--card-foreground));
+        }
+        .msg-tool-btn[data-role="danger"] {
+          border-color: var(--esp-action-cancel-border, var(--input));
+          background: var(--esp-action-danger-fill, var(--card));
+          color: var(--esp-action-danger-on, var(--card-foreground));
+        }
+        .msg-tool-btn[data-role="success"]:hover:not(:disabled) { background: var(--esp-action-success-fill, var(--muted)); }
+        .msg-tool-btn[data-role="danger"]:hover:not(:disabled) { background: var(--esp-action-danger-fill, var(--muted)); }
+        .msg-icon-btn[data-role="cancel"] {
+          background: var(--esp-action-cancel-bg, transparent);
+          color: var(--esp-action-cancel-fg, var(--ink-600));
+        }
+        .msg-icon-btn[data-role="success"] {
+          background: var(--esp-action-success-fill, transparent);
+          color: var(--esp-action-success-on, var(--ink-600));
+        }
+        .msg-icon-btn[data-role="danger"] {
+          background: var(--esp-action-danger-fill, transparent);
+          color: var(--esp-action-danger-on, var(--ink-600));
+        }
+        .msg-icon-btn[data-role="cancel"]:hover { background: var(--esp-action-cancel-bg, var(--ink-200)); }
+        .msg-icon-btn[data-role="success"]:hover { background: var(--esp-action-success-fill, var(--ink-200)); }
+        .msg-icon-btn[data-role="danger"]:hover { background: var(--esp-action-danger-fill, var(--ink-200)); }
         .msg-tool-btn:disabled { opacity: .6; cursor: not-allowed; }
 
         .msg-time {
@@ -932,7 +961,7 @@ export const MESSAGERIE_STYLES_CSS = `
           padding: 5px 9px;
           border: none;
           border-left: 3px solid var(--primary-fill);
-          border-radius: 8px;
+          border-radius: var(--esp-primitive-media-radius, 8px);
           background: var(--ink-100);
           color: var(--ink-900);
           font: inherit;
@@ -964,7 +993,7 @@ export const MESSAGERIE_STYLES_CSS = `
           margin: 0 8px;
           padding: 6px 9px;
           border-left: 3px solid var(--primary-fill);
-          border-radius: 8px;
+          border-radius: var(--esp-primitive-media-radius, 8px);
           background: var(--ink-100);
           font-size: 12px;
         }
@@ -983,7 +1012,7 @@ export const MESSAGERIE_STYLES_CSS = `
           gap: 3px;
           padding: 1px 7px;
           border: 1px solid var(--ink-200);
-          border-radius: 999px;
+          border-radius: var(--esp-primitive-chip-radius, 999px);
           background: var(--ink-0);
           color: var(--ink-900);
           font: inherit;
@@ -1030,7 +1059,7 @@ export const MESSAGERIE_STYLES_CSS = `
           display: block;
           max-width: 100%;
           max-height: 320px;
-          border-radius: 10px;
+          border-radius: var(--esp-primitive-media-radius, 10px);
           object-fit: cover;
         }
         .msg-audio { width: 100%; min-width: 190px; }
@@ -1040,7 +1069,7 @@ export const MESSAGERIE_STYLES_CSS = `
           gap: 8px;
           padding: 7px 10px;
           border: 1px solid var(--ink-200);
-          border-radius: 10px;
+          border-radius: var(--esp-primitive-media-radius, 10px);
           background: var(--ink-0);
           color: var(--ink-900);
           font-size: 12px;
@@ -1147,7 +1176,7 @@ export const MESSAGERIE_STYLES_CSS = `
           max-width: 100%;
           padding: 4px 6px 4px 10px;
           border: 1px solid var(--ink-200);
-          border-radius: 999px;
+          border-radius: var(--esp-primitive-chip-radius, 999px);
           background: var(--ink-100);
           font-size: 11.5px;
         }
@@ -1173,7 +1202,7 @@ export const MESSAGERIE_STYLES_CSS = `
           max-height: 96px;
           padding: 8px 10px;
           border: 1px solid var(--ink-300);
-          border-radius: 11px;
+          border-radius: var(--esp-input-radius, 11px);
           background: var(--ink-0);
           color: var(--ink-900);
           font: inherit;
@@ -1190,7 +1219,7 @@ export const MESSAGERIE_STYLES_CSS = `
         .msg-panel[data-variant="page"] .msg-composer textarea {
           max-height: 132px;
           padding: 10px 14px;
-          border-radius: 20px;
+          border-radius: var(--esp-input-radius, 20px);
           font-size: 16px;
         }
         /* Le bouton d'envoi, plein, distinct des boutons discrets. */
@@ -1245,7 +1274,7 @@ export const MESSAGERIE_STYLES_CSS = `
         .msg-error {
           margin: 0 8px 8px;
           padding: 8px 10px;
-          border-radius: 10px;
+          border-radius: var(--esp-primitive-chip-radius, 10px);
           background: var(--danger-50, var(--ink-100));
           color: var(--danger-700, var(--ink-900));
           font-size: 12.5px;
@@ -1311,17 +1340,17 @@ export const MESSAGERIE_STYLES_CSS = `
             calc(clamp(300px, min(440px, calc((100dvh - 64px) * .46), calc(100vw - 32px)), 440px) / .46),
             calc(100dvh - 64px)
           );
-          border: 1px solid var(--ink-200);
-          border-radius: 20px;
+          border: 1px solid var(--esp-primitive-surface-border, var(--ink-200));
+          border-radius: var(--esp-primitive-card-radius, 20px);
           background: var(--esp-surface-card, var(--ink-0));
-          box-shadow: var(--shadow-xl);
+          box-shadow: var(--esp-surface-shadow, var(--shadow-xl));
           overflow: hidden;
           outline: none;
           transition: box-shadow 160ms ease, opacity 160ms ease;
         }
         .icom-float[data-dragging="true"] {
           user-select: none;
-          box-shadow: var(--icom-float-drag-shadow);
+          box-shadow: var(--esp-surface-shadow, var(--icom-float-drag-shadow));
         }
         .icom-float-bar {
           display: flex;
@@ -1549,9 +1578,9 @@ export const MESSAGERIE_STYLES_CSS = `
           flex-direction: column;
           align-items: center;
           gap: 8px;
-          padding: 16px 12px;
-          border: 1px solid var(--ink-200);
-          border-radius: 14px;
+          padding: var(--esp-card-padding, 16px 12px);
+          border: 1px solid var(--esp-primitive-surface-border, var(--ink-200));
+          border-radius: var(--esp-primitive-card-radius, 14px);
           background: var(--ink-0);
           text-align: center;
         }
@@ -1580,9 +1609,9 @@ export const MESSAGERIE_STYLES_CSS = `
           display: flex;
           flex-direction: column;
           gap: 6px;
-          padding: 10px;
-          border: 1px solid var(--ink-200);
-          border-radius: 12px;
+          padding: var(--esp-card-padding, 10px);
+          border: 1px solid var(--esp-primitive-surface-border, var(--ink-200));
+          border-radius: var(--esp-primitive-card-radius, 12px);
           background: var(--ink-0);
         }
         /* ⚠️ --danger-100 et --danger-500 : les SEULS paliers rouges definis par
@@ -1627,7 +1656,7 @@ export const MESSAGERIE_STYLES_CSS = `
           min-height: 32px;
           padding: 5px 8px;
           border: none;
-          border-radius: 8px;
+          border-radius: var(--esp-primitive-button-radius, 8px);
           background: transparent;
           color: var(--primary-700);
           font: inherit;
@@ -1672,7 +1701,7 @@ export const MESSAGERIE_STYLES_CSS = `
           min-height: 44px;
           padding: 8px 10px;
           border: 1px solid var(--ink-300);
-          border-radius: 9px;
+          border-radius: var(--esp-input-radius, 9px);
           background: var(--ink-0);
           color: var(--ink-900);
           font: inherit;
@@ -1693,9 +1722,9 @@ export const MESSAGERIE_STYLES_CSS = `
           min-width: 0;
           min-height: 54px;
           padding: 6px 3px;
-          border: 1px solid var(--ink-200);
-          border-radius: 12px;
-          background: var(--ink-0);
+          border: 1px solid var(--esp-action-cancel-border, var(--ink-200));
+          border-radius: var(--esp-primitive-button-radius, 12px);
+          background: var(--esp-action-cancel-bg, var(--ink-0));
           color: var(--ink-800);
           font: inherit;
           font-size: 11.5px;
@@ -1792,7 +1821,7 @@ export const MESSAGERIE_STYLES_CSS = `
           min-height: 44px;
           padding: 0 11px;
           border: 1px solid var(--ink-300);
-          border-radius: 999px;
+          border-radius: var(--esp-input-radius, 999px);
           background: var(--ink-50);
           color: var(--ink-500);
         }
@@ -1814,8 +1843,8 @@ export const MESSAGERIE_STYLES_CSS = `
           display: flex;
           flex-direction: column;
           gap: 8px;
-          padding: 10px;
-          border-radius: 10px;
+          padding: var(--esp-card-padding, 10px);
+          border-radius: var(--esp-primitive-card-radius, 10px);
           background: var(--ink-50);
         }
         .msg-infos-member {
@@ -1892,7 +1921,7 @@ export const MESSAGERIE_STYLES_CSS = `
           margin: 0 8px 10px 56px;
           padding: 10px;
           border: 1px solid var(--danger-100);
-          border-radius: 10px;
+          border-radius: var(--esp-primitive-card-radius, 10px);
           background: var(--danger-50, var(--ink-50));
           color: var(--danger-700);
         }
@@ -1913,9 +1942,9 @@ export const MESSAGERIE_STYLES_CSS = `
           width: 100%;
           min-height: 44px;
           padding: 8px 10px;
-          border: 1px solid var(--ink-200);
-          border-radius: 10px;
-          background: var(--ink-0);
+          border: 1px solid var(--esp-action-cancel-border, var(--ink-200));
+          border-radius: var(--esp-primitive-button-radius, 10px);
+          background: var(--esp-action-cancel-bg, var(--ink-0));
           color: var(--ink-900);
           font: inherit;
           font-size: 13px;
@@ -1975,16 +2004,18 @@ export const MESSAGERIE_STYLES_CSS = `
           min-width: 0;
           min-height: 36px;
           padding: 4px 7px;
-          border: 1px solid var(--ink-300);
+          border: 1px solid var(--esp-action-cancel-border, var(--ink-300));
           border-radius: 999px;
-          background: var(--ink-0);
+          background: var(--esp-action-cancel-bg, var(--ink-0));
         }
         .msg-infos-sensitive-actions .msg-infos-action:hover .msg-infos-action-pill,
         .msg-infos-sensitive-actions .msg-infos-action[aria-pressed="true"] .msg-infos-action-pill {
-          background: var(--ink-100);
+          background: var(--esp-action-cancel-bg, var(--ink-100));
         }
         .msg-infos-sensitive-actions .msg-infos-action[data-danger="true"] .msg-infos-action-pill {
-          border-color: var(--danger-500);
+          border-color: var(--esp-action-cancel-border, var(--danger-500));
+          background: var(--esp-action-danger-fill, var(--ink-0));
+          color: var(--esp-action-danger-on, inherit);
         }
         .msg-infos-action-pill > span {
           min-width: 0;
@@ -2000,9 +2031,9 @@ export const MESSAGERIE_STYLES_CSS = `
           align-self: flex-start;
           min-height: 44px;
           padding: 6px 9px;
-          border: 1px solid var(--ink-200);
-          border-radius: 8px;
-          background: transparent;
+          border: 1px solid var(--esp-action-cancel-border, var(--ink-200));
+          border-radius: var(--esp-primitive-button-radius, 8px);
+          background: var(--esp-action-cancel-bg, transparent);
           color: var(--ink-700);
           font: inherit;
           font-size: 12px;
@@ -2012,9 +2043,11 @@ export const MESSAGERIE_STYLES_CSS = `
         }
         .msg-infos-mini:hover { background: var(--ink-100); }
         .msg-infos-mini[data-danger="true"] {
-          border-color: var(--danger-500);
-          color: var(--danger-700);
+          border-color: var(--esp-action-cancel-border, var(--danger-500));
+          background: var(--esp-action-danger-fill, transparent);
+          color: var(--esp-action-danger-on, var(--danger-700));
         }
+        .msg-infos-mini[data-danger="true"]:hover { background: var(--esp-action-danger-fill, var(--ink-100)); }
         .msg-infos-mini:disabled { opacity: 0.55; cursor: default; }
         .msg-panel[data-variant="page"] .msg-infos-mini {
           min-height: 44px;
@@ -2024,7 +2057,7 @@ export const MESSAGERIE_STYLES_CSS = `
         .msg-success {
           margin: 0 8px;
           padding: 8px 10px;
-          border-radius: 10px;
+          border-radius: var(--esp-primitive-chip-radius, 10px);
           background: var(--success-50, var(--ink-100));
           color: var(--success-600);
           font-size: 12.5px;
@@ -2042,9 +2075,9 @@ export const MESSAGERIE_STYLES_CSS = `
           flex-direction: column;
           align-items: center;
           gap: 6px;
-          padding: 16px 12px;
-          border: 1px solid var(--ink-200);
-          border-radius: 14px;
+          padding: var(--esp-card-padding, 16px 12px);
+          border: 1px solid var(--esp-primitive-surface-border, var(--ink-200));
+          border-radius: var(--esp-primitive-card-radius, 14px);
           background: var(--ink-0);
           text-align: center;
         }
@@ -2054,7 +2087,7 @@ export const MESSAGERIE_STYLES_CSS = `
           width: min(100%, 260px);
           margin-top: 8px;
           padding: 16px;
-          border-radius: 12px;
+          border-radius: var(--esp-primitive-media-radius, 12px);
           /* Contraste OBLIGÉ d'un code QR, quel que soit le thème : clair
              derrière, sombre devant — des jetons constants, pas ceux de la
              charte (un thème sombre inverserait le code). */
@@ -2119,12 +2152,12 @@ export const MESSAGERIE_STYLES_CSS = `
         }
         .msg-panel[data-fill="screen"] .msg-infos-hero,
         .msg-panel[data-fill="screen"] .msg-infos-block {
-          border: 1px solid var(--ink-200);
-          border-radius: 14px;
+          border: 1px solid var(--esp-primitive-surface-border, var(--ink-200));
+          border-radius: var(--esp-primitive-card-radius, 14px);
           background: var(--ink-0);
         }
-        .msg-panel[data-fill="screen"] .msg-infos-hero { padding: 16px 12px 14px; }
-        .msg-panel[data-fill="screen"] .msg-infos-block { padding: 8px 10px; }
+        .msg-panel[data-fill="screen"] .msg-infos-hero { padding: var(--esp-card-padding, 16px 12px 14px); }
+        .msg-panel[data-fill="screen"] .msg-infos-block { padding: var(--esp-card-padding, 8px 10px); }
         .msg-panel[data-fill="screen"] .msg-infos-member .msg-row {
           display: grid;
           grid-template-columns: 40px minmax(0, 1fr);
@@ -2140,8 +2173,8 @@ export const MESSAGERIE_STYLES_CSS = `
         }
         .msg-panel[data-fill="screen"] .msg-infos-member-actions .msg-infos-mini {
           border-color: transparent;
-          border-radius: 999px;
-          background: var(--primary-50);
+          border-radius: var(--esp-primitive-button-radius, 999px);
+          background: var(--esp-action-cancel-bg, var(--primary-50));
           color: var(--primary-700);
           padding-inline: 10px;
         }
@@ -2175,6 +2208,24 @@ export const MESSAGERIE_STYLES_CSS = `
           .msg-infos-sensitive-confirm { margin-left: 0; }
         }
 
+        .msg-panel .msg-infos .msg-infos-mini[data-role="success"] {
+          background: var(--esp-action-success-fill, transparent);
+          color: var(--esp-action-success-on, var(--ink-700));
+          border-color: var(--esp-action-cancel-border, var(--ink-200));
+        }
+        .msg-panel .msg-infos .msg-infos-mini[data-role="cancel"] {
+          background: var(--esp-action-cancel-bg, transparent);
+          color: var(--esp-action-cancel-fg, var(--ink-700));
+        }
+        .msg-panel .msg-infos .msg-infos-mini[data-role="danger"] {
+          background: var(--esp-action-danger-fill, transparent);
+          color: var(--esp-action-danger-on, var(--ink-700));
+          border-color: var(--esp-action-cancel-border, var(--ink-200));
+        }
+        .msg-send-btn[data-role="success"] {
+          background: var(--esp-action-success-fill, var(--role-message-fill, var(--primary-fill)));
+          color: var(--esp-action-success-on, var(--role-message-on, var(--on-fill)));
+        }
         @media (prefers-reduced-motion: reduce) {
           .msg-panel, .msg-head, .msg-row, .msg-collapse-icon {
             transition: none;

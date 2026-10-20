@@ -54,7 +54,7 @@ export function PaymentStatusCard({ attempt, compact = false }: { attempt: Payme
       <div><dt className="text-sm text-muted-foreground">{t("refundStatus")}</dt><dd>{refundState ? t(`refundStates.${refundState}`) : t("stateUnknown")}</dd></div>
     </dl> : null}
     <p className="text-sm text-muted-foreground">{observed ? t("observed", { date: observed }) : t("dateUnknown")}</p>
-    {attempt.reviewRequired ? <div role="status" className="grid gap-2 rounded-xl border border-border bg-background p-4"><h3 className="font-semibold">{t("reviewRequired")}</h3><p>{t("reviewHint")}</p></div> : null}
+    {attempt.reviewRequired ? <div role="status" className="grid gap-2 rounded-[var(--ui2-card-radius)] border border-[color:var(--esp-surface-border)] bg-background p-[var(--esp-card-padding,16px)]"><h3 className="font-semibold">{t("reviewRequired")}</h3><p>{t("reviewHint")}</p></div> : null}
     {state === "unknown" || state === "submitting" || state === "unavailable" ? <p role="status" className="text-sm">{t("searchFirst")}</p> : null}
     {!compact ? <>
       <section className="grid gap-2"><h3 className="font-medium">{t("fulfillmentStatus")}</h3><p className="text-sm text-muted-foreground">{t("fulfillmentUnconfirmed")}</p></section>

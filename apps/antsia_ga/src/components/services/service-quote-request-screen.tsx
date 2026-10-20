@@ -88,7 +88,7 @@ function QuoteRequestForm({ handle, offerRef, offerTitle, threadId, attachments,
       <legend className="text-sm font-medium">{t("quote.attachments")}</legend>
       <p className="text-xs text-muted-foreground">{t("quote.attachmentsHint", { max: COMMERCE_SERVICE_LIMITS.quoteAttachmentsMax })}</p>
       {attachments.length === 0 ? <p className="text-sm text-muted-foreground">{t("quote.noAttachments")}</p> : <ul className="grid gap-2">{attachments.map((item) => <li key={item.messageId}>
-        <label className="flex min-h-11 items-start gap-3 rounded-lg border border-border p-3">
+        <label className="flex min-h-11 items-start gap-3 rounded-[var(--ui2-card-radius)] border border-border p-[var(--esp-card-padding,16px)]">
           <input type="checkbox" value={item.messageId} className="mt-1 size-4" {...form.register("attachmentMessageIds")} />
           <span className="grid gap-1 text-sm"><span>{t("quote.attachmentSent", { date: new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeStyle: "short" }).format(item.createdAt) })}</span>{item.files.map((file) => <span key={`${item.messageId}:${file.filename}`} className="break-all text-muted-foreground">{file.filename}</span>)}</span>
         </label>

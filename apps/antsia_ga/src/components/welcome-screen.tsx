@@ -162,12 +162,12 @@ export function WelcomeScreen({ publicPostId, notificationReference, shopContact
                     key={suggestion.handle}
                     type="button"
                     onClick={() => form.setValue("handle", suggestion.handle, { shouldValidate: true })}
-                    className="min-h-11 rounded-full border border-border bg-background px-3 py-1 hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    className="min-h-11 rounded-[var(--esp-chip-radius)] border border-transparent bg-muted px-3 py-1 hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   >
                     @{suggestion.handle}
                   </button>
                 ) : (
-                  <span key={suggestion.handle} className="rounded-full px-3 py-1 text-muted-foreground line-through">
+                  <span key={suggestion.handle} className="rounded-[var(--esp-chip-radius)] px-3 py-1 text-muted-foreground line-through">
                     {t("antsia:welcome.taken", { handle: `@${suggestion.handle}` })}
                   </span>
                 ),
@@ -176,7 +176,7 @@ export function WelcomeScreen({ publicPostId, notificationReference, shopContact
           ) : null}
 
           <Field id="locale" label={t("antsia:welcome.localeLabel")}>
-            <select id="locale" className="min-h-11 rounded-lg border border-input bg-background px-3 text-sm" {...form.register("locale")}>
+            <select id="locale" className="min-h-11 rounded-[var(--esp-field-radius)] border border-input bg-muted px-3 text-sm" {...form.register("locale")}>
               <option value="fr">{t("antsia:welcome.french")}</option>
               <option value="en">{t("antsia:welcome.english")}</option>
             </select>

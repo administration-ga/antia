@@ -15,6 +15,7 @@
  * page rendent la même — un seul gabarit à tenir.
  */
 
+import { themedActionStyle } from "../themed-action-style"
 import { api } from "@antsia/api/engine"
 import type { Id } from "@antsia/api/engine"
 import { useNetwork, useRoutes, type EnginePostPresentation } from "@antsia/api/network"
@@ -455,7 +456,8 @@ function PostCardContent({ post, now, onTag, onMention, offer }: PostCardProps) 
               aria-label={t("postCard.editLabel")}
             />
             <div style={{ display: "flex", gap: 8 }}>
-              <Button
+              <Button style={themedActionStyle("success", "primary")}
+                variant="success"
                 size="sm"
                 onClick={() =>
                   void editPost({ networkId, postId: post._id, body: editedBody })
@@ -470,9 +472,9 @@ function PostCardContent({ post, now, onTag, onMention, offer }: PostCardProps) 
               >
                 {t("postCard.save")}
               </Button>
-              <Button
+              <Button style={themedActionStyle("cancel", "ghost")}
                 size="sm"
-                variant="ghost"
+                variant="outline"
                 onClick={() => {
                   setEditedBody(post.body)
                   setEditing(false)
@@ -484,10 +486,10 @@ function PostCardContent({ post, now, onTag, onMention, offer }: PostCardProps) 
           </div>
   )
 
-  const liveBlock = post.live ? <Link href={routes.conference(post.live.sessionId)} className="mt-3 flex min-h-11 items-center justify-between gap-3 rounded-xl border border-border bg-muted p-4"><span>{post.live.title}</span><span>{t(`direct:status.${post.live.status}`)}</span></Link> : null
+  const liveBlock = post.live ? <Link href={routes.conference(post.live.sessionId)} className="mt-3 flex min-h-11 items-center justify-between gap-[var(--esp-card-gap,0.75rem)] rounded-[var(--esp-primitive-card-radius,0.75rem)] border border-[var(--esp-primitive-surface-border,var(--border))] bg-muted p-4"><span>{post.live.title}</span><span>{t(`direct:status.${post.live.status}`)}</span></Link> : null
 
   const eventBlock = post.event !== null ? (
-          <section aria-label={t("post.event.label")} className="grid gap-2 rounded-xl border border-border bg-muted p-4">
+          <section aria-label={t("post.event.label")} className="grid gap-2 rounded-[var(--esp-primitive-card-radius,0.75rem)] border border-[var(--esp-primitive-surface-border,var(--border))] bg-muted p-4">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <span className="text-xs font-semibold text-muted-foreground">{t("post.event.label")}</span>
               <span className={post.event.status === "cancelled" ? "text-xs font-semibold text-destructive" : "text-xs font-semibold text-muted-foreground"}>
@@ -524,7 +526,7 @@ function PostCardContent({ post, now, onTag, onMention, offer }: PostCardProps) 
               minWidth: 44,
               justifyContent: "center",
               padding: "7px 10px",
-              borderRadius: 9,
+              borderRadius: "var(--esp-primitive-button-radius, 9px)",
               fontFamily: "inherit",
               fontSize: 12.5,
               fontWeight: 700,
@@ -561,7 +563,7 @@ function PostCardContent({ post, now, onTag, onMention, offer }: PostCardProps) 
                 minWidth: 44,
                 justifyContent: "center",
                 padding: "7px 10px",
-                borderRadius: 9,
+                borderRadius: "var(--esp-primitive-button-radius, 9px)",
                 fontFamily: "inherit",
                 fontSize: 12.5,
                 fontWeight: 700,
@@ -793,7 +795,7 @@ function PostCardContent({ post, now, onTag, onMention, offer }: PostCardProps) 
         <article
           data-post-presentation="media"
           style={{
-            padding: `14px ${POST_CARD_GUTTER}px`,
+            padding: `var(--esp-card-padding, 14px) ${POST_CARD_GUTTER}px`,
             display: "flex",
             flexDirection: "column",
             gap: 10,
@@ -851,7 +853,7 @@ function PostCardContent({ post, now, onTag, onMention, offer }: PostCardProps) 
                 minWidth: 44,
                 marginInlineStart: "auto",
                 padding: "7px 10px",
-                borderRadius: 9,
+                borderRadius: "var(--esp-primitive-button-radius, 9px)",
                 cursor: saving ? "progress" : "pointer",
                 background: saved ? "var(--primary-50)" : "transparent",
                 color: saved ? "var(--primary-600)" : "var(--ink-500)",
@@ -887,7 +889,7 @@ function PostCardContent({ post, now, onTag, onMention, offer }: PostCardProps) 
     <Card padded={false} style={POST_SURFACE_STYLE}>
       <article
         style={{
-          padding: `14px ${POST_CARD_GUTTER}px`,
+          padding: `var(--esp-card-padding, 14px) ${POST_CARD_GUTTER}px`,
           display: "flex",
           flexDirection: "column",
           gap: 10,
@@ -1230,8 +1232,8 @@ function SharedPostCard({
           // Le tiret disait « cadre vide » ; la surface teintée suffit
           // (2026-08-21, cartes sans bordure).
           background: "var(--ink-50, var(--ink-0))",
-          borderRadius: 10,
-          padding: 14,
+          borderRadius: "var(--esp-primitive-card-radius, 10px)",
+          padding: "var(--esp-card-padding, 14px)",
           color: "var(--ink-600)",
           fontSize: 13,
         }}
@@ -1257,8 +1259,8 @@ function SharedPostCard({
       style={{
         // Sans liseré (2026-08-21) : la citation se distingue par sa surface
         // teintée.
-        borderRadius: 10,
-        padding: 12,
+        borderRadius: "var(--esp-primitive-card-radius, 10px)",
+        padding: "var(--esp-card-padding, 12px)",
         display: "flex",
         flexDirection: "column",
         gap: 10,

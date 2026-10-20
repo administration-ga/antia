@@ -30,10 +30,10 @@ import {
 } from "./discover-model"
 
 const ENTRY_LINK =
-  "flex min-h-11 items-start justify-between gap-3 rounded-xl border border-border bg-card p-4 text-card-foreground hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+  "flex min-h-11 items-start justify-between gap-3 rounded-[var(--ui2-card-radius)] border border-[color:var(--esp-surface-border)] bg-card p-[var(--esp-card-padding,16px)] text-card-foreground hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
 
 const CHIP_LINK =
-  "inline-flex min-h-11 items-center rounded-full border border-border bg-card px-4 text-sm font-medium text-card-foreground hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+  "inline-flex min-h-11 items-center rounded-[var(--esp-chip-radius)] border border-transparent bg-card px-4 text-sm font-medium text-card-foreground hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
 
 /** Une entrée de Découvrir : un lien d'une seule pièce, libellé puis phrase. */
 function EntryLink({ entry }: { entry: DiscoverEntry }) {

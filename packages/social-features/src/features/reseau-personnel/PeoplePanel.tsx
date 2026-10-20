@@ -11,6 +11,7 @@
  * d'une absence.
  */
 
+import { themedActionStyle } from "../themed-action-style"
 import { api, type Id } from "@antsia/api/engine"
 import { useAuthenticatedConvexQuery } from "@antsia/api/hooks"
 import { useNetwork, useRoutes } from "@antsia/api/network"
@@ -262,9 +263,9 @@ const PEOPLE_PANEL_CSS = `
         min-width: 0;
         flex-direction: column;
         gap: 8px;
-        padding: 14px;
-        border: 1px solid var(--ink-200);
-        border-radius: 16px;
+        padding: var(--esp-card-padding, 14px);
+        border: 1px solid var(--esp-primitive-surface-border, var(--ink-200));
+        border-radius: var(--esp-primitive-card-radius, 16px);
         background: var(--ink-0);
       }
       /* DEUX lignes pour le nom : un patronyme composé ne tient pas sur une
@@ -497,7 +498,7 @@ function SearchCard({ compact = false }: { compact?: boolean }) {
                 style={
                   compact
                     ? {
-                        borderRadius: 11,
+                        borderRadius: "var(--esp-input-radius, 11px)",
                         border: "1px solid var(--ink-300)",
                         padding: "10px 12px",
                         fontSize: 13,
@@ -512,7 +513,7 @@ function SearchCard({ compact = false }: { compact?: boolean }) {
                 size="sm"
                 variant="ghost"
                 style={{
-                  borderRadius: 11,
+                  borderRadius: "var(--esp-primitive-button-radius, 11px)",
                   background: "var(--ink-150)",
                   color: "var(--ink-900)",
                   padding: "10px 13px",
@@ -694,18 +695,18 @@ function PendingRequestsCard({ pending }: { pending: ReturnType<typeof usePerson
                     size="sm"
                     icon="check"
                     // Accepter : couleur des relations (ADR-0027).
-                    variant="social"
+                    variant="success"
                     disabled={busy === request.connectionId}
-                    style={RESEAU_PILL_ACTION_STYLE}
+                    style={themedActionStyle("success", "social", RESEAU_PILL_ACTION_STYLE)}
                     onClick={() => void decide(request.connectionId, true)}
                   >
                     {t("peoplePanel.pending.accept")}
                   </Button>
                   <Button
                     size="sm"
-                    variant="ghost"
+                    variant="danger"
                     disabled={busy === request.connectionId}
-                    style={RESEAU_PILL_ACTION_STYLE}
+                    style={themedActionStyle("danger", "ghost", RESEAU_PILL_ACTION_STYLE)}
                     onClick={() => void decide(request.connectionId, false)}
                   >
                     {t("peoplePanel.pending.decline")}

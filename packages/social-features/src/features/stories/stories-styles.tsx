@@ -75,7 +75,7 @@ const STORIES_CSS = `
         width: 100%;
         aspect-ratio: 9 / 16;
         overflow: hidden;
-        border-radius: 12px;
+        border-radius: var(--esp-primitive-card-radius, 12px);
         background: var(--muted);
       }
       .st-card-media {
@@ -196,7 +196,7 @@ const STORIES_CSS = `
       .st-tray-tile:focus-visible {
         outline: 2px solid var(--ring);
         outline-offset: 3px;
-        border-radius: 12px;
+        border-radius: var(--esp-primitive-card-radius, 12px);
       }
       /* L'anneau. Il ne porte AUCUNE couleur : elle vient des classes
          .esp-story-ring / -seen / -self, posees a cote de celle-ci. */
@@ -302,16 +302,40 @@ const STORIES_CSS = `
         background: var(--primary-fill);
         color: var(--primary-fill-on, var(--on-fill));
       }
-      /* Le « + » est un bouton à part entière quand ma série est en ligne :
-         sa zone de toucher déborde son rond de 22 px. */
+      /* Le « + » est un bouton frère du médaillon quand ma série est en ligne.
+         La cible ANTSIA mesure 44 px ; seule la pastille visible mesure 22 px.
+         Le centre reste celui du rond historique, sans déplacer la rangée. */
       .st-ring-plus-button {
+        position: absolute;
+        right: calc(-2px - (var(--esp-control-min-size, 22px) - 22px) / 2);
+        bottom: calc(-2px - (var(--esp-control-min-size, 22px) - 22px) / 2);
+        display: flex;
+        width: var(--esp-control-min-size, 22px);
+        height: var(--esp-control-min-size, 22px);
+        align-items: center;
+        justify-content: center;
         padding: 0;
+        border: none;
+        border-radius: 999px;
+        background: transparent;
+        color: inherit;
         cursor: pointer;
       }
+      .st-ring-plus-button > .st-ring-plus {
+        position: static;
+        flex: 0 0 22px;
+        pointer-events: none;
+      }
+      /* Hors ANTSIA, le bouton reste à 22 px et conserve son ancienne zone de
+         toucher de 40 px. Dans ANTSIA, ce pseudo-élément ne dépasse pas les 44 px. */
       .st-ring-plus-button::before {
         content: "";
         position: absolute;
-        inset: -9px;
+        top: 50%;
+        left: 50%;
+        width: max(40px, var(--esp-control-min-size, 22px));
+        height: max(40px, var(--esp-control-min-size, 22px));
+        transform: translate(-50%, -50%);
         border-radius: 999px;
       }
       .st-ring-name {
@@ -473,7 +497,7 @@ const STORIES_CSS = `
         gap: 6px;
         padding: 8px 12px;
         border: none;
-        border-radius: 999px;
+        border-radius: var(--esp-primitive-chip-radius, 999px);
         font: inherit;
         font-size: 12.5px;
         font-weight: 700;
@@ -502,7 +526,7 @@ const STORIES_CSS = `
         align-items: center;
         gap: 7px;
         padding: 5px 12px;
-        border-radius: 999px;
+        border-radius: var(--esp-primitive-chip-radius, 999px);
         font-size: 11px;
         font-weight: 800;
         letter-spacing: 0.08em;
@@ -592,8 +616,8 @@ const STORIES_CSS = `
         width: min(430px, 100%);
         max-height: min(760px, 92dvh);
         overflow: hidden;
-        border-radius: 18px;
-        border: 1px solid var(--border);
+        border-radius: var(--esp-primitive-card-radius, 18px);
+        border: 1px solid var(--esp-raised-border, var(--border));
         background: var(--background);
       }
 `

@@ -14,7 +14,7 @@ import { signOutAndRedirect } from "@/lib/sign-out"
 import { meEntriesIn, type MeEntry, type MeSection } from "./me-model"
 
 const ENTRY_LINK =
-  "flex min-h-11 items-start justify-between gap-3 rounded-xl border border-border bg-card p-4 text-card-foreground hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+  "flex min-h-11 items-start justify-between gap-3 rounded-[var(--ui2-card-radius)] border border-[color:var(--esp-surface-border)] bg-card p-[var(--esp-card-padding,16px)] text-card-foreground hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
 
 /** Une liste d'entrées menant à des pages déjà servies (Profil, Paramètres). */
 export function EntryList({ entries }: { entries: readonly MeEntry[] }) {
@@ -82,7 +82,7 @@ export function MemberMeScreen() {
         <section aria-labelledby={titles.preferences} className="flex flex-col gap-4">
           <h2 id={titles.preferences} className="text-lg font-semibold">{t("me.preferencesTitle")}</h2>
           <EntryList entries={meEntriesIn("preferences", handle)} />
-          <div className="rounded-xl border border-border bg-card p-2">
+          <div className="rounded-[var(--ui2-card-radius)] border border-[color:var(--esp-surface-border)] bg-card p-[var(--esp-card-padding,16px)] ">
             <AppearanceControl />
           </div>
         </section>

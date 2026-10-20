@@ -28,7 +28,7 @@ export function ShopCommerceLink({ shopId, dirty = false }: { shopId: Id<"shops"
   const id = useId()
   const form = useForm<LinkForm>({ resolver: zodResolver(linkForm), defaultValues: { permissions: ["catalog_drafts", "publish_catalog"], consent: undefined } })
 
-  return <section aria-labelledby={`${id}-title`} className="grid gap-4 rounded-xl border border-border bg-background p-4">
+  return <section aria-labelledby={`${id}-title`} className="grid gap-4 rounded-[var(--ui2-card-radius)] border border-[color:var(--esp-surface-border)] bg-background p-[var(--esp-card-padding,16px)]">
     <h3 id={`${id}-title`} className="text-lg font-semibold">{t("link.title")}</h3>
     <p className="text-sm text-muted-foreground">{t("link.lead")}</p>
     {query.isError ? <div role="alert" className="grid gap-2"><p>{t("link.loadError")}</p><Button type="button" variant="outline" onClick={() => void query.refetch()}>{t("common.retry")}</Button></div> : !query.data ? <p role="status">{t("common.loading")}</p> : <>
@@ -52,7 +52,7 @@ export function ShopCommerceLink({ shopId, dirty = false }: { shopId: Id<"shops"
       })}>
         <fieldset disabled={action.pending || dirty} className="grid gap-2">
           <legend className="mb-2 font-medium">{t("link.permissionsTitle")}</legend>
-          {COMMERCE_LINK_PERMISSIONS.map((permission) => <label key={permission} className="flex min-h-11 items-start gap-3 rounded-lg border border-border p-3"><input type="checkbox" value={permission} className="mt-1 size-4 accent-primary" {...form.register("permissions")} /><span className="text-sm">{t(`link.permissions.${permission}`)}</span></label>)}
+          {COMMERCE_LINK_PERMISSIONS.map((permission) => <label key={permission} className="flex min-h-11 items-start gap-3 rounded-[var(--ui2-card-radius)] border border-border p-[var(--esp-card-padding,16px)]"><input type="checkbox" value={permission} className="mt-1 size-4 accent-primary" {...form.register("permissions")} /><span className="text-sm">{t(`link.permissions.${permission}`)}</span></label>)}
         </fieldset>
         {form.formState.errors.permissions ? <p role="alert" className="text-sm text-destructive">{t("link.choosePermission")}</p> : null}
         <label className="flex min-h-11 items-start gap-3"><input type="checkbox" disabled={action.pending || dirty} className="mt-1 size-4 accent-primary" {...form.register("consent")} /><span className="text-sm">{t("link.consent", { version: query.data.consentTextVersion })}</span></label>

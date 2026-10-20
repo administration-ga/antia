@@ -151,11 +151,13 @@ export function StoriesTray({
 						{canCreate ? (
 							<button
 								type="button"
-								className="st-ring-plus st-ring-plus-button"
+								className="st-ring-plus-button"
 								aria-label={t("storiesTray.create")}
 								onClick={onCreate}
 							>
-								<Icon name="plus" size={13} />
+								<span className="st-ring-plus" aria-hidden="true">
+									<Icon name="plus" size={13} />
+								</span>
 							</button>
 						) : null}
 					</span>

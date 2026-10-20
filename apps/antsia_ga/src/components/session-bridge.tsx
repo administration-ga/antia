@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next"
 import { isSigningOutEverywhere } from "@antsia/api/sign-out-everywhere"
 
 import { authClient } from "@/lib/auth-client"
+import { buttonClassName } from "@/components/shared/button-class"
 import { BRIDGE_CLIENT_TIMEOUT_MS, BRIDGE_RESUME_EVENT, sdkSessionCookie } from "@/lib/session-bridge"
 import { clearLocalSessionForAnonymousBridge, currentSessionBridgeGeneration, requestSessionBridge, rotateSessionBridgeFence } from "@/lib/session-bridge-client"
 
@@ -15,13 +16,16 @@ export function SessionBridgePreflight({ children }: { children: ReactNode }) {
   const [phase, setPhase] = useState<"pending" | "ready" | "error">("pending")
   const pending = useRef<Promise<boolean> | null>(null)
   useEffect(() => {
+    // Une transition déjà engagée peut remonter cette porte pendant la sortie.
+    // Seul le gestionnaire de sortie possède alors la génération et sa purge.
+    if (isSigningOutEverywhere()) return
     let cancelled = false
     if (!pending.current) pending.current = (async () => {
         const generation = rotateSessionBridgeFence()
         // Pas de marque anonyme avant la purge/proof du SDK. Même un OTT sans API sera fermé.
         return requestSessionBridge("DELETE", { generation, anonymous: false })
     })()
-    void pending.current.then((cleared) => { if (!cancelled) setPhase(cleared ? "ready" : "error") }).catch(() => { if (!cancelled) setPhase("error") })
+    void pending.current.then((cleared) => { if (!cancelled && !isSigningOutEverywhere()) setPhase(cleared ? "ready" : "error") }).catch(() => { if (!cancelled && !isSigningOutEverywhere()) setPhase("error") })
     return () => { cancelled = true }
   }, [])
   if (phase === "ready") return children
@@ -30,7 +34,7 @@ export function SessionBridgePreflight({ children }: { children: ReactNode }) {
 
 function BridgeStatus({ label, failed }: { label: string; failed: boolean }) {
   const { t } = useTranslation("publicNetwork")
-  return <div role={failed ? "alert" : "status"} className="mx-auto flex min-h-[50dvh] max-w-lg flex-col items-center justify-center gap-4 px-5 text-center"><p>{label}</p>{failed ? <button className="min-h-11 rounded-lg border border-border bg-card px-4 focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring" onClick={() => window.location.reload()}>{t("states.retry")}</button> : null}</div>
+  return <div role={failed ? "alert" : "status"} className="mx-auto flex min-h-[50dvh] max-w-lg flex-col items-center justify-center gap-4 px-5 text-center"><p>{label}</p>{failed ? <button className={buttonClassName("outline")} onClick={() => window.location.reload()}>{t("states.retry")}</button> : null}</div>
 }
 
 /** Monté APRÈS LiveSessionGate : promotion seulement après les barrières session/JWT réussies. */

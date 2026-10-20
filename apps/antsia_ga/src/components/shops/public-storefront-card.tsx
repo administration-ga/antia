@@ -17,13 +17,13 @@ export function PublicStorefrontCard({ storefront, locale, catalog }: { storefro
     { key: "hours", value: storefront.hours },
   ] as const
 
-  return <article className="mx-auto w-full max-w-3xl overflow-hidden rounded-2xl border border-border bg-card text-card-foreground">
-    {storefront.bannerUrl ? <Image unoptimized src={storefront.bannerUrl} width={1200} height={400} alt="" loading="lazy" className="max-h-64 w-full object-cover" /> : null}
-    <div className="flex flex-col gap-6 p-5 sm:p-8">
+  return <article className="mx-auto w-full max-w-3xl overflow-hidden rounded-[var(--ui2-card-radius)] border border-[color:var(--esp-surface-border)] bg-card text-card-foreground">
+    {storefront.bannerUrl ? <div className="p-[var(--esp-card-padding,16px)] pb-0"><Image unoptimized src={storefront.bannerUrl} width={1200} height={400} alt="" loading="lazy" className="max-h-64 w-full rounded-[var(--esp-media-radius)] object-cover" /></div> : null}
+    <div className="flex flex-col gap-6 p-[var(--esp-card-padding,16px)]">
       <header className="flex flex-col gap-4">
         <p className="text-sm font-medium text-primary">{t("shops:publicStorefront.title", { name: storefront.name })}</p>
         <div className="flex items-start gap-4">
-          {storefront.logoUrl ? <Image unoptimized src={storefront.logoUrl} width={72} height={72} alt="" loading="lazy" className="size-18 shrink-0 rounded-2xl object-contain" /> : <span aria-hidden="true" className="flex size-16 shrink-0 items-center justify-center rounded-2xl bg-muted text-2xl font-semibold">{storefront.name.slice(0, 1)}</span>}
+          {storefront.logoUrl ? <Image unoptimized src={storefront.logoUrl} width={72} height={72} alt="" loading="lazy" className="size-18 shrink-0 rounded-[var(--esp-avatar-page-radius)] object-contain" /> : <span aria-hidden="true" className="flex size-16 shrink-0 items-center justify-center rounded-[var(--esp-avatar-page-radius)] bg-muted text-2xl font-semibold">{storefront.name.slice(0, 1)}</span>}
           <div className="flex min-w-0 flex-col gap-2">
             <h1 className="break-words text-3xl font-semibold tracking-tight">{storefront.name}</h1>
             <p className="break-all text-sm text-muted-foreground">@{storefront.handle}</p>

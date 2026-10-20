@@ -24,7 +24,7 @@ function OfferCartSelection({ offer }: { offer: CatalogOffer }) {
   const schema = z.object({ variantRef: z.string(), quantity: z.string().regex(/^[1-9]\d{0,2}$/, t("quantityError")) })
   const form = useForm<z.infer<typeof schema>>({ resolver: zodResolver(schema), defaultValues: { variantRef: "", quantity: "1" } })
   if (offer.price.mode === "quote" || !offer.variants.length && !["fixed", "unit"].includes(offer.price.mode)) return <p className="text-sm text-muted-foreground">{t("quoteClosed")}</p>
-  return <form className="grid w-full gap-3 rounded-xl border border-border bg-background p-4" onSubmit={form.handleSubmit((values) => {
+  return <form className="grid w-full gap-3 rounded-[var(--ui2-card-radius)] border border-[color:var(--esp-surface-border)] bg-background p-[var(--esp-card-padding,16px)]" onSubmit={form.handleSubmit((values) => {
     if (!cart.ready) return
     if (offer.variants.length && !offer.variants.some((variant) => variant.variantRef === values.variantRef)) { form.setError("variantRef", { message: t("variantError") }); return }
     const result = addCartItem(cart.draft, { networkId: String(cart.networkId), personId: String(cart.personId) }, offer.shopHandle, { offerRef: offer.offerRef, ...(values.variantRef ? { variantRef: values.variantRef } : {}), quantity: Number(values.quantity) }, Date.now())

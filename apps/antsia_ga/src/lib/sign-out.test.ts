@@ -9,6 +9,15 @@ import { routes } from "./routes"
 
 afterEach(() => { vi.unstubAllGlobals(); mocks.sdk.mockReset(); mocks.bridge.mockReset(); mocks.fence.mockReset() })
 describe("sortie avec purge du pont", () => {
+  it("une révocation et deux purges confirmées retournent à l'entrée sans avertissement", async () => {
+    const assign = vi.fn()
+    vi.stubGlobal("window", { location: { assign } })
+    mocks.fence.mockReturnValue("generation")
+    mocks.sdk.mockImplementation(async (_client, options) => { options.navigate({ serverRevoked: true, localCleared: true }); return {} })
+    mocks.bridge.mockResolvedValue(true)
+    await signOutAndRedirect()
+    await vi.waitFor(() => expect(assign).toHaveBeenCalledWith(routes.signedOut(false)))
+  })
   it("ferme synchroniquement, attend la purge locale avant navigation et signale son échec", async () => {
     const order: string[] = [], assign = vi.fn(() => { order.push("navigate") })
     vi.stubGlobal("window", { location: { assign } })

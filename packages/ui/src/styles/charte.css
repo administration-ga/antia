@@ -670,8 +670,53 @@
   --ui2-button-radius: initial;
   --ui2-badge-radius: initial;
   --ui2-card-radius: initial;
+  /* Espacement et profondeur des cartes : chaque consommateur garde sa
+     facture historique en repli ; les sept chartes ANTSIA partagent 16/12 px
+     et aucune ombre sur les surfaces posées dans la page. */
+  --esp-card-padding: initial;
+  --esp-card-gap: initial;
+  --esp-surface-shadow: initial;
+  /* Un dialogue surélevé se distingue déjà de la page par sa couleur. */
+  --esp-raised-border: initial;
+  /* Alertes tonales : leur fond porte déjà l'état ; sans liseré ANTSIA. */
+  --esp-alert-border: initial;
+  --esp-alert-accent-width: initial;
+  /* Cible des commandes du kit : 44 px ANTSIA, densité historique ailleurs. */
+  --esp-control-min-size: initial;
+  /* Nouveaux raccords des primitives : activation propre au réseau ANTSIA.
+     Les autres réseaux peuvent déjà porter les anciens jetons de géométrie
+     sans avoir adopté ces composants ; leurs replis restent donc inchangés. */
+  --esp-primitive-card-radius: initial;
+  --esp-primitive-button-radius: initial;
+  --esp-primitive-badge-radius: initial;
+  --esp-primitive-chip-radius: initial;
+  --esp-primitive-chip-bg: initial;
+  --esp-primitive-chip-border: initial;
+  --esp-input-radius: initial;
+  --esp-primitive-surface-border: initial;
+  --esp-primitive-neutral-bg: initial;
+  --esp-primitive-neutral-border: initial;
+  --esp-primitive-secondary-bg: initial;
+  --esp-primitive-secondary-fg: initial;
+  --esp-primitive-secondary-border: initial;
+  --esp-primitive-tab-bg: initial;
+  --esp-primitive-tab-fg: initial;
+  --esp-primitive-tab-border: initial;
+  --esp-primitive-icon-bg: initial;
+  --esp-primitive-identity-fill: initial;
+  --esp-primitive-fill-on: initial;
+  --esp-action-success-fill: initial;
+  --esp-action-success-on: initial;
+  --esp-action-danger-fill: initial;
+  --esp-action-danger-on: initial;
+  --esp-action-cancel-bg: initial;
+  --esp-action-cancel-fg: initial;
+  --esp-action-cancel-border: initial;
+  --esp-primitive-media-radius: initial;
+  --esp-primitive-avatar-page-radius: initial;
   --esp-chip-radius: initial;
   --esp-field-radius: initial;
+  --esp-field-border: initial;
   --esp-media-radius: initial;
   --esp-fab-radius: initial;
   --esp-avatar-page-radius: initial;
@@ -682,6 +727,7 @@
      relèvent de la règle, et WCAG 1.4.11 l'exige (P18b). Replis : les fonds et
      filets historiques. */
   --ui2-button-outline-bg: initial;
+  --ui2-button-outline-fg: initial;
   --ui2-button-outline-border: initial;
   --ui2-button-secondary-bg: initial;
   --ui2-button-secondary-border: initial;

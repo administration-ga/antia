@@ -65,6 +65,7 @@
  * j'ai retiré mon profil, me ramène à sa gestion pour le republier.
  */
 
+import { themedActionStyle } from "../themed-action-style"
 import { api } from "@antsia/api/engine"
 import type { Id } from "@antsia/api/engine"
 import { useAuthenticatedConvexQuery } from "@antsia/api/hooks"
@@ -851,7 +852,7 @@ function EmptyWallNote({ text }: { text: string }) {
         margin: 0,
         padding: 24,
         border: "1px dashed var(--ink-200)",
-        borderRadius: 8,
+        borderRadius: "var(--esp-primitive-card-radius, 8px)",
         color: "var(--ink-600)",
         fontSize: 14,
       }}
@@ -932,19 +933,19 @@ function ConnectionButton({
       return (
         <>
           <Button
-            // Accepter : couleur des relations (ADR-0027).
-            variant="social"
+            // Accepter : couleur de validation, relations en repli hors ANTSIA (ADR-0027).
+            variant="success"
             icon="userCheck"
             disabled={pending}
-            style={RESEAU_PRIMARY_ACTION_STYLE}
+            style={themedActionStyle("success", "social", RESEAU_PRIMARY_ACTION_STYLE)}
             onClick={() => answer(true)}
           >
             {t("profilPersonnePage.connection.accept")}
           </Button>
           <Button
-            variant="ghost"
+            variant="danger"
             disabled={pending}
-            style={RESEAU_SECONDARY_ACTION_STYLE}
+            style={themedActionStyle("danger", "ghost", RESEAU_SECONDARY_ACTION_STYLE)}
             onClick={() => answer(false)}
           >
             {t("profilPersonnePage.connection.decline")}

@@ -48,7 +48,7 @@ function ServiceOfferOptions({ offer }: { offer: CatalogOffer }) {
     </div>
   }
   const modes = [options.quote.available, options.booking !== null, options.fixedOrder !== null].filter(Boolean).length
-  return <section aria-label={t("offer.title")} className="grid w-full gap-3 rounded-xl border border-border bg-background p-4">
+  return <section aria-label={t("offer.title")} className="grid w-full gap-3 rounded-[var(--ui2-card-radius)] border border-[color:var(--esp-surface-border)] bg-background p-[var(--esp-card-padding,16px)]">
     <h2 className="text-base font-semibold">{t("offer.title")}</h2>
     {modes === 0 ? <p className="text-sm text-muted-foreground">{t("offer.none")}</p> : <div className="flex flex-wrap gap-3">
       {options.quote.available ? <Link className={ACTION_LINK} href={routes.serviceQuote(offer.shopHandle, offer.offerRef)}><FileText aria-hidden="true" className="size-4" />{t("offer.quote")}</Link> : null}

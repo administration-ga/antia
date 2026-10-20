@@ -17,7 +17,7 @@ export function ErasureCommerceNotice() {
   const bookings = useAuthenticatedConvexQuery(api.modules.shops.serviceLifecycle.myUpcomingBookings, {})
   const data = bookings.data
   if (!data || data.count === 0) return null
-  return <div role="note" className="mb-4 grid gap-2 rounded-xl border border-border p-4 text-sm">
+  return <div role="note" className="mb-4 grid gap-2 rounded-[var(--ui2-card-radius)] border border-border p-[var(--esp-card-padding,16px)] text-sm">
     <p>{t(data.truncated ? "personal.eraseBookingsMany" : "personal.eraseBookings", { count: data.count })}</p>
     <Link className="inline-flex min-h-11 items-center underline" href={routes.serviceRequests()}>{t("personal.eraseBookingsLink")}</Link>
   </div>
