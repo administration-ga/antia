@@ -1,6 +1,6 @@
 # Plan d’implémentation — expérience sociale responsive ANTSIA
 
-Mise à jour : 21 octobre 2026. Périmètre : ANTSIA Web uniquement. **U01–U08 sont raccordés en source.** La demande explicite du propriétaire autorise désormais vérifications, corrections, commit, push et déploiement ; le gel décrit dans les prompts initiaux est levé pour cette livraison. Les versions réellement contrôlées et publiées sont consignées dans le [bilan U08](rapports/U08_LIVRAISON_2026-10-21.md). Les sources natives et les changements de l'autre session sont préservés ; aucune capacité P16 n'est ouverte par cette tranche.
+Mise à jour : 21 octobre 2026. Périmètre : ANTSIA Web uniquement. **U01–U08 sont raccordés et publiés sur le Web ANTSIA ; les recettes visuelles/authentifiées et physiques restent non exécutées.** La demande explicite du propriétaire autorise désormais vérifications, corrections, commit, push et déploiement ; le gel décrit dans les prompts initiaux est levé pour cette livraison. Les versions réellement contrôlées et publiées sont consignées dans le [bilan U08](rapports/U08_LIVRAISON_2026-10-21.md). Les sources natives et les changements de l'autre session sont préservés ; aucune capacité P16 n'est ouverte par cette tranche.
 
 ## 1. Objectif et références
 

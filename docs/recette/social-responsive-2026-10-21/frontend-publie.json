@@ -1,0 +1,20 @@
+{
+  "checkedAt": "2026-10-20T23:15:59.177479+00:00",
+  "origin": "https://antsia.vercel.app",
+  "httpStatus": 200,
+  "health": {
+    "status": "ok",
+    "application": "antsia-ga",
+    "version": "social-responsive-20261021-e34875c094de4b4f",
+    "backend": "configured"
+  },
+  "deploymentId": "dpl_57gtmHo6kvFvPqUBBym6VhxgExrX",
+  "deploymentUrl": "https://antsia-ny8zf56bb-okatechs-projects-f0102678.vercel.app",
+  "releaseCommit": "68f8ad92bd6f87acc53a8ae85563bd781863c4fc",
+  "sourceFingerprint": "e34875c094de4b4f541da8beb584cc2f5e431b4202b20bf4eb53aa883f27fd1a",
+  "cspProductionBackend": true,
+  "baselinePreserved": "cache-performance-20261021-e3fab6816eb3f79f",
+  "browserRecipe": "NOT RUN: tool policy denied browser access",
+  "physicalCalls": "NOT RUN",
+  "dataAndSecretsChanged": false
+}
