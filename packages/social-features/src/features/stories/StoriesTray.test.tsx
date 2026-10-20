@@ -242,4 +242,46 @@ describe("StoriesTray — médaillons déclarés par l'application (ADR-0027)", 
 		fireEvent.click(tray.querySelector<HTMLButtonElement>(".st-tray-create")!)
 		expect(onCreate).toHaveBeenCalledTimes(1)
 	})
+
+	it("ma série en ligne rejoint « Vous » : une seule tuile, le médaillon l'ouvre, le « + » en crée une", () => {
+		const onOpen = vi.fn()
+		const onCreate = vi.fn()
+		mocks.byInstant.set(BASE, {
+			groups: [
+				group("awa", { unseenCount: 1, author: { ...group("awa").author, displayName: "Awa NDONG" } }),
+				group("moi", { author: { ...group("moi").author, displayName: "OKA Tech" } }),
+			],
+			truncated: false,
+		})
+		renderWithEngine(ringsTray(onOpen, onCreate))
+		const tray = screen.getByRole("group")
+		// « Vous » une seule fois, en tête.
+		expect([...tray.querySelectorAll(".st-ring-name")].map((name) => name.textContent)).toEqual(["Vous", "Awa"])
+		expect(tray.querySelector(".st-tray-create")).toBeNull()
+		// Ma série dans le dégradé du thème, jamais l'anneau pâle.
+		const own = tray.querySelector(".st-ring-own")!
+		expect(own.querySelector(".esp-story-ring")).not.toBeNull()
+		expect(tray.querySelector(".esp-story-ring-self")).toBeNull()
+		expect(own.textContent).toContain("OT")
+		// Deux boutons frères, jamais l'un dans l'autre.
+		const open = screen.getByRole("button", { name: /Votre actu/ })
+		const create = screen.getByRole("button", { name: "Publier une actu" })
+		expect(open.contains(create)).toBe(false)
+		fireEvent.click(open)
+		expect(onOpen).toHaveBeenCalledWith("moi")
+		fireEvent.click(create)
+		expect(onCreate).toHaveBeenCalledTimes(1)
+		expect(onOpen).toHaveBeenCalledTimes(1)
+	})
+
+	it("sans droit de créer, ma série garde « Vous » sans « + »", () => {
+		mocks.byInstant.set(BASE, { groups: [group("moi")], truncated: false })
+		renderWithEngine(
+			<NetworkProvider networkId={TEST_NETWORK_ID} personId={TEST_PERSON_ID} slug="stories-rings" charte="antsia" routes={TEST_ROUTES} storiesPresentation="rings">
+				<StoriesTray myHandle="moi" now={BASE} onOpen={vi.fn()} onCreate={vi.fn()} canCreate={false} />
+			</NetworkProvider>,
+		)
+		expect([...document.querySelectorAll(".st-ring-name")].map((name) => name.textContent)).toEqual(["Vous"])
+		expect(document.querySelector(".st-ring-plus")).toBeNull()
+	})
 })
