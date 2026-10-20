@@ -480,8 +480,8 @@ const STORIES_CSS = `
       }
       .st-caption {
         margin: 0;
-        font-size: 14px;
-        line-height: 1.45;
+        font-size: var(--esp-content-font-size, 14px);
+        line-height: var(--esp-content-line-height, 1.45);
         overflow-wrap: anywhere;
       }
       /* Les commandes du bandeau. Leur FOND est translucide pour rester
@@ -550,9 +550,11 @@ const STORIES_CSS = `
       }
       .st-live-title {
         margin: 0;
-        font-size: 20px;
-        font-weight: 800;
-        line-height: 1.25;
+        font-family: var(--esp-heading-font-family, inherit);
+        font-size: var(--esp-section-title-size, 20px);
+        font-weight: var(--esp-heading-font-weight, 800);
+        line-height: var(--esp-section-title-leading, 1.25);
+        letter-spacing: var(--esp-section-title-tracking, normal);
         overflow-wrap: anywhere;
       }
       .st-live-host {
@@ -583,14 +585,17 @@ const STORIES_CSS = `
       }
       .st-empty-title {
         margin: 0;
-        font-size: 17px;
+        font-family: var(--esp-heading-font-family, inherit);
+        font-size: var(--esp-section-title-size, 17px);
+        line-height: var(--esp-section-title-leading, inherit);
+        letter-spacing: var(--esp-section-title-tracking, normal);
         font-weight: 700;
       }
       .st-empty-text {
         margin: 0;
         max-width: 34ch;
-        font-size: 13.5px;
-        line-height: 1.5;
+        font-size: var(--esp-content-font-size, 13.5px);
+        line-height: var(--esp-content-line-height, 1.5);
         color: var(--muted-foreground);
       }
 

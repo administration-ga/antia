@@ -58,7 +58,7 @@ export function SignInCard({ compact = false, intent = "sign-in", signOutIncompl
   if (session.status === "loading" || (!signOutIncomplete && (session.status === "restricted" || session.status === "member" || session.status === "welcome"))) return <CenteredStatus label={t("session.checking")} />
 
   return (
-    <div className={compact ? "rounded-[var(--ui2-card-radius)] border border-[color:var(--esp-surface-border)] bg-card p-[var(--esp-card-padding,16px)] text-card-foreground shadow-[var(--esp-surface-shadow,none)] " : undefined}>
+    <div className={compact ? "antsia-panel antsia-copy [&_h2]:font-display [&_h2]:text-xl [&_h2]:font-bold [&_h2]:leading-[1.2]" : "antsia-copy"}>
       {signOutIncomplete ? <p role="alert" className="mb-6 rounded-[var(--ui2-card-radius)] border border-transparent bg-muted p-4 text-sm">{tIdentity("signOutIncomplete")}</p> : null}
       <IdentityEntry
         key={intent}
@@ -72,7 +72,7 @@ export function SignInCard({ compact = false, intent = "sign-in", signOutIncompl
         title={signUp ? t("access.signUpTitle") : compact ? t("access.signInTitle") : undefined}
         lead={signUp ? t("access.signUpLead") : compact ? "" : undefined}
       />
-      <div className="mt-5 border-t border-border pt-5 text-center">
+      <div className="mt-4 border-t border-border pt-4 text-center">
         {!signUp ? <p className="mb-3 text-sm text-muted-foreground">{t("access.newHere")}</p> : null}
         <Link href={routes.signIn(signUp ? undefined : "sign-up", continuationPostId, notification, contact)} prefetch={false} className={buttonClassName(signUp ? "outline" : "primary", compact ? "min-h-12 w-full px-5 py-3 text-base font-semibold sm:w-auto" : "px-4")}>
           {t(signUp ? "access.existingAccount" : "access.createAccount")}

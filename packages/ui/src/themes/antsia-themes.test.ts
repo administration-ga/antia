@@ -124,7 +124,7 @@ const INHERITED_IN_DARK = new Set([
   "--chart-2", "--chart-3", "--chart-4", "--chart-5",
   "--esp-tone-blue", "--esp-tone-blue-bg", "--esp-tone-amber", "--esp-tone-amber-bg",
   "--esp-tone-rose", "--esp-tone-rose-bg", "--esp-tone-green", "--esp-tone-green-bg",
-  "--esp-mobilebar-shadow", "--esp-shadow-card", "--border-light",
+  "--esp-shadow-card", "--border-light",
   "--esp-segment-on", "--esp-segment-on-fg",
 ])
 
@@ -150,7 +150,7 @@ const declarationsOf = (css: string, selectors: readonly string[]) =>
 const sharedOf = (charte: string) =>
   new Map(declarationsOf(read(`./${charte}.css`), [`[data-charte="${charte}"]`, `.dark[data-charte="${charte}"]`, `.dark [data-charte="${charte}"]`]))
 /** Les jetons propres à chaque thème dans son bloc commun : le voile, le contour et l'aperçu. */
-const OWN_SHARED = new Set(["--ui2-scrim", "--esp-surface-border", "--esp-mobilebar-border", "--esp-theme-swatch-1", "--esp-theme-swatch-2", "--esp-theme-swatch-3"])
+const OWN_SHARED = new Set(["--esp-post-shadow", "--ui2-scrim", "--esp-surface-border", "--esp-mobilebar-border", "--esp-theme-swatch-1", "--esp-theme-swatch-2", "--esp-theme-swatch-3"])
 const GABOMA_SHARED = sharedOf("antsia")
 
 describe("les sept thèmes d'antsia.ga (ADR-0027)", () => {

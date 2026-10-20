@@ -35,8 +35,8 @@ export function ShopPublicationForm({ shop, dirty, onDirty, onPrepare }: { shop:
     if (!form.formState.isDirty) form.reset({ publicListing: shop.audience.publicListing, visibility: shop.audience.visibility })
   }, [shop, form])
   const permissions = publicationActions(shop, dirty || form.formState.isDirty)
-  return <section className="grid gap-5" aria-labelledby={`${id}-title`}>
-    <h2 id={`${id}-title`} className="text-lg font-semibold">{t("steps.publish")}</h2>
+  return <section className="antsia-page" aria-labelledby={`${id}-title`}>
+    <h2 id={`${id}-title`} className="antsia-subtitle">{t("steps.publish")}</h2>
     <p>{t("publication.summary", { name: shop.name ?? t("list.untitled"), model: t(`models.${shop.model}`) })}</p>
     <p className="font-medium">{t(`states.${shop.storefront.state}`)}</p>
     {shop.storefront.decisionReason ? <p className="whitespace-pre-wrap rounded-[var(--ui2-card-radius)] bg-muted p-[var(--esp-card-padding,16px)]">{shop.storefront.decisionReason}</p> : null}
@@ -44,23 +44,23 @@ export function ShopPublicationForm({ shop, dirty, onDirty, onPrepare }: { shop:
       setNotice(null)
       await action.run(() => audience({ networkId, shopId: shop.shopId, publicListing: values.publicListing, ...(values.publicListing ? { textVersion: shop.audience.currentTextVersion } : {}), ...(!shop.audience.rootNetwork ? { visibility: values.visibility } : {}) }), () => { form.reset(values); setNotice(t("publication.audienceSaved")) })
     })}>
-      <h3 className="font-semibold">{t("publication.audienceTitle")}</h3>
+      <h3 className="font-display text-base font-bold leading-snug">{t("publication.audienceTitle")}</h3>
       <p className="text-sm text-muted-foreground">{t("publication.memberAudience")}</p>
       {!shop.audience.rootNetwork ? <Field id={`${id}-visibility`} label={t("publication.reach")}><select id={`${id}-visibility`} className={SHOP_SELECT_CLASS} disabled={action.pending} {...form.register("visibility")}><option value="network">{t("publication.networkOnly")}</option><option value="root">{t("publication.alsoRoot")}</option></select></Field> : null}
       <label className="flex min-h-11 items-start gap-3"><input type="checkbox" className="mt-1 size-5 shrink-0 accent-primary" disabled={action.pending} aria-describedby={`${id}-consent`} {...form.register("publicListing")} /><span>{t("publication.publicConsent")}</span></label>
       <p id={`${id}-consent`} className="text-sm text-muted-foreground">{t("publication.consentDetails")}</p>
       <p className="text-xs text-muted-foreground">{t("publication.consentVersion", { version: shop.audience.currentTextVersion })}</p>
       <p className="text-sm">{t(shop.audience.publicNow ? "publication.publicNow" : "publication.notPublicNow")}</p>
-      <Button type="submit" variant="outline" pending={action.pending} disabled={!form.formState.isDirty} className="justify-self-start">{t("publication.saveAudience")}</Button>
+      <Button type="submit" variant="outline" pending={action.pending} disabled={!form.formState.isDirty} className="w-full sm:w-auto sm:justify-self-start">{t("publication.saveAudience")}</Button>
     </form>
-    {shop.publication.gaps.length > 0 ? <div className="grid gap-2"><p>{t("publication.incomplete")}</p><ul className="list-inside list-disc">{shop.publication.gaps.map((gap) => <li key={gap}>{t(`publication.gaps.${gap}`)}</li>)}</ul><Button type="button" variant="outline" onClick={onPrepare} className="justify-self-start">{t("publication.prepare")}</Button></div> : null}
-    {shop.policy === "closed" ? <div className="grid gap-2 rounded-[var(--ui2-card-radius)] bg-muted p-[var(--esp-card-padding,16px)]"><p>{t("publication.closed")}</p><Button type="button" variant="outline" onClick={onPrepare} className="justify-self-start">{t("publication.prepare")}</Button></div> : null}
+    {shop.publication.gaps.length > 0 ? <div className="grid gap-2"><p>{t("publication.incomplete")}</p><ul className="list-inside list-disc">{shop.publication.gaps.map((gap) => <li key={gap}>{t(`publication.gaps.${gap}`)}</li>)}</ul><Button type="button" variant="outline" onClick={onPrepare} className="w-full sm:w-auto sm:justify-self-start">{t("publication.prepare")}</Button></div> : null}
+    {shop.policy === "closed" ? <div className="grid gap-2 rounded-[var(--ui2-card-radius)] bg-muted p-[var(--esp-card-padding,16px)]"><p>{t("publication.closed")}</p><Button type="button" variant="outline" onClick={onPrepare} className="w-full sm:w-auto sm:justify-self-start">{t("publication.prepare")}</Button></div> : null}
     {dirty || form.formState.isDirty ? <p role="status" className="text-sm">{t("publication.saveFirst")}</p> : null}
     {shop.storefront.state === "suspended" ? <p>{t("publication.suspended")}</p> : null}
     {shop.storefront.state === "pending_review" ? <p>{t("publication.reviewPending")}</p> : null}
-    {permissions.request ? <Button type="button" pending={action.pending} onClick={() => void action.run(() => request({ networkId, shopId: shop.shopId }), (result) => setNotice(t(`states.${result.storefront}`)))} className="justify-self-start">{t(shop.publication.outcome === "admit" ? "publication.publish" : "publication.request")}</Button> : null}
-    {permissions.cancel ? <Button type="button" variant="outline" pending={action.pending} onClick={() => void action.run(() => cancel({ networkId, shopId: shop.shopId }), (result) => setNotice(t(`states.${result.storefront}`)))} className="justify-self-start">{t("publication.cancelRequest")}</Button> : null}
-    {permissions.withdraw ? <Button type="button" variant="outline" pending={action.pending} onClick={() => { if (window.confirm(t("publication.withdrawConfirm"))) void action.run(() => withdraw({ networkId, shopId: shop.shopId }), (result) => setNotice(t(`states.${result.storefront}`))) }} className="justify-self-start">{t("publication.withdraw")}</Button> : null}
+    {permissions.request ? <Button type="button" pending={action.pending} onClick={() => void action.run(() => request({ networkId, shopId: shop.shopId }), (result) => setNotice(t(`states.${result.storefront}`)))} className="w-full sm:w-auto sm:justify-self-start">{t(shop.publication.outcome === "admit" ? "publication.publish" : "publication.request")}</Button> : null}
+    {permissions.cancel ? <Button type="button" variant="outline" pending={action.pending} onClick={() => void action.run(() => cancel({ networkId, shopId: shop.shopId }), (result) => setNotice(t(`states.${result.storefront}`)))} className="w-full sm:w-auto sm:justify-self-start">{t("publication.cancelRequest")}</Button> : null}
+    {permissions.withdraw ? <Button type="button" variant="outline" pending={action.pending} onClick={() => { if (window.confirm(t("publication.withdrawConfirm"))) void action.run(() => withdraw({ networkId, shopId: shop.shopId }), (result) => setNotice(t(`states.${result.storefront}`))) }} className="w-full sm:w-auto sm:justify-self-start">{t("publication.withdraw")}</Button> : null}
     {action.error ? <p role="alert" className="text-sm text-destructive">{action.error}</p> : null}
     {notice ? <p role="status">{notice}</p> : null}
     {shop.page && shop.storefront.state === "published" ? <ShopLink href={routes.storefront(shop.page.handle)}>{t("storefront.viewStorefront")}</ShopLink> : null}

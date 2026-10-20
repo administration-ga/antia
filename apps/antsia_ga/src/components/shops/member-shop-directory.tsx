@@ -39,7 +39,7 @@ function DirectoryWindows() {
   const query = useAuthenticatedConvexQuery(api.modules.shops.shops.directory, { networkId, paginationOpts: { cursor, numItems: 12 } })
 
   if (query.isError) return <div role="alert" className="flex flex-col gap-3 rounded-[var(--ui2-card-radius)] border border-[color:var(--esp-surface-border)] bg-card p-[var(--esp-card-padding,16px)] ">
-    <h3 className="font-semibold">{t("directory.errorTitle")}</h3>
+    <h3 className="font-display text-base font-bold leading-snug">{t("directory.errorTitle")}</h3>
     <p className="text-sm text-muted-foreground">{t("directory.errorMessage")}</p>
     <Button variant="outline" className="self-start" pending={query.isFetching} onClick={() => { void query.refetch() }}>{t("directory.retry")}</Button>
   </div>
@@ -64,7 +64,7 @@ export function MemberShopDirectory() {
   const titleId = useId()
   return <section id="boutiques" aria-labelledby={titleId} className="scroll-mt-24 flex flex-col gap-4">
     <div className="flex flex-wrap items-start justify-between gap-3">
-      <div className="flex flex-col gap-2"><h2 id={titleId} className="text-lg font-semibold">{t("directory.title")}</h2><p className="text-sm text-muted-foreground">{t("directory.lead")}</p></div>
+      <div className="flex flex-col gap-2"><h2 id={titleId} className="antsia-subtitle">{t("directory.title")}</h2><p className="text-sm text-muted-foreground">{t("directory.lead")}</p></div>
       <Link href={routes.myShops()} className="inline-flex min-h-11 items-center rounded-[var(--ui2-button-radius)] px-3 text-sm font-medium text-primary hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">{tMember("commerce.myShop")}</Link>
     </div>
     <DirectoryWindows key={`${networkId}:${personId}`} />

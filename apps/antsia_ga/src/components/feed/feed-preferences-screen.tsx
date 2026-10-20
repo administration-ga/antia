@@ -20,7 +20,7 @@ export function FeedPreferencesScreen() {
           {t("personal.home")}
         </Link>
         <header className="flex flex-col gap-3">
-          <h1 className="text-2xl font-semibold tracking-tight">{t("feedPreferences.title")}</h1>
+          <h1 className="antsia-title">{t("feedPreferences.title")}</h1>
           <p className="text-base text-muted-foreground">{t("feedPreferences.lead")}</p>
           <p className="text-sm text-muted-foreground">{t("feedPreferences.scope")}</p>
         </header>

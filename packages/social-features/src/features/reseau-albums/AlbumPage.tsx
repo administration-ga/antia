@@ -148,10 +148,10 @@ function AlbumPageBody({ handle, albumId, canEdit = true, onEdit }: AlbumPagePro
     return (
       <ProfilFrame>
         <Card style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-          <h1 style={{ margin: 0, fontSize: 18, color: "var(--ink-900)" }}>
+          <h1 style={{ margin: 0, fontFamily: "var(--esp-heading-font-family, inherit)", fontSize: "var(--esp-page-title-size, 18px)", lineHeight: "var(--esp-page-title-leading, inherit)", letterSpacing: "var(--esp-page-title-tracking, normal)", fontWeight: "var(--esp-heading-font-weight, inherit)", color: "var(--ink-900)" }}>
             {t("albumPage.inaccessibleTitle")}
           </h1>
-          <p style={{ margin: 0, fontSize: 14, color: "var(--ink-600)" }}>
+          <p style={{ margin: 0, fontSize: "var(--esp-content-font-size, 14px)", lineHeight: "var(--esp-content-line-height, inherit)", color: "var(--ink-600)" }}>
             {t("albumPage.inaccessibleText")}
           </p>
           <div>
@@ -198,7 +198,7 @@ function AlbumPageBody({ handle, albumId, canEdit = true, onEdit }: AlbumPagePro
                 {t("albumPage.backToProfile")}
               </Button>
             </div>
-            <h1 style={{ margin: 0, fontSize: 20, color: "var(--ink-900)" }}>
+            <h1 style={{ margin: 0, fontFamily: "var(--esp-heading-font-family, inherit)", fontSize: "var(--esp-page-title-size, 20px)", lineHeight: "var(--esp-page-title-leading, inherit)", letterSpacing: "var(--esp-page-title-tracking, normal)", fontWeight: "var(--esp-heading-font-weight, inherit)", color: "var(--ink-900)" }}>
               {album.title}
             </h1>
             <p style={{ margin: 0, fontSize: 13, color: "var(--ink-600)" }}>
@@ -207,7 +207,7 @@ function AlbumPageBody({ handle, albumId, canEdit = true, onEdit }: AlbumPagePro
               {albumCountLabel(album.itemCount, t)}
             </p>
             {album.description ? (
-              <p style={{ margin: 0, fontSize: 14, color: "var(--ink-700)" }}>
+              <p style={{ margin: 0, fontSize: "var(--esp-content-font-size, 14px)", lineHeight: "var(--esp-content-line-height, inherit)", color: "var(--ink-700)" }}>
                 {album.description}
               </p>
             ) : null}
@@ -270,7 +270,7 @@ function AlbumPageBody({ handle, albumId, canEdit = true, onEdit }: AlbumPagePro
           ) : null}
 
           {items.length === 0 ? (
-            <p style={{ margin: 0, fontSize: 14, color: "var(--ink-600)" }}>
+            <p style={{ margin: 0, fontSize: "var(--esp-content-font-size, 14px)", lineHeight: "var(--esp-content-line-height, inherit)", color: "var(--ink-600)" }}>
               {t("albumPage.empty")}
             </p>
           ) : (

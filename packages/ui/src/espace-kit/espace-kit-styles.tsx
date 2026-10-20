@@ -31,7 +31,7 @@ const ESPACE_KIT_CSS = `
         background: var(--esp-surface-card, var(--secondary));
         border: 1px solid var(--esp-surface-border, var(--border));
         border-radius: var(--esp-primitive-card-radius, 18px);
-        box-shadow: none;
+        box-shadow: var(--esp-surface-shadow, none);
       }
       .esk-card-head {
         display: flex;
@@ -41,7 +41,9 @@ const ESPACE_KIT_CSS = `
       }
       .esk-card-title {
         margin: 0;
-        font-size: 14px;
+        font-family: var(--esp-heading-font-family, inherit);
+        font-size: var(--esp-subsection-title-size, 14px);
+        line-height: var(--esp-subsection-title-leading, normal);
         font-weight: 700;
         color: var(--ink-900);
       }
@@ -339,7 +341,7 @@ const ESPACE_KIT_CSS = `
         background: var(--esp-surface-raised, var(--esp-surface-card, var(--secondary)));
         border: 1px solid var(--esp-raised-border, var(--border));
         border-radius: var(--esp-primitive-card-radius, 18px);
-        box-shadow: none;
+        box-shadow: var(--esp-floating-shadow, none);
       }
       .esk-dialog-header {
         flex-shrink: 0;
@@ -349,9 +351,10 @@ const ESPACE_KIT_CSS = `
       }
       .esk-dialog-title {
         margin: 0;
-        font-size: 16px;
+        font-family: var(--esp-heading-font-family, inherit);
+        font-size: var(--esp-section-title-size, 16px);
         font-weight: 700;
-        line-height: 1.35;
+        line-height: var(--esp-section-title-leading, 1.35);
         color: var(--ink-900);
         overflow-wrap: anywhere;
       }

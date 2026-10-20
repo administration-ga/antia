@@ -652,13 +652,14 @@ export const MESSAGERIE_STYLES_CSS = `
           background: transparent;
           color: var(--ink-900);
           font: inherit;
-          font-size: 13px;
+          font-size: var(--esp-field-font-size, 13px);
+          line-height: var(--esp-field-line-height, inherit);
           outline: none;
         }
         /* 16 px : sous ce seuil, iOS ZOOME sur le champ au focus et ne
            revient jamais en arriere. C'est la regle anti-zoom, pas un gout. */
         .msg-panel[data-variant="page"] .msg-search-row { padding: 10px 14px; }
-        .msg-panel[data-variant="page"] .msg-search-row input { font-size: 16px; }
+        .msg-panel[data-variant="page"] .msg-search-row input { font-size: var(--esp-field-font-size, 16px); }
 
         .msg-body { flex: 1; min-height: 0; overflow-y: auto; padding: 8px; }
         .msg-panel[data-variant="page"] .msg-body {
@@ -786,8 +787,8 @@ export const MESSAGERIE_STYLES_CSS = `
           max-width: 100%;
           padding: 7px 11px;
           border-radius: 13px;
-          font-size: 13px;
-          line-height: 1.45;
+          font-size: var(--esp-content-font-size, 13px);
+          line-height: var(--esp-content-line-height, 1.45);
           white-space: pre-wrap;
           overflow-wrap: anywhere;
         }
@@ -811,7 +812,7 @@ export const MESSAGERIE_STYLES_CSS = `
         .msg-bubble[data-deleted="true"] { font-style: italic; opacity: .7; }
         .msg-panel[data-variant="page"] .msg-bubble {
           padding: 8px 12px;
-          font-size: 15px;
+          font-size: var(--esp-content-font-size, 15px);
           border-radius: 16px;
         }
         /* Le bloc qui PORTE la bulle. Ce n'est plus un bouton (P18b, A02) : un
@@ -1206,7 +1207,8 @@ export const MESSAGERIE_STYLES_CSS = `
           background: var(--ink-0);
           color: var(--ink-900);
           font: inherit;
-          font-size: 13px;
+          font-size: var(--esp-field-font-size, 13px);
+          line-height: var(--esp-field-line-height, inherit);
           resize: none;
         }
         .msg-panel[data-variant="page"] .msg-composer {
@@ -1220,7 +1222,7 @@ export const MESSAGERIE_STYLES_CSS = `
           max-height: 132px;
           padding: 10px 14px;
           border-radius: var(--esp-input-radius, 20px);
-          font-size: 16px;
+          font-size: var(--esp-field-font-size, 16px);
         }
         /* Le bouton d'envoi, plein, distinct des boutons discrets. */
         .msg-send-btn {
@@ -1269,8 +1271,8 @@ export const MESSAGERIE_STYLES_CSS = `
 
         /* ── DIVERS ──────────────────────────────────────────────────────── */
 
-        .msg-empty { padding: 14px 10px; font-size: 12.5px; color: var(--ink-600); }
-        .msg-panel[data-variant="page"] .msg-empty { font-size: 14.5px; padding: 20px 12px; }
+        .msg-empty { padding: 14px 10px; font-size: var(--esp-content-font-size, 12.5px); line-height: var(--esp-content-line-height, inherit); color: var(--ink-600); }
+        .msg-panel[data-variant="page"] .msg-empty { font-size: var(--esp-content-font-size, 14.5px); padding: 20px 12px; }
         .msg-error {
           margin: 0 8px 8px;
           padding: 8px 10px;
@@ -1442,7 +1444,14 @@ export const MESSAGERIE_STYLES_CSS = `
           padding: 8px 20px;
           border-bottom: 1px solid var(--border);
         }
-        .icom-page-heading h1 { margin: 0; font-size: 22px; font-weight: 700; }
+        .icom-page-heading h1 {
+          margin: 0;
+          font-family: var(--esp-heading-font-family, inherit);
+          font-size: var(--esp-page-title-size, 22px);
+          font-weight: 700;
+          line-height: var(--esp-page-title-leading, inherit);
+          letter-spacing: var(--esp-page-title-tracking, normal);
+        }
         .icom-page-heading-links { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
         .icom-page-heading a { display: flex; align-items: center; min-height: 44px; color: var(--primary); }
         .icom-page-columns { display: grid; grid-template-columns: minmax(300px, 35%) minmax(0, 1fr); flex: 1 1 auto; min-height: 0; }
@@ -1456,6 +1465,14 @@ export const MESSAGERIE_STYLES_CSS = `
         .icom-messages-page .icom-page-detail { min-width: 0; }
         .icom-page-empty { display: flex; flex: 1; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 24px; text-align: center; color: var(--muted-foreground); }
         .icom-page-empty h2, .icom-page-empty p { margin: 0; max-width: 36rem; }
+        .icom-page-empty h2 {
+          font-family: var(--esp-heading-font-family, inherit);
+          font-size: var(--esp-section-title-size, inherit);
+          font-weight: var(--esp-heading-font-weight, inherit);
+          line-height: var(--esp-section-title-leading, inherit);
+          letter-spacing: var(--esp-section-title-tracking, normal);
+        }
+        .icom-page-empty p { font-size: var(--esp-content-font-size, inherit); line-height: var(--esp-content-line-height, inherit); }
         .msg-list-scope { margin: 0; flex: 0 0 auto; padding: 8px 14px; color: var(--muted-foreground); font-size: 12px; line-height: 1.45; }
         .icom-messages-page[data-mobile="true"] { height: calc(100% - 96px - env(safe-area-inset-bottom, 0px)); }
         .icom-messages-page[data-mobile="true"] .icom-page-columns { display: flex; flex-direction: column; }

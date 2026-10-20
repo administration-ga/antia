@@ -21,7 +21,7 @@ export default function HealthPage() {
   return (
     <main id="contenu" className="mx-auto flex min-h-dvh max-w-xl flex-col justify-center gap-6 px-6 py-16">
       <PublicAccountTheme enabled />
-      <h1 className="text-3xl">{t("health.title")}</h1>
+      <h1 className="antsia-title ">{t("health.title")}</h1>
       <dl className="grid min-w-0 grid-cols-[auto_minmax(0,1fr)] gap-x-6 gap-y-2 rounded-[var(--ui2-card-radius)] border border-[color:var(--esp-surface-border)] bg-card p-[var(--esp-card-padding,16px)] text-card-foreground [overflow-wrap:anywhere]">
         <dt className="text-muted-foreground">{t("health.application")}</dt>
         <dd>{report.application}</dd>

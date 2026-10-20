@@ -87,6 +87,8 @@
   "welcome": {
     "title": "Bienvenue sur {{brand}}",
     "lead": "Choisissez comment les membres vous verront. Rien n'est publié sans vous.",
+    "previewTitle": "Aperçu du profil",
+    "previewLead": "Vérifiez votre nom affiché et votre identifiant avant de rejoindre le réseau.",
     "displayNameLabel": "Nom affiché",
     "displayNameHint": "Le nom que les membres verront. Il n'est recopié d'aucun registre.",
     "handleLabel": "Identifiant public",

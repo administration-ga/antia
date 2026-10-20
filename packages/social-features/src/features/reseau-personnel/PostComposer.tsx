@@ -410,7 +410,9 @@ export function PostComposer({
               // Repliée tant qu'on n'écrit pas, elle s'ouvre dès la première
               // frappe ou au focus. La transition porte sur `min-height`
               // seule, et se tait sous `prefers-reduced-motion`.
-              minHeight: expanded ? 84 : 44,
+              minHeight: expanded ? "var(--esp-textarea-min-height, 84px)" : 44,
+              fontSize: "var(--esp-field-font-size, inherit)",
+              lineHeight: "var(--esp-field-line-height, inherit)",
               padding: expanded ? "12px 13px" : "10px 13px",
               transition: "min-height 150ms ease-out",
             }}

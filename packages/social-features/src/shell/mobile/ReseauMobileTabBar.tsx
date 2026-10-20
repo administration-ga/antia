@@ -156,7 +156,7 @@ function DestinationsTabBar({ routes, onCreate, handle = null, current }: Reseau
                   className={cn(
                     "relative flex items-center justify-center",
                     isCreate
-                      ? "size-12 rounded-[var(--esp-fab-radius,10px)] bg-[var(--primary-fill)] text-[color:var(--primary-fill-on,var(--on-fill))] shadow-[var(--esp-fab-shadow,none)]"
+                      ? "size-[var(--esp-fab-size,48px)] rounded-[var(--esp-fab-radius,10px)] bg-[var(--primary-fill)] text-[color:var(--primary-fill-on,var(--on-fill))] shadow-[var(--esp-fab-shadow,none)]"
                       : "size-7 rounded-[var(--esp-chip-radius,10px)]",
                     // Onglet actif : pastille tonale du thème (ADR-0027), accent plein en repli.
                     ariaCurrent !== undefined && "bg-[var(--esp-tab-active-bg,var(--accent))] text-[color:var(--esp-tab-active-fg,var(--accent-foreground))]",

@@ -24,7 +24,7 @@ export function NetworkAppealRows({ cursor, onFirst, onNext }: { cursor: string 
   return <>
     <p className="text-sm text-muted-foreground">{t("moderation.appealScope")}</p>
     {data.page.length === 0 ? <p role="status" className="rounded-[var(--ui2-card-radius)] border border-[color:var(--esp-surface-border)] bg-card p-[var(--esp-card-padding,16px)] text-muted-foreground">{t(data.isDone ? "moderation.empty" : "moderation.emptyWindow")}</p> : data.page.map((row) => <article key={row.appealId} className="flex min-w-0 flex-col gap-3 rounded-[var(--ui2-card-radius)] border border-[color:var(--esp-surface-border)] bg-card p-[var(--esp-card-padding,16px)] ">
-      <h2 className="text-lg font-semibold">{t("moderation.appealTitle")}</h2>
+      <h2 className="antsia-subtitle ">{t("moderation.appealTitle")}</h2>
       <time dateTime={new Date(row.createdAt).toISOString()} className="text-sm text-muted-foreground">{date(row.createdAt)}</time>
       <p className="break-words whitespace-pre-wrap">{t("moderation.appealReason", { reason: row.reason })}</p>
       <p className="break-words whitespace-pre-wrap text-sm text-muted-foreground">{row.decisionReason ? t("moderation.initialReason", { reason: row.decisionReason }) : t("moderation.initialReasonMissing")}</p>

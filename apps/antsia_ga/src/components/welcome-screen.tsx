@@ -88,7 +88,9 @@ export function WelcomeScreen({ publicPostId, notificationReference, shopContact
     else if (session.status === "member") router.replace(destination)
   }, [session.status, continuationPostId, notification, contact?.handle, contact?.offerRef, destination, router])
 
-  const displayName = useSettled(useWatch({ control: form.control, name: "displayName" }))
+  const draftDisplayName = useWatch({ control: form.control, name: "displayName" })
+  const draftHandle = useWatch({ control: form.control, name: "handle" })
+  const displayName = useSettled(draftDisplayName)
   const suggestions = useQuery(
     api.modules.people.profile.suggestHandles,
     session.status === "welcome" && session.person && displayName.trim().length >= 2 ? { displayName } : "skip",
@@ -117,97 +119,108 @@ export function WelcomeScreen({ publicPostId, notificationReference, shopContact
 
   const errors = form.formState.errors
   return (
-    <main id="contenu" className="mx-auto flex min-h-dvh w-full max-w-lg flex-col justify-center gap-6 px-5 py-12">
-      <header className="flex flex-col gap-2">
-        <h1 className="text-3xl">{t("antsia:welcome.title")}</h1>
+    <main id="contenu" className="antsia-page antsia-copy mx-auto min-h-dvh w-full max-w-5xl content-center px-4 py-8 sm:px-6 sm:py-12">
+      <header className="antsia-page-header max-w-2xl">
+        <h1 className="antsia-title">{t("antsia:welcome.title")}</h1>
         <p className="text-muted-foreground">{t("antsia:welcome.lead")}</p>
         <Button variant="ghost" className="self-start" pending={signingOut} onClick={async () => { setSigningOut(true); await signOutAndRedirect() }}>{t("antsia:nav.signOut")}</Button>
       </header>
-      <Card>
-        <form onSubmit={onSubmit} noValidate className="flex flex-col gap-5">
-          <Field id="displayName" label={t("antsia:welcome.displayNameLabel")} hint={t("antsia:welcome.displayNameHint")} error={errors.displayName?.message}>
-            <TextInput
-              id="displayName"
-              autoComplete="name"
-              maxLength={DISPLAY_NAME_MAX_LENGTH}
-              aria-invalid={errors.displayName ? true : undefined}
-              aria-describedby={errors.displayName ? "displayName-error" : "displayName-hint"}
-              {...form.register("displayName")}
-            />
-          </Field>
-
-          <Field id="handle" label={t("antsia:welcome.handleLabel")} hint={t("antsia:welcome.handleHint")} error={errors.handle?.message}>
-            <div className="relative">
-              <AtSign aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+      <div className="grid min-w-0 items-start gap-6 min-[960px]:grid-cols-[minmax(0,1fr)_312px]">
+        <Card>
+          <form onSubmit={onSubmit} noValidate className="antsia-form-grid">
+            <Field id="displayName" label={t("antsia:welcome.displayNameLabel")} hint={t("antsia:welcome.displayNameHint")} error={errors.displayName?.message}>
               <TextInput
-                id="handle"
-                autoComplete="username"
-                autoCapitalize="none"
-                spellCheck={false}
-                maxLength={HANDLE_MAX_LENGTH}
-                className="pl-9"
-                aria-invalid={errors.handle ? true : undefined}
-                aria-describedby={errors.handle ? "handle-error" : "handle-hint"}
-                {...form.register("handle")}
+                id="displayName"
+                autoComplete="name"
+                maxLength={DISPLAY_NAME_MAX_LENGTH}
+                aria-invalid={errors.displayName ? true : undefined}
+                aria-describedby={errors.displayName ? "displayName-error" : "displayName-hint"}
+                {...form.register("displayName")}
               />
-            </div>
-          </Field>
+            </Field>
 
-          {suggestions && suggestions.length > 0 ? (
-            <div className="flex flex-wrap items-center gap-2 text-sm">
-              <span className="text-muted-foreground">{t("antsia:welcome.suggestions")}</span>
-              {suggestions.map((suggestion) =>
-                suggestion.available ? (
-                  <button
-                    key={suggestion.handle}
-                    type="button"
-                    onClick={() => form.setValue("handle", suggestion.handle, { shouldValidate: true })}
-                    className="min-h-11 rounded-[var(--esp-chip-radius)] border border-transparent bg-muted px-3 py-1 hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                  >
-                    @{suggestion.handle}
-                  </button>
-                ) : (
-                  <span key={suggestion.handle} className="rounded-[var(--esp-chip-radius)] px-3 py-1 text-muted-foreground line-through">
-                    {t("antsia:welcome.taken", { handle: `@${suggestion.handle}` })}
-                  </span>
-                ),
-              )}
-            </div>
-          ) : null}
-
-          <Field id="locale" label={t("antsia:welcome.localeLabel")}>
-            <select id="locale" className="min-h-11 rounded-[var(--esp-field-radius)] border border-input bg-muted px-3 text-sm" {...form.register("locale")}>
-              <option value="fr">{t("antsia:welcome.french")}</option>
-              <option value="en">{t("antsia:welcome.english")}</option>
-            </select>
-          </Field>
-          <Field id="timeZone" label={t("antsia:welcome.timeZoneLabel")} hint={t("antsia:welcome.timeZoneHint")} error={errors.timeZone?.message}>
-            <TextInput id="timeZone" aria-invalid={errors.timeZone ? true : undefined} aria-describedby={errors.timeZone ? "timeZone-error" : "timeZone-hint"} {...form.register("timeZone")} />
-          </Field>
-          {consentGiven ? null : (
-            <div className="flex flex-col gap-1.5">
-              <label className="flex items-start gap-3 text-sm">
-                <input
-                  type="checkbox"
-                  className="mt-0.5 size-5 shrink-0 accent-primary"
-                  aria-invalid={errors.consent ? true : undefined}
-                  {...form.register("consent")}
+            <Field id="handle" label={t("antsia:welcome.handleLabel")} hint={t("antsia:welcome.handleHint")} error={errors.handle?.message}>
+              <div className="relative">
+                <AtSign aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                <TextInput
+                  id="handle"
+                  autoComplete="username"
+                  autoCapitalize="none"
+                  spellCheck={false}
+                  maxLength={HANDLE_MAX_LENGTH}
+                  className="pl-9"
+                  aria-invalid={errors.handle ? true : undefined}
+                  aria-describedby={errors.handle ? "handle-error" : "handle-hint"}
+                  {...form.register("handle")}
                 />
-                <span>{t("antsia:welcome.consentLabel")}</span>
-              </label>
-              {errors.consent ? (
-                <p role="alert" className="text-sm text-destructive">
-                  {errors.consent.message}
-                </p>
-              ) : null}
-            </div>
-          )}
+              </div>
+            </Field>
 
-          <Button type="submit" pending={form.formState.isSubmitting}>
-            {form.formState.isSubmitting ? t("antsia:welcome.submitting") : t("antsia:welcome.submit")}
-          </Button>
-        </form>
-      </Card>
+            {suggestions && suggestions.length > 0 ? (
+              <div className="flex flex-wrap items-center gap-2 text-sm">
+                <span className="text-muted-foreground">{t("antsia:welcome.suggestions")}</span>
+                {suggestions.map((suggestion) =>
+                  suggestion.available ? (
+                    <button
+                      key={suggestion.handle}
+                      type="button"
+                      onClick={() => form.setValue("handle", suggestion.handle, { shouldValidate: true })}
+                      className="min-h-11 rounded-[var(--esp-chip-radius)] border border-transparent bg-muted px-3 py-1 hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    >
+                      @{suggestion.handle}
+                    </button>
+                  ) : (
+                    <span key={suggestion.handle} className="rounded-[var(--esp-chip-radius)] px-3 py-1 text-muted-foreground line-through">
+                      {t("antsia:welcome.taken", { handle: `@${suggestion.handle}` })}
+                    </span>
+                  ),
+                )}
+              </div>
+            ) : null}
+
+            <div className="grid min-w-0 gap-4 sm:grid-cols-2">
+              <Field id="locale" label={t("antsia:welcome.localeLabel")}>
+                <select id="locale" className="min-h-11 w-full rounded-[var(--esp-field-radius)] border border-input bg-muted px-3 text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" {...form.register("locale")}>
+                  <option value="fr">{t("antsia:welcome.french")}</option>
+                  <option value="en">{t("antsia:welcome.english")}</option>
+                </select>
+              </Field>
+              <Field id="timeZone" label={t("antsia:welcome.timeZoneLabel")} hint={t("antsia:welcome.timeZoneHint")} error={errors.timeZone?.message}>
+                <TextInput id="timeZone" aria-invalid={errors.timeZone ? true : undefined} aria-describedby={errors.timeZone ? "timeZone-error" : "timeZone-hint"} {...form.register("timeZone")} />
+              </Field>
+            </div>
+            {consentGiven ? null : (
+              <div className="flex flex-col gap-1.5">
+                <label className="flex items-start gap-3 text-sm">
+                  <input
+                    type="checkbox"
+                    className="mt-0.5 size-5 shrink-0 accent-primary"
+                    aria-invalid={errors.consent ? true : undefined}
+                    {...form.register("consent")}
+                  />
+                  <span>{t("antsia:welcome.consentLabel")}</span>
+                </label>
+                {errors.consent ? (
+                  <p role="alert" className="text-sm text-destructive">
+                    {errors.consent.message}
+                  </p>
+                ) : null}
+              </div>
+            )}
+
+            <Button type="submit" pending={form.formState.isSubmitting}>
+              {form.formState.isSubmitting ? t("antsia:welcome.submitting") : t("antsia:welcome.submit")}
+            </Button>
+          </form>
+        </Card>
+        <aside aria-labelledby="welcome-preview-title" className="antsia-panel antsia-page min-w-0 min-[960px]:sticky min-[960px]:top-6">
+          <header className="antsia-page-header"><h2 id="welcome-preview-title" className="antsia-subtitle">{t("antsia:welcome.previewTitle")}</h2><p className="text-sm text-muted-foreground">{t("antsia:welcome.previewLead")}</p></header>
+          <div className="flex min-w-0 items-center gap-3 rounded-[var(--esp-media-radius)] bg-muted p-4">
+            <span aria-hidden="true" className="flex size-12 shrink-0 items-center justify-center rounded-full bg-card font-display text-xl font-bold">{draftDisplayName.trim().slice(0, 1) || <AtSign className="size-5" />}</span>
+            <div className="min-w-0"><p className="break-words font-semibold">{draftDisplayName.trim() || t("antsia:welcome.displayNameLabel")}</p><p className="break-all text-sm text-muted-foreground">{draftHandle.trim() ? `@${draftHandle.trim()}` : t("antsia:welcome.handleLabel")}</p></div>
+          </div>
+        </aside>
+      </div>
     </main>
   )
 }

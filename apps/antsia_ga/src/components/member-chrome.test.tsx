@@ -95,7 +95,7 @@ describe("MemberPage — les mêmes destinations que le fil, une coque d'appel i
     const html = renderToStaticMarkup(<MemberPage><p>contenu</p></MemberPage>)
     expect(attribute(html, "data-bar")).toEqual({ active: null, handle: "awa.ndong", current: "auto", create: true })
     expect(html).not.toContain("data-rail")
-    expect(html).toContain("max-[959px]:pb-[calc(6rem+env(safe-area-inset-bottom,0px))]")
+    expect(html).toContain("max-[959px]:pb-[calc(120px+env(safe-area-inset-bottom,0px))]")
   })
 
   it("avant de connaître la largeur, n'en monte aucun (pas de double carte « Créer »)", () => {

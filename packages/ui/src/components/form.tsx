@@ -107,7 +107,8 @@ export const Field = ({ label, hint, error, required, children, htmlFor }: Field
 
 const INPUT_BASE: CSSProperties = {
   fontFamily: "inherit",
-  fontSize: 14,
+  fontSize: "var(--esp-field-font-size, 14px)",
+  lineHeight: "var(--esp-field-line-height, normal)",
   color: "var(--ink-900)",
   padding: "8px 12px",
   // Jeton et non valeur en dur : un style EN LIGNE l'emporte sur toute feuille
@@ -164,7 +165,7 @@ export const TextArea = forwardRef<HTMLTextAreaElement, TextareaHTMLAttributes<H
       <textarea
         ref={ref}
         {...rest}
-        style={{ ...INPUT_BASE, minHeight: 100, resize: "vertical", ...style }}
+        style={{ ...INPUT_BASE, minHeight: "var(--esp-textarea-min-height, 100px)", resize: "vertical", ...style }}
       />
     )
   },

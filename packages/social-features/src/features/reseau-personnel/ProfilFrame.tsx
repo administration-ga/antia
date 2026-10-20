@@ -54,6 +54,7 @@ const PROFIL_FRAME_CSS = `
           border: 1px solid var(--esp-primitive-surface-border, var(--ink-200));
           border-radius: var(--esp-primitive-card-radius, 20px);
           background: var(--esp-surface-card, var(--ink-100));
+          box-shadow: var(--esp-surface-shadow, none);
           overflow: hidden;
         }
         .pp-banner { height: 128px; }
@@ -80,7 +81,7 @@ const PROFIL_FRAME_CSS = `
            évoquer — la monture suit son cadre plutôt que de l'arrondir en
            médaillon. */
         .pp-avatar--square {
-          border-radius: var(--esp-primitive-avatar-page-radius, calc(var(--radius-lg) + 4px));
+          border-radius: var(--esp-profile-avatar-page-radius, var(--esp-primitive-avatar-page-radius, calc(var(--radius-lg) + 4px)));
         }
         .pp-name-row {
           display: flex;
@@ -90,10 +91,11 @@ const PROFIL_FRAME_CSS = `
         }
         .pp-name {
           margin: 0;
-          font-size: 26px;
+          font-family: var(--esp-heading-font-family, inherit);
+          font-size: var(--esp-page-title-size, 26px);
           font-weight: 700;
-          letter-spacing: -.02em;
-          line-height: 1.15;
+          letter-spacing: var(--esp-page-title-tracking, -.02em);
+          line-height: var(--esp-page-title-leading, 1.15);
           color: var(--ink-900);
         }
         .pp-handle {
@@ -105,8 +107,8 @@ const PROFIL_FRAME_CSS = `
         .pp-headline {
           margin: 8px 0 0;
           max-width: 62ch;
-          font-size: 14.5px;
-          line-height: 1.5;
+          font-size: var(--esp-content-font-size, 14.5px);
+          line-height: var(--esp-content-line-height, 1.5);
           color: var(--ink-700);
         }
         .pp-actions {
@@ -135,7 +137,7 @@ export function ProfilFrame({ children }: { children: ReactNode }) {
       style={{
         display: "flex",
         flexDirection: "column",
-        gap: 16,
+        gap: "var(--esp-card-gap, 16px)",
         height: "100%",
         overflowY: "auto",
         maxWidth: 760,

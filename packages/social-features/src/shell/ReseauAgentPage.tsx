@@ -132,7 +132,7 @@ export const RESEAU_DESKTOP_CSS = `
         .rp-scope {
           /* Contrat visuel du bureau : une seule cadence entre les blocs et
              un seul rayon pour toutes les surfaces de premier niveau. */
-          --rp-stack-gap: 16px;
+          --rp-stack-gap: var(--esp-layout-gap, 16px);
           /* Le rayon des surfaces vient de la charte (--rp-surface-radius,
              18 px par défaut, redéclarable par un thème) : il n'est plus fixé ici. */
           container-type: inline-size;
@@ -184,7 +184,7 @@ export const RESEAU_DESKTOP_CSS = `
           display: flex;
           flex-direction: column;
           width: 100%;
-          max-width: 792px;
+          max-width: var(--esp-desktop-main-max, 792px);
           margin-inline: auto;
           min-width: 0;
           min-height: 0;
@@ -197,7 +197,7 @@ export const RESEAU_DESKTOP_CSS = `
         .rp-main-col[data-volet="pages"],
         .rp-main-col[data-volet="groupes"],
         .rp-main-col[data-volet="enregistrements"] {
-          max-width: 1120px;
+          max-width: var(--esp-layout-max-width, 1120px);
         }
         .rp-tabs {
           display: flex;
@@ -211,7 +211,7 @@ export const RESEAU_DESKTOP_CSS = `
           gap: var(--rp-stack-gap);
           grid-template-columns: minmax(0, 1fr);
           align-items: start;
-          max-width: 1120px;
+          max-width: var(--esp-layout-max-width, 1120px);
           margin-inline: auto;
           width: 100%;
           /* Sur une colonne, la PAGE défile ici (le scope, lui, est fermé) ;
@@ -261,7 +261,9 @@ export const RESEAU_DESKTOP_CSS = `
         }
         .rp-volet-title {
           margin: 0;
-          font-size: 18px;
+          font-family: var(--esp-heading-font-family, inherit);
+          font-size: var(--esp-section-title-size, 18px);
+          line-height: var(--esp-section-title-leading, normal);
           font-weight: 700;
           letter-spacing: -.01em;
           color: var(--ink-900);
@@ -410,8 +412,8 @@ export const RESEAU_DESKTOP_CSS = `
            la découverte. */
         @container rp-page (min-width: 812px) {
           .rp-grid {
-            grid-template-columns: minmax(176px, 224px) minmax(620px, 792px);
-            max-width: 1032px;
+            grid-template-columns: var(--esp-grid-compact-columns, minmax(176px, 224px) minmax(620px, 792px));
+            max-width: var(--esp-layout-max-width, 1032px);
           }
           .rp-rail-start {
             display: flex;
@@ -432,8 +434,8 @@ export const RESEAU_DESKTOP_CSS = `
            Valeur : COLLAPSED_THREE_COLUMN_MIN (reseau-layout.ts). */
         @container rp-page (min-width: 1108px) {
           .rp-grid {
-            grid-template-columns: minmax(176px, 224px) minmax(620px, 792px) minmax(280px, 312px);
-            max-width: 1360px;
+            grid-template-columns: var(--esp-grid-wide-columns, minmax(176px, 224px) minmax(620px, 792px) minmax(280px, 312px));
+            max-width: var(--esp-layout-max-width, 1360px);
           }
           .rp-grid .rp-rail-end {
             display: flex;
@@ -444,7 +446,7 @@ export const RESEAU_DESKTOP_CSS = `
           .rp-desktop-icom-link { display: none !important; }
         }
         @media (min-width: 960px) {
-          .rp-scope { padding: 14px 16px 0; }
+          .rp-scope { padding: 14px var(--esp-layout-gutter, 16px) 0; }
         }
         /* Filet de sécurité sur viewport étroit : la container query mesure le
            CONTENEUR, qui peut être large alors que la fenêtre ne l'est pas. */

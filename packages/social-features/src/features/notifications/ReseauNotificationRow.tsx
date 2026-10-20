@@ -128,8 +128,8 @@ export function NotificationRow({
 				<p
 					style={{
 						margin: 0,
-						fontSize: compact ? 12.5 : 13,
-						lineHeight: 1.5,
+						fontSize: `var(--esp-content-font-size, ${compact ? 12.5 : 13}px)`,
+						lineHeight: "var(--esp-content-line-height, 1.5)",
 						color: "var(--ink-800)",
 						overflowWrap: "anywhere",
 					}}

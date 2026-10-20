@@ -79,15 +79,19 @@
   --role-danger-fill: #c8102e;
   --role-danger-on: #ffffff;
   --role-danger-ink: #b50e29;
-  --role-message-soft: #d9e1ed; /* fond tonal du bouton Écrire */
-  --role-react-soft: #f7efde; /* fond de l'action réagie */
+  --role-message-soft: color-mix(in srgb, var(--role-message-fill) 15%, var(--card)); /* fond tonal du bouton Écrire */
+  --role-react-soft: color-mix(in srgb, var(--role-react-fill) 18%, var(--card)); /* fond de l'action réagie */
   --primary-fill: #2f67b5; /* aplat d'identité : bouton Publier, Créer, interrupteur */
   --primary-fill-hover: #2a5da3;
   --primary-fill-on: #ffffff; /* texte posé sur l'aplat d'identité */
-  --ui2-button-secondary-bg: #d9e1ed; /* bouton secondaire tonal, sans filet */
+  --ui2-button-secondary-bg: var(--role-message-soft); /* bouton secondaire tonal, sans filet */
   --ui2-button-secondary-fg: #2a5fa8;
-  --esp-mobilebar-bg: rgb(247 247 247 / 0.9); /* barre flottante, translucide au-dessus du fil */
-  --esp-fab-shadow: 0 10px 20px -8px rgb(47 103 181 / 0.55);
+  --esp-mobilebar-bg: rgb(247 247 247 / 0.88); /* barre flottante, translucide au-dessus du fil */
+  --esp-motif-reference-glow: rgb(0 0 0 / 0.07);
+  --esp-motif-grain-ink: rgb(0 0 0 / 0.07);
+  --esp-theme-card-shadow: none;
+  --esp-mobilebar-shadow: 0 14px 30px -12px rgb(0 0 0 / 0.25), 0 2px 6px rgb(0 0 0 / 0.06);
+  --esp-fab-shadow: 0 10px 20px -8px color-mix(in srgb, var(--primary-fill) 75%, transparent);
   --esp-tab-active-bg: #d7e0ec; /* onglet actif : pastille tonale */
   --esp-tab-active-fg: #2a5fa8;
 
@@ -96,7 +100,7 @@
   --rp-surface-radius: 24px; /* cartes du fil et surfaces de premier niveau */
   --esp-inline-link-decoration: underline;
   --esp-sticky-header-inset: 4rem; /* barre de membre collante (P18b, A13) */
-  --body-font-size: 16px;
+  --body-font-size: 15px;
   --font-sans: "Inter Variable", "Inter", system-ui, sans-serif; /* Inter embarquée (`styles.css`) */
   --font-display: var(--font-familjen-grotesk, "Familjen Grotesk Variable"), "Inter", system-ui, sans-serif;
 
@@ -161,15 +165,19 @@
   --role-danger-fill: #ff6b7a;
   --role-danger-on: #2a0509;
   --role-danger-ink: #ff8592;
-  --role-message-soft: #222935; /* fond tonal du bouton Écrire */
-  --role-react-soft: #332b1b; /* fond de l'action réagie */
+  --role-message-soft: color-mix(in srgb, var(--role-message-fill) 15%, var(--card)); /* fond tonal du bouton Écrire */
+  --role-react-soft: color-mix(in srgb, var(--role-react-fill) 18%, var(--card)); /* fond de l'action réagie */
   --primary-fill: #6fa2f0; /* aplat d'identité : bouton Publier, Créer, interrupteur */
   --primary-fill-hover: #80adf2;
   --primary-fill-on: #06142e; /* texte posé sur l'aplat d'identité */
-  --ui2-button-secondary-bg: #222935; /* bouton secondaire tonal, sans filet */
+  --ui2-button-secondary-bg: var(--role-message-soft); /* bouton secondaire tonal, sans filet */
   --ui2-button-secondary-fg: #86b2f4;
-  --esp-mobilebar-bg: rgb(20 20 20 / 0.9); /* barre flottante, translucide au-dessus du fil */
-  --esp-fab-shadow: 0 10px 20px -8px rgb(111 162 240 / 0.45);
+  --esp-mobilebar-bg: rgb(20 20 20 / 0.88); /* barre flottante, translucide au-dessus du fil */
+  --esp-theme-card-shadow: none;
+  --esp-mobilebar-shadow: 0 14px 30px -10px rgb(0 0 0 / 0.8), 0 2px 6px rgb(0 0 0 / 0.45);
+  --esp-motif-reference-glow: rgb(255 255 255 / 0.12);
+  --esp-motif-grain-ink: rgb(255 255 255 / 0.05);
+  --esp-fab-shadow: 0 10px 20px -8px color-mix(in srgb, var(--primary-fill) 75%, transparent);
   --esp-tab-active-bg: #232b37; /* onglet actif : pastille tonale */
   --esp-tab-active-fg: #86b2f4;
 }
@@ -262,11 +270,44 @@
   --ui2-card-radius: 24px; /* cartes d'ui-v2, comme les surfaces du réseau */
   --esp-card-padding: 16px;
   --esp-card-gap: 12px;
-  --esp-surface-shadow: none;
+  --esp-surface-shadow: var(--esp-theme-card-shadow);
   --esp-raised-border: transparent;
   --esp-alert-border: transparent;
   --esp-alert-accent-width: 0px;
   --esp-control-min-size: 44px;
+  --esp-heading-font-weight: 700;
+  --esp-page-title-tracking: -0.015em;
+  --esp-section-title-tracking: -0.01em;
+  --esp-floating-shadow: var(--esp-mobilebar-shadow);
+  --esp-post-shadow: var(--esp-theme-card-shadow);
+  --esp-field-font-size: 16px;
+  --esp-field-line-height: 1.4;
+  --esp-textarea-min-height: 104px;
+  --esp-page-title-size: 26px;
+  --esp-page-title-leading: 1.1;
+  --esp-section-title-size: 20px;
+  --esp-section-title-leading: 1.2;
+  --esp-subsection-title-size: 16px;
+  --esp-subsection-title-leading: 1.3;
+  --esp-heading-font-family: var(--font-display);
+  --esp-content-font-size: 15px;
+  --esp-content-line-height: 1.5;
+  --esp-profile-avatar-page-radius: 24px;
+  --esp-profile-avatar-size: 104px;
+  --esp-fab-size: 52px;
+  --esp-layout-max-width: 1400px;
+  --esp-layout-gutter: 20px;
+  --esp-layout-gap: 24px;
+  --esp-desktop-main-max: none;
+  --esp-grid-compact-columns: 248px minmax(0, 1fr);
+  --esp-grid-wide-columns: 248px minmax(0, 1fr) 312px;
+  --esp-mobile-content-padding: 4px 12px 120px;
+  --esp-tablet-content-padding: 8px 24px 140px;
+  --esp-tablet-content-max: 728px;
+  --esp-mobile-dock-inset: 12px;
+  --esp-mobile-dock-bottom: 16px;
+  --esp-tablet-dock-bottom: 26px;
+  --esp-tablet-dock-width: 540px;
   --esp-primitive-card-radius: var(--ui2-card-radius);
   --esp-primitive-button-radius: var(--ui2-button-radius);
   --esp-primitive-badge-radius: var(--ui2-badge-radius);

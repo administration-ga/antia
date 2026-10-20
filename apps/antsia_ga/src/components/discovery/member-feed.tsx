@@ -121,7 +121,7 @@ export function MemberDiscoveryFeed({ filter }: { filter: Extract<MemberFeedFilt
 
   const header = <header className="flex flex-col gap-2">
     <Link href={routes.feed()} className="inline-flex min-h-11 items-center self-start rounded-[var(--ui2-button-radius)] px-3 text-sm underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">{t("discovery.back")}</Link>
-    <h1 className="text-2xl font-semibold">{province ? t("discovery.provinceTitle", { name: province.name }) : filter.tag ? t("discovery.tagTitle", { tag: filter.tag }) : t("discovery.nationalTitle")}</h1>
+    <h1 className="antsia-title ">{province ? t("discovery.provinceTitle", { name: province.name }) : filter.tag ? t("discovery.tagTitle", { tag: filter.tag }) : t("discovery.nationalTitle")}</h1>
     <p className="text-sm text-muted-foreground">{t("discovery.memberScope")}</p>
   </header>
   const provinceField = <ProvinceFilterForm current={filter.province} />

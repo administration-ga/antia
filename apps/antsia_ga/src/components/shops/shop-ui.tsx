@@ -13,14 +13,14 @@ export const SHOP_LINK_CLASS = "inline-flex min-h-11 items-center justify-center
 export const SHOP_SELECT_CLASS = "min-h-11 w-full rounded-[var(--esp-field-radius)] border border-input bg-muted px-3 py-2 text-base text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
 
 export function ShopFrame({ title, lead, children }: { title: string; lead?: string; children: ReactNode }) {
-  return <MemberPage><div className="mx-auto flex w-full min-w-0 max-w-3xl flex-col gap-5 pb-24 [overflow-wrap:anywhere]"><header className="grid gap-2"><h1 className="text-2xl font-semibold tracking-tight">{title}</h1>{lead ? <p className="text-muted-foreground">{lead}</p> : null}</header>{children}</div></MemberPage>
+  return <MemberPage><div className="antsia-page antsia-copy mx-auto w-full max-w-5xl pb-24 [overflow-wrap:anywhere]"><header className="antsia-page-header"><h1 className="antsia-title">{title}</h1>{lead ? <p className="text-muted-foreground">{lead}</p> : null}</header>{children}</div></MemberPage>
 }
 /** Un lien de boutique ; avec `variant`, il prend la facture d'un bouton (« Poser une question » en tonal des messages, ADR-0027),
  * à sa largeur même dans une grille. */
 export function ShopLink({ href, children, variant }: { href: string; children: ReactNode; variant?: ButtonVariant }) { return <Link href={href} className={variant ? buttonClassName(variant, "justify-self-start") : SHOP_LINK_CLASS}>{children}</Link> }
 export function ShopQueryFailure({ retry, href }: { retry?: () => void; href: string }) {
   const { t } = useTranslation("shops")
-  return <Card><div className="grid gap-3"><h2 className="text-lg font-semibold">{t("common.unavailableTitle")}</h2><p>{t("common.unavailableBody")}</p><div className="flex flex-wrap gap-2">{retry ? <Button variant="outline" onClick={retry}>{t("common.retry")}</Button> : null}<ShopLink href={href}>{t("common.back")}</ShopLink></div></div></Card>
+  return <Card><div className="grid gap-3"><h2 className="antsia-subtitle">{t("common.unavailableTitle")}</h2><p>{t("common.unavailableBody")}</p><div className="flex flex-wrap gap-2">{retry ? <Button variant="outline" onClick={retry}>{t("common.retry")}</Button> : null}<ShopLink href={href}>{t("common.back")}</ShopLink></div></div></Card>
 }
 export function ShopLogo({ url, name }: { url: string | null; name: string }) {
   const [failedUrl, setFailedUrl] = useState<string | null>(null)

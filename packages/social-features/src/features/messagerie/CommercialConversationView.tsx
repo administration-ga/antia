@@ -106,7 +106,7 @@ function CommercialConversation({ threadId: rawId, onBack, onOpenOffer, renderEx
 	})
 	return <>
 		<ConversationHeader variant="page" kind="draft" title={counterpart} subtitle={t(`contact.states.${thread.state}`)} onBack={onBack} />
-		<div className="msg-body grid content-start gap-4 p-4" aria-busy={busy || undefined}>
+		<div className="msg-body grid content-start gap-4 p-4" style={{ fontSize: "var(--esp-content-font-size, inherit)", lineHeight: "var(--esp-content-line-height, inherit)" }} aria-busy={busy || undefined}>
 			<p className="text-sm text-muted-foreground">{t("contact.privateChannel")}</p>
 			{thread.offer ? <button type="button" className="msg-tool-btn justify-self-start" onClick={() => onOpenOffer?.(thread.shop.handle, thread.offer!.offerRef)} disabled={!onOpenOffer}>{t("contact.offerContext", { title: thread.offer.title })}</button> : <p className="text-xs text-muted-foreground">{t("contact.noOffer")}</p>}
 			<p role="status" className="text-sm">{t(`contact.stateHelp.${thread.state}`)}</p>

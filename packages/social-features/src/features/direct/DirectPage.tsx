@@ -132,10 +132,10 @@ function DirectSessionView({ session }: { session: DirectSession }) {
     void leaveViewer({ networkId, sessionId: session.sessionId }).catch(() => undefined)
   }
   return (
-    <section className="flex min-w-0 flex-col gap-5" aria-label={session.title}>
+    <section className="flex min-w-0 flex-col gap-5" style={{ fontSize: "var(--esp-content-font-size, inherit)", lineHeight: "var(--esp-content-line-height, inherit)" }} aria-label={session.title}>
       <Link href={routes.home()} className="inline-flex min-h-11 items-center text-sm">{t("back")}</Link>
       <header className="flex flex-wrap items-center justify-between gap-3">
-        <div><p className="text-sm text-muted-foreground">{t(`status.${session.status}`)}</p><h1 className="text-2xl font-semibold">{session.title}</h1><p className="text-sm text-muted-foreground">{session.host.displayName ?? t("person")}</p>{session.page ? <Link href={routes.page(session.page.handle)} className="text-sm">{t("create.signedPage", { name: session.page.name })}</Link> : null}</div>
+        <div><p className="text-sm text-muted-foreground">{t(`status.${session.status}`)}</p><h1 className="text-2xl font-semibold" style={{ fontFamily: "var(--esp-heading-font-family, inherit)", fontSize: "var(--esp-page-title-size, 1.5rem)", fontWeight: "var(--esp-heading-font-weight, 600)", lineHeight: "var(--esp-page-title-leading, 2rem)", letterSpacing: "var(--esp-page-title-tracking, normal)" }}>{session.title}</h1><p className="text-sm text-muted-foreground">{session.host.displayName ?? t("person")}</p>{session.page ? <Link href={routes.page(session.page.handle)} className="text-sm">{t("create.signedPage", { name: session.page.name })}</Link> : null}</div>
         <span className="rounded-full border border-border px-3 py-1 text-sm">{t(`audience.${session.audience}`)}</span>
       </header>
       {anotherRoom ? <p role="alert">{t("anotherRoom")} <Link href={routes.conference(state.sessionId!)}>{t("returnToRoom")}</Link></p> : null}

@@ -61,10 +61,10 @@ describe("système commun réellement consommé par les primitives (ADR-0027)", 
         const node: ChartedNode = { charte, dark, nested }
         const label = `${id} ${dark ? "sombre" : "clair"}${nested ? " portail" : ""}`
 
-        it(`${label} : carte et kit 24/16 px, sans ombre ; champs 14 px`, () => {
+        it(`${label} : carte et kit 24/16 px, profondeur du thème ; champs 14 px`, () => {
           expect(resolved(cascade, node, card, "border-radius")).toBe("24px")
           expect(resolved(cascade, node, card, "padding")).toBe("16px")
-          expect(resolved(cascade, node, card, "box-shadow")).toBe("none")
+          expect(resolved(cascade, node, card, "box-shadow")).toBe(cascade.resolve(node, "--esp-surface-shadow"))
           expect(resolved(cascade, node, styleOf(spaceCard, "div"), "border-radius")).toBe("24px")
           expect(resolved(cascade, node, styleOf(spaceCard, "section"), "padding")).toBe("16px")
           expect(resolved(cascade, node, table, "border-radius")).toBe("24px")

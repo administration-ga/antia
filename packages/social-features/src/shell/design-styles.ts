@@ -14,7 +14,7 @@ export const RESEAU_SURFACE_STYLE = {
   /* La page réseau du bureau pose son rayon de surface sur .rp-scope. Le repli
      conserve le contrat historique pour les composants rendus hors page. */
   borderRadius: "var(--rp-surface-radius, 18px)",
-  boxShadow: "none",
+  boxShadow: "var(--esp-surface-shadow, none)",
 } satisfies CSSProperties
 
 export const RESEAU_CARD_STYLE = {
@@ -40,7 +40,7 @@ export const POST_SURFACE_STYLE = {
      fond (Électrique), un anneau intérieur la détache — transparent partout
      ailleurs, sans effet sur la mise en page, et recouvert par un média qui
      traverse la carte bord à bord. */
-  boxShadow: "inset 0 0 0 1px var(--esp-surface-border, transparent)",
+  boxShadow: "var(--esp-post-shadow, inset 0 0 0 1px var(--esp-surface-border, transparent))",
 } satisfies CSSProperties
 
 export const RESEAU_HERO_STYLE = {
@@ -54,7 +54,7 @@ export const RESEAU_INNER_CARD_STYLE = {
   /* Carte posée sur une carte de même couleur : le filet reste (contour à couleur égale). */
   border: "1px solid var(--border)",
   borderRadius: "var(--esp-media-radius, 16px)",
-  boxShadow: "none",
+  boxShadow: "var(--esp-surface-shadow, none)",
 } satisfies CSSProperties
 
 export const RESEAU_PRIMARY_ACTION_STYLE = {

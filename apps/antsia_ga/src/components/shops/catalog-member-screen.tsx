@@ -32,7 +32,7 @@ function MemberCatalogWindow({ handle, search, preview = false }: { handle: stri
   if (query.isPending || !query.data) return <p role="status" className="text-sm text-muted-foreground">{t("catalog.loading")}</p>
   const page: CatalogPage = query.data
   const translate = (key: string, options?: Record<string, unknown>) => t(key, options)
-  return <div className="grid gap-5" aria-busy={query.isFetching || undefined}>
+  return <div className="antsia-page" aria-busy={query.isFetching || undefined}>
     {!preview ? <CatalogFiltersForm handle={handle} filters={filters} collections={page.collections} audience="member" /> : null}
     <CatalogGrid page={page} audience="member" locale={i18n.resolvedLanguage ?? "fr"} t={translate} />
     {page.page.length === 0 ? <p className="text-sm text-muted-foreground">{t("catalog.publicConsentHint")}</p> : null}
@@ -43,7 +43,7 @@ function MemberCatalogWindow({ handle, search, preview = false }: { handle: stri
 export function MemberCatalogPreview({ handle }: { handle: string }) {
   const { networkId, personId } = useNetwork()
   const { t } = useTranslation("shops")
-  return <section aria-labelledby="member-shop-catalog" className="grid gap-4"><h2 id="member-shop-catalog" className="text-xl font-semibold">{t("catalog.title")}</h2><MemberCatalogWindow key={JSON.stringify([networkId, personId, handle])} handle={handle} search={{ cursor: null }} preview /></section>
+  return <section aria-labelledby="member-shop-catalog" className="grid gap-4"><h2 id="member-shop-catalog" className="antsia-subtitle">{t("catalog.title")}</h2><MemberCatalogWindow key={JSON.stringify([networkId, personId, handle])} handle={handle} search={{ cursor: null }} preview /></section>
 }
 
 export function MemberOfferScreen({ handle, offerRef }: { handle: string; offerRef: string }) {

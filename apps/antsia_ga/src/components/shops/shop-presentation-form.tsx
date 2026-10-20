@@ -29,12 +29,12 @@ export function ShopPresentationForm({ shop, onDirty }: { shop: ShopEditorData; 
     receivedVersion.current = shop.updatedAt
     if (!form.formState.isDirty) form.reset(presentationValues(shop))
   }, [form, shop])
-  return <div className="grid gap-6">
-    <form noValidate className="grid gap-4" aria-labelledby={`${id}-title`} onSubmit={form.handleSubmit(async (values) => {
+  return <div className="grid min-w-0 gap-6 xl:grid-cols-2">
+    <form noValidate className="antsia-form-grid" aria-labelledby={`${id}-title`} onSubmit={form.handleSubmit(async (values) => {
       setSaved(false)
       await action.run(() => update({ networkId, shopId: shop.shopId, ...values }), () => { form.reset(values); setSaved(true) })
     })}>
-      <h2 id={`${id}-title`} className="text-lg font-semibold">{t("steps.presentation")}</h2>
+      <h2 id={`${id}-title`} className="antsia-subtitle">{t("steps.presentation")}</h2>
       <p className="text-sm text-muted-foreground">{t(shop.page ? "presentation.pageIdentity" : "presentation.lead")}</p>
       {(["name", "description", "specialty", "serviceArea", "hours"] as const).map((field) => {
         const error = form.formState.errors[field]?.message
@@ -43,7 +43,7 @@ export function ShopPresentationForm({ shop, onDirty }: { shop: ShopEditorData; 
       })}
       {action.error ? <p role="alert" className="text-sm text-destructive">{action.error}</p> : null}
       {saved && !form.formState.isDirty ? <p role="status" className="text-sm">{t("common.saved")}</p> : null}
-      <Button type="submit" pending={action.pending} disabled={!form.formState.isDirty} className="justify-self-start">{t("common.save")}</Button>
+      <Button type="submit" pending={action.pending} disabled={!form.formState.isDirty} className="w-full sm:w-auto sm:justify-self-start">{t("common.save")}</Button>
     </form>
     <PresentationPreview values={{ ...presentationValues(shop), ...preview }} logoUrl={shop.logo.url} />
     <ShopLogoForm shop={shop} onDirty={setLogoDirty} />
@@ -53,7 +53,7 @@ export function ShopPresentationForm({ shop, onDirty }: { shop: ShopEditorData; 
 export function PresentationPreview({ values, logoUrl }: { values: PresentationValues; logoUrl: string | null }) {
   const { t } = useTranslation("shops")
   const [mode, setMode] = useState<"phone" | "desktop">("phone")
-  return <section className="grid gap-3 border-t border-border pt-5" aria-label={t("preview.title")}><h3 className="font-semibold">{t("preview.title")}</h3><p className="text-sm text-muted-foreground">{t("preview.draft")}</p><div role="group" aria-label={t("preview.width")} className="flex flex-wrap gap-2">{(["phone", "desktop"] as const).map((item) => <Button key={item} type="button" variant={mode === item ? "primary" : "outline"} aria-pressed={mode === item} onClick={() => setMode(item)}>{t(`preview.${item}`)}</Button>)}</div><div data-shop-preview={mode} className="mx-auto w-full rounded-[var(--ui2-card-radius)] border border-[color:var(--esp-surface-border)] bg-background p-[var(--esp-card-padding,16px)] [overflow-wrap:anywhere]" style={{ maxWidth: mode === "phone" ? 360 : undefined }}><div className="grid gap-4 rounded-[var(--ui2-card-radius)] border border-[color:var(--esp-surface-border)] bg-card p-[var(--esp-card-padding,16px)] text-card-foreground"><div className="flex items-start gap-3"><ShopLogo url={logoUrl} name={values.name} /><h4 className="min-w-0 text-lg font-semibold">{values.name || t("list.untitled")}</h4></div>{values.description ? <p className="whitespace-pre-wrap">{values.description}</p> : null}<dl className="grid gap-3">{(["specialty", "serviceArea", "hours"] as const).map((field) => values[field] ? <div key={field}><dt className="text-sm font-medium text-muted-foreground">{t(`fields.${field}`)}</dt><dd className="whitespace-pre-wrap">{values[field]}</dd></div> : null)}</dl></div></div></section>
+  return <section className="grid min-w-0 gap-3 self-start" aria-label={t("preview.title")}><h3 className="font-display text-base font-bold leading-snug">{t("preview.title")}</h3><p className="text-sm text-muted-foreground">{t("preview.draft")}</p><div role="group" aria-label={t("preview.width")} className="flex flex-wrap gap-2">{(["phone", "desktop"] as const).map((item) => <Button key={item} type="button" variant={mode === item ? "primary" : "outline"} className="aria-pressed:bg-[var(--esp-tab-active-bg)] aria-pressed:text-[color:var(--esp-tab-active-fg)] aria-pressed:hover:bg-[var(--esp-tab-active-bg)]" aria-pressed={mode === item} onClick={() => setMode(item)}>{t(`preview.${item}`)}</Button>)}</div><div data-shop-preview={mode} className="mx-auto w-full rounded-[var(--ui2-card-radius)] border border-[color:var(--esp-surface-border)] bg-background p-[var(--esp-card-padding,16px)] [overflow-wrap:anywhere]" style={{ maxWidth: mode === "phone" ? 360 : undefined }}><div className="grid gap-4 rounded-[var(--ui2-card-radius)] border border-[color:var(--esp-surface-border)] bg-card p-[var(--esp-card-padding,16px)] text-card-foreground"><div className="flex items-start gap-3"><ShopLogo url={logoUrl} name={values.name} /><h4 className="min-w-0 text-lg font-semibold">{values.name || t("list.untitled")}</h4></div>{values.description ? <p className="whitespace-pre-wrap">{values.description}</p> : null}<dl className="grid gap-3">{(["specialty", "serviceArea", "hours"] as const).map((field) => values[field] ? <div key={field}><dt className="text-sm font-medium text-muted-foreground">{t(`fields.${field}`)}</dt><dd className="whitespace-pre-wrap">{values[field]}</dd></div> : null)}</dl></div></div></section>
 }
 
 function ShopLogoForm({ shop, onDirty }: { shop: ShopEditorData; onDirty: (dirty: boolean) => void }) {
@@ -85,12 +85,12 @@ function ShopLogoForm({ shop, onDirty }: { shop: ShopEditorData; onDirty: (dirty
       setResultNote(result.withheld ? t(`errors:${result.withheld}`) : t("presentation.logoSaved"))
     })
   }
-  return <section aria-labelledby={`${id}-title`} className="grid gap-3 border-t border-border pt-5">
-    <h3 id={`${id}-title`} className="font-semibold">{t("presentation.logo")}</h3>
+  return <section aria-labelledby={`${id}-title`} className="grid min-w-0 gap-3 border-t border-border pt-4 xl:col-span-2">
+    <h3 id={`${id}-title`} className="font-display text-base font-bold leading-snug">{t("presentation.logo")}</h3>
     <ShopLogo url={shop.logo.url} name={shop.name ?? ""} />
     {shop.logo.withheld ? <p role="status" className="text-sm">{t(`errors:${shop.logo.withheld}`)}</p> : shop.logo.present && !shop.logo.url ? <p className="text-sm">{t("presentation.logoUnavailable")}</p> : null}
     <Field id={id} label={t("presentation.pickLogo")} hint={t("presentation.logoHint")}>
-      <input id={id} ref={input} type="file" accept={UPLOAD_USAGES.page_logo.mimeTypes.join(",")} disabled={action.pending} className="min-h-11 w-full rounded-[var(--esp-field-radius)] border border-input bg-muted p-2 text-sm" aria-describedby={`${id}-hint`} onChange={(event) => {
+      <input id={id} ref={input} type="file" accept={UPLOAD_USAGES.page_logo.mimeTypes.join(",")} disabled={action.pending} className="min-h-11 w-full rounded-[var(--esp-field-radius)] border border-input bg-muted px-3 py-2 text-base" aria-describedby={`${id}-hint`} onChange={(event) => {
         const chosen = event.currentTarget.files?.[0] ?? null
         setResultNote(null)
         if (chosen && (!isMimeAllowedForUsage("page_logo", chosen.type) || chosen.size <= 0 || chosen.size > UPLOAD_USAGES.page_logo.maxBytes)) { action.setError(t("presentation.logoInvalid")); setFile(null); return }
@@ -100,6 +100,6 @@ function ShopLogoForm({ shop, onDirty }: { shop: ShopEditorData; onDirty: (dirty
     </Field>
     {action.error ? <p role="alert" className="text-sm text-destructive">{action.error}</p> : null}
     {resultNote ? <p role="status" className="text-sm">{resultNote}</p> : null}
-    <Button type="button" variant="outline" pending={action.pending} disabled={!file} onClick={() => void upload()} className="justify-self-start">{t("presentation.uploadLogo")}</Button>
+    <Button type="button" variant="outline" pending={action.pending} disabled={!file} onClick={() => void upload()} className="w-full sm:w-auto sm:justify-self-start">{t("presentation.uploadLogo")}</Button>
   </section>
 }

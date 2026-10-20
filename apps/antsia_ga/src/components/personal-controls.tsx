@@ -32,7 +32,7 @@ function AppealForm({ reportId }: { reportId: Id<"reports"> }) {
   const { t } = useTranslation("antsia")
   const appeal = useMutation(api.modules.moderation.cases.fileAppeal)
   const form = useForm<{ reason: string }>({ resolver: zodResolver(z.object({ reason: z.string().trim().min(10, t("personal.appealHint")).max(500, t("personal.appealHint")) })), defaultValues: { reason: "" } })
-  return <form className="flex flex-col gap-3" noValidate onSubmit={form.handleSubmit(async ({ reason }) => {
+  return <form className="antsia-form-grid" noValidate onSubmit={form.handleSubmit(async ({ reason }) => {
     try { await appeal({ reportId, reason }); form.reset(); toast.success(t("personal.appealSent")) }
     catch { toast.error(t("personal.error")) }
   })}>
@@ -46,7 +46,7 @@ function AppealForm({ reportId }: { reportId: Id<"reports"> }) {
 function Decisions() {
   const { t } = useTranslation("antsia")
   const { results, status, loadMore } = usePaginatedQuery(api.modules.moderation.cases.myDecisions, {}, { initialNumItems: 10 })
-  return <Card><h2 className="mb-4 text-xl font-semibold">{t("personal.decisionsTitle")}</h2>
+  return <Card><h2 className="antsia-subtitle mb-4">{t("personal.decisionsTitle")}</h2>
     {status === "LoadingFirstPage" ? <p role="status">{t("personal.loading")}</p> : !results.length ? <p className="text-muted-foreground">{t("personal.noDecisions")}</p> : null}
     <div className="flex flex-col gap-4">{results.map((decision) => <article key={decision.reportId} className="rounded-[var(--ui2-card-radius)] border border-border p-[var(--esp-card-padding,16px)]">
       <p className="font-medium">{t(`personal.statuses.${decision.status}`)}</p>
@@ -73,7 +73,7 @@ function DataRights() {
   const word = t("personal.confirmWord")
   const form = useForm<{ confirmation: string }>({ resolver: zodResolver(z.object({ confirmation: z.string().refine((value) => value === word, t("personal.confirmError")) })), defaultValues: { confirmation: "" } })
   return <>
-    <Card><h2 className="text-xl font-semibold">{t("personal.exportTitle")}</h2><p className="my-3 text-sm text-muted-foreground">{t("personal.exportLead")}</p>
+    <Card><h2 className="antsia-subtitle ">{t("personal.exportTitle")}</h2><p className="my-3 text-sm text-muted-foreground">{t("personal.exportLead")}</p>
       <Button pending={exporting} onClick={async () => {
         const current = ++generation.current
         setExporting(true)
@@ -110,11 +110,11 @@ function DataRights() {
       }}><Download aria-hidden="true" className="size-4" />{t(exporting ? "personal.exporting" : "personal.export")}</Button>
       {exporting ? <progress className="mt-3 w-full" max={progress.max} value={progress.value} aria-label={t("personal.exporting")} /> : null}
     </Card>
-    <Card><h2 className="text-xl font-semibold">{t("personal.eraseTitle")}</h2><p className="my-3 text-sm text-muted-foreground">{t("personal.eraseLead")}</p><ErasureCommerceNotice />
+    <Card><h2 className="antsia-subtitle ">{t("personal.eraseTitle")}</h2><p className="my-3 text-sm text-muted-foreground">{t("personal.eraseLead")}</p><ErasureCommerceNotice />
       {job === undefined ? <p role="status">{t("personal.loading")}</p> : job ? <>
         <p role="status" className="mb-4">{t("personal.eraseRequested", { date: formatViewerDate(job.dueAt, i18n.language, { dateStyle: "long" }, timeZone) })}</p>
         <Button variant="outline" pending={canceling} disabled={!job.canCancel} onClick={async () => { setCanceling(true); try { await cancel({}); toast.success(t("personal.eraseCancelled")) } catch { toast.error(t("personal.error")) } finally { setCanceling(false) } }}>{t("personal.cancelErase")}</Button>
-      </> : <form className="flex flex-col gap-3" noValidate onSubmit={form.handleSubmit(async () => {
+      </> : <form className="antsia-form-grid" noValidate onSubmit={form.handleSubmit(async () => {
         try { await erase({ confirmation: "DELETE_MY_ANTSIA_ACCOUNT" }); form.reset() } catch { toast.error(t("personal.error")) }
       })}>
         <Field id="erase-confirmation" label={t("personal.confirmLabel", { word })} error={form.formState.errors.confirmation?.message}>
@@ -139,10 +139,10 @@ export function PersonalControls() {
   const active = root && memberships?.some((membership) => membership.networkId === root._id && ["en_attente", "declaree", "verifiee"].includes(membership.status))
   return <div className="esp-page-motif min-h-dvh bg-background text-foreground">
     <header className="border-b border-border"><nav className="mx-auto flex max-w-5xl items-center justify-between gap-3 px-4 py-3" aria-label={t("nav.label")}>
-      <Link href={routes.feed()} className="font-semibold">{BRAND_NAME}</Link><Button variant="ghost" pending={leaving} onClick={async () => { setLeaving(true); await signOutAndRedirect() }}><LogOut aria-hidden="true" className="size-4" />{t("nav.signOut")}</Button>
+      <Link href={routes.feed()} className="inline-flex min-h-11 items-center gap-1.5 font-[family-name:var(--font-display)] text-[26px] font-bold tracking-[0.06em] text-foreground">{BRAND_NAME}<span aria-hidden="true" className="size-[7px] rounded-full bg-[var(--primary-fill)]" /></Link><Button variant="ghost" pending={leaving} onClick={async () => { setLeaving(true); await signOutAndRedirect() }}><LogOut aria-hidden="true" className="size-4" />{t("nav.signOut")}</Button>
     </nav></header>
-    <main id="contenu" tabIndex={-1} className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-4 py-8 focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring">
-      <header><ShieldCheck aria-hidden="true" className="mb-3 size-6 text-primary" /><h1 className="text-3xl">{t("personal.title")}</h1><p className="mt-3 text-muted-foreground">{t("personal.lead")}</p><Link className="mt-4 inline-flex min-h-11 items-center text-sm underline" href={routes.feed()}>{t("personal.home")}</Link></header>
+    <main id="contenu" tabIndex={-1} className="antsia-page mx-auto w-full max-w-5xl px-3 py-6 sm:px-6 focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring">
+      <header><ShieldCheck aria-hidden="true" className="mb-3 size-6 text-primary" /><h1 className="antsia-title ">{t("personal.title")}</h1><p className="mt-3 text-muted-foreground">{t("personal.lead")}</p><Link className="mt-4 inline-flex min-h-11 items-center text-sm underline" href={routes.feed()}>{t("personal.home")}</Link></header>
       <PreferencesControls /><PublicAgentControls key={`${person._id}:agent`} /><AnalyticsControls /><PersonalCommerceControls key={`${person._id}:commerce`} personId={person._id} /><DataRights /><Decisions />
       {root && active ? <PageModerationDecisions key={`${person._id}:pages`} networkId={root._id} /> : null}
       {root && memberships?.some((membership) => membership.networkId === root._id) ? <NotificationControls networkId={root._id} canActivate={Boolean(active)} /> : null}

@@ -16,7 +16,7 @@ export const ESPACE_SURFACE_STYLE = {
   background: "var(--esp-surface-card, var(--secondary))",
   border: "1px solid var(--esp-primitive-surface-border, var(--border))",
   borderRadius: "var(--esp-primitive-card-radius, 18px)",
-  boxShadow: "none",
+  boxShadow: "var(--esp-surface-shadow, none)",
 } satisfies CSSProperties
 
 export const ESPACE_CARD_STYLE = {
@@ -28,5 +28,5 @@ export const ESPACE_INNER_CARD_STYLE = {
   background: "var(--card)",
   border: "1px solid var(--border)",
   borderRadius: "var(--esp-media-radius, 16px)",
-  boxShadow: "none",
+  boxShadow: "var(--esp-surface-shadow, none)",
 } satisfies CSSProperties

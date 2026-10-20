@@ -376,7 +376,7 @@ function ProfilPersonnePageInner({ handle }: ProfilPersonnePageProps) {
     if (myRetiredProfile) {
       return (
         <ProfilFrame>
-          <h1 style={{ margin: 0, fontSize: 18, color: "var(--ink-900)" }}>
+          <h1 style={{ margin: 0, fontFamily: "var(--esp-heading-font-family, inherit)", fontSize: "var(--esp-page-title-size, 18px)", lineHeight: "var(--esp-page-title-leading, inherit)", letterSpacing: "var(--esp-page-title-tracking, normal)", fontWeight: "var(--esp-heading-font-weight, inherit)", color: "var(--ink-900)" }}>
             {t("profilPersonnePage.retired.title")}
           </h1>
           <ProfilReseauSection />
@@ -387,7 +387,7 @@ function ProfilPersonnePageInner({ handle }: ProfilPersonnePageProps) {
       <ProfilFrame>
         <Card style={RESEAU_CARD_STYLE}>
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            <h1 style={{ margin: 0, fontSize: 18, color: "var(--ink-900)" }}>
+            <h1 style={{ margin: 0, fontFamily: "var(--esp-heading-font-family, inherit)", fontSize: "var(--esp-page-title-size, 18px)", lineHeight: "var(--esp-page-title-leading, inherit)", letterSpacing: "var(--esp-page-title-tracking, normal)", fontWeight: "var(--esp-heading-font-weight, inherit)", color: "var(--ink-900)" }}>
               {t("profilPersonnePage.refused.title")}
             </h1>
             {/* Une seule phrase pour tous les cas : dire « ce compte est
@@ -534,7 +534,7 @@ function ProfilPersonnePageInner({ handle }: ProfilPersonnePageProps) {
         >
           <h2
             id="pp-gestion-titre"
-            style={{ margin: 0, fontSize: 16, color: "var(--ink-900)" }}
+            style={{ margin: 0, fontFamily: "var(--esp-heading-font-family, inherit)", fontSize: "var(--esp-section-title-size, 16px)", lineHeight: "var(--esp-section-title-leading, inherit)", letterSpacing: "var(--esp-section-title-tracking, normal)", fontWeight: "var(--esp-heading-font-weight, inherit)", color: "var(--ink-900)" }}
           >
             {t("profilPersonnePage.manage.title")}
           </h2>
@@ -593,7 +593,7 @@ function ProfilPersonnePageInner({ handle }: ProfilPersonnePageProps) {
         >
           <h2
             id="profil-publications"
-            style={{ margin: 0, fontSize: 16, color: "var(--ink-900)" }}
+            style={{ margin: 0, fontFamily: "var(--esp-heading-font-family, inherit)", fontSize: "var(--esp-section-title-size, 16px)", lineHeight: "var(--esp-section-title-leading, inherit)", letterSpacing: "var(--esp-section-title-tracking, normal)", fontWeight: "var(--esp-heading-font-weight, inherit)", color: "var(--ink-900)" }}
           >
             {t("profilPersonnePage.wall.title")}
           </h2>

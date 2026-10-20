@@ -49,18 +49,23 @@ export function Avatar({
   const [failed, setFailed] = useState(false)
   const showImage = Boolean(avatarUrl) && !failed
   const initials = hasIdentity ? initialsOf(displayName) : ""
+  const renderedSize = size === 104 ? `var(--esp-profile-avatar-size, ${size}px)` : size
 
   return (
     <span
       aria-hidden="true"
       style={{
-        width: size,
-        height: size,
+        width: renderedSize,
+        height: renderedSize,
         flexShrink: 0,
         // Le rayon de la tuile est un JETON, jamais une valeur : la charte
         // scopée de l'espace le remappe avec le reste.
         // Les pages en carré arrondi, les personnes en rond (ADR-0027).
-        borderRadius: shape === "square" ? "var(--esp-avatar-page-radius, var(--radius-lg))" : size / 2,
+        borderRadius: shape === "square"
+          ? size === 104
+            ? "var(--esp-profile-avatar-page-radius, var(--esp-avatar-page-radius, var(--radius-lg)))"
+            : "var(--esp-avatar-page-radius, var(--radius-lg))"
+          : size / 2,
         overflow: "hidden",
         background: showImage ? "var(--ink-100)" : "var(--primary-50)",
         color: "var(--primary-600)",

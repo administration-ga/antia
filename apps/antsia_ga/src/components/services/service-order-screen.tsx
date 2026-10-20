@@ -72,7 +72,7 @@ export function ServiceOrderForm({ handle, offerRef, fixedOrder, existingRequest
       else setFailure(result.outcome === "refused" ? "order.refused" : "common.unavailable")
     })
   })
-  return <Card><form noValidate className="grid gap-4" onSubmit={submit} aria-busy={action.pending || undefined}>
+  return <Card><form noValidate className="antsia-form-grid" onSubmit={submit} aria-busy={action.pending || undefined}>
     <p className="text-lg font-semibold">{fixedOrder.unit ? t("offer.fixedPriceUnit", { amount: serviceAmount(fixedOrder.unitAmount.amount, locale), unit: fixedOrder.unit }) : t("offer.fixedPrice", { amount: serviceAmount(fixedOrder.unitAmount.amount, locale) })}</p>
     {fixedOrder.leadTimeDays !== null ? <p className="text-sm text-muted-foreground">{t("order.leadTime", { count: fixedOrder.leadTimeDays })}</p> : null}
     <div className="grid gap-4 sm:grid-cols-2">
@@ -87,7 +87,7 @@ export function ServiceOrderForm({ handle, offerRef, fixedOrder, existingRequest
     </fieldset>
     {total !== null ? <p role="status" className="font-medium">{t("order.total", { amount: serviceAmount(total, locale) })}</p> : null}
     <p className="text-xs text-muted-foreground">{t("order.noStock")}</p>
-    <label className="flex items-start gap-3 text-sm"><input type="checkbox" className="mt-1 size-4" aria-invalid={errors.consent ? true : undefined} {...form.register("consent")} /><span>{t("consents.serviceOrder")}</span></label>
+    <label className="flex min-h-11 items-start gap-3 text-sm"><input type="checkbox" className="mt-1 size-4" aria-invalid={errors.consent ? true : undefined} {...form.register("consent")} /><span>{t("consents.serviceOrder")}</span></label>
     {errors.consent?.message ? <p role="alert" className="text-sm text-destructive">{errors.consent.message}</p> : null}
     {/* Commander : couleur du commerce (ADR-0027). */}
     <Button type="submit" variant="commerce" pending={action.pending}>{t(existingRequestRowId ? "order.reconfirm" : "order.submit")}</Button>

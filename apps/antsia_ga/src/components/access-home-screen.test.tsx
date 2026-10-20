@@ -83,17 +83,18 @@ describe("accueil ANTSIA — accès réel", () => {
 
   it("présente IDN et OTP avec une inscription distincte et les lectures publiques secondaires", async () => {
     await mount()
-    expect(host.querySelector("h1")?.textContent).toBe(BRAND_NAME)
+    expect(host.querySelector("h1")?.textContent).toBe("Créez des liens. Faites grandir votre réseau.")
     expect(host.querySelector("h2")?.textContent).toBe("Connexion")
     expect(host.querySelector('input[type="email"]')?.getAttribute("aria-label")).toBe("Adresse e-mail")
     expect(host.querySelector('input[type="password"]')).toBeNull()
     const buttons = Array.from(host.querySelectorAll("button"))
     expect(buttons[0]?.textContent).toContain("Continuer avec mon identité IDN")
     expect(buttons.some((button) => button.textContent?.includes("Recevoir un code"))).toBe(true)
-    const signup = host.querySelector(`a[href="${routes.signIn("sign-up")}"]`)
+    const signup = host.querySelector(`main a[href="${routes.signIn("sign-up")}"]`)
     expect(signup?.textContent).toBe("Créer un compte")
-    expect(host.querySelector(`a[href="${routes.discover()}"]`)?.textContent).toBe("Découvrir les publications publiques")
-    expect(host.querySelector(`h1 a[href="${routes.home()}"]`)?.textContent).toBe(BRAND_NAME)
+    expect(host.querySelector(`main a[href="${routes.discover()}"]`)?.textContent).toBe("Découvrir les publications publiques")
+    expect(host.querySelector(`header nav a[href="${routes.discover()}"]`)?.textContent).toBe("Découvrir")
+    expect(host.querySelector(`header a[href="${routes.home()}"][translate="no"]`)?.textContent).toBe(BRAND_NAME)
     expect(host.querySelector(`footer a[href="${routes.about()}"]`)?.textContent).toBe("À propos")
     expect(host.querySelector(`footer a[href="${routes.legal()}"]`)).not.toBeNull()
     expect(host.querySelector(`footer a[href="${routes.privacy()}"]`)).not.toBeNull()
@@ -113,8 +114,9 @@ describe("accueil ANTSIA — accès réel", () => {
     await mount()
     await act(async () => host.querySelector<HTMLButtonElement>('button[lang="en"]')!.click())
     expect(document.documentElement.lang).toBe("en")
+    expect(host.querySelector("h1")?.textContent).toBe("Make connections. Grow your network.")
     expect(host.querySelector("h2")?.textContent).toBe("Log in")
-    expect(host.querySelector(`a[href="${routes.signIn("sign-up")}"]`)?.textContent).toBe("Create an account")
+    expect(host.querySelector(`main a[href="${routes.signIn("sign-up")}"]`)?.textContent).toBe("Create an account")
   })
 
   it.each([["member", routes.feed()], ["welcome", routes.welcome()], ["restricted", routes.personalControls()]])("redirige une session %s sans montrer de formulaire", async (status, destination) => {
@@ -134,10 +136,10 @@ describe("accueil ANTSIA — accès réel", () => {
 
   it("l'inscription garde IDN et OTP puis revient vers la même connexion", async () => {
     await mount(<AccessHomeScreen intent="sign-up" />)
-    expect(host.querySelector("h1")?.textContent).toBe(BRAND_NAME)
+    expect(host.querySelector("h1")?.textContent).toBe("Créez des liens. Faites grandir votre réseau.")
     expect(host.querySelector("h2")?.textContent).toBe("Créer votre compte ANTSIA")
     expect(host.querySelector('input[type="email"]')).not.toBeNull()
-    expect(host.querySelector(`a[href="${routes.signIn()}"]`)?.textContent).toContain("J’ai déjà un compte")
+    expect(host.querySelector(`main a[href="${routes.signIn()}"]`)?.textContent).toContain("J’ai déjà un compte")
     expect(mocks.authClient.signIn.oauth2).not.toHaveBeenCalled()
   })
 
@@ -153,9 +155,9 @@ describe("accueil ANTSIA — accès réel", () => {
     expect(host.querySelector('input[autocomplete="one-time-code"]')).not.toBeNull()
 
     await rerender(<AccessHomeScreen intent="sign-in" />)
-    expect(host.querySelector("h1")?.textContent).toBe(BRAND_NAME)
+    expect(host.querySelector("h1")?.textContent).toBe("Créez des liens. Faites grandir votre réseau.")
     expect(host.querySelector("h2")?.textContent).toBe("Connexion")
-    expect(host.querySelector(`a[href="${routes.signIn("sign-up")}"]`)?.textContent).toBe("Créer un compte")
+    expect(host.querySelector(`main a[href="${routes.signIn("sign-up")}"]`)?.textContent).toBe("Créer un compte")
     expect(host.querySelector('input[autocomplete="one-time-code"]')).toBeNull()
     expect(host.querySelector<HTMLInputElement>('input[type="email"]')?.value).toBe("")
     expect(mocks.authClient.emailOtp.sendVerificationOtp).toHaveBeenCalledTimes(1)

@@ -87,6 +87,8 @@
   "welcome": {
     "title": "Welcome to {{brand}}",
     "lead": "Choose how members will see you. Nothing is published without you.",
+    "previewTitle": "Profile preview",
+    "previewLead": "Check your display name and handle before joining the network.",
     "displayNameLabel": "Display name",
     "displayNameHint": "The name members will see. It is not copied from any registry.",
     "handleLabel": "Public handle",

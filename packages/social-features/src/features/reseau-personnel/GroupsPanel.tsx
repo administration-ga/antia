@@ -81,15 +81,18 @@ function newIdempotencyKey(): string {
 const SECTION_TITLE_STYLE = {
   margin: 0,
   color: "var(--ink-900)",
-  fontSize: 14,
+  fontFamily: "var(--esp-heading-font-family, inherit)",
+  fontSize: "var(--esp-section-title-size, 14px)",
+  lineHeight: "var(--esp-section-title-leading, inherit)",
+  letterSpacing: "var(--esp-section-title-tracking, normal)",
   fontWeight: 700,
 } as const
 
 const MUTED_TEXT_STYLE = {
   margin: 0,
   color: "var(--ink-600)",
-  fontSize: 13,
-  lineHeight: 1.55,
+  fontSize: "var(--esp-content-font-size, 13px)",
+  lineHeight: "var(--esp-content-line-height, 1.55)",
 } as const
 
 function EmptyNote({ text }: { text: string }) {
@@ -415,7 +418,8 @@ function GroupCardRow({
                 cursor: "pointer",
                 color: "var(--ink-900)",
                 font: "inherit",
-                fontSize: 14.5,
+                fontSize: "var(--esp-subsection-title-size, 14.5px)",
+                lineHeight: "var(--esp-subsection-title-leading, inherit)",
                 fontWeight: 700,
                 textAlign: "left",
               }}
@@ -626,7 +630,7 @@ function GroupPage({
       <Card style={RESEAU_CARD_STYLE}>
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
-            <h2 style={{ ...SECTION_TITLE_STYLE, fontSize: 17 }}>{group.name}</h2>
+            <h2 style={{ ...SECTION_TITLE_STYLE, fontSize: "var(--esp-section-title-size, 17px)" }}>{group.name}</h2>
             {roleLabel ? (
               <Badge tone="primary" size="sm">
                 {roleLabel}
@@ -872,7 +876,7 @@ function MembersCard({ groupId, myRole }: { groupId: GroupId; myRole: ThematicGr
   return (
     <Card style={RESEAU_CARD_STYLE}>
       <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-        <h3 style={SECTION_TITLE_STYLE}>{t("groupsPanel.members.title")}</h3>
+        <h3 style={{ ...SECTION_TITLE_STYLE, fontFamily: "inherit", fontSize: "var(--esp-subsection-title-size, 14px)", lineHeight: "var(--esp-subsection-title-leading, inherit)" }}>{t("groupsPanel.members.title")}</h3>
         <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: 8 }}>
           {members.results.map((member) => (
             <li key={member.personId} style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>

@@ -189,7 +189,7 @@ function AlbumsPages({ handle, isSelf, variant, onCreate }: AlbumsSectionProps &
                     </span>
                   )}
                   <span className="as-body">
-                    <span style={{ fontSize: 14, color: "var(--ink-900)", fontWeight: 600 }}>
+                    <span style={{ fontSize: "var(--esp-content-font-size, 14px)", lineHeight: "var(--esp-content-line-height, inherit)", color: "var(--ink-900)", fontWeight: 600 }}>
                       {album.title}
                     </span>
                     <span style={{ fontSize: 12, color: "var(--ink-600)" }}>

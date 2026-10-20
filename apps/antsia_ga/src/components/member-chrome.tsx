@@ -59,10 +59,10 @@ export function MemberTopBar({ onMobile = "visible" }: { onMobile?: "visible" | 
         onMobile === "hidden" && "hidden min-[960px]:block",
       )}
     >
-      <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-2 px-4 py-2 sm:px-5">
+      <div className="mx-auto flex max-w-[1400px] flex-wrap items-center justify-between gap-2 px-4 py-2 sm:px-5">
         {/* La marque comme en tête du téléphone (ADR-0028, ADR-0030) : Familjen Grotesk, son
             point à l'aplat d'identité, l'encre du texte — jamais l'encre d'identité. */}
-        <Link href={routes.feed()} data-brand="" className="inline-flex min-h-11 items-center gap-1.5 rounded-[var(--ui2-button-radius)] px-1 text-[22px] font-bold tracking-[0.06em] text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" style={{ fontFamily: "var(--font-display, inherit)" }}>
+        <Link href={routes.feed()} data-brand="" className="inline-flex min-h-11 items-center gap-1.5 rounded-[var(--ui2-button-radius)] px-1 text-[26px] font-bold tracking-[0.06em] text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" style={{ fontFamily: "var(--font-display, inherit)" }}>
           {BRAND_NAME}
           <span aria-hidden="true" className="inline-block size-[7px] rounded-full bg-[var(--primary-fill)]" />
         </Link>
@@ -158,7 +158,7 @@ function DestinationsMemberPage({ children }: { children: ReactNode }) {
   return (
     <div className="esp-page-motif min-h-dvh bg-background">
       <MemberTopBar />
-      <div className={cn("mx-auto w-full max-w-7xl px-4 sm:px-5", withNavigation && "min-[960px]:grid min-[960px]:grid-cols-[minmax(200px,248px)_minmax(0,1fr)] min-[960px]:gap-6")}>
+      <div className={cn("mx-auto w-full max-w-[1400px] px-3 sm:px-6 min-[960px]:px-5", withNavigation && "min-[960px]:grid min-[960px]:grid-cols-[248px_minmax(0,1fr)] min-[960px]:gap-6")}>
         {withNavigation ? (
           <div className={cn(DESKTOP_ONLY_CLASS, "sticky top-16 max-h-[calc(100dvh-4rem)] self-start overflow-y-auto py-6")}>
             {mobile === false ? (
@@ -172,9 +172,9 @@ function DestinationsMemberPage({ children }: { children: ReactNode }) {
           id="contenu"
           tabIndex={-1}
           className={cn(
-            "min-w-0 py-6 focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring",
+            "min-w-0 py-4 min-[960px]:py-6 focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring",
             // La barre basse est FIXE : le bas de page lui laisse sa place (barre, gouttière, encoche).
-            withNavigation && "max-[959px]:pb-[calc(6rem+env(safe-area-inset-bottom,0px))]",
+            withNavigation && "max-[959px]:pb-[calc(120px+env(safe-area-inset-bottom,0px))]",
           )}
         >
           {children}

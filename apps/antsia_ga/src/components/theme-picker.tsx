@@ -8,7 +8,7 @@ import { useTranslation } from "react-i18next"
 import { useThemeChoice } from "./personal-theme"
 
 /**
- * Préférences > Thème : les six thèmes d'antsia.ga, Gaboma par défaut (ADR-0027).
+ * Préférences > Thème : les sept thèmes d'antsia.ga, Gaboma par défaut (ADR-0027).
  * Chaque option est peinte dans SON thème (`data-charte` sur l'option) : le
  * membre voit le fond, la carte, le texte et les trois couleurs du thème avant
  * de choisir. Le choix est immédiat, sans bouton d'enregistrement : en session, il
@@ -29,14 +29,14 @@ export function ThemePicker() {
     <fieldset className="grid min-w-0 gap-3">
       <legend className="text-sm font-semibold text-foreground">{t("preferences.theme.label")}</legend>
       <p id={hintId} className="-mt-1 text-xs text-muted-foreground">{t(choose ? "preferences.theme.hint" : "preferences.theme.hintDevice")}</p>
-      <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-4">
         {appearance.themes.map((entry) => {
           const checked = appearance.theme === entry.id
           return (
             <label
               key={entry.id}
               data-charte={entry.charte}
-              className={`relative grid min-w-0 cursor-pointer gap-2 rounded-[var(--ui2-card-radius)] border border-[color:var(--esp-surface-border)] p-4 text-card-foreground transition-colors has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring has-[:focus-visible]:ring-offset-2 has-[:focus-visible]:ring-offset-background ${checked ? "bg-[var(--esp-tab-active-bg)]" : "bg-card"}`}
+              className={`relative grid min-w-0 cursor-pointer gap-2 rounded-[var(--ui2-card-radius)] border border-[color:var(--esp-surface-border)] p-4 text-card-foreground shadow-[var(--esp-surface-shadow)] transition-colors has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring has-[:focus-visible]:ring-offset-2 has-[:focus-visible]:ring-offset-background ${checked ? "bg-[var(--esp-tab-active-bg)]" : "bg-card"}`}
             >
               <input
                 type="radio"

@@ -496,7 +496,7 @@ function PostCardContent({ post, now, onTag, onMention, offer }: PostCardProps) 
                 {t(`post.event.${post.event.status}`)}
               </span>
             </div>
-            <h3 className="m-0 text-sm font-semibold text-foreground">{post.event.title}</h3>
+            <h3 className="m-0 text-sm font-semibold text-foreground" style={{ fontSize: "var(--esp-subsection-title-size, 0.875rem)", fontWeight: "var(--esp-heading-font-weight, 600)", lineHeight: "var(--esp-subsection-title-leading, 1.25rem)" }}>{post.event.title}</h3>
             <p className="m-0 text-sm text-foreground">{formatEventRange(post.event.startAt, post.event.endAt, i18n.language, timeZone)}</p>
             <p className="m-0 text-xs text-muted-foreground">{t("post.event.timeZone", { timeZone })}</p>
             {post.event.myParticipation !== null ? (

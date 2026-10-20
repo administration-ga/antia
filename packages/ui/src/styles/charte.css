@@ -672,7 +672,7 @@
   --ui2-card-radius: initial;
   /* Espacement et profondeur des cartes : chaque consommateur garde sa
      facture historique en repli ; les sept chartes ANTSIA partagent 16/12 px
-     et aucune ombre sur les surfaces posées dans la page. */
+     et la profondeur propre au thème sur les surfaces posées dans la page. */
   --esp-card-padding: initial;
   --esp-card-gap: initial;
   --esp-surface-shadow: initial;
@@ -744,6 +744,44 @@
   --esp-header-icon-radius: initial;
   /* Ombre du bouton Créer, qui flotte : elle prend sa couleur. */
   --esp-fab-shadow: initial;
+  /* Maquettes ANTSIA : opt-in, chaque consommateur conserve son repli historique. */
+  --esp-heading-font-weight: initial;
+  --esp-page-title-tracking: initial;
+  --esp-section-title-tracking: initial;
+  --esp-motif-reference-glow: initial;
+  --esp-floating-shadow: initial;
+  --esp-post-shadow: initial;
+  --esp-field-font-size: initial;
+  --esp-field-line-height: initial;
+  --esp-textarea-min-height: initial;
+  --esp-page-title-size: initial;
+  --esp-page-title-leading: initial;
+  --esp-section-title-size: initial;
+  --esp-section-title-leading: initial;
+  --esp-subsection-title-size: initial;
+  --esp-subsection-title-leading: initial;
+  --esp-heading-font-family: initial;
+  --esp-content-font-size: initial;
+  --esp-content-line-height: initial;
+  --esp-profile-avatar-page-radius: initial;
+  --esp-profile-avatar-size: initial;
+  --esp-fab-size: initial;
+  --esp-layout-max-width: initial;
+  --esp-layout-gutter: initial;
+  --esp-layout-gap: initial;
+  --esp-desktop-main-max: initial;
+  --esp-grid-compact-columns: initial;
+  --esp-grid-wide-columns: initial;
+  --esp-mobile-content-padding: initial;
+  --esp-tablet-content-padding: initial;
+  --esp-tablet-content-max: initial;
+  --esp-mobile-dock-inset: initial;
+  --esp-mobile-dock-bottom: initial;
+  --esp-tablet-dock-bottom: initial;
+  --esp-tablet-dock-width: initial;
+  --esp-theme-card-shadow: initial;
+  --esp-motif-grain-ink: initial;
+  --esp-motif-position: initial;
 }
 
 /* Au téléphone et sur les petites tablettes, les commandes d'ui-v2 rejoignent

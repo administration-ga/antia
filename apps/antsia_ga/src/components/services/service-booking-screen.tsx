@@ -73,7 +73,7 @@ function BookingFlow({ handle, offerRef, services }: { handle: string; offerRef:
       else setFailure(result.outcome === "refused" ? "booking.refused" : "common.unavailable")
     })
   })
-  return <div className="grid gap-5">
+  return <div className="antsia-page">
     <Card><div className="grid gap-3">
       <Field id={`${id}-service`} label={t("booking.service")}><select id={`${id}-service`} className={SHOP_SELECT_CLASS} value={serviceRef} onChange={(event) => { setServiceRef(event.target.value); setSlot(null); setClientRequestId(newClientRequestId()) }}>{services.map((item) => <option key={item.serviceRef} value={item.serviceRef}>{t("booking.serviceOption", { label: item.label, duration: serviceDurationMinutes(item.durationMinutes, t) })}</option>)}</select></Field>
       {service?.description ? <p className="text-sm text-muted-foreground">{service.description}</p> : null}
@@ -85,14 +85,14 @@ function BookingFlow({ handle, offerRef, services }: { handle: string; offerRef:
       </ul> : null}
     </div></Card>
     {service ? <Card><ServiceSlotPicker key={service.serviceRef} handle={handle} offerRef={offerRef} serviceRef={service.serviceRef} selected={slot} onPick={pick} /></Card> : null}
-    {service && slot ? <Card><form noValidate className="grid gap-4" onSubmit={submit} aria-busy={action.pending || undefined}>
+    {service && slot ? <Card><form noValidate className="antsia-form-grid" onSubmit={submit} aria-busy={action.pending || undefined}>
       <Field id={`${id}-note`} label={t("booking.note")} hint={t("booking.noteHint", { max: COMMERCE_SERVICE_LIMITS.noteMax })} error={errors.note?.message}><TextArea id={`${id}-note`} aria-invalid={errors.note ? true : undefined} {...form.register("note")} /></Field>
       <fieldset className="grid gap-3 sm:grid-cols-2"><legend className="text-sm font-medium sm:col-span-2">{t("contact.legend")}</legend>
         <Field id={`${id}-first`} label={t("contact.firstName")} error={errors.firstName?.message}><TextInput id={`${id}-first`} autoComplete="given-name" {...form.register("firstName")} /></Field>
         <Field id={`${id}-last`} label={t("contact.lastName")} hint={t("contact.lastNameHint")} error={errors.lastName?.message}><TextInput id={`${id}-last`} autoComplete="family-name" {...form.register("lastName")} /></Field>
         <p className="text-xs text-muted-foreground sm:col-span-2">{t("contact.hint")}</p>
       </fieldset>
-      <label className="flex items-start gap-3 text-sm"><input type="checkbox" className="mt-1 size-4" aria-invalid={errors.consent ? true : undefined} {...form.register("consent")} /><span>{t("consents.booking")}</span></label>
+      <label className="flex min-h-11 items-start gap-3 text-sm"><input type="checkbox" className="mt-1 size-4" aria-invalid={errors.consent ? true : undefined} {...form.register("consent")} /><span>{t("consents.booking")}</span></label>
       {errors.consent?.message ? <p role="alert" className="text-sm text-destructive">{errors.consent.message}</p> : null}
       {/* Réserver : couleur du commerce (ADR-0027). */}
       <Button type="submit" variant="commerce" pending={action.pending}>{t("booking.submit")}</Button>

@@ -115,9 +115,9 @@ type Signatory = FunctionReturnType<typeof api.modules.pages.signatories.listPag
 /** Combien de mes revendications la fiche relit pour trouver celle de CETTE page (une personne en dépose peu). */
 const MY_CLAIMS_SCAN = 50
 
-const SECTION_TITLE_STYLE = { margin: 0, fontSize: 16, color: "var(--ink-900)" } as const
-const SUBSECTION_TITLE_STYLE = { margin: 0, fontSize: 14, fontWeight: 700, color: "var(--ink-900)" } as const
-const MUTED_TEXT_STYLE = { margin: 0, color: "var(--ink-600)", fontSize: 13, lineHeight: 1.55 } as const
+const SECTION_TITLE_STYLE = { margin: 0, fontFamily: "var(--esp-heading-font-family, inherit)", fontSize: "var(--esp-section-title-size, 16px)", fontWeight: "var(--esp-heading-font-weight, inherit)", lineHeight: "var(--esp-section-title-leading, inherit)", letterSpacing: "var(--esp-section-title-tracking, normal)", color: "var(--ink-900)" } as const
+const SUBSECTION_TITLE_STYLE = { margin: 0, fontSize: "var(--esp-subsection-title-size, 14px)", lineHeight: "var(--esp-subsection-title-leading, inherit)", fontWeight: 700, color: "var(--ink-900)" } as const
+const MUTED_TEXT_STYLE = { margin: 0, color: "var(--ink-600)", fontSize: "var(--esp-content-font-size, 13px)", lineHeight: "var(--esp-content-line-height, 1.55)" } as const
 const STACK_STYLE = { display: "flex", flexDirection: "column", gap: 12 } as const
 const ACTIONS_STYLE = { display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" } as const
 
@@ -159,7 +159,7 @@ export function ProfilPagePage({ handle }: ProfilPagePageProps) {
       <ProfilFrame>
         <Card style={RESEAU_CARD_STYLE}>
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            <h1 style={{ margin: 0, fontSize: 18, color: "var(--ink-900)" }}>{refusal.title}</h1>
+            <h1 style={{ margin: 0, fontFamily: "var(--esp-heading-font-family, inherit)", fontSize: "var(--esp-page-title-size, 18px)", lineHeight: "var(--esp-page-title-leading, inherit)", letterSpacing: "var(--esp-page-title-tracking, normal)", fontWeight: "var(--esp-heading-font-weight, inherit)", color: "var(--ink-900)" }}>{refusal.title}</h1>
             {/* Une seule phrase, choisie pour ne trancher entre AUCUNE des
                 causes possibles : `getPage` ne distingue pas non plus. */}
             <p style={{ margin: 0, fontSize: 14, color: "var(--ink-600)" }}>{refusal.body}</p>

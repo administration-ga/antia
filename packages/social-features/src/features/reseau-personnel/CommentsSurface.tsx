@@ -278,8 +278,11 @@ function CommentsSurfaceContent({
               style={{
                 margin: 0,
                 color: "var(--ink-900)",
-                fontSize: 17,
-                lineHeight: 1.25,
+                fontFamily: "var(--esp-heading-font-family, inherit)",
+                fontSize: "var(--esp-section-title-size, 17px)",
+                fontWeight: "var(--esp-heading-font-weight, inherit)",
+                lineHeight: "var(--esp-section-title-leading, 1.25)",
+                letterSpacing: "var(--esp-section-title-tracking, normal)",
               }}
             >
               {t("commentsSurface.title")}

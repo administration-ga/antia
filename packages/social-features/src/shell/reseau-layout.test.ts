@@ -182,6 +182,17 @@ function selectorParts(rule: CssRule): string[] {
   return rule.selector.split(",").map((part) => part.trim())
 }
 
+/** Une déclaration doit rester sur son sélecteur ET son palier, pas ailleurs dans la feuille. */
+function ruleBody(rules: readonly CssRule[], selector: string, conditions: readonly string[] = []): string {
+  const matches = rules.filter((rule) =>
+    selectorParts(rule).includes(selector) &&
+    rule.conditions.length === conditions.length &&
+    rule.conditions.every((condition, index) => condition === conditions[index])
+  )
+  expect(matches).toHaveLength(1)
+  return matches[0]?.body ?? ""
+}
+
 describe("la grille implémente les paliers du module", () => {
   const css = cssOf(RESEAU_DESKTOP_CSS)
   const rules = cssRules(css)
@@ -191,18 +202,65 @@ describe("la grille implémente les paliers du module", () => {
     expect(css).toContain(
       `minmax(${FEED_COLUMN_MIN}px, ${FEED_COLUMN_MAX}px) ${RAIL_END_WIDTH}px`
     )
-    expect(css).toContain(`max-width: ${GRID_MAX_WIDTH}px`)
+    expect(ruleBody(rules, ".rp-grid")).toContain(
+      `max-width: var(--esp-layout-max-width, ${GRID_MAX_WIDTH}px)`
+    )
+    expect(ruleBody(rules, ".rp-main-col")).toContain(
+      `max-width: var(--esp-desktop-main-max, ${FEED_COLUMN_MAX}px)`
+    )
     expect(css).toContain(`min-width: ${COLLAPSED_NAV_MIN}px`)
     expect(css).toContain(`min-width: ${COLLAPSED_THREE_COLUMN_MIN}px`)
-    expect(css).toContain(
-      `grid-template-columns: minmax(${RESEAU_NAV_RAIL_MIN_WIDTH}px, ${RESEAU_NAV_RAIL_WIDTH}px) minmax(${COLLAPSED_FEED_MIN}px, ${FEED_COLUMN_MAX}px) minmax(${COLLAPSED_RAIL_END_MIN}px, ${RAIL_END_WIDTH}px)`
+    const compact = ruleBody(rules, ".rp-grid", [`@container rp-page (min-width: ${COLLAPSED_NAV_MIN}px)`])
+    expect(compact).toContain(
+      `grid-template-columns: var(--esp-grid-compact-columns, minmax(${RESEAU_NAV_RAIL_MIN_WIDTH}px, ${RESEAU_NAV_RAIL_WIDTH}px) minmax(${COLLAPSED_FEED_MIN}px, ${FEED_COLUMN_MAX}px))`
     )
-    expect(css).toContain(`max-width: ${GRID_WITH_NAV_MAX_WIDTH}px`)
+    expect(compact).toContain(
+      `max-width: var(--esp-layout-max-width, ${RESEAU_NAV_RAIL_WIDTH + RESEAU_COLUMN_GAP + FEED_COLUMN_MAX}px)`
+    )
+    const wide = ruleBody(rules, ".rp-grid", [`@container rp-page (min-width: ${COLLAPSED_THREE_COLUMN_MIN}px)`])
+    expect(wide).toContain(
+      `grid-template-columns: var(--esp-grid-wide-columns, minmax(${RESEAU_NAV_RAIL_MIN_WIDTH}px, ${RESEAU_NAV_RAIL_WIDTH}px) minmax(${COLLAPSED_FEED_MIN}px, ${FEED_COLUMN_MAX}px) minmax(${COLLAPSED_RAIL_END_MIN}px, ${RAIL_END_WIDTH}px))`
+    )
+    expect(wide).toContain(`max-width: var(--esp-layout-max-width, ${GRID_WITH_NAV_MAX_WIDTH}px)`)
   })
 
   it("emploie la même gouttière latérale et aligne les cartes en tête", () => {
-    expect(css).toContain(".rp-scope { padding: 14px 16px 0; }")
+    expect(ruleBody(rules, ".rp-scope", [`@media (min-width: ${RESEAU_MOBILE_MAX_PX + 1}px)`])).toContain(
+      "padding: 14px var(--esp-layout-gutter, 16px) 0;"
+    )
+    expect(ruleBody(rules, ".rp-scope")).toContain(
+      `--rp-stack-gap: var(--esp-layout-gap, ${RESEAU_COLUMN_GAP}px)`
+    )
     expect(css).toContain("padding-top: 0;")
+  })
+
+  it("garde une hauteur définie et les scrollers de chaque colonne aux mêmes paliers", () => {
+    expect(codeOf("./ReseauAgentPage.tsx")).toMatch(
+      /<div\s+className="rp-scope"\s+style=\{\{\s*height:\s*"100%"/
+    )
+    expect(ruleBody(rules, ".rp-scope")).toContain("overflow: hidden")
+    const singleColumn = ruleBody(rules, ".rp-grid")
+    expect(singleColumn).toContain("flex: 1")
+    expect(singleColumn).toContain("min-height: 0")
+    expect(singleColumn).toContain("overflow-y: auto")
+
+    const twoColumns = [`@container rp-page (min-width: ${TWO_COLUMN_MIN}px)`]
+    const grid = ruleBody(rules, ".rp-grid", twoColumns)
+    expect(grid).toContain("height: 100%")
+    expect(grid).toContain("overflow: hidden")
+    for (const selector of [".rp-main-col", ".rp-grid .rp-rail-end"]) {
+      const column = ruleBody(rules, selector, twoColumns)
+      expect(column).toContain("overflow-y: auto")
+      expect(column).toContain("min-height: 0")
+      expect(column).toContain("padding-bottom: 48px")
+    }
+    const rightRail = ruleBody(rules, ".rp-grid .rp-rail-end", twoColumns)
+    expect(rightRail).toContain("max-height: 100%")
+    expect(rightRail).toContain("overflow-x: hidden")
+    const leftRail = ruleBody(rules, ".rp-rail-start", [`@container rp-page (min-width: ${COLLAPSED_NAV_MIN}px)`])
+    expect(leftRail).toContain("overflow-y: auto")
+    expect(leftRail).toContain("min-height: 0")
+    expect(leftRail).toContain("padding-bottom: 48px")
   })
 
   it("ne masque le rappel du profil à AUCUN palier", () => {
@@ -378,13 +436,19 @@ describe("une largeur de lecture par TÂCHE (R-15)", () => {
 describe("les deux coquilles implémentent les paliers de R-15", () => {
   const desktop = cssOf(RESEAU_DESKTOP_CSS)
   const mobile = cssOf(RESEAU_MOBILE_CSS)
+  const desktopRules = cssRules(desktop)
+  const mobileRules = cssRules(mobile)
 
   it("le bureau élargit les collections par le volet ouvert", () => {
     expect(desktop).toContain('.rp-main-col[data-volet="relations"]')
     expect(desktop).toContain('.rp-main-col[data-volet="pages"]')
     expect(desktop).toContain('.rp-main-col[data-volet="groupes"]')
     expect(desktop).toContain('.rp-main-col[data-volet="enregistrements"]')
-    expect(desktop).toContain(`max-width: ${COLLECTION_COLUMN_MAX}px`)
+    for (const volet of ["relations", "pages", "groupes", "enregistrements"]) {
+      expect(ruleBody(desktopRules, `.rp-main-col[data-volet="${volet}"]`)).toContain(
+        `max-width: var(--esp-layout-max-width, ${COLLECTION_COLUMN_MAX}px)`
+      )
+    }
     // Le fil, lui, garde sa largeur d'article : aucune règle ne le relâche.
     expect(desktop).not.toContain('.rp-main-col[data-volet="fil"] {')
   })
@@ -406,10 +470,47 @@ describe("les deux coquilles implémentent les paliers de R-15", () => {
     expect(mobile).toContain(
       `@container rm-scroll (min-width: ${TABLET_WIDE_MIN}px)`
     )
-    expect(mobile).toContain(`max-width: ${TABLET_COLUMN_MAX}px`)
-    expect(mobile).toContain(`max-width: ${TABLET_WIDE_COLUMN_MAX}px`)
+    expect(ruleBody(mobileRules, ".rm-column", [`@container rm-scroll (min-width: ${TABLET_COLUMN_MIN}px)`])).toContain(
+      `max-width: var(--esp-tablet-content-max, ${TABLET_COLUMN_MAX}px)`
+    )
+    expect(ruleBody(mobileRules, ".rm-column", [`@container rm-scroll (min-width: ${TABLET_WIDE_MIN}px)`])).toContain(
+      `max-width: var(--esp-tablet-content-max, ${TABLET_WIDE_COLUMN_MAX}px)`
+    )
     expect(mobile).toContain(".rm-column:has([data-collection])")
     expect(mobile).toContain("max-width: none")
+  })
+
+  it("conserve les replis de rembourrage et laisse le document défiler au téléphone", () => {
+    expect(ruleBody(mobileRules, ".rm-scroll")).toContain(
+      "padding: var(--esp-mobile-content-padding, 10px 12px 12px)"
+    )
+    expect(ruleBody(mobileRules, ".rm-scroll", [
+      `@media (min-width: ${TABLET_COLUMN_MIN}px) and (max-width: ${RESEAU_MOBILE_MAX_PX}px)`,
+    ])).toContain("padding: var(--esp-tablet-content-padding, 10px 12px 12px)")
+    expect(ruleBody(mobileRules, ".rm-scroll")).toContain("position: relative")
+    for (const selector of [".rm-shell", ".rm-scroll"]) {
+      const bodies = mobileRules.filter((rule) => selectorParts(rule).includes(selector)).map((rule) => rule.body)
+      expect(ruleBody(mobileRules, selector)).toContain("min-height: 0")
+      for (const body of bodies) {
+        expect(body).not.toMatch(/(?:^|;)\s*height\s*:/)
+        expect(body).not.toMatch(/overflow(?:-y)?\s*:\s*(?:auto|scroll|hidden)/)
+      }
+    }
+  })
+
+  it("laisse les jetons de mise en page inactifs pour les deux chartes DIASPORALE", () => {
+    const base = cssOf(readFileSync(new URL("../../../ui/src/styles/charte.css", import.meta.url), "utf8"))
+    const diasporaThemes = ["diasporale.css", "diasporale-gaboma.css"].map((file) =>
+      cssOf(readFileSync(new URL(`../../../ui/src/themes/${file}`, import.meta.url), "utf8"))
+    )
+    for (const token of [
+      "--esp-layout-max-width", "--esp-layout-gutter", "--esp-layout-gap", "--esp-desktop-main-max",
+      "--esp-grid-compact-columns", "--esp-grid-wide-columns", "--esp-mobile-content-padding",
+      "--esp-tablet-content-padding", "--esp-tablet-content-max",
+    ]) {
+      expect(base).toContain(`${token}: initial;`)
+      for (const theme of diasporaThemes) expect(theme).not.toMatch(new RegExp(`${token}\\s*:`))
+    }
   })
 
   it("les trois collections se DÉSIGNENT, sinon la relâche ne trouve personne", () => {

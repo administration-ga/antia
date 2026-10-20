@@ -57,7 +57,7 @@ export function ServiceSlotPicker({ handle, offerRef, serviceRef, selected, onPi
   })
   const ready = result?.outcome === "ready" ? result : null
   return <section aria-labelledby={`${id}-title`} className="grid gap-4">
-    <h3 id={`${id}-title`} className="text-base font-semibold">{t("slots.title")}</h3>
+    <h3 id={`${id}-title`} className="font-display text-base font-bold leading-snug">{t("slots.title")}</h3>
     {zones.length > 1 ? <fieldset className="grid gap-2"><legend className="text-sm font-medium">{t("slots.zone")}</legend>
       {zones.map((candidate) => <label key={candidate} className="flex min-h-11 items-center gap-3 text-sm"><input type="radio" name={`${id}-zone`} className="size-4" checked={zone === candidate} onChange={() => setZone(candidate)} />{serviceZoneName(fromAt, candidate, locale)}</label>)}
     </fieldset> : <p className="text-sm text-muted-foreground">{t("slots.zoneOnly", { zone: serviceZoneName(fromAt, zone, locale) })}</p>}
