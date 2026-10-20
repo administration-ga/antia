@@ -38,12 +38,12 @@ function client() {
   }
 }
 
-async function mount(locale: "fr" | "en" = "fr") {
+async function mount(locale: "fr" | "en" = "fr", shared = false) {
   const i18n = createAppI18n({ locale, appResources, defaultNS: "antsia" })
   container = document.createElement("div")
   document.body.append(container)
   root = createRoot(container)
-  await act(async () => root!.render(<I18nextProvider i18n={i18n}><DemoAccountsPanel authClient={client() as never} /></I18nextProvider>))
+  await act(async () => root!.render(<I18nextProvider i18n={i18n}><DemoAccountsPanel authClient={client() as never} shared={shared} /></I18nextProvider>))
 }
 
 const buttons = () => [...container.querySelectorAll<HTMLButtonElement>("button")]
@@ -71,6 +71,15 @@ describe("DemoAccountsPanel", () => {
     state.catalogue = []
     await mount()
     expect(container.querySelector("section")).toBeNull()
+  })
+
+  it("sur le site de démonstration, dit que les comptes et contenus sont fictifs et partagés", async () => {
+    await mount("fr", true)
+    expect(container.querySelector("section p")?.textContent).toMatch(/^Site de démonstration : comptes et contenus fictifs, partagés par tous les visiteurs\./)
+    await act(async () => root?.unmount())
+    container.remove()
+    await mount("fr")
+    expect(container.querySelector("section p")?.textContent).toMatch(/^Développement local seulement/)
   })
 
   it("présente chaque acteur avec son nom et son rôle", async () => {

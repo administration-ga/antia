@@ -79,8 +79,8 @@ export function SignInCard({ compact = false, intent = "sign-in", signOutIncompl
         </Link>
         {!signUp ? <p className="mt-3 text-xs leading-relaxed text-muted-foreground">{t("access.accountPromise")}</p> : null}
       </div>
-      {/* Développement local seulement : le catalogue est vide ailleurs. */}
-      {configuration?.localCodes ? <DemoAccountsPanel authClient={entryClient} /> : null}
+      {/* Développement local, ou déploiement de démonstration déclaré : le serveur en décide, le catalogue est vide ailleurs. */}
+      {configuration?.localCodes || configuration?.demoAccounts ? <DemoAccountsPanel authClient={entryClient} shared={!configuration.localCodes} /> : null}
     </div>
   )
 }

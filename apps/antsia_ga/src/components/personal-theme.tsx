@@ -13,7 +13,7 @@ import { createThemeAccountSync, type ThemeAccountSync } from "@/lib/theme-accou
 
 /**
  * Choisir un thème EN SESSION : appliqué tout de suite, enregistré sur le compte ; `null`
- * hors session. Le contexte vit dans le moteur (ADR-0029) : le sélecteur du rail
+ * hors session. Le contexte vit dans le moteur (ADR-0030) : le sélecteur du rail
  * (`AppearanceControl`) s'en sert comme Préférences > Thème.
  */
 export { useThemeChoice } from "@antsia/social-features/shell/appearance"

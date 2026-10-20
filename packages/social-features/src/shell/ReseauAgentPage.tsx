@@ -789,7 +789,7 @@ function ReseauAgentPageInner() {
                           placeholder={t("reseauAgentPage.searchPlaceholder")}
                           aria-label={t("reseauAgentPage.searchLabel")}
                           style={{
-                            // Système épuré (ADR-0027, ADR-0029) : l'angle des champs
+                            // Système épuré (ADR-0027, ADR-0030) : l'angle des champs
                             // (14 px) et le contour de contrôle à 3:1 (`--input`,
                             // gardé par décision du propriétaire) ; ailleurs, la
                             // pastille d'origine.
@@ -844,7 +844,7 @@ function ReseauAgentPageInner() {
                         value={scope}
                         onChange={(event) => goToScope(parseFeedScope(event.target.value))}
                         style={{
-                          // Un filtre du fil est une PUCE des chartes (ADR-0029) :
+                          // Un filtre du fil est une PUCE des chartes (ADR-0030) :
                           // angle des puces, gris du creux, aucun filet dans les
                           // thèmes ANTSIA ; la pastille d'origine en repli.
                           border: "1px solid var(--esp-chip-border, var(--ink-300))",

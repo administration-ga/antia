@@ -47,7 +47,7 @@ describe("configuration des portes PA4", () => {
       BETTER_AUTH_SECRET: "fictional-session-secret-which-is-not-returned",
     })
     expect(config).toMatchObject({ idn: true, emailOtp: true, smsOtp: true, localCodes: false })
-    expect(Object.keys(config).sort()).toEqual(["applications", "emailOtp", "idn", "localCodes", "smsOtp", "trustedOrigins"])
+    expect(Object.keys(config).sort()).toEqual(["applications", "demoAccounts", "emailOtp", "idn", "localCodes", "smsOtp", "trustedOrigins"])
     const serialized = JSON.stringify(config)
     for (const secret of [idnEnv.IDN_CLIENT_SECRET, "fictional-mail-key", "fictional-sms-key", "fictional-session-secret-which-is-not-returned"]) expect(serialized).not.toContain(secret)
     expect(serialized).not.toContain("https://sms.example.test/send")
@@ -56,6 +56,15 @@ describe("configuration des portes PA4", () => {
 
   it("des portes non configurées restent annoncées fermées hors développement local", () => {
     expect(authenticationConfiguration({})).toMatchObject({ idn: false, emailOtp: false, smsOtp: false, localCodes: false })
+  })
+
+  it("la démonstration déclarée annonce ses comptes et le code e-mail, sans codes locaux ni ports locaux", () => {
+    const demo = { CONVEX_CLOUD_URL: "https://demo-antsia-123.convex.cloud", ANTSIA_DEMO_DEPLOYMENT: "demo-antsia-123", ANTSIA_DEV_TOOLS: "true" }
+    expect(authenticationConfiguration(demo)).toMatchObject({ demoAccounts: true, emailOtp: true, smsOtp: false, localCodes: false })
+    expect(trustedOrigins(demo).some((origin) => origin.includes("localhost") || origin.includes("127.0.0.1"))).toBe(false)
+    const copied = { ...demo, CONVEX_CLOUD_URL: "https://production-antsia-456.convex.cloud" }
+    expect(authenticationConfiguration(copied)).toMatchObject({ demoAccounts: false, emailOtp: false, localCodes: false })
+    expect(authenticationConfiguration({})).toMatchObject({ demoAccounts: false })
   })
 
   it("les codes et les ports locaux exigent ensemble le backend local et la variable explicite", () => {

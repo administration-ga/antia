@@ -75,7 +75,7 @@ describe("AppearanceControl", () => {
     expect(screen.getAllByRole("combobox")).toHaveLength(1)
   })
 
-  it("propose le thème sous son nom et le pose sur l'appareil hors session (ADR-0029)", () => {
+  it("propose le thème sous son nom et le pose sur l'appareil hors session (ADR-0030)", () => {
     render(themed())
     const select = screen.getByRole("combobox", { name: "Thème" })
     expect(within(select).getAllByRole("option").map((option) => option.textContent)).toEqual(["Gaboma", "Soleil"])

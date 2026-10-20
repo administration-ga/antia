@@ -56,7 +56,7 @@ describe("MemberTopBar — la barre du haut sous les deux navigations", () => {
     expect(html).toContain("data-bell")
     expect(html).toContain("data-identity")
     expect(html).toContain("nav.signOut")
-    // La marque des chartes (ADR-0029) : la police d'affichage et son point à l'aplat d'identité.
+    // La marque des chartes (ADR-0030) : la police d'affichage et son point à l'aplat d'identité.
     expect(html).toContain('data-brand=""')
     expect(html).toContain("var(--font-display, inherit)")
     expect(html).toContain("bg-[var(--primary-fill)]")

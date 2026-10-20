@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/ui-v2/src/components/theme-toggle.tsx @ 25398f565 — adaptations : sélecteur natif nommé plutôt que bascule à deux états ; retour système toujours disponible, état commun du provider, phrases par i18n et jetons du moteur, cible 44 px et focus visible ; ADR-0029 : un second sélecteur, le THÈME, quand l'application nomme ses thèmes (`themeName`) — enregistré sur le compte en session (`useThemeChoice`), sur l'appareil sinon ; angle des champs du système épuré (`--esp-field-radius`), angle d'origine en repli.
+// Dupliqué de socle/packages/ui-v2/src/components/theme-toggle.tsx @ 25398f565 — adaptations : sélecteur natif nommé plutôt que bascule à deux états ; retour système toujours disponible, état commun du provider, phrases par i18n et jetons du moteur, cible 44 px et focus visible ; ADR-0030 : un second sélecteur, le THÈME, quand l'application nomme ses thèmes (`themeName`) — enregistré sur le compte en session (`useThemeChoice`), sur l'appareil sinon ; angle des champs du système épuré (`--esp-field-radius`), angle d'origine en repli.
 "use client"
 
 import { useId } from "react"

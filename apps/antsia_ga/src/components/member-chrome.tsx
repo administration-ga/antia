@@ -60,7 +60,7 @@ export function MemberTopBar({ onMobile = "visible" }: { onMobile?: "visible" | 
       )}
     >
       <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-2 px-4 py-2 sm:px-5">
-        {/* La marque comme en tête du téléphone (ADR-0028, ADR-0029) : Familjen Grotesk, son
+        {/* La marque comme en tête du téléphone (ADR-0028, ADR-0030) : Familjen Grotesk, son
             point à l'aplat d'identité, l'encre du texte — jamais l'encre d'identité. */}
         <Link href={routes.feed()} data-brand="" className="inline-flex min-h-11 items-center gap-1.5 rounded-lg px-1 text-[22px] font-bold tracking-[0.06em] text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" style={{ fontFamily: "var(--font-display, inherit)" }}>
           {BRAND_NAME}

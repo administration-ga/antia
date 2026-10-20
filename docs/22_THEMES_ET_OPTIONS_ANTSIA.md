@@ -9,7 +9,7 @@
 > - Décisions : [ADR-0027](adr/0027-six-themes-trois-couleurs-et-systeme-epure.md) (thèmes, système
 >   épuré, motifs) ; [ADR-0028](adr/0028-ecran-des-chartes-a-la-lettre.md) (composants de l'écran des
 >   chartes : publication, actions, cartes du fil, en-tête du téléphone) ;
->   [ADR-0029](adr/0029-bureau-au-systeme-des-chartes-et-theme-au-rail.md) (chrome du bureau, thème
+>   [ADR-0030](adr/0030-bureau-au-systeme-des-chartes-et-theme-au-rail.md) (chrome du bureau, thème
 >   au rail) ; ADR-0026 (thème du compte, apparence posée avant l'affichage).
 > - Maquettes : artifact privé « Chartes ANTSIA », version 7
 >   (<https://claude.ai/artifact/Arc4fsUDikm3DRHuZNr35u>). Depuis le 19/10/2026 au soir, le code
@@ -143,7 +143,7 @@ Depuis le 19/10/2026 au soir, antsia.ga déclare `postPresentation="charte"` : l
 Le fil du téléphone s'ouvre **en liste** (l'Immersion reste offerte) et la publication passe par le
 bouton « + » de la barre. Retour arrière : `postPresentation="media"` dans `network-shell.tsx`.
 
-## Le bureau au même système (ADR-0029)
+## Le bureau au même système (ADR-0030)
 
 Depuis le 20/10/2026, le chrome du bureau d'antsia.ga reprend le système des chartes, par les
 jetons de l'ADR-0027 et leurs replis d'origine (DIASPORALE et la console inchangées) :

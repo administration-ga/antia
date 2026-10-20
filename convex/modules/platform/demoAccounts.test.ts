@@ -85,6 +85,24 @@ describe("comptes de démonstration — garde de développement", () => {
     expect(await t.query(api.modules.platform.demoAccounts.catalogue, {})).toEqual([])
   })
 
+  it("la démonstration déclarée ouvre le catalogue et l'équipement d'un acteur", async () => {
+    vi.stubEnv("CONVEX_CLOUD_URL", "https://demo-antsia-123.convex.cloud")
+    vi.stubEnv("ANTSIA_DEMO_DEPLOYMENT", "demo-antsia-123")
+    const t = await fixture()
+    expect((await t.query(api.modules.platform.demoAccounts.catalogue, {})).map((entry) => entry.actor)).toEqual([...DEMO_ACTORS])
+    const { as } = await demoActor(t, "membre")
+    expect(await as.mutation(api.modules.platform.demoAccounts.equipMyDemoAccount, { actor: "membre" })).toEqual({ actor: "membre", status: "declaree", role: "member" })
+  })
+
+  it("la déclaration recopiée sur un autre déploiement (la production comprise) n'ouvre rien", async () => {
+    vi.stubEnv("CONVEX_CLOUD_URL", "https://production-antsia-456.convex.cloud")
+    vi.stubEnv("ANTSIA_DEMO_DEPLOYMENT", "demo-antsia-123")
+    const t = await fixture()
+    expect(await t.query(api.modules.platform.demoAccounts.catalogue, {})).toEqual([])
+    const user = await welcomed(t, demoEmailOf("membre"), { handle: "membre.demo", displayName: "Awa MBA" })
+    expect(await code(user.as.mutation(api.modules.platform.demoAccounts.equipMyDemoAccount, { actor: "membre" }))).toBe("policyRefused")
+  })
+
   it("le catalogue nomme chaque acteur en Prénom NOM, sur le domaine réservé", async () => {
     openDevTools()
     const t = await fixture()

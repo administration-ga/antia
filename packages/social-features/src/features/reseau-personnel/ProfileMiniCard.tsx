@@ -234,7 +234,7 @@ const PROFILE_MINI_CARD_CSS = `
           font-size: 13px;
           font-weight: 700;
           color: var(--primary-600);
-          /* Une action en texte des chartes est soulignée (ADR-0029) ; sans trait ailleurs. */
+          /* Une action en texte des chartes est soulignée (ADR-0030) ; sans trait ailleurs. */
           text-decoration: var(--esp-inline-link-decoration, none);
           white-space: nowrap;
         }

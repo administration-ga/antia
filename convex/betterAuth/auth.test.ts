@@ -233,6 +233,64 @@ describe("connexion légère e-mail et SMS réelle dans Better Auth", () => {
   })
 })
 
+describe("déploiement de démonstration déclaré : les comptes réservés seulement", () => {
+  const DEMO_EMAIL = "membre@demo.antsia.test"
+
+  function declareDemo(name = "demo-antsia-123") {
+    vi.stubEnv("CONVEX_CLOUD_URL", "https://demo-antsia-123.convex.cloud")
+    vi.stubEnv("ANTSIA_DEV_TOOLS", undefined)
+    vi.stubEnv("ANTSIA_DEMO_DEPLOYMENT", name)
+  }
+
+  it("le code d'un compte de démonstration se relit et ouvre une vraie session, sans service de courriel", async () => {
+    declareDemo()
+    const t = testConvex({ automaticSessions: false })
+    const code = await issueCode(t, "email", DEMO_EMAIL)
+    const result = await signIn(t, "email", code.code, DEMO_EMAIL)
+    expect(result.status).toBe(200)
+    expect(record(record(result.data).user).email).toBe(DEMO_EMAIL)
+  })
+
+  it("toute autre adresse exige le vrai service de courriel : aucun code lisible", async () => {
+    declareDemo()
+    const t = testConvex({ automaticSessions: false })
+    const refusal = await request(t, "/email-otp/send-verification-otp", { body: { email: EMAIL, type: "sign-in" } })
+    expect(refusal.status).toBe(503)
+    expect(record(refusal.data).code).toBe("otpDeliveryUnavailable")
+    expect(await t.query(api.modules.platform.devTools.latestOtp, { email: EMAIL })).toBeNull()
+    expect(await t.run((ctx) => ctx.db.query("devOtpCodes").take(1))).toEqual([])
+  })
+
+  it("avec le service de courriel, une vraie adresse reçoit son code par courriel et jamais à l'écran", async () => {
+    declareDemo()
+    vi.stubEnv("RESEND_API_KEY", "fictional-resend-test-key")
+    vi.stubEnv("RESEND_FROM_ADDRESS", "ANTSIA <no-reply@example.test>")
+    const send = vi.spyOn(Resend.prototype, "sendEmail").mockResolvedValue("fictional-email-id" as never)
+    const t = testConvex({ automaticSessions: false })
+    const response = await request(t, "/email-otp/send-verification-otp", { body: { email: EMAIL, type: "sign-in" } })
+    expect(response.status).toBe(200)
+    expect(send).toHaveBeenCalledOnce()
+    expect(await t.query(api.modules.platform.devTools.latestOtp, { email: EMAIL })).toBeNull()
+  })
+
+  it("aucun code par SMS ne s'affiche : la porte SMS reste fermée sans relais", async () => {
+    declareDemo()
+    const t = testConvex({ automaticSessions: false })
+    const refusal = await request(t, "/phone-number/send-otp", { body: { phoneNumber: PHONE } })
+    expect(refusal.status).toBe(503)
+    expect(await t.query(api.modules.platform.devTools.latestOtp, { email: PHONE })).toBeNull()
+  })
+
+  it("la déclaration recopiée sur un autre déploiement n'ouvre rien, même pour une adresse réservée", async () => {
+    declareDemo("production-antsia-456")
+    const t = testConvex({ automaticSessions: false })
+    const refusal = await request(t, "/email-otp/send-verification-otp", { body: { email: DEMO_EMAIL, type: "sign-in" } })
+    expect(refusal.status).toBe(503)
+    expect(record(refusal.data).code).toBe("otpDeliveryUnavailable")
+    expect(await t.query(api.modules.platform.devTools.latestOtp, { email: DEMO_EMAIL })).toBeNull()
+  })
+})
+
 describe("langue de la personne et marque du réseau dans le code de connexion", () => {
   const DIASPORALE_ORIGIN = new URL(catalog.applications.diasporale_com.site_url).origin
   const ANTSIA_ORIGIN = new URL(catalog.applications.antsia_ga.site_url).origin

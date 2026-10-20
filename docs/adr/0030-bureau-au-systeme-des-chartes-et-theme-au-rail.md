@@ -1,4 +1,4 @@
-# ADR-0029 : Le bureau d'antsia.ga au système des chartes, et le thème au rail
+# ADR-0030 : Le bureau d'antsia.ga au système des chartes, et le thème au rail
 
 - **Statut** : Proposé — demandé par le propriétaire le 20/10/2026 (« il y a vraiment un
   problème, tu n'arrives pas à implémenter les 7 design et chartes graphiques ») ; « accepté »

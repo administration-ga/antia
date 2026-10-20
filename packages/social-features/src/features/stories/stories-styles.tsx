@@ -237,11 +237,11 @@ const STORIES_CSS = `
          tuile garde une largeur figée : la rangée ne se recompose pas selon
          la longueur des prénoms, tronqués d'une ellipse. */
       .st-tray[data-presentation="rings"] {
-        gap: 12px;
+        gap: 10px;
         padding: 4px 2px 8px;
       }
       .st-tray[data-presentation="rings"] .st-tray-tile {
-        width: 72px;
+        width: 64px;
         text-align: center;
       }
       .st-ring-tile {
@@ -250,41 +250,75 @@ const STORIES_CSS = `
         align-items: center;
         gap: 6px;
       }
+      /* Les mesures de la maquette des chartes (ADR-0028) : un anneau de
+         2,5 px, séparé du portrait par 2,5 px de la couleur de page. */
       .st-ring-tile .st-tray-ring {
-        width: 68px;
-        height: 68px;
-        padding: 3px;
+        width: 60px;
+        height: 60px;
+        padding: 2.5px;
       }
-      /* « Vous » : un disque neutre, sans anneau, et son « + » à l'aplat
-         d'identité, comme le bouton Créer. */
+      .st-ring-tile .st-tray-disc {
+        border-width: 2.5px;
+      }
+      /* « Vous » : mon portrait (ou la silhouette), et son « + » à l'aplat
+         d'identité, comme le bouton Créer. Sans série en ligne, un disque
+         neutre sans anneau ; avec, ma série dans son anneau. */
       .st-ring-self {
         position: relative;
         display: flex;
-        width: 68px;
-        height: 68px;
+        width: 60px;
+        height: 60px;
       }
-      .st-ring-self .st-tray-disc {
+      .st-ring-self > .st-tray-disc {
         border: none;
+      }
+      .st-ring-open {
+        display: flex;
+        width: 100%;
+        height: 100%;
+        padding: 0;
+        border: none;
+        border-radius: 999px;
+        background: transparent;
+        color: inherit;
+        cursor: pointer;
+      }
+      .st-ring-open:focus-visible,
+      .st-ring-plus-button:focus-visible {
+        outline: 2px solid var(--ring);
+        outline-offset: 3px;
       }
       .st-ring-plus {
         position: absolute;
         right: -2px;
         bottom: -2px;
         display: flex;
-        width: 26px;
-        height: 26px;
+        width: 22px;
+        height: 22px;
         align-items: center;
         justify-content: center;
-        border: 3px solid var(--background);
+        border: 2.5px solid var(--background);
         border-radius: 999px;
         background: var(--primary-fill);
         color: var(--primary-fill-on, var(--on-fill));
       }
+      /* Le « + » est un bouton à part entière quand ma série est en ligne :
+         sa zone de toucher déborde son rond de 22 px. */
+      .st-ring-plus-button {
+        padding: 0;
+        cursor: pointer;
+      }
+      .st-ring-plus-button::before {
+        content: "";
+        position: absolute;
+        inset: -9px;
+        border-radius: 999px;
+      }
       .st-ring-name {
-        max-width: 72px;
+        max-width: 64px;
         overflow: hidden;
         font-size: 12px;
-        font-weight: 600;
+        font-weight: 500;
         line-height: 1.25;
         white-space: nowrap;
         text-overflow: ellipsis;

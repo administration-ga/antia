@@ -640,7 +640,7 @@ export const MESSAGERIE_STYLES_CSS = `
           flex: 0 0 auto;
           margin: 8px 8px 0;
           padding: 7px 11px;
-          /* L'angle des champs du système épuré (ADR-0029) ; la pastille d'origine en repli. */
+          /* L'angle des champs du système épuré (ADR-0030) ; la pastille d'origine en repli. */
           border-radius: var(--esp-field-radius, 999px);
           background: var(--ink-100);
           color: var(--ink-600);

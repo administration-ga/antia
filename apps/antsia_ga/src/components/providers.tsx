@@ -74,7 +74,7 @@ export function SessionProviders({ children }: { children: ReactNode }) {
 
 /**
  * L'apparence d'antsia.ga : ses thèmes, ses motifs, et le NOM de chaque thème dans la
- * langue de la personne (ADR-0029) — le rail du moteur propose alors le thème à côté
+ * langue de la personne (ADR-0030) — le rail du moteur propose alors le thème à côté
  * de l'apparence, avec les mêmes noms que Préférences > Thème.
  */
 function AppAppearance({ children }: { children: ReactNode }) {
