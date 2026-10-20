@@ -1,0 +1,27 @@
+{
+  "previousCandidate": "social-responsive-20261021-7cd355519605aaea",
+  "candidate": "social-responsive-20261021-49d2898716c2ea18",
+  "baseline": {
+    "version": "session-coordination-20261021-03548f8c8f01470e",
+    "deploymentId": "dpl_UxMyjdTakahwkCjfRSyy7PFF9gAL",
+    "url": "https://antsia-5383efgvc-okatechs-projects-f0102678.vercel.app",
+    "backend": "diligent-avocet-585"
+  },
+  "changedPublishedFiles": {
+    "apps/antsia_ga/src/components/identity-tools.tsx": "39df4e379a2e8e8fbd17318290ff3f0375e679b18a94e8b6fb730e9a3779f385",
+    "apps/antsia_ga/src/components/session-bridge.tsx": "bd0113427baed29b1c612d362daa7c1e003485724d7f1d528bf234c069e039b6",
+    "apps/antsia_ga/src/components/session-bridge.test.tsx": "d8dd3d08d811a88624f72e7eece59dbbfe02a57b6672511fae65a8b1fc0896d1",
+    "apps/antsia_ga/src/lib/session-bridge-client.ts": "9213c2f9a967a522367ce94e916d407755cd662abefdac9b58a46bef37b18bda",
+    "apps/antsia_ga/src/lib/session-bridge-client.test.ts": "6dd0c08a2dd1e2f63f5d112ccee2ee552404b7b1f72578aa4e7f79cc890f6a7c",
+    "apps/antsia_ga/src/lib/sign-out.ts": "0a85694217ce73962b58a5a16af98424cb90ec20bd28879dc4c326bf5a94510c",
+    "apps/antsia_ga/src/lib/sign-out.test.ts": "047721fec1ff6662bea3c5577034757069d1b99fe421ee6e0f193400a0f09ada"
+  },
+  "backendDelta": [],
+  "currentCheckoutMatches": true,
+  "tests": {
+    "suites": 99,
+    "passed": 756,
+    "log": "test-app-integration-session.log"
+  },
+  "build": "Next 16.2.9 passed, TypeScript included"
+}
