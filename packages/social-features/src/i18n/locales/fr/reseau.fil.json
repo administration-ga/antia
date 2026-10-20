@@ -6,7 +6,14 @@
       "scheduled": "Évènement prévu",
       "cancelled": "Évènement annulé",
       "timeZone": "Heures affichées dans votre fuseau : {{timeZone}}",
-      "participation": "Votre réponse enregistrée : {{response}}"
+      "participation": "Votre réponse enregistrée : {{response}}",
+      "participate": "Participer",
+      "participateLabel": "Participer : {{title}}",
+      "later": "Plus tard",
+      "laterLabel": "Plus tard : {{title}}",
+      "laterNote": "Vous pourrez répondre depuis votre agenda.",
+      "participated": "Vous participez à {{title}}.",
+      "participateFailed": "Votre réponse n'a pas pu être enregistrée."
     }
   },
   "feedPages": {
@@ -221,7 +228,8 @@
       "withdrawn": "La publication a été retirée de la lecture sans compte.",
       "withdrawFailed": "Le retrait de la lecture publique n’a pas pu être enregistré.",
       "availableOnRoot": "Lisible aussi dans {{brand}}."
-    }
+    },
+    "pageKind": "Page"
   },
   "sharePostDialog": {
     "title": "Partager la publication de {{name}}",
@@ -339,5 +347,15 @@
     "back": "Revenir",
     "discard": "Abandonner le brouillon",
     "close": "Fermer"
+  },
+  "feedSuggestion": {
+    "label": "Personne à découvrir : {{name}}",
+    "profileOf": "Profil de {{name}}",
+    "follow": "Suivre",
+    "followLabel": "Suivre {{name}}",
+    "followed": "Vous suivez {{name}}.",
+    "followFailed": "L'abonnement n'a pas pu être enregistré.",
+    "write": "Écrire",
+    "writeLabel": "Écrire à {{name}}"
   }
 }

@@ -15,8 +15,10 @@ export function PublicIdentity({ author, locale }: { author: PublicAuthor; local
   const t = getPublicT(locale)
   const label = author.displayName ?? t("post.withdrawnAuthor")
   const href = author.handle ? author.kind === "page" ? routes.officialPage(author.handle) : routes.publicProfile(author.handle) : null
+  // Les chartes (ADR-0028) : une personne est ronde, une page a son carré arrondi.
+  const shape = author.kind === "page" ? "rounded-[var(--esp-avatar-page-radius,0.75rem)]" : "rounded-full"
   return <div className="flex min-w-0 items-center gap-3">
-    {author.avatarUrl ? <Image unoptimized src={author.avatarUrl} width={44} height={44} alt="" loading="lazy" className="size-11 shrink-0 rounded-xl object-cover" /> : <span aria-hidden="true" className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-muted font-semibold">{author.displayName?.slice(0, 1) ?? "·"}</span>}
+    {author.avatarUrl ? <Image unoptimized src={author.avatarUrl} width={44} height={44} alt="" loading="lazy" className={`size-11 shrink-0 object-cover ${shape}`} /> : <span aria-hidden="true" className={`flex size-11 shrink-0 items-center justify-center bg-muted font-semibold ${shape}`}>{author.displayName?.slice(0, 1) ?? "·"}</span>}
     <div className="min-w-0"><p className="break-words font-semibold">{href ? <Link href={href} prefetch={false} className="rounded-sm hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring">{label}</Link> : label}</p>
       {author.handle ? <p className="break-all text-sm text-muted-foreground">@{author.handle}</p> : null}
       {author.badges.length ? <ul aria-label={t("post.badges")} className="mt-1 flex flex-wrap gap-2 text-xs text-muted-foreground">{author.badges.map((badge) => <li key={badge}>{t(`badges.${badge}`)}</li>)}</ul> : null}
@@ -61,21 +63,25 @@ function SharedPublicPost({ shared, locale }: { shared: PublicSharedPost; locale
   return <blockquote className="flex min-w-0 flex-col gap-4 rounded-xl border border-border p-4"><PublicIdentity author={shared.author} locale={locale} /><p className="border-l-2 border-primary pl-3 text-xs text-muted-foreground">{t("post.origin", { name: shared.origin.name })}</p><PublicMedia media={shared.media} /><PublicCaption body={shared.body} locale={locale} full={shared.media.length === 0} /><Link href={routes.publication(shared.id)} prefetch={false} className="inline-flex min-h-11 items-center rounded-lg text-sm font-medium text-primary hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring">{t("post.original")}</Link></blockquote>
 }
 
-/** Projection SSR allowlistée ; seul le lecteur média est interactif, sans fournisseur membre. */
+/**
+ * Projection SSR allowlistée ; seul le lecteur média est interactif, sans
+ * fournisseur membre. L'ordre des chartes (ADR-0028), comme la carte des
+ * membres : identité, texte (borné par « Lire la suite » quand un média
+ * suit), média posé dans la carte, puis les actions.
+ */
 export function PublicPostCard({ post, locale }: { post: PublicPost; locale: Locale }) {
   const t = getPublicT(locale)
   const textOnly = post.media.length === 0 && post.shared === null
-  return <article data-post-presentation="media" className="flex min-w-0 flex-col gap-4 overflow-hidden rounded-2xl border border-border bg-card p-5 text-card-foreground sm:p-6">
+  return <article data-post-presentation="charte" className="flex min-w-0 flex-col gap-4 overflow-hidden rounded-[var(--rp-surface-radius,1rem)] border border-[var(--esp-surface-border,var(--border))] bg-card p-5 text-card-foreground sm:p-6">
     <div className="flex flex-wrap items-start justify-between gap-4"><PublicIdentity author={post.author} locale={locale} /><Link href={routes.publication(post.id)} prefetch={false} className="inline-flex min-h-11 shrink-0 items-center rounded-lg px-1 py-2 text-xs text-muted-foreground hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring"><time dateTime={new Date(post.publishedAt).toISOString()}>{publicDate(post.publishedAt, locale)}</time></Link></div>
     <p className="border-l-2 border-primary pl-3 text-xs font-medium text-muted-foreground">{t("post.origin", { name: post.origin.name })}</p>
-    {textOnly ? <PublicCaption body={post.body} locale={locale} full /> : null}
+    <PublicCaption body={post.body} locale={locale} full={textOnly} />
     <PublicMedia media={post.media} />
     {post.shared ? <SharedPublicPost shared={post.shared} locale={locale} /> : null}
     <div role="group" aria-label={t("post.actions")} className="flex flex-wrap items-center gap-3 border-t border-border pt-2">
       <Link href={routes.signIn(undefined, post.id)} prefetch={false} className="inline-flex min-h-11 items-center rounded-lg px-2 text-sm font-medium text-primary underline underline-offset-4 focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring">{t("post.participate")}</Link>
       <Link href={routes.publication(post.id)} prefetch={false} className="inline-flex min-h-11 items-center rounded-lg px-2 text-sm font-medium underline underline-offset-4 focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring">{t("post.open")}</Link>
     </div>
-    {!textOnly ? <PublicCaption body={post.body} locale={locale} /> : null}
     {post.hasCommerceOffer ? <PublicOfferPostSlot postId={post.id} locale={locale} /> : null}
     <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border pt-3 text-xs text-muted-foreground">
       <span>{t("post.publicAudience")}</span>

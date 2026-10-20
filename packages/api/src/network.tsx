@@ -103,11 +103,18 @@ export type EngineNavigation = "volets" | "destinations"
  *  · `"media"` : auteur → média → actions → légende → offre facultative, cadre
  *    au ratio réel du média (borné, jamais recadré ni déformé), galerie avec
  *    index et visionneuse, légende bornée avec « Lire la suite ».
+ *  · `"charte"` : l'écran des chartes de la série 3 (ADR-0028), à la lettre —
+ *    auteur (badges en signes), texte, média POSÉ dans la carte (angle de
+ *    16 px, mêmes cadre, galerie et visionneuse que « media »), puis une
+ *    rangée d'icônes : réagir, commenter, partager, enregistrer. Le fil qui
+ *    la porte suit le même écran : carte de suggestion en tête du téléphone
+ *    (Suivre, Écrire), évènement annoncé avec Participer et Plus tard, en-tête
+ *    du téléphone en ronds (recherche, cloche, messages), liste par défaut.
  *
  * Aucune donnée, aucun droit ni aucune garde ne dépend de cette valeur : elle
  * ne choisit que la mise en page des mêmes projections du moteur.
  */
-export type EnginePostPresentation = "classic" | "media"
+export type EnginePostPresentation = "classic" | "media" | "charte"
 
 /**
  * La PRÉSENTATION DU FIL que l'application déclare — capacité sœur de
@@ -194,11 +201,12 @@ export function resolveEngineNavigation(requested: EngineNavigation | undefined,
 }
 
 /**
- * La présentation RETENUE : `"media"` seulement sur demande explicite de
- * l'application. Rien de déclaré ou valeur inconnue : la carte historique.
+ * La présentation RETENUE : `"media"` ou `"charte"` seulement sur demande
+ * explicite de l'application. Rien de déclaré ou valeur inconnue : la carte
+ * historique.
  */
 export function resolveEnginePostPresentation(requested: EnginePostPresentation | undefined): EnginePostPresentation {
-  return requested === "media" ? "media" : "classic"
+  return requested === "media" || requested === "charte" ? requested : "classic"
 }
 
 /**
@@ -233,7 +241,7 @@ export function NetworkProvider(props: {
   liveAvailable?: boolean
   /** Opt-in de la navigation par destinations ; absent = `"volets"` (comportement historique). */
   navigation?: EngineNavigation
-  /** Opt-in de la présentation média des publications ; absent = `"classic"` (comportement historique). */
+  /** Opt-in de la présentation média ou charte des publications ; absent = `"classic"` (comportement historique). */
   postPresentation?: EnginePostPresentation
   /** Opt-in du fil immersif (P04) ; absent = `"list"` (comportement historique). */
   feedPresentation?: EngineFeedPresentation

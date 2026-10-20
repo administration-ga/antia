@@ -6,7 +6,14 @@
       "scheduled": "Scheduled event",
       "cancelled": "Cancelled event",
       "timeZone": "Times shown in your time zone: {{timeZone}}",
-      "participation": "Your recorded response: {{response}}"
+      "participation": "Your recorded response: {{response}}",
+      "participate": "Attend",
+      "participateLabel": "Attend: {{title}}",
+      "later": "Later",
+      "laterLabel": "Later: {{title}}",
+      "laterNote": "You can answer from your agenda.",
+      "participated": "You are attending {{title}}.",
+      "participateFailed": "Your answer could not be saved."
     }
   },
   "feedPages": {
@@ -221,7 +228,8 @@
       "withdrawn": "The post has been withdrawn from reading without an account.",
       "withdrawFailed": "Withdrawal from public reading could not be saved.",
       "availableOnRoot": "Also readable in {{brand}}."
-    }
+    },
+    "pageKind": "Page"
   },
   "sharePostDialog": {
     "title": "Share {{name}}'s post",
@@ -339,5 +347,15 @@
     "back": "Go back",
     "discard": "Discard the draft",
     "close": "Close"
+  },
+  "feedSuggestion": {
+    "label": "Someone to discover: {{name}}",
+    "profileOf": "Profile of {{name}}",
+    "follow": "Follow",
+    "followLabel": "Follow {{name}}",
+    "followed": "You follow {{name}}.",
+    "followFailed": "The follow could not be saved.",
+    "write": "Write",
+    "writeLabel": "Write to {{name}}"
   }
 }

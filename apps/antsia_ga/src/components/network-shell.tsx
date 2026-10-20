@@ -49,10 +49,15 @@ export function useMemberSession(): MemberSession {
  * à l'identique — c'est le retour arrière. La couche de communication, elle,
  * ne bouge pas : toujours montée ICI, une fois, quelle que soit la navigation.
  *
- * `postPresentation="media"` (P03) : antsia.ga choisit la présentation média
- * des publications (auteur → média → actions → légende, ratio réel du média,
- * galerie et visionneuse) partout où le moteur rend une `PostCard`. Retirer
- * cette prop rend la carte historique, à l'identique — c'est le retour arrière.
+ * `postPresentation="charte"` (ADR-0028) : antsia.ga reprend à la lettre
+ * l'écran des chartes de la série 3 — publication (texte, photo posée dans la
+ * carte, rangée d'icônes), carte de suggestion (Suivre, Écrire) en tête du fil
+ * au téléphone, évènement annoncé avec Participer et Plus tard, en-tête du
+ * téléphone en ronds (recherche, cloche, messages) et fil en liste par défaut,
+ * l'Immersion restant offerte. Les médias gardent le ratio réel, la galerie et
+ * la visionneuse de la présentation média (P03). `postPresentation="media"`
+ * rend la présentation P03 ; retirer la prop rend la carte historique, à
+ * l'identique — c'est le retour arrière.
  *
  * `feedPresentation="immersive"` (P04) : antsia.ga propose le fil immersif —
  * une publication par hauteur disponible, par défaut au téléphone, sur demande
@@ -93,7 +98,7 @@ export function NetworkShell({ children }: { children: ReactNode }) {
 
   return (
     <NextRouterAdapter>
-      <NetworkProvider networkId={session.root._id} slug={session.root.slug} personId={session.person._id} charte={appearance?.charte ?? CHARTE} routes={engineRoutes} liveAvailable navigation="destinations" postPresentation="media" feedPresentation="immersive" storiesPresentation="rings" wordmark={BRAND_NAME} PostOfferRenderer={OfferPostSlot}>
+      <NetworkProvider networkId={session.root._id} slug={session.root.slug} personId={session.person._id} charte={appearance?.charte ?? CHARTE} routes={engineRoutes} liveAvailable navigation="destinations" postPresentation="charte" feedPresentation="immersive" storiesPresentation="rings" wordmark={BRAND_NAME} PostOfferRenderer={OfferPostSlot}>
         <MemberSessionContext.Provider value={session}>
           <PostHogProvider configuration={usageConfiguration} consented={!permission.paused && session.person.consentsInForce.includes("usage_analytics")} screen={usageScreenForPath(pathname)} networkSlug={session.root.slug} locale={i18n.resolvedLanguage === "en" ? "en" : "fr"}>
             <CommunicationShell />

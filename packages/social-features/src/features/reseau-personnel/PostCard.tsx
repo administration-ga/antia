@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/PostCard.tsx @ 25398f565 — adaptations : la carte est la PROJECTION du moteur (`PostCardPost` = `FunctionReturnType<typeof api.modules.posts.posts.getPost>`, rendue telle quelle par le fil, la recherche, les murs, les groupes et les pages : `_id`, `isMine`, `author.personId`, `page`, réactions `counts`) au lieu du DTO du socle (`postId`, `authorUserId`, `authorKind`, `signedBy`, `page.orgId`) ; identité d'auteur par `PostIdentityLines` (nom, badges CALCULÉS par le serveur — ni fonction ni administration) et `author-link` (lien, forme de pastille, signature) avec les adresses INJECTÉES (`useRoutes()` : profil d'une personne, `page(handle)` d'une page) ; une publication de PAGE parle sous l'identité de la page (nom, logo, badge de confiance), son auteur n'en est que le signataire ; nom neutre traduit pour un profil non publié ; annonce du direct branchée sur sa projection vivante et la route de conférence injectée ; gestes du moteur avec le réseau courant (`engagement.engagement.toggleReaction`, `posts.posts.{edit, remove, pinOnMyWall}`, `pages.pages.removePagePost` pour une publication de page, `moderation.moderation.{reportPost, reportComment}`) ; l'épinglage personnel n'est pas offert sur une publication de page ; libellés, toasts et noms accessibles par l'i18n (clés `reseau:postCard.*`) ; refus du moteur dit par son code (`postEngineErrorText`) ; partage cité avec la page de l'original quand c'est une page qui parle, ses mots-dièse et mentions suivant les gestionnaires de la carte. ; PA6 : dates de publication et citation dans la préférence du lecteur, origine réseau attribuée sans lien, carte de l’évènement annoncé avec dates/statut/réponse réellement projetés et sans droits inventés ; P03 (étude social-commerce du 18/10/2026) : présentation « media » déclarée par l'application (`useNetwork().postPresentation`) — auteur → média (photo, galerie, vidéo, citation, direct, évènement) → actions (réagir avec choix explicite, commenter, partager et copier le lien, enregistrer) → légende bornée « Lire la suite » → offre liée facultative (`offer`, emplacement typé vide jusqu'au lot P09) ; texte seul à hauteur naturelle ; la présentation historique reste le défaut, à l'identique.
+// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/PostCard.tsx @ 25398f565 — adaptations : la carte est la PROJECTION du moteur (`PostCardPost` = `FunctionReturnType<typeof api.modules.posts.posts.getPost>`, rendue telle quelle par le fil, la recherche, les murs, les groupes et les pages : `_id`, `isMine`, `author.personId`, `page`, réactions `counts`) au lieu du DTO du socle (`postId`, `authorUserId`, `authorKind`, `signedBy`, `page.orgId`) ; identité d'auteur par `PostIdentityLines` (nom, badges CALCULÉS par le serveur — ni fonction ni administration) et `author-link` (lien, forme de pastille, signature) avec les adresses INJECTÉES (`useRoutes()` : profil d'une personne, `page(handle)` d'une page) ; une publication de PAGE parle sous l'identité de la page (nom, logo, badge de confiance), son auteur n'en est que le signataire ; nom neutre traduit pour un profil non publié ; annonce du direct branchée sur sa projection vivante et la route de conférence injectée ; gestes du moteur avec le réseau courant (`engagement.engagement.toggleReaction`, `posts.posts.{edit, remove, pinOnMyWall}`, `pages.pages.removePagePost` pour une publication de page, `moderation.moderation.{reportPost, reportComment}`) ; l'épinglage personnel n'est pas offert sur une publication de page ; libellés, toasts et noms accessibles par l'i18n (clés `reseau:postCard.*`) ; refus du moteur dit par son code (`postEngineErrorText`) ; partage cité avec la page de l'original quand c'est une page qui parle, ses mots-dièse et mentions suivant les gestionnaires de la carte. ; PA6 : dates de publication et citation dans la préférence du lecteur, origine réseau attribuée sans lien, carte de l’évènement annoncé avec dates/statut/réponse réellement projetés et sans droits inventés ; P03 (étude social-commerce du 18/10/2026) : présentation « media » déclarée par l'application (`useNetwork().postPresentation`) — auteur → média (photo, galerie, vidéo, citation, direct, évènement) → actions (réagir avec choix explicite, commenter, partager et copier le lien, enregistrer) → légende bornée « Lire la suite » → offre liée facultative (`offer`, emplacement typé vide jusqu'au lot P09) ; texte seul à hauteur naturelle ; la présentation historique reste le défaut, à l'identique ; ADR-0028 : présentation « charte », l'écran des chartes de la série 3 à la lettre — en-tête (nom, badges en signes : coche Vérifié, Officiel, Agent public ; `@identifiant` ou « Page », date), texte, média POSÉ dans la carte (angle des photos), direct, évènement annoncé (titre et dates en une phrase, Participer à la couleur du commerce et Plus tard en gris quand le lecteur est invité, `events.events.respond` sur l'identifiant de SA ligne), citation, puis une rangée d'icônes avec leurs décomptes (réagir, commenter, partager ; enregistrer à droite).
 "use client"
 
 /**
@@ -26,12 +26,12 @@ import { LEGACY_ROOT_NETWORK_SLUG, ROOT_NETWORK_SLUG } from "@antsia/social-doma
 import { Button, Card, TextArea } from "@antsia/ui"
 import { useMutation } from "convex/react"
 import type { FunctionReturnType } from "convex/server"
-import { Bookmark, BookmarkCheck, GlobeLock, MessageCircle, Share2 } from "lucide-react"
+import { BadgeCheck, Bookmark, BookmarkCheck, Calendar, GlobeLock, MessageCircle, MessageSquare, Send, Share2 } from "lucide-react"
 import { useEffect, useRef, useState, type ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 
-import { PostIdentityLines } from "../../components/identity"
+import { badgeLabelKey, PostIdentityLines, signalBadges } from "../../components/identity"
 import { POST_SURFACE_STYLE } from "../../shell/design-styles"
 import { Avatar } from "./Avatar"
 // Où mène l'auteur, sous quel visage, et ce qu'on a le droit de lui faire :
@@ -44,7 +44,7 @@ import {
   type AuthorKind,
 } from "./author-link"
 import { CommentsSurface } from "./CommentsSurface"
-import { formatEventRange, myResponseLabel } from "./evenements-list"
+import { formatEventRange, isPastEvent, myResponseLabel } from "./evenements-list"
 import { PostCardCaption } from "./PostCardCaption"
 import { PostMedia } from "./PostMedia"
 import { PostOverflowMenu } from "./PostOverflowMenu"
@@ -129,9 +129,10 @@ export function PostCard(props: PostCardProps) {
 function PostCardContent({ post, now, onTag, onMention, offer }: PostCardProps) {
   const { t, i18n } = useTranslation("reseau")
   const { networkId, personId, slug, postPresentation, PostOfferRenderer } = useNetwork()
-  // La présentation que l'application déclare : « media » sur opt-in, sinon
-  // la carte historique (aucune application ne change sans le demander).
-  const presentation = postPresentation === "media" ? "media" : "classic"
+  // La présentation que l'application déclare : « media » ou « charte » sur
+  // opt-in, sinon la carte historique (aucune application ne change sans le
+  // demander).
+  const presentation: EnginePostPresentation = postPresentation === "media" || postPresentation === "charte" ? postPresentation : "classic"
   const routes = useRoutes()
   const timeZone = useViewerTimeZone()
   const [showComments, setShowComments] = useState(false)
@@ -298,10 +299,59 @@ function PostCardContent({ post, now, onTag, onMention, offer }: PostCardProps) 
       : t("postCard.share")
 
   /*
-   * Les MORCEAUX de la carte, partagés par les deux présentations : chacun est
-   * le même élément, seul l'ordre change (historique : corps → médias →
-   * actions ; « media » : médias → actions → légende → offre).
+   * Les MORCEAUX de la carte, partagés par les présentations : chacun est le
+   * même élément, seul l'ordre change (historique : corps → médias →
+   * actions ; « media » : médias → actions → légende → offre ; « charte » :
+   * corps → médias posés → actions → offre).
    */
+  /*
+   * Le menu « … » vit dans l'EN-TÊTE, pas dans la barre d'actions : ce sont
+   * des gestes sur la publication en tant qu'objet (la garder, la faire
+   * disparaître), pas des réponses à son contenu. C'est aussi là que tout
+   * réseau social le pose, et l'habitude compte. Le même dans les trois
+   * présentations.
+   */
+  const overflowMenu = (
+    <PostOverflowMenu
+      postId={post._id}
+      authorPersonId={post.author.personId}
+      authorName={identity.name}
+      authorKind={authorKind}
+      isOwn={isOwn}
+      /* L'épinglage PERSONNEL ne vaut ni pour une publication de
+         groupe (elle s'épingle dans son groupe, par ses modérateurs)
+         ni pour celle d'une page (elle appartient à la page). Le menu
+         retire l'entrée, il ne la grise pas. */
+      canPin={post.audience !== "group" && page === null}
+      bookmarked={post.viewer.bookmarked}
+      notifying={post.viewer.notifying}
+      onRemove={() =>
+        void (page !== null
+          ? removePagePost({ networkId, postId: post._id })
+          : removePost({ networkId, postId: post._id }))
+          .then(() => toast.success(t("postCard.toast.removed")))
+          .catch((error: unknown) =>
+            toast.error(postEngineErrorText(error, "reseau:postCard.toast.removeFailed", t))
+          )
+      }
+      onReport={() => setReportTarget({ kind: "post" })}
+      /* Modifier et Épingler vivent dans ce menu depuis le 2026-08-21
+         (décision utilisateur) : ils occupaient une rangée de boutons
+         texte sous l'en-tête de chaque carte de l'auteur. */
+      onEdit={() => {
+        setEditedBody(post.body)
+        setEditing(true)
+      }}
+      onPin={() =>
+        void pinPost({ networkId, postId: post._id })
+          .then(() => toast.success(t("postCard.toast.pinned")))
+          .catch((error: unknown) =>
+            toast.error(postEngineErrorText(error, "reseau:postCard.toast.pinFailed", t))
+          )
+      }
+    />
+  )
+
   const header = (
         <header style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <Avatar
@@ -388,50 +438,7 @@ function PostCardContent({ post, now, onTag, onMention, offer }: PostCardProps) 
               </span>
             </p>
           </div>
-          {/*
-           * Le menu « … » vit dans l'EN-TÊTE, pas dans la barre d'actions :
-           * ce sont des gestes sur la publication en tant qu'objet (la garder,
-           * la faire disparaître), pas des réponses à son contenu. C'est aussi
-           * là que tout réseau social le pose, et l'habitude compte.
-           */}
-          <PostOverflowMenu
-            postId={post._id}
-            authorPersonId={post.author.personId}
-            authorName={identity.name}
-            authorKind={authorKind}
-            isOwn={isOwn}
-            /* L'épinglage PERSONNEL ne vaut ni pour une publication de
-               groupe (elle s'épingle dans son groupe, par ses modérateurs)
-               ni pour celle d'une page (elle appartient à la page). Le menu
-               retire l'entrée, il ne la grise pas. */
-            canPin={post.audience !== "group" && page === null}
-            bookmarked={post.viewer.bookmarked}
-            notifying={post.viewer.notifying}
-            onRemove={() =>
-              void (page !== null
-                ? removePagePost({ networkId, postId: post._id })
-                : removePost({ networkId, postId: post._id }))
-                .then(() => toast.success(t("postCard.toast.removed")))
-                .catch((error: unknown) =>
-                  toast.error(postEngineErrorText(error, "reseau:postCard.toast.removeFailed", t))
-                )
-            }
-            onReport={() => setReportTarget({ kind: "post" })}
-            /* Modifier et Épingler vivent dans ce menu depuis le 2026-08-21
-               (décision utilisateur) : ils occupaient une rangée de boutons
-               texte sous l'en-tête de chaque carte de l'auteur. */
-            onEdit={() => {
-              setEditedBody(post.body)
-              setEditing(true)
-            }}
-            onPin={() =>
-              void pinPost({ networkId, postId: post._id })
-                .then(() => toast.success(t("postCard.toast.pinned")))
-                .catch((error: unknown) =>
-                  toast.error(postEngineErrorText(error, "reseau:postCard.toast.pinFailed", t))
-                )
-            }
-          />
+          {overflowMenu}
         </header>
   )
 
@@ -609,6 +616,159 @@ function PostCardContent({ post, now, onTag, onMention, offer }: PostCardProps) 
     </>
   )
 
+  if (presentation === "charte") {
+    /*
+     * PRÉSENTATION « CHARTE » (opt-in de l'application, ADR-0028) : l'écran
+     * des chartes de la série 3, à la lettre — auteur, texte, média posé dans
+     * la carte, puis une rangée d'icônes. Le texte reste ENTIER quand il est
+     * seul ; avec un média, il est borné par « Lire la suite » au-dessus de
+     * lui.
+     */
+    const textOnly = post.media.length === 0 && post.share === null && post.event === null && !post.live
+    const body = editing ? editor : post.body.length > 0 ? (
+      textOnly
+        ? <RichText body={post.body} onTag={onTag} onMention={onMention} />
+        : <PostCardCaption body={post.body} onTag={onTag} onMention={onMention} />
+    ) : null
+    const saved = post.viewer.bookmarked
+    return (
+      <Card padded={false} style={POST_SURFACE_STYLE}>
+        <article data-post-presentation="charte" className="rp-charte-post">
+          <header className="rp-charte-head">
+            <Avatar
+              displayName={identity.name}
+              avatarUrl={identity.avatarUrl}
+              size={40}
+              hasIdentity={identity.handle !== null}
+              shape={avatarShapeFor(authorRef)}
+            />
+            <div className="rp-charte-who">
+              <p className="rp-charte-name">
+                {authorLink ? (
+                  <Link href={authorLink} style={{ color: "inherit", textDecoration: "none" }}>
+                    {identity.name}
+                  </Link>
+                ) : (
+                  <span>{identity.name}</span>
+                )}
+                <CharteBadges badges={identity.badges} />
+              </p>
+              <p className="rp-charte-meta">
+                {/* Une page se dit « Page » ; une personne, par son adresse publiée. */}
+                {page !== null ? (
+                  <>
+                    <span>{t("postCard.pageKind")}</span>
+                    <span aria-hidden="true">·</span>
+                  </>
+                ) : identity.handle !== null ? (
+                  <>
+                    <span>@{identity.handle}</span>
+                    <span aria-hidden="true">·</span>
+                  </>
+                ) : null}
+                <time dateTime={new Date(post.publishedAt).toISOString()}>
+                  {formatRelativeDate(post.publishedAt, now, t, timeZone)}
+                </time>
+                {post.origin !== null ? (
+                  <>
+                    <span aria-hidden="true">·</span>
+                    <span>{t("post.origin", { name: post.origin.name })}</span>
+                  </>
+                ) : null}
+                {signature ? (
+                  <>
+                    <span aria-hidden="true">·</span>
+                    <span>{signature}</span>
+                  </>
+                ) : null}
+                <span className="sr-only">
+                  {t("postCard.context", {
+                    audience: audienceLabel(post.audience, t),
+                    reason: feedReasonLabel(post.reason, t),
+                  })}
+                </span>
+              </p>
+            </div>
+            {overflowMenu}
+          </header>
+
+          {body}
+
+          {post.media.length > 0 ? <PostMedia media={post.media} presentation="charte" primary /> : null}
+          {liveBlock}
+          {post.event !== null ? <CharteEventBlock event={post.event} now={now} /> : null}
+          {post.share ? (
+            <SharedPostCard share={post.share} now={now} onTag={onTag} onMention={onMention} presentation="charte" />
+          ) : null}
+
+          {/* La rangée d'icônes des chartes : réagir, commenter, partager ou
+              copier le lien, et enregistrer à droite. Chaque bouton garde son
+              nom accessible, son décompte visible et une cible de 44 px. */}
+          <div role="group" aria-label={t("postCard.actionsLabel")} className="rp-charte-actions">
+            <PostReactionControl
+              reactions={post.reactions}
+              pending={pendingReaction}
+              onReact={handleReaction}
+              choiceButton
+              appearance="charte"
+            />
+            <button
+              type="button"
+              className="rp-charte-act"
+              onClick={() => setShowComments(true)}
+              aria-expanded={showComments}
+              aria-haspopup="dialog"
+              aria-label={commentLabel}
+              title={t("postCard.comment")}
+            >
+              <MessageSquare aria-hidden="true" size={20} strokeWidth={2} />
+              {post.commentCount > 0 ? <span aria-hidden="true">{formatCount(post.commentCount)}</span> : null}
+            </button>
+            {routes.post || canQuote ? (
+              <button
+                type="button"
+                className="rp-charte-act"
+                onClick={() => setSharing(true)}
+                aria-expanded={sharing}
+                aria-haspopup="dialog"
+                aria-label={shareLabel}
+                title={t("postCard.share")}
+              >
+                <Send aria-hidden="true" size={20} strokeWidth={2} />
+                {post.shareCount > 0 ? <span aria-hidden="true">{formatCount(post.shareCount)}</span> : null}
+              </button>
+            ) : null}
+            {/* Enregistrer : bascule lue sur le serveur, forme de l'icône (pleine)
+                ET couleur, jamais la couleur seule. */}
+            <button
+              type="button"
+              className="rp-charte-act rp-charte-act--end"
+              aria-pressed={saved}
+              aria-busy={saving || undefined}
+              aria-label={t(saved ? "postOverflow.bookmark.removeLabel" : "postOverflow.bookmark.addLabel")}
+              title={t(saved ? "postOverflow.bookmark.removeLabel" : "postOverflow.bookmark.addLabel")}
+              disabled={saving}
+              onClick={() => void toggleSaved()}
+            >
+              <Bookmark aria-hidden="true" size={20} strokeWidth={2} fill={saved ? "currentColor" : "none"} />
+            </button>
+          </div>
+
+          {withdrawBlock}
+
+          {offer ? (
+            <section aria-label={offer.label} data-post-offer="">
+              {offer.content}
+            </section>
+          ) : post.hasCommerceOffer && PostOfferRenderer ? <PostOfferRenderer networkId={networkId} postId={post._id} /> : null}
+        </article>
+
+        <style href="rp-charte-post" precedence="default">{CHARTE_POST_CSS}</style>
+        {overlays}
+      </Card>
+    )
+  }
+
   if (presentation === "media") {
     /*
      * PRÉSENTATION « MEDIA » (opt-in de l'application, lot P03) :
@@ -784,6 +944,257 @@ function PostCardContent({ post, now, onTag, onMention, offer }: PostCardProps) 
 
       {overlays}
     </Card>
+  )
+}
+
+/**
+ * La feuille de la présentation « charte » (ADR-0028), hors du JSX : un
+ * littéral enfant de `<style>` passerait pour une chaîne d'interface (cliquet
+ * `no-hardcoded-strings`). Jetons de la charte seulement : 16 px dans la
+ * carte, 12 px entre ses blocs, l'encre atténuée pour la ligne d'appoint et
+ * les décomptes, l'encre des relations pour la coche Vérifié.
+ */
+const CHARTE_POST_CSS = `
+  .rp-charte-post {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 16px;
+    min-width: 0;
+    font-size: 15px;
+  }
+  .rp-charte-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+  }
+  .rp-charte-who {
+    display: grid;
+    gap: 1px;
+    min-width: 0;
+    flex: 1 1 auto;
+  }
+  .rp-charte-name {
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1.3;
+    color: var(--foreground);
+  }
+  .rp-charte-meta {
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px;
+    font-size: 13px;
+    line-height: 1.35;
+    color: var(--muted-foreground);
+  }
+  .rp-charte-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 8px;
+    border-radius: var(--ui2-badge-radius, 6px);
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.25;
+  }
+  .rp-charte-badge[data-badge="official"] {
+    background: var(--foreground);
+    color: var(--card);
+  }
+  .rp-charte-badge[data-badge="public_agent"] {
+    background: var(--role-message-soft, var(--muted));
+    color: var(--role-message-ink, var(--foreground));
+  }
+  .rp-charte-verified {
+    display: inline-flex;
+    color: var(--role-social-ink, var(--primary));
+  }
+  .rp-charte-post .rp-of-trigger { border-radius: 999px; }
+  .rp-charte-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px;
+    margin-inline-start: -7px;
+    margin-inline-end: -7px;
+  }
+  .rp-charte-act {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-width: 44px;
+    min-height: 44px;
+    padding: 0 7px;
+    border: 0;
+    border-radius: 999px;
+    background: transparent;
+    color: var(--muted-foreground);
+    font: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    cursor: pointer;
+  }
+  .rp-charte-act:hover:not(:disabled) { color: var(--foreground); }
+  .rp-charte-act:focus-visible {
+    outline: 3px solid var(--ring);
+    outline-offset: 2px;
+  }
+  .rp-charte-act[aria-pressed="true"] { color: var(--primary); }
+  .rp-charte-act[aria-expanded="true"] { color: var(--foreground); }
+  .rp-charte-act--end { margin-inline-start: auto; }
+  .rp-charte-act:disabled { cursor: progress; }
+  .rp-charte-event {
+    display: grid;
+    gap: 12px;
+    margin: 0;
+  }
+  .rp-charte-event p { margin: 0; }
+  .rp-charte-event-note {
+    font-size: 13px;
+    color: var(--muted-foreground);
+  }
+  .rp-charte-event-cancelled {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--destructive);
+  }
+  .rp-charte-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .rp-charte-row > button { flex: 1 1 0; min-width: max-content; }
+`
+
+/** La géométrie d'un bouton de la charte : pilule de 44 px, sa variante garde sa couleur. */
+const CHARTE_BUTTON_STYLE = {
+  borderRadius: "var(--ui2-button-radius, 999px)",
+  minHeight: 44,
+  padding: "0 18px",
+  fontSize: 14,
+  fontWeight: 600,
+} as const
+
+/**
+ * Les badges CALCULÉS par le serveur, en signes comme dans les chartes :
+ * Vérifié par une coche à l'encre des relations (son nom reste lu), Officiel
+ * et Agent public en étiquettes. « Communauté » seul ne dit rien et ne
+ * s'affiche pas.
+ */
+function CharteBadges({ badges }: { badges: readonly Badge[] }) {
+  const { t } = useTranslation("reseau")
+  return (
+    <>
+      {signalBadges({ badges }).map((badge) =>
+        badge === "verified" ? (
+          <span key={badge} className="rp-charte-verified" title={t(badgeLabelKey(badge))}>
+            <BadgeCheck aria-hidden="true" size={16} strokeWidth={2.2} />
+            <span className="sr-only">{t(badgeLabelKey(badge))}</span>
+          </span>
+        ) : (
+          <span key={badge} className="rp-charte-badge" data-badge={badge}>
+            {t(badgeLabelKey(badge))}
+          </span>
+        ),
+      )}
+    </>
+  )
+}
+
+type PostEvent = NonNullable<PostCardPost["event"]>
+
+/**
+ * L'évènement ANNONCÉ, dans la présentation « charte » : son titre et ses
+ * dates en une phrase, puis, quand le lecteur est invité et que la question a
+ * encore un sens (prévu, pas révolu), « Participer » à la couleur du commerce
+ * et « Plus tard » en gris.
+ *
+ * ⚠️ « Plus tard » ne RÉPOND rien : l'invitation reste en attente dans
+ * l'agenda et la cloche ; seule la question quitte la carte pour cette
+ * lecture. Le serveur reste seul juge de la réponse (`events.respond`, sur
+ * l'identifiant de MA ligne que la carte projette — `null` pour un évènement
+ * de page ou un non-invité, et alors aucun bouton).
+ */
+function CharteEventBlock({ event, now }: { event: PostEvent; now: number }) {
+  const { t, i18n } = useTranslation("reseau")
+  const { networkId } = useNetwork()
+  const timeZone = useViewerTimeZone()
+  const respond = useMutation(api.modules.events.events.respond)
+  const [setAside, setSetAside] = useState(false)
+  const [busy, setBusy] = useState(false)
+  const range = formatEventRange(event.startAt, event.endAt, i18n.language, timeZone)
+  // Un moteur antérieur à l'ADR-0028 ne sert pas encore ce champ : sans identifiant, aucune réponse proposée.
+  const participationId = event.myParticipationId ?? null
+  const answerable =
+    participationId !== null &&
+    event.status !== "cancelled" &&
+    event.myParticipation !== "accepted" &&
+    !isPastEvent(event, now, timeZone)
+  const answer = event.myParticipation !== null && event.myParticipation !== "pending" ? myResponseLabel(event.myParticipation, t) : null
+
+  const participate = async () => {
+    if (participationId === null || busy) return
+    setBusy(true)
+    try {
+      await respond({ networkId, participationId, response: "accepted" })
+      toast.success(t("post.event.participated", { title: event.title }))
+    } catch (error) {
+      toast.error(postEngineErrorText(error, "reseau:post.event.participateFailed", t))
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  return (
+    <section aria-label={t("post.event.label")} className="rp-charte-event">
+      <p>
+        <strong>{event.title}</strong> {range}
+      </p>
+      {event.status === "cancelled" ? <p className="rp-charte-event-cancelled">{t("post.event.cancelled")}</p> : null}
+      {answer !== null ? <p className="rp-charte-event-note">{t("post.event.participation", { response: answer })}</p> : null}
+      {answerable && !setAside ? (
+        <div className="rp-charte-row">
+          <Button
+            type="button"
+            variant="commerce"
+            disabled={busy}
+            aria-busy={busy || undefined}
+            aria-label={t("post.event.participateLabel", { title: event.title })}
+            style={CHARTE_BUTTON_STYLE}
+            onClick={() => void participate()}
+          >
+            <Calendar aria-hidden="true" size={16} strokeWidth={2} />
+            {t("post.event.participate")}
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            aria-label={t("post.event.laterLabel", { title: event.title })}
+            style={CHARTE_BUTTON_STYLE}
+            onClick={() => setSetAside(true)}
+          >
+            {t("post.event.later")}
+          </Button>
+        </div>
+      ) : null}
+      {answerable && setAside ? (
+        <p className="rp-charte-event-note" role="status">
+          {t("post.event.laterNote")}
+        </p>
+      ) : null}
+    </section>
   )
 }
 

@@ -7,7 +7,9 @@
 >   document en sont extraites automatiquement. Contrastes vérifiés par
 >   `packages/ui/src/themes/antsia-themes.test.ts` (niveau AA).
 > - Décisions : [ADR-0027](adr/0027-six-themes-trois-couleurs-et-systeme-epure.md) (thèmes, système
->   épuré, motifs) ; ADR-0026 (thème du compte, apparence posée avant l'affichage).
+>   épuré, motifs) ; [ADR-0028](adr/0028-ecran-des-chartes-a-la-lettre.md) (composants de l'écran des
+>   chartes : publication, actions, cartes du fil, en-tête du téléphone) ; ADR-0026 (thème du compte,
+>   apparence posée avant l'affichage).
 > - Maquettes : artifact privé « Chartes ANTSIA », version 7
 >   (<https://claude.ai/artifact/Arc4fsUDikm3DRHuZNr35u>). Depuis le 19/10/2026 au soir, le code
 >   reprend ses valeurs EXACTES partout où le contrôle AA les accepte : 385 couleurs sur 392 ; les
@@ -122,6 +124,23 @@ embarquées (`@fontsource-variable`, importées par `packages/ui/src/styles.css`
 **Retours visuels.** Succès et danger s'affichent toujours avec une icône et un texte, jamais la
 couleur seule. Les toasts (sonner) suivent les jetons du thème
 (`apps/antsia_ga/src/app/globals.css`).
+
+## Les composants de l'écran des chartes (ADR-0028)
+
+Depuis le 19/10/2026 au soir, antsia.ga déclare `postPresentation="charte"` : le fil reprend
+**à la lettre** l'écran du téléphone des chartes, dans les sept thèmes.
+
+| Composant | Rendu | Couleurs et angles |
+|---|---|---|
+| En-tête du téléphone | Marque ANTSIA et son point, puis recherche, cloche, messages | Ronds `--esp-header-icon-*` (cible 44 px) ; pastilles `--role-react-*` cerclées du fond ; aucun filet |
+| Actus | Médaillons dans leur anneau, « Vous » et son « + » en tête, juste sous l'en-tête | Anneau `--esp-theme-swatch-*` |
+| Carte de suggestion | Une personne, `@identifiant · titre`, « Suivre » et « Écrire » de même largeur | Suivre `--role-social-fill` ; Écrire tonal `--role-message-soft` / `-ink` ; carte 24 px |
+| Publication | Auteur (coche Vérifié, étiquettes Officiel et Agent public), texte, média posé dans la carte, rangée d'icônes | Média `--esp-media-radius` (16 px) ; coche `--role-social-ink` ; Officiel en encre pleine |
+| Rangée d'actions | Cœur, commentaire, partage avec leurs décomptes ; Enregistrer à droite | Cœur plein `--role-react-ink` une fois posé ; décomptes en encre atténuée |
+| Évènement annoncé | Titre et dates en une phrase ; Participer et Plus tard pour un invité | Participer `--role-commerce-fill` ; Plus tard gris (`outline`) |
+
+Le fil du téléphone s'ouvre **en liste** (l'Immersion reste offerte) et la publication passe par le
+bouton « + » de la barre. Retour arrière : `postPresentation="media"` dans `network-shell.tsx`.
 
 ## Écarts retenus par rapport aux chartes
 
