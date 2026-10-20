@@ -1,15 +1,15 @@
 "use client"
 
-import { useNetwork } from "@antsia/api/network"
+import { useNetwork, useNetworkNavigationLayout } from "@antsia/api/network"
 import { BRAND_NAME } from "@antsia/social-contracts/brand"
 import type { CreationKind } from "@antsia/social-features/features/reseau-personnel/creation-controller"
 import { useCreationController } from "@antsia/social-features/features/reseau-personnel/use-creation-controller"
 import { NotificationBell } from "@antsia/social-features/notifications"
 import { AppearanceToggle } from "@antsia/social-features/shell/appearance"
-import { PostComposerSheet, ReseauMenuRail, ReseauMobileTabBar } from "@antsia/social-features/reseau-personnel"
+import { PostComposerSheet, ReseauCreateAction, ReseauMenuRail, ReseauMobileTabBar } from "@antsia/social-features/reseau-personnel"
 import { StoryCreateSheet } from "@antsia/social-features/stories"
 import { cn } from "@antsia/ui/lib/cn"
-import { DESKTOP_ONLY_CLASS, useIsReseauMobile } from "@antsia/ui/overlay"
+import { DESKTOP_ONLY_CLASS } from "@antsia/ui/overlay"
 import { Compass, LogOut, MessageCircle, ShieldCheck, SlidersHorizontal, UserRound } from "lucide-react"
 import Link from "next/link"
 import { usePathname, useSearchParams } from "next/navigation"
@@ -30,8 +30,8 @@ const NAV_LINK =
  * du réseau, la messagerie, mon profil et la déconnexion.
  *
  * Au téléphone, le fil a sa propre coquille (en-tête et barre basse du
- * moteur) : la page du fil la masque sous 960 px (`onMobile="hidden"`, même
- * seuil que la bascule de `ReseauAgentPage`). Les pages de profil, de page et
+ * moteur) : la page du fil la masque sous le seuil commun de navigation
+ * (`onMobile="hidden"`, 768 px en U02, 960 px hors opt-in). Les pages de profil, de page et
  * d'album n'ont qu'elle.
  *
  * Sous la navigation par destinations (P02, déclarée par `NetworkShell`), la
@@ -46,6 +46,7 @@ export function MemberTopBar({ onMobile = "visible" }: { onMobile?: "visible" | 
   const { t: tMember } = useTranslation("memberNetwork")
   const { person } = useMemberSession()
   const destinations = useNetwork().navigation === "destinations"
+  const { adaptive } = useNetworkNavigationLayout()
   const [signingOut, setSigningOut] = useState(false)
   const myHandle = person.published && person.handle ? person.handle : null
   /* Sous les destinations, ce qui reste n'est plus une navigation mais les
@@ -56,7 +57,7 @@ export function MemberTopBar({ onMobile = "visible" }: { onMobile?: "visible" | 
     <header
       className={cn(
         "sticky top-0 z-30 border-b border-transparent bg-background/90 backdrop-blur",
-        onMobile === "hidden" && "hidden min-[960px]:block",
+        onMobile === "hidden" && (adaptive ? "hidden min-[768px]:block" : "hidden min-[960px]:block"),
       )}
     >
       <div className="mx-auto flex max-w-[1400px] flex-wrap items-center justify-between gap-2 px-4 py-2 sm:px-5">
@@ -75,6 +76,7 @@ export function MemberTopBar({ onMobile = "visible" }: { onMobile?: "visible" | 
               <Link href={routes.moderation()} className={NAV_LINK} aria-label={tMember("nav.moderation")}><ShieldCheck aria-hidden="true" className="size-4" /><span className="hidden lg:inline">{tMember("nav.moderation")}</span></Link>
             </>
           )}
+          {onMobile === "visible" ? <ReseauCreateAction /> : null}
           <AppearanceToggle />
           <NotificationBell />
           <IdentityTools />
@@ -112,9 +114,9 @@ export function MemberTopBar({ onMobile = "visible" }: { onMobile?: "visible" | 
 }
 
 /** Une page de membre hors du fil (profil, page, album) : la barre du haut, puis le contenu. */
-export function MemberPage({ children }: { children: ReactNode }) {
+export function MemberPage({ children, workspace = false, immersiveOnPhone = false }: { children: ReactNode; workspace?: boolean; immersiveOnPhone?: boolean }) {
   const destinations = useNetwork().navigation === "destinations"
-  if (destinations) return <DestinationsMemberPage>{children}</DestinationsMemberPage>
+  if (destinations) return <DestinationsMemberPage workspace={workspace} immersiveOnPhone={immersiveOnPhone}>{children}</DestinationsMemberPage>
   return (
     <div className="esp-page-motif min-h-dvh bg-background">
       <MemberTopBar />
@@ -128,7 +130,7 @@ export function MemberPage({ children }: { children: ReactNode }) {
 /**
  * Une page de membre sous la navigation par DESTINATIONS (P02) : les cinq
  * destinations y sont les mêmes que sur le fil — rail à gauche au bureau
- * (≥ 960 px), barre basse au téléphone — et « Créer » y ouvre les MÊMES
+ * (dès 768 px en U02, 960 px historiquement), barre basse au téléphone — et « Créer » y ouvre les MÊMES
  * surfaces (publication, actu ; la conférence passe par l'hôte persistant de
  * la coque), montées UNE fois pour la page.
  *
@@ -136,7 +138,7 @@ export function MemberPage({ children }: { children: ReactNode }) {
  * `NetworkShell`, une fois pour toutes les pages de membre — changer de page
  * ne recrée ni l'appel, ni la présence.
  *
- * ⚠️ Un seul des deux arbres de navigation est monté (`useIsReseauMobile`) :
+ * ⚠️ Un seul des deux arbres de navigation est monté (`useNetworkNavigationLayout`) :
  * deux cartes « Créer » montées ensemble seraient deux pièges de focus. La
  * colonne du rail existe dès le premier rendu au bureau (CSS) : le contenu ne
  * saute pas quand le rail arrive.
@@ -144,23 +146,30 @@ export function MemberPage({ children }: { children: ReactNode }) {
  * ⚠️ Les pages de DIRECT (`isLiveSessionPath`) gardent l'écran entier : ni rail,
  * ni barre sur leurs commandes — même règle que les vues immersives du fil.
  */
-function DestinationsMemberPage({ children }: { children: ReactNode }) {
+function DestinationsMemberPage({ children, workspace, immersiveOnPhone }: { children: ReactNode; workspace: boolean; immersiveOnPhone: boolean }) {
   const { person } = useMemberSession()
   const pathname = usePathname()
-  const mobile = useIsReseauMobile()
+  const { adaptive, mobile } = useNetworkNavigationLayout()
+  // Messages garde ses scrollers liste/détail ; les autres pages défilent
+  // dans le document. Aucun hôte média n'est déplacé dans ce conteneur.
+  const boundedWorkspace = adaptive && workspace
   /* Le MÊME contrôleur que le fil : ouvrir une surface ne touche à aucun état
      de navigation, et le brouillon de publication vit dans son magasin de
-     module (il survit au changement de page comme à la bascule 959/960). */
+     module (il survit au changement de page comme à la bascule de navigation). */
   const creation = useCreationController()
   const handle = person.published && person.handle ? person.handle : null
   const withNavigation = !isLiveSessionPath(pathname)
 
   return (
-    <div className="esp-page-motif min-h-dvh bg-background">
-      <MemberTopBar />
-      <div className={cn("mx-auto w-full max-w-[1400px] px-3 sm:px-6 min-[960px]:px-5", withNavigation && "min-[960px]:grid min-[960px]:grid-cols-[248px_minmax(0,1fr)] min-[960px]:gap-6")}>
+    <div className={boundedWorkspace ? "antsia-member-workspace esp-page-motif flex h-dvh flex-col overflow-hidden bg-background" : "esp-page-motif min-h-dvh bg-background"}>
+      <MemberTopBar onMobile={boundedWorkspace && immersiveOnPhone ? "hidden" : "visible"} />
+      <div
+        data-with-navigation={withNavigation ? "" : undefined}
+        data-workspace={boundedWorkspace ? "" : undefined}
+        className={adaptive ? "antsia-member-frame" : cn("mx-auto w-full max-w-[1400px] px-3 sm:px-6 min-[960px]:px-5", withNavigation && "min-[960px]:grid min-[960px]:grid-cols-[248px_minmax(0,1fr)] min-[960px]:gap-6")}
+      >
         {withNavigation ? (
-          <div className={cn(DESKTOP_ONLY_CLASS, "sticky top-16 max-h-[calc(100dvh-4rem)] self-start overflow-y-auto py-6")}>
+          <div className={adaptive ? "antsia-member-rail citizen-scrollbar" : cn(DESKTOP_ONLY_CLASS, "sticky top-16 max-h-[calc(100dvh-4rem)] self-start overflow-y-auto py-6")}>
             {mobile === false ? (
               <Suspense fallback={null}>
                 <MemberDestinationsRail onCreate={creation.openCreation} />
@@ -172,15 +181,16 @@ function DestinationsMemberPage({ children }: { children: ReactNode }) {
           id="contenu"
           tabIndex={-1}
           className={cn(
-            "min-w-0 py-4 min-[960px]:py-6 focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring",
+            "focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring",
+            adaptive ? "antsia-member-content" : "min-w-0 py-4 min-[960px]:py-6",
             // La barre basse est FIXE : le bas de page lui laisse sa place (barre, gouttière, encoche).
-            withNavigation && "max-[959px]:pb-[calc(120px+env(safe-area-inset-bottom,0px))]",
+            withNavigation && !adaptive && "max-[959px]:pb-[calc(120px+env(safe-area-inset-bottom,0px))]",
           )}
         >
           {children}
         </main>
       </div>
-      {withNavigation && mobile === true ? (
+      {withNavigation && mobile === true && !immersiveOnPhone ? (
         <Suspense fallback={null}>
           <MemberDestinationsBar handle={handle} onCreate={creation.openCreation} />
         </Suspense>

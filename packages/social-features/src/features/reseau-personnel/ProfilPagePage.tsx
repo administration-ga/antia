@@ -127,7 +127,7 @@ export interface ProfilPagePageProps {
 
 export function ProfilPagePage({ handle }: ProfilPagePageProps) {
   const { t } = useTranslation("reseau")
-  const { networkId } = useNetwork()
+  const { networkId, personId } = useNetwork()
   const routes = useRoutes()
   const router = useRouter()
   const page = useAuthenticatedConvexQuery(api.modules.pages.pages.getPage, { networkId, handle })
@@ -180,7 +180,7 @@ export function ProfilPagePage({ handle }: ProfilPagePageProps) {
   }
 
   // Une autre page ⇒ un autre mur, un autre formulaire : tout l'état repart de zéro.
-  return <PageProfile key={page.data.pageId} page={page.data} />
+  return <PageProfile key={`${networkId}:${personId}:${page.data.pageId}`} page={page.data} />
 }
 
 /** La fiche chargée : identité, gestes, gestion, revendication, mur. */

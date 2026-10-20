@@ -1,15 +1,22 @@
 "use client"
 
 import { MessagesRoute } from "@antsia/social-features/messagerie"
+import { useNetwork } from "@antsia/api/network"
 import { Suspense } from "react"
-import { MemberTopBar } from "@/components/member-chrome"
+import { MemberPage, MemberTopBar } from "@/components/member-chrome"
 import { useCommercialMessages } from "@/components/shops/contact-messages"
 
 import type { MessagesRouteTarget } from "@/lib/messages-route"
 
 export function MessagesScreen({ route }: { route: MessagesRouteTarget }) {
   const commercial = useCommercialMessages()
+  const { navigation, navigationLayout } = useNetwork()
   const immersive = route.compose !== undefined || (route.kind !== undefined && route.id !== undefined)
+  if (navigation === "destinations" && navigationLayout === "adaptive") {
+    return <MemberPage workspace immersiveOnPhone={immersive}>
+      <Suspense fallback={null}><MessagesRoute {...route} commercial={commercial} /></Suspense>
+    </MemberPage>
+  }
   return (
     <div className="esp-page-motif flex h-dvh flex-col overflow-hidden bg-background">
       <div className="shrink-0"><MemberTopBar onMobile={immersive ? "hidden" : "visible"} /></div>

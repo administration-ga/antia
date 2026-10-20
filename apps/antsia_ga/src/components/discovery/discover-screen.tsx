@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { ArrowRight, Hash } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { useId } from "react"
+import { Suspense, useId } from "react"
 import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 
@@ -14,6 +14,7 @@ import { MemberServiceDirectory, useServicesDiscoverable } from "@/components/se
 import { MemberShopDirectory } from "@/components/shops/member-shop-directory"
 import { Button, Field, TextInput } from "@/components/shared/controls"
 import { routes } from "@/lib/routes"
+import { MediaDiscoveryScreen } from "./media-discovery-screen"
 import {
   discoverContentEntries,
   discoverJobEntry,
@@ -109,12 +110,14 @@ export function MemberDiscoverScreen() {
 
   return (
     <MemberPage>
-      <div className="antsia-page mx-auto w-full max-w-3xl">
+      <div className="antsia-page mx-auto w-full max-w-6xl">
         <header className="flex flex-col gap-2">
           <h1 className="antsia-title ">{t("nav.discover")}</h1>
           <p className="antsia-copy text-muted-foreground">{t("discoverHub.lead")}</p>
           <p className="text-sm text-muted-foreground">{t("discovery.memberScope")}</p>
         </header>
+
+        <Suspense fallback={<p role="status">{t("socialExperience:loading")}</p>}><MediaDiscoveryScreen mode="explore" /></Suspense>
 
         {showsDiscoverTabs(discoverData) ? <nav aria-label={t("commerce.sections")} className="flex flex-wrap gap-2">
           {servedDiscoverTabs(discoverData).map((tab) => {

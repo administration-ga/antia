@@ -5,6 +5,7 @@ import type { ReactNode } from "react"
 
 import { routes } from "@/lib/routes"
 import { catalogAvailability, catalogDate, catalogPrice, catalogVariantPrice, type CatalogAudience, type CatalogOffer, type CatalogTranslate } from "./catalog-model"
+import { OFFER_DETAIL_CSS } from "./offer-experience-styles"
 
 const linkClass = "inline-flex min-h-11 items-center rounded-[var(--ui2-button-radius)] text-sm font-medium text-primary underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
 
@@ -16,11 +17,13 @@ export function OfferMedia({ media, title, t, className = "aspect-square" }: { m
 /** Présentation commune SSR/membre : aucun hook ni fournisseur de compte requis. */
 export function OfferCard({ offer, audience, locale, t, compact = false }: { offer: CatalogOffer; audience: CatalogAudience; locale: string; t: CatalogTranslate; compact?: boolean }) {
   const href = audience === "public" ? routes.publicShopOffer(offer.shopHandle, offer.offerRef) : routes.shopOffer(offer.shopHandle, offer.offerRef)
-  return <article className={`antsia-panel flex h-full min-w-0 gap-3 ${compact ? "flex-row" : "flex-col"}`}>
-    <Link href={href} prefetch={false} className={`rounded-[var(--esp-media-radius)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${compact ? "w-24 shrink-0 self-start sm:w-32" : ""}`} aria-label={t("catalog.openOfferNamed", { title: offer.title })}><OfferMedia media={offer.media[0]} title={offer.title} t={t} /></Link>
+  const storefront = audience === "public" ? routes.publicStorefront(offer.shopHandle) : routes.storefront(offer.shopHandle)
+  return <article className={`antsia-panel flex h-full min-w-0 gap-3 [overflow-wrap:anywhere] ${compact ? "flex-row" : "flex-col"}`}>
+    <Link href={href} prefetch={false} className={`rounded-[var(--esp-media-radius)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${compact ? "w-20 shrink-0 self-start sm:w-28" : ""}`} aria-label={t("catalog.openOfferNamed", { title: offer.title })}><OfferMedia media={offer.media[0]} title={offer.title} t={t} /></Link>
     <div className="flex min-w-0 flex-1 flex-col gap-2">
       <p className="text-xs font-medium text-muted-foreground">{t(`catalog.kinds.${offer.kind}`)}</p>
       <h3 className="font-display text-base font-bold leading-snug break-words"><Link href={href} prefetch={false} className="rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">{offer.title}</Link></h3>
+      <Link href={storefront} prefetch={false} className="inline-flex min-h-11 items-center self-start rounded text-sm text-muted-foreground underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">{t("catalog.soldBy", { handle: offer.shopHandle })}</Link>
       <p className="break-words text-lg font-semibold">{catalogPrice(offer.price, locale, t)}</p>
       {offer.variants.length ? <p className="text-xs text-muted-foreground">{t("catalog.hasVariants", { count: offer.variants.length })}</p> : null}
       <p className="text-xs font-medium text-muted-foreground">{t("catalog.availability.title")}</p>
@@ -35,20 +38,20 @@ export function OfferCard({ offer, audience, locale, t, compact = false }: { off
 export function OfferDetails({ offer, audience, locale, t, actionSlot }: { offer: CatalogOffer; audience: CatalogAudience; locale: string; t: CatalogTranslate; actionSlot?: ReactNode }) {
   const storefront = audience === "public" ? routes.publicStorefront(offer.shopHandle) : routes.storefront(offer.shopHandle)
   const Heading = audience === "public" ? "h1" : "h2"
-  return <article className="antsia-panel grid min-w-0 gap-6 lg:grid-cols-2">
-    <header className="antsia-page-header min-w-0 lg:col-start-2 lg:row-start-1">
+  return <div data-offer-detail-frame><style>{OFFER_DETAIL_CSS}</style><article className="antsia-panel offer-detail-layout min-w-0 gap-6 [overflow-wrap:anywhere]">
+    <header className="antsia-page-header offer-detail-heading min-w-0">
       <p className="text-sm font-medium text-muted-foreground">{t(`catalog.kinds.${offer.kind}`)}</p>
       <Heading className="antsia-title break-words">{offer.title}</Heading>
       <Link href={storefront} prefetch={false} className={`${linkClass} justify-self-start`}>{t("catalog.soldBy", { handle: offer.shopHandle })}</Link>
       <p className="break-words text-2xl font-semibold">{catalogPrice(offer.price, locale, t)}</p>
       <p className="text-sm text-muted-foreground">{t("catalog.displayedPriceHint")}</p>
-      {actionSlot}
+      {audience === "member" && actionSlot ? <div data-offer-actions className="grid min-w-0 gap-3">{actionSlot}</div> : null}
     </header>
-    <div className="grid min-w-0 gap-3 sm:grid-cols-2 lg:col-start-1 lg:row-start-1 lg:grid-cols-1">{offer.media.length ? offer.media.map((media, index) => <OfferMedia key={index} media={media} title={offer.title} t={t} />) : <OfferMedia media={undefined} title={offer.title} t={t} />}</div>
-    <section className="grid min-w-0 gap-3 lg:col-span-2"><h2 className="antsia-subtitle">{t("catalog.description")}</h2><p className="whitespace-pre-wrap break-words leading-relaxed">{offer.description || t("catalog.noDescription")}</p></section>
-    {offer.variants.length ? <details className="lg:col-span-2 rounded-[var(--ui2-card-radius)] border border-border p-[var(--esp-card-padding,16px)]" open={offer.variants.length <= 6}><summary className="min-h-11 cursor-pointer font-semibold">{t("catalog.variants", { count: offer.variants.length })}</summary><ul className="mt-3 grid gap-3 sm:grid-cols-2">{offer.variants.map((variant) => <li key={variant.variantRef} className="grid gap-1 rounded-[var(--ui2-card-radius)] bg-background p-[var(--esp-card-padding,16px)]"><h3 className="font-display text-base font-bold leading-snug break-words">{variant.label}</h3>{variant.options.length ? <p className="break-words text-sm text-muted-foreground">{variant.options.map((option, index) => offer.variantAxes[index] ? `${offer.variantAxes[index]} : ${option}` : option).join(" · ")}</p> : null}<p className="font-semibold">{catalogVariantPrice(offer.price, variant, locale, t)}</p><p className="text-xs text-muted-foreground">{catalogAvailability(offer.availability, t, variant.availability)}</p></li>)}</ul></details> : null}
-    <section className="grid min-w-0 gap-3 rounded-[var(--ui2-card-radius)] bg-muted lg:col-span-2 p-[var(--esp-card-padding,16px)]"><h2 className="antsia-subtitle">{t("catalog.availability.title")}</h2><p>{catalogAvailability(offer.availability, t)}</p><p className="text-sm text-muted-foreground">{t("catalog.availability.indicative")}</p>{offer.availability.updatedAt !== null ? <p className="text-xs text-muted-foreground">{t("catalog.availability.updated", { date: catalogDate(offer.availability.updatedAt, locale) })}</p> : null}</section>
-    {offer.zone || offer.leadTimeDays !== null || offer.collections.length ? <dl className="grid min-w-0 gap-4 sm:grid-cols-2 lg:col-span-2">{offer.zone ? <div><dt className="text-sm font-medium text-muted-foreground">{t("catalog.zone")}</dt><dd className="break-words">{offer.zone}</dd></div> : null}{offer.leadTimeDays !== null ? <div><dt className="text-sm font-medium text-muted-foreground">{t("catalog.leadTime")}</dt><dd>{t("catalog.leadTimeDays", { count: offer.leadTimeDays })}</dd></div> : null}{offer.collections.length ? <div><dt className="text-sm font-medium text-muted-foreground">{t("catalog.collections")}</dt><dd className="break-words">{offer.collections.map((collection) => collection.label).join(" · ")}</dd></div> : null}</dl> : null}
-    <p className="text-xs text-muted-foreground lg:col-span-2">{t("catalog.updated", { date: catalogDate(offer.changedAt, locale) })}</p>
-  </article>
+    <div className="offer-detail-media grid min-w-0 gap-3">{offer.media.length ? offer.media.map((media, index) => <OfferMedia key={index} media={media} title={offer.title} t={t} />) : <OfferMedia media={undefined} title={offer.title} t={t} />}</div>
+    <section className="offer-detail-full grid min-w-0 gap-3"><h2 className="antsia-subtitle">{t("catalog.description")}</h2><p className="whitespace-pre-wrap break-words leading-relaxed">{offer.description || t("catalog.noDescription")}</p></section>
+    {offer.variants.length ? <details className="offer-detail-full rounded-[var(--ui2-card-radius)] border border-border p-[var(--esp-card-padding,16px)]" open={offer.variants.length <= 6}><summary className="min-h-11 cursor-pointer font-semibold">{t("catalog.variants", { count: offer.variants.length })}</summary><ul className="mt-3 grid grid-cols-[repeat(auto-fit,minmax(min(100%,15rem),1fr))] gap-3">{offer.variants.map((variant) => <li key={variant.variantRef} className="grid min-w-0 gap-1 rounded-[var(--ui2-card-radius)] bg-background p-[var(--esp-card-padding,16px)]"><h3 className="font-display text-base font-bold leading-snug break-words">{variant.label}</h3>{variant.options.length ? <p className="break-words text-sm text-muted-foreground">{variant.options.map((option, index) => offer.variantAxes[index] ? `${offer.variantAxes[index]} : ${option}` : option).join(" · ")}</p> : null}<p className="font-semibold">{catalogVariantPrice(offer.price, variant, locale, t)}</p><p className="text-xs text-muted-foreground">{catalogAvailability(offer.availability, t, variant.availability)}</p></li>)}</ul></details> : null}
+    <section className="offer-detail-full grid min-w-0 gap-3 rounded-[var(--ui2-card-radius)] bg-muted p-[var(--esp-card-padding,16px)]"><h2 className="antsia-subtitle">{t("catalog.availability.title")}</h2><p>{catalogAvailability(offer.availability, t)}</p><p className="text-sm text-muted-foreground">{t("catalog.availability.indicative")}</p>{offer.availability.updatedAt !== null ? <p className="text-xs text-muted-foreground">{t("catalog.availability.updated", { date: catalogDate(offer.availability.updatedAt, locale) })}</p> : null}</section>
+    {offer.zone || offer.leadTimeDays !== null || offer.collections.length ? <dl className="offer-detail-full grid min-w-0 gap-4 sm:grid-cols-2">{offer.zone ? <div><dt className="text-sm font-medium text-muted-foreground">{t("catalog.zone")}</dt><dd className="break-words">{offer.zone}</dd></div> : null}{offer.leadTimeDays !== null ? <div><dt className="text-sm font-medium text-muted-foreground">{t("catalog.leadTime")}</dt><dd>{t("catalog.leadTimeDays", { count: offer.leadTimeDays })}</dd></div> : null}{offer.collections.length ? <div><dt className="text-sm font-medium text-muted-foreground">{t("catalog.collections")}</dt><dd className="break-words">{offer.collections.map((collection) => collection.label).join(" · ")}</dd></div> : null}</dl> : null}
+    <p className="offer-detail-full text-xs text-muted-foreground">{t("catalog.updated", { date: catalogDate(offer.changedAt, locale) })}</p>
+  </article></div>
 }

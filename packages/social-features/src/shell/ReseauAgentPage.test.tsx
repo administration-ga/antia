@@ -15,6 +15,7 @@ const mocks = vi.hoisted(() => {
   return {
     anyPath,
     mobile: false as boolean | null,
+    adaptive: false,
     tab: "fil" as string,
     goToTab: vi.fn(),
     push: vi.fn(),
@@ -24,6 +25,11 @@ const mocks = vi.hoisted(() => {
 vi.mock("@antsia/ui/overlay", async (importOriginal) => ({
   ...(await importOriginal<typeof import("@antsia/ui/overlay")>()),
   useIsReseauMobile: () => mocks.mobile,
+}))
+
+vi.mock("@antsia/api/network", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@antsia/api/network")>()),
+  useNetworkNavigationLayout: () => ({ adaptive: mocks.adaptive, mobile: mocks.mobile }),
 }))
 
 vi.mock("@antsia/api/engine", () => ({ api: mocks.anyPath() }))
@@ -131,6 +137,7 @@ function page() {
 beforeEach(() => {
   postDraftStore.resetForTests()
   mocks.mobile = false
+  mocks.adaptive = false
   mocks.tab = "fil"
   mocks.goToTab.mockClear()
   mocks.push.mockClear()
@@ -138,6 +145,54 @@ beforeEach(() => {
 })
 
 describe("ReseauAgentPage — la page réseau", () => {
+  /** U02 : scénarios écrits seulement ; jsdom ne mesure pas les container queries. */
+  it("pose la variante adaptative sur un seul arbre, sans hauteur de page imposée", () => {
+    mocks.adaptive = true
+    const vue = page()
+    const scope = vue.container.querySelector<HTMLElement>(".rp-scope")!
+    expect(scope.getAttribute("data-navigation-layout")).toBe("adaptive")
+    expect(scope.style.height).toBe("")
+    expect(screen.getAllByRole("main")).toHaveLength(1)
+    expect(screen.getAllByTestId("FeedPage")).toHaveLength(1)
+    expect(screen.getAllByTestId("PostComposerSheet")).toHaveLength(1)
+    // L'ossature reste unique ; les seuils tablette/ordinateur redistribuent ses éléments en CSS.
+    expect(scope.querySelectorAll(".rp-rail-start")).toHaveLength(1)
+    expect(scope.querySelectorAll(".rp-main-col")).toHaveLength(1)
+    expect(scope.querySelectorAll(".rp-rail-end")).toHaveLength(1)
+  })
+
+  it("garde les mêmes noeuds et le sélecteur de fichier entre tablette et ordinateur", () => {
+    mocks.adaptive = true
+    postDraftStore.setComposerOpen(true)
+    const initialWidth = window.innerWidth
+    const vue = page()
+    const scope = vue.container.querySelector(".rp-scope")
+    const feed = screen.getByTestId("FeedPage")
+    const picker = screen.getByTestId("composer-file-picker")
+    try {
+      // Le hook partagé a déjà retenu mobile=false à chacun de ces paliers ;
+      // on vérifie le montage React, pas une mesure CSS simulée comme une preuve visuelle.
+      for (const width of [768, 1199, 1200, 1400]) {
+        Object.defineProperty(window, "innerWidth", { configurable: true, value: width })
+        vue.rerender(<EngineTestWrapper><ReseauAgentPage /></EngineTestWrapper>)
+        expect(vue.container.querySelector(".rp-scope")).toBe(scope)
+        expect(screen.getByTestId("FeedPage")).toBe(feed)
+        expect(screen.getByTestId("composer-file-picker")).toBe(picker)
+        expect(picker.isConnected).toBe(true)
+        expect(screen.getAllByRole("main")).toHaveLength(1)
+      }
+    } finally {
+      Object.defineProperty(window, "innerWidth", { configurable: true, value: initialWidth })
+    }
+  })
+
+  it("conserve le contrat de hauteur et l'absence d'opt-in pour un réseau historique", () => {
+    const vue = page()
+    const scope = vue.container.querySelector<HTMLElement>(".rp-scope")!
+    expect(scope.hasAttribute("data-navigation-layout")).toBe(false)
+    expect(scope.style.height).toBe("100%")
+  })
+
   it.each([true, false])("conserve le sélecteur ouvert quand la coquille change depuis mobile=%s", (mobile) => {
     mocks.mobile = mobile
     postDraftStore.setComposerOpen(true)

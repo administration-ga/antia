@@ -36,8 +36,8 @@
  *
  * ⚠️ L'instant passé aux lectures est FIGÉ au montage : le changer referait
  * l'abonnement, la série repasserait par « Chargement… » et la vidéo en cours
- * repartirait de zéro. Un écran de lecteur vit quelques minutes ; une story
- * expirée pendant qu'on la regarde reste lisible jusqu'au bout, comme au socle.
+ * repartirait de zéro. L'expiration déjà reçue ferme toutefois le segment
+ * dès que l'horloge de l'écran l'atteint, sans attendre un réabonnement.
  */
 
 import { api } from "@antsia/api/engine"
@@ -45,7 +45,7 @@ import { useAuthenticatedConvexQuery } from "@antsia/api/hooks"
 import { useNetwork } from "@antsia/api/network"
 import { Button } from "@antsia/ui"
 import { useMutation } from "convex/react"
-import { useEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { SWIPE_HYSTERESIS_PX } from "../../shell/mobile/gestures"
@@ -98,7 +98,12 @@ export interface StoryViewerProps {
 	onExhausted: (direction: 1 | -1) => void
 }
 
-export function StoryViewer({
+export function StoryViewer(props: StoryViewerProps) {
+	const { networkId, personId } = useNetwork()
+	return <StoryViewerContent key={`${networkId}:${personId}:${props.handle ?? "mine"}:${props.myHandle ?? ""}`} {...props} />
+}
+
+function StoryViewerContent({
 	handle,
 	displayName,
 	avatarUrl,
@@ -129,7 +134,7 @@ export function StoryViewer({
 			: "skip",
 	)
 	const loaded = source === "mine" ? mine.data : theirs.data
-	const stories = loaded ?? []
+	const stories = useMemo(() => loaded ?? [], [loaded])
 
 	const markSeen = useMutation(api.modules.stories.stories.markSeen)
 	const removeStory = useMutation(api.modules.stories.stories.remove)
@@ -147,13 +152,31 @@ export function StoryViewer({
 	const [failed, setFailed] = useState(false)
 
 	const primed = useRef(false)
+	const alive = useRef(true)
+	const shownStory = useRef<string | null>(null)
+	useEffect(() => {
+		alive.current = true
+		return () => { alive.current = false }
+	}, [])
 	/** La sortie de série n'est annoncée QU'UNE fois — cf. l'effet plus bas. */
 	const exhausted = useRef(false)
 	const seenSent = useRef(new Set<string>())
+	const expiredAdvance = useRef<string | null>(null)
 	const pressed = useRef<{ x: number; y: number; t: number } | null>(null)
 	const videoRef = useRef<HTMLVideoElement>(null)
 
-	const current = stories[index]
+	const selected = stories[index]
+	// Le serveur reste l'autorité ; une date d'expiration déjà reçue interdit
+	// aussi de laisser l'ancien média ouvert entre deux lectures horodatées.
+	const current = selected !== undefined && selected.expiresAt > now ? selected : undefined
+	useEffect(() => {
+		if (!active || selected === undefined || selected.expiresAt > now) return
+		if (expiredAdvance.current === String(selected.storyId)) return
+		expiredAdvance.current = String(selected.storyId)
+		const next = stories.findIndex((story, position) => position > index && story.expiresAt > now)
+		if (next >= 0) setIndex(next)
+		else onExhausted(1)
+	}, [active, index, now, onExhausted, selected, stories])
 	const duration =
 		current === undefined
 			? 0
@@ -162,7 +185,8 @@ export function StoryViewer({
 	// La story N+1 de la MÊME série — le pager précharge déjà les auteurs
 	// voisins en les montant, mais rien ne réchauffait le segment suivant :
 	// chaque avancée payait un aller-retour réseau à froid.
-	const upcoming = preloadTarget(stories, index)
+	const nextStory = stories[index + 1]
+	const upcoming = nextStory !== undefined && nextStory.expiresAt > now ? preloadTarget(stories, index) : null
 
 	// L'horloge est ARRÊTÉE dès qu'une seule de ces raisons tient — la liste
 	// complète vit dans `isPlaybackHalted` (module pur) : en oublier une fait
@@ -192,11 +216,14 @@ export function StoryViewer({
 	useEffect(() => {
 		if (primed.current || stories.length === 0) return
 		primed.current = true
-		setIndex(initialStoryIndex(stories))
-	}, [stories])
+		const initial = initialStoryIndex(stories)
+		const live = stories.findIndex((story, position) => position >= initial && story.expiresAt > now)
+		setIndex(live >= 0 ? live : initial)
+	}, [now, stories])
 
 	/** Chaque story repart de zéro. */
 	const currentId = current === undefined ? null : String(current.storyId)
+	useLayoutEffect(() => { shownStory.current = currentId }, [currentId])
 	useEffect(() => {
 		setTimer(STORY_TIMER_ZERO)
 		setRemoveArmed(false)
@@ -281,6 +308,27 @@ export function StoryViewer({
 	 * le `playing` qui aurait rabaissé `stalled` — pause éternelle, vidéo
 	 * chargée à 100 % et muette (chronologie constatée le 2026-08-20).
 	 */
+	/**
+	 * Lance la lecture, et traduit le seul échec qui regarde l'écran : le
+	 * refus d'autoplay lève le chip « Lire ». Un AbortError (un `pause()` qui
+	 * interrompt un `play()` en vol) est bénin et quotidien — le traiter comme
+	 * un refus ferait clignoter le chip à chaque pause au doigt.
+	 */
+	const startPlayback = useCallback((node: HTMLVideoElement) => {
+		node
+			.play()
+			.then(() => {
+				if (alive.current && videoRef.current === node) setNeedsTap(false)
+			})
+			.catch((err: unknown) => {
+				if (!alive.current || videoRef.current !== node) return
+				if (err instanceof DOMException && err.name === "NotAllowedError") {
+					setNeedsTap(true)
+					setStalled(false)
+				}
+			})
+	}, [setNeedsTap, setStalled])
+
 	useEffect(() => {
 		const node = videoRef.current
 		if (node === null) return
@@ -293,25 +341,7 @@ export function StoryViewer({
 			return
 		}
 		startPlayback(node)
-	}, [mediaHalted, muted, currentId])
-
-	/**
-	 * Lance la lecture, et traduit le seul échec qui regarde l'écran : le
-	 * refus d'autoplay lève le chip « Lire ». Un AbortError (un `pause()` qui
-	 * interrompt un `play()` en vol) est bénin et quotidien — le traiter comme
-	 * un refus ferait clignoter le chip à chaque pause au doigt.
-	 */
-	const startPlayback = (node: HTMLVideoElement) => {
-		node
-			.play()
-			.then(() => setNeedsTap(false))
-			.catch((err: unknown) => {
-				if (err instanceof DOMException && err.name === "NotAllowedError") {
-					setNeedsTap(true)
-					setStalled(false)
-				}
-			})
-	}
+	}, [mediaHalted, muted, currentId, startPlayback])
 
 	/**
 	 * Rejoue quand la DÉCISION dit « joue » et que l'élément s'est pourtant
@@ -505,6 +535,7 @@ export function StoryViewer({
 					}}
 				/>
 			) : (
+				// eslint-disable-next-line @next/next/no-img-element -- lecteur du moteur indépendant de Next : URL servie par la garde et scène déjà dimensionnée.
 				<img
 					className="st-media"
 					src={current.media.url}
@@ -546,6 +577,7 @@ export function StoryViewer({
 					{upcoming.kind === "video" ? (
 						<video src={upcoming.url} preload="metadata" muted />
 					) : (
+						// eslint-disable-next-line @next/next/no-img-element -- préchargement borné de la seule voisine, URL servie par la garde ; aucune optimisation Next.
 						<img src={upcoming.url} alt="" />
 					)}
 				</div>
@@ -605,10 +637,12 @@ export function StoryViewer({
 										}
 										void removeStory({ networkId, storyId: current.storyId })
 											.then(() => {
+												if (!alive.current || shownStory.current !== String(current.storyId)) return
 												toast.success(t("storyViewer.removed"))
 												goNext()
 											})
 											.catch((error: unknown) => {
+												if (!alive.current || shownStory.current !== String(current.storyId)) return
 												toast.error(
 													storyEngineErrorText(
 														error,

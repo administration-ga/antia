@@ -129,11 +129,12 @@ export function PostCard(props: PostCardProps) {
 
 function PostCardContent({ post, now, onTag, onMention, offer }: PostCardProps) {
   const { t, i18n } = useTranslation("reseau")
-  const { networkId, personId, slug, postPresentation, PostOfferRenderer } = useNetwork()
+  const { networkId, personId, slug, postPresentation, PostOfferRenderer, navigation, navigationLayout } = useNetwork()
   // La présentation que l'application déclare : « media » ou « charte » sur
   // opt-in, sinon la carte historique (aucune application ne change sans le
   // demander).
   const presentation: EnginePostPresentation = postPresentation === "media" || postPresentation === "charte" ? postPresentation : "classic"
+  const mediaFirst = presentation === "charte" && navigation === "destinations" && navigationLayout === "adaptive"
   const routes = useRoutes()
   const timeZone = useViewerTimeZone()
   const [showComments, setShowComments] = useState(false)
@@ -147,7 +148,7 @@ function PostCardContent({ post, now, onTag, onMention, offer }: PostCardProps) 
   const live = useRef(true)
   const context = `${networkId}:${personId}:${post._id}`
   const latestContext = useRef(context)
-  latestContext.current = context
+  useEffect(() => { latestContext.current = context }, [context])
   useEffect(() => { live.current = true; return () => { live.current = false } }, [])
   const [reportTarget, setReportTarget] = useState<
     | { kind: "post" }
@@ -623,8 +624,8 @@ function PostCardContent({ post, now, onTag, onMention, offer }: PostCardProps) 
      * PRÉSENTATION « CHARTE » (opt-in de l'application, ADR-0028) : l'écran
      * des chartes de la série 3, à la lettre — auteur, texte, média posé dans
      * la carte, puis une rangée d'icônes. Le texte reste ENTIER quand il est
-     * seul ; avec un média, il est borné par « Lire la suite » au-dessus de
-     * lui.
+     * seul ; avec un média, il est borné par « Lire la suite ». La coque
+     * adaptive ANTSIA le place après le média et ses actions.
      */
     const textOnly = post.media.length === 0 && post.share === null && post.event === null && !post.live
     const body = editing ? editor : post.body.length > 0 ? (
@@ -635,7 +636,7 @@ function PostCardContent({ post, now, onTag, onMention, offer }: PostCardProps) 
     const saved = post.viewer.bookmarked
     return (
       <Card padded={false} style={POST_SURFACE_STYLE}>
-        <article data-post-presentation="charte" className="rp-charte-post">
+        <article data-post-presentation="charte" data-post-layout={mediaFirst ? "media-first" : undefined} className="rp-charte-post">
           <header className="rp-charte-head">
             <Avatar
               displayName={identity.name}
@@ -683,6 +684,7 @@ function PostCardContent({ post, now, onTag, onMention, offer }: PostCardProps) 
                     <span>{signature}</span>
                   </>
                 ) : null}
+                {mediaFirst ? <span className="rp-charte-audience">{audienceLabel(post.audience, t)}</span> : null}
                 <span className="sr-only">
                   {t("postCard.context", {
                     audience: audienceLabel(post.audience, t),
@@ -694,7 +696,7 @@ function PostCardContent({ post, now, onTag, onMention, offer }: PostCardProps) 
             {overflowMenu}
           </header>
 
-          {body}
+          {!mediaFirst || textOnly ? body : null}
 
           {post.media.length > 0 ? <PostMedia media={post.media} presentation="charte" primary /> : null}
           {liveBlock}
@@ -755,6 +757,10 @@ function PostCardContent({ post, now, onTag, onMention, offer }: PostCardProps) 
               <Bookmark aria-hidden="true" size={20} strokeWidth={2} fill={saved ? "currentColor" : "none"} />
             </button>
           </div>
+
+          {/* U03 ANTSIA : le média porte la lecture, puis ses actions et sa
+              légende repliable. Un texte seul garde son corps entier en tête. */}
+          {mediaFirst && !textOnly ? <div className="rp-charte-caption">{body}</div> : null}
 
           {withdrawBlock}
 
@@ -999,6 +1005,13 @@ const CHARTE_POST_CSS = `
     line-height: 1.35;
     color: var(--muted-foreground);
   }
+  .rp-charte-post[data-post-layout="media-first"] .rp-charte-meta,
+  .rp-charte-post[data-post-layout="media-first"] .rp-charte-name > a,
+  .rp-charte-post[data-post-layout="media-first"] .rp-charte-name > span { overflow-wrap: anywhere; }
+  .rp-charte-post[data-post-layout="media-first"] { font-size: inherit; }
+  .rp-charte-audience { font-weight: 600; }
+  .rp-charte-audience::before { content: "·"; margin-inline-end: 4px; }
+  .rp-charte-caption { min-width: 0; overflow-wrap: anywhere; }
   .rp-charte-badge {
     display: inline-flex;
     align-items: center;

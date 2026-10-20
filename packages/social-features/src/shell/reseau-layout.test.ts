@@ -7,6 +7,7 @@ import { describe, expect, it } from "vitest"
 import { storyComposePose } from "../features/stories/story-create"
 import { createAppI18n } from "../i18n"
 import { RESEAU_MOBILE_CSS } from "./mobile/mobile-styles"
+import { RESEAU_ADAPTIVE_CSS } from "./reseau-adaptive-styles"
 import {
   COLLAPSED_FEED_MIN,
   COLLAPSED_NAV_MIN,
@@ -234,9 +235,9 @@ describe("la grille implémente les paliers du module", () => {
     expect(css).toContain("padding-top: 0;")
   })
 
-  it("garde une hauteur définie et les scrollers de chaque colonne aux mêmes paliers", () => {
+  it("garde une hauteur définie et les scrollers historiques hors opt-in adaptatif", () => {
     expect(codeOf("./ReseauAgentPage.tsx")).toMatch(
-      /<div\s+className="rp-scope"\s+style=\{\{\s*height:\s*"100%"/
+      /<div\s+className="rp-scope"\s+data-navigation-layout=\{adaptive \? "adaptive" : undefined\}\s+style=\{adaptive \? undefined : \{\s*height:\s*"100%"/
     )
     expect(ruleBody(rules, ".rp-scope")).toContain("overflow: hidden")
     const singleColumn = ruleBody(rules, ".rp-grid")
@@ -261,6 +262,18 @@ describe("la grille implémente les paliers du module", () => {
     expect(leftRail).toContain("overflow-y: auto")
     expect(leftRail).toContain("min-height: 0")
     expect(leftRail).toContain("padding-bottom: 48px")
+  })
+
+  it("réserve le défilement du document à l'opt-in et borne seulement son rail", () => {
+    const adaptive = cssRules(cssOf(RESEAU_ADAPTIVE_CSS))
+    const scope = '.rp-scope[data-navigation-layout="adaptive"]'
+    expect(ruleBody(adaptive, scope)).toContain("height: auto")
+    expect(ruleBody(adaptive, scope)).toContain("overflow: visible")
+    expect(ruleBody(adaptive, `${scope} .rp-main-col`)).toContain("overflow: visible")
+    const rail = adaptive.find(rule => selectorParts(rule).includes(`${scope} .rp-rail-start`) && rule.body.includes("position: sticky"))?.body ?? ""
+    expect(rail).toContain("position: sticky")
+    expect(rail).toContain("overflow-y: auto")
+    expect(rail).toContain("max-height: calc(100dvh")
   })
 
   it("ne masque le rappel du profil à AUCUN palier", () => {

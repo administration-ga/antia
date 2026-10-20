@@ -2,12 +2,12 @@
   "nav": {
     "label": "Public navigation",
     "footer": "Information and rights",
-    "discover": "Discover",
+    "discover": "Explore",
     "provinces": "Provinces",
     "createAccount": "Create an account",
     "transparency": "Transparency",
     "enter": "Sign in",
-    "myFeed": "My feed",
+    "myFeed": "Home",
     "about": "About",
     "legal": "Legal notice",
     "privacy": "Privacy",
@@ -44,7 +44,7 @@
     "next": "Next page"
   },
   "discover": {
-    "title": "Discover the network",
+    "title": "Explore the network",
     "lead": "Explore a province or topic and read contributions their authors chose to make public.",
     "member": "Open the member view",
     "trends": "Measured topics",

@@ -1,7 +1,7 @@
 "use client"
 
 /** Destination Messages P05, réutilisant les vues et les droits du moteur. */
-import { useNetwork, useRoutes } from "@antsia/api/network"
+import { useNetwork, useNetworkNavigationLayout, useRoutes } from "@antsia/api/network"
 import { Link, usePathname, useRouter, useSearchParams } from "@antsia/api/routing"
 import { useEffect, useMemo, useState, type ReactNode } from "react"
 import { useTranslation } from "react-i18next"
@@ -27,6 +27,8 @@ import { SOURCE_AGENT } from "./messagerie-source"
 import { MessagerieStyles } from "./messagerie-styles"
 import type { MessagerieNav } from "./messagerie-views"
 import { useInfosPanneau } from "./use-infos-panneau"
+import { ICOM_WORKSPACE_CSS } from "./icom-workspace-styles"
+import { useIcomWorkspaceWide } from "./use-icom-workspace"
 
 /** Identité du dock existant : seule sa surface change, jamais la session d'appel. */
 const CALL_HOST_ID = "icom-agent"
@@ -41,6 +43,7 @@ export function IcomMessagesPage({ conversationKey = null, compose, isMobile, co
 }) {
 	const { t } = useTranslation("messagerie")
 	const { networkId, personId } = useNetwork()
+	const { adaptive } = useNetworkNavigationLayout()
 	const routes = useRoutes()
 	const router = useRouter()
 	const pathname = usePathname()
@@ -57,17 +60,23 @@ export function IcomMessagesPage({ conversationKey = null, compose, isMobile, co
 		if (!hasDetail) writeListState(scope, { view })
 	}, [scope, view, hasDetail])
 	const nav = useMemo<MessagerieNav>(() => ({
-		openConversation: (key) => router.push(conversationHref(key, base) ?? base, { scroll: false }),
+		openConversation: (key) => {
+			writeListState(scope, { returnFocusKey: key })
+			router.push(conversationHref(key, base) ?? base, { scroll: false })
+		},
 		openCompose: () => router.push(composeHref(base), { scroll: false }),
 		openComposeGroupe: () => router.push(composeGroupeHref(base), { scroll: false }),
 		back: () => router.push(icomViewHref(readListState(scope).view, base), { scroll: false }),
 	}), [router, base, scope])
 	const [callHost, setCallHost] = useState<HTMLDivElement | null>(null)
+	const [workspace, setWorkspace] = useState<HTMLElement | null>(null)
+	const workspaceWide = useIcomWorkspaceWide(workspace, adaptive)
+	const callHostVisible = !adaptive || hasDetail || workspaceWide
 	const callMode = useCallHostMode(CALL_HOST_ID)
 	useEffect(() => {
-		if (isMobile || !callHost) return
+		if (isMobile || !callHost || !callHostVisible) return
 		return registerCallHost({ id: CALL_HOST_ID, scopes: ["personnel"], pose: "medium", element: callHost })
-	}, [callHost, isMobile])
+	}, [callHost, isMobile, callHostVisible])
 	const invitation = searchParams.get(INVITATION_GROUPE_PARAM)
 	const commercialId = conversationKey ? parseCommercialKey(conversationKey) : null
 	const contextualId = conversationKey ? parseContextualConversationKey(conversationKey) : null
@@ -84,11 +93,12 @@ export function IcomMessagesPage({ conversationKey = null, compose, isMobile, co
 		/>
 		: <div className="icom-page-empty"><h2>{t("icomViews.chooseConversation")}</h2><p>{t("icomViews.chooseConversationBody")}</p></div>
 
-	if (isMobile && hasDetail) return <><MessagerieStyles /><div className="msg-panel" data-variant="page" data-fill="screen" data-open="true">{detail}</div></>
+	if (isMobile && hasDetail) return <><MessagerieStyles />{adaptive ? <style>{ICOM_WORKSPACE_CSS}</style> : null}<div className={adaptive ? "icom-adaptive-phone-detail" : undefined}><div className="msg-panel" data-variant="page" data-fill="screen" data-open="true">{detail}</div></div></>
 
 	return <>
 		<MessagerieStyles />
-		<section className="icom-messages-page" data-mobile={isMobile ? "true" : "false"} aria-label={t("icomViews.title")}>
+		{adaptive ? <style>{ICOM_WORKSPACE_CSS}</style> : null}
+		<section ref={setWorkspace} className="icom-messages-page" data-layout={adaptive ? "adaptive" : undefined} data-has-detail={hasDetail ? "true" : "false"} data-mobile={isMobile ? "true" : "false"} aria-label={t("icomViews.title")}>
 			<header className="icom-page-heading"><h1>{t("icomViews.title")}</h1><div className="icom-page-heading-links"><Link href={routes.home()}>{t("icomViews.backToFeed")}</Link>{routes.me ? <Link href={routes.me()}>{t("icomViews.myProfile")}</Link> : null}</div></header>
 			<div className="icom-page-columns">
 				<aside className="icom-page-list" aria-label={t("icomViews.navigation")}>
@@ -112,6 +122,6 @@ export function IcomMessagesPage({ conversationKey = null, compose, isMobile, co
 				</div> : null}
 			</div>
 		</section>
-		{isMobile ? <><ReseauMobileStyles /><IcomMobileTabBar active={ICOM_VIEWS.find((item) => item.id === view)?.brique ?? "ichat"} badges={{ unreadMessages: nonLus.total.total }} /></> : null}
+		{isMobile && !adaptive ? <><ReseauMobileStyles /><IcomMobileTabBar active={ICOM_VIEWS.find((item) => item.id === view)?.brique ?? "ichat"} badges={{ unreadMessages: nonLus.total.total }} /></> : null}
 	</>
 }
