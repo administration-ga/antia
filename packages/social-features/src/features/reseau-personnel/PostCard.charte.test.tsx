@@ -176,6 +176,13 @@ describe("PostCard « charte » — l'évènement annoncé", () => {
     expect(mocks.calls).toEqual([])
   })
 
+  it("un moteur qui ne sert pas encore l'identifiant de la ligne : aucune réponse proposée", () => {
+    const { myParticipationId: _omitted, ...previous } = event
+    renderCharte({ ...base, media: [], event: previous as NonNullable<PostCardPost["event"]> })
+    const card = screen.getByRole("region", { name: "Évènement annoncé" })
+    expect(within(card).queryAllByRole("button")).toHaveLength(0)
+  })
+
   it.each([
     { label: "un non-invité ou une page", patch: { myParticipation: null, myParticipationId: null } },
     { label: "une réponse déjà donnée", patch: { myParticipation: "accepted" as const } },

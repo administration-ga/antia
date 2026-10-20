@@ -1135,7 +1135,8 @@ function CharteEventBlock({ event, now }: { event: PostEvent; now: number }) {
   const [setAside, setSetAside] = useState(false)
   const [busy, setBusy] = useState(false)
   const range = formatEventRange(event.startAt, event.endAt, i18n.language, timeZone)
-  const participationId = event.myParticipationId
+  // Un moteur antérieur à l'ADR-0028 ne sert pas encore ce champ : sans identifiant, aucune réponse proposée.
+  const participationId = event.myParticipationId ?? null
   const answerable =
     participationId !== null &&
     event.status !== "cancelled" &&
