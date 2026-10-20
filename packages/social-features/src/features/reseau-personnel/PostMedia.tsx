@@ -122,7 +122,7 @@ export function PostMedia({
   if (video) {
     // Retenue par la garde : la place reste, la raison se dit — jamais un
     // lecteur pointé sur rien.
-    if (video.url === null) {
+    if (video.url === null || video.withheld !== null) {
       return (
         <WithheldTile
           text={t(withheldKey(video.withheld))}
@@ -713,7 +713,7 @@ function ImageTile({
   const [failed, setFailed] = useState(false)
 
   // Retenue par la garde des fichiers : la raison, à la place de l'image.
-  if (item.url === null) {
+  if (item.url === null || item.withheld !== null) {
     return (
       <WithheldTile
         text={t(withheldKey(item.withheld))}

@@ -199,6 +199,8 @@ export const createAuth = (ctx: GenericCtx<DataModel>, requestOrigin?: string | 
   type OAuthConfig = Parameters<typeof genericOAuth>[0]["config"][number]
   const idnProvider: OAuthConfig[] = idnOptions ? [{
     ...idn({ ...idnOptions, scopes: ["openid", "profile", "email"] }),
+    // Une nouvelle entrée doit permettre une autre identité, même si IDN garde son SSO.
+    prompt: "login",
     // Callback central stable, aussi pendant l'échange sans en-tête Origin.
     redirectURI: `${siteUrl}/api/auth/oauth2/callback/idn`,
     mapProfileToUser: async (profile: Record<string, unknown>) => {
