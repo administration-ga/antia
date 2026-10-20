@@ -1,5 +1,5 @@
 {
-  "version": "social-responsive-20261021-49d2898716c2ea18",
+  "version": "social-responsive-20261021-e34875c094de4b4f",
   "scope": "ANTSIA Web and all six runtime workspaces",
   "backend": {
     "suites": 176,
@@ -39,7 +39,7 @@
   },
   "typecheck": "Convex, tests and six ANTSIA workspaces passed; final Next build includes TypeScript",
   "lint": "Six ANTSIA workspaces passed, zero errors; pre-existing warnings retained. Scoped modified files pass strict lint.",
-  "build": "Next 16.2.9 final production build passed",
+  "build": "Final Next16.4.2 production build passed, TypeScript included",
   "globalVerify": {
     "status": "failed_external",
     "reason": "DIASPORALE app still narrows withheld codes and does not admit already published fileScanUnavailable",
@@ -76,5 +76,13 @@
       "url": "https://antsia-5383efgvc-okatechs-projects-f0102678.vercel.app",
       "backend": "diligent-avocet-585"
     }
+  },
+  "performanceIntegration": {
+    "frozenLockInstall": true,
+    "apiConfigTests": 7,
+    "appSuites": 101,
+    "appTests": 763,
+    "build": "Next16.4.2 passed, TypeScript included",
+    "lint": "6 ANTSIA workspaces passed, zero errors; historical warnings retained"
   }
 }

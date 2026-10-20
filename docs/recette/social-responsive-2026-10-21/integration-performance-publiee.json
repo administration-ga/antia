@@ -1,0 +1,39 @@
+{
+  "previousCandidate": "social-responsive-20261021-49d2898716c2ea18",
+  "candidate": "social-responsive-20261021-e34875c094de4b4f",
+  "baseline": {
+    "version": "cache-performance-20261021-e3fab6816eb3f79f",
+    "deploymentId": "dpl_6VZqPxNpTmJJvd6LU36ho5GCZ3Rk",
+    "url": "https://antsia-hrut2ep6i-okatechs-projects-f0102678.vercel.app",
+    "backend": "diligent-avocet-585",
+    "commit": "2fc457a505d4bafc1909c72072d9e5b4f74fd7c6"
+  },
+  "changedPublishedFiles": {
+    "packages/api/next-config.mjs": "d1816782a677b9948782a50f720dcc76f0179659b65e1d2dd9d02b4a74195640",
+    "packages/api/next-config.test.ts": "7571523ee716c25b1bc34e1171f71cbad30d682378c0c8bbc762f9dd85b2b8ec",
+    "apps/antsia_ga/next.config.ts": "1364473e1eb8ae3f63287e9477617d7aceda545da1b6ccef66accf67929b3952",
+    "apps/antsia_ga/src/instrumentation.ts": "27595a8a88794c944159ad7e13ae1faf125ca0418554cbfc4644ae3337a935c4",
+    "apps/antsia_ga/src/instrumentation.test.ts": "ef85a81d15586b419edf82735a44d3d1bd7024ae43769df6aefb776054d11deb",
+    "apps/antsia_ga/src/i18n/server.ts": "6e594d147bef07714200750bbc53111c6180619637433caf0a781c863513445b",
+    "apps/antsia_ga/src/i18n/server.test.ts": "4bbe27399fae9fdf76c3bd5fb74fbb8db51273b73815fb1feacfef5ed4cc8f21",
+    "docs/demo-content/cache-developpement-2026-10-20.md": "39a3715f17f0d8334018f42c3e88efd33934dafe52100753e7c06996802df67e",
+    "docs/demo-content/performance-cache-2026-10-21.md": "ddda0562c87a526b5dfab9d8a3665f1eb1e45bf324ae29c3036c13b35d85d921",
+    "docs/demo-content/recette/cache-gc-20261020.png": "f50ce0e43062b6ec3ff40056ee4fbef4a2f83a33834703e0b5c8604059091893",
+    "docs/demo-content/recette/performance-cache-20261021.png": "8a0293c6b92e7f0bc29cef3b3133f16387e87427ddabfb55a3d914c99f544f88",
+    "package.json": "d576b1fda377108a3c504a81e6436887dc63f67abf657e0f0b9481ccf23bd6e7",
+    "bun.lock": "edda6dba476fac0c89599e1d9d46fb6491acc54c84ce72a954c596c630c4981a",
+    "apps/antsia_ga/src/lib/public-catalog-data.ts": "40ad5e13e84ba4b9f711bf2da3c233897cb4a9bfc3fd1352d032abf8fc83c982",
+    "apps/antsia_ga/src/lib/public-catalog-data.test.ts": "05b2123b6313711065594ccb9d3fbba9323cb8723780a448a85b2777e85ba8ba"
+  },
+  "backendDelta": [],
+  "overlapWithUxChanges": [],
+  "nextVersion": "16.4.2",
+  "validation": {
+    "frozenLockInstall": true,
+    "apiConfigTests": 7,
+    "appSuites": 101,
+    "appTests": 763,
+    "build": "Next16.4.2 passed, TypeScript included",
+    "lint": "6 ANTSIA workspaces passed, zero errors; historical warnings retained"
+  }
+}

@@ -119,17 +119,17 @@
     "apps/antsia_ga/src/i18n/locales/en/antsia.json"
   ],
   "excluded": [
-    "Next/cache evolution",
     "native calls",
     "P19 commerce lifecycle",
     "DIASPORALE changes",
     "demo accounts/seeds"
   ],
   "productionBaseline": {
-    "version": "session-coordination-20261021-03548f8c8f01470e",
-    "deploymentId": "dpl_UxMyjdTakahwkCjfRSyy7PFF9gAL",
-    "url": "https://antsia-5383efgvc-okatechs-projects-f0102678.vercel.app",
-    "backend": "diligent-avocet-585"
+    "version": "cache-performance-20261021-e3fab6816eb3f79f",
+    "deploymentId": "dpl_6VZqPxNpTmJJvd6LU36ho5GCZ3Rk",
+    "url": "https://antsia-hrut2ep6i-okatechs-projects-f0102678.vercel.app",
+    "backend": "diligent-avocet-585",
+    "commit": "2fc457a505d4bafc1909c72072d9e5b4f74fd7c6"
   },
   "preservedPublishedFiles": [
     "packages/social-features/src/shell/presence/use-presence-heartbeat.ts",
@@ -140,15 +140,38 @@
     "apps/antsia_ga/src/lib/session-bridge-client.ts",
     "apps/antsia_ga/src/lib/session-bridge-client.test.ts",
     "apps/antsia_ga/src/lib/sign-out.ts",
-    "apps/antsia_ga/src/lib/sign-out.test.ts"
+    "apps/antsia_ga/src/lib/sign-out.test.ts",
+    "packages/api/next-config.mjs",
+    "packages/api/next-config.test.ts",
+    "apps/antsia_ga/next.config.ts",
+    "apps/antsia_ga/src/instrumentation.ts",
+    "apps/antsia_ga/src/instrumentation.test.ts",
+    "apps/antsia_ga/src/i18n/server.ts",
+    "apps/antsia_ga/src/i18n/server.test.ts",
+    "docs/demo-content/cache-developpement-2026-10-20.md",
+    "docs/demo-content/performance-cache-2026-10-21.md",
+    "docs/demo-content/recette/cache-gc-20261020.png",
+    "docs/demo-content/recette/performance-cache-20261021.png",
+    "package.json",
+    "bun.lock",
+    "apps/antsia_ga/src/lib/public-catalog-data.ts",
+    "apps/antsia_ga/src/lib/public-catalog-data.test.ts"
   ],
   "filteredTests": {
     "apps/antsia_ga/src/components/access-home-screen.test.tsx": "Seulement les deux attentes de lexique U01, présentes dans la vraie source ; couverture de démonstration publiée conservée."
   },
-  "previousProductionBaseline": {
-    "version": "presence-logout-20261021-fb1f057a51a7bab5",
-    "deploymentId": "dpl_JDZo2WJXF1XuwNQcHwHr3YSJmVJd",
-    "url": "https://antsia-1y8ijnvmw-okatechs-projects-f0102678.vercel.app",
-    "backend": "diligent-avocet-585"
-  }
+  "previousProductionBaselines": [
+    {
+      "version": "presence-logout-20261021-fb1f057a51a7bab5",
+      "deploymentId": "dpl_JDZo2WJXF1XuwNQcHwHr3YSJmVJd",
+      "url": "https://antsia-1y8ijnvmw-okatechs-projects-f0102678.vercel.app",
+      "backend": "diligent-avocet-585"
+    },
+    {
+      "version": "session-coordination-20261021-03548f8c8f01470e",
+      "deploymentId": "dpl_UxMyjdTakahwkCjfRSyy7PFF9gAL",
+      "url": "https://antsia-5383efgvc-okatechs-projects-f0102678.vercel.app",
+      "backend": "diligent-avocet-585"
+    }
+  ]
 }
