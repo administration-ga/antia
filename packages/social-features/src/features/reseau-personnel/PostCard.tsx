@@ -487,10 +487,10 @@ function PostCardContent({ post, now, onTag, onMention, offer }: PostCardProps) 
           </div>
   )
 
-  const liveBlock = post.live ? <Link href={routes.conference(post.live.sessionId)} className="mt-3 flex min-h-11 items-center justify-between gap-[0.75rem] rounded-[0.75rem] border border-[var(--esp-primitive-surface-border,var(--border))] bg-muted p-4"><span>{post.live.title}</span><span>{t(`direct:status.${post.live.status}`)}</span></Link> : null
+  const liveBlock = post.live ? <Link href={routes.conference(post.live.sessionId)} className="mt-3 flex min-h-11 items-center justify-between gap-3 rounded-xl border border-border bg-muted p-4"><span>{post.live.title}</span><span>{t(`direct:status.${post.live.status}`)}</span></Link> : null
 
   const eventBlock = post.event !== null ? (
-          <section aria-label={t("post.event.label")} className="grid gap-2 rounded-[0.75rem] border border-[var(--esp-primitive-surface-border,var(--border))] bg-muted p-4">
+          <section aria-label={t("post.event.label")} className="grid gap-2 rounded-xl border border-border bg-muted p-4">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <span className="text-xs font-semibold text-muted-foreground">{t("post.event.label")}</span>
               <span className={post.event.status === "cancelled" ? "text-xs font-semibold text-destructive" : "text-xs font-semibold text-muted-foreground"}>
