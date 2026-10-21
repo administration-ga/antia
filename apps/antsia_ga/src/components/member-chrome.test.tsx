@@ -22,7 +22,7 @@ vi.mock("@antsia/api/network", () => ({
 }))
 vi.mock("@/components/network-shell", () => ({ useMemberSession: () => ({ person: { published: true, handle: "awa.ndong", displayName: "Awa Ndong", badges: [] } }) }))
 vi.mock("@antsia/social-features/notifications", () => ({ NotificationBell: () => <span data-bell="" /> }))
-vi.mock("@/components/identity-tools", () => ({ IdentityTools: () => <span data-identity="" /> }))
+vi.mock("@/components/identity-tools", () => ({ IdentityTools: ({ account }: { account?: boolean }) => <span data-identity={account ? "account" : ""} /> }))
 vi.mock("@/lib/sign-out", () => ({ signOutAndRedirect: vi.fn() }))
 vi.mock("@antsia/social-features/reseau-personnel", () => ({
   ReseauCreateAction: () => <button type="button" data-create-action="">Créer</button>,
@@ -315,4 +315,21 @@ describe("MemberPage — transition adaptive sans remontage du contenu", () => {
       }
     }
   })
+
+describe("MemberTopBar — U09 (épure) sous l'opt-in adaptatif", () => {
+  it("marque, cloche et menu du compte : ni bascule d'apparence, ni sortie, ni Créer au bureau en double", () => {
+    state.adaptive = true
+    const html = renderToStaticMarkup(<MemberTopBar />)
+    expect(hrefsOf(html)).toEqual([routes.feed()])
+    expect(html).toContain("data-bell")
+    expect(html).toContain('data-identity="account"')
+    expect(html).not.toContain("data-appearance")
+    expect(html).not.toContain("nav.signOut")
+    // Le menu du compte n'est montré qu'à partir de 768 px ; au téléphone, Profil le porte.
+    expect(html).toContain("hidden min-[768px]:inline-flex")
+    // Créer : au téléphone seulement, devant la marque ; le rail le porte au bureau.
+    expect(html).toContain('class="min-[768px]:hidden"><button type="button" data-create-action=""')
+    expect(html).toContain("antsia-topbar-row")
+  })
+})
 })

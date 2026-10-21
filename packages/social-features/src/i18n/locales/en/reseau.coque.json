@@ -34,7 +34,11 @@
     "seeRequests": "See requests",
     "postUnavailable": "This post is no longer available.",
     "searchEmpty": "No post matches this search.",
-    "loadMore": "See more posts"
+    "loadMore": "See more posts",
+    "composerLabel": "Post to the feed",
+    "composerPrompt": "What's on your mind, {{name}}?",
+    "composerPromptAnonymous": "What's on your mind?",
+    "composerPhoto": "Photo"
   },
   "reseauMobileHeader": {
     "wordmark": "Network",

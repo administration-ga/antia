@@ -47,10 +47,10 @@
     "reportRecorded": "Le signalement a été transmis à la modération.",
     "states": {
       "requested": "Demande en attente",
-      "accepted": "Conversation acceptée",
+      "accepted": "Discussion acceptée",
       "declined": "Demande refusée",
       "blocked": "Échanges bloqués",
-      "closed": "Conversation close"
+      "closed": "Discussion close"
     },
     "stateHelp": {
       "requested": "Votre premier texte constitue une demande. Les échanges, pièces jointes et appels restent fermés jusqu’à son acceptation par la boutique.",
@@ -94,7 +94,7 @@
       "myRequests": "Mes demandes"
     },
     "calls": {
-      "origin": "Conversation avec une boutique",
+      "origin": "Discussion avec une boutique",
       "consent": "J’accepte les appels audio et vidéo dans cette conversation.",
       "help": "Cet accord est personnel et révocable. L’autre partie doit aussi accepter ; sa disponibilité et ses préférences sont vérifiées au démarrage.",
       "respondent": "Personne à appeler dans la boutique",

@@ -1,5 +1,17 @@
-/** U02 : styles propres à ANTSIA ; les thèmes et les seuils des autres réseaux restent intacts. */
+/**
+ * U02 : styles propres à ANTSIA ; les thèmes et les seuils des autres réseaux restent intacts.
+ * U09 (épure) : un seul cadre pour toutes les pages de membre ET le fil (reseau-adaptive-styles
+ * du moteur) — 1 400 px au plus, marges 12/16/24 px, écart 16/24 px, 24 px en tête dès 768 px —,
+ * et la barre du haut aligne ses bords sur ce cadre.
+ */
 const MEMBER_NAVIGATION_CSS = `
+  .antsia-topbar-row {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 1400px;
+    margin-inline: auto;
+    padding-inline: 12px;
+  }
   .antsia-member-frame {
     box-sizing: border-box;
     width: 100%;
@@ -32,6 +44,7 @@ const MEMBER_NAVIGATION_CSS = `
     display: flex;
   }
   @media (min-width: 768px) {
+    .antsia-topbar-row { padding-inline: 16px; }
     .antsia-member-frame { padding-inline: 16px; }
     .antsia-member-frame[data-with-navigation] {
       display: grid;
@@ -62,7 +75,8 @@ const MEMBER_NAVIGATION_CSS = `
     .antsia-member-workspace .icom-messages-page[data-mobile="true"] { height: 100%; }
   }
   @media (min-width: 1200px) {
-    .antsia-member-frame { padding-inline: 20px; }
+    .antsia-topbar-row { padding-inline: 24px; }
+    .antsia-member-frame { padding-inline: 24px; }
     .antsia-member-frame[data-with-navigation] {
       grid-template-columns: 248px minmax(0, 1fr);
       gap: 24px;

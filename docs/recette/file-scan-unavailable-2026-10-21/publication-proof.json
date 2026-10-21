@@ -1,0 +1,46 @@
+{
+  "mainCommit": "0773370b0a85c038cdaf14f05290382835ba6305",
+  "diasporaleCommit": "ad898b57a46a055edab6f39f8c2b7df49bc210e8",
+  "sourceFingerprint": "c62c4a1c039c34d0fb2267384373f0d7125b61d9011f00948a56b01ea9af2a43",
+  "sourceFiles": 2887,
+  "promotedAt": "2026-10-21T17:43:02Z",
+  "production": {
+    "id": "dpl_4GBYbcaziPMAYd2nszD914NnrUWa",
+    "url": "https://antsia-15gqfbcqx-okatechs-projects-f0102678.vercel.app",
+    "version": "main-0773370b0a85-production",
+    "readyState": "READY",
+    "durationSeconds": 112.9
+  },
+  "demo": {
+    "id": "dpl_CuVN1DXjaypVuxq1vngzjgUyXLrB",
+    "url": "https://antsia-demo-rb0npgaxo-okatechs-projects-f0102678.vercel.app",
+    "version": "main-0773370b0a85-demo",
+    "readyState": "READY",
+    "durationSeconds": 147.6
+  },
+  "serverSecretsInheritedWithoutReading": true,
+  "convexDeployed": false,
+  "prePromotion": {
+    "childDirect": "302 vers le SSO Vercel",
+    "productionDirect": "302 vers le SSO Vercel",
+    "oldDemoAlias": 404,
+    "publicVersionBefore": "main-5851d025af92-production"
+  },
+  "publicHealth": {
+    "production": "200 main-0773370b0a85-production",
+    "demo": "200 main-0773370b0a85-demo"
+  },
+  "onlineCheck": {
+    "page": "/demo/actus (compte démo fictif Awa MBA)",
+    "widths": [
+      390,
+      834,
+      1440
+    ],
+    "translatedMessageShown": true,
+    "rawKeyShown": false,
+    "horizontalOverflow": false,
+    "consoleErrorsOrWarnings": 0
+  },
+  "rollbackTarget": "https://antsia-kcpanvsq4-okatechs-projects-f0102678.vercel.app (main-5851d025af92-production)"
+}

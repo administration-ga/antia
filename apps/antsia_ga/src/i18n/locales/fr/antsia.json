@@ -248,7 +248,7 @@
     "erasePurchasesLink": "Ouvrir Mes achats"
   },
   "settings": {
-    "title": "Paramètres",
+    "title": "Réglages",
     "lead": "Réglez l’affichage d’{{brand}}, sa langue et votre fuseau horaire.",
     "displayTitle": "Affichage",
     "displayLead": "Votre thème est enregistré sur votre compte et vous suit sur vos autres appareils. L’apparence et le motif de fond restent propres à cet appareil.",
@@ -431,5 +431,9 @@
         "description": "Modératrice du réseau."
       }
     }
+  },
+  "account": {
+    "menu": "Mon compte",
+    "appearance": "Apparence"
   }
 }

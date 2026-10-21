@@ -25,7 +25,7 @@
  * geste principal de l'en-tête.
  */
 
-import { useNetwork, useRoutes } from "@antsia/api/network"
+import { useNetwork, useNetworkNavigationLayout, useRoutes } from "@antsia/api/network"
 import { Link } from "@antsia/api/routing"
 import { Icon, TextInput } from "@antsia/ui"
 import { type FormEvent, type KeyboardEvent, useEffect, useRef, useState } from "react"
@@ -61,7 +61,10 @@ export function ReseauMobileHeader({ onSearch, searchQuery, profileHref, avatarU
   /* L'en-tête des chartes (ADR-0028) : recherche, cloche, messages — la porte
      des messages reste même quand la barre basse en porte une. */
   const charte = postPresentation === "charte"
-  const showMessagesDoor = charte || !destinations
+  /* U09 (épure, opt-in adaptatif) : Messages est une place de la barre basse ;
+     l'en-tête n'en répète pas la porte ni la pastille. */
+  const { adaptive } = useNetworkNavigationLayout()
+  const showMessagesDoor = !adaptive && (charte || !destinations)
   /**
    * Le brouillon est LOCAL, semé par la recherche en cours. Remonter chaque
    * frappe au parent relancerait la query à chaque lettre : la recherche se

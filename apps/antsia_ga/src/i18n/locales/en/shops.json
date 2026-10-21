@@ -47,10 +47,10 @@
     "reportRecorded": "The report was sent to moderation.",
     "states": {
       "requested": "Request pending",
-      "accepted": "Conversation accepted",
+      "accepted": "Chat accepted",
       "declined": "Request declined",
       "blocked": "Exchanges blocked",
-      "closed": "Conversation closed"
+      "closed": "Chat closed"
     },
     "stateHelp": {
       "requested": "Your first text is a request. Exchanges, attachments and calls stay closed until the shop accepts it.",
@@ -94,7 +94,7 @@
       "myRequests": "My requests"
     },
     "calls": {
-      "origin": "Shop conversation",
+      "origin": "Shop chat",
       "consent": "I accept audio and video calls in this conversation.",
       "help": "This consent is personal and revocable. The other side must also accept; availability and preferences are checked when starting a call.",
       "respondent": "Person to call at the shop",

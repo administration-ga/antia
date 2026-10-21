@@ -198,6 +198,11 @@ export function ReseauMenuRail({
 	const shopsLabel = navigationLabels?.shops?.trim() ?? ""
 	const shopsHref = adaptive && shopsLabel.length > 0 ? routes.shops?.() ?? null : null
 	const pathname = usePathname()
+	/* U09 — épure (opt-in adaptatif d'ANTSIA) : le rail ne garde que les
+	   destinations, Boutiques, Créer et Réglages. « Dans le réseau » vit dans
+	   Explorer, l'identité dans la destination Profil (sa photo), l'apparence
+	   dans le menu du compte : aucune entrée n'y est répétée. */
+	const epure = adaptive && destinationRoutes !== null
 
 	/* L'identité mène au profil — c'est le geste qu'on cherche en premier dans
 	   un menu de réseau social. Sous la navigation par destinations, elle coiffe
@@ -232,19 +237,21 @@ export function ReseauMenuRail({
 			{destinationRoutes !== null ? (
 				<RailDestinations
 					routes={destinationRoutes}
-					identity={identity}
+					identity={epure ? null : identity}
+					profileAvatar={epure ? { displayName, avatarUrl: person?.avatar?.url ?? null } : null}
+					shops={epure && shopsHref !== null ? { href: shopsHref, label: shopsLabel } : null}
 					handle={handle}
 					onSelectTab={onSelectTab}
 					onCreate={onCreate}
 					current={current}
 				/>
 			) : null}
-			<nav aria-label={t("reseauMenuRail.navLabel")} style={{ padding: 12 }}>
+			<nav aria-label={t("reseauMenuRail.navLabel")} style={epure ? { padding: 12, borderTop: "1px solid var(--esp-surface-border, var(--border))", marginTop: 12 } : { padding: 12 }}>
 				{/* Les volets sous les destinations : un titre les sépare, pour
 				    qu'une liste continue ne se lise pas comme un seul niveau. */}
-				{destinationRoutes === null ? identity : <h2 className="rmr-section-title" style={SECTION_TITLE_STYLE}>{t("reseauDestinations.voletsTitle")}</h2>}
+				{epure ? null : destinationRoutes === null ? identity : <h2 className="rmr-section-title" style={SECTION_TITLE_STYLE}>{t("reseauDestinations.voletsTitle")}</h2>}
 
-				<ul
+				{epure ? null : <ul
 					style={{
 						listStyle: "none",
 						margin: "8px 0 0",
@@ -301,9 +308,9 @@ export function ReseauMenuRail({
 							</li>
 						)
 					})}
-				</ul>
+				</ul>}
 
-				{shopsHref !== null ? (
+				{!epure && shopsHref !== null ? (
 					<Link href={shopsHref} style={{ ...LINK_ITEM_STYLE, marginTop: 14 }} className="rmr-item focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" title={shopsLabel}>
 						<Store size={18} aria-hidden="true" />
 						<span className="rmr-label" style={{ flex: 1, fontSize: 13.5, fontWeight: 600 }}>{shopsLabel}</span>
@@ -347,7 +354,7 @@ export function ReseauMenuRail({
 					</>
 				) : null}
 
-				{shortcuts.length > 0 ? (
+				{!epure && shortcuts.length > 0 ? (
 					<section style={{ marginTop: 14 }}>
 						<h2
 							className="rmr-section-title"
@@ -398,7 +405,7 @@ export function ReseauMenuRail({
 					<Link
 						href={settingsHref}
 						aria-current={pathname === settingsHref ? "page" : undefined}
-						style={{ ...(pathname === settingsHref ? SELECTED_LINK_ITEM_STYLE : LINK_ITEM_STYLE), marginTop: 14 }}
+						style={{ ...(pathname === settingsHref ? SELECTED_LINK_ITEM_STYLE : LINK_ITEM_STYLE), marginTop: epure ? 0 : 14 }}
 						className="rmr-item focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
 						title={adaptive ? t("reseauMenuRail.settings") : undefined}
 					>
@@ -408,7 +415,7 @@ export function ReseauMenuRail({
 				) : null}
 				{/* Un seul contrôle, gardé dans le rail large. En compact, sa porte
 				    mène aux vrais réglages sans panneau débordant du scroller. */}
-				{adaptive && settingsHref !== null ? (
+				{epure && settingsHref !== null ? null : adaptive && settingsHref !== null ? (
 					<>
 						<div className="rmr-appearance-controls"><AppearanceControl /></div>
 						<Link href={settingsHref} style={{ ...LINK_ITEM_STYLE, marginTop: 8 }} className="rmr-item rmr-appearance-link focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" title={t("shell:appearance.label")}>
@@ -449,6 +456,8 @@ export function ReseauMenuRail({
 function RailDestinations({
 	routes,
 	identity,
+	profileAvatar = null,
+	shops = null,
 	handle,
 	onSelectTab,
 	onCreate,
@@ -456,6 +465,10 @@ function RailDestinations({
 }: {
 	routes: ReseauDestinationRoutes
 	identity: ReactNode
+	/** U09 : la photo du membre tient lieu d'icône à Profil (plus de carte d'identité au-dessus). */
+	profileAvatar?: { displayName: string; avatarUrl: string | null } | null
+	/** U09 : Boutiques suit les destinations, avant Créer. */
+	shops?: { href: string; label: string } | null
 	handle: string | null
 	onSelectTab?: (tab: ReseauAgentTabId) => void
 	onCreate?: (kind: CreationKind) => void
@@ -490,7 +503,11 @@ function RailDestinations({
 					const badge = destination.id === "messages" ? unreadBadge : null
 					const content = (
 						<>
-							<DestinationIcon aria-hidden="true" size={18} />
+							{destination.id === "profil" && profileAvatar !== null ? (
+								<span aria-hidden="true" style={{ display: "inline-flex", flex: "0 0 auto" }}>
+									<Avatar displayName={profileAvatar.displayName} avatarUrl={profileAvatar.avatarUrl} size={22} />
+								</span>
+							) : <DestinationIcon aria-hidden="true" size={18} />}
 							<span className="rmr-label" style={{ flex: 1, fontSize: 13.5, fontWeight: 600 }}>{destination.label ?? t(destination.labelKey)}</span>
 							{badge !== null ? (
 								<span className="rmr-badge"><Badge tone="primary" size="sm" style={COUNT_BADGE_STYLE}>
@@ -545,6 +562,12 @@ function RailDestinations({
 					)
 				})}
 			</ul>
+			{shops !== null ? (
+				<Link href={shops.href} style={{ ...LINK_ITEM_STYLE, marginTop: 2 }} className="rmr-item focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" title={adaptive ? shops.label : undefined}>
+					<Store size={18} aria-hidden="true" />
+					<span className="rmr-label" style={{ flex: 1, fontSize: 13.5, fontWeight: 600 }}>{shops.label}</span>
+				</Link>
+			) : null}
 			{routes.clips !== undefined ? <Button ref={triggerRef} className="rmr-item" title={t("reseauDestinations.creer")} variant="ghost" aria-haspopup="dialog" aria-expanded={open} onClick={() => setOpen(true)} style={{ ...ITEM_STYLE, marginTop: 8 }}>
 				<CreateIcon aria-hidden="true" size={18} />
 				<span className="rmr-label" style={{ flex: 1, fontSize: 13.5, fontWeight: 600 }}>{t("reseauDestinations.creer")}</span>

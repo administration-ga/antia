@@ -64,6 +64,7 @@ import { Suspense, useCallback } from "react"
 import { useTranslation } from "react-i18next"
 
 import { MessagerieDock } from "../features/messagerie/MessagerieDock"
+import { FeedComposerPrompt } from "./FeedComposerPrompt"
 import { BookmarksPanel } from "../features/reseau-personnel/BookmarksPanel"
 import { EvenementsPanel } from "../features/reseau-personnel/EvenementsPanel"
 import { EvenementsRail } from "../features/reseau-personnel/EvenementsRail"
@@ -725,7 +726,10 @@ function ReseauAgentPageInner({ adaptive }: { adaptive: boolean }) {
               {/* La carte ne porte que l'identité, dans ses trois états —
                   chargement compris : elle ne doit jamais sauter quand la
                   réponse arrive. */}
-              <ProfileMiniCard
+              {/* U09 (épure) : sous l'opt-in adaptatif, la porte de publication
+                  remplace la carte d'identité — Profil, Créer et Messages sont
+                  déjà des destinations du rail. */}
+              {adaptive ? <FeedComposerPrompt onPublish={() => creation.openCreation("publication")} onLive={liveAvailable ? () => creation.openCreation("conference") : null} /> : <ProfileMiniCard
                 cover={showCover(RESEAU_HEADER_VARIANT, shownTab)}
                 action={
                   <div className="rp-profile-actions" style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
@@ -749,7 +753,7 @@ function ReseauAgentPageInner({ adaptive }: { adaptive: boolean }) {
                     <ReseauDesktopIcomLink />
                   </div>
                 }
-              />
+              />}
             </div>
           </div>
 
@@ -1026,7 +1030,8 @@ function ReseauAgentPageInner({ adaptive }: { adaptive: boolean }) {
             une surface autonome ; les modules publics suivent dans le même
             scroller et remontent aussitôt que la carte est détachée. */}
         <aside className="rp-rail-end rp-identity-aside citizen-scrollbar" aria-label={t("reseauAgentPage.railEndLabel")}>
-          <MessagerieDock />
+          {/* U09 : la destination Messages porte la messagerie ; pas de doublon iCom ici. */}
+          {adaptive ? null : <MessagerieDock />}
           {rails.suggestions ? <SuggestionsPanel /> : null}
           {rails.pagesToFollow ? <PagesSuggestionsRail /> : null}
           {rails.events ? <EvenementsRail now={now} /> : null}

@@ -431,5 +431,9 @@
         "description": "Moderator of the network."
       }
     }
+  },
+  "account": {
+    "menu": "My account",
+    "appearance": "Appearance"
   }
 }
