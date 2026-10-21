@@ -85,6 +85,8 @@ function notificationMarker(kind: string): { icon: LucideIcon; background: strin
 	if (kind.includes("event")) return { icon: Calendar, background: "var(--role-commerce-fill, var(--primary-fill))", color: "var(--role-commerce-on, var(--on-fill))" }
 	if (kind.startsWith("live_")) return { icon: Video, background: "var(--primary-fill)", color: "var(--primary-fill-on, var(--on-fill))" }
 	if (kind === "file_withheld" || kind === "moderation_decision" || kind === "attestation_not_confirmed") return { icon: ShieldCheck, background: "var(--role-danger-fill, var(--danger-fill))", color: "var(--role-danger-on, var(--on-fill))" }
+	// SU01d : l'accusé de réception et la décision au déclarant informent, ils n'alertent pas.
+	if (kind === "report_received" || kind === "report_decided") return { icon: ShieldCheck, background: "var(--primary-fill)", color: "var(--primary-fill-on, var(--on-fill))" }
 	if (kind.startsWith("commerce_") || kind === "commercial_contact") return { icon: ShoppingBag, background: "var(--role-commerce-fill, var(--primary-fill))", color: "var(--role-commerce-on, var(--on-fill))" }
 	if (kind === "call_missed" || kind === "voicemail_left") return { icon: Phone, background: "var(--role-message-fill, var(--primary-fill))", color: "var(--role-message-on, var(--on-fill))" }
 	if (kind === "album_published" || kind === "page_post") return { icon: Image, background: "var(--primary-fill)", color: "var(--primary-fill-on, var(--on-fill))" }
@@ -130,7 +132,7 @@ export function NotificationRow({
 	// A system notice must not turn a projected actor into its apparent
 	// author. In particular, page posts keep the page voice, and moderation
 	// notices never acquire a moderator portrait from an incidental actor.
-	const systemVoice = ["page_post", "moderation_decision", "membership_changed", "badge_changed", "file_withheld", "association_event_reminder", "attestation_verified", "attestation_not_confirmed"].includes(item.kind) || item.kind.startsWith("commerce_")
+	const systemVoice = ["page_post", "moderation_decision", "report_received", "report_decided", "membership_changed", "badge_changed", "file_withheld", "association_event_reminder", "attestation_verified", "attestation_not_confirmed"].includes(item.kind) || item.kind.startsWith("commerce_")
 	const actorName = item.actor?.displayName?.trim() || ""
 	const displayName = item.page?.name.trim() || (!systemVoice && actorName && sentence.includes(actorName) ? actorName : "")
 	const nameAt = displayName.length > 0 ? sentence.indexOf(displayName) : -1

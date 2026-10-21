@@ -113,6 +113,9 @@ export function ReportContentDialog({ kind, onClose, onSubmit, allowNote = true 
             }}
           >
             {t("reportContentDialog.description")}
+            {/* SU01d : l'accusé de réception et la décision suivent la transmission (ordonnance 0011, art. 24). */}
+            {" "}
+            {t("reportContentDialog.followUp")}
           </p>
         </div>
         <label style={{ display: "grid", gap: 6, fontWeight: 600 }}>

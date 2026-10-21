@@ -203,7 +203,8 @@ export function exportableRecord(table: string, row: DataRecord, personId: strin
   if (table === "personBlocks") return row.blockerPersonId === personId ? projectedRecord(row, [...RECORD_METADATA, "blockerPersonId", "targetPersonId"]) : null
   if (table === "follows") return row.followerPersonId === personId || row.targetPersonId === personId ? projectedRecord(row, [...RECORD_METADATA, "followerPersonId", "targetPersonId"]) : null
   if (table === "reports" || table === "contentReports") {
-    if (row.reporterPersonId === personId) return projectedRecord(row, [...REPORT_REFERENCE_FIELDS, "reason", "note", "source"])
+    // SU01d : le déclarant exporte aussi le délai légal, ses deux avis et l'effet sur le contenu — jamais la sanction ni le motif de modération.
+    if (row.reporterPersonId === personId) return projectedRecord(row, [...REPORT_REFERENCE_FIELDS, "reason", "note", "source", "legalBasis", "dueAt", "acknowledgedAt", "reporterNotifiedAt", "removedTarget"])
     if (table === "reports" && row.ownerPersonId === personId) return projectedRecord(row, [...REPORT_REFERENCE_FIELDS, "source", "decisionReason", "reviewedAt", "removedTarget"])
     return null
   }

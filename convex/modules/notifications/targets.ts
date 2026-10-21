@@ -10,6 +10,8 @@
  *  - `moderation_decision` : les décisions de la PAGE qui porte le contenu d'un dossier sans
  *    propriétaire personnel (P16), si le lecteur en est signataire VIVANT maintenant ; sa propre
  *    décision : ses décisions personnelles (« Mes données ») ;
+ *  - `report_received`, `report_decided` (SU01d) : ses signalements (« Mes signalements »), pour
+ *    le seul déclarant du dossier ;
  *  - mise en relation DIASPORALE (13 genres) : un sujet GÉNÉRIQUE — nature et référence opaque,
  *    public et adresse de page relus par la tranche (`serviceNoticeView`) — que l'application
  *    DIASPORALE route elle-même.
@@ -29,6 +31,7 @@ import { contextualNotificationTarget } from "../contextualMessaging/access"
 import { owningPageOfReport } from "../moderation/policy"
 import { liveSignatoryRole } from "../pages/access"
 import { commerceNoticeView } from "./commerceAccess"
+import { isReporterNoticeKind, reporterNoticeRecipient } from "./policy"
 import { isDiasporaCommunityNotificationKind, isDiasporaServiceNotificationKind } from "./tables"
 
 type ReadCtx = Pick<QueryCtx, "db">
@@ -41,6 +44,7 @@ export const notificationOpenTargetValidator = v.union(
   v.object({ kind: v.literal("jobApplication"), applicationId: v.string() }),
   v.object({ kind: v.literal("pageModerationDecisions"), pageId: v.string(), pageHandle: v.string() }),
   v.object({ kind: v.literal("personalDecisions") }),
+  v.object({ kind: v.literal("personalReports") }),
   v.object({
     kind: v.literal("diasporaServiceNotice"),
     audience: literals(DIASPORA_NOTICE_AUDIENCES),
@@ -120,6 +124,8 @@ export function diasporaCommunityNoticeTarget(view: CommunityNoticeDto | null): 
 export async function notificationOpenTargetOf(ctx: ReadCtx, row: Doc<"notifications">): Promise<NotificationOpenTarget | null> {
   if (isCommerceNotificationKind(row.kind)) return (await commerceNoticeView(ctx, row))?.target ?? null
   if (row.kind === "moderation_decision") return await moderationDecisionTarget(ctx, row)
+  // SU01d : « Mes signalements », pour le déclarant du dossier seul (relu à l'instant).
+  if (isReporterNoticeKind(row.kind)) return row.subjectReportId !== undefined && await reporterNoticeRecipient(ctx, row.networkId, row.recipientPersonId, row.subjectReportId) ? { kind: "personalReports" } : null
   if (isDiasporaServiceNotificationKind(row.kind)) return diasporaNoticeTarget(row, await serviceNoticeView(ctx, row))
   if (isDiasporaCommunityNotificationKind(row.kind)) return diasporaCommunityNoticeTarget(await communityNoticeView(ctx, row))
   // CC-2b : le fil contextuel RELU pour le destinataire (partie actuelle, sinon repli neutre `null`).

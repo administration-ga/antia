@@ -100,6 +100,9 @@ export function pageDecisionsAnchor(pageId: string): string {
   return `decisions-page-${encodeURIComponent(pageId)}`
 }
 
+/** SU01d : l'ancre de « Mes signalements » dans « Mes données » (lue aussi par cette section). */
+export const PERSONAL_REPORTS_ANCHOR = "mes-signalements"
+
 /**
  * Table des routes d'antsia.ga — le SEUL fichier de l'application où une URL
  * s'écrit (cliquet `no-hardcoded-urls`). Les paquets du moteur ne connaissent
@@ -275,6 +278,8 @@ export const routes = {
   personalControls: () => "/mes-donnees",
   /** P14B : les décisions de modération visant une page représentée, section de « Mes données ». */
   pageModerationDecisions: (pageId: string) => `/mes-donnees#${pageDecisionsAnchor(pageId)}`,
+  /** SU01d : « Mes signalements », section de « Mes données » (accusé de réception, décision). */
+  personalReports: () => `/mes-donnees#${PERSONAL_REPORTS_ANCHOR}`,
   notificationCenter: () => "/fil?notifications=1",
   openNotification: (reference?: string) => {
     const notification = parseNotificationReference(reference)
@@ -462,6 +467,7 @@ export const engineRoutes: EngineRoutes = {
   jobApplication: routes.jobApplication,
   pageModerationDecisions: routes.pageModerationDecisions,
   personalDecisions: routes.personalControls,
+  personalReports: routes.personalReports,
 }
 
 /**

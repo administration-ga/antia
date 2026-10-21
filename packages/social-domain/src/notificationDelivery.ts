@@ -20,7 +20,7 @@ export const WEEK_MS = 7 * 86_400_000
 export function notificationCategory(kind: NotificationKind | "call_incoming"): NotificationCategory {
   if (kind === "commercial_contact" || kind === "contextual_message" || kind === "contextual_closed" || kind === "group_message" || kind === "group_added") return "messages"
   if (kind === "call_missed" || kind === "voicemail_left" || kind === "call_incoming") return "calls"
-  if (kind === "moderation_decision") return "moderation"
+  if (kind === "moderation_decision" || kind === "report_received" || kind === "report_decided") return "moderation"
   if (kind === "file_withheld") return "files"
   if (["membership_changed", "badge_changed", "attestation_verified", "attestation_not_confirmed", "sponsorship_received", "sponsorship_withdrawn"].includes(kind)) return "network"
   return "social"
