@@ -2,6 +2,7 @@
   "antsia": {
     "me": {
       "title": "My space",
+      "profile": "View my profile",
       "lead": "Your personal activity, settings and requests. Open your network profile separately.",
       "profileHint": "Your presentation and content available to members, according to its audience.",
       "activityTitle": "My activity"

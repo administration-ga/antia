@@ -41,11 +41,12 @@ export const ICOM_WORKSPACE_CSS = `
 .icom-messages-page[data-layout="adaptive"] .msg-list-scope {
   overflow-wrap: anywhere;
 }
-.icom-adaptive-phone-detail,
-.icom-adaptive-phone-detail > .msg-panel[data-variant="page"][data-open="true"] {
+.icom-messages-page[data-layout="adaptive"][data-mobile="true"][data-has-detail="true"] {
   height: 100%;
   min-height: 0;
-  padding-top: 0;
+}
+.icom-messages-page[data-layout="adaptive"][data-mobile="true"][data-has-detail="true"] .icom-page-heading {
+  display: none;
 }
 @container icom-workspace (min-width: ${ICOM_WORKSPACE_SPLIT_MIN}px) {
   .icom-messages-page[data-layout="adaptive"] .icom-page-columns {

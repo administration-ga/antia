@@ -1,0 +1,53 @@
+{
+  "date": "2026-10-21",
+  "version": "responsive-recipe-20261021-5e87719d6f0eb0e7",
+  "sourceFingerprint": "5e87719d6f0eb0e7cb97f6d92e7eb60862f1f498582cd4dddd85a0aa7be7c083",
+  "technicalFiles": 2076,
+  "candidateChecks": [
+    {
+      "step": "tests-features",
+      "exitCode": 0,
+      "seconds": 125.2
+    },
+    {
+      "step": "tests-app",
+      "exitCode": 0,
+      "seconds": 38.0
+    },
+    {
+      "step": "ratchets",
+      "exitCode": 0,
+      "seconds": 18.7
+    },
+    {
+      "step": "typecheck-six",
+      "exitCode": 0,
+      "seconds": 21.1
+    },
+    {
+      "step": "lint-six",
+      "exitCode": 0,
+      "seconds": 28.2
+    }
+  ],
+  "candidatePassedTests": {
+    "socialFeatures": 4119,
+    "application": 763,
+    "ratchets": 140
+  },
+  "localProductionBuild": {
+    "exitCode": 0,
+    "nextVersion": "16.4.2",
+    "logSha256": "d7f2689879b754e86922a8d0bd6f9fc3b0571a58732614d462957758a759427b"
+  },
+  "sharedCheckoutVerify": {
+    "exitCode": 0,
+    "seconds": 695.9,
+    "ownSourcesStable": true,
+    "scope": "Shared checkout, including parallel unshipped work; not the frozen publication candidate",
+    "logSha256": "c69d89597391613fdec8098013a93870c07ffec0656fe5304b56c8690e37bfa5"
+  },
+  "backendDeploymentRequired": false,
+  "noEnvironmentEdits": true,
+  "privateScreenshotsCommitted": false
+}
