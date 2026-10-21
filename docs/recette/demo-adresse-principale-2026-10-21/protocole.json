@@ -1,0 +1,23 @@
+{
+  "status": "passed",
+  "hostPath": "/demo",
+  "formats": [
+    {
+      "width": 390,
+      "height": 844
+    },
+    {
+      "width": 834,
+      "height": 1112
+    },
+    {
+      "width": 1440,
+      "height": 1000
+    }
+  ],
+  "noMessageSend": true,
+  "noRealAccountModification": true,
+  "restoreOriginalDraft": true,
+  "screenshotsRemainLocal": true,
+  "completedAt": "2026-10-21T07:31:37.875Z"
+}

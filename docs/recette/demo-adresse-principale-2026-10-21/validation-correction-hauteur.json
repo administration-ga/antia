@@ -1,0 +1,38 @@
+[
+  {
+    "target": "production",
+    "step": "app-tests",
+    "exitCode": 0,
+    "seconds": 37.8
+  },
+  {
+    "target": "production",
+    "step": "typecheck",
+    "exitCode": 0,
+    "seconds": 3.5
+  },
+  {
+    "target": "production",
+    "step": "changed-files-lint",
+    "exitCode": 0,
+    "seconds": 1.6
+  },
+  {
+    "target": "demo",
+    "step": "app-tests",
+    "exitCode": 0,
+    "seconds": 37.9
+  },
+  {
+    "target": "demo",
+    "step": "typecheck",
+    "exitCode": 0,
+    "seconds": 3.3
+  },
+  {
+    "target": "demo",
+    "step": "changed-files-lint",
+    "exitCode": 0,
+    "seconds": 1.5
+  }
+]

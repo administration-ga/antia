@@ -1,0 +1,105 @@
+{
+  "main": {
+    "target": "production",
+    "url": "https://antsia-h6s4w3rex-okatechs-projects-f0102678.vercel.app",
+    "id": "dpl_FdLMA2wAQfQRx5PKcFRRUv4ncooM",
+    "readyState": "READY",
+    "exitCode": 0,
+    "seconds": 92.8,
+    "version": "demo-path-20261021-production-282e26b0a9e64f29",
+    "sourceFingerprint": "282e26b0a9e64f2967318d30f829b1ffb5d69a5a6b95d51cbd7d815d751e6e81",
+    "releaseCommit": "58de1ebcd24b356da8905df37e0c3acd4172af2f",
+    "buildConfiguration": {
+      "NEXT_PUBLIC_SITE_URL": "https://antsia.vercel.app",
+      "NEXT_PUBLIC_CONVEX_URL": "https://diligent-avocet-585.convex.cloud",
+      "CONVEX_SITE_URL": "https://diligent-avocet-585.convex.site",
+      "NEXT_PUBLIC_BUILD_SHA": "demo-path-20261021-production-282e26b0a9e64f29",
+      "NEXT_PUBLIC_DEMO_ENTRY_ENABLED": "true",
+      "NEXT_PUBLIC_APP_BASE_PATH": ""
+    },
+    "serverVariableNames": [
+      "ANTSIA_DEMO_PROXY_TOKEN",
+      "ANTSIA_DEMO_RUNTIME_ORIGIN",
+      "ANTSIA_DEMO_HOSTING_BYPASS"
+    ],
+    "oldDomainNotRecreated": true,
+    "promoted": false
+  },
+  "child": {
+    "target": "demo",
+    "url": "https://antsia-demo-8ep07aj8t-okatechs-projects-f0102678.vercel.app",
+    "id": "dpl_Fe3aJ8kWBe1RoQXaxQnf4XBpFkJ4",
+    "readyState": "READY",
+    "exitCode": 0,
+    "seconds": 81.6,
+    "version": "demo-path-20261021-demo-9c2ca9be3e566a4b",
+    "sourceFingerprint": "9c2ca9be3e566a4be971d76938693b1a0f38c62de82a058d13f6cd6d86916c09",
+    "releaseCommit": "71c7dacf93a28bed26ad3a1fe77fb1eaefe62960",
+    "buildConfiguration": {
+      "NEXT_PUBLIC_SITE_URL": "https://antsia.vercel.app",
+      "NEXT_PUBLIC_CONVEX_URL": "https://vivid-hedgehog-655.convex.cloud",
+      "CONVEX_SITE_URL": "https://vivid-hedgehog-655.convex.site",
+      "NEXT_PUBLIC_BUILD_SHA": "demo-path-20261021-demo-9c2ca9be3e566a4b",
+      "NEXT_PUBLIC_DEMO_ENTRY_ENABLED": "",
+      "NEXT_PUBLIC_APP_BASE_PATH": "/demo"
+    },
+    "serverVariableNames": [
+      "ANTSIA_DEMO_PROXY_TOKEN"
+    ],
+    "oldDomainNotRecreated": true,
+    "promoted": false
+  },
+  "staged": {
+    "main": {
+      "health": {
+        "status": "ok",
+        "application": "antsia-ga",
+        "version": "demo-path-20261021-production-282e26b0a9e64f29",
+        "backend": "configured"
+      },
+      "backendCspCorrect": true,
+      "noRelayTokenInHeaders": true
+    },
+    "demo": {
+      "health": {
+        "status": "ok",
+        "application": "antsia-ga",
+        "version": "demo-path-20261021-demo-9c2ca9be3e566a4b",
+        "backend": "configured"
+      },
+      "backendCspCorrect": true,
+      "noRelayTokenInHeaders": true
+    },
+    "authTransport": {
+      "emptyBodyStatus": 400,
+      "normalisedPathAdmitted": true,
+      "otpRequested": false
+    }
+  },
+  "public": {
+    "main": {
+      "health": {
+        "status": "ok",
+        "application": "antsia-ga",
+        "version": "demo-path-20261021-production-282e26b0a9e64f29",
+        "backend": "configured"
+      },
+      "backendCspCorrect": true,
+      "noRelayTokenInHeaders": true
+    },
+    "demo": {
+      "health": {
+        "status": "ok",
+        "application": "antsia-ga",
+        "version": "demo-path-20261021-demo-9c2ca9be3e566a4b",
+        "backend": "configured"
+      },
+      "backendCspCorrect": true,
+      "noRelayTokenInHeaders": true
+    }
+  },
+  "oldDomainHttpStatus": 404,
+  "publishedAt": "2026-10-21T07:30:42.999023+00:00",
+  "mainPromoted": true,
+  "childDirectAccessProtected": true
+}

@@ -1,0 +1,162 @@
+{
+  "status": "passed",
+  "url": "https://antsia.vercel.app/demo/messages/a/commercant.demo",
+  "environment": "existing_fictitious_accounts",
+  "relationCreated": false,
+  "messageSendPerformed": false,
+  "newConversationCreated": false,
+  "originalDraftEmpty": true,
+  "originalDraftRestored": true,
+  "draftLength": 85,
+  "draftTextSha256": "53b26742d8b67535ce5870737a38451abcf777069a98c06ad588bd1e1460d89e",
+  "metrics": [
+    {
+      "format": "telephone",
+      "bannerHeight": "121px",
+      "composer": {
+        "bottom": 836,
+        "height": 112,
+        "width": 250,
+        "x": 70,
+        "y": 724
+      },
+      "focused": true,
+      "footer": {
+        "bottom": 844,
+        "height": 129,
+        "top": 715
+      },
+      "horizontalOverflow": false,
+      "length": 85,
+      "matches": true,
+      "selection": [
+        84,
+        85
+      ],
+      "viewport": [
+        390,
+        844
+      ],
+      "visible": true
+    },
+    {
+      "format": "tablette",
+      "bannerHeight": "61px",
+      "composer": {
+        "bottom": 1104,
+        "height": 112,
+        "width": 574,
+        "x": 186,
+        "y": 992
+      },
+      "focused": true,
+      "footer": {
+        "bottom": 1112,
+        "height": 129,
+        "top": 983
+      },
+      "horizontalOverflow": false,
+      "length": 85,
+      "matches": true,
+      "selection": [
+        84,
+        85
+      ],
+      "viewport": [
+        834,
+        1112
+      ],
+      "visible": true
+    },
+    {
+      "format": "ordinateur",
+      "bannerHeight": "61px",
+      "composer": {
+        "bottom": 992,
+        "height": 112,
+        "width": 591.203125,
+        "x": 750.796875,
+        "y": 880
+      },
+      "focused": true,
+      "footer": {
+        "bottom": 1000,
+        "height": 129,
+        "top": 871
+      },
+      "horizontalOverflow": false,
+      "length": 85,
+      "matches": true,
+      "selection": [
+        84,
+        85
+      ],
+      "viewport": [
+        1440,
+        1000
+      ],
+      "visible": true
+    },
+    {
+      "format": "retour-tablette",
+      "bannerHeight": "61px",
+      "composer": {
+        "bottom": 1104,
+        "height": 112,
+        "width": 574,
+        "x": 186,
+        "y": 992
+      },
+      "focused": true,
+      "footer": {
+        "bottom": 1112,
+        "height": 129,
+        "top": 983
+      },
+      "horizontalOverflow": false,
+      "length": 85,
+      "matches": true,
+      "selection": [
+        84,
+        85
+      ],
+      "viewport": [
+        834,
+        1112
+      ],
+      "visible": true
+    },
+    {
+      "format": "retour-telephone",
+      "bannerHeight": "121px",
+      "composer": {
+        "bottom": 836,
+        "height": 112,
+        "width": 250,
+        "x": 70,
+        "y": 724
+      },
+      "focused": true,
+      "footer": {
+        "bottom": 844,
+        "height": 129,
+        "top": 715
+      },
+      "horizontalOverflow": false,
+      "length": 85,
+      "matches": true,
+      "selection": [
+        84,
+        85
+      ],
+      "viewport": [
+        390,
+        844
+      ],
+      "visible": true
+    }
+  ],
+  "consoleWarningOrErrorCount": 0,
+  "physicalDeviceTest": false,
+  "at": "2026-10-21T07:31:37.875Z"
+}

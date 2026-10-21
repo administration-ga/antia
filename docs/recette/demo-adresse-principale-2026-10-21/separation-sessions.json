@@ -1,0 +1,13 @@
+{
+  "main": {
+    "url": "https://antsia.vercel.app/fil",
+    "realMemberVisible": true,
+    "demoActorVisible": false
+  },
+  "demoReturn": {
+    "draftEmpty": true,
+    "visible": true
+  },
+  "mainSessionSignOutPerformed": false,
+  "demoReloginRequired": false
+}

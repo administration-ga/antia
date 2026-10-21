@@ -1,0 +1,26 @@
+{
+  "publicVersion": "connections-20261021-demo-a134a7893b5dcc87",
+  "deploymentId": "dpl_7RvC1cFdZnXo66rYGmHJDHnJH63r",
+  "changedFiles": [
+    {
+      "path": "ANTSIA/packages/social-features/src/features/reseau-personnel/use-dual-connection-pagination.test.tsx",
+      "sha256": "3a060cca05543b4fcf2e36d715a772fddd9ad35fdd59c9aea65a604f7f7fc3b2",
+      "preserved": true
+    },
+    {
+      "path": "ANTSIA/packages/social-features/src/features/reseau-personnel/use-dual-connection-pagination.ts",
+      "sha256": "705940c29dc96c8eaba37fdd3f1996c985d1bc65738396f00c4a5efae93cc331",
+      "preserved": true
+    }
+  ],
+  "unexpectedRuntimeSourceDelta": [],
+  "excludedMetadataAndGeneratedArtifacts": [
+    "ANTSIA/.gitignore",
+    "ANTSIA/CLAUDE.md",
+    "ANTSIA/apps/admin_antsia_ga/.env.example",
+    "ANTSIA/apps/admin_antsia_ga/tsconfig.tsbuildinfo",
+    "ANTSIA/apps/antsia_ga/.env.example",
+    "ANTSIA/apps/antsia_ga/tsconfig.tsbuildinfo"
+  ],
+  "newBuildRequired": false
+}

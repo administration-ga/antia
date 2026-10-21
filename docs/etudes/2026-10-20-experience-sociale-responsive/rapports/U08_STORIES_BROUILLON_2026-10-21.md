@@ -1,6 +1,6 @@
 # Contrôles connectés — Stories et brouillon Messages
 
-Date : 21 octobre 2026. Publication Web effectuée ; contrôle du vrai brouillon encore en attente d’une relation existante.
+Date : 21 octobre 2026. Publication Web effectuée ; contrôle du vrai brouillon terminé ensuite sur les comptes fictifs intégrés à l’adresse principale (voir complément ci-dessous).
 
 ## Résultat constaté en production
 
@@ -46,3 +46,8 @@ Santé publique : HTTP 200, status ok, version exacte, backend configured ; CSP 
 - [Publication](../../../recette/stories-brouillon-en-ligne-2026-10-21/publication.json)
 
 Restant : ouvrir un composeur réel depuis une relation acceptée existante, saisir un texte non envoyé, vérifier son contenu et son focus à 390/834/1440 puis au retour, et restaurer le brouillon antérieur. Ne pas assimiler le champ de recherche destinataire ou les tests automatisés à ce contrôle connecté.
+
+
+## Complément du 21/10 — brouillon désormais contrôlé
+
+La demande suivante autorise les comptes de démonstration sur l’adresse principale. La recette connectée du vrai composeur est terminée à 390/834/1440 puis au retour : texte, focus et sélection conservés, aucun débordement, aucun message envoyé, brouillon initial vide restauré. Le bandeau démo qui masquait le composeur mobile est corrigé et publié. Le compte réel reste distinct et conservé. Les constats d’attente ci-dessus restent le résultat historique de la première recette, pas l’état actuel. Voir le [rapport dédié](../../../recette/demo-adresse-principale-2026-10-21/rapport.md).
