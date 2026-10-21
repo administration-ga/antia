@@ -1,0 +1,134 @@
+{
+  "repositoryIsPrivate": false,
+  "privacyDecision": "Aucune capture connectée copiée dans le dépôt public ; originaux conservés localement. Les noms ci-dessous ne sont pas des liens vers des fichiers versionnés.",
+  "captures": [
+    {
+      "file": "production-light-390.png",
+      "zone": "production",
+      "mode": "light",
+      "width": 390,
+      "sha256": "e52e97c088ff3d4728bd4de899d059647b6c7de3063ba2a3fcfd5be802f220eb",
+      "bytes": 40554,
+      "includedInRepository": false,
+      "retainedLocally": true
+    },
+    {
+      "file": "production-light-834.png",
+      "zone": "production",
+      "mode": "light",
+      "width": 834,
+      "sha256": "6ee26d3382eb699f15ff3c025c597907b0d9deaffd0bb6dba703c8ce960ad336",
+      "bytes": 66174,
+      "includedInRepository": false,
+      "retainedLocally": true
+    },
+    {
+      "file": "production-light-1440.png",
+      "zone": "production",
+      "mode": "light",
+      "width": 1440,
+      "sha256": "eff604f74fd5d3724f74756fcae24bfae0b49f6babb08560b6903da241f4362c",
+      "bytes": 104920,
+      "includedInRepository": false,
+      "retainedLocally": true
+    },
+    {
+      "file": "production-dark-390.png",
+      "zone": "production",
+      "mode": "dark",
+      "width": 390,
+      "sha256": "0a80bc1aa978327f48565b3bc59871a75ac6da269fa632b34bf52c7a850298ec",
+      "bytes": 40443,
+      "includedInRepository": false,
+      "retainedLocally": true
+    },
+    {
+      "file": "production-dark-834.png",
+      "zone": "production",
+      "mode": "dark",
+      "width": 834,
+      "sha256": "11f6b2eeca7a043a3f404c1f1d2f9e1132c48ec4cedbe6edf0bd1864adfc0031",
+      "bytes": 65160,
+      "includedInRepository": false,
+      "retainedLocally": true
+    },
+    {
+      "file": "production-dark-1440.png",
+      "zone": "production",
+      "mode": "dark",
+      "width": 1440,
+      "sha256": "0f6a9901cd8b5386077d4f6e15aff117c582069f997b2d754e286daec96f61a9",
+      "bytes": 105956,
+      "includedInRepository": false,
+      "retainedLocally": true
+    },
+    {
+      "file": "demo-light-390.png",
+      "zone": "demo",
+      "mode": "light",
+      "width": 390,
+      "sha256": "98645964c654dd2d7235f1e9227deaf4f21482e00650e8f3856d5c8691262a2b",
+      "bytes": 46010,
+      "includedInRepository": false,
+      "retainedLocally": true
+    },
+    {
+      "file": "demo-light-834.png",
+      "zone": "demo",
+      "mode": "light",
+      "width": 834,
+      "sha256": "dfcbd7812dc41a7cede933a78a30dd416291bd4c031bfe4ef3e02f841b260b87",
+      "bytes": 98518,
+      "includedInRepository": false,
+      "retainedLocally": true
+    },
+    {
+      "file": "demo-light-1440.png",
+      "zone": "demo",
+      "mode": "light",
+      "width": 1440,
+      "sha256": "567abfae80a5e277af511015867015bdec6fafb4e41b86a901f3c0feb032aafc",
+      "bytes": 133109,
+      "includedInRepository": false,
+      "retainedLocally": true
+    },
+    {
+      "file": "demo-dark-390.png",
+      "zone": "demo",
+      "mode": "dark",
+      "width": 390,
+      "sha256": "50e7bb001f654edcc54530c8ef3b97b55b231aa8c62b77b6ced5016e5dc5de8b",
+      "bytes": 46575,
+      "includedInRepository": false,
+      "retainedLocally": true
+    },
+    {
+      "file": "demo-dark-834.png",
+      "zone": "demo",
+      "mode": "dark",
+      "width": 834,
+      "sha256": "6bf96c47e4d8d1b59b65dd0275d73c9047e5feaa530f891773e520e83b28c88e",
+      "bytes": 99864,
+      "includedInRepository": false,
+      "retainedLocally": true
+    },
+    {
+      "file": "demo-dark-1440.png",
+      "zone": "demo",
+      "mode": "dark",
+      "width": 1440,
+      "sha256": "2280e7c524612b30d19d9724ca2dc830a161b9576027dd988d3c46c8add314b4",
+      "bytes": 134877,
+      "includedInRepository": false,
+      "retainedLocally": true
+    },
+    {
+      "file": "production-final-restored.png",
+      "zone": "production",
+      "sha256": "4eb9756cf22a70d758992f28d391cef8d7159f4e66ca98ae5df82696baf364a7",
+      "bytes": 96976,
+      "includedInRepository": false,
+      "retainedLocally": true
+    }
+  ]
+}

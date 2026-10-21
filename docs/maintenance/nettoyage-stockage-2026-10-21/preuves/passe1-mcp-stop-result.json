@@ -1,0 +1,13 @@
+{
+  "projection": {
+    "sourceFile": "mcp-stop-result.json",
+    "sourceSha256": "3bb329f41590b1ee32f1e89985e0def7e5371f7575e40b87b0849d0e2debc4d2",
+    "rawSourceRetainedLocally": true
+  },
+  "evidence": {
+    "time": "2026-10-21T13:43:48.704335",
+    "rootsSignalledCount": 10,
+    "skippedCount": 0,
+    "timestampTimezone": "not specified in original"
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "projection": {
+    "sourceFile": "rapport.json",
+    "sourceSha256": "f22ebcaa20725e353d0f7e762f8747f54f9fdee43cbca308a97d02c8369b3f27",
+    "rawSourceRetainedLocally": true
+  },
+  "evidence": {
+    "checkedAt": "2026-10-21T13:54:50.274032",
+    "initialAvailableKiB": 10755572,
+    "finalAvailableKiB": 11832508,
+    "netAdditionalGB": 1.1,
+    "availableGB": 12.12,
+    "localHttp": {
+      "3030": 200,
+      "3210": 200,
+      "3211": 404
+    },
+    "scanScope": "bounded metadata scans; no global filesystem walk",
+    "removedTypes": [
+      "caches npm recréables inactifs",
+      "installateur téléchargé redondant",
+      "dépendances non suivies d’une copie datée inactive"
+    ],
+    "preservedClasses": [
+      "sources",
+      "dépendances actives",
+      "sessions",
+      "preuves de livraison et tests",
+      "historique et index Git",
+      "serveurs Next et Convex",
+      "builds et SDK Xcode",
+      "cache protégé macOS"
+    ],
+    "timestampTimezone": "not specified in original"
+  }
+}

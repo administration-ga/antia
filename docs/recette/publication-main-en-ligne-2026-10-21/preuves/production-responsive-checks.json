@@ -1,0 +1,99 @@
+{
+  "projection": {
+    "sourceFile": "production-responsive-checks.json",
+    "sourceSha256": "aba6db38122dcb5591bdf06361a86ce0e49e415380952f1e71828b37192e4cb4",
+    "rawSourceRetainedLocally": true
+  },
+  "evidence": [
+    {
+      "dark": false,
+      "error": false,
+      "height": 900,
+      "member": true,
+      "path": "/fil",
+      "scrollWidth": 1440,
+      "videoCount": 4,
+      "videoErrors": 0,
+      "width": 1440,
+      "mode": "light",
+      "screenshotFile": "production-light-1440.png",
+      "screenshotIncluded": false,
+      "screenshotRetainedLocally": true
+    },
+    {
+      "dark": false,
+      "error": false,
+      "height": 1112,
+      "member": true,
+      "path": "/fil",
+      "scrollWidth": 834,
+      "videoCount": 4,
+      "videoErrors": 0,
+      "width": 834,
+      "mode": "light",
+      "screenshotFile": "production-light-834.png",
+      "screenshotIncluded": false,
+      "screenshotRetainedLocally": true
+    },
+    {
+      "dark": false,
+      "error": false,
+      "height": 844,
+      "member": true,
+      "path": "/fil",
+      "scrollWidth": 390,
+      "videoCount": 4,
+      "videoErrors": 0,
+      "width": 390,
+      "mode": "light",
+      "screenshotFile": "production-light-390.png",
+      "screenshotIncluded": false,
+      "screenshotRetainedLocally": true
+    },
+    {
+      "dark": true,
+      "error": false,
+      "height": 900,
+      "member": true,
+      "path": "/fil",
+      "scrollWidth": 1440,
+      "videoCount": 4,
+      "videoErrors": 0,
+      "width": 1440,
+      "mode": "dark",
+      "screenshotFile": "production-dark-1440.png",
+      "screenshotIncluded": false,
+      "screenshotRetainedLocally": true
+    },
+    {
+      "dark": true,
+      "error": false,
+      "height": 1112,
+      "member": true,
+      "path": "/fil",
+      "scrollWidth": 834,
+      "videoCount": 4,
+      "videoErrors": 0,
+      "width": 834,
+      "mode": "dark",
+      "screenshotFile": "production-dark-834.png",
+      "screenshotIncluded": false,
+      "screenshotRetainedLocally": true
+    },
+    {
+      "dark": true,
+      "error": false,
+      "height": 844,
+      "member": true,
+      "path": "/fil",
+      "scrollWidth": 390,
+      "videoCount": 4,
+      "videoErrors": 0,
+      "width": 390,
+      "mode": "dark",
+      "screenshotFile": "production-dark-390.png",
+      "screenshotIncluded": false,
+      "screenshotRetainedLocally": true
+    }
+  ]
+}

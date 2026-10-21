@@ -1,0 +1,19 @@
+{
+  "projection": {
+    "sourceFile": "installer-removal.json",
+    "sourceSha256": "31baf011291640469972b9d06a343c6fa990ed1c652e53c908b9a0609aa06a7c",
+    "rawSourceRetainedLocally": true
+  },
+  "evidence": {
+    "bytes": 382122986,
+    "sha256": "2300d918c3ad1c1a6f246af1de620ad094e5c14357f415083f665a24d19173ec",
+    "installedVersion": "3.1623.0",
+    "installedSignatureVerified": true,
+    "mounted": false,
+    "open": false,
+    "deletedAt": "2026-10-21T13:53:17.859615",
+    "type": "installateur téléchargé redondant",
+    "installedApplicationPreserved": true,
+    "timestampTimezone": "not specified in original"
+  }
+}

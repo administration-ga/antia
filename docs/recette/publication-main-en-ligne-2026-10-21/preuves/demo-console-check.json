@@ -1,0 +1,14 @@
+{
+  "projection": {
+    "sourceFile": "demo-console-check.json",
+    "sourceSha256": "24b199b353847373c3c58b3de3b7cc0fca56325595bdfff2e56f8bc8b30a2388",
+    "rawSourceRetainedLocally": true
+  },
+  "evidence": {
+    "checkedAt": "2026-10-21T11:30:53.900Z",
+    "errors": 0,
+    "warnings": 0,
+    "restoredAppearance": "system",
+    "viewportReset": true
+  }
+}

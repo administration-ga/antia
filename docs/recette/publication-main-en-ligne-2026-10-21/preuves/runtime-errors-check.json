@@ -1,0 +1,20 @@
+{
+  "projection": {
+    "sourceFile": "runtime-errors-check.json",
+    "sourceSha256": "c193742114b0149e86a3d2c8287f04ad4c180fe811df59e423509f70fc8515dc",
+    "rawSourceRetainedLocally": true
+  },
+  "evidence": {
+    "checkedAt": "2026-10-21T11:32:13.450927+00:00",
+    "since": "2026-10-21T11:20:51Z",
+    "method": "Vercel logs --no-follow --no-branch --level error --limit 50",
+    "production": {
+      "exitCode": 0,
+      "entries": 0
+    },
+    "demo": {
+      "exitCode": 0,
+      "entries": 0
+    }
+  }
+}

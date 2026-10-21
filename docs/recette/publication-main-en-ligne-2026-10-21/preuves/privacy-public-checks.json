@@ -1,0 +1,531 @@
+{
+  "projection": {
+    "sourceFile": "privacy-public-checks.json",
+    "sourceSha256": "30f07b8379ec83c2a6da7348de3257999ee146b7bb4bbc3c6c278ea126a4347b",
+    "rawSourceRetainedLocally": true
+  },
+  "evidence": {
+    "checkedAt": "2026-10-21T11:21:32.158183+00:00",
+    "passed": true,
+    "target": "public-anonymous",
+    "checks": [
+      {
+        "zone": "production",
+        "language": "fr",
+        "path": "/confidentialite",
+        "passed": true,
+        "checks": [
+          {
+            "key": "legal.draft",
+            "scopeKey": "legal.draft",
+            "normalizedTextSha256": "fe2f420a91f15605070071e3df819cd128657c4cf70b009b20309fb16a7c4e1a",
+            "present": true
+          },
+          {
+            "key": "legal.privacy.rights.body",
+            "scopeKey": "legal.privacy.rights.body",
+            "normalizedTextSha256": "c35068de981cac49aecebbb11a05aae632964b4993233d5130666670230a8f9d",
+            "present": true
+          },
+          {
+            "key": "legal.privacy.controller.title",
+            "scopeKey": "legal.privacy.controller",
+            "normalizedTextSha256": "7b4c7409efa348edf2535cdcb90741252267abc1a54367dc12194099c66f3683",
+            "present": true
+          },
+          {
+            "key": "legal.privacy.controller.body",
+            "scopeKey": "legal.privacy.controller",
+            "normalizedTextSha256": "c84dc225e9894cf760ee3f90fceb6e6db23bfb80b91ba78f585cbc308887d8ae",
+            "present": true
+          },
+          {
+            "key": "legal.privacy.data.title",
+            "scopeKey": "legal.privacy.data",
+            "normalizedTextSha256": "09a603c5e5e3e10061d5428ecb8d7a281eff5ff1f51b2509733366588b706da9",
+            "present": true
+          },
+          {
+            "key": "legal.privacy.data.body",
+            "scopeKey": "legal.privacy.data",
+            "normalizedTextSha256": "f5ff918e3a631fd8f2fe415fe60a105d19f0b9f86809afcf739a1b2341f33bae",
+            "present": true
+          },
+          {
+            "key": "legal.privacy.recipients.title",
+            "scopeKey": "legal.privacy.recipients",
+            "normalizedTextSha256": "4eab821ea72107f184b564c93edddfc56902930ecba92faa90577d6c86cc5f88",
+            "present": true
+          },
+          {
+            "key": "legal.privacy.recipients.body",
+            "scopeKey": "legal.privacy.recipients",
+            "normalizedTextSha256": "10239d9e5eb82935781b2ad11885a0f2e38e733aabfe9b723020c67e4b94a027",
+            "present": true
+          },
+          {
+            "key": "legal.privacy.retention.title",
+            "scopeKey": "legal.privacy.retention",
+            "normalizedTextSha256": "6782daa1eac9c08f246a51457f421dda04cd966878954b68968c98d4c01598ba",
+            "present": true
+          },
+          {
+            "key": "legal.privacy.retention.body",
+            "scopeKey": "legal.privacy.retention",
+            "normalizedTextSha256": "2e4976e45b6bd1418545f4df6d36d385357090f862850506e849664a9d85334c",
+            "present": true
+          },
+          {
+            "key": "legal.privacy.device.title",
+            "scopeKey": "legal.privacy.device",
+            "normalizedTextSha256": "849bb118adc727d1d483f528899b25d0e34b211560ffcc825cf69f24b97b38b5",
+            "present": true
+          },
+          {
+            "key": "legal.privacy.device.body",
+            "scopeKey": "legal.privacy.device",
+            "normalizedTextSha256": "822677a32c9c08e3ecb5019ee343dc2757bfd0b8fe36e1be9fef96c079d3c259",
+            "present": true
+          }
+        ],
+        "httpStatus": 200,
+        "htmlSha256": "6dde172da5912eedf4437a1a7185d87c277ea6755ba5199605ed07506dc45157",
+        "visibleTextSha256": "545a33eb025afafb6517dd3f2e3c08666e7bfa97181f11a78692d28c29dc460c",
+        "noRelaySecretInResponse": true
+      },
+      {
+        "zone": "production",
+        "language": "fr",
+        "path": "/mentions-legales",
+        "passed": true,
+        "checks": [
+          {
+            "key": "legal.draft",
+            "scopeKey": "legal.draft",
+            "normalizedTextSha256": "fe2f420a91f15605070071e3df819cd128657c4cf70b009b20309fb16a7c4e1a",
+            "present": true
+          },
+          {
+            "key": "legal.legal.lead",
+            "scopeKey": "legal.legal.lead",
+            "normalizedTextSha256": "be5ca9d9181776d2c290fc501dad829b5ae46d37b6dfa5e40e4ec185ea79aaae",
+            "present": true
+          },
+          {
+            "key": "legal.legal.publisher.body",
+            "scopeKey": "legal.legal.publisher.body",
+            "normalizedTextSha256": "8d4857831846b1ce8ff5eb72133f509de49d3e7eefb585b290581089ae224d49",
+            "present": true
+          },
+          {
+            "key": "legal.legal.publication.body",
+            "scopeKey": "legal.legal.publication.body",
+            "normalizedTextSha256": "c5289953e81cc0599b0601985df5cc30b37a54cc29cdd7390bd0541483930009",
+            "present": true
+          }
+        ],
+        "httpStatus": 200,
+        "htmlSha256": "9a2a0df08a60da18a6ef80126f4873fbfcf24690bbdb329848fa50615c651052",
+        "visibleTextSha256": "2fa6c1745c81a2f410848369cab0cb7dfd7872d08ebd2a816c16d1a9797ec123",
+        "noRelaySecretInResponse": true
+      },
+      {
+        "zone": "production",
+        "language": "en",
+        "path": "/confidentialite",
+        "passed": true,
+        "checks": [
+          {
+            "key": "legal.draft",
+            "scopeKey": "legal.draft",
+            "normalizedTextSha256": "91043ff73ab2b93ff0f647ac405bfb677d24d707acc46da8465ed6f0b9220426",
+            "present": true
+          },
+          {
+            "key": "legal.privacy.rights.body",
+            "scopeKey": "legal.privacy.rights.body",
+            "normalizedTextSha256": "e95a8b959ca349d07d88c90b3594ee6407efb6268acea2b8925e4958622c406a",
+            "present": true
+          },
+          {
+            "key": "legal.privacy.controller.title",
+            "scopeKey": "legal.privacy.controller",
+            "normalizedTextSha256": "44cba506e2aad67f76c3bcd14f0ea8a143b45669d21db93043bc6651fea5974f",
+            "present": true
+          },
+          {
+            "key": "legal.privacy.controller.body",
+            "scopeKey": "legal.privacy.controller",
+            "normalizedTextSha256": "e3943413a010d2f74b0841fb56f925eaeb1d9eed82869d85b1623efa4a5c667b",
+            "present": true
+          },
+          {
+            "key": "legal.privacy.data.title",
+            "scopeKey": "legal.privacy.data",
+            "normalizedTextSha256": "95e9d0a05d1f8477a9d8b52cc052ae3619582cd3fe59ae4b2dc0e7246df88454",
+            "present": true
+          },
+          {
+            "key": "legal.privacy.data.body",
+            "scopeKey": "legal.privacy.data",
+            "normalizedTextSha256": "95c35591e632a09d1e66cb90560dd6b5ecc5354c32fcae1a62185db79984eee4",
+            "present": true
+          },
+          {
+            "key": "legal.privacy.recipients.title",
+            "scopeKey": "legal.privacy.recipients",
+            "normalizedTextSha256": "9866c1c0a5ba94fb38fbf18b5b4afaf39415290f558a5f4dfea993c8f19fb6f7",
+            "present": true
+          },
+          {
+            "key": "legal.privacy.recipients.body",
+            "scopeKey": "legal.privacy.recipients",
+            "normalizedTextSha256": "4bef94b44b47d0026b3824067bbcac8f89e2d15434ffd09d868e814d75623f45",
+            "present": true
+          },
+          {
+            "key": "legal.privacy.retention.title",
+            "scopeKey": "legal.privacy.retention",
+            "normalizedTextSha256": "12d26a909d7acd5c358aa52762a5a3406242fe998710e8eefb965d811a9ff74f",
+            "present": true
+          },
+          {
+            "key": "legal.privacy.retention.body",
+            "scopeKey": "legal.privacy.retention",
+            "normalizedTextSha256": "8eb0f9fb4983619f1cce2d923018e9010346a1cf97d699430063a8a9bcb994c6",
+            "present": true
+          },
+          {
+            "key": "legal.privacy.device.title",
+            "scopeKey": "legal.privacy.device",
+            "normalizedTextSha256": "bbc5843f8a109ed22271e2afa734fad41032311a1df5befab3acc1276dd1a7b2",
+            "present": true
+          },
+          {
+            "key": "legal.privacy.device.body",
+            "scopeKey": "legal.privacy.device",
+            "normalizedTextSha256": "5f84f5b33aa61820dc4ebfe16a130f6700576e9171c4cbaeea5968578cdcc620",
+            "present": true
+          }
+        ],
+        "httpStatus": 200,
+        "htmlSha256": "f32497da7509c002e8f1f46cf63412d3dc633e5fd6ec906599b13dab8740da5b",
+        "visibleTextSha256": "e52c45434892d8253b952213732c590568912c8c1cad0706cfc5728efb82ffef",
+        "noRelaySecretInResponse": true
+      },
+      {
+        "zone": "production",
+        "language": "en",
+        "path": "/mentions-legales",
+        "passed": true,
+        "checks": [
+          {
+            "key": "legal.draft",
+            "scopeKey": "legal.draft",
+            "normalizedTextSha256": "91043ff73ab2b93ff0f647ac405bfb677d24d707acc46da8465ed6f0b9220426",
+            "present": true
+          },
+          {
+            "key": "legal.legal.lead",
+            "scopeKey": "legal.legal.lead",
+            "normalizedTextSha256": "35d03deec9ce303409172c79e64ecea48bfe4b649c3fe941201fed53a7f78962",
+            "present": true
+          },
+          {
+            "key": "legal.legal.publisher.body",
+            "scopeKey": "legal.legal.publisher.body",
+            "normalizedTextSha256": "8b295e3917f4fe9cbfcb939aa4c9f71893ffc0ef797b592f222ba929d7356c54",
+            "present": true
+          },
+          {
+            "key": "legal.legal.publication.body",
+            "scopeKey": "legal.legal.publication.body",
+            "normalizedTextSha256": "ce61e47f5dcc3cb069ea1bbe1ffa9212b8a2f0b0ffc1440f91a9fb8790a5f69a",
+            "present": true
+          }
+        ],
+        "httpStatus": 200,
+        "htmlSha256": "74c8f8cb34324adcd2b30d8ee9a4d6eecbabfa8e49cb32e83d05cdd92c6f0790",
+        "visibleTextSha256": "7d1be0b868f6a077949731e7fd2c4bb17bb8cb0b9e9a68eed179c04c856e394f",
+        "noRelaySecretInResponse": true
+      },
+      {
+        "zone": "demo",
+        "language": "fr",
+        "path": "/demo/confidentialite",
+        "passed": true,
+        "checks": [
+          {
+            "key": "legal.draft",
+            "scopeKey": "legal.draft",
+            "normalizedTextSha256": "fe2f420a91f15605070071e3df819cd128657c4cf70b009b20309fb16a7c4e1a",
+            "present": true
+          },
+          {
+            "key": "legal.privacy.rights.body",
+            "scopeKey": "legal.privacy.rights.body",
+            "normalizedTextSha256": "c35068de981cac49aecebbb11a05aae632964b4993233d5130666670230a8f9d",
+            "present": true
+          },
+          {
+            "key": "legal.privacy.controller.title",
+            "scopeKey": "legal.privacy.controller",
+            "normalizedTextSha256": "7b4c7409efa348edf2535cdcb90741252267abc1a54367dc12194099c66f3683",
+            "present": true
+          },
+          {
+            "key": "legal.privacy.controller.body",
+            "scopeKey": "legal.privacy.controller",
+            "normalizedTextSha256": "c84dc225e9894cf760ee3f90fceb6e6db23bfb80b91ba78f585cbc308887d8ae",
+            "present": true
+          },
+          {
+            "key": "legal.privacy.data.title",
+            "scopeKey": "legal.privacy.data",
+            "normalizedTextSha256": "09a603c5e5e3e10061d5428ecb8d7a281eff5ff1f51b2509733366588b706da9",
+            "present": true
+          },
+          {
+            "key": "legal.privacy.data.body",
+            "scopeKey": "legal.privacy.data",
+            "normalizedTextSha256": "f5ff918e3a631fd8f2fe415fe60a105d19f0b9f86809afcf739a1b2341f33bae",
+            "present": true
+          },
+          {
+            "key": "legal.privacy.recipients.title",
+            "scopeKey": "legal.privacy.recipients",
+            "normalizedTextSha256": "4eab821ea72107f184b564c93edddfc56902930ecba92faa90577d6c86cc5f88",
+            "present": true
+          },
+          {
+            "key": "legal.privacy.recipients.body",
+            "scopeKey": "legal.privacy.recipients",
+            "normalizedTextSha256": "10239d9e5eb82935781b2ad11885a0f2e38e733aabfe9b723020c67e4b94a027",
+            "present": true
+          },
+          {
+            "key": "legal.privacy.retention.title",
+            "scopeKey": "legal.privacy.retention",
+            "normalizedTextSha256": "6782daa1eac9c08f246a51457f421dda04cd966878954b68968c98d4c01598ba",
+            "present": true
+          },
+          {
+            "key": "legal.privacy.retention.body",
+            "scopeKey": "legal.privacy.retention",
+            "normalizedTextSha256": "2e4976e45b6bd1418545f4df6d36d385357090f862850506e849664a9d85334c",
+            "present": true
+          },
+          {
+            "key": "legal.privacy.device.title",
+            "scopeKey": "legal.privacy.device",
+            "normalizedTextSha256": "849bb118adc727d1d483f528899b25d0e34b211560ffcc825cf69f24b97b38b5",
+            "present": true
+          },
+          {
+            "key": "legal.privacy.device.body",
+            "scopeKey": "legal.privacy.device",
+            "normalizedTextSha256": "822677a32c9c08e3ecb5019ee343dc2757bfd0b8fe36e1be9fef96c079d3c259",
+            "present": true
+          }
+        ],
+        "httpStatus": 200,
+        "htmlSha256": "65c28d53c7c18862326d92d58ec7c332e35fbbd235e3c528025cb5fee4821547",
+        "visibleTextSha256": "8e2832a1670c1c5b1e9d21f92a5cf17b6a16f5e6021c1c0c5fcbfc8d88868422",
+        "noRelaySecretInResponse": true
+      },
+      {
+        "zone": "demo",
+        "language": "fr",
+        "path": "/demo/mentions-legales",
+        "passed": true,
+        "checks": [
+          {
+            "key": "legal.draft",
+            "scopeKey": "legal.draft",
+            "normalizedTextSha256": "fe2f420a91f15605070071e3df819cd128657c4cf70b009b20309fb16a7c4e1a",
+            "present": true
+          },
+          {
+            "key": "legal.legal.lead",
+            "scopeKey": "legal.legal.lead",
+            "normalizedTextSha256": "be5ca9d9181776d2c290fc501dad829b5ae46d37b6dfa5e40e4ec185ea79aaae",
+            "present": true
+          },
+          {
+            "key": "legal.legal.publisher.body",
+            "scopeKey": "legal.legal.publisher.body",
+            "normalizedTextSha256": "8d4857831846b1ce8ff5eb72133f509de49d3e7eefb585b290581089ae224d49",
+            "present": true
+          },
+          {
+            "key": "legal.legal.publication.body",
+            "scopeKey": "legal.legal.publication.body",
+            "normalizedTextSha256": "c5289953e81cc0599b0601985df5cc30b37a54cc29cdd7390bd0541483930009",
+            "present": true
+          }
+        ],
+        "httpStatus": 200,
+        "htmlSha256": "06b11b99b388d602882ae2743d979c35ff2e77120ccbab9e533e0de60fc9e025",
+        "visibleTextSha256": "a1ee564fc7026f22990709bcdaf1733a4548477380da82bdfc60abe00ca995fb",
+        "noRelaySecretInResponse": true
+      },
+      {
+        "zone": "demo",
+        "language": "en",
+        "path": "/demo/confidentialite",
+        "passed": true,
+        "checks": [
+          {
+            "key": "legal.draft",
+            "scopeKey": "legal.draft",
+            "normalizedTextSha256": "91043ff73ab2b93ff0f647ac405bfb677d24d707acc46da8465ed6f0b9220426",
+            "present": true
+          },
+          {
+            "key": "legal.privacy.rights.body",
+            "scopeKey": "legal.privacy.rights.body",
+            "normalizedTextSha256": "e95a8b959ca349d07d88c90b3594ee6407efb6268acea2b8925e4958622c406a",
+            "present": true
+          },
+          {
+            "key": "legal.privacy.controller.title",
+            "scopeKey": "legal.privacy.controller",
+            "normalizedTextSha256": "44cba506e2aad67f76c3bcd14f0ea8a143b45669d21db93043bc6651fea5974f",
+            "present": true
+          },
+          {
+            "key": "legal.privacy.controller.body",
+            "scopeKey": "legal.privacy.controller",
+            "normalizedTextSha256": "e3943413a010d2f74b0841fb56f925eaeb1d9eed82869d85b1623efa4a5c667b",
+            "present": true
+          },
+          {
+            "key": "legal.privacy.data.title",
+            "scopeKey": "legal.privacy.data",
+            "normalizedTextSha256": "95e9d0a05d1f8477a9d8b52cc052ae3619582cd3fe59ae4b2dc0e7246df88454",
+            "present": true
+          },
+          {
+            "key": "legal.privacy.data.body",
+            "scopeKey": "legal.privacy.data",
+            "normalizedTextSha256": "95c35591e632a09d1e66cb90560dd6b5ecc5354c32fcae1a62185db79984eee4",
+            "present": true
+          },
+          {
+            "key": "legal.privacy.recipients.title",
+            "scopeKey": "legal.privacy.recipients",
+            "normalizedTextSha256": "9866c1c0a5ba94fb38fbf18b5b4afaf39415290f558a5f4dfea993c8f19fb6f7",
+            "present": true
+          },
+          {
+            "key": "legal.privacy.recipients.body",
+            "scopeKey": "legal.privacy.recipients",
+            "normalizedTextSha256": "4bef94b44b47d0026b3824067bbcac8f89e2d15434ffd09d868e814d75623f45",
+            "present": true
+          },
+          {
+            "key": "legal.privacy.retention.title",
+            "scopeKey": "legal.privacy.retention",
+            "normalizedTextSha256": "12d26a909d7acd5c358aa52762a5a3406242fe998710e8eefb965d811a9ff74f",
+            "present": true
+          },
+          {
+            "key": "legal.privacy.retention.body",
+            "scopeKey": "legal.privacy.retention",
+            "normalizedTextSha256": "8eb0f9fb4983619f1cce2d923018e9010346a1cf97d699430063a8a9bcb994c6",
+            "present": true
+          },
+          {
+            "key": "legal.privacy.device.title",
+            "scopeKey": "legal.privacy.device",
+            "normalizedTextSha256": "bbc5843f8a109ed22271e2afa734fad41032311a1df5befab3acc1276dd1a7b2",
+            "present": true
+          },
+          {
+            "key": "legal.privacy.device.body",
+            "scopeKey": "legal.privacy.device",
+            "normalizedTextSha256": "5f84f5b33aa61820dc4ebfe16a130f6700576e9171c4cbaeea5968578cdcc620",
+            "present": true
+          }
+        ],
+        "httpStatus": 200,
+        "htmlSha256": "6fd1949bad078000fb4ea17a3528f63608aaaca8537603fe2d8098e2b095bd51",
+        "visibleTextSha256": "baff5ea927ad089e70de24660d8432ca4c9e42a4aeeb59381614c839aae45ddc",
+        "noRelaySecretInResponse": true
+      },
+      {
+        "zone": "demo",
+        "language": "en",
+        "path": "/demo/mentions-legales",
+        "passed": true,
+        "checks": [
+          {
+            "key": "legal.draft",
+            "scopeKey": "legal.draft",
+            "normalizedTextSha256": "91043ff73ab2b93ff0f647ac405bfb677d24d707acc46da8465ed6f0b9220426",
+            "present": true
+          },
+          {
+            "key": "legal.legal.lead",
+            "scopeKey": "legal.legal.lead",
+            "normalizedTextSha256": "35d03deec9ce303409172c79e64ecea48bfe4b649c3fe941201fed53a7f78962",
+            "present": true
+          },
+          {
+            "key": "legal.legal.publisher.body",
+            "scopeKey": "legal.legal.publisher.body",
+            "normalizedTextSha256": "8b295e3917f4fe9cbfcb939aa4c9f71893ffc0ef797b592f222ba929d7356c54",
+            "present": true
+          },
+          {
+            "key": "legal.legal.publication.body",
+            "scopeKey": "legal.legal.publication.body",
+            "normalizedTextSha256": "ce61e47f5dcc3cb069ea1bbe1ffa9212b8a2f0b0ffc1440f91a9fb8790a5f69a",
+            "present": true
+          }
+        ],
+        "httpStatus": 200,
+        "htmlSha256": "deb2ecc496ca07cdfbbafd9d508c8dad34a7b89890073dd2776f69249b32b3a1",
+        "visibleTextSha256": "f5fa682e9f477f123ad26ba7b631fc9ad2e2e59d879c151d0fdbf259e60fc45a",
+        "noRelaySecretInResponse": true
+      }
+    ],
+    "failures": [],
+    "method": "8 anonymous GET via public origin; Accept-Language fr/en; HTMLParser excludes script/style/hidden subtrees; entire exact normalized visible leaf texts",
+    "applicationSessionProvided": false,
+    "otpRequested": false,
+    "dataMutations": false,
+    "pagesHttp200": 8,
+    "passedAssertions": 64,
+    "expectedAssertions": 64,
+    "mainCommit": "d50c5a014daedd2c4b32571cf70461867121eb26",
+    "sourceFingerprint": "824797881ad006fe597098dab02be4afaefb12473e9b55fa1beac1e932d8e9dc",
+    "versions": {
+      "production": "main-d50c5a014dae-production",
+      "demo": "main-d50c5a014dae-demo"
+    },
+    "healthVersionsPreviouslyVerified": true,
+    "authorizedScopeKeys": 20,
+    "uniqueExpectedLeafValues": 30,
+    "sourceAuthorizedFiles": [
+      {
+        "path": "apps/antsia_ga/src/components/public/public-legal.tsx",
+        "sha256": "0f610212c93d411b26497b2aa529ab69c3d7d8e6d7eae3237c31705daf3c418b"
+      },
+      {
+        "path": "apps/antsia_ga/src/i18n/locales/fr/publicNetwork.json",
+        "sha256": "adb1a8c5a265c671016d9d02064ebb2ae1799935e4ec0b599a7d517ff00ff974"
+      },
+      {
+        "path": "apps/antsia_ga/src/i18n/locales/en/publicNetwork.json",
+        "sha256": "fb567d7e6e5927f0cef6270cf075834f7d636e742b68692b60b8ea9e26214c1f"
+      }
+    ],
+    "sourceAuthorizedFilesMatchPlan": true,
+    "zoneAssertionsPassed": {
+      "production": 32,
+      "demo": 32
+    },
+    "finishedAt": "2026-10-21T11:21:35.269508+00:00"
+  }
+}

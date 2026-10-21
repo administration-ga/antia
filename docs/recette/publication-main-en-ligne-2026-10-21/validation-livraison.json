@@ -1,0 +1,37 @@
+{
+  "command": "bun run verify",
+  "exitCode": 0,
+  "startedAt": "2026-10-21T11:59:33.303098+00:00",
+  "finishedAt": "2026-10-21T12:13:24.748777+00:00",
+  "baseCommit": "d50c5a014daedd2c4b32571cf70461867121eb26",
+  "testsPassed": 14382,
+  "suiteTestTotals": [
+    2687,
+    144,
+    899,
+    65,
+    243,
+    10,
+    2178,
+    4045,
+    877,
+    81,
+    970,
+    58,
+    1389
+  ],
+  "bunTestTotals": [
+    39,
+    697
+  ],
+  "testsSkippedPreexisting": 3,
+  "onlyDocumentationAdded": true,
+  "baseTrackedFileCount": 2584,
+  "allBaseTrackedFilesUnchanged": true,
+  "localOnlyPorts": [
+    3220,
+    3221
+  ],
+  "productionConvexCommands": false,
+  "sharedHeadAndIndexPreserved": true
+}

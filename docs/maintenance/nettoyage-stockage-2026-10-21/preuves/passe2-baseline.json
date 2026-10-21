@@ -1,0 +1,12 @@
+{
+  "projection": {
+    "sourceFile": "baseline.json",
+    "sourceSha256": "827255189f1fe81703de57ccf268fcd253985649db48477e9aa4d11982d4789f",
+    "rawSourceRetainedLocally": true
+  },
+  "evidence": {
+    "initialAvailableKiB": 10755572,
+    "startedAt": "2026-10-21T13:50:59.850722",
+    "timestampTimezone": "not specified in original"
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "projection": {
+    "sourceFile": "demo-reloads.json",
+    "sourceSha256": "b0f8b34c07d9ef12ce999340ca26a12234e97494e0569c00f221febf1cd32e2f",
+    "rawSourceRetainedLocally": true
+  },
+  "evidence": {
+    "baseline": {
+      "path": "/demo/fil",
+      "signedIn": true,
+      "preferences": [
+        "system",
+        "gaboma",
+        "pour_vous"
+      ]
+    },
+    "reloads": [
+      {
+        "reload": 1,
+        "path": "/demo/fil",
+        "signedIn": true,
+        "passed": true
+      },
+      {
+        "reload": 2,
+        "path": "/demo/fil",
+        "signedIn": true,
+        "passed": true
+      },
+      {
+        "reload": 3,
+        "path": "/demo/fil",
+        "signedIn": true,
+        "passed": true
+      }
+    ],
+    "passed": true,
+    "method": "Wait for visible signed-in control after each reload"
+  }
+}

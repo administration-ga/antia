@@ -1,0 +1,22 @@
+{
+  "projection": {
+    "sourceFile": "production-final-check.json",
+    "sourceSha256": "3200509b6e0c84705316b8d37c7959f3ed947e6517df4484676f9c38e4c322d9",
+    "rawSourceRetainedLocally": true
+  },
+  "evidence": {
+    "checkedAt": "2026-10-21T11:37:08.156Z",
+    "state": {
+      "path": "/fil",
+      "preferences": [
+        "system",
+        "gaboma",
+        "pour_vous"
+      ],
+      "signedIn": true
+    },
+    "viewportReset": true,
+    "errors": 0,
+    "warnings": 0
+  }
+}
