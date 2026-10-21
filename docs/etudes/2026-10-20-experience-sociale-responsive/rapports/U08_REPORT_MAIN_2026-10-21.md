@@ -55,7 +55,7 @@ Preuve : [`publication-proof.json`](../../../recette/responsive-u03-u08-main-202
 
 ### Observations, sans retour arrière
 
-- **Clé brute dans les actus.** La visionneuse affiche la clé `fileScanUnavailable` pour un média dont l'analyse est indisponible. Ce défaut existait déjà dans `main` `086cd43` : les backends renvoient ce motif, absent du contrat front de `main` (`MediaWithheld`, `errors.json`). Correctif à part.
+- **Clé brute dans les actus.** La visionneuse affiche la clé `fileScanUnavailable` pour un média dont l'analyse est indisponible. Ce défaut existait déjà dans `main` `086cd43` : les backends renvoient ce motif, absent du contrat front de `main` (`MediaWithheld`, `errors.json`). **Corrigé et publié** le soir même : PR 31 (contrat front, écrans, garde Convex alignée sur les backends en ligne) et diasporale#22 (`789e9ec`), version `main-0773370b0a85`. Contrôle en ligne de `/demo/actus` à 390, 834 et 1 440 px : phrase traduite, aucune clé brute ([preuve](../../../recette/file-scan-unavailable-2026-10-21/publication-proof.json)).
 - **Fiche d'offre à une colonne.** Le cadre boutique de `main` fait 768 px, sous le seuil de 832 px de la mise en page à deux colonnes de U07. Le cadre de 1 024 px venait de l'ancien design (`3507e4a`), pas de U.
 - **Onglet coupé.** À 390 px, l'onglet « Conversations » de Messages se coupe en fin de mot.
 
