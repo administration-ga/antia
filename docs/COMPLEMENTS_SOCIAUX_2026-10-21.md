@@ -1,6 +1,6 @@
 # Compléments sociaux — 21 octobre 2026
 
-Les modèles fournis dans les onze captures Facebook sont intégrés dans les vrais composants ANTSIA : invitations, suggestions, profils, notifications, cartes d’offre et aperçus vidéo du fil. Les fonctions et contenus existants restent raccordés. Cette livraison est **locale, sans publication de cette tranche**.
+Les modèles fournis dans les onze captures Facebook sont intégrés dans les vrais composants ANTSIA : invitations, suggestions, profils, notifications, cartes d’offre et aperçus vidéo du fil. Les fonctions et contenus existants restent raccordés. Les commits de livraison sont poussés et les deux versions sont **publiées sur ANTSIA et sa zone /demo**. La recette locale initiale est conservée ci-dessous.
 
 ## Comportements intégrés
 
@@ -40,9 +40,9 @@ Le contrôle visuel porte sur Gaboma sombre. La résolution du nouveau jeton est
 
 Aucune actualité, personne, relation commune, campagne sponsorisée ni gamme de produits n’a été inventée. Les actualités restent les vraies publications autorisées du réseau. Les vignettes commerce représentent les médias de leur offre, sans simuler des produits absents des données.
 
-Le rail Clips est couvert par ses tests de filtrage, limites, destinations, absence d’autoplay et fermeture ; les données locales utilisées pour les captures ne contiennent pas de vidéo livrable permettant d’en revendiquer la lecture en navigateur.
+Le rail Clips est couvert par ses tests de filtrage, limites, destinations, absence d’autoplay et fermeture. La recette locale initiale ne disposait pas de vidéo livrable ; la recette publiée a ensuite observé deux aperçus décodés en production (readyState 4, aucune erreur, muets et en pause). Aucun nouveau média n’a été publié.
 
-Pas de build de production ni de `verify` global revendiqué pour cette tranche. Aucun commit applicatif, push, déploiement distant, secret ou fichier d’environnement modifié. L’arbre et l’index partagés ainsi que les travaux voisins sont conservés. Une seule relation de recette a été ajoutée sur le backend local, sans retrait des relations ou invitations existantes.
+Les limites de la recette locale initiale sont levées pour les compilations et la publication décrites ci-dessous. Aucun backend, secret ou fichier d’environnement privé n’a été modifié. L’arbre et l’index de travail partagés restent sur leur état initial. Une seule relation de recette a été ajoutée localement ; la recette en ligne n’a effectué aucune mutation sociale, bascule de compte ou déconnexion.
 
 ## Preuves
 
@@ -50,3 +50,23 @@ Pas de build de production ni de `verify` global revendiqué pour cette tranche.
 - [Mesures responsives](recette/complements-sociaux-2026-10-21/responsive.json), [conservation des données](recette/complements-sociaux-2026-10-21/local-after.json), [console locale](recette/complements-sociaux-2026-10-21/console-locale.json).
 - [Notification avec décision](recette/complements-sociaux-2026-10-21/notifications-mobile.png), [suggestions bureau](recette/complements-sociaux-2026-10-21/suggestions-1440.png), [catalogue tablette](recette/complements-sociaux-2026-10-21/catalogue-tablette.png), [fiche mobile](recette/complements-sociaux-2026-10-21/offre-mobile.png).
 - Les captures Facebook fournies servent de référence ; elles ne sont pas ajoutées aux médias de l’application.
+
+
+## Publication autorisée et vérifiée
+
+| Cible | Commit source poussé | Version | Déploiement |
+| --- | --- | --- | --- |
+| [ANTSIA](https://antsia.vercel.app/) | `2966feaafc0f4c86176845c3ba4c07d5a7297422` | `social-20261021-production-2966feaafc0f` | `dpl_EpqwAiwbS4BzDTec73RL2AWCbNNK` — READY |
+| [Démo intégrée](https://antsia.vercel.app/demo) | `df82f10ac50a5058ef236e20ed2578bbcd9386c2` | `social-20261021-demo-df82f10ac50a` | `dpl_9d6JWNqASpK8KbdejSw2ozKpPDxX` — READY |
+
+Les branches `codex/complements-sociaux-20261021` et `codex/complements-sociaux-demo-20261021` portent les sources. Le prérequis `05d8487` conserve exactement les trois fichiers de confidentialité publiés pendant la préparation ; trois formulations sont clarifiées ensuite sans changer leurs informations. Le test de contrat DIASPORALE ajoute une seule entrée pour le jeton de rayon : commit `aafe007`, branche `codex/contrat-actions-sociales-20261021`, poussée sans publication de l’application DIASPORALE.
+
+La vérification complète a été reprise après un faux positif lexical dans le cliquet de communication : **15 222 tests réussis**, génération et typages Convex, typages des 12 espaces et lint des 11 espaces sans erreur. Le test partagé reconnaît explicitement le nouveau jeton ; aucun CSS ou palette DIASPORALE n’a été changé. Les avertissements de lint préexistants restent consignés dans les journaux locaux.
+
+Le candidat figé, distinct de l’arbre de travail partagé, passe en plus ses deux typages, **4 153 tests du paquet social et 994 tests de l’application**, puis les deux compilations Vercel Next 16.4.2 (125,2 s démo ; 140,5 s principal). Ces totaux diffèrent de l’arbre partagé car les changements voisins non publiés en sont exclus.
+
+L’enfant démo est construit en premier, sans promotion de l’ancien domaine. Le principal référence sa nouvelle origine immuable et hérite des secrets existants. Ses contrôles préparatoires vérifient versions, services et CSP. L’alias public est relu juste avant promotion pour conserver la publication concurrente. Après activation : deux santés HTTP 200 avec versions exactes, CSP des backends respectifs et aucun secret du relais dans les réponses. L’enfant direct redirige vers le SSO Vercel ; l’ancien domaine démo reste en 404.
+
+Après rechargement, les profils réel et démo attendus sont conservés. Mes connexions se charge en production et côté presse démo. Les relevés démo des relations et invitations sont identiques avant/après : trois connexions (dont Awa), deux suivis, aucune invitation en attente. Les notifications de production s’ouvrent, les nouveaux boutons Ajouter et Consulter l’offre mesurent 44 px de haut avec un rayon de 8 px, et la fiche produit démo est atteinte. Les deux aperçus Clips chargent sans autoplay. **Console des deux onglets : zéro avertissement et zéro erreur.**
+
+Les [preuves de publication](recette/complements-sociaux-2026-10-21/publication/publication-proof.json), [contrôles du navigateur](recette/complements-sociaux-2026-10-21/publication/browser-proof.json) et [validation complète](recette/complements-sociaux-2026-10-21/publication/validation.json) sont versionnés sans contenu privé. Les captures des sessions authentifiées restent locales et sont exclues du commit de preuves.
