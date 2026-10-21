@@ -1,0 +1,35 @@
+{
+  "staged": {
+    "main": {
+      "health": {
+        "status": "ok",
+        "application": "antsia-ga",
+        "version": "social-20261021-production-2966feaafc0f",
+        "backend": "configured"
+      },
+      "backendCspCorrect": true,
+      "noRelayTokenInHeaders": true
+    },
+    "demo": {
+      "health": {
+        "status": "ok",
+        "application": "antsia-ga",
+        "version": "social-20261021-demo-df82f10ac50a",
+        "backend": "configured"
+      },
+      "backendCspCorrect": true,
+      "noRelayTokenInHeaders": true
+    }
+  },
+  "candidateValidation": {
+    "typechecksPassed": 2,
+    "socialFeatureTestsPassed": 4153,
+    "applicationTestsPassed": 994
+  },
+  "beforePromotionHealth": {
+    "status": "ok",
+    "application": "antsia-ga",
+    "version": "confidentialite-20261021-999a947c649ad78a",
+    "backend": "configured"
+  }
+}

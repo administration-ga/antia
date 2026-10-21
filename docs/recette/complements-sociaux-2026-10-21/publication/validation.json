@@ -1,0 +1,41 @@
+{
+  "publicationChecksPassed": true,
+  "execution": "global verify resumed after a failed lexical ratchet, then complete remaining phases",
+  "firstAttempt": {
+    "exitCode": 1,
+    "convexTestsPassed": 2853,
+    "ratchetsPassed": 143,
+    "ratchetsFailed": 1
+  },
+  "failedRatchetRecheck": {
+    "exitCode": 0,
+    "testsPassed": 2
+  },
+  "continuation": {
+    "exitCode": 0,
+    "workspaceTypechecks": 12,
+    "workspaceTestGroups": 12,
+    "workspaceLints": 11,
+    "testCounts": [
+      912,
+      86,
+      291,
+      75,
+      2286,
+      4159,
+      963,
+      87,
+      1115,
+      83,
+      1402
+    ],
+    "bunTestCounts": [
+      69,
+      697
+    ],
+    "lintErrors": 0
+  },
+  "uniqueTestsPassed": 15222,
+  "themeContractCompanion": "DIASPORALE test entry only; no palette or runtime code change",
+  "noBackendDeployment": true
+}

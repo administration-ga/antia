@@ -1,0 +1,27 @@
+{
+  "privacyPrerequisite": "05d84873f400df267d5e9ed46b51ea160af67f10",
+  "targets": {
+    "production": {
+      "commit": "2966feaafc0f4c86176845c3ba4c07d5a7297422",
+      "branch": "codex/complements-sociaux-20261021",
+      "parent": "05d84873f400df267d5e9ed46b51ea160af67f10",
+      "tree": "af802abe7dcf811e3b82eef9d6efa0dbbbb7b02a"
+    },
+    "demo": {
+      "commit": "df82f10ac50a5058ef236e20ed2578bbcd9386c2",
+      "branch": "codex/complements-sociaux-demo-20261021",
+      "parent": "0af6d49ce0b9b44dbba10f447f034a7967058d66",
+      "tree": "5e4a9bd3092c6bac76e828324cd8337b77742a3d"
+    }
+  },
+  "companion": {
+    "repository": "DIASPORALE",
+    "commit": "aafe007c287ec59b73fb0276fb236441989500c4",
+    "branch": "codex/contrat-actions-sociales-20261021",
+    "changedPaths": [
+      "packages/diasporale-features/src/styles/engine-theme-contrast.test.ts"
+    ],
+    "insertions": 1
+  },
+  "sharedStatePreserved": true
+}

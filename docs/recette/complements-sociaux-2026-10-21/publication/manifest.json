@@ -1,0 +1,57 @@
+[
+  {
+    "path": ".gitignore",
+    "bytes": 69,
+    "sha256": "177b9842704511e46829d2a4151e23a4105e8cd493fd718398b29d9612b03fcf"
+  },
+  {
+    "path": "browser-proof.json",
+    "bytes": 756,
+    "sha256": "1c2604009df15ecb5a22943a2bdea5631944a0609a230ba0924c15a2014145b2"
+  },
+  {
+    "path": "commits.json",
+    "bytes": 934,
+    "sha256": "340c95e47bdb634919239d951e03a269153a04e8a6d83c20b201e265df6a52fd"
+  },
+  {
+    "path": "console.json",
+    "bytes": 36,
+    "sha256": "5b84d5cbbbc0cb7a74aab29690d4be4a85cf159cdedd93baa56ff8c0cb2b2457"
+  },
+  {
+    "path": "demo-invitations-apres.txt",
+    "bytes": 396,
+    "sha256": "310ffc66c3600ef6e2a3eabd1d93399a3be0dd5863c23cf1be770afd4533429b"
+  },
+  {
+    "path": "demo-invitations-avant.txt",
+    "bytes": 396,
+    "sha256": "310ffc66c3600ef6e2a3eabd1d93399a3be0dd5863c23cf1be770afd4533429b"
+  },
+  {
+    "path": "demo-relations-apres.txt",
+    "bytes": 960,
+    "sha256": "3762d755a243f35b0a64afd803e8368d149ec374e8ca04832f55f539e5927233"
+  },
+  {
+    "path": "demo-relations-avant.txt",
+    "bytes": 960,
+    "sha256": "3762d755a243f35b0a64afd803e8368d149ec374e8ca04832f55f539e5927233"
+  },
+  {
+    "path": "publication-proof.json",
+    "bytes": 1006,
+    "sha256": "024e279a1b678c8c68e70c11ce9d8e4d372b449a9932ba089dc404875672bc13"
+  },
+  {
+    "path": "staged-proof.json",
+    "bytes": 862,
+    "sha256": "308379b87106a42076f4467b7eeaf375d30731e17446de16e0317558ad34e21c"
+  },
+  {
+    "path": "validation.json",
+    "bytes": 843,
+    "sha256": "986e7394b5e8af0adce8a7c36abaed962a28308aab812ab0c202adb5b350a4b0"
+  }
+]
