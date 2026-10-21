@@ -9,6 +9,7 @@
 // ── La page réseau et sa coque (`shell/`) ──────────────────────────────────
 export { ReseauAgentPage, RESEAU_DESKTOP_CSS } from "../../shell/ReseauAgentPage"
 export { ReseauMenuRail } from "../../shell/ReseauMenuRail"
+export { ReseauCreateAction } from "../../shell/ReseauCreateAction"
 export { ReseauDesktopIcomLink, desktopIcomLabel, icomUnreadTotal } from "../../shell/ReseauDesktopIcomLink"
 // ⚠️ Ré-export NOMMÉ, et non `export *` : `mobile/reseau-mobile-tabs` publie
 // déjà un `ReseauMenuItem` — la feuille « Menu » du téléphone et le rail-menu

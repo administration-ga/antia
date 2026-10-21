@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/PostMedia.tsx @ ad2e7fdc2 — adaptations : type `PostMediaDto` du contrat `@antsia/social-contracts/media` ; un média RETENU par la garde des fichiers (`url` nulle, `withheld` : analyse en cours ou bloqué) garde sa place et dit pourquoi (textes du code, espace `errors`) au lieu d'un lien mort — image, vidéo et carrousel ; libellés et annonces par l'i18n (clés `reseau:postMedia.*`) ; surface plein écran de `@antsia/ui/overlay` (charte de l'application) ; cadre, carrousel et gestes inchangés ; feuille de style sortie du JSX dans une constante de module (`POST_MEDIA_CSS`) — un littéral enfant de `<style>` passerait pour une chaîne d'interface — règles inchangées ; P03 (étude social-commerce) : présentation « media » déclarée par l'application (`presentation`, sinon `useOptionalNetwork().postPresentation`), rendue par `PostMediaPresentation` — ratio réel borné, galerie et visionneuse —, la présentation historique restant le défaut, à l'identique.
+// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/PostMedia.tsx @ ad2e7fdc2 — adaptations : type `PostMediaDto` du contrat `@antsia/social-contracts/media` ; un média RETENU par la garde des fichiers (`url` nulle, `withheld` : analyse en cours ou bloqué) garde sa place et dit pourquoi (textes du code, espace `errors`) au lieu d'un lien mort — image, vidéo et carrousel ; libellés et annonces par l'i18n (clés `reseau:postMedia.*`) ; surface plein écran de `@antsia/ui/overlay` (charte de l'application) ; cadre, carrousel et gestes inchangés ; feuille de style sortie du JSX dans une constante de module (`POST_MEDIA_CSS`) — un littéral enfant de `<style>` passerait pour une chaîne d'interface — règles inchangées ; P03 (étude social-commerce) : présentation « media » déclarée par l'application (`presentation`, sinon `useOptionalNetwork().postPresentation`), rendue par `PostMediaPresentation` — ratio réel borné, galerie et visionneuse —, la présentation historique restant le défaut, à l'identique ; ADR-0028 : présentation « charte » — les mêmes cadre, galerie et visionneuse que « media », POSÉS dans la carte à l'angle des photos (`inset`), la publication elle-même désignée par `primary` (coordination vidéo, mémoire de galerie).
 "use client"
 
 /**
@@ -70,6 +70,7 @@ export function PostMedia({
   media,
   gutter = 0,
   presentation,
+  primary = false,
 }: {
   media: readonly PostMediaDto[]
   /** Le rembourrage lateral de la carte hote, que le media TRAVERSE. */
@@ -81,10 +82,16 @@ export function PostMedia({
    * explicitement.
    */
   presentation?: EnginePostPresentation
+  /**
+   * Les médias de la publication ELLE-MÊME, posés dans sa carte (présentation
+   * « charte ») : ils suivent le coordinateur de lecture et la mémoire de
+   * galerie, jamais ceux d'une publication citée. Ailleurs, le débord en décide.
+   */
+  primary?: boolean
 }) {
   const { t } = useTranslation("reseau")
   const network = useOptionalNetwork()
-  const mode: EnginePostPresentation = presentation ?? (network?.postPresentation === "media" ? "media" : "classic")
+  const mode: EnginePostPresentation = presentation ?? network?.postPresentation ?? "classic"
   if (media.length === 0) return null
 
   // Le debord, ecrit une fois : marges negatives et largeur rendue, plus le
@@ -101,19 +108,21 @@ export function PostMedia({
           marginInline: -gutter,
           width: `calc(100% + ${gutter * 2}px)`,
           maxWidth: "none",
-          borderRadius: 0,
+          borderRadius: "var(--esp-primitive-media-radius, 0px)",
         }
       : null
 
   // Présentation « media » (opt-in de l'application) : son propre rendu. Tout
   // ce qui suit reste la présentation historique, intouchée.
   if (mode === "media") return <PostMediaPresentation media={media} bleed={bleed} />
+  // Présentation « charte » (ADR-0028) : jamais de débord, le média est posé.
+  if (mode === "charte") return <PostMediaPresentation media={media} bleed={null} primary={primary} inset />
 
   const video = media.find((item) => item.kind === "video")
   if (video) {
     // Retenue par la garde : la place reste, la raison se dit — jamais un
     // lecteur pointé sur rien.
-    if (video.url === null) {
+    if (video.url === null || video.withheld !== null) {
       return (
         <WithheldTile
           text={t(withheldKey(video.withheld))}
@@ -137,7 +146,7 @@ export function PostMedia({
           // son contenu doivent rester entiers ; les bandes sont sombres).
           aspectRatio: STANDARD_RATIO,
           objectFit: "contain",
-          borderRadius: 8,
+          borderRadius: "var(--esp-primitive-media-radius, 8px)",
           background: "var(--ink-900)",
           display: "block",
           ...bleed,
@@ -164,7 +173,7 @@ export function PostMedia({
       style={{
         display: "grid",
         gap: 4,
-        borderRadius: 8,
+        borderRadius: "var(--esp-primitive-media-radius, 8px)",
         overflow: "hidden",
         ...layout,
         ...bleed,
@@ -191,7 +200,7 @@ function ImageCarousel({
     marginInline: number
     width: string
     maxWidth: string
-    borderRadius: number
+    borderRadius: number | string
   } | null
 }) {
   const { t } = useTranslation("reseau")
@@ -442,7 +451,7 @@ const POST_MEDIA_CSS = `
       .rpm-carousel {
         position: relative;
         overflow: hidden;
-        border-radius: var(--radius-lg);
+        border-radius: var(--esp-primitive-media-radius, var(--radius-lg));
         background: var(--ink-100);
       }
       .rpm-carousel-viewport {
@@ -498,10 +507,10 @@ const POST_MEDIA_CSS = `
         min-width: 44px;
         min-height: 44px;
         border: 1px solid var(--ink-200);
-        border-radius: var(--radius-lg);
+        border-radius: var(--esp-primitive-chip-radius, var(--radius-lg));
         background: var(--ink-0);
         color: var(--ink-900);
-        box-shadow: var(--shadow-sm);
+        box-shadow: var(--esp-surface-shadow, var(--shadow-sm));
         pointer-events: none;
       }
       .rpm-expand-hint { left: var(--sp-2); }
@@ -524,7 +533,7 @@ const POST_MEDIA_CSS = `
         border-radius: 999px;
         background: var(--ink-0);
         color: var(--ink-900);
-        box-shadow: var(--shadow-md);
+        box-shadow: var(--esp-surface-shadow, var(--shadow-md));
         cursor: pointer;
       }
       .rpm-carousel-arrow-previous { left: var(--sp-2); }
@@ -557,7 +566,7 @@ const POST_MEDIA_CSS = `
         border: 1px solid var(--ink-0);
         border-radius: 999px;
         background: var(--ink-300);
-        box-shadow: var(--shadow-xs);
+        box-shadow: var(--esp-surface-shadow, var(--shadow-xs));
       }
       .rpm-carousel-dot[aria-current="true"] .rpm-carousel-dot-mark {
         width: 9px;
@@ -592,7 +601,7 @@ const POST_MEDIA_CSS = `
         border-radius: 999px;
         background: var(--ink-0);
         color: var(--ink-900);
-        box-shadow: var(--shadow-sm);
+        box-shadow: var(--esp-surface-shadow, var(--shadow-sm));
         cursor: pointer;
       }
       .rpm-lightbox-stage {
@@ -662,7 +671,7 @@ function WithheldTile({
     marginInline: number
     width: string
     maxWidth: string
-    borderRadius: number
+    borderRadius: number | string
   } | null
   span?: number
 }) {
@@ -676,7 +685,7 @@ function WithheldTile({
         aspectRatio: ratio,
         padding: 16,
         textAlign: "center",
-        borderRadius: 8,
+        borderRadius: "var(--esp-primitive-media-radius, 8px)",
         background: "var(--ink-100)",
         color: "var(--ink-600)",
         fontSize: 13,
@@ -704,7 +713,7 @@ function ImageTile({
   const [failed, setFailed] = useState(false)
 
   // Retenue par la garde des fichiers : la raison, à la place de l'image.
-  if (item.url === null) {
+  if (item.url === null || item.withheld !== null) {
     return (
       <WithheldTile
         text={t(withheldKey(item.withheld))}

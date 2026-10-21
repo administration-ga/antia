@@ -61,12 +61,12 @@ export function identityErrorKey(error: unknown): string {
   return "errors.generic"
 }
 
-async function authRequest(run: (options: AuthRequestOptions) => Promise<unknown>): Promise<unknown> {
+async function authRequest(run: (options: AuthRequestOptions) => Promise<unknown>, headers?: Record<string, string>): Promise<unknown> {
   const controller = new AbortController()
   let timer: ReturnType<typeof setTimeout> | undefined
   try {
     return await Promise.race([
-      Promise.resolve().then(() => run({ fetchOptions: { throw: false, signal: controller.signal } })),
+      Promise.resolve().then(() => run({ fetchOptions: { throw: false, signal: controller.signal, ...(headers ? { headers } : {}) } })),
       new Promise<never>((_resolve, reject) => {
         timer = setTimeout(() => { reject(new DOMException("Authentication request timed out", "TimeoutError")); controller.abort() }, 10_000)
       }),
@@ -78,7 +78,7 @@ async function authRequest(run: (options: AuthRequestOptions) => Promise<unknown
 
 /** Porte commune, sans route ni origine propre à une application. */
 export function IdentityEntry({ authClient, callbackURL, onAuthenticated, configuration, renderLocalCode, presentation = "default", headingLevel = 1, title, lead }: IdentityEntryProps) {
-  const { t } = useTranslation("identity")
+  const { t, i18n } = useTranslation("identity")
   const fieldId = useId()
   const [method, setMethod] = useState<Method>("email")
   const [destination, setDestination] = useState<Destination | null>(null)
@@ -115,7 +115,9 @@ export function IdentityEntry({ authClient, callbackURL, onAuthenticated, config
     const key = `${target.method}:${target.identifier}`
     const deadline = cooldowns.current.get(key) ?? 0
     if (deadline > Date.now()) { setError(t("cooldown", { count: Math.ceil((deadline - Date.now()) / 1_000) })); return false }
-    const result = await authRequest((options) => target.method === "email" ? authClient.emailOtp.sendVerificationOtp({ email: target.identifier, type: "sign-in", ...options }) : authClient.phoneNumber.sendOtp({ phoneNumber: target.identifier, ...options }))
+    // La langue affichée accompagne la demande : le moteur compose le code dans cette langue.
+    const language = i18n.resolvedLanguage ?? i18n.language
+    const result = await authRequest((options) => target.method === "email" ? authClient.emailOtp.sendVerificationOtp({ email: target.identifier, type: "sign-in", ...options }) : authClient.phoneNumber.sendOtp({ phoneNumber: target.identifier, ...options }), language ? { "Accept-Language": language } : undefined)
     if (responseError(result)) { setError(t(identityErrorKey(responseError(result)))); return false }
     const data = responseData(result)
     const sent = typeof data === "object" && data !== null && (target.method === "email" ? "success" in data && data.success === true : "message" in data && typeof data.message === "string" && data.message.length > 0)
@@ -160,8 +162,8 @@ export function IdentityEntry({ authClient, callbackURL, onAuthenticated, config
         <Heading className={compact ? "text-xl font-semibold" : "text-3xl"}>{destination ? t("codeTitle") : title ?? t("title")}</Heading>
         {headingLead ? <p className={`break-words text-muted-foreground ${compact ? "text-sm" : ""}`}>{headingLead}</p> : null}
       </header>
-      {error ? <p role="alert" className="rounded-lg border border-destructive/40 bg-card px-4 py-3 text-sm text-destructive">{error}</p> : null}
-      {notice ? <p role="status" className="rounded-lg bg-muted px-4 py-3 text-sm">{notice}</p> : null}
+      {error ? <p role="alert" className="rounded-[var(--esp-primitive-card-radius,var(--radius-lg))] border border-[color:var(--esp-alert-border,color-mix(in_oklab,var(--destructive)_40%,transparent))] bg-card px-4 py-[var(--esp-card-padding,0.75rem)] text-sm text-destructive">{error}</p> : null}
+      {notice ? <p role="status" className="rounded-[var(--esp-primitive-card-radius,var(--radius-lg))] bg-muted px-4 py-[var(--esp-card-padding,0.75rem)] text-sm">{notice}</p> : null}
       {configuration === undefined ? <p role="status" className="text-sm text-muted-foreground">{t("loading")}</p> : null}
       {configuration === null ? <p role="alert" className="text-sm text-muted-foreground">{t("configurationUnavailable")}</p> : null}
       {!destination ? (

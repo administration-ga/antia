@@ -19,11 +19,17 @@ import { useCartConnectivity, useCartDraft } from "./use-cart-draft"
 export function CartScreen() {
   const { t } = useTranslation("cart")
   const cart = useCartDraft()
-  return <ShopFrame title={t("title")} lead={t("lead")}><div className="flex flex-wrap gap-2"><ShopLink href={routes.purchases()}>{t("myPurchases")}</ShopLink></div><p className="text-sm text-muted-foreground">{t("draftNotice")}</p>{!cart.ready ? <p role="status">{t("loading")}</p> : cart.draft ? <CartContents key={JSON.stringify([cart.networkId, cart.personId, cart.draft.handle])} draft={cart.draft} save={cart.save} /> : <Card><p>{t("empty")}</p></Card>}</ShopFrame>
+  return <ShopFrame title={t("title")} lead={t("lead")}>
+    <div className="flex flex-wrap gap-2"><ShopLink href={routes.purchases()}>{t("myPurchases")}</ShopLink></div>
+    <p className="text-sm text-muted-foreground">{t("draftNotice")}</p>
+    {cart.ready && cart.drafts.length ? <nav aria-label={t("cartsNavigation")}><ul className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">{cart.drafts.map(draft => <li key={draft.handle}><Button type="button" variant={cart.selectedHandle === draft.handle ? "commerce" : "outline"} aria-pressed={cart.selectedHandle === draft.handle} onClick={() => cart.select(draft.handle)} className="flex w-full flex-wrap justify-between gap-2"><span>{t("seller", { handle: draft.handle })}</span><span>{t("lineCount", { count: draft.items.length })}</span></Button></li>)}</ul></nav> : null}
+    {cart.saveError ? <p role="alert">{t(cart.saveError === "drafts_full" ? "drafts_full" : cart.saveError === "conflict" ? "draftConflict" : "draftUnavailable")}</p> : null}
+    {!cart.ready ? <p role="status">{t("loading")}</p> : cart.draft ? <CartContents key={JSON.stringify([cart.networkId, cart.personId, cart.draft.handle])} draft={cart.draft} save={cart.save} /> : <Card><p>{t("empty")}</p></Card>}
+  </ShopFrame>
 }
 function CartContents({ draft, save }: { draft: CartDraft; save: (draft: CartDraft | null) => boolean }) {
   const { t, i18n } = useTranslation("cart")
-  const { networkId } = useCartDraft()
+  const { networkId } = useCartDraft(draft.handle)
   const connectivity = useCartConnectivity()
   const router = useRouter()
   const convex = useConvex()
@@ -77,7 +83,7 @@ function CartContents({ draft, save }: { draft: CartDraft; save: (draft: CartDra
   const context = query.isError ? previousContext.current : query.data ?? previousContext.current
   const lines: CheckoutCartLine[] = context?.items.flatMap((item) => item.available && item.offer ? [{ offer: item.offer, quantity: item.quantity, ...(item.variantRef ? { variantRef: item.variantRef } : {}) }] : []) ?? []
   const first = lines[0]
-  return <div className="grid gap-5">
+  return <div className="antsia-page">
     <div className="flex flex-wrap gap-3"><p className="self-center font-medium">{t("seller", { handle: draft.handle })}</p><ShopLink href={routes.storefront(draft.handle)}>{t("backToShop")}</ShopLink></div>
     {!connectivity.online ? <p role="status">{t("offline")}</p> : null}
     {recover && submitted ? <Card><p>{t("recoverHint")}</p><SubmittedCart draft={draft} save={save} onRecover={() => setRecover(true)} onStopped={stopped} recovery /></Card> : null}
@@ -86,7 +92,7 @@ function CartContents({ draft, save }: { draft: CartDraft; save: (draft: CartDra
       const current = context?.items.find((entry) => entry.offerRef === item.offerRef && (entry.variantRef ?? undefined) === item.variantRef)
       return <li key={cartItemKey(item)}><CartLine item={item} offer={current?.offer ?? null} available={current?.available === true} locked={!!submitted} locale={i18n.resolvedLanguage ?? "fr"} update={(quantity) => edit(draft.items.map((entry) => cartItemKey(entry) === cartItemKey(item) ? { ...entry, quantity } : entry))} remove={() => edit(draft.items.filter((entry) => cartItemKey(entry) !== cartItemKey(item)))} /></li>
     })}</ul>
-    {!submitted ? <Button variant="outline" onClick={() => edit([])}>{t("clear")}</Button> : null}
+    {!submitted ? <Button variant="danger" onClick={() => edit([])}>{t("clear")}</Button> : null}
     {query.isPending ? <p role="status">{t("loading")}</p> : null}
     {query.isError || context && !context.available ? <p role="alert">{t("unavailable")}</p> : null}
     <Button variant="outline" pending={action.pending} disabled={!connectivity.online} onClick={refresh}>{t("refresh")}</Button>
@@ -106,11 +112,11 @@ function CartLine({ item, offer, available, locked, locale, update, remove }: { 
   const variant = offer?.variants.find((entry) => entry.variantRef === item.variantRef)
   const amount = variant?.amount ?? (offer?.price.mode === "fixed" || offer?.price.mode === "unit" ? offer.price.amount : null)
   const unit = variant?.unit ?? (offer?.price.mode === "unit" ? offer.price.unit : null)
-  return <Card><div className="grid gap-3"><h2 className="font-semibold">{offer?.title ?? t("missing")}</h2>{variant ? <p>{variant.label}</p> : null}{amount !== null ? <p>{unit ? t("unit", { amount: checkoutAmount(amount, locale), unit }) : checkoutAmount(amount, locale)}</p> : null}{!available ? <p role="status">{t("missing")}</p> : null}<form className="flex flex-wrap items-end gap-3" onSubmit={(event) => { event.preventDefault(); if (!locked && valid) update(Number(quantity)) }}><label className="grid gap-1 text-sm"><span>{t("quantity")}</span><TextInput value={quantity} disabled={locked} inputMode="numeric" aria-invalid={!valid} onChange={(event) => setQuantity(event.target.value)} className="max-w-28" /></label><Button type="submit" variant="outline" disabled={locked || !valid}>{t("update")}</Button><Button type="button" variant="ghost" disabled={locked} onClick={remove}>{t("remove")}</Button></form>{!valid ? <p role="alert" className="text-sm">{t("quantityError")}</p> : null}</div></Card>
+  return <Card><div className="grid gap-3"><h2 className="antsia-subtitle">{offer?.title ?? t("missing")}</h2>{variant ? <p>{variant.label}</p> : null}{amount !== null ? <p>{unit ? t("unit", { amount: checkoutAmount(amount, locale), unit }) : checkoutAmount(amount, locale)}</p> : null}{!available ? <p role="status">{t("missing")}</p> : null}<form className="flex flex-wrap items-end gap-3" onSubmit={(event) => { event.preventDefault(); if (!locked && valid) update(Number(quantity)) }}><label className="grid gap-1 text-sm"><span>{t("quantity")}</span><TextInput value={quantity} disabled={locked} inputMode="numeric" aria-invalid={!valid} onChange={(event) => setQuantity(event.target.value)} className="max-w-28" /></label><Button type="submit" variant="outline" disabled={locked || !valid}>{t("update")}</Button><Button type="button" variant="danger" disabled={locked} onClick={remove}>{t("remove")}</Button></form>{!valid ? <p role="alert" className="text-sm">{t("quantityError")}</p> : null}</div></Card>
 }
 function SubmittedCart({ draft, save, onRecover, onStopped, recovery = false }: { draft: CartDraft; save: (draft: CartDraft | null) => boolean; onRecover: () => void; onStopped: () => void; recovery?: boolean }) {
   const { t } = useTranslation("cart")
-  const { networkId } = useCartDraft()
+  const { networkId } = useCartDraft(draft.handle)
   const connectivity = useCartConnectivity()
   const action = useShopAction()
   const stop = useMutation(api.modules.shops.checkout.stopClientIntent)

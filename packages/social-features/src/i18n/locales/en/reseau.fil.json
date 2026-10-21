@@ -6,7 +6,14 @@
       "scheduled": "Scheduled event",
       "cancelled": "Cancelled event",
       "timeZone": "Times shown in your time zone: {{timeZone}}",
-      "participation": "Your recorded response: {{response}}"
+      "participation": "Your recorded response: {{response}}",
+      "participate": "Attend",
+      "participateLabel": "Attend: {{title}}",
+      "later": "Later",
+      "laterLabel": "Later: {{title}}",
+      "laterNote": "You can answer from your agenda.",
+      "participated": "You are attending {{title}}.",
+      "participateFailed": "Your answer could not be saved."
     }
   },
   "feedPages": {
@@ -137,7 +144,11 @@
   "reportContentDialog": {
     "title": {
       "publication": "Report this post",
-      "commentaire": "Report this comment"
+      "commentaire": "Report this comment",
+      "professionalProfile": "Report this professional profile",
+      "professionalCollaboration": "Report this collaboration request",
+      "editorialVersion": "Report this article",
+      "editorialMedia": "Report this media outlet"
     },
     "description": "The platform reviews the report. The author does not learn who you are.",
     "reasonLabel": "Reason",
@@ -221,7 +232,8 @@
       "withdrawn": "The post has been withdrawn from reading without an account.",
       "withdrawFailed": "Withdrawal from public reading could not be saved.",
       "availableOnRoot": "Also readable in {{brand}}."
-    }
+    },
+    "pageKind": "Page"
   },
   "sharePostDialog": {
     "title": "Share {{name}}'s post",
@@ -286,7 +298,8 @@
       "publishFailed": "The comment could not be posted.",
       "removeFailed": "The removal could not be saved.",
       "editFailed": "The edit could not be saved."
-    }
+    },
+    "closed": "New comments are closed. Existing exchanges remain available to read."
   },
   "postOverflowMenu": {
     "trigger": "More actions on this post",
@@ -339,5 +352,21 @@
     "back": "Go back",
     "discard": "Discard the draft",
     "close": "Close"
+  },
+  "feedSuggestion": {
+    "label": "Someone to discover: {{name}}",
+    "profileOf": "Profile of {{name}}",
+    "follow": "Follow",
+    "followLabel": "Follow {{name}}",
+    "followed": "You follow {{name}}.",
+    "followFailed": "The follow could not be saved.",
+    "write": "Write",
+    "writeLabel": "Write to {{name}}"
+  },
+  "feedClips": {
+    "title": "Videos from your feed",
+    "hide": "Hide video previews",
+    "open": "Watch the video by {{name}}",
+    "seeAll": "See all videos"
   }
 }

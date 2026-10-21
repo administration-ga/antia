@@ -31,6 +31,7 @@
  * ou une relecture ferme les lignes jusqu'à la prochaine réponse autorisée.
  */
 
+import { themedActionStyle } from "../themed-action-style"
 import { useViewerTimeZone } from "@antsia/api/viewer-preferences"
 import { api, type Id } from "@antsia/api/engine"
 import { useAuthenticatedPaginatedQuery } from "@antsia/api/hooks"
@@ -368,7 +369,7 @@ function EventCard({
       <article style={{ display: "grid", gap: 8 }}>
         <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
           <span style={{ flex: 1, minWidth: 0 }}>
-            <h3 style={{ margin: 0, fontSize: 14.5, fontWeight: 700 }}>{event.title}</h3>
+            <h3 style={{ margin: 0, fontSize: "var(--esp-subsection-title-size, 14.5px)", lineHeight: "var(--esp-subsection-title-leading, inherit)", fontWeight: 700 }}>{event.title}</h3>
             <p style={{ margin: "2px 0 0", fontSize: 12.5, color: "var(--muted-foreground)" }}>{formatEventRange(event.startAt, event.endAt, locale, timeZone)}</p>
           </span>
           {cancelled ? (
@@ -378,7 +379,7 @@ function EventCard({
           ) : null}
         </div>
 
-        {event.location !== null ? <p style={{ margin: 0, fontSize: 12.5 }}>{event.location}</p> : null}
+        {event.location !== null ? <p style={{ margin: 0, fontSize: "var(--esp-content-font-size, 12.5px)", lineHeight: "var(--esp-content-line-height, inherit)" }}>{event.location}</p> : null}
 
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <Avatar displayName={organizerName} avatarUrl={event.organizer.avatarUrl} hasIdentity={event.organizer.displayName !== null} size={22} />
@@ -407,7 +408,7 @@ function EventCard({
               <Button size="sm" variant="commerce" disabled={busy} onClick={() => onRespond("accepted")}>
                 {t("evenementsPanel.card.accept")}
               </Button>
-              <Button size="sm" variant="ghost" disabled={busy} onClick={() => onRespond("declined")}>
+              <Button style={themedActionStyle("danger", "ghost")} size="sm" variant="danger" disabled={busy} onClick={() => onRespond("declined")}>
                 {t("evenementsPanel.card.decline")}
               </Button>
             </>
@@ -437,7 +438,7 @@ function EventCard({
                   </Button>
                 </>
               ) : (
-                <Button size="sm" variant="ghost" disabled={busy} onClick={onAskCancel}>
+                <Button style={themedActionStyle("danger", "ghost")} size="sm" variant="danger" disabled={busy} onClick={onAskCancel}>
                   {t("evenementsPanel.card.askCancel")}
                 </Button>
               )}
@@ -557,7 +558,7 @@ function CreateEventCard({ timeZone, onCreated, onCancel }: { timeZone: string; 
       >
         {timeError ? <p role="alert" className="sr-only">{timeError}</p> : null}
         <div style={{ display: "grid", gap: 2 }}>
-          <h2 style={{ margin: 0, fontSize: 15, fontWeight: 700 }}>{t("evenementsPanel.composer.title")}</h2>
+          <h2 style={{ margin: 0, fontFamily: "var(--esp-heading-font-family, inherit)", fontSize: "var(--esp-section-title-size, 15px)", lineHeight: "var(--esp-section-title-leading, inherit)", letterSpacing: "var(--esp-section-title-tracking, normal)", fontWeight: 700 }}>{t("evenementsPanel.composer.title")}</h2>
           <p style={MUTED_TEXT_STYLE}>{t("evenementsPanel.composer.zone", { timeZone })}</p>
         </div>
         <Field label={t("evenementsPanel.composer.titleLabel")} error={titleError ?? undefined}>
@@ -605,7 +606,7 @@ function CreateEventCard({ timeZone, onCreated, onCancel }: { timeZone: string; 
           <TextArea rows={3} value={description} maxLength={EVENT_DESCRIPTION_MAX_LENGTH} onChange={(change) => setDescription(change.target.value)} />
         </Field>
         <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
-          <Button type="button" variant="ghost" disabled={submitting} onClick={onCancel}>
+          <Button style={themedActionStyle("cancel", "ghost")} type="button" variant="outline" disabled={submitting} onClick={onCancel}>
             {t("evenementsPanel.composer.cancel")}
           </Button>
           <Button type="submit" disabled={submitting || validateEventTitle(title, t) !== null}>

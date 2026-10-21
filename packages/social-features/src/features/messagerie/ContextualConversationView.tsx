@@ -384,7 +384,7 @@ function ContextualConversation({ threadId: rawId, onBack, onOpenObject, describ
         <div className="flex flex-col gap-2 border-b border-border px-4 py-3 text-sm" role="group" aria-labelledby={closeQuestionId}>
           <p id={closeQuestionId} className="m-0">{t("contextualConversation.close.confirm")}</p>
           <div className="flex flex-wrap gap-2">
-            <button type="button" className="msg-tool-btn" disabled={busy} onClick={() => closeThread(thread.revision)}>
+            <button data-role="danger" type="button" className="msg-tool-btn" disabled={busy} onClick={() => closeThread(thread.revision)}>
               {t("contextualConversation.close.confirmAction")}
             </button>
             <button ref={closeCancelRef} type="button" className="msg-tool-btn" disabled={busy} onClick={() => setConfirmClose(false)}>
@@ -764,7 +764,7 @@ function ContextualMessageActionsSheet({
             <div className="flex flex-col gap-2" role="group" aria-labelledby={removeQuestionId}>
               <p id={removeQuestionId} className="m-0 text-sm">{t("contextualConversation.actions.removeConfirm")}</p>
               <div className="flex flex-wrap gap-2">
-                <button type="button" className="msg-tool-btn" disabled={pending} onClick={() => void remove()}>
+                <button data-role="danger" type="button" className="msg-tool-btn" disabled={pending} onClick={() => void remove()}>
                   {t("contextualConversation.actions.removeConfirmAction")}
                 </button>
                 <button type="button" className="msg-tool-btn" disabled={pending} onClick={() => setStep("menu")}>
@@ -793,7 +793,7 @@ function ContextualReportForm({ pending, onCancel, onSubmit }: { pending: boolea
     <form className="flex flex-col gap-2" onSubmit={form.handleSubmit(async (values) => onSubmit(values.reason))}>
       <div className="flex flex-col gap-1 text-sm font-medium">
         <label htmlFor={reasonId}>{t("contextualConversation.actions.reportReason")}</label>
-        <select id={reasonId} className="min-h-11 rounded-lg border border-input bg-background p-2" disabled={pending} {...form.register("reason")}>
+        <select id={reasonId} className="min-h-11 rounded-[var(--esp-input-radius,0.5rem)] border border-input bg-background p-2" disabled={pending} {...form.register("reason")}>
           {CONTENT_REPORT_REASONS.map((reason) => (
             <option key={reason} value={reason}>{t(`reseau:reportContentDialog.reasons.${reason}`)}</option>
           ))}
@@ -912,7 +912,7 @@ function ContextualCallStartForm({
       {needsTarget && targets.length > 1 ? (
         <div className="flex flex-col gap-1 text-sm">
           <label htmlFor={targetId}>{t("contextualConversation.calls.target")}</label>
-          <select id={targetId} className="min-h-11 rounded-lg border border-input bg-background p-2" disabled={disabled} {...form.register("target")}>
+          <select id={targetId} className="min-h-11 rounded-[var(--esp-input-radius,0.5rem)] border border-input bg-background p-2" disabled={disabled} {...form.register("target")}>
             {targets.map((target) => (
               <option key={String(target.personId)} value={String(target.personId)}>
                 {contextualLabelName(target.label) ?? t("contextualConversation.counterpart.person")}

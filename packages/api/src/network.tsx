@@ -16,7 +16,7 @@
  * §7.5) est porté tel quel, en constantes : `personalMode = true`,
  * `personalSpaceIsElsewhere = false`, `activeOrgId = null`.
  */
-import { createContext, useContext, useEffect, useState, type ComponentType, type ReactNode } from "react"
+import { createContext, useCallback, useContext, useEffect, useState, useSyncExternalStore, type ComponentType, type ReactNode } from "react"
 
 import type { Id } from "./engine"
 import { migrateNetworkStorage } from "./network-storage-migration"
@@ -27,6 +27,8 @@ export interface EngineRoutes {
   home: () => string
   /** Adresse membre d'une publication, quand l'application sert ce lien direct. */
   post?: (postId: string) => string
+  /** Chemin physique pour un lien copié ; le routeur conserve ses chemins logiques. */
+  sharePath?: (path: string) => string
   /** Base de la messagerie en pages (iCom au téléphone, anciens liens). */
   messages: () => string
   /** Canal commercial facultatif, injecté par ANTSIA seulement. */
@@ -63,6 +65,10 @@ export interface EngineRoutes {
    * garde sa navigation par volets.
    */
   me?: () => string
+  /** Annuaire des boutiques servi par l'application ; absent : aucun raccourci de rail inventé. */
+  shops?: () => string
+  /** U04 : vrai lecteur vidéo ; le filtre auteur reste jugé par le serveur. */
+  clips?: (handle?: string) => string
   /**
    * P14B — destinations TYPÉES d'un avis (cloche, ouverture d'une notification
    * poussée), injectées par l'application qui les sert : une demande de service
@@ -92,6 +98,9 @@ export interface EngineRoutes {
  */
 export type EngineNavigation = "volets" | "destinations"
 
+/** U02 : géométrie de navigation, sur déclaration ; le moteur garde ses seuils historiques par défaut. */
+export type EngineNavigationLayout = "classic" | "adaptive"
+
 /**
  * La PRÉSENTATION des publications que l'application déclare — capacité de
  * présentation sœur de `navigation`, jamais un droit (lot P03 de l'étude
@@ -103,11 +112,18 @@ export type EngineNavigation = "volets" | "destinations"
  *  · `"media"` : auteur → média → actions → légende → offre facultative, cadre
  *    au ratio réel du média (borné, jamais recadré ni déformé), galerie avec
  *    index et visionneuse, légende bornée avec « Lire la suite ».
+ *  · `"charte"` : l'écran des chartes de la série 3 (ADR-0028), à la lettre —
+ *    auteur (badges en signes), texte, média POSÉ dans la carte (angle de
+ *    16 px, mêmes cadre, galerie et visionneuse que « media »), puis une
+ *    rangée d'icônes : réagir, commenter, partager, enregistrer. Le fil qui
+ *    la porte suit le même écran : carte de suggestion en tête du téléphone
+ *    (Suivre, Écrire), évènement annoncé avec Participer et Plus tard, en-tête
+ *    du téléphone en ronds (recherche, cloche, messages), liste par défaut.
  *
  * Aucune donnée, aucun droit ni aucune garde ne dépend de cette valeur : elle
  * ne choisit que la mise en page des mêmes projections du moteur.
  */
-export type EnginePostPresentation = "classic" | "media"
+export type EnginePostPresentation = "classic" | "media" | "charte"
 
 /**
  * La PRÉSENTATION DU FIL que l'application déclare — capacité sœur de
@@ -148,6 +164,9 @@ export type EngineStoriesPresentation = "cards" | "rings"
 /** P09 : rendu injecté par l'application, aucune dépendance du moteur vers son front. */
 export type EnginePostOfferRenderer = ComponentType<{ networkId: Id<"networks">; postId: Id<"posts"> }>
 
+/** MP13 : aperçu éditorial relu par l'application ; absent, aucune surface ajoutée. */
+export type EnginePostArticleRenderer = ComponentType<{ networkId: Id<"networks">; postId: Id<"posts"> }>
+
 export interface NetworkContextValue {
   networkId: Id<"networks">
   /** Identifiant lisible du réseau (`antsia`, `diaspora`…). */
@@ -162,6 +181,10 @@ export interface NetworkContextValue {
   liveAvailable: boolean
   /** La navigation déclarée par l'application, déjà rabattue sur `"volets"` si une destination manque. */
   navigation: EngineNavigation
+  /** U02 : absent dans les consommateurs historiques ; téléphone <768, rail compact <1200 sur opt-in. */
+  navigationLayout?: EngineNavigationLayout
+  /** Libellés d'entrées optionnelles traduits par l'application qui sert leurs routes. */
+  navigationLabels?: Readonly<{ shops?: string; clips?: string }>
   /** La présentation des publications déclarée par l'application, `"classic"` sauf opt-in explicite. */
   postPresentation: EnginePostPresentation
   /** La présentation du fil déclarée par l'application, `"list"` sauf opt-in explicite (P04). */
@@ -174,6 +197,7 @@ export interface NetworkContextValue {
    */
   wordmark: string | null
   PostOfferRenderer?: EnginePostOfferRenderer
+  PostArticleRenderer?: EnginePostArticleRenderer
   /** Contrat d'`OrgProvider` lu par les surfaces du socle : toujours l'espace personnel. */
   personalMode: true
   personalSpaceIsElsewhere: false
@@ -193,12 +217,47 @@ export function resolveEngineNavigation(requested: EngineNavigation | undefined,
   return routes.discover !== undefined && routes.me !== undefined ? "destinations" : "volets"
 }
 
+/** L'adaptation n'a de sens que si les destinations sont effectivement servies. */
+export function resolveEngineNavigationLayout(requested: EngineNavigationLayout | undefined, navigation: EngineNavigation): EngineNavigationLayout {
+  return navigation === "destinations" && requested === "adaptive" ? "adaptive" : "classic"
+}
+
+export function networkNavigationMobileQuery(layout: EngineNavigationLayout): string {
+  return layout === "adaptive" ? "(width < 768px)" : "(max-width: 959px)"
+}
+
 /**
- * La présentation RETENUE : `"media"` seulement sur demande explicite de
- * l'application. Rien de déclaré ou valeur inconnue : la carte historique.
+ * Un seul choix d'arbre pour la page réseau et les autres pages de membre.
+ * Le serveur et l'hydratation rendent null : jamais un faux format connu.
+ * 768→1200 reste le même arbre ; le rail se compose uniquement en CSS.
+ */
+export function useNetworkNavigationLayout(): { adaptive: boolean; mobile: boolean | null } {
+  const { navigation, navigationLayout } = useNetwork()
+  const layout = resolveEngineNavigationLayout(navigationLayout, navigation)
+  const query = networkNavigationMobileQuery(layout)
+  const subscribe = useCallback((notify: () => void) => {
+    if (typeof window === "undefined" || typeof window.matchMedia !== "function") return () => {}
+    const media = window.matchMedia(query)
+    media.addEventListener("change", notify)
+    return () => media.removeEventListener("change", notify)
+  }, [query])
+  const getSnapshot = useCallback((): boolean | null => {
+    if (typeof window === "undefined" || typeof window.matchMedia !== "function") return null
+    return window.matchMedia(query).matches
+  }, [query])
+  const mobile = useSyncExternalStore(subscribe, getSnapshot, navigationServerSnapshot)
+  return { adaptive: layout === "adaptive", mobile }
+}
+
+function navigationServerSnapshot(): null { return null }
+
+/**
+ * La présentation RETENUE : `"media"` ou `"charte"` seulement sur demande
+ * explicite de l'application. Rien de déclaré ou valeur inconnue : la carte
+ * historique.
  */
 export function resolveEnginePostPresentation(requested: EnginePostPresentation | undefined): EnginePostPresentation {
-  return requested === "media" ? "media" : "classic"
+  return requested === "media" || requested === "charte" ? requested : "classic"
 }
 
 /**
@@ -227,13 +286,18 @@ export function resolveEngineWordmark(requested: string | undefined): string | n
 export function NetworkProvider(props: {
   networkId: Id<"networks">
   slug: string
+  /** Isole une application servie sur la même origine ; vide = stockage historique du réseau. */
+  storageNamespace?: string
   personId: Id<"persons">
   charte: string
   routes: EngineRoutes
   liveAvailable?: boolean
   /** Opt-in de la navigation par destinations ; absent = `"volets"` (comportement historique). */
   navigation?: EngineNavigation
-  /** Opt-in de la présentation média des publications ; absent = `"classic"` (comportement historique). */
+  /** U02 : géométrie à trois formats, seulement sous destinations ; absent = seuil historique 960. */
+  navigationLayout?: EngineNavigationLayout
+  navigationLabels?: Readonly<{ shops?: string; clips?: string }>
+  /** Opt-in de la présentation média ou charte des publications ; absent = `"classic"` (comportement historique). */
   postPresentation?: EnginePostPresentation
   /** Opt-in du fil immersif (P04) ; absent = `"list"` (comportement historique). */
   feedPresentation?: EngineFeedPresentation
@@ -242,42 +306,51 @@ export function NetworkProvider(props: {
   /** La marque affichée en tête de la coque du téléphone ; absente = le libellé neutre du moteur. */
   wordmark?: string
   PostOfferRenderer?: EnginePostOfferRenderer
+  PostArticleRenderer?: EnginePostArticleRenderer
   children: ReactNode
 }) {
+  const storageNamespace = props.storageNamespace ?? ""
+  const storageScope = `${storageNamespace}${props.slug}`
   const [initializedSlug, setInitializedSlug] = useState<string | null>(null)
 
   useEffect(() => {
     // La reprise précède le montage des enfants : les stores du dock, des
     // brouillons et des appels ne doivent pas hydrater le nouveau préfixe vide.
     // Chaque stockage est indépendant, y compris si son accès lui-même échoue.
-    try {
-      migrateNetworkStorage(window.localStorage, props.slug)
-    } catch {
-      // Le navigateur peut refuser l'accès à localStorage (mode privé/politique).
+    // Un espace isolé ne reprend jamais les brouillons du vrai réseau.
+    if (!storageNamespace) {
+      try {
+        migrateNetworkStorage(window.localStorage, props.slug)
+      } catch {
+        // Le navigateur peut refuser l'accès à localStorage (mode privé/politique).
+      }
+      try {
+        migrateNetworkStorage(window.sessionStorage, props.slug)
+      } catch {
+        // L'absence de persistance n'empêche jamais l'accès au réseau.
+      }
     }
-    try {
-      migrateNetworkStorage(window.sessionStorage, props.slug)
-    } catch {
-      // L'absence de persistance n'empêche jamais l'accès au réseau.
-    }
-    setInitializedSlug(props.slug)
-  }, [props.slug])
+    setInitializedSlug(storageScope)
+  }, [props.slug, storageNamespace, storageScope])
 
-  if (initializedSlug !== props.slug) return null
+  if (initializedSlug !== storageScope) return null
 
   const value: NetworkContextValue = {
     networkId: props.networkId,
     slug: props.slug,
     personId: props.personId,
     charte: props.charte,
-    storagePrefix: `antsia:${props.slug}:`,
+    storagePrefix: `${storageNamespace}antsia:${props.slug}:`,
     liveAvailable: props.liveAvailable === true,
     navigation: resolveEngineNavigation(props.navigation, props.routes),
+    navigationLayout: resolveEngineNavigationLayout(props.navigationLayout, resolveEngineNavigation(props.navigation, props.routes)),
+    navigationLabels: props.navigationLabels,
     postPresentation: resolveEnginePostPresentation(props.postPresentation),
     feedPresentation: resolveEngineFeedPresentation(props.feedPresentation),
     storiesPresentation: resolveEngineStoriesPresentation(props.storiesPresentation),
     wordmark: resolveEngineWordmark(props.wordmark),
     PostOfferRenderer: props.PostOfferRenderer,
+    PostArticleRenderer: props.PostArticleRenderer,
     personalMode: true,
     personalSpaceIsElsewhere: false,
     activeOrgId: null,

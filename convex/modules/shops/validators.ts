@@ -1,3 +1,4 @@
+import { storefrontTermsValidator } from "./storefrontTerms"
 /**
  * Validateurs des BOUTIQUES (P07). Module sans fonction Convex enregistrée.
  * Littéraux DÉRIVÉS des listes pures (`./rules`, une seule source) ; DTO
@@ -5,6 +6,7 @@
  * fichiers), aucun signataire, aucun contact.
  */
 import { type Infer, v } from "convex/values"
+import { ACTIVITY_BLOCKS, ACTIVITY_CAPABILITIES, ACTIVITY_TEMPLATES } from "@antsia/social-domain/activityConfiguration"
 
 import { badgeValidator, contentVisibilityValidator, literals, membershipStatusValidator } from "../../lib/validators"
 import { withheldCodeValidator } from "../files/storageGuard"
@@ -20,6 +22,13 @@ import {
 } from "./rules"
 
 export const shopModelValidator = literals(SHOP_MODELS)
+/** MP02 : configuration de présentation, jamais une permission de publication ou d'encaissement. */
+export const activityConfigurationValidator = v.object({
+  version: v.literal(1),
+  capabilities: v.array(literals(ACTIVITY_CAPABILITIES)),
+  template: literals(ACTIVITY_TEMPLATES),
+  blocks: v.array(literals(ACTIVITY_BLOCKS)),
+})
 export const storefrontStateValidator = literals(STOREFRONT_STATES)
 export const storefrontPolicyValidator = literals(STOREFRONT_POLICIES)
 export const shopBlockValidator = literals(SHOP_BLOCKS)
@@ -80,6 +89,7 @@ export const shopEditorValidator = v.object({
   shopId: v.id("shops"),
   role: shopManagerRoleValidator,
   model: shopModelValidator,
+  activityConfiguration: v.optional(activityConfigurationValidator),
   name: v.union(v.string(), v.null()),
   description: v.union(v.string(), v.null()),
   specialty: v.union(v.string(), v.null()),
@@ -113,6 +123,7 @@ export type ShopEditor = Infer<typeof shopEditorValidator>
 
 /** La VITRINE vue par un membre du réseau : identité de la page, présentation commerciale, blocs non vides. */
 export const storefrontValidator = v.object({
+  storefrontTerms: v.optional(storefrontTermsValidator),
   pageId: v.id("pages"),
   handle: v.string(),
   name: v.string(),
@@ -120,6 +131,7 @@ export const storefrontValidator = v.object({
   logoUrl: v.union(v.string(), v.null()),
   bannerUrl: v.union(v.string(), v.null()),
   model: shopModelValidator,
+  activityConfiguration: v.optional(activityConfigurationValidator),
   specialty: v.union(v.string(), v.null()),
   serviceArea: v.union(v.string(), v.null()),
   hours: v.union(v.string(), v.null()),
@@ -151,12 +163,14 @@ export type StorefrontCard = Infer<typeof storefrontCardValidator>
  * officielles (`modules/public/access.ts`, inchangé).
  */
 export const publicStorefrontValidator = v.object({
+  storefrontTerms: v.optional(storefrontTermsValidator),
   handle: v.string(),
   name: v.string(),
   description: v.union(v.string(), v.null()),
   logoUrl: v.union(v.string(), v.null()),
   bannerUrl: v.union(v.string(), v.null()),
   model: shopModelValidator,
+  activityConfiguration: v.optional(activityConfigurationValidator),
   specialty: v.union(v.string(), v.null()),
   serviceArea: v.union(v.string(), v.null()),
   hours: v.union(v.string(), v.null()),
@@ -174,6 +188,7 @@ export const storefrontReviewItemValidator = v.object({
   networkSlug: v.string(),
   storefront: storefrontStateValidator,
   model: shopModelValidator,
+  activityConfiguration: v.optional(activityConfigurationValidator),
   name: v.union(v.string(), v.null()),
   description: v.union(v.string(), v.null()),
   specialty: v.union(v.string(), v.null()),

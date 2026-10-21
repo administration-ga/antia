@@ -19,6 +19,10 @@ export const moderationTargetValidator = v.union(
   v.object({ kind: v.literal("commercialMessage"), id: v.id("commercialMessages") }),
   // CC-2b (ADR-0025) : surface UNIQUE des messages contextuels ; la nature du fil est dérivée côté serveur.
   v.object({ kind: v.literal("contextualMessage"), id: v.id("contextualMessages") }),
+  v.object({ kind: v.literal("professionalProfile"), id: v.id("professionalProfiles") }),
+  v.object({ kind: v.literal("professionalCollaboration"), id: v.id("professionalCollaborations") }),
+  v.object({ kind: v.literal("editorialVersion"), id: v.id("editorialVersions") }),
+  v.object({ kind: v.literal("editorialMedia"), id: v.id("editorialMedia") }),
   v.object({ kind: v.literal("post"), id: v.id("posts") }),
   v.object({ kind: v.literal("comment"), id: v.id("postComments") }),
   v.object({ kind: v.literal("groupMessage"), id: v.id("groupMessages") }),
@@ -31,6 +35,7 @@ export const moderationTargetValidator = v.union(
   v.object({ kind: v.literal("serviceReview"), id: v.id("serviceReviews") }),
   v.object({ kind: v.literal("serviceReviewReply"), id: v.id("serviceReviewReplies") }),
   v.object({ kind: v.literal("commerceOffer"), id: v.id("commerceCatalogHeads") }),
+  v.object({ kind: v.literal("commerceStorefront"), id: v.id("commerceCatalogHeads") }),
   // P15 : offre d'emploi reflétée, contenu public de la page (jamais une candidature).
   v.object({ kind: v.literal("commerceJob"), id: v.id("commerceJobHeads") }),
   // Vague H DIASPORALE (G9, ajout délégué) : contenus de l'entraide, du mentorat, du kit d'arrivée et de l'emploi.

@@ -15,15 +15,26 @@
     "empty": "Aucune activité pour le moment. Les réactions, commentaires, invitations et mentions apparaîtront ici.",
     "loadMore": "Voir plus d'activité",
     "loadingMore": "Chargement de l'activité précédente…",
-    "seeAll": "Tout voir"
+    "seeAll": "Tout voir",
+    "filters": "Filtrer les notifications",
+    "all": "Toutes",
+    "unread": "Non lues",
+    "filterScope": "Le filtre porte sur les notifications chargées. Les pages suivantes peuvent en contenir d’autres.",
+    "emptyUnread": "Aucune notification non lue parmi celles chargées.",
+    "groups": {
+      "new": "Nouveau",
+      "earlier": "Plus tôt"
+    }
   },
   "reseauNotificationRow": {
     "markRead": "Marquer lu",
-    "accept": "Accepter",
+    "accept": "Confirmer",
     "decline": "Refuser",
     "accepted": "Connexion acceptée.",
     "declined": "Invitation déclinée.",
-    "alreadyHandled": "Invitation déjà traitée."
+    "alreadyHandled": "Invitation déjà traitée.",
+    "unread": "Notification non lue.",
+    "decisionFailed": "La réponse n’a pas pu être enregistrée. Réessayez."
   },
   "notificationCenterTabs": {
     "unread_one": "{{count}} notification non lue",
@@ -65,6 +76,7 @@
       "contextualClosed": "{{actor}} a clos une mise en relation.",
       "contextualClosedSystem": "Une mise en relation a été close.",
       "commerce": {
+        "followupUpdated": "Votre demande de service a une mise à jour. Ouvrez-la pour la relire.",
         "quoteReceived": "Un devis vous attend pour votre demande de service.",
         "quoteRevised": "Un devis révisé vous attend pour votre demande de service.",
         "bookingConfirmed": "Votre rendez-vous est confirmé par le professionnel.",

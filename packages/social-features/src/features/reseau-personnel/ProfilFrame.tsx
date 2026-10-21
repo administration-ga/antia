@@ -24,6 +24,8 @@
  */
 
 import type { ReactNode } from "react"
+import { useNetwork } from "@antsia/api/network"
+import { PROFILE_ADAPTIVE_CSS } from "./profile-adaptive-styles"
 
 /**
  * La feuille du cadre, HORS du JSX : un littéral enfant de `<style>` passerait
@@ -51,9 +53,10 @@ const PROFIL_FRAME_CSS = `
            littéral de gabarit, où un backtick termine la chaîne et casse le
            fichier. */
         .pp-identity {
-          border: 1px solid var(--ink-200);
-          border-radius: 20px;
-          background: var(--ink-100);
+          border: 1px solid var(--esp-primitive-surface-border, var(--ink-200));
+          border-radius: var(--esp-primitive-card-radius, 20px);
+          background: var(--esp-surface-card, var(--ink-100));
+          box-shadow: var(--esp-surface-shadow, none);
           overflow: hidden;
         }
         .pp-banner { height: 128px; }
@@ -63,7 +66,7 @@ const PROFIL_FRAME_CSS = `
            une bande transparente au-dessus de la carte — un trou, la ou le
            repli sans couverture montre le degrade .esp-banner. */
         .pp-banner--photo { background-color: var(--ink-150); }
-        .pp-identity-body { padding: 0 22px 20px; }
+        .pp-identity-body { padding: 0 var(--esp-card-padding, 22px) var(--esp-card-padding, 20px); }
         .pp-avatar {
           /* À CHEVAL : c'est ce qui fait lire l'ensemble comme UNE carte
              d'identité, et non comme une image suivie d'un bloc de texte.
@@ -80,7 +83,7 @@ const PROFIL_FRAME_CSS = `
            évoquer — la monture suit son cadre plutôt que de l'arrondir en
            médaillon. */
         .pp-avatar--square {
-          border-radius: calc(var(--radius-lg) + 4px);
+          border-radius: var(--esp-profile-avatar-page-radius, var(--esp-primitive-avatar-page-radius, calc(var(--radius-lg) + 4px)));
         }
         .pp-name-row {
           display: flex;
@@ -90,10 +93,11 @@ const PROFIL_FRAME_CSS = `
         }
         .pp-name {
           margin: 0;
-          font-size: 26px;
+          font-family: var(--esp-heading-font-family, inherit);
+          font-size: var(--esp-page-title-size, 26px);
           font-weight: 700;
-          letter-spacing: -.02em;
-          line-height: 1.15;
+          letter-spacing: var(--esp-page-title-tracking, -.02em);
+          line-height: var(--esp-page-title-leading, 1.15);
           color: var(--ink-900);
         }
         .pp-handle {
@@ -105,8 +109,8 @@ const PROFIL_FRAME_CSS = `
         .pp-headline {
           margin: 8px 0 0;
           max-width: 62ch;
-          font-size: 14.5px;
-          line-height: 1.5;
+          font-size: var(--esp-content-font-size, 14.5px);
+          line-height: var(--esp-content-line-height, 1.5);
           color: var(--ink-700);
         }
         .pp-actions {
@@ -129,16 +133,19 @@ const PROFIL_FRAME_CSS = `
       `
 
 export function ProfilFrame({ children }: { children: ReactNode }) {
+  const { navigation, navigationLayout } = useNetwork()
+  const adaptive = navigation === "destinations" && navigationLayout === "adaptive"
   return (
     <div
       className="citizen-scrollbar rp-profile-frame"
+      data-profile-layout={adaptive ? "adaptive" : undefined}
       style={{
         display: "flex",
         flexDirection: "column",
-        gap: 16,
-        height: "100%",
-        overflowY: "auto",
-        maxWidth: 760,
+        gap: "var(--esp-card-gap, 16px)",
+        height: adaptive ? "auto" : "100%",
+        overflowY: adaptive ? "visible" : "auto",
+        maxWidth: adaptive ? 1120 : 760,
         marginInline: "auto",
         width: "100%",
       }}
@@ -146,6 +153,7 @@ export function ProfilFrame({ children }: { children: ReactNode }) {
       <style href="rp-profile-frame" precedence="default">
         {PROFIL_FRAME_CSS}
       </style>
+      {adaptive ? <style href="rp-profile-adaptive-u05" precedence="default">{PROFILE_ADAPTIVE_CSS}</style> : null}
       {children}
     </div>
   )

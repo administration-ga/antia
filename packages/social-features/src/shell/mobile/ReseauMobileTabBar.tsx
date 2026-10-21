@@ -112,7 +112,7 @@ const DESTINATION_ITEM_CLASS =
  */
 function DestinationsTabBar({ routes, onCreate, handle = null, current }: ReseauMobileTabBarProps & { routes: ReseauDestinationRoutes }) {
   const { t } = useTranslation("reseau")
-  const { liveAvailable } = useNetwork()
+  const { liveAvailable, navigationLayout } = useNetwork()
   const pathname = usePathname()
   const searchParams = useSearchParams()
   const { open, setOpen, triggerRef } = useChoiceTrigger<HTMLButtonElement>()
@@ -135,7 +135,7 @@ function DestinationsTabBar({ routes, onCreate, handle = null, current }: Reseau
       data-mobile-nav=""
       data-reseau-mobile-nav=""
       data-reseau-destinations=""
-      className={`fixed right-3 bottom-[calc(0.75rem+env(safe-area-inset-bottom,0px))] left-3 z-40 print:hidden ${MOBILE_ONLY_CLASS}`}
+      className={`fixed right-3 bottom-[calc(0.75rem+env(safe-area-inset-bottom,0px))] left-3 z-40 print:hidden ${navigationLayout === "adaptive" ? "min-[768px]:hidden" : MOBILE_ONLY_CLASS}`}
     >
       <div className="esp-reseau-tabbar border backdrop-blur-md">
         <ul className="m-0 flex h-16 list-none items-stretch gap-0.5 p-1">
@@ -156,7 +156,7 @@ function DestinationsTabBar({ routes, onCreate, handle = null, current }: Reseau
                   className={cn(
                     "relative flex items-center justify-center",
                     isCreate
-                      ? "size-12 rounded-[var(--esp-fab-radius,10px)] bg-[var(--primary-fill)] text-[color:var(--primary-fill-on,var(--on-fill))] shadow-[var(--esp-fab-shadow,none)]"
+                      ? "size-[var(--esp-fab-size,48px)] rounded-[var(--esp-fab-radius,10px)] bg-[var(--primary-fill)] text-[color:var(--primary-fill-on,var(--on-fill))] shadow-[var(--esp-fab-shadow,none)]"
                       : "size-7 rounded-[var(--esp-chip-radius,10px)]",
                     // Onglet actif : pastille tonale du thème (ADR-0027), accent plein en repli.
                     ariaCurrent !== undefined && "bg-[var(--esp-tab-active-bg,var(--accent))] text-[color:var(--esp-tab-active-fg,var(--accent-foreground))]",
@@ -164,12 +164,12 @@ function DestinationsTabBar({ routes, onCreate, handle = null, current }: Reseau
                 >
                   <DestinationIcon aria-hidden="true" className={isCreate ? "size-[22px]" : "size-5"} strokeWidth={isCreate ? 2.4 : undefined} />
                   {badge !== null ? (
-                    <span className="absolute -top-1.5 -right-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-[var(--role-react-fill,var(--primary))] px-1 font-mono text-[9px] font-bold tabular-nums text-[color:var(--role-react-on,var(--primary-foreground))]">
+                    <span className="absolute -top-1.5 -right-2 flex h-4 min-w-4 items-center justify-center rounded-[var(--esp-primitive-badge-radius,999px)] bg-[var(--role-react-fill,var(--primary))] px-1 font-mono text-[9px] font-bold tabular-nums text-[color:var(--role-react-on,var(--primary-foreground))]">
                       <span aria-hidden="true">{badge}</span>
                     </span>
                   ) : null}
                 </span>
-                <span className={isCreate ? "sr-only" : "max-w-full truncate text-[10px] font-semibold"}>{t(destination.labelKey)}</span>
+                <span className={isCreate ? "sr-only" : "max-w-full truncate text-[10px] font-semibold"}>{destination.label ?? t(destination.labelKey)}</span>
                 {/* Un espace ENTRE le libellé et la phrase : le nom accessible se
                     lit « Messages 3 conversations non lues », jamais « Messages3… ». */}
                 {badge !== null ? (

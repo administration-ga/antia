@@ -608,6 +608,8 @@
      version claire, écrit en repli là où il est lu. Un thème à trois couleurs
      (ADR-0027) y fait tourner ses trois couleurs (ses nuanciers), comme la maquette. */
   --esp-story-ring-fill: initial;
+  /* L'anneau vu est décoratif ; son état reste nommé par le contrôle. */
+  --esp-story-ring-seen-fill: initial;
   /* Trait des liens du TEXTE COURANT (mots-dièse et mentions d'une publication
      ou d'un commentaire), jamais des liens de navigation : aucun par défaut. */
   --esp-inline-link-decoration: none;
@@ -670,8 +672,55 @@
   --ui2-button-radius: initial;
   --ui2-badge-radius: initial;
   --ui2-card-radius: initial;
+  /* Espacement et profondeur des cartes : chaque consommateur garde sa
+     facture historique en repli ; les sept chartes ANTSIA partagent 16/12 px
+     et la profondeur propre au thème sur les surfaces posées dans la page. */
+  --esp-card-padding: initial;
+  --esp-card-gap: initial;
+  --esp-surface-shadow: initial;
+  /* Un dialogue surélevé se distingue déjà de la page par sa couleur. */
+  --esp-raised-border: initial;
+  /* Alertes tonales : leur fond porte déjà l'état ; sans liseré ANTSIA. */
+  --esp-alert-border: initial;
+  --esp-alert-accent-width: initial;
+  /* Cible des commandes du kit : 44 px ANTSIA, densité historique ailleurs. */
+  --esp-control-min-size: initial;
+  /* Nouveaux raccords des primitives : activation propre au réseau ANTSIA.
+     Les autres réseaux peuvent déjà porter les anciens jetons de géométrie
+     sans avoir adopté ces composants ; leurs replis restent donc inchangés. */
+  --esp-primitive-card-radius: initial;
+  --esp-primitive-button-radius: initial;
+  /* Actions de relation et de catalogue, distinctes des filtres en pilule. */
+  --esp-social-action-radius: initial;
+  --esp-primitive-badge-radius: initial;
+  --esp-primitive-chip-radius: initial;
+  --esp-primitive-chip-bg: initial;
+  --esp-primitive-chip-border: initial;
+  --esp-input-radius: initial;
+  --esp-primitive-surface-border: initial;
+  --esp-primitive-neutral-bg: initial;
+  --esp-primitive-neutral-border: initial;
+  --esp-primitive-secondary-bg: initial;
+  --esp-primitive-secondary-fg: initial;
+  --esp-primitive-secondary-border: initial;
+  --esp-primitive-tab-bg: initial;
+  --esp-primitive-tab-fg: initial;
+  --esp-primitive-tab-border: initial;
+  --esp-primitive-icon-bg: initial;
+  --esp-primitive-identity-fill: initial;
+  --esp-primitive-fill-on: initial;
+  --esp-action-success-fill: initial;
+  --esp-action-success-on: initial;
+  --esp-action-danger-fill: initial;
+  --esp-action-danger-on: initial;
+  --esp-action-cancel-bg: initial;
+  --esp-action-cancel-fg: initial;
+  --esp-action-cancel-border: initial;
+  --esp-primitive-media-radius: initial;
+  --esp-primitive-avatar-page-radius: initial;
   --esp-chip-radius: initial;
   --esp-field-radius: initial;
+  --esp-field-border: initial;
   --esp-media-radius: initial;
   --esp-fab-radius: initial;
   --esp-avatar-page-radius: initial;
@@ -682,6 +731,7 @@
      relèvent de la règle, et WCAG 1.4.11 l'exige (P18b). Replis : les fonds et
      filets historiques. */
   --ui2-button-outline-bg: initial;
+  --ui2-button-outline-fg: initial;
   --ui2-button-outline-border: initial;
   --ui2-button-secondary-bg: initial;
   --ui2-button-secondary-border: initial;
@@ -698,6 +748,66 @@
   --esp-header-icon-radius: initial;
   /* Ombre du bouton Créer, qui flotte : elle prend sa couleur. */
   --esp-fab-shadow: initial;
+  /* Maquettes ANTSIA : opt-in, chaque consommateur conserve son repli historique. */
+  --esp-heading-font-weight: initial;
+  --esp-page-title-tracking: initial;
+  --esp-section-title-tracking: initial;
+  --esp-motif-reference-glow: initial;
+  --esp-floating-shadow: initial;
+  --esp-post-shadow: initial;
+  --esp-field-font-size: initial;
+  --esp-field-line-height: initial;
+  --esp-textarea-min-height: initial;
+  --esp-page-title-size: initial;
+  --esp-messages-heading-size: initial;
+  --esp-page-title-leading: initial;
+  --esp-section-title-size: initial;
+  --esp-section-title-leading: initial;
+  --esp-subsection-title-size: initial;
+  --esp-subsection-title-leading: initial;
+  --esp-heading-font-family: initial;
+  --esp-content-font-size: initial;
+  --esp-content-line-height: initial;
+  --esp-profile-avatar-page-radius: initial;
+  --esp-profile-avatar-size: initial;
+  /* Teintes du nom PUBLIC : aucune relation avec les preuves ou les droits. */
+  --esp-avatar-1-bg: initial;
+  --esp-avatar-1-fg: initial;
+  --esp-avatar-2-bg: initial;
+  --esp-avatar-2-fg: initial;
+  --esp-avatar-3-bg: initial;
+  --esp-avatar-3-fg: initial;
+  --esp-avatar-4-bg: initial;
+  --esp-avatar-4-fg: initial;
+  --esp-avatar-5-bg: initial;
+  --esp-avatar-5-fg: initial;
+  --esp-avatar-6-bg: initial;
+  --esp-avatar-6-fg: initial;
+  --esp-avatar-neutral-bg: initial;
+  --esp-avatar-neutral-fg: initial;
+  --esp-avatar-font-24: initial;
+  --esp-avatar-font-32: initial;
+  --esp-avatar-font-40: initial;
+  --esp-avatar-font-48: initial;
+  --esp-avatar-font-64: initial;
+  --esp-avatar-font-104: initial;
+  --esp-fab-size: initial;
+  --esp-layout-max-width: initial;
+  --esp-layout-gutter: initial;
+  --esp-layout-gap: initial;
+  --esp-desktop-main-max: initial;
+  --esp-grid-compact-columns: initial;
+  --esp-grid-wide-columns: initial;
+  --esp-mobile-content-padding: initial;
+  --esp-tablet-content-padding: initial;
+  --esp-tablet-content-max: initial;
+  --esp-mobile-dock-inset: initial;
+  --esp-mobile-dock-bottom: initial;
+  --esp-tablet-dock-bottom: initial;
+  --esp-tablet-dock-width: initial;
+  --esp-theme-card-shadow: initial;
+  --esp-motif-grain-ink: initial;
+  --esp-motif-position: initial;
 }
 
 /* Au téléphone et sur les petites tablettes, les commandes d'ui-v2 rejoignent

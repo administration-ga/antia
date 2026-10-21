@@ -1,10 +1,11 @@
 // @vitest-environment jsdom
-// PA6 : une panne et une fenêtre lacunaire ne deviennent jamais un fil complet vide.
+// PA6 : une panne et une fenêtre lacunaire ne deviennent jamais un fil complet vide ; ADR-0028 : sous la charte, la carte de suggestion ouvre la première page, sans carrousels.
 import { fireEvent, screen } from "@testing-library/react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import type { FunctionReturnType } from "convex/server"
 import type { api } from "@antsia/api/engine"
 
+import type { EnginePostPresentation } from "@antsia/api/network"
 import { renderWithEngine } from "../../tests/engine-wrapper"
 
 type Feed = FunctionReturnType<typeof api.modules.posts.posts.myFeed>
@@ -12,25 +13,29 @@ const state = vi.hoisted(() => ({
   data: undefined as Feed | undefined,
   isLoading: false,
   isError: false,
+  signingOut: false,
   refetch: vi.fn(async () => undefined),
   prepare: vi.fn(),
 }))
 vi.mock("@antsia/api/hooks", () => ({ useAuthenticatedConvexQuery: () => state, useConvexMutationQuery: () => ({ mutate: state.prepare }) }))
+vi.mock("@antsia/api/sign-out-everywhere", () => ({ isSigningOutEverywhere: () => state.signingOut }))
 vi.mock("./PostCard", () => ({ PostCard: ({ post }: { post: { body: string } }) => <p>{post.body}</p> }))
-vi.mock("./PagesSuggestionsRail", () => ({ PagesSuggestionsRail: () => null }))
-vi.mock("./SuggestionsPanel", () => ({ SuggestionsPanel: () => null }))
+vi.mock("./PagesSuggestionsRail", () => ({ PagesSuggestionsRail: () => <p>Carrousel des pages</p> }))
+vi.mock("./SuggestionsPanel", () => ({ SuggestionsPanel: () => <p>Carrousel des personnes</p> }))
+vi.mock("./FeedClipsRail", () => ({ FeedClipsRail: () => <p>Aperçus vidéos</p> }))
+vi.mock("./FeedSuggestionCard", () => ({ FeedSuggestionCard: () => <p>Suggestion des chartes</p> }))
 
 import { FeedPage } from "./FeedPages"
 
-function mount(first = true) {
+function mount(first = true, options: { postPresentation?: EnginePostPresentation; interleaveAfter?: (count: number) => number | null } = {}) {
   const onTail = vi.fn()
   const onBoundaryShift = vi.fn()
-  const element = () => <FeedPage cursor={null} pageIndex={first ? 0 : 1} pageKey="page" nextMountedCursor={undefined} scope="recents" now={0} isFirst={first} isLast interleaveAfter={null} onTag={vi.fn()} onMention={vi.fn()} onTail={onTail} onBoundaryShift={onBoundaryShift} emptyFallback={<p>Fil vide</p>} />
-  const view = renderWithEngine(element())
+  const element = () => <FeedPage cursor={null} pageIndex={first ? 0 : 1} pageKey="page" nextMountedCursor={undefined} scope="recents" now={0} isFirst={first} isLast interleaveAfter={options.interleaveAfter ?? null} onTag={vi.fn()} onMention={vi.fn()} onTail={onTail} onBoundaryShift={onBoundaryShift} emptyFallback={<p>Fil vide</p>} />
+  const view = renderWithEngine(element(), { postPresentation: options.postPresentation })
   return { onTail, onBoundaryShift, rerender: () => view.rerender(element()) }
 }
 
-beforeEach(() => { vi.clearAllMocks(); state.data = undefined; state.isLoading = false; state.isError = false })
+beforeEach(() => { vi.clearAllMocks(); state.data = undefined; state.isLoading = false; state.isError = false; state.signingOut = false })
 
 describe("FeedPage — vérité des états", () => {
   it("prépare une seule fois la première page admise et annonce la préparation", () => {
@@ -46,6 +51,29 @@ describe("FeedPage — vérité des états", () => {
     mount(false)
     expect(state.prepare).not.toHaveBeenCalled()
     expect(screen.queryByText(/Votre fil se prépare/)).toBeNull()
+  })
+
+  it("n'amorce aucun travail si la première réponse arrive pendant la déconnexion", () => {
+    const view = mount()
+    state.signingOut = true
+    state.data = { items: [], nextCursor: null, lacunar: true, preparing: true, preparationKey: "a".repeat(64) }
+    view.rerender()
+    expect(state.prepare).not.toHaveBeenCalled()
+  })
+
+  it("ne prépare pas une nouvelle génération pendant la sortie et ne consomme pas sa clé", () => {
+    state.data = { items: [], nextCursor: null, lacunar: true, preparing: true, preparationKey: "a".repeat(64) }
+    const view = mount()
+    expect(state.prepare).toHaveBeenCalledOnce()
+    state.signingOut = true
+    state.data = { ...state.data, preparationKey: "b".repeat(64) }
+    view.rerender()
+    expect(state.prepare).toHaveBeenCalledTimes(1)
+    // Une prochaine admission réarme la même clé ; le refus local ne l'a pas marquée préparée.
+    const deferredPage = state.data
+    state.data = undefined; view.rerender()
+    state.signingOut = false; state.data = deferredPage; view.rerender()
+    expect(state.prepare).toHaveBeenCalledTimes(2)
   })
 
   it("réveille une version manquante une seule fois et réarme après une erreur d'accès", () => {
@@ -116,5 +144,43 @@ describe("FeedPage — vérité des états", () => {
     const { onTail } = mount()
     expect(screen.queryByText("Fil vide")).toBeNull()
     expect(onTail).not.toHaveBeenCalled()
+  })
+})
+
+describe("FeedPage — écran des chartes (ADR-0028)", () => {
+  const post = (id: string, body: string) => ({ _id: id, body }) as unknown as Feed["items"][number]
+  const fourPosts = () => ({ items: [post("posts_1", "Un"), post("posts_2", "Deux"), post("posts_3", "Trois"), post("posts_4", "Quatre")], nextCursor: null, lacunar: false })
+  const afterThird = (count: number) => (count > 3 ? 3 : null)
+
+  it("la suggestion reste en tête et les carrousels complètent le fil après la troisième publication", () => {
+    state.data = fourPosts()
+    mount(true, { postPresentation: "charte", interleaveAfter: afterThird })
+    const suggestion = screen.getByText("Suggestion des chartes")
+    expect(suggestion.compareDocumentPosition(screen.getByText("Un")) & Node.DOCUMENT_POSITION_FOLLOWING).not.toBe(0)
+    // Au téléphone seulement : le rail droit du bureau porte déjà les suggestions.
+    expect(suggestion.closest(".rp-feed-inline")).not.toBeNull()
+    expect(screen.getByText("Trois").compareDocumentPosition(screen.getByText("Carrousel des personnes")) & Node.DOCUMENT_POSITION_FOLLOWING).not.toBe(0)
+    expect(screen.getByText("Carrousel des pages")).toBeTruthy()
+    expect(screen.getByText("Quatre").compareDocumentPosition(screen.getByText("Aperçus vidéos")) & Node.DOCUMENT_POSITION_FOLLOWING).not.toBe(0)
+  })
+
+  it("un fil vide garde la suggestion au-dessus de son état vide", () => {
+    state.data = { items: [], nextCursor: null, lacunar: false }
+    mount(true, { postPresentation: "charte" })
+    expect(screen.getByText("Suggestion des chartes")).toBeTruthy()
+    expect(screen.getByText("Fil vide")).toBeTruthy()
+  })
+
+  it("une page suivante n'ouvre rien", () => {
+    state.data = fourPosts()
+    mount(false, { postPresentation: "charte" })
+    expect(screen.queryByText("Suggestion des chartes")).toBeNull()
+  })
+
+  it("sans la charte, les carrousels restent intercalés après la 3ᵉ publication", () => {
+    state.data = fourPosts()
+    mount(true, { interleaveAfter: afterThird })
+    expect(screen.queryByText("Suggestion des chartes")).toBeNull()
+    expect(screen.getByText("Trois").compareDocumentPosition(screen.getByText("Carrousel des personnes")) & Node.DOCUMENT_POSITION_FOLLOWING).not.toBe(0)
   })
 })

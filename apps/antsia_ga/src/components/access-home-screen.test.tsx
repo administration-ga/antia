@@ -43,13 +43,19 @@ async function mount(children: ReactNode = <AccessHomeScreen />) {
 }
 
 beforeEach(() => {
+  vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true)
   vi.clearAllMocks()
   mocks.status = "signedOut"
   mocks.configuration = { idn: true, emailOtp: true, smsOtp: true, localCodes: false }
   mocks.authClient.emailOtp.sendVerificationOtp.mockResolvedValue({ data: { success: true }, error: null })
   window.history.replaceState({}, "", routes.home())
 })
-afterEach(async () => { await act(async () => root?.unmount()); host?.remove(); root = undefined })
+afterEach(async () => {
+  await act(async () => root?.unmount())
+  host?.remove()
+  root = undefined
+  vi.unstubAllGlobals()
+})
 
 describe("accueil ANTSIA — accès réel", () => {
   it("propose le mode sombre en un appui, avant même la connexion (ADR-0027)", async () => {
@@ -64,22 +70,22 @@ describe("accueil ANTSIA — accès réel", () => {
     expect(items.get("antsia:test:appearance")).toBe("dark")
     await act(async () => toggle!.click())
     expect(document.documentElement.classList.contains("dark")).toBe(false)
-    vi.unstubAllGlobals()
   })
 
   it("présente IDN et OTP avec une inscription distincte et les lectures publiques secondaires", async () => {
     await mount()
-    expect(host.querySelector("h1")?.textContent).toBe(BRAND_NAME)
+    expect(host.querySelector("h1")?.textContent).toBe("Créez des liens. Faites grandir votre réseau.")
     expect(host.querySelector("h2")?.textContent).toBe("Connexion")
     expect(host.querySelector('input[type="email"]')?.getAttribute("aria-label")).toBe("Adresse e-mail")
     expect(host.querySelector('input[type="password"]')).toBeNull()
     const buttons = Array.from(host.querySelectorAll("button"))
     expect(buttons[0]?.textContent).toContain("Continuer avec mon identité IDN")
     expect(buttons.some((button) => button.textContent?.includes("Recevoir un code"))).toBe(true)
-    const signup = host.querySelector(`a[href="${routes.signIn("sign-up")}"]`)
+    const signup = host.querySelector(`main a[href="${routes.signIn("sign-up")}"]`)
     expect(signup?.textContent).toBe("Créer un compte")
-    expect(host.querySelector(`a[href="${routes.discover()}"]`)?.textContent).toBe("Découvrir les publications publiques")
-    expect(host.querySelector(`h1 a[href="${routes.home()}"]`)?.textContent).toBe(BRAND_NAME)
+    expect(host.querySelector(`main a[href="${routes.discover()}"]`)?.textContent).toBe("Explorer les publications publiques")
+    expect(host.querySelector(`header nav a[href="${routes.discover()}"]`)?.textContent).toBe("Explorer")
+    expect(host.querySelector(`header a[href="${routes.home()}"][translate="no"]`)?.textContent).toBe(BRAND_NAME)
     expect(host.querySelector(`footer a[href="${routes.about()}"]`)?.textContent).toBe("À propos")
     expect(host.querySelector(`footer a[href="${routes.legal()}"]`)).not.toBeNull()
     expect(host.querySelector(`footer a[href="${routes.privacy()}"]`)).not.toBeNull()
@@ -99,8 +105,9 @@ describe("accueil ANTSIA — accès réel", () => {
     await mount()
     await act(async () => host.querySelector<HTMLButtonElement>('button[lang="en"]')!.click())
     expect(document.documentElement.lang).toBe("en")
+    expect(host.querySelector("h1")?.textContent).toBe("Make connections. Grow your network.")
     expect(host.querySelector("h2")?.textContent).toBe("Log in")
-    expect(host.querySelector(`a[href="${routes.signIn("sign-up")}"]`)?.textContent).toBe("Create an account")
+    expect(host.querySelector(`main a[href="${routes.signIn("sign-up")}"]`)?.textContent).toBe("Create an account")
   })
 
   it.each([["member", routes.feed()], ["welcome", routes.welcome()], ["restricted", routes.personalControls()]])("redirige une session %s sans montrer de formulaire", async (status, destination) => {
@@ -120,10 +127,10 @@ describe("accueil ANTSIA — accès réel", () => {
 
   it("l'inscription garde IDN et OTP puis revient vers la même connexion", async () => {
     await mount(<AccessHomeScreen intent="sign-up" />)
-    expect(host.querySelector("h1")?.textContent).toBe(BRAND_NAME)
+    expect(host.querySelector("h1")?.textContent).toBe("Créez des liens. Faites grandir votre réseau.")
     expect(host.querySelector("h2")?.textContent).toBe("Créer votre compte ANTSIA")
     expect(host.querySelector('input[type="email"]')).not.toBeNull()
-    expect(host.querySelector(`a[href="${routes.signIn()}"]`)?.textContent).toContain("J’ai déjà un compte")
+    expect(host.querySelector(`main a[href="${routes.signIn()}"]`)?.textContent).toContain("J’ai déjà un compte")
     expect(mocks.authClient.signIn.oauth2).not.toHaveBeenCalled()
   })
 
@@ -139,12 +146,24 @@ describe("accueil ANTSIA — accès réel", () => {
     expect(host.querySelector('input[autocomplete="one-time-code"]')).not.toBeNull()
 
     await rerender(<AccessHomeScreen intent="sign-in" />)
-    expect(host.querySelector("h1")?.textContent).toBe(BRAND_NAME)
+    expect(host.querySelector("h1")?.textContent).toBe("Créez des liens. Faites grandir votre réseau.")
     expect(host.querySelector("h2")?.textContent).toBe("Connexion")
-    expect(host.querySelector(`a[href="${routes.signIn("sign-up")}"]`)?.textContent).toBe("Créer un compte")
+    expect(host.querySelector(`main a[href="${routes.signIn("sign-up")}"]`)?.textContent).toBe("Créer un compte")
     expect(host.querySelector('input[autocomplete="one-time-code"]')).toBeNull()
     expect(host.querySelector<HTMLInputElement>('input[type="email"]')?.value).toBe("")
     expect(mocks.authClient.emailOtp.sendVerificationOtp).toHaveBeenCalledTimes(1)
     expect(mocks.authClient.signIn.emailOtp).not.toHaveBeenCalled()
+  })
+
+  it("conserve la boutique visée sur les liens de connexion et de création", async () => {
+    const destination = { kind: "storefront" as const, handle: "atelier.ndong" }
+    await mount(<AccessHomeScreen specializedDestination={destination} />)
+    const signUp = routes.signIn("sign-up", undefined, undefined, undefined, destination)
+    const signIn = routes.signIn(undefined, undefined, undefined, undefined, destination)
+    const headerLinks = Array.from(host.querySelectorAll("header a"), link => link.getAttribute("href"))
+    const mainLinks = Array.from(host.querySelectorAll("main a"), link => link.getAttribute("href"))
+    expect(headerLinks).toContain(signUp)
+    expect(headerLinks).toContain(signIn)
+    expect(mainLinks).toContain(signUp)
   })
 })

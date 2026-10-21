@@ -37,6 +37,7 @@
     "serviceReview": "Avis de prestations",
     "serviceReviewReply": "Réponses aux avis de prestations",
     "commerceOffer": "Offres des boutiques",
+    "commerceStorefront": "Conditions de la boutique",
     "commercialMessage": "Message commercial",
     "contextualMessage": "Messages de mise en relation",
     "commerceJob": "Offres d’emploi",
@@ -48,7 +49,11 @@
     "diasporaKitResource": "Ressources du kit d’arrivée DIASPORALE",
     "diasporaJobOffer": "Offres d’emploi DIASPORALE",
     "diasporaTalentProfile": "Profils de talent DIASPORALE",
-    "diasporaJobApplication": "Candidatures DIASPORALE"
+    "diasporaJobApplication": "Candidatures DIASPORALE",
+    "professionalProfile": "Profil professionnel",
+    "professionalCollaboration": "Demande de collaboration",
+    "editorialVersion": "Version d’article",
+    "editorialMedia": "Présentation du média"
   },
   "teams": {
     "title": "Équipes de modération",
@@ -282,7 +287,8 @@
     "kinds": {
       "diasporaServiceRequest": "Demandes de service (DIASPORALE)",
       "diasporaMentoring": "Mentorats acceptés (DIASPORALE)",
-      "diasporaJobApplication": "Candidatures présélectionnées (DIASPORALE)"
+      "diasporaJobApplication": "Candidatures présélectionnées (DIASPORALE)",
+      "professionalCollaboration": "Collaboration professionnelle"
     }
   },
   "paymentPolicy": {
@@ -294,7 +300,9 @@
     "disabled": "Nouveaux lancements de paiement fermés",
     "enable": "Autoriser les nouveaux paiements",
     "disable": "Fermer les nouveaux paiements",
-    "updated": "Dernière décision le"
+    "updated": "Dernière décision le",
+    "validationMissing": "Les nouveaux paiements restent fermés : la validation des décisions de paiement et la recette croisée manquent. Un ancien réglage actif ne remplace pas ces prérequis.",
+    "validationBlocked": "Nouveaux paiements bloqués en attente de validation"
   },
   "servicePolicy": {
     "title": "Devis, rendez-vous et prestations",
@@ -305,7 +313,9 @@
     "disabled": "Demandes de services fermées",
     "enable": "Ouvrir les demandes de services",
     "disable": "Fermer les demandes de services",
-    "updated": "Dernière décision le"
+    "updated": "Dernière décision le",
+    "validationMissing": "Les nouvelles demandes de services restent fermées : les règles de conservation et la recette croisée doivent être validées. Le suivi et les annulations des engagements existants gardent leurs voies dédiées.",
+    "validationBlocked": "Nouvelles demandes bloquées en attente de validation"
   },
   "jobPolicy": {
     "title": "Offres d’emploi et candidatures",
@@ -319,7 +329,9 @@
     "disableJobs": "Masquer les offres d’emploi (et fermer les candidatures)",
     "enableApplications": "Ouvrir les candidatures",
     "disableApplications": "Fermer les candidatures",
-    "updated": "Dernière décision le"
+    "updated": "Dernière décision le",
+    "validationMissing": "Les candidatures restent fermées en attente de validation des règles de conservation et de la recette croisée. Les offres peuvent rester consultables ; suivi et retrait des candidatures existantes gardent leurs voies dédiées.",
+    "validationBlocked": "Nouvelles candidatures bloquées en attente de validation"
   },
   "storefrontPolicy": {
     "title": "Publication des vitrines",
