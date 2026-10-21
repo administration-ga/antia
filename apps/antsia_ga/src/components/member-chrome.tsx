@@ -21,6 +21,7 @@ import { IdentityTools } from "@/components/identity-tools"
 import { Button } from "@/components/shared/controls"
 import { signOutAndRedirect } from "@/lib/sign-out"
 import { isLiveSessionPath, memberDestinationFor, routes } from "@/lib/routes"
+import { demoWorkspaceHeight } from "@/lib/demo-embed"
 
 const NAV_LINK =
   "inline-flex min-h-11 min-w-11 items-center justify-center gap-2 rounded-[var(--ui2-button-radius)] px-3 text-sm font-medium text-foreground hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
@@ -161,7 +162,7 @@ function DestinationsMemberPage({ children, workspace, immersiveOnPhone }: { chi
   const withNavigation = !isLiveSessionPath(pathname)
 
   return (
-    <div className={boundedWorkspace ? "antsia-member-workspace esp-page-motif flex h-dvh flex-col overflow-hidden bg-background" : "esp-page-motif min-h-dvh bg-background"}>
+    <div className={boundedWorkspace ? "antsia-member-workspace esp-page-motif flex h-dvh flex-col overflow-hidden bg-background" : "esp-page-motif min-h-dvh bg-background"} style={boundedWorkspace ? { height: demoWorkspaceHeight() } : undefined}>
       <MemberTopBar onMobile={boundedWorkspace && immersiveOnPhone ? "hidden" : "visible"} />
       <div
         data-with-navigation={withNavigation ? "" : undefined}
