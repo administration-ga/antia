@@ -12,7 +12,7 @@ Un second déploiement complet du moteur et d'antsia.ga, séparé de la producti
 |---|---|---|
 | Backend Convex | projet de production actuel | projet **distinct** (ex. `antsia-demo`) |
 | Site | `antsia.vercel.app` | projet d'hébergement **distinct** (ex. `antsia-demo`) |
-| Comptes | vrais membres | les huit comptes fictifs `<acteur>@demo.antsia.test`, partagés |
+| Comptes | vrais membres | les huit comptes fictifs `<acteur>@demo.antsia.test`, partagés, et dix figurants `figurant-<n>@demo.antsia.test` (absents de l'écran de connexion) |
 | Bouton « Comptes de démonstration » | jamais | sur l'écran de connexion et l'accueil |
 
 Le bouton n'apparaît que si le backend annonce `demoAccounts` (configuration de
@@ -80,13 +80,48 @@ déploiement. Sur tout autre déploiement, le catalogue est vide et l'équipemen
 3. Sur la production (`antsia.vercel.app`) : aucun panneau de démonstration ;
    `modules/platform/demoAccounts:catalogue` rend `[]`.
 
-## 4. Exploitation
+## 4. Contenus de démonstration (graines d'animation, propriétaire)
+
+Les comptes fictifs ne suffisent pas à montrer un réseau vivant. Les graines d'animation (21/10)
+remplissent la démonstration, et elle seule (garde `assertDemoContentAllowed` : confirmation ET
+déploiement de démonstration déclaré) :
+
+| Contenu | Volume |
+|---|---|
+| Publications | 72 : 42 des acteurs, 10 de leurs pages, 20 des figurants ; 27 avec image (37 %) |
+| Images | 8 illustrations générées (`demo-media/animation-20261020`) et 56 photos libres de droits Pexels (`demo-media/photos-20261021`, crédits dans son `manifest.json`) |
+| Boutiques | épicerie 13 produits, studio photo 10 prestations, atelier informatique 10 prestations |
+| Figurants | 10 personnes fictives (NOM en capitales), portrait, 2 publications chacune |
+| Graphe | 37 relations acceptées, 16 demandes en attente (chaque acteur en reçoit au moins une, avec son avis dans la cloche), abonnements aux personnes et aux pages ; les figurants sans lien deviennent des suggestions |
+| Engagement | réactions variées et commentaires sur chaque publication nouvelle |
+
+Lancement, après la publication des fonctions (point 1.4), avec la clé de démonstration dans
+l'environnement :
+
+```bash
+ANTSIA_CONVEX_DEMO_DEPLOY_KEY='…' bash scripts/convex-deploy-demo-production.sh graines
+```
+
+Le mode `tout` du même script les enchaîne entre la publication de la démonstration et celle de la
+production. Le script `scripts/seed-demo-content.mjs` :
+
+1. inscrit les sept acteurs puis les dix figurants par le **vrai parcours OTP** du site
+   (`https://antsia.vercel.app/demo/api/auth`), sans écrire aucun code ni jeton ;
+2. appelle `seeds/demoContent:run` puis `:runFigurants` (fonctions internes, clé de démonstration) ;
+3. dépose les images une à une : le serveur planifie chaque cible et n'accepte que la taille et
+   l'empreinte SHA-256 de son manifeste (`seeds/demoContentMedia:storeAsset`), aucune URL n'est suivie.
+
+Rejouable sans effet de bord : une publication retirée ou modifiée n'est pas reprise, une demande
+refusée ou une relation rompue ne revient pas, un portrait choisi par la personne n'est pas remplacé.
+Les actus des acteurs se reposent une fois par jour à chaque rejeu.
+
+## 5. Exploitation
 
 - **Chaque mise en production du moteur** se rejoue sur la démonstration (point 1.4 puis 2.3), pour
   que la démonstration montre le même produit.
 - **Remise à zéro** : les comptes étant partagés, effacer périodiquement les données du déploiement
-  de démonstration (ou en recréer un), puis rejouer la graine (point 1.5). Les huit comptes se
-  recréent au premier appui.
+  de démonstration (ou en recréer un), puis rejouer la graine (point 1.5) et les graines
+  d'animation (point 4). Les huit comptes se recréent au premier appui.
 - **Limites connues** : par adresse, trois codes par cinq minutes et cinq connexions par quinze
   minutes (seaux du moteur, non desserrés) — plusieurs visiteurs sur le même compte au même moment
   peuvent attendre quelques minutes. Un domaine personnalisé qui remplacerait l'adresse

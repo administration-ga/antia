@@ -50,6 +50,7 @@ import { admitToNetwork, setMembershipStatus } from "../people/admission"
 import { syncIdentityForPerson } from "../people/identity"
 import { hasStrongIdentityFor } from "../people/persons"
 import { refreshReaderContexts } from "../posts/feedMaterialization"
+import { DEMO_FIGURANTS, demoFigurantEmailOf, demoFigurantOf } from "../../seeds/demoFigurants"
 
 export { DEMO_EMAIL_DOMAIN }
 
@@ -307,5 +308,63 @@ export const equipMyDemoAccount = personMutation({
       if (spec.shop) await ensureDemoShop(ctx, root, person, pageId, spec.shop.model)
     }
     return { actor, status: membership.status, role: membership.role }
+  },
+})
+
+const figurantEntryValidator = v.object({
+  slot: v.number(),
+  email: v.string(),
+  profile: v.object({ handle: v.string(), displayName: v.string(), headline: v.string() }),
+})
+
+/**
+ * @publicProjection Développement local et démonstration déclarée seulement : les
+ * figurants fictifs (adresse réservée et profil), vide partout ailleurs. L'écran de
+ * connexion ne les lit pas : ils animent le fil, les suggestions et les demandes.
+ */
+export const figurantCatalogue = query({
+  args: {},
+  returns: v.array(figurantEntryValidator),
+  handler: async () => {
+    if (!demoAccountsAllowed()) return []
+    return DEMO_FIGURANTS.map((figurant) => ({
+      slot: figurant.slot,
+      email: demoFigurantEmailOf(figurant.slot),
+      profile: { handle: figurant.handle, displayName: displayNameOf(figurant), headline: figurant.headline },
+    }))
+  },
+})
+
+/**
+ * @selfScoped Développement local et démonstration déclarée seulement : fait entrer le
+ * figurant de la SESSION dans la racine par la vraie règle d'admission, si son adresse
+ * vérifiée est celle du figurant demandé et son profil publié sous l'identifiant attendu.
+ * Ni identité, ni rôle, ni page : un membre déclaré ordinaire. Idempotente.
+ */
+export const equipMyDemoFigurant = personMutation({
+  args: { slot: v.number() },
+  returns: v.object({ slot: v.number(), status: membershipStatusValidator }),
+  handler: async (ctx, { slot }) => {
+    if (!demoAccountsAllowed()) return fail("policyRefused")
+    const figurant = demoFigurantOf(slot)
+    if (!figurant) return fail("policyRefused")
+    const person = ctx.person
+    if ((await sessionEmail(ctx, person.authUserId)) !== demoFigurantEmailOf(slot)) return fail("policyRefused")
+    if (person.handle !== figurant.handle || person.displayName !== displayNameOf(figurant) || person.publishedAt === undefined) return fail("profileRequired")
+    const consents = await ctx.db.query("consents").withIndex("by_person_and_purpose", (q) => q.eq("personId", person._id)).take(100)
+    if (missingConsentsToJoin(consents).length > 0) return fail("consentRequired")
+    const root = await getRootNetwork(ctx)
+    if (!root) return fail("notFound")
+    let membership = await getMembership(ctx, root._id, person._id)
+    if (!membership || membership.status === "partie") {
+      const evidence = { strongIdentity: await hasStrongIdentityFor(ctx, person._id), externalVerification: false, sponsored: false }
+      const entry = entryStatusFor(root.membershipPolicy, evidence)
+      if (entry === null) return fail("policyRefused")
+      await admitToNetwork(ctx, { personId: person._id, network: root, root, entry, evidence })
+      await refreshReaderContexts(ctx, root._id, person._id)
+      membership = await getMembership(ctx, root._id, person._id)
+    }
+    if (!membership) return fail("notFound")
+    return { slot, status: membership.status }
   },
 })

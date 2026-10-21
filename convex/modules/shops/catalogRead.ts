@@ -167,7 +167,7 @@ export async function listCatalog(ctx: ReadCtx, context: CatalogReadContext, arg
   const demo = shop ? await demoCatalogForShop(ctx, context, shop._id) : null
   const numItems = Math.min(12, args.paginationOpts.numItems)
   if (demo) {
-    // Registre fictif fermé à huit offres : filtrage et tri portent sur toute cette sélection.
+    // Registre fictif fermé (au plus treize offres par activité) : filtrage et tri portent sur toute cette sélection.
     const selected = demo.offers.filter(offer => demoMatches(offer, filters, args.collectionRef))
     if (filters.sort === "newest") selected.sort((a, b) => b.changedAt - a.changedAt)
     if (filters.sort === "price_asc" || filters.sort === "price_desc") selected.sort((a, b) => {
@@ -180,7 +180,7 @@ export async function listCatalog(ctx: ReadCtx, context: CatalogReadContext, arg
     const scope = await sha256Hex(JSON.stringify(["demo-catalog-v2", context.root._id, context.network?._id ?? null, context.readerPersonId ?? null, shop!._id, filters, args.collectionRef ?? null]))
     const raw = catalogCursor(args.paginationOpts.cursor, scope), offset = raw === null ? 0 : Number(raw)
     if (!Number.isSafeInteger(offset) || offset < 0 || offset > selected.length || raw !== null && String(offset) !== raw) return invalidCatalog("cursor")
-    const end = Math.min(selected.length, offset + Math.min(numItems, 8))
+    const end = Math.min(selected.length, offset + numItems)
     return { page: selected.slice(offset, end), isDone: end >= selected.length, continueCursor: end < selected.length ? JSON.stringify({ version: 2, scope, cursor: String(end) }) : "", collections: demo.collections, filteredWindow: false }
   }
   if (args.collectionRef && isDemoCollectionRef(args.collectionRef)) return empty
