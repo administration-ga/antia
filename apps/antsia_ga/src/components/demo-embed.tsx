@@ -38,7 +38,8 @@ export function DemoModeBanner() {
   }, [enabled])
 
   if (!enabled) return null
-  return <aside ref={bannerRef} aria-label={t("demoIntegration.title")} className="flex min-w-0 flex-wrap items-center justify-between gap-2 border-b border-border bg-card px-4 py-2 text-card-foreground">
+  // Bords sur la gouttière des pages (`px-gutter`, globals.css) : ceux de la barre du haut et des colonnes.
+  return <aside ref={bannerRef} aria-label={t("demoIntegration.title")} className="flex min-w-0 flex-wrap items-center justify-between gap-2 border-b border-border bg-card px-gutter py-2 text-card-foreground">
     <div className="min-w-0"><p className="text-sm font-bold">{t("demoIntegration.title")}</p><p className="text-xs text-muted-foreground">{t("demoIntegration.lead")}</p></div>
     <a href={routes.home()} className={actionClassName}>{t("demoIntegration.back")}</a>
   </aside>

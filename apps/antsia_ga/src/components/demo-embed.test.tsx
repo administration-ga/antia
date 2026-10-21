@@ -105,6 +105,8 @@ describe("bandeau du build démo", () => {
     vi.stubEnv("NEXT_PUBLIC_CONVEX_URL", "https://vivid-hedgehog-655.convex.cloud")
     await mount(<DemoModeBanner />)
     expect(container.querySelector("aside")?.getAttribute("aria-label")).toBe("Mode démo")
+    // Ses bords tombent sur la gouttière des pages (jeton du thème, 16 puis 24 px).
+    expect(container.querySelector("aside")?.classList.contains("px-gutter")).toBe(true)
     expect(container.textContent).toContain("Comptes et contenus fictifs, partagés")
     expect(container.textContent).toContain("Votre compte ANTSIA reste séparé")
     expect(container.querySelector("a")?.getAttribute("href")).toBe("/")

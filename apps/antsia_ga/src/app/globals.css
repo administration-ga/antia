@@ -19,6 +19,21 @@
 @source "../../../../packages/ui/src";
 @source "../../../../packages/social-features/src";
 
+/* La gouttière des pages (décision du propriétaire du 22/10/2026) : au bureau,
+   la marge extérieure vaut l'écart entre les colonnes, et la barre du haut comme
+   le bandeau démo s'y alignent. Un seul jeton du thème Tailwind (`px-gutter`,
+   `gap-gutter`), relu par la coque des membres (`member-navigation-styles.tsx`)
+   et par la page réseau du moteur (`reseau-adaptive-styles.ts`) : 16 px, puis
+   24 px dès 1 200 px. `static` : ces deux feuilles le lisent hors des classes. */
+@theme static {
+  --spacing-gutter: 16px;
+}
+@media (min-width: 1200px) {
+  :root {
+    --spacing-gutter: 24px;
+  }
+}
+
 /* P18b (A13, WCAG 2.4.11) : un élément focalisé ou visé par une ancre ne passe
    plus sous les barres fixes. En haut, la barre de membre collante (jeton du
    thème) ; sous 960 px, la barre des destinations, sa marge basse et la zone
