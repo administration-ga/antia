@@ -225,7 +225,7 @@
     "eraseBookingsMany": "Vous avez au moins {{count}} rendez-vous à venir chez des professionnels. L’effacement de votre compte ne les annule pas chez eux ; annulez-les d’abord depuis Mes demandes.",
     "eraseBookingsLink": "Ouvrir Mes demandes",
     "pageDecisionsTitle": "Décisions visant mes pages",
-    "pageDecisionsLead": "Un contenu porté par une page que vous représentez (offre, poste, réponse, évènement) peut être retiré par la modération. Un signataire actif de la page peut faire recours en son nom.",
+    "pageDecisionsLead": "Un contenu porté par une page que vous représentez (offre, poste, réponse, événement) peut être retiré par la modération. Un signataire actif de la page peut faire recours en son nom.",
     "pageDecisionsEmpty": "Aucune décision ne vise cette page.",
     "pageDecisionsUnavailable": "Les décisions de cette page ne sont pas accessibles pour le moment."
   },
