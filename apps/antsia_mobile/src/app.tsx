@@ -1,7 +1,7 @@
 import { Component, useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react"
 import { ActivityIndicator, BackHandler, Linking, ScrollView, StatusBar, Text, useColorScheme, View } from "react-native"
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context"
-import { ConvexProvider, ConvexProviderWithAuth, ConvexReactClient, useConvexAuth, useQuery } from "convex/react"
+import { ConvexProvider, ConvexProviderWithAuth, type ConvexReactClient, useConvexAuth, useQuery } from "convex/react"
 import { ConvexHttpClient } from "convex/browser"
 import { api, type Id } from "@antsia/api/engine"
 import { MEMBER_THEME_IDS, memberThemeOf } from "@antsia/social-contracts/appearance"
@@ -13,6 +13,7 @@ import { Action, Card, Label, Status as NativeStatusText } from "./components/ui
 import { NativeRuntimeProvider } from "./runtime"
 import { nativeRouteFromUrl, nativeWebRoutes, type NativeRoute } from "./lib/routes"
 import { useNativeSessionController, type NativeSessionController } from "./lib/session-controller"
+import { useOwnedConvexClient } from "./lib/owned-convex-client"
 import { FeedScreen } from "./screens/feed-screen"
 import { PostScreen } from "./screens/post-screen"
 import { MessagesScreen } from "./screens/messages-screen"
@@ -48,13 +49,12 @@ class NativeBoundary extends Component<{ children: ReactNode; onFailure: () => v
 }
 
 function AnonymousTransport({ controller, env }: { controller: NativeSessionController; env: NativeEnvironment }) {
-  const [client] = useState(() => new ConvexReactClient(env.convexUrl, { unsavedChangesWarning: false }))
-  useEffect(() => () => { void client.close() }, [client])
+  const client = useOwnedConvexClient(env.convexUrl)
   return <ConvexProvider client={client}><ScrollView keyboardShouldPersistTaps="handled"><NativeEntry controller={controller} webUrl={env.webUrl} scheme={env.scheme} /></ScrollView></ConvexProvider>
 }
 
 function MemberTransport({ controller, env, onMemberConfirmed }: { controller: NativeSessionController; env: NativeEnvironment; onMemberConfirmed: (member: MemberCallContext) => void }) {
-  const [client] = useState(() => new ConvexReactClient(env.convexUrl, { unsavedChangesWarning: false }))
+  const client = useOwnedConvexClient(env.convexUrl)
   const id = controller.session!.id, generation = controller.vault.generation
   const fetchAccessToken = useCallback(async () => {
     if (!controller.sessionIsCurrent(id, generation)) return null
@@ -66,7 +66,6 @@ function MemberTransport({ controller, env, onMemberConfirmed }: { controller: N
     } catch { if (controller.sessionIsCurrent(id, generation)) controller.blocked(); return null }
   }, [controller.auth, controller.blocked, controller.sessionIsCurrent, generation, id])
   const useAuth = useCallback(() => ({ isLoading: false, isAuthenticated: true, fetchAccessToken }), [fetchAccessToken])
-  useEffect(() => () => { client.clearAuth(); void client.close() }, [client])
   return <ConvexProviderWithAuth client={client} useAuth={useAuth}><MemberGate controller={controller} client={client} env={env} onMemberConfirmed={onMemberConfirmed} /></ConvexProviderWithAuth>
 }
 
