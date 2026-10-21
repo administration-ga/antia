@@ -47,7 +47,7 @@ const config: ExpoConfig = {
   userInterfaceStyle: "automatic",
   // Expo SDK 57 impose déjà la New Architecture ; aucune option legacy ici.
   ...(scheme ? { scheme } : {}),
-  ios: { buildNumber: "3", config: { usesNonExemptEncryption: false }, ...(bundleIdentifier ? { bundleIdentifier } : {}) },
+  ios: { buildNumber: "4", config: { usesNonExemptEncryption: false }, ...(bundleIdentifier ? { bundleIdentifier } : {}) },
   android: {
     versionCode: 2,
     ...(androidPackage ? { package: androidPackage } : {}),
@@ -64,6 +64,8 @@ const config: ExpoConfig = {
       apnsEnvironment: process.env.APNS_ENVIRONMENT,
       firebaseConfigPath: process.env.NATIVE_FIREBASE_CONFIG_PATH,
     }],
+    // SDK iOS 27 : sans cycle de vie UIScene, UIKit refuse de lancer l'app.
+    "./plugins/with-scene-lifecycle.cjs",
   ],
   updates: { enabled: false },
 }

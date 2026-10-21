@@ -62,9 +62,18 @@ Aucun `--auto-submit`. Le profil iOS interne exige un compte Apple Developer et 
 préenregistré ; choisir `testflight` uniquement pour un test via App Store Connect, avec une
 soumission distincte. Le réglage local de signature App Store est réservé à `testflight`
 par `NATIVE_IOS_APP_STORE_BUILD=true` ; le profil interne conserve la sélection EAS.
-La version est `0.1.0`, build iOS `3`, Android `2` : ces builds embarquent le correctif du plantage
-qui suivait la confirmation de connexion (PR33). Les builds iOS `2` et Android `1` contiennent ce
-défaut. Incrémenter ces numéros explicitement avant toute nouvelle distribution qui l'exige.
+La version est `0.1.0`, build iOS `4`, Android `2`. Ils embarquent le correctif du plantage
+qui suivait la confirmation de connexion (PR33), présent dans les builds iOS `2` et Android `1`.
+Le build iOS `4` adopte aussi le cycle de vie UIScene, sans lequel le build `3` ne démarre pas sous iOS 27.
+Incrémenter ces numéros explicitement avant toute nouvelle distribution qui l'exige.
+
+Depuis iOS 27, UIKit refuse de lancer une app compilée avec le SDK iOS 27 sans cycle de vie UIScene
+(« UIScene life cycle is required for apps built with this SDK », arrêt SIGTRAP au démarrage).
+Le gabarit Expo SDK 57 crée encore sa fenêtre dans l'AppDelegate.
+`plugins/with-scene-lifecycle.cjs` déclare donc une scène unique dans l'`Info.plist`, retire la fenêtre
+du lancement et génère `SceneDelegate.swift`. Ce délégué démarre React Native dans la scène et renvoie
+les liens à l'AppDelegate. Si le gabarit change, le plugin échoue au prebuild : il ne produit jamais
+une app sans fenêtre.
 
 ## Exécution dans le simulateur iOS
 
