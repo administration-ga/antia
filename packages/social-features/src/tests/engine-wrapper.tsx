@@ -61,6 +61,7 @@ export function EngineTestWrapper(props: {
   navigation?: EngineNavigation
   navigationLayout?: EngineNavigationLayout
   navigationLabels?: NetworkContextValue["navigationLabels"]
+  PostArticleRenderer?: NetworkContextValue["PostArticleRenderer"]
 }) {
   const i18n = createAppI18n({ locale: "fr", appResources: { fr: {}, en: {} }, defaultNS: "social" })
   return (
@@ -77,6 +78,7 @@ export function EngineTestWrapper(props: {
           navigation={props.navigation}
           navigationLayout={props.navigationLayout}
           navigationLabels={props.navigationLabels}
+          PostArticleRenderer={props.PostArticleRenderer}
         >
           {props.children}
         </NetworkProvider>
@@ -86,11 +88,11 @@ export function EngineTestWrapper(props: {
 }
 
 /** `render` de testing-library, dans l'enveloppe du moteur. */
-export function renderWithEngine(ui: ReactElement, options: Omit<RenderOptions, "wrapper"> & { router?: RouterImplementation; personId?: Id<"persons">; routes?: EngineRoutes; postPresentation?: EnginePostPresentation; navigation?: EngineNavigation; navigationLayout?: EngineNavigationLayout; navigationLabels?: NetworkContextValue["navigationLabels"] } = {}) {
-  const { router, personId, routes, postPresentation, navigation, navigationLayout, navigationLabels, ...rest } = options
+export function renderWithEngine(ui: ReactElement, options: Omit<RenderOptions, "wrapper"> & { router?: RouterImplementation; personId?: Id<"persons">; routes?: EngineRoutes; postPresentation?: EnginePostPresentation; navigation?: EngineNavigation; navigationLayout?: EngineNavigationLayout; navigationLabels?: NetworkContextValue["navigationLabels"]; PostArticleRenderer?: NetworkContextValue["PostArticleRenderer"] } = {}) {
+  const { router, personId, routes, postPresentation, navigation, navigationLayout, navigationLabels, PostArticleRenderer, ...rest } = options
   return render(ui, {
     wrapper: ({ children }) => (
-      <EngineTestWrapper router={router} personId={personId} routes={routes} postPresentation={postPresentation} navigation={navigation} navigationLayout={navigationLayout} navigationLabels={navigationLabels}>
+      <EngineTestWrapper router={router} personId={personId} routes={routes} postPresentation={postPresentation} navigation={navigation} navigationLayout={navigationLayout} navigationLabels={navigationLabels} PostArticleRenderer={PostArticleRenderer}>
         {children}
       </EngineTestWrapper>
     ),

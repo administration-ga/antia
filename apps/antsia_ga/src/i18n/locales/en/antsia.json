@@ -4,6 +4,17 @@
     "description": "{{brand}} brings the networks of the Gabonese digital ecosystem together in one public network where everyone knows who they are talking to."
   },
   "skipToContent": "Skip to content",
+  "demoIntegration": {
+    "title": "Demo mode",
+    "lead": "Fictional accounts and content are shared between visitors. Your ANTSIA account stays separate.",
+    "entry": "Demo accounts",
+    "back": "Back to ANTSIA",
+    "frameTitle": "ANTSIA — isolated demo accounts and network",
+    "loading": "Loading the demo…",
+    "delayed": "The demo is taking longer to respond. You can wait or try again.",
+    "retry": "Try again",
+    "unavailable": "The demo is temporarily unavailable. You can return to ANTSIA."
+  },
   "home": {
     "eyebrow": "Under construction",
     "title": "{{brand}}, the Gabonese public social network",
@@ -87,6 +98,8 @@
   "welcome": {
     "title": "Welcome to {{brand}}",
     "lead": "Choose how members will see you. Nothing is published without you.",
+    "previewTitle": "Profile preview",
+    "previewLead": "Check your display name and handle before joining the network.",
     "displayNameLabel": "Display name",
     "displayNameHint": "The name members will see. It is not copied from any registry.",
     "handleLabel": "Public handle",
@@ -171,7 +184,7 @@
     "exportDone": "Your personal export is ready.",
     "error": "This operation did not complete. You can try again.",
     "eraseTitle": "Request account erasure",
-    "eraseLead": "Your content, connections and files will be erased after 30 days. You can cancel during this period. Preserved references become anonymous.",
+    "eraseLead": "Erasure of your social data is scheduled after a 30-day cancellation period. Retained quotations become anonymous. Commitments and transaction copies held by professionals follow a separate process.",
     "confirmWord": "DELETE",
     "confirmLabel": "Type {{word}} to confirm",
     "confirmError": "The confirmation does not match.",
@@ -227,7 +240,12 @@
     "pageDecisionsTitle": "Decisions about my pages",
     "pageDecisionsLead": "Content carried by a page you represent (offer, job post, reply, event) can be removed by moderation. An active signatory of the page can appeal on its behalf.",
     "pageDecisionsEmpty": "No decision concerns this page.",
-    "pageDecisionsUnavailable": "This page’s decisions are not available right now."
+    "pageDecisionsUnavailable": "This page’s decisions are not available right now.",
+    "eraseCommerce": "ANTSIA erasure does not cancel or refund appointments, orders or payments. It does not confirm erasure of copies held by PRO.GA or professionals. Retention of invoices, evidence and other transaction data follows a separate process whose rules remain to be validated.",
+    "eraseBookingsUnknown": "The number of upcoming appointments is unknown. An unavailable read does not mean there are none. Review your requests and commitments before deciding.",
+    "eraseBookingsNone": "No upcoming appointment was identified in the requests reviewed. This count does not cover your orders or payments.",
+    "eraseBookingsEmptyWindow": "No upcoming appointment was identified in the reviewed window. Other requests may not be covered.",
+    "erasePurchasesLink": "Open My purchases"
   },
   "settings": {
     "title": "Settings",
@@ -413,17 +431,6 @@
         "description": "Moderator of the network."
       }
     }
-  },
-  "demoIntegration": {
-    "title": "Demo mode",
-    "lead": "Fictional accounts and content are shared between visitors. Your ANTSIA account stays separate.",
-    "entry": "Demo accounts",
-    "back": "Back to ANTSIA",
-    "frameTitle": "ANTSIA — isolated demo accounts and network",
-    "loading": "Loading the demo…",
-    "delayed": "The demo is taking longer to respond. You can wait or try again.",
-    "retry": "Try again",
-    "unavailable": "The demo is temporarily unavailable. You can return to ANTSIA."
   },
   "account": {
     "menu": "My account",

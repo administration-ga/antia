@@ -164,6 +164,9 @@ export type EngineStoriesPresentation = "cards" | "rings"
 /** P09 : rendu injecté par l'application, aucune dépendance du moteur vers son front. */
 export type EnginePostOfferRenderer = ComponentType<{ networkId: Id<"networks">; postId: Id<"posts"> }>
 
+/** MP13 : aperçu éditorial relu par l'application ; absent, aucune surface ajoutée. */
+export type EnginePostArticleRenderer = ComponentType<{ networkId: Id<"networks">; postId: Id<"posts"> }>
+
 export interface NetworkContextValue {
   networkId: Id<"networks">
   /** Identifiant lisible du réseau (`antsia`, `diaspora`…). */
@@ -194,6 +197,7 @@ export interface NetworkContextValue {
    */
   wordmark: string | null
   PostOfferRenderer?: EnginePostOfferRenderer
+  PostArticleRenderer?: EnginePostArticleRenderer
   /** Contrat d'`OrgProvider` lu par les surfaces du socle : toujours l'espace personnel. */
   personalMode: true
   personalSpaceIsElsewhere: false
@@ -302,6 +306,7 @@ export function NetworkProvider(props: {
   /** La marque affichée en tête de la coque du téléphone ; absente = le libellé neutre du moteur. */
   wordmark?: string
   PostOfferRenderer?: EnginePostOfferRenderer
+  PostArticleRenderer?: EnginePostArticleRenderer
   children: ReactNode
 }) {
   const storageNamespace = props.storageNamespace ?? ""
@@ -345,6 +350,7 @@ export function NetworkProvider(props: {
     storiesPresentation: resolveEngineStoriesPresentation(props.storiesPresentation),
     wordmark: resolveEngineWordmark(props.wordmark),
     PostOfferRenderer: props.PostOfferRenderer,
+    PostArticleRenderer: props.PostArticleRenderer,
     personalMode: true,
     personalSpaceIsElsewhere: false,
     activeOrgId: null,

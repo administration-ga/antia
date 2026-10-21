@@ -492,6 +492,7 @@ const ENGINE_ONLY_SENTENCES: Readonly<Record<EngineOnlyKind, { actor: string | n
  * boutique. Un genre commerce ajouté sans phrase ici ne compile pas.
  */
 const COMMERCE_SENTENCES: Readonly<Record<CommerceNotificationKind, string>> = Object.freeze({
+	commerce_service_followup_updated: "notifications:notificationTargets.sentence.commerce.followupUpdated",
 	commerce_service_quote_received: "notifications:notificationTargets.sentence.commerce.quoteReceived",
 	commerce_service_quote_revised: "notifications:notificationTargets.sentence.commerce.quoteRevised",
 	commerce_service_booking_confirmed: "notifications:notificationTargets.sentence.commerce.bookingConfirmed",

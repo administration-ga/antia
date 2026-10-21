@@ -44,14 +44,24 @@ export function readCartDraft(storage: CartStorage, networkId: string, personId:
     const key = cartDraftKey(networkId, personId)
     const raw = storage.getItem(key)
     const draft = parseCartDraft(raw, networkId, personId, nowMs)
-    if (raw && !draft) storage.removeItem(key)
+    // Un ancien appelant ne détruit jamais une collection écrite par la version suivante.
+    if (raw && !draft && !isProtectedCartPayload(raw)) storage.removeItem(key)
     return draft
   } catch { return null }
 }
 export function writeCartDraft(storage: CartStorage, draft: CartDraft, nowMs: number): boolean {
   const parsed = parseCartDraft(JSON.stringify(draft), draft.networkId, draft.personId, nowMs)
   if (!parsed) return false
-  try { storage.setItem(cartDraftKey(draft.networkId, draft.personId), JSON.stringify(parsed)); return true } catch { return false }
+  try {
+    const key = cartDraftKey(draft.networkId, draft.personId)
+    if (isProtectedCartPayload(storage.getItem(key))) return false
+    storage.setItem(key, JSON.stringify(parsed)); return true
+  } catch { return false }
+}
+function isProtectedCartPayload(raw: string | null): boolean {
+  if (!raw) return false
+  if (raw.length > 16_384) return true
+  try { const value: unknown = JSON.parse(raw); return value !== null && typeof value === "object" && "version" in value && value.version === 2 } catch { return false }
 }
 export function removeCartDraft(storage: CartStorage, networkId: string, personId: string): boolean {
   try { storage.removeItem(cartDraftKey(networkId, personId)); return true } catch { return false }

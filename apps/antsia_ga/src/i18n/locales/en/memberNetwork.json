@@ -103,6 +103,7 @@
       "serviceReview": "Service review",
       "serviceReviewReply": "Service review reply",
       "commerceOffer": "Store offer",
+      "commerceStorefront": "Store terms",
       "contextualMessage": "Matchmaking message",
       "diasporaAidQuestion": "DIASPORALE mutual aid question",
       "diasporaAidAnswer": "DIASPORALE mutual aid answer",
@@ -112,7 +113,11 @@
       "diasporaKitResource": "DIASPORALE arrival kit resource",
       "diasporaJobOffer": "DIASPORALE job offer",
       "diasporaTalentProfile": "DIASPORALE talent profile",
-      "diasporaJobApplication": "DIASPORALE job application"
+      "diasporaJobApplication": "DIASPORALE job application",
+      "professionalProfile": "Professional profile",
+      "professionalCollaboration": "Collaboration request",
+      "editorialVersion": "Article version",
+      "editorialMedia": "Media presentation"
     },
     "preview": "Content excerpt for review",
     "previewBounded": "Limited excerpt, accessible within your current scope.",

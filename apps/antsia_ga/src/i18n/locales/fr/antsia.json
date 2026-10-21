@@ -4,6 +4,17 @@
     "description": "{{brand}} réunit les réseaux de l'écosystème numérique gabonais dans un réseau public où chacun sait à qui il parle."
   },
   "skipToContent": "Aller au contenu",
+  "demoIntegration": {
+    "title": "Mode démo",
+    "lead": "Comptes et contenus fictifs, partagés entre les visiteurs. Votre compte ANTSIA reste séparé.",
+    "entry": "Comptes démo",
+    "back": "Retour à ANTSIA",
+    "frameTitle": "ANTSIA — comptes et réseau de démonstration isolés",
+    "loading": "Chargement de la démo…",
+    "delayed": "La démo met plus de temps à répondre. Vous pouvez patienter ou réessayer.",
+    "retry": "Réessayer",
+    "unavailable": "La démo est momentanément indisponible. Vous pouvez revenir à ANTSIA."
+  },
   "home": {
     "eyebrow": "En construction",
     "title": "{{brand}}, le réseau social public gabonais",
@@ -87,6 +98,8 @@
   "welcome": {
     "title": "Bienvenue sur {{brand}}",
     "lead": "Choisissez comment les membres vous verront. Rien n'est publié sans vous.",
+    "previewTitle": "Aperçu du profil",
+    "previewLead": "Vérifiez votre nom affiché et votre identifiant avant de rejoindre le réseau.",
     "displayNameLabel": "Nom affiché",
     "displayNameHint": "Le nom que les membres verront. Il n'est recopié d'aucun registre.",
     "handleLabel": "Identifiant public",
@@ -171,7 +184,7 @@
     "exportDone": "Votre export personnel est prêt.",
     "error": "Cette opération n’a pas abouti. Vous pouvez réessayer.",
     "eraseTitle": "Demander l’effacement de mon compte",
-    "eraseLead": "Vos contenus, relations et fichiers seront effacés après 30 jours. Vous pouvez annuler pendant ce délai. Les citations conservées deviennent anonymes.",
+    "eraseLead": "L’effacement de vos données sociales est programmé après un délai d’annulation de 30 jours. Les citations conservées deviennent anonymes. Les engagements et copies transactionnelles chez les professionnels suivent un traitement distinct.",
     "confirmWord": "SUPPRIMER",
     "confirmLabel": "Saisissez {{word}} pour confirmer",
     "confirmError": "La confirmation ne correspond pas.",
@@ -227,7 +240,12 @@
     "pageDecisionsTitle": "Décisions visant mes pages",
     "pageDecisionsLead": "Un contenu porté par une page que vous représentez (offre, poste, réponse, événement) peut être retiré par la modération. Un signataire actif de la page peut faire recours en son nom.",
     "pageDecisionsEmpty": "Aucune décision ne vise cette page.",
-    "pageDecisionsUnavailable": "Les décisions de cette page ne sont pas accessibles pour le moment."
+    "pageDecisionsUnavailable": "Les décisions de cette page ne sont pas accessibles pour le moment.",
+    "eraseCommerce": "L’effacement ANTSIA n’annule ni ne rembourse vos rendez-vous, commandes ou paiements. Il ne confirme pas l’effacement des copies chez PRO.GA ou les professionnels. La conservation des factures, preuves et autres données transactionnelles suit un traitement distinct, dont les règles restent à valider.",
+    "eraseBookingsUnknown": "Le nombre de rendez-vous à venir n’est pas établi. Une lecture indisponible ne signifie pas qu’il n’en existe aucun. Consultez vos demandes et engagements avant de décider.",
+    "eraseBookingsNone": "Aucun rendez-vous à venir n’a été identifié dans les demandes consultées. Ce décompte ne couvre pas vos commandes ni vos paiements.",
+    "eraseBookingsEmptyWindow": "Aucun rendez-vous à venir n’a été identifié dans la fenêtre consultée. D’autres demandes peuvent ne pas être couvertes.",
+    "erasePurchasesLink": "Ouvrir Mes achats"
   },
   "settings": {
     "title": "Réglages",
@@ -413,17 +431,6 @@
         "description": "Modératrice du réseau."
       }
     }
-  },
-  "demoIntegration": {
-    "title": "Mode démo",
-    "lead": "Comptes et contenus fictifs, partagés entre les visiteurs. Votre compte ANTSIA reste séparé.",
-    "entry": "Comptes démo",
-    "back": "Retour à ANTSIA",
-    "frameTitle": "ANTSIA — comptes et réseau de démonstration isolés",
-    "loading": "Chargement de la démo…",
-    "delayed": "La démo met plus de temps à répondre. Vous pouvez patienter ou réessayer.",
-    "retry": "Réessayer",
-    "unavailable": "La démo est momentanément indisponible. Vous pouvez revenir à ANTSIA."
   },
   "account": {
     "menu": "Mon compte",

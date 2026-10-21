@@ -20,8 +20,9 @@ import { useMemberSession } from "@/components/network-shell"
 import { IdentityTools } from "@/components/identity-tools"
 import { Button } from "@/components/shared/controls"
 import { signOutAndRedirect } from "@/lib/sign-out"
+import { isLiveSessionPath, memberDestinationFor, routes, specializedShopRoute, specializedProfessionalRoute, specializedEditorialRoute } from "@/lib/routes"
 import { demoWorkspaceHeight } from "@/lib/demo-embed"
-import { isLiveSessionPath, memberDestinationFor, routes } from "@/lib/routes"
+import { SpecializedPage, SpecializedProfessionalPage, SpecializedEditorialPage } from "./specialized-page"
 
 const NAV_LINK =
   "inline-flex min-h-11 min-w-11 items-center justify-center gap-2 rounded-lg px-3 text-sm font-medium text-foreground hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
@@ -125,6 +126,11 @@ export function MemberTopBar({ onMobile = "visible" }: { onMobile?: "visible" | 
 /** Une page de membre hors du fil (profil, page, album) : la barre du haut, puis le contenu. */
 export function MemberPage({ children, workspace = false, immersiveOnPhone = false }: { children: ReactNode; workspace?: boolean; immersiveOnPhone?: boolean }) {
   const destinations = useNetwork().navigation === "destinations"
+  const pathname = usePathname()
+  const space = destinations ? specializedShopRoute(pathname) : null
+  if (destinations && specializedEditorialRoute(pathname)) return <SpecializedEditorialPage>{children}</SpecializedEditorialPage>
+  if (destinations && specializedProfessionalRoute(pathname)) return <SpecializedProfessionalPage>{children}</SpecializedProfessionalPage>
+  if (space) return <SpecializedPage space={space}>{children}</SpecializedPage>
   if (destinations) return <DestinationsMemberPage workspace={workspace} immersiveOnPhone={immersiveOnPhone}>{children}</DestinationsMemberPage>
   return (
     <div className="esp-page-motif min-h-dvh bg-background">

@@ -15,6 +15,7 @@
  * page rendent la même — un seul gabarit à tenir.
  */
 
+import { themedActionStyle } from "../themed-action-style"
 import { api } from "@antsia/api/engine"
 import type { Id } from "@antsia/api/engine"
 import { useNetwork, useRoutes, type EnginePostPresentation } from "@antsia/api/network"
@@ -128,7 +129,7 @@ export function PostCard(props: PostCardProps) {
 
 function PostCardContent({ post, now, onTag, onMention, offer }: PostCardProps) {
   const { t, i18n } = useTranslation("reseau")
-  const { networkId, personId, slug, postPresentation, PostOfferRenderer, navigation, navigationLayout } = useNetwork()
+  const { networkId, personId, slug, postPresentation, PostOfferRenderer, PostArticleRenderer, navigation, navigationLayout } = useNetwork()
   // La présentation que l'application déclare : « media » ou « charte » sur
   // opt-in, sinon la carte historique (aucune application ne change sans le
   // demander).
@@ -456,7 +457,8 @@ function PostCardContent({ post, now, onTag, onMention, offer }: PostCardProps) 
               aria-label={t("postCard.editLabel")}
             />
             <div style={{ display: "flex", gap: 8 }}>
-              <Button
+              <Button style={themedActionStyle("success", "primary")}
+                variant="success"
                 size="sm"
                 onClick={() =>
                   void editPost({ networkId, postId: post._id, body: editedBody })
@@ -471,9 +473,9 @@ function PostCardContent({ post, now, onTag, onMention, offer }: PostCardProps) 
               >
                 {t("postCard.save")}
               </Button>
-              <Button
+              <Button style={themedActionStyle("cancel", "ghost")}
                 size="sm"
-                variant="ghost"
+                variant="outline"
                 onClick={() => {
                   setEditedBody(post.body)
                   setEditing(false)
@@ -495,7 +497,7 @@ function PostCardContent({ post, now, onTag, onMention, offer }: PostCardProps) 
                 {t(`post.event.${post.event.status}`)}
               </span>
             </div>
-            <h3 className="m-0 text-sm font-semibold text-foreground">{post.event.title}</h3>
+            <h3 className="m-0 text-sm font-semibold text-foreground" style={{ fontSize: "0.875rem", fontWeight: "600", lineHeight: "1.25rem" }}>{post.event.title}</h3>
             <p className="m-0 text-sm text-foreground">{formatEventRange(post.event.startAt, post.event.endAt, i18n.language, timeZone)}</p>
             <p className="m-0 text-xs text-muted-foreground">{t("post.event.timeZone", { timeZone })}</p>
             {post.event.myParticipation !== null ? (
@@ -525,7 +527,7 @@ function PostCardContent({ post, now, onTag, onMention, offer }: PostCardProps) 
               minWidth: 44,
               justifyContent: "center",
               padding: "7px 10px",
-              borderRadius: 9,
+              borderRadius: "9px",
               fontFamily: "inherit",
               fontSize: 12.5,
               fontWeight: 700,
@@ -562,7 +564,7 @@ function PostCardContent({ post, now, onTag, onMention, offer }: PostCardProps) 
                 minWidth: 44,
                 justifyContent: "center",
                 padding: "7px 10px",
-                borderRadius: 9,
+                borderRadius: "9px",
                 fontFamily: "inherit",
                 fontSize: 12.5,
                 fontWeight: 700,
@@ -588,6 +590,7 @@ function PostCardContent({ post, now, onTag, onMention, offer }: PostCardProps) 
         <CommentsSurface
           postId={post._id}
           now={now}
+          readOnly={post.commentsOpen === false}
           onClose={() => setShowComments(false)}
           onTag={onTag}
           onMention={onMention}
@@ -625,7 +628,7 @@ function PostCardContent({ post, now, onTag, onMention, offer }: PostCardProps) 
      * seul ; avec un média, il est borné par « Lire la suite ». La coque
      * adaptive ANTSIA le place après le média et ses actions.
      */
-    const textOnly = post.media.length === 0 && post.share === null && post.event === null && !post.live
+    const textOnly = post.media.length === 0 && post.share === null && post.event === null && !post.live && !post.hasEditorialArticle
     const body = editing ? editor : post.body.length > 0 ? (
       textOnly
         ? <RichText body={post.body} onTag={onTag} onMention={onMention} />
@@ -697,6 +700,8 @@ function PostCardContent({ post, now, onTag, onMention, offer }: PostCardProps) 
           {!mediaFirst || textOnly ? body : null}
 
           {post.media.length > 0 ? <PostMedia media={post.media} presentation="charte" primary /> : null}
+          {post.hasEditorialArticle && PostArticleRenderer ? <PostArticleRenderer networkId={networkId} postId={post._id} /> : null}
+
           {liveBlock}
           {post.event !== null ? <CharteEventBlock event={post.event} now={now} /> : null}
           {post.share ? (
@@ -787,7 +792,7 @@ function PostCardContent({ post, now, onTag, onMention, offer }: PostCardProps) 
      * aperçu coupé, aucune hauteur imposée. Sinon le corps devient la légende,
      * bornée avec « Lire la suite ».
      */
-    const textOnly = post.media.length === 0 && post.share === null && post.event === null && !post.live
+    const textOnly = post.media.length === 0 && post.share === null && post.event === null && !post.live && !post.hasEditorialArticle
     const body = editing ? editor : post.body.length > 0 ? (
       textOnly
         ? <RichText body={post.body} onTag={onTag} onMention={onMention} />
@@ -814,6 +819,8 @@ function PostCardContent({ post, now, onTag, onMention, offer }: PostCardProps) 
               {post.media.length > 0 ? (
                 <PostMedia media={post.media} gutter={POST_CARD_GUTTER} presentation="media" />
               ) : null}
+              {post.hasEditorialArticle && PostArticleRenderer ? <PostArticleRenderer networkId={networkId} postId={post._id} /> : null}
+
               {liveBlock}
               {eventBlock}
               {post.share ? (
@@ -857,7 +864,7 @@ function PostCardContent({ post, now, onTag, onMention, offer }: PostCardProps) 
                 minWidth: 44,
                 marginInlineStart: "auto",
                 padding: "7px 10px",
-                borderRadius: 9,
+                borderRadius: "9px",
                 cursor: saving ? "progress" : "pointer",
                 background: saved ? "var(--primary-50)" : "transparent",
                 color: saved ? "var(--primary-600)" : "var(--ink-500)",
@@ -915,6 +922,8 @@ function PostCardContent({ post, now, onTag, onMention, offer }: PostCardProps) 
         {post.media.length > 0 ? (
           <PostMedia media={post.media} gutter={POST_CARD_GUTTER} presentation="classic" />
         ) : null}
+
+        {post.hasEditorialArticle && PostArticleRenderer ? <PostArticleRenderer networkId={networkId} postId={post._id} /> : null}
 
         {liveBlock}
 
@@ -1236,6 +1245,7 @@ function SharedPostCard({
 }) {
   const { t } = useTranslation("reseau")
   const timeZone = useViewerTimeZone()
+  const { networkId, PostArticleRenderer } = useNetwork()
   if (!share.available) {
     return (
       <div
@@ -1243,8 +1253,8 @@ function SharedPostCard({
           // Le tiret disait « cadre vide » ; la surface teintée suffit
           // (2026-08-21, cartes sans bordure).
           background: "var(--ink-50, var(--ink-0))",
-          borderRadius: 10,
-          padding: 14,
+          borderRadius: "10px",
+          padding: "14px",
           color: "var(--ink-600)",
           fontSize: 13,
         }}
@@ -1270,8 +1280,8 @@ function SharedPostCard({
       style={{
         // Sans liseré (2026-08-21) : la citation se distingue par sa surface
         // teintée.
-        borderRadius: 10,
-        padding: 12,
+        borderRadius: "10px",
+        padding: "12px",
         display: "flex",
         flexDirection: "column",
         gap: 10,
@@ -1304,6 +1314,7 @@ function SharedPostCard({
       </div>
       {share.body.length > 0 ? <RichText body={share.body} onTag={onTag} onMention={onMention} /> : null}
       {share.media.length > 0 ? <PostMedia media={share.media} presentation={presentation} /> : null}
+      {share.hasEditorialArticle && PostArticleRenderer ? <PostArticleRenderer networkId={networkId} postId={share.postId} /> : null}
     </div>
   )
 }

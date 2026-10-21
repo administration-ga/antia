@@ -8,7 +8,7 @@ vi.mock("@antsia/api/network", () => ({ useNetwork: () => ({ networkId: "root", 
 vi.mock("@antsia/api/sign-out-everywhere", () => ({ isSigningOutEverywhere: () => false }))
 vi.mock("convex/react", () => ({ useConvexAuth: () => ({ isAuthenticated: true }), useMutation: () => vi.fn() }))
 vi.mock("@/components/member-chrome", () => ({ MemberPage: ({ children }: { children: import("react").ReactNode }) => <main>{children}</main> }))
-vi.mock("react-i18next", () => ({ useTranslation: () => ({ t: (key: string, options?: Record<string, unknown>) => options?.version ? `${key}:${options.version}` : key }) }))
+vi.mock("react-i18next", () => ({ useTranslation: () => ({ i18n: { resolvedLanguage: "fr" }, t: (key: string, options?: Record<string, unknown>) => options?.version ? `${key}:${options.version}` : key }) }))
 // P15 : l'aperçu des offres d'emploi garde ses propres tests ; ici, aucune offre reçue (écrit, non exécuté).
 vi.mock("@/components/jobs/member-shop-jobs-screen", () => ({ MemberShopJobsPreview: () => null }))
 vi.mock("./catalog-member-screen", () => ({ MemberCatalogPreview: () => <div data-testid="catalog-preview" /> }))

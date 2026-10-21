@@ -22,6 +22,7 @@
  *     effacer — l'identifiant reste réservé, republier rétablit.
  */
 
+import { themedActionStyle } from "../themed-action-style"
 import { api } from "@antsia/api/engine"
 import type { Id } from "@antsia/api/engine"
 import { useAuthenticatedConvexQuery } from "@antsia/api/hooks"
@@ -287,9 +288,9 @@ export function ProfilePublicationCard() {
           </Field>
           <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
             <Button
-              variant="ghost"
+              variant="outline"
               onClick={() => setEditing(false)}
-              style={RESEAU_SECONDARY_ACTION_STYLE}
+              style={themedActionStyle("cancel", "ghost", RESEAU_SECONDARY_ACTION_STYLE)}
             >
               {t("profilePublicationCard.editor.cancel")}
             </Button>
@@ -441,9 +442,9 @@ export function ProfilePublicationCard() {
           </Button>
           {person.avatar !== null ? (
             <Button
-              variant="ghost"
+              variant="danger"
               size="sm"
-              style={RESEAU_SECONDARY_ACTION_STYLE}
+              style={themedActionStyle("danger", "ghost", RESEAU_SECONDARY_ACTION_STYLE)}
               onClick={() => removeImage("avatar")}
             >
               {t("profilePublicationCard.actions.removeAvatar")}
@@ -451,9 +452,9 @@ export function ProfilePublicationCard() {
           ) : null}
           {person.cover !== null ? (
             <Button
-              variant="ghost"
+              variant="danger"
               size="sm"
-              style={RESEAU_SECONDARY_ACTION_STYLE}
+              style={themedActionStyle("danger", "ghost", RESEAU_SECONDARY_ACTION_STYLE)}
               onClick={() => removeImage("cover")}
             >
               {t("profilePublicationCard.actions.removeCover")}

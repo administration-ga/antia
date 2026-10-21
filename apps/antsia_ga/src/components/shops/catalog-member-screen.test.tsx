@@ -11,7 +11,7 @@ vi.mock("@antsia/api/engine", () => ({ api: { modules: { shops: { catalog: { lis
 vi.mock("@antsia/api/network", () => ({ useNetwork: () => ({ networkId: "root", personId: "reader" }) }))
 vi.mock("@antsia/api/hooks", () => ({ useAuthenticatedConvexQuery: mocks.query }))
 vi.mock("@/components/member-chrome", () => ({ MemberPage: ({ children }: { children: ReactNode }) => <main>{children}</main> }))
-vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }) }))
+vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }), useSearchParams: () => null }))
 vi.mock("convex/react", () => ({ useConvexAuth: () => ({ isAuthenticated: true }) }))
 vi.mock("@antsia/api/sign-out-everywhere", () => ({ isSigningOutEverywhere: () => false }))
 
@@ -29,7 +29,7 @@ describe("catalogue membre et slot reliés aux projections réelles", () => {
     const value = html(<MemberCatalogScreen handle="atelier" search={{ kind: "product", query: "sac", cursor: "page-2" }} />)
     expect(mocks.query).toHaveBeenCalledWith("list", { networkId: "root", handle: "atelier", kind: "product", query: "sac", paginationOpts: { cursor: "page-2", numItems: 12 } })
     expect(value).toContain("Sac artisanal")
-    expect(value).toContain("name=\"recherche\"")
+    expect(value).toContain("name=\"query\"")
     expect(value).toContain("Première page")
   })
   it("un refus ne conserve aucune offre provenant d'un DTO précédent", () => {
@@ -60,5 +60,24 @@ describe("catalogue membre et slot reliés aux projections réelles", () => {
     expect(html(<OfferPostSlot {...props} />)).toBe("")
     mocks.query.mockReturnValue({ data: catalogOfferFixture(), isError: true, isPending: false })
     expect(html(<OfferPostSlot {...props} />)).not.toContain("Sac artisanal")
+  })
+})
+
+
+describe("MP05d — catalogue membre filtré", () => {
+  it("transmet toutes les facettes et conserve le prochain lien même si la fenêtre est vide", () => {
+    mocks.query.mockReturnValue({ data: catalogPageFixture({ page: [], isDone: false, continueCursor: "next", filteredWindow: true }), isError: false, isPending: false, isFetching: false })
+    const search = { kind: "product" as const, collectionRef: "pro.ga:offer_collection:01JA00000000000000000000C1", category: ["fashion.women"], material: ["Lin", "Coton"], audience: ["women"] as Array<"women">, minPrice: 0, maxPrice: 25000, sort: "price_asc" as const, cursor: null }
+    const value = html(<MemberCatalogScreen handle="atelier" search={search} />)
+    expect(mocks.query).toHaveBeenCalledWith("list", { networkId: "root", handle: "atelier", kind: "product", collectionRef: search.collectionRef, category: search.category, material: ["Coton", "Lin"], audience: search.audience, minPrice: 0, maxPrice: 25000, sort: "price_asc", paginationOpts: { cursor: null, numItems: 12 } })
+    expect(value).toContain("categorie=fashion.women")
+    expect(value).toContain("matiere=Coton&amp;matiere=Lin")
+    expect(value).toContain("curseur=next")
+  })
+  it("annonce une indexation en cours sans présenter la fenêtre vide comme absence exhaustive", () => {
+    mocks.query.mockReturnValue({ data: catalogPageFixture({ page: [], indexStatus: "building" }), isError: false, isPending: false, isFetching: false })
+    const value = html(<MemberCatalogScreen handle="atelier" search={{ category: ["fashion"], cursor: null }} />)
+    expect(value).toContain("en cours d’indexation")
+    expect(value).not.toContain("Aucune offre disponible")
   })
 })

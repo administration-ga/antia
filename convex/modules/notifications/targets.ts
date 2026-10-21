@@ -16,7 +16,7 @@
  * Aucun autre genre n'a de destination typée : `null`, et l'écran garde la cible de son sujet commun.
  */
 import { isCommerceNotificationKind } from "@antsia/social-domain/commerceNotifications"
-import { CONTEXTUAL_KINDS, CONTEXTUAL_SIDES, isContextualNotificationKind } from "@antsia/social-domain/contextualMessaging"
+import { CONTEXTUAL_SUPPORTED_KINDS, CONTEXTUAL_SIDES, isContextualNotificationKind } from "@antsia/social-domain/contextualMessaging"
 import { DIASPORA_COMMUNITY_NOTICE_AUDIENCES, DIASPORA_COMMUNITY_NOTICE_OPENS, DIASPORA_NOTICE_AUDIENCES, DIASPORA_NOTICE_SUBJECT_KINDS, type NotificationOpenTarget } from "@antsia/social-domain/notificationOpenTarget"
 import { v } from "convex/values"
 
@@ -62,7 +62,7 @@ export const notificationOpenTargetValidator = v.union(
   v.object({
     kind: v.literal("contextualThread"),
     threadId: v.string(),
-    contextKind: literals(CONTEXTUAL_KINDS),
+    contextKind: literals(CONTEXTUAL_SUPPORTED_KINDS),
     objectId: v.string(),
     side: literals(CONTEXTUAL_SIDES),
     pageHandle: v.union(v.string(), v.null()),

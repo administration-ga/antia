@@ -161,4 +161,11 @@ describe("accueil ANTSIA — accès réel", () => {
     expect(mocks.authClient.emailOtp.sendVerificationOtp).toHaveBeenCalledTimes(1)
     expect(mocks.authClient.signIn.emailOtp).not.toHaveBeenCalled()
   })
+
+  it("MP01 : conserve la boutique visée sur le lien de création de compte", async () => {
+    const destination = { kind: "storefront" as const, handle: "atelier.ndong" }
+    await mount(<AccessHomeScreen specializedDestination={destination} />)
+    const mainLinks = Array.from(host.querySelectorAll("main a"), link => link.getAttribute("href"))
+    expect(mainLinks).toContain(routes.signIn("sign-up", undefined, undefined, undefined, destination))
+  })
 })

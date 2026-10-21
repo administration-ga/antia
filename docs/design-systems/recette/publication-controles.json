@@ -1,0 +1,62 @@
+{
+  "checkedAt": "2026-10-20T18:55:52.104363+00:00",
+  "deploymentId": "dpl_F2NAUaB5miGd7UeqPXv8MWjR2WRT",
+  "sourceCommit": "3507e4a264c0a135f0d07faa3b4c2432e814423f",
+  "health": {
+    "status": "ok",
+    "application": "antsia-ga",
+    "version": "3507e4a264c0a135f0d07faa3b4c2432e814423f",
+    "backend": "configured"
+  },
+  "css": {
+    "allSevenThemes": true,
+    "newLayoutClass": true,
+    "newReferenceToken": true,
+    "fontInter": true,
+    "bytes": 233164
+  },
+  "browser": [
+    {
+      "route": "/",
+      "width": 1440,
+      "mode": "dark",
+      "locale": "fr",
+      "overflow": false,
+      "bodyPx": 15,
+      "titlePx": 26,
+      "inputPx": 16
+    },
+    {
+      "route": "/",
+      "width": 390,
+      "mode": "light",
+      "locale": "fr",
+      "overflow": false,
+      "visibleHeaderLinks": [
+        "ANTSIA",
+        "Entrer"
+      ]
+    },
+    {
+      "route": "/",
+      "width": 834,
+      "mode": "light",
+      "locale": "en",
+      "overflow": false,
+      "title": "Make connections. Grow your network.",
+      "preview": "The origin feed"
+    },
+    {
+      "route": "/mentions-legales",
+      "width": 390,
+      "mode": "dark",
+      "locale": "fr",
+      "overflow": false,
+      "summaryOpens": true,
+      "sectionTitlePx": 20
+    }
+  ],
+  "memberRecipe": "Owner chose public-only verification after IDN requested a renewed login; no authenticated production theme matrix is claimed",
+  "runtimeLogs": "No entries returned by Vercel error query for this deployment",
+  "restored": "French and initial resolved dark mode; temporary IAB and Chrome viewport overrides reset"
+}

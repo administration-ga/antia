@@ -16,6 +16,28 @@ import frLexiconOverrides from "./overrides/u09-fr.json"
 import enLexiconOverrides from "./overrides/u09-en.json"
 import frCommerceExperience from "./locales/fr/commerceExperience.json"
 import enCommerceExperience from "./locales/en/commerceExperience.json"
+import frEditorial from "./locales/fr/editorial.json"
+import enEditorial from "./locales/en/editorial.json"
+import frEditorialPublic from "./locales/fr/editorialPublic.json"
+import enEditorialPublic from "./locales/en/editorialPublic.json"
+import frPersonalMeetings from "./locales/fr/personalMeetings.json"
+import enPersonalMeetings from "./locales/en/personalMeetings.json"
+import frProfessionals from "./locales/fr/professionals.json"
+import enProfessionals from "./locales/en/professionals.json"
+import frProfessionalPublic from "./locales/fr/professionalPublic.json"
+import enProfessionalPublic from "./locales/en/professionalPublic.json"
+import frPaymentPreparation from "./locales/fr/paymentPreparation.json"
+import enPaymentPreparation from "./locales/en/paymentPreparation.json"
+import frProviderPreparation from "./locales/fr/providerPreparation.json"
+import enProviderPreparation from "./locales/en/providerPreparation.json"
+import frProvider from "./locales/fr/provider.json"
+import enProvider from "./locales/en/provider.json"
+import frSpecializedSpaces from "./locales/fr/specializedSpaces.json"
+import enSpecializedSpaces from "./locales/en/specializedSpaces.json"
+import frActivityConfiguration from "./locales/fr/activityConfiguration.json"
+import enActivityConfiguration from "./locales/en/activityConfiguration.json"
+import frMarketplace from "./locales/fr/marketplace.json"
+import enMarketplace from "./locales/en/marketplace.json"
 import frSocialExperience from "./locales/fr/socialExperience.json"
 import enSocialExperience from "./locales/en/socialExperience.json"
 
@@ -50,6 +72,6 @@ function adapt(base: Record<string, Record<string, unknown>>, ...changes: Record
 // Chaque adaptation part des namespaces complets : les clés inchangées du
 // moteur et de l'application restent disponibles, au serveur comme au client.
 export const appResources: AppResources = {
-  fr: adapt({ ...engineResources.fr, antsia: frAntsia, memberNetwork: frMemberNetwork, publicNetwork: frPublicNetwork, shops: frShops, checkout: frCheckout, payment: frPayment, cart: frCart, purchases: frPurchases, jobs: frJobs, services: frServices, socialExperience: frSocialExperience, commerceExperience: frCommerceExperience }, frEngineOverrides, frProfileOverrides, frMessagesOverrides, frLexiconOverrides),
-  en: adapt({ ...engineResources.en, antsia: enAntsia, memberNetwork: enMemberNetwork, publicNetwork: enPublicNetwork, shops: enShops, checkout: enCheckout, payment: enPayment, cart: enCart, purchases: enPurchases, jobs: enJobs, services: enServices, socialExperience: enSocialExperience, commerceExperience: enCommerceExperience }, enEngineOverrides, enProfileOverrides, enMessagesOverrides, enLexiconOverrides),
+  fr: adapt({ ...engineResources.fr, antsia: frAntsia, memberNetwork: frMemberNetwork, publicNetwork: frPublicNetwork, shops: frShops, checkout: frCheckout, payment: frPayment, cart: frCart, purchases: frPurchases, jobs: frJobs, services: frServices, socialExperience: frSocialExperience, commerceExperience: frCommerceExperience, specializedSpaces: frSpecializedSpaces, activityConfiguration: frActivityConfiguration, marketplace: frMarketplace, provider: frProvider, providerPreparation: frProviderPreparation, paymentPreparation: frPaymentPreparation, professionalPublic: frProfessionalPublic, professionals: frProfessionals, personalMeetings: frPersonalMeetings, editorialPublic: frEditorialPublic, editorial: frEditorial }, frEngineOverrides, frProfileOverrides, frMessagesOverrides, frLexiconOverrides),
+  en: adapt({ ...engineResources.en, antsia: enAntsia, memberNetwork: enMemberNetwork, publicNetwork: enPublicNetwork, shops: enShops, checkout: enCheckout, payment: enPayment, cart: enCart, purchases: enPurchases, jobs: enJobs, services: enServices, socialExperience: enSocialExperience, commerceExperience: enCommerceExperience, specializedSpaces: enSpecializedSpaces, activityConfiguration: enActivityConfiguration, marketplace: enMarketplace, provider: enProvider, providerPreparation: enProviderPreparation, paymentPreparation: enPaymentPreparation, professionalPublic: enProfessionalPublic, professionals: enProfessionals, personalMeetings: enPersonalMeetings, editorialPublic: enEditorialPublic, editorial: enEditorial }, enEngineOverrides, enProfileOverrides, enMessagesOverrides, enLexiconOverrides),
 }

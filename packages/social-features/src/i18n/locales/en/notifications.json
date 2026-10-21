@@ -76,6 +76,7 @@
       "contextualClosed": "{{actor}} closed a request conversation.",
       "contextualClosedSystem": "A request conversation was closed.",
       "commerce": {
+        "followupUpdated": "Your service request has an update. Open it to review.",
         "quoteReceived": "A quote is waiting for your service request.",
         "quoteRevised": "A revised quote is waiting for your service request.",
         "bookingConfirmed": "Your appointment is confirmed by the professional.",

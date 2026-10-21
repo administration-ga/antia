@@ -143,6 +143,7 @@ export function StoriesTray({
 							onClick={() => onOpen(mine.author.handle)}
 						>
 							<StoryRing
+								presentation="rings"
 								state={drawnRingState("self", rings)}
 								displayName={mine.author.displayName ?? ""}
 								avatarUrl={mine.author.avatarUrl ?? myAvatarUrl}
@@ -151,11 +152,13 @@ export function StoriesTray({
 						{canCreate ? (
 							<button
 								type="button"
-								className="st-ring-plus st-ring-plus-button"
+								className="st-ring-plus-button"
 								aria-label={t("storiesTray.create")}
 								onClick={onCreate}
 							>
-								<Icon name="plus" size={13} />
+								<span className="st-ring-plus" aria-hidden="true">
+									<Icon name="plus" size={14} />
+								</span>
 							</button>
 						) : null}
 					</span>
@@ -176,11 +179,7 @@ export function StoriesTray({
 						<span className="st-ring-tile">
 							<span className="st-ring-self">
 								<span className="st-tray-disc">
-									{myAvatarUrl !== null ? (
-										<img className="st-tray-cover" src={myAvatarUrl} alt="" aria-hidden="true" />
-									) : (
-										<Icon name="user" size={24} />
-									)}
+									<OwnStoryPortrait key={myAvatarUrl} url={myAvatarUrl} />
 								</span>
 								<span className="st-ring-plus" aria-hidden="true">
 									<Icon name="plus" size={13} />
@@ -231,6 +230,7 @@ export function StoriesTray({
 							   reste dans `aria-label`). */
 							<span className="st-ring-tile">
 								<StoryRing
+									presentation="rings"
 									state={ring}
 									displayName={group.author.displayName ?? ""}
 									avatarUrl={group.author.avatarUrl}
@@ -300,4 +300,12 @@ export function StoriesTray({
 			})}
 		</div>
 	)
+}
+
+/** Sans série à ouvrir, « Vous » reste une entrée de création neutre. */
+function OwnStoryPortrait({ url }: { url: string | null }) {
+	const [failed, setFailed] = useState(false)
+	if (url === null || failed) return <Icon name="user" size={24} />
+	// eslint-disable-next-line @next/next/no-img-element -- moteur indépendant de Next : portrait déjà délivré par la garde.
+	return <img className="st-tray-cover" src={url} alt="" aria-hidden="true" onError={() => setFailed(true)} />
 }

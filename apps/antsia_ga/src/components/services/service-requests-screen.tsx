@@ -13,6 +13,7 @@ import { ShopFrame, ShopLink, useShopAction } from "@/components/shops/shop-ui"
 import { routes } from "@/lib/routes"
 import { BookingPanel, OrderPanel, QuotePanel } from "./service-request-panels"
 import { SERVICE_AGENDA_TIME_ZONE, SERVICE_REQUESTS_PAGE_SIZE, serviceDateTime, serviceReasonKey, serviceRequestStatus } from "./service-model"
+import { ServiceReviewNotice, useServiceReview } from "./service-intent-guard"
 
 function RequestsFailure({ retry }: { retry?: () => void }) {
   const { t } = useTranslation("services")
@@ -48,8 +49,8 @@ function RequestCard({ request }: { request: ServiceRequestDto }) {
   const { t, i18n } = useTranslation("services")
   const locale = i18n.resolvedLanguage ?? "fr"
   const status = serviceRequestStatus(request)
-  return <article className="grid gap-2 rounded-xl border border-border bg-card p-4 text-card-foreground">
-    <div className="flex flex-wrap items-start justify-between gap-2"><h2 className="break-words font-semibold">{request.offerTitle}</h2><span className="rounded-full border border-border px-3 py-1 text-xs">{t(`status.${status}`)}</span></div>
+  return <article className="grid gap-2 rounded-[var(--ui2-card-radius)] border border-[color:var(--esp-surface-border)] bg-card p-4 text-card-foreground">
+    <div className="flex flex-wrap items-start justify-between gap-2"><h2 className="mp-subtitle break-words">{request.offerTitle}</h2><span className="rounded-[var(--ui2-badge-radius)] border border-transparent bg-muted px-3 py-1 text-xs">{t(`status.${status}`)}</span></div>
     <p className="text-sm text-muted-foreground">{t(`modes.${request.mode}`)}</p>
     {request.booking ? <p className="text-sm">{t("requests.bookingAt", { start: serviceDateTime(request.booking.startAt, SERVICE_AGENDA_TIME_ZONE, locale), zone: SERVICE_AGENDA_TIME_ZONE })}</p> : null}
     {request.desiredDate ? <p className="text-sm">{t("requests.desiredDate", { date: request.desiredDate })}</p> : null}
@@ -78,9 +79,9 @@ function RequestDetail({ request }: { request: ServiceRequestDto }) {
   const { t, i18n } = useTranslation("services")
   const locale = i18n.resolvedLanguage ?? "fr"
   const status = serviceRequestStatus(request)
-  return <div className="grid gap-5">
+  return <div className="mp-page">
     <Card><div className="grid gap-2">
-      <h2 className="break-words text-xl font-semibold">{request.offerTitle}</h2>
+      <h2 className="mp-subtitle break-words">{request.offerTitle}</h2>
       <p className="text-sm text-muted-foreground">{t(`modes.${request.mode}`)}</p>
       <p role="status" className="font-medium">{t(`status.${status}`)}</p>
       <p className="text-sm">{t(`statusHint.${status}`)}</p>
@@ -108,17 +109,19 @@ function RequestControls({ request }: { request: ServiceRequestDto }) {
   const refresh = useAction(api.modules.shops.serviceActions.refresh)
   const retry = useAction(api.modules.shops.serviceActions.retry)
   const action = useShopAction()
+  const review = useServiceReview()
   const [message, setMessage] = useState<string | null>(null)
   const last = request.lastCommand
   return <Card><div className="grid gap-3">
+    <ServiceReviewNotice review={review} onReview={async () => await refresh({ networkId, requestRowId: request.requestRowId }) === "updated"} />
     {last ? <div className="grid gap-1">
       <p className="text-sm font-medium">{t("command.last", { kind: t(`commandKinds.${last.kind}`) })}</p>
-      <p className="text-sm">{t(`commandStates.${last.state}`)}</p>
+      <p className="text-sm">{t(last.kind === "quote_reject" && last.state === "accepted" ? "quotes.rejectedNow" : `commandStates.${last.state}`)}</p>
       {last.reason ? <p className="text-sm text-muted-foreground">{t(serviceReasonKey(last.reason))}</p> : null}
     </div> : null}
     <div className="flex flex-wrap gap-2">
-      {last?.state === "unknown" ? <Button pending={action.pending} disabled={!last.canRetry} onClick={() => { setMessage(null); void action.run(() => retry({ networkId, requestRowId: request.requestRowId }), (result) => setMessage(result.outcome === "request" ? `commandStates.${result.state}` : result.outcome === "refused" ? "command.retryRefused" : "common.unavailable")) }}>{t("command.check")}</Button> : null}
-      <Button variant="outline" pending={action.pending} onClick={() => { setMessage(null); void action.run(() => refresh({ networkId, requestRowId: request.requestRowId }), (result) => setMessage(`refresh.${result}`)) }}>{t("command.refresh")}</Button>
+      {last?.state === "unknown" ? <Button pending={action.pending} disabled={!last.canRetry || !review.online} onClick={() => { if (!navigator.onLine) return; setMessage(null); void action.run(async () => { const result = await refresh({ networkId, requestRowId: request.requestRowId }); if (!action.current() || !navigator.onLine || result === "unavailable") return null; return await retry({ networkId, requestRowId: request.requestRowId }) }, (result) => setMessage(result?.outcome === "request" ? last.kind === "quote_reject" && result.state === "accepted" ? "quotes.rejectedNow" : `commandStates.${result.state}` : result?.outcome === "refused" ? "command.retryRefused" : "common.unavailable")) }}>{t("command.check")}</Button> : null}
+      <Button variant="outline" pending={action.pending} disabled={!review.online} onClick={() => { if (!navigator.onLine) return; setMessage(null); void action.run(() => refresh({ networkId, requestRowId: request.requestRowId }), (result) => setMessage(`refresh.${result}`)) }}>{t("command.refresh")}</Button>
     </div>
     {last?.state === "unknown" && !last.canRetry ? <p className="text-xs text-muted-foreground">{t("command.inFlight")}</p> : null}
     {message ? <p role="status" className="text-sm">{t(message)}</p> : null}

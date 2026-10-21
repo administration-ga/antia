@@ -103,6 +103,7 @@
       "serviceReview": "Avis de prestation",
       "serviceReviewReply": "Réponse à un avis de prestation",
       "commerceOffer": "Offre de boutique",
+      "commerceStorefront": "Conditions de la boutique",
       "contextualMessage": "Message de mise en relation",
       "diasporaAidQuestion": "Question d’entraide DIASPORALE",
       "diasporaAidAnswer": "Réponse d’entraide DIASPORALE",
@@ -112,7 +113,11 @@
       "diasporaKitResource": "Ressource du kit d’arrivée DIASPORALE",
       "diasporaJobOffer": "Offre d’emploi DIASPORALE",
       "diasporaTalentProfile": "Profil de talent DIASPORALE",
-      "diasporaJobApplication": "Candidature DIASPORALE"
+      "diasporaJobApplication": "Candidature DIASPORALE",
+      "professionalProfile": "Profil professionnel",
+      "professionalCollaboration": "Demande de collaboration",
+      "editorialVersion": "Version d’article",
+      "editorialMedia": "Présentation du média"
     },
     "preview": "Extrait du contenu à relire",
     "previewBounded": "Extrait limité, accessible dans votre périmètre actuel.",

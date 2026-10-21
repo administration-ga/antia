@@ -34,7 +34,7 @@ export function FeedScreen({ filter = { kind: "personal" } }: { filter?: MemberF
   const adaptive = destinations && network.navigationLayout === "adaptive"
   if (filter.kind === "national") return <MemberDiscoveryFeed filter={filter} />
   if (filter.kind === "invalid") {
-    const invalid = <><h1 className="text-2xl font-semibold">{t("discovery.invalidTitle")}</h1><p role="alert">{t("discovery.invalidFilter")}</p><Link href={routes.nationalFeed()} className="inline-flex min-h-11 items-center self-start rounded-lg px-3 underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">{t("discovery.nationalTitle")}</Link></>
+    const invalid = <><h1 className="text-2xl font-semibold">{t("discovery.invalidTitle")}</h1><p role="alert">{t("discovery.invalidFilter")}</p><Link href={routes.nationalFeed()} className="inline-flex min-h-11 items-center self-start rounded-[var(--ui2-button-radius)] px-3 underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">{t("discovery.nationalTitle")}</Link></>
     if (destinations) return <MemberPage><div className="mx-auto flex w-full max-w-3xl flex-col gap-4">{invalid}</div></MemberPage>
     return <div className="min-h-dvh bg-background"><MemberTopBar /><main id="contenu" className="mx-auto flex max-w-3xl flex-col gap-4 p-6">{invalid}</main></div>
   }
@@ -42,10 +42,10 @@ export function FeedScreen({ filter = { kind: "personal" } }: { filter?: MemberF
     <div className={adaptive ? "flex [--antsia-workspace-height:100dvh] min-h-[var(--antsia-workspace-height,100dvh)] flex-col bg-background" : "flex [--antsia-workspace-height:100dvh] min-h-[var(--antsia-workspace-height,100dvh)] flex-col bg-background min-[960px]:h-[var(--antsia-workspace-height,100dvh)]"} style={{ "--antsia-workspace-height": demoWorkspaceHeight() } as CSSProperties}>
       <MemberTopBar onMobile="hidden" />
       {destinations ? null : <nav aria-label={t("nav.discover")} className="flex flex-wrap items-center gap-1 border-b border-border px-3 min-[960px]:hidden">
-        <Link href={routes.feedPreferences()} className="inline-flex min-h-11 items-center rounded-lg px-3 text-sm underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">{tApp("feedPreferences.title")}</Link>
-        <Link href={routes.nationalFeed()} className="inline-flex min-h-11 items-center rounded-lg px-3 text-sm underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">{t("nav.national")}</Link>
-        <Link href={routes.discover()} className="inline-flex min-h-11 items-center rounded-lg px-3 text-sm underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">{t("nav.discover")}</Link>
-        <Link href={routes.moderation()} className="inline-flex min-h-11 items-center rounded-lg px-3 text-sm underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">{t("nav.moderation")}</Link>
+        <Link href={routes.feedPreferences()} className="inline-flex min-h-11 items-center rounded-[var(--ui2-button-radius)] px-3 text-sm underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">{tApp("feedPreferences.title")}</Link>
+        <Link href={routes.nationalFeed()} className="inline-flex min-h-11 items-center rounded-[var(--ui2-button-radius)] px-3 text-sm underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">{t("nav.national")}</Link>
+        <Link href={routes.discover()} className="inline-flex min-h-11 items-center rounded-[var(--ui2-button-radius)] px-3 text-sm underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">{t("nav.discover")}</Link>
+        <Link href={routes.moderation()} className="inline-flex min-h-11 items-center rounded-[var(--ui2-button-radius)] px-3 text-sm underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">{t("nav.moderation")}</Link>
       </nav>}
       {/* La page porte son propre `<main>` (le volet ouvert) : cette enveloppe
           n'est que la cible du lien d'évitement. */}

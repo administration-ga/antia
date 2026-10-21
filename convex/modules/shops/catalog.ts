@@ -5,10 +5,10 @@ import { v } from "convex/values"
 import { networkQuery } from "../../lib/functions"
 import { canSeePostDoc } from "../posts/access"
 import { catalogOfferByHandle, listCatalog, resolvePostOffer } from "./catalogRead"
-import { catalogKindValidator, catalogListValidator, catalogOfferValidator } from "./catalogValidators"
+import { catalogFilterArgs, catalogListValidator, catalogOfferValidator } from "./catalogValidators"
 
 export const list = networkQuery({
-  args: { handle: v.string(), kind: v.optional(catalogKindValidator), collectionRef: v.optional(v.string()), query: v.optional(v.string()), paginationOpts: paginationOptsValidator }, returns: catalogListValidator,
+  args: { handle: v.string(), ...catalogFilterArgs, paginationOpts: paginationOptsValidator }, returns: catalogListValidator,
   handler: async (ctx, args) => await listCatalog(ctx, { root: ctx.rootNetwork, readerPersonId: ctx.person._id, network: ctx.network }, args),
 })
 export const offer = networkQuery({

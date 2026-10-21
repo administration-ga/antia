@@ -192,6 +192,25 @@ describe("MemberPage — les mêmes destinations que le fil, une coque d'appel i
     }
   })
 
+  it("MP01 : une route commerciale branche la coque métier sans rail ni barre sociale", () => {
+    state.adaptive = true
+    for (const pathname of [routes.storefront("atelier"), routes.shopCatalog("atelier"), routes.shopOffer("atelier", "pro.ga:offer:abc"), routes.serviceBooking("atelier", "pro.ga:offer:abc"), routes.provider("atelier"), routes.providerCatalog("atelier"), routes.providerOffer("atelier", "pro.ga:offer:abc")]) {
+      state.pathname = pathname.split("?")[0]!
+      for (const mobile of [null, false, true]) {
+        state.mobile = mobile
+        const html = renderToStaticMarkup(<MemberPage><p data-shop-content="">boutique</p></MemberPage>)
+        expect(html).toContain(pathname.startsWith("/prestataire/") || pathname.includes("/rendez-vous/") ? 'data-specialized-space="provider"' : 'data-specialized-space="shop"')
+        expect(html).not.toContain("data-rail")
+        expect(html).not.toContain("data-bar")
+        expect(html).not.toContain("data-post-sheet")
+        expect(html).not.toContain("data-story-sheet")
+        expect(html.match(/<main\b/g)).toHaveLength(1)
+        expect(html.match(/<nav\b/g)).toHaveLength(1)
+        expect(html.match(/data-shop-content=""/g)).toHaveLength(1)
+      }
+    }
+  })
+
   it("volets (retour arrière) : la page d'avant, sans rail, barre ni surface ajoutée", () => {
     state.navigation = "volets"
     const html = renderToStaticMarkup(<MemberPage><p>contenu</p></MemberPage>)

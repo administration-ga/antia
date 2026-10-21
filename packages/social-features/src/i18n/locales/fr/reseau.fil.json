@@ -144,7 +144,11 @@
   "reportContentDialog": {
     "title": {
       "publication": "Signaler cette publication",
-      "commentaire": "Signaler ce commentaire"
+      "commentaire": "Signaler ce commentaire",
+      "professionalProfile": "Signaler ce profil professionnel",
+      "professionalCollaboration": "Signaler cette demande de collaboration",
+      "editorialVersion": "Signaler cet article",
+      "editorialMedia": "Signaler ce média"
     },
     "description": "La plateforme instruit le signalement. L’auteur ne connaît pas votre identité.",
     "reasonLabel": "Motif",
@@ -294,7 +298,8 @@
       "publishFailed": "Le commentaire n'a pas pu être publié.",
       "removeFailed": "Le retrait n'a pas pu être enregistré.",
       "editFailed": "La modification n'a pas pu être enregistrée."
-    }
+    },
+    "closed": "Les nouveaux commentaires sont fermés. Les échanges déjà publiés restent consultables."
   },
   "postOverflowMenu": {
     "trigger": "Autres actions sur cette publication",

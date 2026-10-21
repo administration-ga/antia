@@ -3,6 +3,8 @@
     "label": "Navigation publique",
     "footer": "Informations et droits",
     "discover": "Explorer",
+    "provinces": "Provinces",
+    "createAccount": "Créer un compte",
     "transparency": "Transparence",
     "enter": "Entrer",
     "myFeed": "Accueil",
@@ -128,6 +130,7 @@
   "legal": {
     "eyebrow": "Comprendre {{brand}}",
     "draft": "Informations sur le service — mise à jour le 21 octobre 2026.",
+    "contents": "Sur cette page",
     "sources": "Textes de référence",
     "apdpvp": "APDPVP : textes et décisions",
     "journal": "Journal officiel : loi n° 025/2023 du 12 juillet 2023",

@@ -3,6 +3,8 @@
     "label": "Public navigation",
     "footer": "Information and rights",
     "discover": "Explore",
+    "provinces": "Provinces",
+    "createAccount": "Create an account",
     "transparency": "Transparency",
     "enter": "Sign in",
     "myFeed": "Home",
@@ -128,6 +130,7 @@
   "legal": {
     "eyebrow": "Understanding {{brand}}",
     "draft": "Service information — updated on 21 October 2026.",
+    "contents": "On this page",
     "sources": "Reference texts",
     "apdpvp": "APDPVP: texts and decisions",
     "journal": "Official Journal: Law No. 025/2023 of 12 July 2023",

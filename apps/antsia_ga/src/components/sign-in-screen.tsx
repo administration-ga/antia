@@ -16,7 +16,8 @@ import { browserAppPath } from "@/lib/app-path"
 import { parsePublicPostContinuation } from "@/lib/public-post-continuation"
 import { parseNotificationReference } from "@/lib/notification-open"
 import { parseShopContactContinuation, type ShopContactContinuation } from "@/lib/shop-contact-continuation"
-import { routes } from "@/lib/routes"
+import { parseSpecializedDestination, type SpecializedDestination } from "@/lib/specialized-navigation"
+import { routes, specializedDestinationPath } from "@/lib/routes"
 import { fencedIdentityEntryClient } from "@/lib/session-bridge-client"
 
 const entryClient = fencedIdentityEntryClient(authClient)
@@ -30,13 +31,14 @@ function DevCodeHint({ identifier }: { identifier: string }) {
 }
 
 /** Même porte sur l'accueil et /entrer ; le fournisseur garde toute l'autorité. */
-export function SignInCard({ compact = false, intent = "sign-in", signOutIncomplete = false, publicPostId, notificationReference, shopContact }: {
+export function SignInCard({ compact = false, intent = "sign-in", signOutIncomplete = false, publicPostId, notificationReference, shopContact, specializedDestination }: {
   compact?: boolean
   intent?: "sign-in" | "sign-up"
   signOutIncomplete?: boolean
   publicPostId?: string
   notificationReference?: string
   shopContact?: ShopContactContinuation
+  specializedDestination?: SpecializedDestination
 }) {
   const { t } = useTranslation("antsia")
   const { t: tIdentity } = useTranslation("identity")
@@ -47,14 +49,16 @@ export function SignInCard({ compact = false, intent = "sign-in", signOutIncompl
   const continuationPostId = parsePublicPostContinuation(publicPostId)
   const notification = continuationPostId ? undefined : parseNotificationReference(notificationReference)
   const contact = continuationPostId || notification ? undefined : parseShopContactContinuation(shopContact)
-  const destination = continuationPostId ? routes.memberPost(continuationPostId) : notification ? routes.openNotification(notification) : contact ? routes.shopContact(contact.handle, contact.offerRef) : routes.feed()
+  const space = continuationPostId || notification || contact ? undefined : parseSpecializedDestination(specializedDestination)
+  const destination = continuationPostId ? routes.memberPost(continuationPostId) : notification ? routes.openNotification(notification) : contact ? routes.shopContact(contact.handle, contact.offerRef) : specializedDestinationPath(space) ?? routes.feed()
+  const welcomePath = routes.welcome(continuationPostId, notification, contact, space)
 
   useEffect(() => {
     if (signOutIncomplete) return
     if (session.status === "restricted") router.replace(routes.personalControls())
     else if (session.status === "member") router.replace(destination)
-    else if (session.status === "welcome") router.replace(routes.welcome(continuationPostId, notification, contact))
-  }, [session.status, signOutIncomplete, continuationPostId, notification, contact?.handle, contact?.offerRef, destination, router])
+    else if (session.status === "welcome") router.replace(welcomePath)
+  }, [session.status, signOutIncomplete, destination, welcomePath, router])
 
   if (session.status === "loading" || (!signOutIncomplete && (session.status === "restricted" || session.status === "member" || session.status === "welcome"))) return <CenteredStatus label={t("session.checking")} />
 
@@ -65,8 +69,8 @@ export function SignInCard({ compact = false, intent = "sign-in", signOutIncompl
         key={intent}
         authClient={entryClient}
         configuration={configuration}
-        callbackURL={browserAppPath(routes.welcome(continuationPostId, notification, contact))}
-        onAuthenticated={() => window.location.assign(browserAppPath(routes.welcome(continuationPostId, notification, contact)))}
+        callbackURL={browserAppPath(welcomePath)}
+        onAuthenticated={() => window.location.assign(browserAppPath(welcomePath))}
         renderLocalCode={(identifier) => <DevCodeHint identifier={identifier} />}
         presentation={compact ? "compact" : "default"}
         headingLevel={compact ? 2 : 1}
@@ -75,7 +79,7 @@ export function SignInCard({ compact = false, intent = "sign-in", signOutIncompl
       />
       <div className="mt-5 border-t border-border pt-5 text-center">
         {!signUp ? <p className="mb-3 text-sm text-muted-foreground">{t("access.newHere")}</p> : null}
-        <Link href={routes.signIn(signUp ? undefined : "sign-up", continuationPostId, notification, contact)} prefetch={false} style={compact && !signUp ? { background: "var(--esp-green-strong)", color: "var(--on-fill)" } : undefined} className={compact ? `inline-flex min-h-12 w-full items-center justify-center rounded-lg px-5 py-3 text-base font-semibold transition-opacity hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring focus-visible:outline-offset-2 sm:w-auto ${signUp ? "border border-border text-primary" : ""}` : "inline-flex min-h-11 items-center justify-center rounded-lg px-4 font-medium text-primary underline underline-offset-4 focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring"}>
+        <Link href={routes.signIn(signUp ? undefined : "sign-up", continuationPostId, notification, contact, space)} prefetch={false} style={compact && !signUp ? { background: "var(--esp-green-strong)", color: "var(--on-fill)" } : undefined} className={compact ? `inline-flex min-h-12 w-full items-center justify-center rounded-lg px-5 py-3 text-base font-semibold transition-opacity hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring focus-visible:outline-offset-2 sm:w-auto ${signUp ? "border border-border text-primary" : ""}` : "inline-flex min-h-11 items-center justify-center rounded-lg px-4 font-medium text-primary underline underline-offset-4 focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring"}>
           {t(signUp ? "access.existingAccount" : "access.createAccount")}
         </Link>
         {!signUp ? <p className="mt-3 text-xs leading-relaxed text-muted-foreground">{t("access.accountPromise")}</p> : null}

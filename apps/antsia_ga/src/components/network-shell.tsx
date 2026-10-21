@@ -15,11 +15,13 @@ import { useTranslation } from "react-i18next"
 
 import { CenteredStatus } from "@/components/shared/controls"
 import { type SessionState, useSessionState } from "@/components/use-session-state"
-import { engineRoutes, routes, shopContactFromLocation, usageScreenForPath } from "@/lib/routes"
+import { engineRoutes, routes, shopContactFromLocation, specializedDestinationFromLocation, usageScreenForPath } from "@/lib/routes"
 import { NOTIFICATION_REFERENCE_PARAM, parseNotificationReference } from "@/lib/notification-open"
 import { usageConfiguration, useUsagePermission } from "./analytics-permission"
 import { OfferPostSlot } from "./shops/offer-post-slot"
+import { ArticlePostSlot } from "./editorial/article-post-slot"
 import { MemberNavigationStyles } from "./member-navigation-styles"
+import { SpecializedNavigationBoundary } from "./specialized-navigation"
 
 /**
  * La charte d'origine d'antsia.ga, redéclarée par les surfaces portalisées (dock,
@@ -95,23 +97,24 @@ export function NetworkShell({ children }: { children: ReactNode }) {
     const references = pathname === routes.openNotification() ? new URLSearchParams(window.location.search).getAll(NOTIFICATION_REFERENCE_PARAM) : []
     const notification = references.length === 1 ? parseNotificationReference(references[0]) : undefined
     const contact = shopContactFromLocation(pathname, window.location.search)
+    const specialized = specializedDestinationFromLocation(pathname, window.location.search)
     if (session.status === "restricted") router.replace(routes.personalControls())
-    else if (session.status === "signedOut") router.replace(routes.signIn(undefined, undefined, notification, contact))
-    else if (session.status === "welcome") router.replace(routes.welcome(undefined, notification, contact))
+    else if (session.status === "signedOut") router.replace(routes.signIn(undefined, undefined, notification, contact, specialized))
+    else if (session.status === "welcome") router.replace(routes.welcome(undefined, notification, contact, specialized))
   }, [session.status, pathname, router])
 
   if (session.status !== "member") return <CenteredStatus label={t("session.checking")} />
 
   return (
     <NextRouterAdapter>
-      <NetworkProvider networkId={session.root._id} slug={session.root.slug} storageNamespace={demoStorageNamespace()} personId={session.person._id} charte={appearance?.charte ?? CHARTE} routes={engineRoutes} liveAvailable navigation="destinations" navigationLayout="adaptive" navigationLabels={{ shops: t("memberNetwork:commerce.shops"), clips: t("socialExperience:clips") }} postPresentation="charte" feedPresentation="immersive" storiesPresentation="rings" wordmark={BRAND_NAME} PostOfferRenderer={OfferPostSlot}>
+      <NetworkProvider networkId={session.root._id} slug={session.root.slug} storageNamespace={demoStorageNamespace()} personId={session.person._id} charte={appearance?.charte ?? CHARTE} routes={engineRoutes} liveAvailable navigation="destinations" navigationLayout="adaptive" navigationLabels={{ shops: t("marketplace:title"), clips: t("socialExperience:clips") }} postPresentation="charte" feedPresentation="immersive" storiesPresentation="rings" wordmark={BRAND_NAME} PostOfferRenderer={OfferPostSlot} PostArticleRenderer={ArticlePostSlot}>
         <MemberSessionContext.Provider value={session}>
           <PostHogProvider configuration={usageConfiguration} consented={!permission.paused && session.person.consentsInForce.includes("usage_analytics")} screen={usageScreenForPath(pathname)} networkSlug={session.root.slug} locale={i18n.resolvedLanguage === "en" ? "en" : "fr"}>
             <MemberNavigationStyles />
             <CommunicationShell />
             <IcomListSessionBoundary />
             <FeedReturnSessionBoundary />
-            <MediaPlaybackProvider>{children}</MediaPlaybackProvider>
+            <MediaPlaybackProvider><SpecializedNavigationBoundary owner={{ networkId: session.root._id, personId: session.person._id }}>{children}</SpecializedNavigationBoundary></MediaPlaybackProvider>
           </PostHogProvider>
         </MemberSessionContext.Provider>
       </NetworkProvider>

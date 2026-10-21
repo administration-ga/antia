@@ -10,7 +10,7 @@
  * À la réouverture des contrôles : `bunx vitest run --config convex/vitest.config.ts modules/contextualMessaging`.
  */
 import { engineErrorCode, engineErrorRule } from "@antsia/social-contracts/errors"
-import { CONTEXTUAL_KINDS } from "@antsia/social-domain/contextualMessaging"
+import { CONTEXTUAL_SUPPORTED_KINDS } from "@antsia/social-domain/contextualMessaging"
 import { makeFunctionReference } from "convex/server"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
@@ -52,7 +52,7 @@ const fakes = vi.hoisted(() => {
   })
   return {
     objects,
-    registry: { diasporaServiceRequest: resolver("diasporaServiceRequest"), diasporaMentoring: resolver("diasporaMentoring"), diasporaJobApplication: resolver("diasporaJobApplication") },
+    registry: { diasporaServiceRequest: resolver("diasporaServiceRequest"), diasporaMentoring: resolver("diasporaMentoring"), diasporaJobApplication: resolver("diasporaJobApplication"), professionalCollaboration: resolver("professionalCollaboration") },
   }
 })
 
@@ -128,7 +128,7 @@ async function fixture() {
     const id = await ctx.db.insert("pages", { networkId: root, handle: "call-salon", name: "Salon des appels", ownerKind: "company", trust: "community", trustRank: 1, visibility: "network", onRoot: true, status: "active", createdByPersonId: admin.personId, searchText: "salon appels", createdAt: NOW, updatedAt: NOW })
     await ctx.db.insert("pageSignatories", { networkId: root, pageId: id, personId: admin.personId, role: "admin", acceptedAt: NOW, createdAt: NOW, updatedAt: NOW })
     await ctx.db.insert("pageSignatories", { networkId: root, pageId: id, personId: teammate.personId, role: "signatory", acceptedAt: NOW, createdAt: NOW, updatedAt: NOW })
-    for (const kind of CONTEXTUAL_KINDS) await ctx.db.insert("contextualPolicies", { networkId: root, kind, enabled: true, updatedAt: NOW })
+    for (const kind of CONTEXTUAL_SUPPORTED_KINDS) await ctx.db.insert("contextualPolicies", { networkId: root, kind, enabled: true, updatedAt: NOW })
     return id
   })
   return { t, root, requester, admin, teammate, mentor, stranger, pageId }

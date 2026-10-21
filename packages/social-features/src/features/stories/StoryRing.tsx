@@ -34,6 +34,8 @@ export interface StoryRingProps {
 	/** La vignette de la story la plus récente ; à défaut, l'avatar. */
 	coverUrl?: string | null
 	avatarUrl?: string | null
+	/** Les tons décoratifs du nom public ne concernent que les médaillons. */
+	presentation?: "cards" | "rings"
 }
 
 export function StoryRing({
@@ -41,6 +43,7 @@ export function StoryRing({
 	displayName,
 	coverUrl,
 	avatarUrl,
+	presentation = "cards",
 }: StoryRingProps) {
 	// La COUVERTURE d'abord : c'est ce que la personne vient de publier, et
 	// c'est ce qui donne envie d'ouvrir. L'avatar n'est qu'un repli — une

@@ -76,6 +76,7 @@
       "contextualClosed": "{{actor}} a clos une mise en relation.",
       "contextualClosedSystem": "Une mise en relation a été close.",
       "commerce": {
+        "followupUpdated": "Votre demande de service a une mise à jour. Ouvrez-la pour la relire.",
         "quoteReceived": "Un devis vous attend pour votre demande de service.",
         "quoteRevised": "Un devis révisé vous attend pour votre demande de service.",
         "bookingConfirmed": "Votre rendez-vous est confirmé par le professionnel.",

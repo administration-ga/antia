@@ -78,6 +78,28 @@ beforeEach(() => {
 })
 afterEach(() => vi.restoreAllMocks())
 
+describe("MP13 : aperçu éditorial injecté", () => {
+  it.each(["classic", "media", "charte"] as const)("rend un article sans corps dans la présentation %s", presentation => {
+    const post = { ...base, body: "", media: [], hasEditorialArticle: true }
+    renderWithEngine(<PostCard post={post} now={NOW} />, { postPresentation: presentation, PostArticleRenderer: ({ postId }) => <a href={`/article/${postId}`}>Article courant</a> })
+    expect(screen.getByRole("link", { name: "Article courant" }).getAttribute("href")).toBe(`/article/${post._id}`)
+  })
+
+  it("rend la référence de l'original partagé au lieu de celle du partageur", () => {
+    const post: PostCardPost = { ...base, media: [], share: { available: true, postId: "posts_original" as never, page: null, author: { displayName: "Rédaction", handle: "journal", avatarUrl: null }, body: "", media: [], publishedAt: NOW, hasEditorialArticle: true } }
+    renderWithEngine(<PostCard post={post} now={NOW} />, { postPresentation: "charte", PostArticleRenderer: ({ postId }) => <a href={`/article/${postId}`}>Article courant</a> })
+    expect(screen.getByRole("link", { name: "Article courant" }).getAttribute("href")).toBe("/article/posts_original")
+  })
+
+  it("garde la surface historique sans opt-in et ne rend pas l'original retiré", () => {
+    const view = renderWithEngine(<PostCard post={{ ...base, hasEditorialArticle: true }} now={NOW} />)
+    expect(screen.queryByRole("link", { name: "Article courant" })).toBeNull()
+    view.unmount()
+    renderWithEngine(<PostCard post={{ ...base, share: { available: false } }} now={NOW} />, { PostArticleRenderer: () => <a href="/article">Article courant</a> })
+    expect(screen.queryByRole("link", { name: "Article courant" })).toBeNull()
+  })
+})
+
 describe("PostCard — présentation « charte » (ADR-0028)", () => {
   it("en ANTSIA adaptive, place média et actions avant la légende, avec l'audience visible", () => {
     const view = renderWithEngine(<PostCard post={base} now={NOW} />, {
