@@ -1,0 +1,46 @@
+{
+  "source": "2966fea",
+  "reason": "Three tokens consumed by approved social components absent from main contract; exact published base and seven theme values only",
+  "files": {
+    "packages/ui/src/styles/charte.css": {
+      "--esp-content-font-size": "initial",
+      "--ui2-button-outline-fg": "initial",
+      "--esp-primitive-surface-border": "initial"
+    },
+    "packages/ui/src/themes/antsia.css": {
+      "--esp-content-font-size": "15px",
+      "--ui2-button-outline-fg": "var(--foreground)",
+      "--esp-primitive-surface-border": "var(--esp-surface-border)"
+    },
+    "packages/ui/src/themes/antsia-corail.css": {
+      "--esp-content-font-size": "15px",
+      "--ui2-button-outline-fg": "var(--foreground)",
+      "--esp-primitive-surface-border": "var(--esp-surface-border)"
+    },
+    "packages/ui/src/themes/antsia-electrique.css": {
+      "--esp-content-font-size": "15px",
+      "--ui2-button-outline-fg": "var(--foreground)",
+      "--esp-primitive-surface-border": "var(--esp-surface-border)"
+    },
+    "packages/ui/src/themes/antsia-foret.css": {
+      "--esp-content-font-size": "15px",
+      "--ui2-button-outline-fg": "var(--foreground)",
+      "--esp-primitive-surface-border": "var(--esp-surface-border)"
+    },
+    "packages/ui/src/themes/antsia-lagon.css": {
+      "--esp-content-font-size": "15px",
+      "--ui2-button-outline-fg": "var(--foreground)",
+      "--esp-primitive-surface-border": "var(--esp-surface-border)"
+    },
+    "packages/ui/src/themes/antsia-sable.css": {
+      "--esp-content-font-size": "15px",
+      "--ui2-button-outline-fg": "var(--foreground)",
+      "--esp-primitive-surface-border": "var(--esp-surface-border)"
+    },
+    "packages/ui/src/themes/antsia-soleil.css": {
+      "--esp-content-font-size": "15px",
+      "--ui2-button-outline-fg": "var(--foreground)",
+      "--esp-primitive-surface-border": "var(--esp-surface-border)"
+    }
+  }
+}

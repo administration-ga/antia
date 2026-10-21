@@ -25,11 +25,13 @@ import frJobs from "./locales/fr/jobs.json"
 import enJobs from "./locales/en/jobs.json"
 import frServices from "./locales/fr/services.json"
 import enServices from "./locales/en/services.json"
+import frSocialExperience from "./locales/fr/socialExperience.json"
+import enSocialExperience from "./locales/en/socialExperience.json"
 
 /** Espace de noms de l'application. */
 export const APP_NAMESPACE = "antsia"
 
 export const appResources: AppResources = {
-  fr: { antsia: frAntsia, memberNetwork: frMemberNetwork, publicNetwork: frPublicNetwork, shops: frShops, checkout: frCheckout, payment: frPayment, cart: frCart, purchases: frPurchases, jobs: frJobs, services: frServices },
-  en: { antsia: enAntsia, memberNetwork: enMemberNetwork, publicNetwork: enPublicNetwork, shops: enShops, checkout: enCheckout, payment: enPayment, cart: enCart, purchases: enPurchases, jobs: enJobs, services: enServices },
+  fr: { antsia: frAntsia, memberNetwork: frMemberNetwork, publicNetwork: frPublicNetwork, shops: frShops, checkout: frCheckout, payment: frPayment, cart: frCart, purchases: frPurchases, jobs: frJobs, services: frServices, socialExperience: frSocialExperience },
+  en: { antsia: enAntsia, memberNetwork: enMemberNetwork, publicNetwork: enPublicNetwork, shops: enShops, checkout: enCheckout, payment: enPayment, cart: enCart, purchases: enPurchases, jobs: enJobs, services: enServices, socialExperience: enSocialExperience },
 }

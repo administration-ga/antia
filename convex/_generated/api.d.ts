@@ -324,6 +324,7 @@ import type * as modules_posts_feedMaterialization from "../modules/posts/feedMa
 import type * as modules_posts_feedPolicy from "../modules/posts/feedPolicy.js";
 import type * as modules_posts_feedRead from "../modules/posts/feedRead.js";
 import type * as modules_posts_feedTables from "../modules/posts/feedTables.js";
+import type * as modules_posts_mediaFeed from "../modules/posts/mediaFeed.js";
 import type * as modules_posts_nativeAuthor from "../modules/posts/nativeAuthor.js";
 import type * as modules_posts_postNotify from "../modules/posts/postNotify.js";
 import type * as modules_posts_postWrite from "../modules/posts/postWrite.js";
@@ -736,6 +737,7 @@ declare const fullApi: ApiFromModules<{
   "modules/posts/feedPolicy": typeof modules_posts_feedPolicy;
   "modules/posts/feedRead": typeof modules_posts_feedRead;
   "modules/posts/feedTables": typeof modules_posts_feedTables;
+  "modules/posts/mediaFeed": typeof modules_posts_mediaFeed;
   "modules/posts/nativeAuthor": typeof modules_posts_nativeAuthor;
   "modules/posts/postNotify": typeof modules_posts_postNotify;
   "modules/posts/postWrite": typeof modules_posts_postWrite;

@@ -1,0 +1,87 @@
+[
+  {
+    "path": "ajout-profil.png",
+    "bytes": 37527,
+    "sha256": "be3d0f263b59b55eae0a1a1c21f7eef246589fe849350f0b7283dd3c869dbb3e"
+  },
+  {
+    "path": "boutique-1440.png",
+    "bytes": 135848,
+    "sha256": "82797ac1ab4a006440142d14ace41248b16141c26b31f2e9c80aac844da27fcc"
+  },
+  {
+    "path": "boutique-390.png",
+    "bytes": 47980,
+    "sha256": "3f6c0d437c94a3f142a71552b9d22b5f8202930c4f4804768608bafdf7b5aaa5"
+  },
+  {
+    "path": "boutique-834.png",
+    "bytes": 103833,
+    "sha256": "da92326c68779d002bf9d1fdf86b0af7f7ba9fa6d00e7ecf324e3bfdc1350abe"
+  },
+  {
+    "path": "catalogue-mobile.png",
+    "bytes": 49757,
+    "sha256": "090c31d93c491e6134ea6c53eadb7a6c68cafbbf5c0d3001f313ae02fdcf17cd"
+  },
+  {
+    "path": "catalogue-tablette.png",
+    "bytes": 108549,
+    "sha256": "e5435af02633dcc47be1c55049db379fcb22d98eece321f2bd83878f649034bb"
+  },
+  {
+    "path": "console-locale.json",
+    "bytes": 914,
+    "sha256": "d4d5b2c0f309cf635977c9adf05ddc41418533e23e371bfb74579d3340b278d6"
+  },
+  {
+    "path": "fil-bureau-apres-acceptation.png",
+    "bytes": 482949,
+    "sha256": "4d546c5637ee18a4ac81213700c883955b9e46a0689b25c79d33076bd5cfa7b6"
+  },
+  {
+    "path": "local-after.json",
+    "bytes": 325,
+    "sha256": "18c4a62dd2fb314d7da1abc97d09c6b50c909c0c29d70bd45b47def0d9f3a879"
+  },
+  {
+    "path": "local-before.json",
+    "bytes": 7065,
+    "sha256": "d9147e0f4f0c283e51435baf1cf3256f5911410764a1fa69ce601ade2f0eb2b4"
+  },
+  {
+    "path": "notifications-mobile.png",
+    "bytes": 158766,
+    "sha256": "1c315c865ea7b2e10c0d99048d59c04f7fed17ed3c5dfe814631512722295217"
+  },
+  {
+    "path": "offre-mobile.png",
+    "bytes": 37416,
+    "sha256": "c3f9fedad2d3cd3a599ef19b5b16cf36527bc094e57eac29169bd89e1205ae3f"
+  },
+  {
+    "path": "responsive.json",
+    "bytes": 1555,
+    "sha256": "c2715fabf495ecd264d90c1ccce20852f5defd3f1f42149da2654984989f76f0"
+  },
+  {
+    "path": "suggestions-1440.png",
+    "bytes": 132053,
+    "sha256": "e8039350a13f0ce1f4578b3a55e1e2c19924321ad0ef44e6c65c0b4bb7bdbc94"
+  },
+  {
+    "path": "suggestions-390.png",
+    "bytes": 36051,
+    "sha256": "eb272c4285cfc817cba1f2f723082547c6a581cdff277f9d2264b769194daad3"
+  },
+  {
+    "path": "suggestions-834.png",
+    "bytes": 74162,
+    "sha256": "cd561cd3d48f62fd74ddc87cf87dd0d5c8b78814fedcd3a2e7f44d58351530a4"
+  },
+  {
+    "path": "summary.json",
+    "bytes": 1625,
+    "sha256": "f11a2f40c729b4c8fc340e64b65d907f407e29f66f4702771f6d221c65aa7af1"
+  }
+]

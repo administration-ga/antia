@@ -1,0 +1,152 @@
+{
+  "status": "applied-candidate-only-per-coordinator-followup",
+  "sourcePublishedCommit": "2966feaafc0f4c86176845c3ba4c07d5a7297422",
+  "sourceParent": "05d84873f400df267d5e9ed46b51ea160af67f10",
+  "candidate": "/Users/okatech/Library/Caches/antsia-merge-pr22-20261021/ECOSYSTEMES/ANTSIA",
+  "files": [
+    {
+      "path": "apps/antsia_ga/src/app/(membre)/clips/page.tsx",
+      "new": true,
+      "beforeSha256": null,
+      "afterSha256": "b0e341c9ba606180c60a555266159550148db6818170cce13b6bc78862015195",
+      "publishedSourceSha256": "b0e341c9ba606180c60a555266159550148db6818170cce13b6bc78862015195",
+      "exactPublishedBlob": true,
+      "scope": "Exact published module/test or translation namespace; bounded prerequisite for Clips/invitations"
+    },
+    {
+      "path": "apps/antsia_ga/src/components/discovery/media-discovery-screen.tsx",
+      "new": true,
+      "beforeSha256": null,
+      "afterSha256": "7c449ddbd8002d8d9e072678369347e4a181c5971b8f154708b174f87aa28cb2",
+      "publishedSourceSha256": "7c449ddbd8002d8d9e072678369347e4a181c5971b8f154708b174f87aa28cb2",
+      "exactPublishedBlob": true,
+      "scope": "Exact published module/test or translation namespace; bounded prerequisite for Clips/invitations"
+    },
+    {
+      "path": "apps/antsia_ga/src/components/discovery/media-discovery-styles.tsx",
+      "new": true,
+      "beforeSha256": null,
+      "afterSha256": "b3e66cfaca18fda30da1859286a6c26502a8fa89d3823b67f610c6d229cdf48c",
+      "publishedSourceSha256": "b3e66cfaca18fda30da1859286a6c26502a8fa89d3823b67f610c6d229cdf48c",
+      "exactPublishedBlob": true,
+      "scope": "Exact published module/test or translation namespace; bounded prerequisite for Clips/invitations"
+    },
+    {
+      "path": "apps/antsia_ga/src/components/discovery/media-discovery-screen.test.tsx",
+      "new": true,
+      "beforeSha256": null,
+      "afterSha256": "eb55a4ccad587fab52520f42dd03b1d7a4f7bac154c805905a7395c4b2105f03",
+      "publishedSourceSha256": "eb55a4ccad587fab52520f42dd03b1d7a4f7bac154c805905a7395c4b2105f03",
+      "exactPublishedBlob": true,
+      "scope": "Exact published module/test or translation namespace; bounded prerequisite for Clips/invitations"
+    },
+    {
+      "path": "apps/antsia_ga/src/i18n/locales/fr/socialExperience.json",
+      "new": true,
+      "beforeSha256": null,
+      "afterSha256": "1e5cf30158a163cb38fe4370e9bc990c624a5f07dbf972ed280eea2ebb5a1e76",
+      "publishedSourceSha256": "1e5cf30158a163cb38fe4370e9bc990c624a5f07dbf972ed280eea2ebb5a1e76",
+      "exactPublishedBlob": true,
+      "scope": "Exact published module/test or translation namespace; bounded prerequisite for Clips/invitations"
+    },
+    {
+      "path": "apps/antsia_ga/src/i18n/locales/en/socialExperience.json",
+      "new": true,
+      "beforeSha256": null,
+      "afterSha256": "d93738ff948b945f3987717f9169152005bc5061490ca9e5f3957c092698b1e7",
+      "publishedSourceSha256": "d93738ff948b945f3987717f9169152005bc5061490ca9e5f3957c092698b1e7",
+      "exactPublishedBlob": true,
+      "scope": "Exact published module/test or translation namespace; bounded prerequisite for Clips/invitations"
+    },
+    {
+      "path": "convex/modules/posts/mediaFeed.ts",
+      "new": true,
+      "beforeSha256": null,
+      "afterSha256": "0f1d953946e8d6d203e8e7c1405adb96cce7d0a725f3ed9413b427d0a9d061b2",
+      "publishedSourceSha256": "0f1d953946e8d6d203e8e7c1405adb96cce7d0a725f3ed9413b427d0a9d061b2",
+      "exactPublishedBlob": true,
+      "scope": "Exact published module/test or translation namespace; bounded prerequisite for Clips/invitations"
+    },
+    {
+      "path": "convex/modules/posts/mediaFeed.test.ts",
+      "new": true,
+      "beforeSha256": null,
+      "afterSha256": "e3e7b4fde0d3ce4fda448c04ba8095c37241b364a689786e905b40ecd0a09292",
+      "publishedSourceSha256": "e3e7b4fde0d3ce4fda448c04ba8095c37241b364a689786e905b40ecd0a09292",
+      "exactPublishedBlob": true,
+      "scope": "Exact published module/test or translation namespace; bounded prerequisite for Clips/invitations"
+    },
+    {
+      "path": "convex/modules/graph/connection-rate-limit.test.ts",
+      "new": true,
+      "beforeSha256": null,
+      "afterSha256": "0fc537620c49dba552f94ad641b0f0b026749c5c46721bf0ed70c0a712c361aa",
+      "publishedSourceSha256": "0fc537620c49dba552f94ad641b0f0b026749c5c46721bf0ed70c0a712c361aa",
+      "exactPublishedBlob": true,
+      "scope": "Exact published module/test or translation namespace; bounded prerequisite for Clips/invitations"
+    },
+    {
+      "path": "packages/api/src/network.tsx",
+      "new": false,
+      "beforeSha256": "9af529c92dc0446027b4fc10f7fe39a8a503319873cb6f7a4d52310f1f0874a4",
+      "afterSha256": "dccbdd7233300715e77edd587b629715d1b4fbaa736d5353d81860ffe46c3210",
+      "publishedSourceSha256": "e942a62ebc8b3926271e9c76f80e696f6d52ba9826ce5f8c466ed4e30a8f4377",
+      "exactPublishedBlob": false,
+      "scope": "Only EngineRoutes.clips declaration; no adaptive layout or shops import"
+    },
+    {
+      "path": "apps/antsia_ga/src/lib/routes.ts",
+      "new": false,
+      "beforeSha256": "74638f06bf1f4a184598d7d3ed7650ce543a2cd72712e68c97c7182b443d8354",
+      "afterSha256": "90465f55ec458a63cad9f7eb1da88de7bcef7cb1d005aa6413290018db16630e",
+      "publishedSourceSha256": "baa2aef4c2a0a8c6563517541e33af2222c9ab6189fa92e4c86eb16c8b1d5b6e",
+      "exactPublishedBlob": false,
+      "scope": "Only routes.clips, routes.mediaWindow and engineRoutes.clips"
+    },
+    {
+      "path": "apps/antsia_ga/src/i18n/resources.ts",
+      "new": false,
+      "beforeSha256": "035be88c4f6569b5c9173abaf620f829932c78deb8db5d549d0dc2f8cefc1051",
+      "afterSha256": "fbae381055b4a068689293fe1adaae39f437dc7df9a5ecbccff248639d5b31c3",
+      "publishedSourceSha256": "5038dac65d6db30b2365ab7234c2a55f282fed1043840db4677d3861122e8d57",
+      "exactPublishedBlob": false,
+      "scope": "Only add socialExperience namespace for both locales; no engine override composition, commerceExperience or server caching"
+    },
+    {
+      "path": "convex/modules/graph/connections.ts",
+      "new": false,
+      "beforeSha256": "8fc6ba29cd220449f323f8420bff157e02b9f6ddaf41dae675587a3e431ad3b3",
+      "afterSha256": "428576e56170a0d433d08fb1bbdf6813fe683b15c2d75bf84c146d8d603f9352",
+      "publishedSourceSha256": "428576e56170a0d433d08fb1bbdf6813fe683b15c2d75bf84c146d8d603f9352",
+      "exactPublishedBlob": true,
+      "scope": "Published optional returnRateLimit and rateLimited retryAfterMs union; previous behavior retained for legacy clients"
+    }
+  ],
+  "testsRun": false,
+  "codegenRun": false,
+  "gitMutations": false,
+  "realCheckoutMutations": false,
+  "backendDeploymentRequired": false,
+  "coordinatorNextSteps": [
+    "Run local codegen before typechecks so api.modules.posts.mediaFeed becomes typed.",
+    "Other worker owns connectionRequests contract/helper and useConnectionRequest.",
+    "Other worker owns useFeedImmersion/useFeedMode clips surface option; candidate initially lacked it.",
+    "Run mediaFeed and connection-rate-limit Convex tests, MediaDiscoveryScreen app tests, full verify sequentially."
+  ],
+  "excluded": [
+    "social-features",
+    "social-contracts",
+    "commerce",
+    "UI CSS",
+    "adaptive navigation refactor",
+    "server i18n caching",
+    "other locale overrides"
+  ],
+  "dependencyChecks": {
+    "postsMediaIndexesAlreadyExist": true,
+    "feedPolicyExportsAlreadyExist": true,
+    "postsEnrichmentExportsAlreadyExist": true
+  },
+  "note": "MediaDiscoveryStyles is the exact new component-local published style module permitted in task; no global UI CSS changed.",
+  "postWriteHashesVerified": true
+}

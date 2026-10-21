@@ -1,0 +1,8 @@
+{
+  "path": "convex/_generated/api.d.ts",
+  "reason": "Mandatory local codegen adds only import and API declaration for approved mediaFeed module",
+  "verifiedAgainstExactTwoLineDerivationFromMain": true,
+  "sha256AfterCodegenBeforeVerifierCompletion": "c435d95c446274449ed079eb83110669fc3629123a19048ba05f965346841e3e",
+  "checkedAt": "2026-10-21T11:07:03.209022+00:00",
+  "sourceEdited": false
+}

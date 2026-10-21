@@ -1,0 +1,77 @@
+[
+  {
+    "screen": "suggestions",
+    "width": 390,
+    "height": 844,
+    "columns": "324px",
+    "documentWidth": 390,
+    "listWidth": 324,
+    "viewport": 390,
+    "action": {
+      "height": 44,
+      "radius": "8px"
+    }
+  },
+  {
+    "screen": "suggestions",
+    "width": 834,
+    "height": 1112,
+    "columns": "314px 314px",
+    "documentWidth": 834,
+    "listWidth": 640,
+    "viewport": 834,
+    "action": {
+      "height": 44,
+      "radius": "8px"
+    }
+  },
+  {
+    "screen": "suggestions",
+    "width": 1440,
+    "height": 1000,
+    "columns": "247.328px 247.336px 247.328px",
+    "documentWidth": 1440,
+    "listWidth": 766,
+    "viewport": 1440,
+    "action": {
+      "height": 44,
+      "radius": "8px"
+    }
+  },
+  {
+    "screen": "boutique",
+    "width": 390,
+    "height": 844,
+    "action": {
+      "height": 44,
+      "radius": "8px"
+    },
+    "documentWidth": 390,
+    "href": "/boutique/epicerie-moussavou-demo/offres/demo%3Aoffer%3Aepicerie-produits",
+    "viewport": 390
+  },
+  {
+    "screen": "boutique",
+    "width": 834,
+    "height": 1112,
+    "action": {
+      "height": 44,
+      "radius": "8px"
+    },
+    "documentWidth": 834,
+    "href": "/boutique/epicerie-moussavou-demo/offres/demo%3Aoffer%3Aepicerie-produits",
+    "viewport": 834
+  },
+  {
+    "screen": "boutique",
+    "width": 1440,
+    "height": 1000,
+    "action": {
+      "height": 44,
+      "radius": "8px"
+    },
+    "documentWidth": 1440,
+    "href": "/boutique/epicerie-moussavou-demo/offres/demo%3Aoffer%3Aepicerie-produits",
+    "viewport": 1440
+  }
+]

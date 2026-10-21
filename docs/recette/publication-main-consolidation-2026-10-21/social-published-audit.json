@@ -1,0 +1,1409 @@
+{
+  "outcome": "done-readonly-audit",
+  "generated_at_utc": "2026-10-21T10:25:40.311938+00:00",
+  "repository": "/Users/okatech/okatech-projects/Digital GABON/DIGITAL_GOUV/NTSAGUI_DIGITAL/ECOSYSTEMES/ANTSIA",
+  "candidate": "/Users/okatech/Library/Caches/antsia-merge-pr22-20261021/ECOSYSTEMES/ANTSIA",
+  "candidate_basis": "46b780bed977c4293ef634e920785a90fe6ba5b9 plus approved privacy-only content (as supplied by coordinator)",
+  "production": {
+    "version": "social-20261021-production-2966feaafc0f",
+    "commit": "2966feaafc0f4c86176845c3ba4c07d5a7297422",
+    "parent": "05d84873f400df267d5e9ed46b51ea160af67f10",
+    "changed_path_count": 67
+  },
+  "demo": {
+    "version": "social-20261021-demo-df82f10ac50a",
+    "commit": "df82f10ac50a5058ef236e20ed2578bbcd9386c2",
+    "parent": "0af6d49ce0b9b44dbba10f447f034a7967058d66",
+    "changed_path_count": 65
+  },
+  "category_counts": {
+    "docs": 2,
+    "evidence": 18,
+    "functional": 19,
+    "locales": 10,
+    "styles": 8,
+    "tests": 10
+  },
+  "common_deltas_identical": true,
+  "production_only_paths": [
+    "apps/antsia_ga/src/i18n/locales/en/publicNetwork.json",
+    "apps/antsia_ga/src/i18n/locales/fr/publicNetwork.json"
+  ],
+  "demo_only_paths": [],
+  "apply_check_summary": {
+    "applies": 43,
+    "fails": 24,
+    "method": "git apply --check per-path binary-capable patch; no patch applied"
+  },
+  "findings": [
+    {
+      "id": "social-delta-equivalence",
+      "severity": "info",
+      "finding": "The 65 shared path deltas are identical, excluding index object hashes. Production alone additionally updates 2 publicNetwork locale files; there is no demo-only path.",
+      "evidence": [
+        "git diff 2966fea^ 2966fea",
+        "git diff df82f10^ df82f10"
+      ]
+    },
+    {
+      "id": "whole-patch-not-transferable",
+      "severity": "blocker",
+      "finding": "Production delta is not directly applicable to the candidate. Per-path read-only apply checks fail for 24 paths. Do not cherry-pick a release parent, copy whole parents, or overwrite candidate files from the released tree.",
+      "evidence": [
+        "apps/antsia_ga/src/components/shops/catalog-grid.tsx",
+        "apps/antsia_ga/src/components/shops/member-shop-directory.tsx",
+        "apps/antsia_ga/src/components/shops/offer-card.tsx",
+        "apps/antsia_ga/src/components/shops/offer-experience-styles.ts",
+        "apps/antsia_ga/src/components/shops/offer-post-slot.tsx",
+        "apps/antsia_ga/src/components/shops/public-offer-post-slot.tsx",
+        "apps/antsia_ga/src/components/shops/public-storefront-card.tsx",
+        "packages/social-features/src/features/notifications/NotificationBell.tsx",
+        "packages/social-features/src/features/notifications/ReseauNotificationRow.tsx",
+        "packages/social-features/src/features/reseau-personnel/PeoplePanel.tsx",
+        "packages/social-features/src/features/reseau-personnel/ProfilPersonnePage.test.tsx",
+        "packages/social-features/src/features/reseau-personnel/ProfilPersonnePage.tsx",
+        "packages/social-features/src/features/reseau-personnel/SuggestionsPanel.tsx",
+        "packages/social-features/src/i18n/locales/en/reseau.json",
+        "packages/social-features/src/i18n/locales/fr/reseau.json",
+        "packages/ui/src/styles/charte.css",
+        "packages/ui/src/themes/antsia-corail.css",
+        "packages/ui/src/themes/antsia-electrique.css",
+        "packages/ui/src/themes/antsia-foret.css",
+        "packages/ui/src/themes/antsia-lagon.css",
+        "packages/ui/src/themes/antsia-reference-layout.test.ts",
+        "packages/ui/src/themes/antsia-sable.css",
+        "packages/ui/src/themes/antsia-soleil.css",
+        "packages/ui/src/themes/antsia.css"
+      ]
+    },
+    {
+      "id": "clips-route-contract",
+      "severity": "blocker",
+      "finding": "New FeedClipsRail accesses routes.clips, absent from candidate EngineRoutes. The new source does not compile unchanged against the candidate contract. It deliberately renders nothing without an injected destination; preserving the published behavior additionally requires the real clips destination and its dependencies, beyond the 67-path delta.",
+      "evidence": [
+        {
+          "ref": "2966feaafc0f4c86176845c3ba4c07d5a7297422",
+          "path": "packages/social-features/src/features/reseau-personnel/FeedClipsRail.tsx",
+          "lines": "49-54",
+          "symbols": [
+            "routes.post",
+            "routes.clips"
+          ]
+        },
+        {
+          "ref": "candidate",
+          "path": "packages/api/src/network.tsx",
+          "lines": "25-91",
+          "absent": "EngineRoutes.clips"
+        },
+        {
+          "ref": "2966feaafc0f4c86176845c3ba4c07d5a7297422",
+          "path": "packages/api/src/network.tsx",
+          "lines": "68-71",
+          "present": "shops? and clips?: (handle?: string) => string"
+        },
+        {
+          "ref": "2966feaafc0f4c86176845c3ba4c07d5a7297422",
+          "path": "apps/antsia_ga/src/lib/routes.ts",
+          "lines": "131-141,210-211",
+          "present": "routes.clips, routes.mediaWindow, engineRoutes.clips"
+        }
+      ],
+      "missing_candidate_paths": [
+        "apps/antsia_ga/src/app/(membre)/clips/page.tsx",
+        "apps/antsia_ga/src/components/discovery/media-discovery-screen.tsx",
+        "apps/antsia_ga/src/components/discovery/media-discovery-styles.tsx",
+        "convex/modules/posts/mediaFeed.ts"
+      ],
+      "dependency_evidence": [
+        {
+          "ref": "2966feaafc0f4c86176845c3ba4c07d5a7297422",
+          "path": "apps/antsia_ga/src/app/(membre)/clips/page.tsx",
+          "lines": "4,10,17",
+          "dependency": "MediaDiscoveryScreen and socialExperience namespace"
+        },
+        {
+          "ref": "2966feaafc0f4c86176845c3ba4c07d5a7297422",
+          "path": "apps/antsia_ga/src/components/discovery/media-discovery-screen.tsx",
+          "lines": "31-35,80-86",
+          "dependency": "routes.mediaWindow and api.modules.posts.mediaFeed.paginate"
+        }
+      ],
+      "candidate_path_checks": {
+        "apps/antsia_ga/src/app/(membre)/clips/page.tsx": false,
+        "apps/antsia_ga/src/components/discovery/media-discovery-screen.tsx": false,
+        "apps/antsia_ga/src/components/discovery/media-discovery-styles.tsx": false,
+        "convex/modules/posts/mediaFeed.ts": false
+      }
+    },
+    {
+      "id": "connection-request-prerequisite",
+      "severity": "blocker-if-copying-released-components",
+      "finding": "Published PeoplePanel, ProfilPersonnePage and SuggestionsPanel already depend on the shared useConnectionRequest hook in their parent version. Candidate lacks the hook. Copying whole released component blobs implicitly imports this non-social-delta base and its new backend argument contract. Apply only selected social hunks to candidate, or explicitly include the bounded prerequisite chain; do not assume the absence of backend files in the social commit means no backend dependency.",
+      "missing_candidate_paths": [
+        "packages/social-features/src/features/reseau-personnel/use-connection-request.ts",
+        "packages/social-features/src/features/reseau-personnel/use-connection-request.test.tsx",
+        "packages/social-contracts/src/connectionRequests.ts"
+      ],
+      "evidence": [
+        {
+          "ref": "2966feaafc0f4c86176845c3ba4c07d5a7297422",
+          "path": "packages/social-features/src/features/reseau-personnel/use-connection-request.ts",
+          "lines": "5,27-29,53-60",
+          "dependency": "connectionRequestRetryAfter and requestConnection({... returnRateLimit: true})"
+        },
+        {
+          "ref": "2966feaafc0f4c86176845c3ba4c07d5a7297422",
+          "path": "convex/modules/graph/connections.ts",
+          "lines": "53-66",
+          "dependency": "optional returnRateLimit argument; requested/accepted/rateLimited union; existing rate limit guard retained"
+        },
+        {
+          "ref": "candidate",
+          "path": "convex/modules/graph/connections.ts",
+          "lines": "51-57",
+          "absent": "returnRateLimit argument and rateLimited return union"
+        },
+        {
+          "ref": "candidate",
+          "path": "packages/social-contracts/package.json",
+          "lines": "8-11",
+          "present": "wildcard ./src/*.ts export already exists; package.json edit is NOT needed"
+        }
+      ],
+      "candidate_path_checks": {
+        "packages/social-features/src/features/reseau-personnel/use-connection-request.ts": false,
+        "packages/social-features/src/features/reseau-personnel/use-connection-request.test.tsx": false,
+        "packages/social-contracts/src/connectionRequests.ts": false
+      }
+    },
+    {
+      "id": "offer-style-base",
+      "severity": "blocker",
+      "finding": "offer-experience-styles.ts is modified, not added, in the social commit, but absent from candidate. New imports from member-shop-directory and public-storefront-card require SHOP_ACTION_CLASS. Released offer-card also imports existing OFFER_DETAIL_CSS from the same base. Its small prior OFFER_DETAIL_CSS definition is a bounded prerequisite if bringing this module, not grounds for copying the whole commerce parent tree.",
+      "evidence": [
+        {
+          "ref": "2966feaafc0f4c86176845c3ba4c07d5a7297422",
+          "path": "apps/antsia_ga/src/components/shops/offer-experience-styles.ts",
+          "lines": "1-25",
+          "exports": [
+            "SHOP_ACTION_CLASS",
+            "OFFER_CARD_CSS",
+            "OFFER_DETAIL_CSS"
+          ]
+        },
+        {
+          "ref": "2966feaafc0f4c86176845c3ba4c07d5a7297422",
+          "path": "apps/antsia_ga/src/components/shops/offer-card.tsx",
+          "lines": "9",
+          "dependency": "OFFER_CARD_CSS, OFFER_DETAIL_CSS, SHOP_ACTION_CLASS"
+        }
+      ]
+    },
+    {
+      "id": "theme-token-vs-layout-base",
+      "severity": "conflict",
+      "finding": "Theme runtime delta is narrow: declare --esp-social-action-radius: initial in charte.css and 8px in each of seven ANTSIA themes. Those files have other parent changes, so full blob copying would pull unrelated geometry. antsia-reference-layout.test.ts is modified by a single additional token assertion but absent from candidate; its released full test additionally asserts the prior 60-board layout geometry. It is not safe to treat its whole content as the social delta alone.",
+      "evidence": [
+        {
+          "ref": "2966feaafc0f4c86176845c3ba4c07d5a7297422",
+          "path": "packages/ui/src/styles/charte.css",
+          "lines": "693-694",
+          "delta": "--esp-social-action-radius: initial"
+        },
+        {
+          "ref": "2966feaafc0f4c86176845c3ba4c07d5a7297422",
+          "path": "packages/ui/src/themes/antsia.css",
+          "lines": "335",
+          "delta": "--esp-social-action-radius: 8px"
+        },
+        {
+          "ref": "2966feaafc0f4c86176845c3ba4c07d5a7297422",
+          "path": "packages/ui/src/themes/antsia-reference-layout.test.ts",
+          "lines": "9-19,26-45",
+          "delta": "only geometry entry line 10 added by social commit"
+        }
+      ]
+    },
+    {
+      "id": "localization-privacy-prod-only",
+      "severity": "info",
+      "finding": "Production-only publicNetwork deltas refine two text values per locale: legal.sections.publication.body (certification -> official validation wording) and legal.privacy.recipients.body (Vercel hosting -> infrastructure wording). They apply on top of the candidate privacy-approved content. They are absent from demo social delta, so preserve them deliberately if aligning to latest production. No new legal page source changed in this commit.",
+      "evidence": [
+        {
+          "ref": "2966feaafc0f4c86176845c3ba4c07d5a7297422",
+          "path": "apps/antsia_ga/src/i18n/locales/fr/publicNetwork.json",
+          "lines": "167,195"
+        },
+        {
+          "ref": "2966feaafc0f4c86176845c3ba4c07d5a7297422",
+          "path": "apps/antsia_ga/src/i18n/locales/en/publicNetwork.json",
+          "lines": "167,195"
+        }
+      ]
+    },
+    {
+      "id": "no-direct-backend-social-delta",
+      "severity": "info",
+      "finding": "No convex/, package manifest, lockfile or environment file is directly changed by either social commit. New social-action-style.ts and notifications-styles.ts are self-contained additions included in the 67 paths; their absence from candidate is expected, not an external prerequisite. Candidate already has Avatar.shape, PostMediaDto, POST_SURFACE_STYLE and viewer-preferences export.",
+      "evidence": [
+        "immutable per-commit changed path inventories",
+        "candidate source inspection"
+      ]
+    }
+  ],
+  "paths": [
+    {
+      "path": "apps/antsia_ga/src/components/shops/catalog-grid.tsx",
+      "status": "M",
+      "category": "functional",
+      "candidate_parent_content": "different",
+      "delta_applies_to_candidate": false,
+      "apply_check_diagnostic": "error: patch failed: apps/antsia_ga/src/components/shops/catalog-grid.tsx:7\nerror: apps/antsia_ga/src/components/shops/catalog-grid.tsx: patch does not apply",
+      "demo_has_delta": true,
+      "prod_demo_delta_identical_excluding_git_index": true
+    },
+    {
+      "path": "apps/antsia_ga/src/components/shops/member-shop-directory.test.tsx",
+      "status": "M",
+      "category": "tests",
+      "candidate_parent_content": "identical",
+      "delta_applies_to_candidate": true,
+      "apply_check_diagnostic": null,
+      "demo_has_delta": true,
+      "prod_demo_delta_identical_excluding_git_index": true
+    },
+    {
+      "path": "apps/antsia_ga/src/components/shops/member-shop-directory.tsx",
+      "status": "M",
+      "category": "functional",
+      "candidate_parent_content": "different",
+      "delta_applies_to_candidate": false,
+      "apply_check_diagnostic": "error: patch failed: apps/antsia_ga/src/components/shops/member-shop-directory.tsx:11\nerror: apps/antsia_ga/src/components/shops/member-shop-directory.tsx: patch does not apply",
+      "demo_has_delta": true,
+      "prod_demo_delta_identical_excluding_git_index": true
+    },
+    {
+      "path": "apps/antsia_ga/src/components/shops/offer-card.test.tsx",
+      "status": "M",
+      "category": "tests",
+      "candidate_parent_content": "different",
+      "delta_applies_to_candidate": true,
+      "apply_check_diagnostic": null,
+      "demo_has_delta": true,
+      "prod_demo_delta_identical_excluding_git_index": true
+    },
+    {
+      "path": "apps/antsia_ga/src/components/shops/offer-card.tsx",
+      "status": "M",
+      "category": "functional",
+      "candidate_parent_content": "different",
+      "delta_applies_to_candidate": false,
+      "apply_check_diagnostic": "error: patch failed: apps/antsia_ga/src/components/shops/offer-card.tsx:1\nerror: apps/antsia_ga/src/components/shops/offer-card.tsx: patch does not apply",
+      "demo_has_delta": true,
+      "prod_demo_delta_identical_excluding_git_index": true
+    },
+    {
+      "path": "apps/antsia_ga/src/components/shops/offer-experience-styles.ts",
+      "status": "M",
+      "category": "functional",
+      "candidate_parent_content": "missing",
+      "delta_applies_to_candidate": false,
+      "apply_check_diagnostic": "error: apps/antsia_ga/src/components/shops/offer-experience-styles.ts: No such file or directory",
+      "demo_has_delta": true,
+      "prod_demo_delta_identical_excluding_git_index": true
+    },
+    {
+      "path": "apps/antsia_ga/src/components/shops/offer-post-slot.tsx",
+      "status": "M",
+      "category": "functional",
+      "candidate_parent_content": "different",
+      "delta_applies_to_candidate": false,
+      "apply_check_diagnostic": "error: patch failed: apps/antsia_ga/src/components/shops/offer-post-slot.tsx:16\nerror: apps/antsia_ga/src/components/shops/offer-post-slot.tsx: patch does not apply",
+      "demo_has_delta": true,
+      "prod_demo_delta_identical_excluding_git_index": true
+    },
+    {
+      "path": "apps/antsia_ga/src/components/shops/public-offer-post-slot.tsx",
+      "status": "M",
+      "category": "functional",
+      "candidate_parent_content": "different",
+      "delta_applies_to_candidate": false,
+      "apply_check_diagnostic": "error: patch failed: apps/antsia_ga/src/components/shops/public-offer-post-slot.tsx:14\nerror: apps/antsia_ga/src/components/shops/public-offer-post-slot.tsx: patch does not apply",
+      "demo_has_delta": true,
+      "prod_demo_delta_identical_excluding_git_index": true
+    },
+    {
+      "path": "apps/antsia_ga/src/components/shops/public-storefront-card.test.tsx",
+      "status": "M",
+      "category": "tests",
+      "candidate_parent_content": "identical",
+      "delta_applies_to_candidate": true,
+      "apply_check_diagnostic": null,
+      "demo_has_delta": true,
+      "prod_demo_delta_identical_excluding_git_index": true
+    },
+    {
+      "path": "apps/antsia_ga/src/components/shops/public-storefront-card.tsx",
+      "status": "M",
+      "category": "functional",
+      "candidate_parent_content": "different",
+      "delta_applies_to_candidate": false,
+      "apply_check_diagnostic": "error: patch failed: apps/antsia_ga/src/components/shops/public-storefront-card.tsx:18\nerror: apps/antsia_ga/src/components/shops/public-storefront-card.tsx: patch does not apply",
+      "demo_has_delta": true,
+      "prod_demo_delta_identical_excluding_git_index": true
+    },
+    {
+      "path": "apps/antsia_ga/src/i18n/locales/en/publicNetwork.json",
+      "status": "M",
+      "category": "locales",
+      "candidate_parent_content": "different",
+      "delta_applies_to_candidate": true,
+      "apply_check_diagnostic": null,
+      "demo_has_delta": false,
+      "prod_demo_delta_identical_excluding_git_index": null
+    },
+    {
+      "path": "apps/antsia_ga/src/i18n/locales/en/shops.json",
+      "status": "M",
+      "category": "locales",
+      "candidate_parent_content": "identical",
+      "delta_applies_to_candidate": true,
+      "apply_check_diagnostic": null,
+      "demo_has_delta": true,
+      "prod_demo_delta_identical_excluding_git_index": true
+    },
+    {
+      "path": "apps/antsia_ga/src/i18n/locales/fr/publicNetwork.json",
+      "status": "M",
+      "category": "locales",
+      "candidate_parent_content": "different",
+      "delta_applies_to_candidate": true,
+      "apply_check_diagnostic": null,
+      "demo_has_delta": false,
+      "prod_demo_delta_identical_excluding_git_index": null
+    },
+    {
+      "path": "apps/antsia_ga/src/i18n/locales/fr/shops.json",
+      "status": "M",
+      "category": "locales",
+      "candidate_parent_content": "identical",
+      "delta_applies_to_candidate": true,
+      "apply_check_diagnostic": null,
+      "demo_has_delta": true,
+      "prod_demo_delta_identical_excluding_git_index": true
+    },
+    {
+      "path": "docs/COMPLEMENTS_SOCIAUX_2026-10-21.md",
+      "status": "A",
+      "category": "docs",
+      "candidate_parent_content": "new-in-social-delta",
+      "delta_applies_to_candidate": true,
+      "apply_check_diagnostic": null,
+      "demo_has_delta": true,
+      "prod_demo_delta_identical_excluding_git_index": true
+    },
+    {
+      "path": "docs/adr/0033-complements-sociaux-actions-compactes.md",
+      "status": "A",
+      "category": "docs",
+      "candidate_parent_content": "new-in-social-delta",
+      "delta_applies_to_candidate": true,
+      "apply_check_diagnostic": null,
+      "demo_has_delta": true,
+      "prod_demo_delta_identical_excluding_git_index": true
+    },
+    {
+      "path": "docs/recette/complements-sociaux-2026-10-21/ajout-profil.png",
+      "status": "A",
+      "category": "evidence",
+      "candidate_parent_content": "new-in-social-delta",
+      "delta_applies_to_candidate": true,
+      "apply_check_diagnostic": null,
+      "demo_has_delta": true,
+      "prod_demo_delta_identical_excluding_git_index": true
+    },
+    {
+      "path": "docs/recette/complements-sociaux-2026-10-21/boutique-1440.png",
+      "status": "A",
+      "category": "evidence",
+      "candidate_parent_content": "new-in-social-delta",
+      "delta_applies_to_candidate": true,
+      "apply_check_diagnostic": null,
+      "demo_has_delta": true,
+      "prod_demo_delta_identical_excluding_git_index": true
+    },
+    {
+      "path": "docs/recette/complements-sociaux-2026-10-21/boutique-390.png",
+      "status": "A",
+      "category": "evidence",
+      "candidate_parent_content": "new-in-social-delta",
+      "delta_applies_to_candidate": true,
+      "apply_check_diagnostic": null,
+      "demo_has_delta": true,
+      "prod_demo_delta_identical_excluding_git_index": true
+    },
+    {
+      "path": "docs/recette/complements-sociaux-2026-10-21/boutique-834.png",
+      "status": "A",
+      "category": "evidence",
+      "candidate_parent_content": "new-in-social-delta",
+      "delta_applies_to_candidate": true,
+      "apply_check_diagnostic": null,
+      "demo_has_delta": true,
+      "prod_demo_delta_identical_excluding_git_index": true
+    },
+    {
+      "path": "docs/recette/complements-sociaux-2026-10-21/catalogue-mobile.png",
+      "status": "A",
+      "category": "evidence",
+      "candidate_parent_content": "new-in-social-delta",
+      "delta_applies_to_candidate": true,
+      "apply_check_diagnostic": null,
+      "demo_has_delta": true,
+      "prod_demo_delta_identical_excluding_git_index": true
+    },
+    {
+      "path": "docs/recette/complements-sociaux-2026-10-21/catalogue-tablette.png",
+      "status": "A",
+      "category": "evidence",
+      "candidate_parent_content": "new-in-social-delta",
+      "delta_applies_to_candidate": true,
+      "apply_check_diagnostic": null,
+      "demo_has_delta": true,
+      "prod_demo_delta_identical_excluding_git_index": true
+    },
+    {
+      "path": "docs/recette/complements-sociaux-2026-10-21/console-locale.json",
+      "status": "A",
+      "category": "evidence",
+      "candidate_parent_content": "new-in-social-delta",
+      "delta_applies_to_candidate": true,
+      "apply_check_diagnostic": null,
+      "demo_has_delta": true,
+      "prod_demo_delta_identical_excluding_git_index": true
+    },
+    {
+      "path": "docs/recette/complements-sociaux-2026-10-21/fil-bureau-apres-acceptation.png",
+      "status": "A",
+      "category": "evidence",
+      "candidate_parent_content": "new-in-social-delta",
+      "delta_applies_to_candidate": true,
+      "apply_check_diagnostic": null,
+      "demo_has_delta": true,
+      "prod_demo_delta_identical_excluding_git_index": true
+    },
+    {
+      "path": "docs/recette/complements-sociaux-2026-10-21/local-after.json",
+      "status": "A",
+      "category": "evidence",
+      "candidate_parent_content": "new-in-social-delta",
+      "delta_applies_to_candidate": true,
+      "apply_check_diagnostic": null,
+      "demo_has_delta": true,
+      "prod_demo_delta_identical_excluding_git_index": true
+    },
+    {
+      "path": "docs/recette/complements-sociaux-2026-10-21/local-before.json",
+      "status": "A",
+      "category": "evidence",
+      "candidate_parent_content": "new-in-social-delta",
+      "delta_applies_to_candidate": true,
+      "apply_check_diagnostic": null,
+      "demo_has_delta": true,
+      "prod_demo_delta_identical_excluding_git_index": true
+    },
+    {
+      "path": "docs/recette/complements-sociaux-2026-10-21/manifest.json",
+      "status": "A",
+      "category": "evidence",
+      "candidate_parent_content": "new-in-social-delta",
+      "delta_applies_to_candidate": true,
+      "apply_check_diagnostic": null,
+      "demo_has_delta": true,
+      "prod_demo_delta_identical_excluding_git_index": true
+    },
+    {
+      "path": "docs/recette/complements-sociaux-2026-10-21/notifications-mobile.png",
+      "status": "A",
+      "category": "evidence",
+      "candidate_parent_content": "new-in-social-delta",
+      "delta_applies_to_candidate": true,
+      "apply_check_diagnostic": null,
+      "demo_has_delta": true,
+      "prod_demo_delta_identical_excluding_git_index": true
+    },
+    {
+      "path": "docs/recette/complements-sociaux-2026-10-21/offre-mobile.png",
+      "status": "A",
+      "category": "evidence",
+      "candidate_parent_content": "new-in-social-delta",
+      "delta_applies_to_candidate": true,
+      "apply_check_diagnostic": null,
+      "demo_has_delta": true,
+      "prod_demo_delta_identical_excluding_git_index": true
+    },
+    {
+      "path": "docs/recette/complements-sociaux-2026-10-21/responsive.json",
+      "status": "A",
+      "category": "evidence",
+      "candidate_parent_content": "new-in-social-delta",
+      "delta_applies_to_candidate": true,
+      "apply_check_diagnostic": null,
+      "demo_has_delta": true,
+      "prod_demo_delta_identical_excluding_git_index": true
+    },
+    {
+      "path": "docs/recette/complements-sociaux-2026-10-21/suggestions-1440.png",
+      "status": "A",
+      "category": "evidence",
+      "candidate_parent_content": "new-in-social-delta",
+      "delta_applies_to_candidate": true,
+      "apply_check_diagnostic": null,
+      "demo_has_delta": true,
+      "prod_demo_delta_identical_excluding_git_index": true
+    },
+    {
+      "path": "docs/recette/complements-sociaux-2026-10-21/suggestions-390.png",
+      "status": "A",
+      "category": "evidence",
+      "candidate_parent_content": "new-in-social-delta",
+      "delta_applies_to_candidate": true,
+      "apply_check_diagnostic": null,
+      "demo_has_delta": true,
+      "prod_demo_delta_identical_excluding_git_index": true
+    },
+    {
+      "path": "docs/recette/complements-sociaux-2026-10-21/suggestions-834.png",
+      "status": "A",
+      "category": "evidence",
+      "candidate_parent_content": "new-in-social-delta",
+      "delta_applies_to_candidate": true,
+      "apply_check_diagnostic": null,
+      "demo_has_delta": true,
+      "prod_demo_delta_identical_excluding_git_index": true
+    },
+    {
+      "path": "docs/recette/complements-sociaux-2026-10-21/summary.json",
+      "status": "A",
+      "category": "evidence",
+      "candidate_parent_content": "new-in-social-delta",
+      "delta_applies_to_candidate": true,
+      "apply_check_diagnostic": null,
+      "demo_has_delta": true,
+      "prod_demo_delta_identical_excluding_git_index": true
+    },
+    {
+      "path": "packages/social-features/src/features/notifications/NotificationBell.tsx",
+      "status": "M",
+      "category": "functional",
+      "candidate_parent_content": "different",
+      "delta_applies_to_candidate": false,
+      "apply_check_diagnostic": "error: patch failed: packages/social-features/src/features/notifications/NotificationBell.tsx:164\nerror: packages/social-features/src/features/notifications/NotificationBell.tsx: patch does not apply",
+      "demo_has_delta": true,
+      "prod_demo_delta_identical_excluding_git_index": true
+    },
+    {
+      "path": "packages/social-features/src/features/notifications/NotificationsCenter.test.tsx",
+      "status": "M",
+      "category": "tests",
+      "candidate_parent_content": "identical",
+      "delta_applies_to_candidate": true,
+      "apply_check_diagnostic": null,
+      "demo_has_delta": true,
+      "prod_demo_delta_identical_excluding_git_index": true
+    },
+    {
+      "path": "packages/social-features/src/features/notifications/NotificationsCenter.tsx",
+      "status": "M",
+      "category": "functional",
+      "candidate_parent_content": "identical",
+      "delta_applies_to_candidate": true,
+      "apply_check_diagnostic": null,
+      "demo_has_delta": true,
+      "prod_demo_delta_identical_excluding_git_index": true
+    },
+    {
+      "path": "packages/social-features/src/features/notifications/NotificationsList.tsx",
+      "status": "M",
+      "category": "functional",
+      "candidate_parent_content": "different",
+      "delta_applies_to_candidate": true,
+      "apply_check_diagnostic": null,
+      "demo_has_delta": true,
+      "prod_demo_delta_identical_excluding_git_index": true
+    },
+    {
+      "path": "packages/social-features/src/features/notifications/ReseauNotificationRow.tsx",
+      "status": "M",
+      "category": "functional",
+      "candidate_parent_content": "different",
+      "delta_applies_to_candidate": false,
+      "apply_check_diagnostic": "error: patch failed: packages/social-features/src/features/notifications/ReseauNotificationRow.tsx:19\nerror: packages/social-features/src/features/notifications/ReseauNotificationRow.tsx: patch does not apply",
+      "demo_has_delta": true,
+      "prod_demo_delta_identical_excluding_git_index": true
+    },
+    {
+      "path": "packages/social-features/src/features/notifications/notifications-styles.ts",
+      "status": "A",
+      "category": "functional",
+      "candidate_parent_content": "new-in-social-delta",
+      "delta_applies_to_candidate": true,
+      "apply_check_diagnostic": null,
+      "demo_has_delta": true,
+      "prod_demo_delta_identical_excluding_git_index": true
+    },
+    {
+      "path": "packages/social-features/src/features/reseau-personnel/FeedClipsRail.test.tsx",
+      "status": "A",
+      "category": "tests",
+      "candidate_parent_content": "new-in-social-delta",
+      "delta_applies_to_candidate": true,
+      "apply_check_diagnostic": null,
+      "demo_has_delta": true,
+      "prod_demo_delta_identical_excluding_git_index": true
+    },
+    {
+      "path": "packages/social-features/src/features/reseau-personnel/FeedClipsRail.tsx",
+      "status": "A",
+      "category": "functional",
+      "candidate_parent_content": "new-in-social-delta",
+      "delta_applies_to_candidate": true,
+      "apply_check_diagnostic": null,
+      "demo_has_delta": true,
+      "prod_demo_delta_identical_excluding_git_index": true
+    },
+    {
+      "path": "packages/social-features/src/features/reseau-personnel/FeedPages.test.tsx",
+      "status": "M",
+      "category": "tests",
+      "candidate_parent_content": "identical",
+      "delta_applies_to_candidate": true,
+      "apply_check_diagnostic": null,
+      "demo_has_delta": true,
+      "prod_demo_delta_identical_excluding_git_index": true
+    },
+    {
+      "path": "packages/social-features/src/features/reseau-personnel/FeedPages.tsx",
+      "status": "M",
+      "category": "functional",
+      "candidate_parent_content": "different",
+      "delta_applies_to_candidate": true,
+      "apply_check_diagnostic": null,
+      "demo_has_delta": true,
+      "prod_demo_delta_identical_excluding_git_index": true
+    },
+    {
+      "path": "packages/social-features/src/features/reseau-personnel/FeedSuggestionCard.tsx",
+      "status": "M",
+      "category": "functional",
+      "candidate_parent_content": "identical",
+      "delta_applies_to_candidate": true,
+      "apply_check_diagnostic": null,
+      "demo_has_delta": true,
+      "prod_demo_delta_identical_excluding_git_index": true
+    },
+    {
+      "path": "packages/social-features/src/features/reseau-personnel/PeoplePanel.test.tsx",
+      "status": "M",
+      "category": "tests",
+      "candidate_parent_content": "identical",
+      "delta_applies_to_candidate": true,
+      "apply_check_diagnostic": null,
+      "demo_has_delta": true,
+      "prod_demo_delta_identical_excluding_git_index": true
+    },
+    {
+      "path": "packages/social-features/src/features/reseau-personnel/PeoplePanel.tsx",
+      "status": "M",
+      "category": "functional",
+      "candidate_parent_content": "different",
+      "delta_applies_to_candidate": false,
+      "apply_check_diagnostic": "error: patch failed: packages/social-features/src/features/reseau-personnel/PeoplePanel.tsx:11\nerror: packages/social-features/src/features/reseau-personnel/PeoplePanel.tsx: patch does not apply",
+      "demo_has_delta": true,
+      "prod_demo_delta_identical_excluding_git_index": true
+    },
+    {
+      "path": "packages/social-features/src/features/reseau-personnel/ProfilPersonnePage.test.tsx",
+      "status": "M",
+      "category": "tests",
+      "candidate_parent_content": "different",
+      "delta_applies_to_candidate": false,
+      "apply_check_diagnostic": "error: patch failed: packages/social-features/src/features/reseau-personnel/ProfilPersonnePage.test.tsx:922\nerror: packages/social-features/src/features/reseau-personnel/ProfilPersonnePage.test.tsx: patch does not apply",
+      "demo_has_delta": true,
+      "prod_demo_delta_identical_excluding_git_index": true
+    },
+    {
+      "path": "packages/social-features/src/features/reseau-personnel/ProfilPersonnePage.tsx",
+      "status": "M",
+      "category": "functional",
+      "candidate_parent_content": "different",
+      "delta_applies_to_candidate": false,
+      "apply_check_diagnostic": "error: patch failed: packages/social-features/src/features/reseau-personnel/ProfilPersonnePage.tsx:65\nerror: packages/social-features/src/features/reseau-personnel/ProfilPersonnePage.tsx: patch does not apply",
+      "demo_has_delta": true,
+      "prod_demo_delta_identical_excluding_git_index": true
+    },
+    {
+      "path": "packages/social-features/src/features/reseau-personnel/SuggestionsPanel.test.tsx",
+      "status": "A",
+      "category": "tests",
+      "candidate_parent_content": "new-in-social-delta",
+      "delta_applies_to_candidate": true,
+      "apply_check_diagnostic": null,
+      "demo_has_delta": true,
+      "prod_demo_delta_identical_excluding_git_index": true
+    },
+    {
+      "path": "packages/social-features/src/features/reseau-personnel/SuggestionsPanel.tsx",
+      "status": "M",
+      "category": "functional",
+      "candidate_parent_content": "different",
+      "delta_applies_to_candidate": false,
+      "apply_check_diagnostic": "error: patch failed: packages/social-features/src/features/reseau-personnel/SuggestionsPanel.tsx:37\nerror: packages/social-features/src/features/reseau-personnel/SuggestionsPanel.tsx: patch does not apply",
+      "demo_has_delta": true,
+      "prod_demo_delta_identical_excluding_git_index": true
+    },
+    {
+      "path": "packages/social-features/src/features/social-action-style.ts",
+      "status": "A",
+      "category": "functional",
+      "candidate_parent_content": "new-in-social-delta",
+      "delta_applies_to_candidate": true,
+      "apply_check_diagnostic": null,
+      "demo_has_delta": true,
+      "prod_demo_delta_identical_excluding_git_index": true
+    },
+    {
+      "path": "packages/social-features/src/i18n/locales/en/notifications.json",
+      "status": "M",
+      "category": "locales",
+      "candidate_parent_content": "identical",
+      "delta_applies_to_candidate": true,
+      "apply_check_diagnostic": null,
+      "demo_has_delta": true,
+      "prod_demo_delta_identical_excluding_git_index": true
+    },
+    {
+      "path": "packages/social-features/src/i18n/locales/en/reseau.fil.json",
+      "status": "M",
+      "category": "locales",
+      "candidate_parent_content": "identical",
+      "delta_applies_to_candidate": true,
+      "apply_check_diagnostic": null,
+      "demo_has_delta": true,
+      "prod_demo_delta_identical_excluding_git_index": true
+    },
+    {
+      "path": "packages/social-features/src/i18n/locales/en/reseau.json",
+      "status": "M",
+      "category": "locales",
+      "candidate_parent_content": "different",
+      "delta_applies_to_candidate": false,
+      "apply_check_diagnostic": "error: patch failed: packages/social-features/src/i18n/locales/en/reseau.json:2\nerror: packages/social-features/src/i18n/locales/en/reseau.json: patch does not apply",
+      "demo_has_delta": true,
+      "prod_demo_delta_identical_excluding_git_index": true
+    },
+    {
+      "path": "packages/social-features/src/i18n/locales/fr/notifications.json",
+      "status": "M",
+      "category": "locales",
+      "candidate_parent_content": "identical",
+      "delta_applies_to_candidate": true,
+      "apply_check_diagnostic": null,
+      "demo_has_delta": true,
+      "prod_demo_delta_identical_excluding_git_index": true
+    },
+    {
+      "path": "packages/social-features/src/i18n/locales/fr/reseau.fil.json",
+      "status": "M",
+      "category": "locales",
+      "candidate_parent_content": "identical",
+      "delta_applies_to_candidate": true,
+      "apply_check_diagnostic": null,
+      "demo_has_delta": true,
+      "prod_demo_delta_identical_excluding_git_index": true
+    },
+    {
+      "path": "packages/social-features/src/i18n/locales/fr/reseau.json",
+      "status": "M",
+      "category": "locales",
+      "candidate_parent_content": "different",
+      "delta_applies_to_candidate": false,
+      "apply_check_diagnostic": "error: patch failed: packages/social-features/src/i18n/locales/fr/reseau.json:2\nerror: packages/social-features/src/i18n/locales/fr/reseau.json: patch does not apply",
+      "demo_has_delta": true,
+      "prod_demo_delta_identical_excluding_git_index": true
+    },
+    {
+      "path": "packages/ui/src/styles/charte.css",
+      "status": "M",
+      "category": "styles",
+      "candidate_parent_content": "different",
+      "delta_applies_to_candidate": false,
+      "apply_check_diagnostic": "error: patch failed: packages/ui/src/styles/charte.css:690\nerror: packages/ui/src/styles/charte.css: patch does not apply",
+      "demo_has_delta": true,
+      "prod_demo_delta_identical_excluding_git_index": true
+    },
+    {
+      "path": "packages/ui/src/themes/antsia-corail.css",
+      "status": "M",
+      "category": "styles",
+      "candidate_parent_content": "different",
+      "delta_applies_to_candidate": false,
+      "apply_check_diagnostic": "error: patch failed: packages/ui/src/themes/antsia-corail.css:331\nerror: packages/ui/src/themes/antsia-corail.css: patch does not apply",
+      "demo_has_delta": true,
+      "prod_demo_delta_identical_excluding_git_index": true
+    },
+    {
+      "path": "packages/ui/src/themes/antsia-electrique.css",
+      "status": "M",
+      "category": "styles",
+      "candidate_parent_content": "different",
+      "delta_applies_to_candidate": false,
+      "apply_check_diagnostic": "error: patch failed: packages/ui/src/themes/antsia-electrique.css:331\nerror: packages/ui/src/themes/antsia-electrique.css: patch does not apply",
+      "demo_has_delta": true,
+      "prod_demo_delta_identical_excluding_git_index": true
+    },
+    {
+      "path": "packages/ui/src/themes/antsia-foret.css",
+      "status": "M",
+      "category": "styles",
+      "candidate_parent_content": "different",
+      "delta_applies_to_candidate": false,
+      "apply_check_diagnostic": "error: patch failed: packages/ui/src/themes/antsia-foret.css:331\nerror: packages/ui/src/themes/antsia-foret.css: patch does not apply",
+      "demo_has_delta": true,
+      "prod_demo_delta_identical_excluding_git_index": true
+    },
+    {
+      "path": "packages/ui/src/themes/antsia-lagon.css",
+      "status": "M",
+      "category": "styles",
+      "candidate_parent_content": "different",
+      "delta_applies_to_candidate": false,
+      "apply_check_diagnostic": "error: patch failed: packages/ui/src/themes/antsia-lagon.css:331\nerror: packages/ui/src/themes/antsia-lagon.css: patch does not apply",
+      "demo_has_delta": true,
+      "prod_demo_delta_identical_excluding_git_index": true
+    },
+    {
+      "path": "packages/ui/src/themes/antsia-reference-layout.test.ts",
+      "status": "M",
+      "category": "tests",
+      "candidate_parent_content": "missing",
+      "delta_applies_to_candidate": false,
+      "apply_check_diagnostic": "error: packages/ui/src/themes/antsia-reference-layout.test.ts: No such file or directory",
+      "demo_has_delta": true,
+      "prod_demo_delta_identical_excluding_git_index": true
+    },
+    {
+      "path": "packages/ui/src/themes/antsia-sable.css",
+      "status": "M",
+      "category": "styles",
+      "candidate_parent_content": "different",
+      "delta_applies_to_candidate": false,
+      "apply_check_diagnostic": "error: patch failed: packages/ui/src/themes/antsia-sable.css:331\nerror: packages/ui/src/themes/antsia-sable.css: patch does not apply",
+      "demo_has_delta": true,
+      "prod_demo_delta_identical_excluding_git_index": true
+    },
+    {
+      "path": "packages/ui/src/themes/antsia-soleil.css",
+      "status": "M",
+      "category": "styles",
+      "candidate_parent_content": "different",
+      "delta_applies_to_candidate": false,
+      "apply_check_diagnostic": "error: patch failed: packages/ui/src/themes/antsia-soleil.css:331\nerror: packages/ui/src/themes/antsia-soleil.css: patch does not apply",
+      "demo_has_delta": true,
+      "prod_demo_delta_identical_excluding_git_index": true
+    },
+    {
+      "path": "packages/ui/src/themes/antsia.css",
+      "status": "M",
+      "category": "styles",
+      "candidate_parent_content": "different",
+      "delta_applies_to_candidate": false,
+      "apply_check_diagnostic": "error: patch failed: packages/ui/src/themes/antsia.css:332\nerror: packages/ui/src/themes/antsia.css: patch does not apply",
+      "demo_has_delta": true,
+      "prod_demo_delta_identical_excluding_git_index": true
+    }
+  ],
+  "transfer_verdict": {
+    "direct_whole_delta": "blocked: read-only application checks fail and clips typed route contract is absent",
+    "safe_scope": "Use immutable 2966fea^..2966fea hunks only; resolve listed conflicts on candidate and explicitly decide bounded prerequisite chains. Never copy 05d8487/0af6d49 parent snapshots or actual shared-tree WIP.",
+    "authorization": "Coordinator reports user authorization for both published social commits and their indispensable published prerequisites. No WIP or whole parent snapshots authorized."
+  },
+  "verification_limits": [
+    "No source/test changes, Git ref/index mutations, builds, codegen, installs or deployment commands executed.",
+    "No executable tests run by this audit. Candidate full verify is owned by coordinator.",
+    "No authenticated UI verification performed. Current public versions are coordinator-provided identifiers; this audit examines their immutable supplied Git commits.",
+    "Unchanged ancestors not exhaustively audited; dependency list covers observed direct hard requirements, not a proof that transferring the broader base would be complete."
+  ],
+  "bounded_prerequisites": [
+    {
+      "group": "clips-runtime",
+      "source_commit": "71c93a55eadff5da45ec9cf2010cef01b03c4b8b",
+      "whole_new_files": [
+        "apps/antsia_ga/src/app/(membre)/clips/page.tsx",
+        "apps/antsia_ga/src/components/discovery/media-discovery-screen.tsx",
+        "apps/antsia_ga/src/components/discovery/media-discovery-styles.tsx",
+        "apps/antsia_ga/src/i18n/locales/fr/socialExperience.json",
+        "apps/antsia_ga/src/i18n/locales/en/socialExperience.json",
+        "convex/modules/posts/mediaFeed.ts"
+      ],
+      "hunks_only": {
+        "packages/api/src/network.tsx": [
+          "EngineRoutes.clips declaration only; adaptive navigation unrelated"
+        ],
+        "apps/antsia_ga/src/lib/routes.ts": [
+          "routes.clips",
+          "routes.mediaWindow",
+          "engineRoutes.clips"
+        ],
+        "apps/antsia_ga/src/i18n/resources.ts": [
+          "two socialExperience imports and namespace entries only"
+        ]
+      },
+      "tests": [
+        "convex/modules/posts/mediaFeed.test.ts",
+        "apps/antsia_ga/src/components/discovery/media-discovery-screen.test.tsx"
+      ],
+      "backend_compatibility": "Candidate already exports all mediaFeed direct helper imports, posts.ts and feedPolicy.ts are identical to release, and schema.ts is identical. No schema/index migration prerequisite identified."
+    },
+    {
+      "group": "connection-request",
+      "source_commit": "4191375f0b6390c6e58d7c6f0bd310fa6e5f163f",
+      "whole_new_files": [
+        "packages/social-features/src/features/reseau-personnel/use-connection-request.ts",
+        "packages/social-features/src/features/reseau-personnel/use-connection-request.test.tsx",
+        "packages/social-contracts/src/connectionRequests.ts"
+      ],
+      "hunks_only": {
+        "convex/modules/graph/connections.ts": [
+          "import retry helper",
+          "requestConnection optional returnRateLimit argument",
+          "rateLimited result validator",
+          "catch only enforceRateLimit to return rateLimited when explicitly requested"
+        ]
+      },
+      "package_export": "No package.json change: existing wildcard covers contract."
+    },
+    {
+      "group": "offer-style",
+      "source_ref": "2966fea^",
+      "whole_new_files": [
+        "apps/antsia_ga/src/components/shops/offer-experience-styles.ts"
+      ],
+      "note": "Parent file contains only OFFER_DETAIL_CSS; add social delta SHOP_ACTION_CLASS and OFFER_CARD_CSS from 2966fea. Do not copy other commerce ancestor changes."
+    },
+    {
+      "group": "theme-test",
+      "source_ref": "2966fea",
+      "note": "Only --esp-social-action-radius geometry entry is social delta. Whole released reference-layout test asserts unrelated parent geometry absent from main, so port focused assertion into existing candidate test rather than requiring unrelated theme refonte."
+    }
+  ],
+  "patch_commands": [
+    "git diff --binary 2966fea^ 2966fea -- <approved social paths>",
+    "git show 4191375f0b6390c6e58d7c6f0bd310fa6e5f163f:packages/social-features/src/features/reseau-personnel/use-connection-request.ts",
+    "git diff 4191375^ 4191375 -- convex/modules/graph/connections.ts",
+    "git show 71c93a55eadff5da45ec9cf2010cef01b03c4b8b:convex/modules/posts/mediaFeed.ts"
+  ],
+  "social_execution": {
+    "outcome": "applied-to-candidate-after-coordinator-go-ahead",
+    "patch": "/Users/okatech/Library/Caches/antsia-releases/20261021-main-publication/privacy-approved/social-people-notifications.patch",
+    "path_count": 30,
+    "paths": [
+      {
+        "path": "packages/social-contracts/src/connectionRequests.ts",
+        "source_commits": [
+          "4191375f0b6390c6e58d7c6f0bd310fa6e5f163f"
+        ],
+        "sha256_before": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "sha256_after": "452f1ffb172da585da06df87493104cc369bf010b02295ad3328c9fb4802dcab",
+        "reason": "published shared connection request prerequisite"
+      },
+      {
+        "path": "packages/social-features/src/features/feed-immersion/use-feed-immersion.test.tsx",
+        "source_commits": [
+          "71c93a55eadff5da45ec9cf2010cef01b03c4b8b"
+        ],
+        "sha256_before": "5a3fb5f55b30688339e06a59aa9c0031f86c8ff262b1da2734806c13d7aeef51",
+        "sha256_after": "56293f46080ee61686829503a6629360b213e4983ba8e7f4ea654489c8704af0",
+        "reason": "published clips surface scoped mode prerequisite"
+      },
+      {
+        "path": "packages/social-features/src/features/feed-immersion/use-feed-immersion.ts",
+        "source_commits": [
+          "71c93a55eadff5da45ec9cf2010cef01b03c4b8b"
+        ],
+        "sha256_before": "4baf2d0f4fb4421fedbbbf55d447fcd28a9e4aeb365d23e8df0adbf959a4ed7e",
+        "sha256_after": "c569c530e6a69e5a588c5405748aa219b7408e9ed2c8229233f3f659cbb3fef4",
+        "reason": "published clips surface scoped mode prerequisite"
+      },
+      {
+        "path": "packages/social-features/src/features/feed-immersion/use-feed-mode.ts",
+        "source_commits": [
+          "71c93a55eadff5da45ec9cf2010cef01b03c4b8b"
+        ],
+        "sha256_before": "ef216cb53a5a0a83907061aa82da51cb4dd0160cb9ceea7014661659d72d43e2",
+        "sha256_after": "13840845359e6947e7b86db141ac458e7ea2ef879d37626483933b1ac008771b",
+        "reason": "published clips surface scoped mode prerequisite"
+      },
+      {
+        "path": "packages/social-features/src/features/notifications/NotificationBell.tsx",
+        "source_commits": [
+          "2966feaafc0f4c86176845c3ba4c07d5a7297422"
+        ],
+        "sha256_before": "78e610a7fe2e2c26cd9a41ab85fc7dfc6449d93b3645cfa4a4a0e6fc7029793b",
+        "sha256_after": "e68a9b8a82c289b4af2be79031c6768198df14485403447e2e7a66f7dbbcd4a9",
+        "reason": "published social delta"
+      },
+      {
+        "path": "packages/social-features/src/features/notifications/NotificationsCenter.test.tsx",
+        "source_commits": [
+          "2966feaafc0f4c86176845c3ba4c07d5a7297422"
+        ],
+        "sha256_before": "8680f17357ca0b2dcc0fdcc43c641126f0090d3050f67d64b81c423ebe5816e4",
+        "sha256_after": "9b345c1520dbca5e974617a44aebc41c09d2be4970502ccaacfe5d582f1abde3",
+        "reason": "published social delta"
+      },
+      {
+        "path": "packages/social-features/src/features/notifications/NotificationsCenter.tsx",
+        "source_commits": [
+          "2966feaafc0f4c86176845c3ba4c07d5a7297422"
+        ],
+        "sha256_before": "d40ffc3415deeb4c43fe0b63570671e4bb7b98974df3f1fc2cf7e7cfe520dd78",
+        "sha256_after": "2258d4a8bf996e4be064ed928756cad297a1a87c7a3462c15d7a3b1094061c5c",
+        "reason": "published social delta"
+      },
+      {
+        "path": "packages/social-features/src/features/notifications/NotificationsList.tsx",
+        "source_commits": [
+          "2966feaafc0f4c86176845c3ba4c07d5a7297422"
+        ],
+        "sha256_before": "0685793d586e6078e9cc720046b5bd629023d34a66600903c77235910838be78",
+        "sha256_after": "640caa29a7f11b9984475d13217478d3cb7d91024db9850de9d8fd0e221034a0",
+        "reason": "published social delta"
+      },
+      {
+        "path": "packages/social-features/src/features/notifications/ReseauNotificationRow.tsx",
+        "source_commits": [
+          "2966feaafc0f4c86176845c3ba4c07d5a7297422"
+        ],
+        "sha256_before": "8d6c007ce30b8d2227d777e68a567b9fc0f2b1dfee7dbc4f04b53abfc9e622b6",
+        "sha256_after": "f60825988427bf962c42d23b14e28e4356f6329be07debe7bfbeebe49a829e24",
+        "reason": "published social delta"
+      },
+      {
+        "path": "packages/social-features/src/features/notifications/notifications-styles.ts",
+        "source_commits": [
+          "2966feaafc0f4c86176845c3ba4c07d5a7297422"
+        ],
+        "sha256_before": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "sha256_after": "db6a5b81555a0b603e1ebef4b2d699e5850b873b0f68707dbba06b751bebca7e",
+        "reason": "published social delta"
+      },
+      {
+        "path": "packages/social-features/src/features/reseau-personnel/FeedClipsRail.test.tsx",
+        "source_commits": [
+          "2966feaafc0f4c86176845c3ba4c07d5a7297422"
+        ],
+        "sha256_before": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "sha256_after": "33377ae5d242a708b71fd8e110d8f06a73f6ab373cf6c392c3f2b5675208a2da",
+        "reason": "published social delta"
+      },
+      {
+        "path": "packages/social-features/src/features/reseau-personnel/FeedClipsRail.tsx",
+        "source_commits": [
+          "2966feaafc0f4c86176845c3ba4c07d5a7297422"
+        ],
+        "sha256_before": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "sha256_after": "82a5d3a21455076c82996f87e304963b1ea8a747d95aadefde4e8298af4ec276",
+        "reason": "published social delta"
+      },
+      {
+        "path": "packages/social-features/src/features/reseau-personnel/FeedPages.test.tsx",
+        "source_commits": [
+          "2966feaafc0f4c86176845c3ba4c07d5a7297422"
+        ],
+        "sha256_before": "02a6d3c616980a961bbfbd6099bcc93f63e9ef8e0cc1a084c48674c01e3ba179",
+        "sha256_after": "40b947c48ad8b67d29f6359caf1511c6ed078cba2c15a02d8a4146030adca8dc",
+        "reason": "published social delta"
+      },
+      {
+        "path": "packages/social-features/src/features/reseau-personnel/FeedPages.tsx",
+        "source_commits": [
+          "2966feaafc0f4c86176845c3ba4c07d5a7297422"
+        ],
+        "sha256_before": "7f4f6f228557067220cf15cf3ab7eba9981d7d3eded35525782406c57f844e76",
+        "sha256_after": "5591192102fcf701ae0d37d96489aa9c97e22d556471bf7385e4b1754e1bad70",
+        "reason": "published social delta"
+      },
+      {
+        "path": "packages/social-features/src/features/reseau-personnel/FeedSuggestionCard.tsx",
+        "source_commits": [
+          "2966feaafc0f4c86176845c3ba4c07d5a7297422"
+        ],
+        "sha256_before": "0ca036944e0ac80ad03c8953740b974e6ae377a76be8d5d4c59c787b657ec8f9",
+        "sha256_after": "b0b62dd59dde07f184ba6cc687f4b858d9d46d3034725bf301ffbe86f816101b",
+        "reason": "published social delta"
+      },
+      {
+        "path": "packages/social-features/src/features/reseau-personnel/PeoplePanel.test.tsx",
+        "source_commits": [
+          "2966feaafc0f4c86176845c3ba4c07d5a7297422"
+        ],
+        "sha256_before": "0ffed4b56579b91bd347cc742b3b65a4640f69468f3aaebdf33176835203fc61",
+        "sha256_after": "c3cee50120308b8c03defed6bae633373fd38ad7c999b3be1cb1583ab5adf89d",
+        "reason": "published social delta"
+      },
+      {
+        "path": "packages/social-features/src/features/reseau-personnel/PeoplePanel.tsx",
+        "source_commits": [
+          "4191375f0b6390c6e58d7c6f0bd310fa6e5f163f",
+          "2966feaafc0f4c86176845c3ba4c07d5a7297422"
+        ],
+        "sha256_before": "58cf2c0e33e845c56fd7d6d97c8dc997ac450752feac52f17f119fccb1e8cfb0",
+        "sha256_after": "2bc5f902deb3a04f8aa447d34497ad8c49650b8f2318e1fa244e3f8728f2f373",
+        "reason": "published social delta plus bounded shared connection hook prerequisite"
+      },
+      {
+        "path": "packages/social-features/src/features/reseau-personnel/ProfilPersonnePage.test.tsx",
+        "source_commits": [
+          "2966feaafc0f4c86176845c3ba4c07d5a7297422"
+        ],
+        "sha256_before": "73ff2dd180d070c88fbaca0e1ab96f3bee154b1c3a4629f9d88d85ad0e845dfa",
+        "sha256_after": "dcb78ac7b966f4a14cb2e74005dba3928e2b1331c1c95b1131a908fdee36be1c",
+        "reason": "published social delta; published returnRateLimit:true assertion prerequisite from release parent preserved"
+      },
+      {
+        "path": "packages/social-features/src/features/reseau-personnel/ProfilPersonnePage.tsx",
+        "source_commits": [
+          "4191375f0b6390c6e58d7c6f0bd310fa6e5f163f",
+          "2966feaafc0f4c86176845c3ba4c07d5a7297422"
+        ],
+        "sha256_before": "4da99103022105871dc74f34efb1ef9573a79bf6e50e6d2e8ca3e9a0222be3a4",
+        "sha256_after": "0237482aeaee8cce192b61d12e9b1a896bba5c078aee57a89c9b28afb6e8494a",
+        "reason": "published social delta plus bounded shared connection hook prerequisite"
+      },
+      {
+        "path": "packages/social-features/src/features/reseau-personnel/SuggestionsPanel.test.tsx",
+        "source_commits": [
+          "2966feaafc0f4c86176845c3ba4c07d5a7297422"
+        ],
+        "sha256_before": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "sha256_after": "84f42253a967be007a5da3f2202eb8ed8415457b08b6282d2029c10c3cc153bd",
+        "reason": "published social delta"
+      },
+      {
+        "path": "packages/social-features/src/features/reseau-personnel/SuggestionsPanel.tsx",
+        "source_commits": [
+          "4191375f0b6390c6e58d7c6f0bd310fa6e5f163f",
+          "2966feaafc0f4c86176845c3ba4c07d5a7297422"
+        ],
+        "sha256_before": "9fc04aa68b59740b44dec86063737351d85b25a7ba964da8786031040487a8b9",
+        "sha256_after": "3f28867893411a295a027da649135602a38992d0a91b06e65111af28db055b87",
+        "reason": "published social delta plus bounded shared connection hook prerequisite"
+      },
+      {
+        "path": "packages/social-features/src/features/reseau-personnel/use-connection-request.test.tsx",
+        "source_commits": [
+          "4191375f0b6390c6e58d7c6f0bd310fa6e5f163f"
+        ],
+        "sha256_before": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "sha256_after": "41fcce6d2c4687473647820f33ce56477664b4a7da1f00cf907feead8e0fd15f",
+        "reason": "published shared connection request prerequisite"
+      },
+      {
+        "path": "packages/social-features/src/features/reseau-personnel/use-connection-request.ts",
+        "source_commits": [
+          "4191375f0b6390c6e58d7c6f0bd310fa6e5f163f"
+        ],
+        "sha256_before": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "sha256_after": "8999e9267b0c5223c7b2f6479849323cf3545a9562305ba8021d8c5e85693415",
+        "reason": "published shared connection request prerequisite"
+      },
+      {
+        "path": "packages/social-features/src/features/social-action-style.ts",
+        "source_commits": [
+          "2966feaafc0f4c86176845c3ba4c07d5a7297422"
+        ],
+        "sha256_before": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "sha256_after": "19bb3cfb4288d43e55c00fd41c9ffb39425d53e6c12020525de4b22fd2052c82",
+        "reason": "published social delta"
+      },
+      {
+        "path": "packages/social-features/src/i18n/locales/en/notifications.json",
+        "source_commits": [
+          "2966feaafc0f4c86176845c3ba4c07d5a7297422"
+        ],
+        "sha256_before": "9d973d2913f5d58398fd135b0c7839a85bef8b8a419d1316f5d989a745863f88",
+        "sha256_after": "741dbb6edbb417032e52e05708b667935f7b73081f22113920831c2ef1f17181",
+        "reason": "published social delta"
+      },
+      {
+        "path": "packages/social-features/src/i18n/locales/en/reseau.fil.json",
+        "source_commits": [
+          "2966feaafc0f4c86176845c3ba4c07d5a7297422"
+        ],
+        "sha256_before": "ac0f1c6f65ebd7497fa52a2d80aadc70e37021c9fa4a46f0f3949ffc7dda373c",
+        "sha256_after": "9a7c91e91603d932d801fc84d1a0542d473d77c4ccd56d4265e27d96460c70aa",
+        "reason": "published social delta"
+      },
+      {
+        "path": "packages/social-features/src/i18n/locales/en/reseau.json",
+        "source_commits": [
+          "4191375f0b6390c6e58d7c6f0bd310fa6e5f163f",
+          "2966feaafc0f4c86176845c3ba4c07d5a7297422"
+        ],
+        "sha256_before": "093cb03c64b69de2cbb281464775507ca8b124f1aa3653f87376633186e91696",
+        "sha256_after": "04ba13acb63701a84fefc33ef839ab4b9bc42169d0106234afa24b37f6a267ab",
+        "reason": "published social delta plus bounded shared connection hook prerequisite"
+      },
+      {
+        "path": "packages/social-features/src/i18n/locales/fr/notifications.json",
+        "source_commits": [
+          "2966feaafc0f4c86176845c3ba4c07d5a7297422"
+        ],
+        "sha256_before": "457771569f08a9abd7a9da5c5dac0d1c082740f10b491bb4fe3c38262e783fef",
+        "sha256_after": "be73147bd7ff9966155e06f8cd505d56fc0a37a802e1d7d42f3349d7758c15aa",
+        "reason": "published social delta"
+      },
+      {
+        "path": "packages/social-features/src/i18n/locales/fr/reseau.fil.json",
+        "source_commits": [
+          "2966feaafc0f4c86176845c3ba4c07d5a7297422"
+        ],
+        "sha256_before": "63e986df43fccca3cdc6cec65215289bf2472ee6f6a9d5d56305b78b0d4d65d9",
+        "sha256_after": "3e1661987b7d25cce970b138d3cd49b744037975e3cf52022e433b091d77813b",
+        "reason": "published social delta"
+      },
+      {
+        "path": "packages/social-features/src/i18n/locales/fr/reseau.json",
+        "source_commits": [
+          "4191375f0b6390c6e58d7c6f0bd310fa6e5f163f",
+          "2966feaafc0f4c86176845c3ba4c07d5a7297422"
+        ],
+        "sha256_before": "fed7317114d1db810af51462de7f0eaeec642edcdeb9a12c19eac345c5919233",
+        "sha256_after": "3da0e3c2c6b8c2614a605ce77ef6dc069a38f4f9d9ab40dd91a4f02844763b62",
+        "reason": "published social delta plus bounded shared connection hook prerequisite"
+      }
+    ],
+    "conflicts_resolved": [
+      {
+        "path": "packages/social-features/src/features/notifications/NotificationBell.tsx",
+        "candidate": "\t\t\t\t\t\t\t\tclassName=\"absolute -top-1.5 -right-1.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-[var(--role-react-fill,var(--destructive))] px-1 text-[9px] font-bold tabular-nums text-[color:var(--role-react-on,var(--destructive-foreground))]\"\n",
+        "parent": "\t\t\t\t\t\t\t\tclassName=\"absolute -top-1.5 -right-1.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-[var(--esp-primitive-badge-radius,999px)] bg-[var(--role-react-fill,var(--destructive))] px-1 text-[9px] font-bold tabular-nums text-[color:var(--role-react-on,var(--destructive-foreground))]\"\n",
+        "published": "\t\t\t\t\t\t\t\tclassName=\"absolute -top-1 -right-1 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-[var(--role-react-fill,var(--destructive))] px-1 text-[10.5px] font-bold tabular-nums text-[color:var(--role-react-on,var(--destructive-foreground))]\"\n",
+        "resolution": "published-social-change"
+      },
+      {
+        "path": "packages/social-features/src/features/notifications/ReseauNotificationRow.tsx",
+        "candidate": "",
+        "parent": "import { themedActionStyle } from \"../themed-action-style\"\n",
+        "published": "import { COMPACT_SOCIAL_ACTION_STYLE } from \"../social-action-style\"\nimport { Avatar } from \"../reseau-personnel/Avatar\"\nimport { BadgeCheck, Bell, Calendar, Heart, Image, MessageCircle, Phone, ShieldCheck, ShoppingBag, UserPlus, Users, Video, type LucideIcon } from \"lucide-react\"\n",
+        "resolution": "published-social-change"
+      },
+      {
+        "path": "packages/social-features/src/features/notifications/ReseauNotificationRow.tsx",
+        "candidate": "\t\t<li\n\t\t\tstyle={{\n\t\t\t\tdisplay: \"flex\",\n\t\t\t\tgap: 8,\n\t\t\t\talignItems: \"flex-start\",\n\t\t\t\tpaddingLeft: 11,\n\t\t\t\tborderLeft: `${compact ? 2 : 3}px solid ${\n\t\t\t\t\tcompact\n\t\t\t\t\t\t? \"var(--ink-200)\"\n\t\t\t\t\t\t: item.readAt === null\n\t\t\t\t\t\t\t? \"var(--primary-500)\"\n\t\t\t\t\t\t\t: \"transparent\"\n\t\t\t\t}`,\n\t\t\t}}\n\t\t>\n\t\t\t<div style={{ minWidth: 0, flex: 1 }}>\n\t\t\t\t<p\n\t\t\t\t\tstyle={{\n\t\t\t\t\t\tmargin: 0,\n\t\t\t\t\t\tfontSize: compact ? 12.5 : 13,\n\t\t\t\t\t\tlineHeight: 1.5,\n\t\t\t\t\t\tcolor: \"var(--ink-800)\",\n\t\t\t\t\t\toverflowWrap: \"anywhere\",\n\t\t\t\t\t}}\n\t\t\t\t>\n\t\t\t\t\t{notificationRowSentence(item, t)}\n\t\t\t\t</p>\n\t\t\t\t{/* La page qui publie porte son badge CALCULÉ : face à une page qui\n\t\t\t\t    emprunterait le nom d'une institution, l'absence d'« Officiel » ne\n\t\t\t\t    suffit pas, il faut voir ce qu'elle est. */}\n\t\t\t\t{item.page ? <NotificationPageBadge badge={item.page.badge} /> : null}\n\t\t\t\t<p\n\t\t\t\t\tstyle={{\n\t\t\t\t\t\tmargin: 0,\n\t\t\t\t\t\tcolor: compact ? \"var(--ink-400)\" : \"var(--ink-600)\",\n\t\t\t\t\t\tfontFamily: compact ? \"var(--font-mono)\" : \"inherit\",\n\t\t\t\t\t\tfontSize: compact ? 11 : 12,\n\t\t\t\t\t}}\n\t\t\t\t>\n\t\t\t\t\t<time dateTime={new Date(item.createdAt).toISOString()}>\n\t\t\t\t\t\t{formatRelativeDate(item.createdAt, now, t, timeZone)}\n\t\t\t\t\t</time>\n\t\t\t\t</p>\n\t\t\t\t{resultText !== null ? (\n\t\t\t\t\t<p\n\t\t\t\t\t\tstyle={{\n\t\t\t\t\t\t\tmargin: \"6px 0 0\",\n\t\t\t\t\t\t\tfontSize: 12.5,\n\t\t\t\t\t\t\tcolor: \"var(--ink-600)\",\n\t\t\t\t\t\t}}\n\t\t\t\t\t>\n\t\t\t\t\t\t{resultText}\n\t\t\t\t\t</p>\n\t\t\t\t) : null}\n\t\t\t\t{!compact && action.mode === \"connection\" ? (\n\t\t\t\t\t<ConnectionInviteActions\n\t\t\t\t\t\tconnectionId={action.connectionId}\n\t\t\t\t\t\tonSettled={() => onMarkRead(item.notificationId)}\n\t\t\t\t\t/>\n\t\t\t\t) : null}\n\t\t\t</div>\n\t\t\t{compact ? null : action.mode === \"callback\" ? (\n\t\t\t\t<Button variant=\"link\" size=\"sm\" onClick={open}>\n\t\t\t\t\t{action.label}\n\t\t\t\t</Button>\n\t\t\t) : action.mode === \"link\" ? (\n\t\t\t\t<Link\n\t\t\t\t\thref={action.href}\n\t\t\t\t\tonClick={() => {\n\t\t\t\t\t\t// Fermer la carte AVANT que le lien ne navigue : la page\n\t\t\t\t\t\t// d'arrivée ne doit pas s'ouvrir inerte sous elle.\n\t\t\t\t\t\tcloseNotificationCenter()\n\t\t\t\t\t\tonMarkRead(item.notificationId)\n\t\t\t\t\t}}\n\t\t\t\t\tstyle={{ fontSize: 13, color: \"var(--primary-700)\" }}\n\t\t\t\t>\n\t\t\t\t\t{action.label}\n\t\t\t\t</Link>\n\t\t\t) : offersMarkRead ? (\n\t\t\t\t<Button\n\t\t\t\t\tvariant=\"link\"\n\t\t\t\t\tsize=\"sm\"\n\t\t\t\t\tonClick={() => onMarkReadExplicitly(item.notificationId)}\n\t\t\t\t>\n\t\t\t\t\t{t(\"reseauNotificationRow.markRead\")}\n\t\t\t\t</Button>\n",
+        "parent": "\t\t<li\n\t\t\tstyle={{\n\t\t\t\tdisplay: \"flex\",\n\t\t\t\tgap: 8,\n\t\t\t\talignItems: \"flex-start\",\n\t\t\t\tpaddingLeft: 11,\n\t\t\t\tborderLeft: `${compact ? 2 : 3}px solid ${\n\t\t\t\t\tcompact\n\t\t\t\t\t\t? \"var(--ink-200)\"\n\t\t\t\t\t\t: item.readAt === null\n\t\t\t\t\t\t\t? \"var(--primary-500)\"\n\t\t\t\t\t\t\t: \"transparent\"\n\t\t\t\t}`,\n\t\t\t}}\n\t\t>\n\t\t\t<div style={{ minWidth: 0, flex: 1 }}>\n\t\t\t\t<p\n\t\t\t\t\tstyle={{\n\t\t\t\t\t\tmargin: 0,\n\t\t\t\t\t\tfontSize: `var(--esp-content-font-size, ${compact ? 12.5 : 13}px)`,\n\t\t\t\t\t\tlineHeight: \"var(--esp-content-line-height, 1.5)\",\n\t\t\t\t\t\tcolor: \"var(--ink-800)\",\n\t\t\t\t\t\toverflowWrap: \"anywhere\",\n\t\t\t\t\t}}\n\t\t\t\t>\n\t\t\t\t\t{notificationRowSentence(item, t)}\n\t\t\t\t</p>\n\t\t\t\t{/* La page qui publie porte son badge CALCULÉ : face à une page qui\n\t\t\t\t    emprunterait le nom d'une institution, l'absence d'« Officiel » ne\n\t\t\t\t    suffit pas, il faut voir ce qu'elle est. */}\n\t\t\t\t{item.page ? <NotificationPageBadge badge={item.page.badge} /> : null}\n\t\t\t\t<p\n\t\t\t\t\tstyle={{\n\t\t\t\t\t\tmargin: 0,\n\t\t\t\t\t\tcolor: compact ? \"var(--ink-400)\" : \"var(--ink-600)\",\n\t\t\t\t\t\tfontFamily: compact ? \"var(--font-mono)\" : \"inherit\",\n\t\t\t\t\t\tfontSize: compact ? 11 : 12,\n\t\t\t\t\t}}\n\t\t\t\t>\n\t\t\t\t\t<time dateTime={new Date(item.createdAt).toISOString()}>\n\t\t\t\t\t\t{formatRelativeDate(item.createdAt, now, t, timeZone)}\n\t\t\t\t\t</time>\n\t\t\t\t</p>\n\t\t\t\t{resultText !== null ? (\n\t\t\t\t\t<p\n\t\t\t\t\t\tstyle={{\n\t\t\t\t\t\t\tmargin: \"6px 0 0\",\n\t\t\t\t\t\t\tfontSize: 12.5,\n\t\t\t\t\t\t\tcolor: \"var(--ink-600)\",\n\t\t\t\t\t\t}}\n\t\t\t\t\t>\n\t\t\t\t\t\t{resultText}\n\t\t\t\t\t</p>\n\t\t\t\t) : null}\n\t\t\t\t{!compact && action.mode === \"connection\" ? (\n\t\t\t\t\t<ConnectionInviteActions\n\t\t\t\t\t\tconnectionId={action.connectionId}\n\t\t\t\t\t\tonSettled={() => onMarkRead(item.notificationId)}\n\t\t\t\t\t/>\n\t\t\t\t) : null}\n\t\t\t</div>\n\t\t\t{compact ? null : action.mode === \"callback\" ? (\n\t\t\t\t<Button variant=\"link\" size=\"sm\" onClick={open}>\n\t\t\t\t\t{action.label}\n\t\t\t\t</Button>\n\t\t\t) : action.mode === \"link\" ? (\n\t\t\t\t<Link\n\t\t\t\t\thref={action.href}\n\t\t\t\t\tonClick={() => {\n\t\t\t\t\t\t// Fermer la carte AVANT que le lien ne navigue : la page\n\t\t\t\t\t\t// d'arrivée ne doit pas s'ouvrir inerte sous elle.\n\t\t\t\t\t\tcloseNotificationCenter()\n\t\t\t\t\t\tonMarkRead(item.notificationId)\n\t\t\t\t\t}}\n\t\t\t\t\tstyle={{ fontSize: 13, color: \"var(--primary-700)\" }}\n\t\t\t\t>\n\t\t\t\t\t{action.label}\n\t\t\t\t</Link>\n\t\t\t) : offersMarkRead ? (\n\t\t\t\t<Button\n\t\t\t\t\tvariant=\"link\"\n\t\t\t\t\tsize=\"sm\"\n\t\t\t\t\tonClick={() => onMarkReadExplicitly(item.notificationId)}\n\t\t\t\t>\n\t\t\t\t\t{t(\"reseauNotificationRow.markRead\")}\n\t\t\t\t</Button>\n",
+        "published": "\t\t<li className=\"ntf-row\" data-unread={unread ? \"\" : undefined} data-compact={compact ? \"\" : undefined}>\n\t\t\t{!compact && action.mode === \"link\" ? (\n\t\t\t\t<Link href={action.href} aria-label={action.label} className=\"ntf-open\" onClick={open}>{content}</Link>\n\t\t\t) : !compact && action.mode === \"callback\" ? (\n\t\t\t\t<button type=\"button\" aria-label={action.label} className=\"ntf-open\" onClick={open}>{content}</button>\n\t\t\t) : <div className=\"ntf-open\">{content}</div>}\n\t\t\t{unread ? <span className=\"ntf-unread-dot\" aria-hidden=\"true\" /> : null}\n\t\t\t{!compact && action.mode === \"connection\" ? (\n\t\t\t\t<div className=\"ntf-row-actions\"><ConnectionInviteActions connectionId={action.connectionId} onSettled={() => onMarkRead(item.notificationId)} /></div>\n\t\t\t) : !compact && offersMarkRead ? (\n\t\t\t\t<div className=\"ntf-row-actions\"><Button variant=\"link\" size=\"sm\" style={COMPACT_SOCIAL_ACTION_STYLE} onClick={() => onMarkReadExplicitly(item.notificationId)}>{t(\"reseauNotificationRow.markRead\")}</Button></div>\n",
+        "resolution": "published-social-change"
+      },
+      {
+        "path": "packages/social-features/src/features/notifications/ReseauNotificationRow.tsx",
+        "candidate": "\t\t\t<Button\n",
+        "parent": "\t\t\t<Button style={themedActionStyle(\"success\", \"social\")}\n",
+        "published": "\t\t\t<Button style={{ ...COMPACT_SOCIAL_ACTION_STYLE, flex: \"1 1 0\", minWidth: 0 }}\n",
+        "resolution": "published-social-change"
+      },
+      {
+        "path": "packages/social-features/src/features/notifications/ReseauNotificationRow.tsx",
+        "candidate": "\t\t\t<Button\n",
+        "parent": "\t\t\t<Button style={themedActionStyle(\"danger\", \"secondary\")}\n",
+        "published": "\t\t\t<Button style={{ ...COMPACT_SOCIAL_ACTION_STYLE, flex: \"1 1 0\", minWidth: 0 }}\n",
+        "resolution": "published-social-change"
+      },
+      {
+        "path": "packages/social-features/src/features/notifications/ReseauNotificationRow.tsx",
+        "candidate": "\t\t\t\tvariant=\"secondary\"\n",
+        "parent": "\t\t\t\tvariant=\"danger\"\n",
+        "published": "\t\t\t\tvariant=\"outline\"\n",
+        "resolution": "published-social-change"
+      },
+      {
+        "path": "packages/social-features/src/features/reseau-personnel/PeoplePanel.tsx",
+        "candidate": "                    // Accepter : couleur des relations (ADR-0027).\n                    variant=\"social\"\n                    disabled={busy === request.connectionId}\n                    style={RESEAU_PILL_ACTION_STYLE}\n",
+        "parent": "                    // Accepter : couleur des relations (ADR-0027).\n                    variant=\"success\"\n                    disabled={busy === request.connectionId}\n                    style={themedActionStyle(\"success\", \"social\", RESEAU_PILL_ACTION_STYLE)}\n",
+        "published": "                    variant=\"social\"\n                    disabled={busy.has(request.connectionId)}\n                    style={COMPACT_SOCIAL_ACTION_STYLE}\n",
+        "resolution": "published-social-change"
+      },
+      {
+        "path": "packages/social-features/src/features/reseau-personnel/PeoplePanel.tsx",
+        "candidate": "                    variant=\"ghost\"\n                    disabled={busy === request.connectionId}\n                    style={RESEAU_PILL_ACTION_STYLE}\n",
+        "parent": "                    variant=\"danger\"\n                    disabled={busy === request.connectionId}\n                    style={themedActionStyle(\"danger\", \"ghost\", RESEAU_PILL_ACTION_STYLE)}\n",
+        "published": "                    variant=\"outline\"\n                    disabled={busy.has(request.connectionId)}\n                    style={COMPACT_SOCIAL_ACTION_STYLE}\n",
+        "resolution": "published-social-change"
+      },
+      {
+        "path": "packages/social-features/src/features/reseau-personnel/ProfilPersonnePage.tsx",
+        "candidate": "",
+        "parent": "import { themedActionStyle } from \"../themed-action-style\"\n",
+        "published": "import { COMPACT_SOCIAL_ACTION_STYLE } from \"../social-action-style\"\nimport { peopleViewHref } from \"./people-panel\"\n",
+        "resolution": "published-social-change"
+      },
+      {
+        "path": "packages/social-features/src/features/reseau-personnel/ProfilPersonnePage.tsx",
+        "candidate": "            // Accepter : couleur des relations (ADR-0027).\n            variant=\"social\"\n",
+        "parent": "            // Accepter : couleur de validation, relations en repli hors ANTSIA (ADR-0027).\n            variant=\"success\"\n",
+        "published": "            variant=\"social\"\n",
+        "resolution": "published-social-change"
+      },
+      {
+        "path": "packages/social-features/src/features/reseau-personnel/ProfilPersonnePage.tsx",
+        "candidate": "            style={RESEAU_PRIMARY_ACTION_STYLE}\n",
+        "parent": "            style={themedActionStyle(\"success\", \"social\", RESEAU_PRIMARY_ACTION_STYLE)}\n",
+        "published": "            style={COMPACT_SOCIAL_ACTION_STYLE}\n",
+        "resolution": "published-social-change"
+      },
+      {
+        "path": "packages/social-features/src/features/reseau-personnel/ProfilPersonnePage.tsx",
+        "candidate": "            variant=\"ghost\"\n",
+        "parent": "            variant=\"danger\"\n",
+        "published": "            variant=\"outline\"\n",
+        "resolution": "published-social-change"
+      },
+      {
+        "path": "packages/social-features/src/features/reseau-personnel/ProfilPersonnePage.tsx",
+        "candidate": "            style={RESEAU_SECONDARY_ACTION_STYLE}\n",
+        "parent": "            style={themedActionStyle(\"danger\", \"ghost\", RESEAU_SECONDARY_ACTION_STYLE)}\n",
+        "published": "            style={COMPACT_SOCIAL_ACTION_STYLE}\n",
+        "resolution": "published-social-change"
+      },
+      {
+        "path": "packages/social-features/src/features/reseau-personnel/SuggestionsPanel.tsx",
+        "candidate": "                padding: presentation === \"carousel\" ? \"10px\" : \"0 44px 0 0\",\n                border: presentation === \"carousel\" ? \"1px solid var(--ink-200)\" : undefined,\n                borderRadius: presentation === \"carousel\" ? \"var(--radius-md)\" : undefined,\n",
+        "parent": "                padding: presentation === \"carousel\" ? \"var(--esp-card-padding, 10px)\" : \"0 44px 0 0\",\n                border: presentation === \"carousel\" ? \"1px solid var(--esp-primitive-surface-border, var(--ink-200))\" : undefined,\n                borderRadius: presentation === \"carousel\" ? \"var(--esp-primitive-card-radius, var(--radius-md))\" : undefined,\n",
+        "published": "                padding: presentation === \"carousel\" ? 0 : \"0 44px 0 0\",\n                border: presentation === \"carousel\" ? \"1px solid var(--esp-primitive-surface-border, var(--ink-200))\" : undefined,\n                borderRadius: presentation === \"carousel\" ? \"var(--esp-primitive-card-radius, var(--radius-md))\" : undefined,\n",
+        "resolution": "published-zero-padding; candidate-existing-border-and-radius"
+      },
+      {
+        "path": "packages/social-features/src/features/reseau-personnel/SuggestionsPanel.tsx",
+        "candidate": "                  borderRadius: \"var(--radius-lg)\",\n                  background: \"transparent\",\n",
+        "parent": "                  borderRadius: \"var(--esp-primitive-button-radius, var(--radius-lg))\",\n                  background: \"transparent\",\n",
+        "published": "                  borderRadius: \"var(--esp-primitive-button-radius, var(--radius-lg))\",\n                  background: presentation === \"carousel\" ? \"var(--ink-0)\" : \"transparent\",\n",
+        "resolution": "published-carousel-background; candidate-existing-radius"
+      }
+    ],
+    "checks": [
+      "git apply --check passed before mutation",
+      "all resulting locale JSON parses",
+      "no conflict markers",
+      "candidate baseline rechecked before apply",
+      "candidate exact output rechecked after apply",
+      "reverse patch --check passed after final read review; hook request assertion includes published returnRateLimit:true argument"
+    ],
+    "limits": [
+      "No test/codegen/commit/push/deploy executed",
+      "No route/API/backend/UI CSS/commerce/docs path modified",
+      "Actual shared working repo not modified"
+    ]
+  }
+}

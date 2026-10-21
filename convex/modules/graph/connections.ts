@@ -11,6 +11,7 @@
  * Le BLOCAGE est unilatéral, muet, et vaut pour toute la paire, dans tous les
  * réseaux : seul son auteur le lève.
  */
+import { connectionRequestRetryAfter } from "@antsia/social-contracts/connectionRequests"
 import type { Badge } from "@antsia/social-domain/badges"
 import { assertConnectionMessage, normalizeHandle } from "@antsia/social-domain/content"
 import { canonicalPair, type ConnectionView, viewConnection } from "@antsia/social-domain/connectionState"
@@ -49,10 +50,20 @@ import { refreshReaderFeed, scheduleReaderRefresh } from "../posts/feedMateriali
  * recevait `blocked` et apprenait le blocage.
  */
 export const requestConnection = networkMutation({
-  args: { targetPersonId: v.optional(v.id("persons")), handle: v.optional(v.string()), message: v.optional(v.string()) },
-  returns: v.object({ status: v.union(v.literal("requested"), v.literal("accepted")) }),
+  args: { targetPersonId: v.optional(v.id("persons")), handle: v.optional(v.string()), message: v.optional(v.string()), returnRateLimit: v.optional(v.boolean()) },
+  returns: v.union(
+    v.object({ status: v.union(v.literal("requested"), v.literal("accepted")) }),
+    v.object({ status: v.literal("rateLimited"), retryAfterMs: v.number() }),
+  ),
   handler: async (ctx, args) => {
-    await enforceRateLimit(ctx, "connection.request", ctx.person._id)
+    try {
+      await enforceRateLimit(ctx, "connection.request", ctx.person._id)
+    } catch (error) {
+      // Refus attendu, sans invitation ni notification ; les autres gardes restent fermées.
+      const retryAfterMs = connectionRequestRetryAfter(error)
+      if (retryAfterMs === null || !args.returnRateLimit) throw error
+      return { status: "rateLimited" as const, retryAfterMs }
+    }
     const message = checked(() => assertConnectionMessage(args.message))
     const target = await resolveTarget(ctx, args)
     if (target === ctx.person._id) return fail("invalidArgument", { field: "target" })

@@ -868,9 +868,10 @@ describe("ProfilPersonnePage — la relation, réglée depuis la fiche", () => {
   it("sans lien : « Se connecter » demande par l'identifiant, et le dit", async () => {
     mocks.queries.connectionWith = ok({ state: "none" })
     rendre()
-    fireEvent.click(screen.getByRole("button", { name: "Se connecter" }))
+    fireEvent.click(screen.getByRole("button", { name: "Ajouter" }))
     await waitFor(() =>
       expect(mocks.mutations.requestConnection).toHaveBeenCalledWith({
+        returnRateLimit: true,
         networkId: TEST_NETWORK_ID,
         handle: "awa",
       }),
@@ -884,7 +885,7 @@ describe("ProfilPersonnePage — la relation, réglée depuis la fiche", () => {
     mocks.mutation("requestConnection").mockRejectedValueOnce(
       Object.assign(new Error("trace serveur"), { data: { code: "notFound" } }),
     )
-    fireEvent.click(screen.getByRole("button", { name: "Se connecter" }))
+    fireEvent.click(screen.getByRole("button", { name: "Ajouter" }))
     await waitFor(() =>
       expect(mocks.toastError).toHaveBeenCalledWith(
         "Cette ressource est introuvable ou n'est pas accessible.",
@@ -896,7 +897,7 @@ describe("ProfilPersonnePage — la relation, réglée depuis la fiche", () => {
     mocks.queries.connectionWith = ok({ state: "requested_by_them", connectionId: "connections_1" })
     rendre()
     expect(screen.getByRole("button", { name: "Refuser" })).toBeTruthy()
-    fireEvent.click(screen.getByRole("button", { name: "Accepter l'invitation" }))
+    fireEvent.click(screen.getByRole("button", { name: "Confirmer" }))
     await waitFor(() =>
       expect(mocks.mutations.respondToConnection).toHaveBeenCalledWith({
         networkId: TEST_NETWORK_ID,
@@ -912,9 +913,11 @@ describe("ProfilPersonnePage — la relation, réglée depuis la fiche", () => {
   it("une invitation envoyée ne se renvoie pas, un lien établi ne se redemande pas", () => {
     mocks.queries.connectionWith = ok({ state: "requested_by_me", connectionId: "connections_1" })
     const premier = rendre()
-    expect(
-      (screen.getByRole("button", { name: "Invitation envoyée" }) as HTMLButtonElement).disabled,
-    ).toBe(true)
+    const sent = screen.getByRole("button", { name: "Invitation envoyée" })
+    expect(sent).toBeEnabled()
+    fireEvent.click(sent)
+    expect(mocks.mutations.requestConnection).not.toHaveBeenCalled()
+    expect(premier.router.calls).toContainEqual({ method: "push", href: "/fil?tab=relations&vue=invitations" })
     premier.unmount()
 
     mocks.queries.connectionWith = ok({ state: "connected", connectionId: "connections_1", since: 1 })

@@ -130,6 +130,7 @@ const INHERITED_IN_DARK = new Set([
 
 /** Un angle par élément (ADR-0027). */
 const ANGLES: Record<string, string> = {
+  "--esp-social-action-radius": "8px",
   "--ui2-button-radius": "999px", "--ui2-badge-radius": "6px", "--ui2-card-radius": "24px", "--esp-chip-radius": "10px",
   "--esp-avatar-page-radius": "12px", "--esp-field-radius": "14px", "--esp-media-radius": "16px", "--esp-fab-radius": "18px",
   "--rp-surface-radius": "24px", "--esp-mobilebar-radius": "28px", "--esp-header-icon-radius": "999px",

@@ -670,6 +670,10 @@
   --ui2-button-radius: initial;
   --ui2-badge-radius: initial;
   --ui2-card-radius: initial;
+  --esp-content-font-size: initial;
+  --ui2-button-outline-fg: initial;
+  --esp-primitive-surface-border: initial;
+  --esp-social-action-radius: initial;
   --esp-chip-radius: initial;
   --esp-field-radius: initial;
   --esp-media-radius: initial;

@@ -1,0 +1,135 @@
+{
+  "status": "prepared_and_applied",
+  "generatedAt": "2026-10-21T10:28:29.649959+00:00",
+  "sourceCommit": "2966feaafc0f4c86176845c3ba4c07d5a7297422",
+  "sourceParent": "05d84873f400df267d5e9ed46b51ea160af67f10",
+  "equivalentDemoCommit": "df82f10ac50a5058ef236e20ed2578bbcd9386c2",
+  "candidateRoot": "/Users/okatech/Library/Caches/antsia-merge-pr22-20261021/ECOSYSTEMES/ANTSIA",
+  "patchSha256": "3334fc8bd0e1d909a0ba53d96ce5a568b16d289950d63c05466d0b8a357d5726",
+  "pathCount": 12,
+  "paths": [
+    {
+      "path": "apps/antsia_ga/src/components/shops/catalog-grid.tsx",
+      "beforeSha256": "a75b20001399bfcc61d48e2e06c58ab027b9c6e84c1134bf2c36ab3af8b1d85a",
+      "afterSha256": "e87dcd523bf51aac64e7609d82671534791ed7d9600cdda35e705c926fd24f55",
+      "publishedBlobSha256": "b481e5fb7f52261c5930fa69f3dab70a17eee440817db866506bca5f4048ffb1",
+      "mode": "social_delta_adapted_to_main"
+    },
+    {
+      "path": "apps/antsia_ga/src/components/shops/member-shop-directory.tsx",
+      "beforeSha256": "3dcbe121a642c5b466bdc9d87b330876428e9c00cdfb3f330f8132b9862ca72e",
+      "afterSha256": "af33e7db8d8214af7b31c30bb040362579c80d1d199ac6d3faeb751a4dd3e061",
+      "publishedBlobSha256": "8ec567e24a9d86add7b0fcb4fe4ac4c309b9ea50e53bed34a6fb09412848f86b",
+      "mode": "social_delta_adapted_to_main"
+    },
+    {
+      "path": "apps/antsia_ga/src/components/shops/member-shop-directory.test.tsx",
+      "beforeSha256": "9e97223295fc3f49dda5d6faf193391b4854dceb06180641aef820e3a71d9ea3",
+      "afterSha256": "861852acb2a22fad87949b6be38bcd7859b5c46ad26d41b8240184e93200865d",
+      "publishedBlobSha256": "861852acb2a22fad87949b6be38bcd7859b5c46ad26d41b8240184e93200865d",
+      "mode": "social_delta_adapted_to_main"
+    },
+    {
+      "path": "apps/antsia_ga/src/components/shops/offer-card.tsx",
+      "beforeSha256": "35ae46914f76846466cb461afa048d6ba63e993269c7067cbd31c110f6dbb420",
+      "afterSha256": "39e3fd344ba70715169227e3e572517caf8448687f8b0d749dc0ef14cbd0073e",
+      "publishedBlobSha256": "22e24c5e37b7a0a3affd99c19325d954e13cd9e9fff0094e1737209c95602a8c",
+      "mode": "social_delta_adapted_to_main"
+    },
+    {
+      "path": "apps/antsia_ga/src/components/shops/offer-card.test.tsx",
+      "beforeSha256": "82595b7ccb59f77a17198df23387654f8778c1d214251ff4c5529210664890de",
+      "afterSha256": "475f991cf2e5a76b7bcfc70772484a961ff8fe158e91f1e01fd976740c2a4fb7",
+      "publishedBlobSha256": "2e26a855a69b2faec2fb2c463994a3957e09ce41f700f90d708d6244486b502d",
+      "mode": "social_delta_adapted_to_main"
+    },
+    {
+      "path": "apps/antsia_ga/src/components/shops/offer-experience-styles.ts",
+      "beforeSha256": null,
+      "afterSha256": "84329dc284a8d3e42311240b1d2ae4b2ae8c551abe9281185bb6f4cb757a95f7",
+      "publishedBlobSha256": "84329dc284a8d3e42311240b1d2ae4b2ae8c551abe9281185bb6f4cb757a95f7",
+      "mode": "added_bounded_styles_prerequisite"
+    },
+    {
+      "path": "apps/antsia_ga/src/components/shops/offer-post-slot.tsx",
+      "beforeSha256": "987449a02bb414a3319f73c722186037001ca61c01ddfe1c1e302102a9eda682",
+      "afterSha256": "fb2397ca5bd28f96238ff63996ff0bbf0b8f7e057a4abac02acf52e2a1fe5795",
+      "publishedBlobSha256": "8c6b48c5ef3c37d080e80f2f3b13731393e460d44b08e935412150320feb3b57",
+      "mode": "social_delta_adapted_to_main"
+    },
+    {
+      "path": "apps/antsia_ga/src/components/shops/public-offer-post-slot.tsx",
+      "beforeSha256": "d32e98b0d7852dba92ed18a65477f044a55dd4ac64b22eabaf82a95b2f405989",
+      "afterSha256": "16eb3a54060f5999345be89d42a4a77ef3fa92b3e29274c0bf5360eedca2b552",
+      "publishedBlobSha256": "0279e237e002e41bdb81ecf39444e0ea49e8c9b25aba8b8ba208a17fb3eb9fe1",
+      "mode": "social_delta_adapted_to_main"
+    },
+    {
+      "path": "apps/antsia_ga/src/components/shops/public-storefront-card.tsx",
+      "beforeSha256": "fe28fda8987de63321eea09f923d4df1e85890a91800b4f42c1a54796e20be4f",
+      "afterSha256": "0e04225ddfd3ae444d30dabfe0b27fa43c1ca84c012249c2fc2a004c929cec5c",
+      "publishedBlobSha256": "a5bccee822a119cac71988879ef6273220b3319366004d56b1c05a89e2500ca6",
+      "mode": "social_delta_adapted_to_main"
+    },
+    {
+      "path": "apps/antsia_ga/src/components/shops/public-storefront-card.test.tsx",
+      "beforeSha256": "21008b187894b13c797a2bb6abdb4fe5ba316016b04214baf8e26e2b21a34092",
+      "afterSha256": "89cc51bfa6dfea54818269ab24137fcf1dd9bcccfc381abcae6b08fd079fa3fa",
+      "publishedBlobSha256": "89cc51bfa6dfea54818269ab24137fcf1dd9bcccfc381abcae6b08fd079fa3fa",
+      "mode": "social_delta_adapted_to_main"
+    },
+    {
+      "path": "apps/antsia_ga/src/i18n/locales/fr/shops.json",
+      "beforeSha256": "51622579be052385ac87efc311f37fffe48bb6c348c4ba9f8dcbfc844d1db2de",
+      "afterSha256": "40b11ce407dcdeed6b2486812992e7b7df29e0bd0c852b04329024c4db0d94b3",
+      "publishedBlobSha256": "40b11ce407dcdeed6b2486812992e7b7df29e0bd0c852b04329024c4db0d94b3",
+      "mode": "social_delta_adapted_to_main"
+    },
+    {
+      "path": "apps/antsia_ga/src/i18n/locales/en/shops.json",
+      "beforeSha256": "7acc411472f787b9c8085942cbb3190774003e6e999f51d59b2e386f448efff2",
+      "afterSha256": "3fa6125bb746cab4b00cf8eb1a2b4687fa2de23e888da7754258de7647b81d5b",
+      "publishedBlobSha256": "3fa6125bb746cab4b00cf8eb1a2b4687fa2de23e888da7754258de7647b81d5b",
+      "mode": "social_delta_adapted_to_main"
+    }
+  ],
+  "adaptations": [
+    "Preserve main OfferMedia and OfferDetails byte-for-byte; only shared link radius updated outside OfferCard.",
+    "Keep main existing radii, border, spacing and headings where published social hunk does not alter their semantic role. No global theme migration imported.",
+    "Keep storefront main max-width, heading, about, description, origin and catalog slot. Add real catalogue action conditioned on admitted catalog/services blocks.",
+    "Keep main offer-post wrappers and only apply responsive padding delta; no unrelated parent attached-offer label/structure copied.",
+    "Include exact small published offer-experience-styles.ts (new social exports plus prior bounded OFFER_DETAIL_CSS); unused detail constant is not wired to main details.",
+    "Locale delta adds exactly catalog.offerPhotos and catalog.openOfferPhoto per language; all existing values unchanged.",
+    "Tests transferred exactly from source social delta, including nullable logo fixture type."
+  ],
+  "verification": {
+    "gitApplyCheck": true,
+    "offerMediaUnchanged": true,
+    "offerDetailsUnchanged": true,
+    "localeDeltaOnlyTwoKeysPerLanguage": true,
+    "executedTests": {
+      "command": "bun run test src/components/shops/offer-card.test.tsx",
+      "cwd": "apps/antsia_ga",
+      "exitCode": 0,
+      "testFilesPassed": 1,
+      "testsPassed": 12,
+      "durationSeconds": 3.78,
+      "backendTests": false,
+      "codegen": false
+    },
+    "codegen": false,
+    "commit": false,
+    "deploy": false,
+    "reverseApplyCheck": true,
+    "whitespaceCheck": true
+  },
+  "dependenciesOutsideScope": [
+    "--esp-social-action-radius contract and theme values are owned by parent tranche; action classes have existing token fallback."
+  ],
+  "raccordFix": {
+    "path": "apps/antsia_ga/src/components/shops/offer-card.test.tsx",
+    "beforeFixSha256": "017978ca994c23c6f30a544609aa66c26d0fea4ac4247a328dd4ae2e97708812",
+    "afterFixSha256": "475f991cf2e5a76b7bcfc70772484a961ff8fe158e91f1e01fd976740c2a4fb7",
+    "change": "Move misplaced test closure from before thumbnail tests to before quote service test; preserve every assertion."
+  }
+}
