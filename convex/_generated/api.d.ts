@@ -8,6 +8,11 @@
  * @module
  */
 
+import type {
+  ApiFromModules,
+  FilterApi,
+  FunctionReference,
+} from "convex/server";
 import type * as betterAuth_auth from "../betterAuth/auth.js";
 import type * as betterAuth_delivery from "../betterAuth/delivery.js";
 import type * as betterAuth_settings from "../betterAuth/settings.js";
@@ -43,6 +48,7 @@ import type * as modules_calls_capacity from "../modules/calls/capacity.js";
 import type * as modules_calls_cleanup from "../modules/calls/cleanup.js";
 import type * as modules_calls_conversation from "../modules/calls/conversation.js";
 import type * as modules_calls_conversationAccess from "../modules/calls/conversationAccess.js";
+import type * as modules_calls_deviceOwnership from "../modules/calls/deviceOwnership.js";
 import type * as modules_calls_direct from "../modules/calls/direct.js";
 import type * as modules_calls_evaluate from "../modules/calls/evaluate.js";
 import type * as modules_calls_groupCalls from "../modules/calls/groupCalls.js";
@@ -50,6 +56,7 @@ import type * as modules_calls_history from "../modules/calls/history.js";
 import type * as modules_calls_journal from "../modules/calls/journal.js";
 import type * as modules_calls_lifecycle from "../modules/calls/lifecycle.js";
 import type * as modules_calls_livekitActions from "../modules/calls/livekitActions.js";
+import type * as modules_calls_native from "../modules/calls/native.js";
 import type * as modules_calls_preferences from "../modules/calls/preferences.js";
 import type * as modules_calls_presence from "../modules/calls/presence.js";
 import type * as modules_calls_push from "../modules/calls/push.js";
@@ -259,9 +266,11 @@ import type * as modules_notifications_bell from "../modules/notifications/bell.
 import type * as modules_notifications_commerceAccess from "../modules/notifications/commerceAccess.js";
 import type * as modules_notifications_commerceEmit from "../modules/notifications/commerceEmit.js";
 import type * as modules_notifications_configuration from "../modules/notifications/configuration.js";
+import type * as modules_notifications_consent from "../modules/notifications/consent.js";
 import type * as modules_notifications_deliveries from "../modules/notifications/deliveries.js";
 import type * as modules_notifications_digest from "../modules/notifications/digest.js";
 import type * as modules_notifications_fanout from "../modules/notifications/fanout.js";
+import type * as modules_notifications_nativeChannels from "../modules/notifications/nativeChannels.js";
 import type * as modules_notifications_notify from "../modules/notifications/notify.js";
 import type * as modules_notifications_open from "../modules/notifications/open.js";
 import type * as modules_notifications_policy from "../modules/notifications/policy.js";
@@ -410,12 +419,14 @@ import type * as modules_thematicGroups_thematicGroups from "../modules/thematic
 import type * as seeds_devSocial from "../seeds/devSocial.js";
 import type * as seeds_foundations from "../seeds/foundations.js";
 
-import type {
-  ApiFromModules,
-  FilterApi,
-  FunctionReference,
-} from "convex/server";
-
+/**
+ * A utility for referencing Convex functions in your app's API.
+ *
+ * Usage:
+ * ```js
+ * const myFunctionReference = api.myModule.myFunction;
+ * ```
+ */
 declare const fullApi: ApiFromModules<{
   "betterAuth/auth": typeof betterAuth_auth;
   "betterAuth/delivery": typeof betterAuth_delivery;
@@ -452,6 +463,7 @@ declare const fullApi: ApiFromModules<{
   "modules/calls/cleanup": typeof modules_calls_cleanup;
   "modules/calls/conversation": typeof modules_calls_conversation;
   "modules/calls/conversationAccess": typeof modules_calls_conversationAccess;
+  "modules/calls/deviceOwnership": typeof modules_calls_deviceOwnership;
   "modules/calls/direct": typeof modules_calls_direct;
   "modules/calls/evaluate": typeof modules_calls_evaluate;
   "modules/calls/groupCalls": typeof modules_calls_groupCalls;
@@ -459,6 +471,7 @@ declare const fullApi: ApiFromModules<{
   "modules/calls/journal": typeof modules_calls_journal;
   "modules/calls/lifecycle": typeof modules_calls_lifecycle;
   "modules/calls/livekitActions": typeof modules_calls_livekitActions;
+  "modules/calls/native": typeof modules_calls_native;
   "modules/calls/preferences": typeof modules_calls_preferences;
   "modules/calls/presence": typeof modules_calls_presence;
   "modules/calls/push": typeof modules_calls_push;
@@ -668,9 +681,11 @@ declare const fullApi: ApiFromModules<{
   "modules/notifications/commerceAccess": typeof modules_notifications_commerceAccess;
   "modules/notifications/commerceEmit": typeof modules_notifications_commerceEmit;
   "modules/notifications/configuration": typeof modules_notifications_configuration;
+  "modules/notifications/consent": typeof modules_notifications_consent;
   "modules/notifications/deliveries": typeof modules_notifications_deliveries;
   "modules/notifications/digest": typeof modules_notifications_digest;
   "modules/notifications/fanout": typeof modules_notifications_fanout;
+  "modules/notifications/nativeChannels": typeof modules_notifications_nativeChannels;
   "modules/notifications/notify": typeof modules_notifications_notify;
   "modules/notifications/open": typeof modules_notifications_open;
   "modules/notifications/policy": typeof modules_notifications_policy;
@@ -819,28 +834,10 @@ declare const fullApi: ApiFromModules<{
   "seeds/devSocial": typeof seeds_devSocial;
   "seeds/foundations": typeof seeds_foundations;
 }>;
-
-/**
- * A utility for referencing Convex functions in your app's public API.
- *
- * Usage:
- * ```js
- * const myFunctionReference = api.myModule.myFunction;
- * ```
- */
 export declare const api: FilterApi<
   typeof fullApi,
   FunctionReference<any, "public">
 >;
-
-/**
- * A utility for referencing Convex functions in your app's internal API.
- *
- * Usage:
- * ```js
- * const myFunctionReference = internal.myModule.myFunction;
- * ```
- */
 export declare const internal: FilterApi<
   typeof fullApi,
   FunctionReference<any, "internal">

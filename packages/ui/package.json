@@ -12,6 +12,7 @@
     "./espace-kit": "./src/espace-kit/index.ts",
     "./styles.css": "./src/styles.css",
     "./themes/*.css": "./src/themes/*.css",
+    "./themes/antsia-native": "./src/themes/antsia-native.ts",
     "./lib/*": "./src/lib/*.ts"
   },
   "scripts": {

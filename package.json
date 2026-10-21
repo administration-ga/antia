@@ -77,7 +77,21 @@
       "vitest": "4.1.10",
       "zod": "3.25.76",
       "web-push": "3.6.7",
-      "@types/web-push": "3.6.4"
+      "@types/web-push": "3.6.4",
+      "expo": "57.0.17",
+      "react-native": "0.86.3",
+      "expo-secure-store": "~57.0.2",
+      "expo-video": "~57.0.3",
+      "expo-crypto": "~57.0.2",
+      "expo-system-ui": "~57.0.3",
+      "react-native-safe-area-context": "~5.7.0",
+      "@livekit/react-native": "3.1.0",
+      "@livekit/react-native-webrtc": "150.1.0",
+      "@livekit/react-native-expo-plugin": "1.1.0",
+      "@config-plugins/react-native-webrtc": "15.0.3",
+      "expo-modules-core": "~57.0.14",
+      "expo-dev-client": "~57.0.16",
+      "@expo/config-plugins": "~57.0.9"
     }
   },
   "scripts": {
