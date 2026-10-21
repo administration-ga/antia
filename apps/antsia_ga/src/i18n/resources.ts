@@ -12,6 +12,8 @@ import frProfileOverrides from "./overrides/u03-fr.json"
 import enProfileOverrides from "./overrides/u03-en.json"
 import frMessagesOverrides from "./overrides/u06-fr.json"
 import enMessagesOverrides from "./overrides/u06-en.json"
+import frLexiconOverrides from "./overrides/u09-fr.json"
+import enLexiconOverrides from "./overrides/u09-en.json"
 import frCommerceExperience from "./locales/fr/commerceExperience.json"
 import enCommerceExperience from "./locales/en/commerceExperience.json"
 import frSocialExperience from "./locales/fr/socialExperience.json"
@@ -48,6 +50,6 @@ function adapt(base: Record<string, Record<string, unknown>>, ...changes: Record
 // Chaque adaptation part des namespaces complets : les clés inchangées du
 // moteur et de l'application restent disponibles, au serveur comme au client.
 export const appResources: AppResources = {
-  fr: adapt({ ...engineResources.fr, antsia: frAntsia, memberNetwork: frMemberNetwork, publicNetwork: frPublicNetwork, shops: frShops, checkout: frCheckout, payment: frPayment, cart: frCart, purchases: frPurchases, jobs: frJobs, services: frServices, socialExperience: frSocialExperience, commerceExperience: frCommerceExperience }, frEngineOverrides, frProfileOverrides, frMessagesOverrides),
-  en: adapt({ ...engineResources.en, antsia: enAntsia, memberNetwork: enMemberNetwork, publicNetwork: enPublicNetwork, shops: enShops, checkout: enCheckout, payment: enPayment, cart: enCart, purchases: enPurchases, jobs: enJobs, services: enServices, socialExperience: enSocialExperience, commerceExperience: enCommerceExperience }, enEngineOverrides, enProfileOverrides, enMessagesOverrides),
+  fr: adapt({ ...engineResources.fr, antsia: frAntsia, memberNetwork: frMemberNetwork, publicNetwork: frPublicNetwork, shops: frShops, checkout: frCheckout, payment: frPayment, cart: frCart, purchases: frPurchases, jobs: frJobs, services: frServices, socialExperience: frSocialExperience, commerceExperience: frCommerceExperience }, frEngineOverrides, frProfileOverrides, frMessagesOverrides, frLexiconOverrides),
+  en: adapt({ ...engineResources.en, antsia: enAntsia, memberNetwork: enMemberNetwork, publicNetwork: enPublicNetwork, shops: enShops, checkout: enCheckout, payment: enPayment, cart: enCart, purchases: enPurchases, jobs: enJobs, services: enServices, socialExperience: enSocialExperience, commerceExperience: enCommerceExperience }, enEngineOverrides, enProfileOverrides, enMessagesOverrides, enLexiconOverrides),
 }

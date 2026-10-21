@@ -104,4 +104,20 @@ describe("ReseauMobileHeader — navigation par destinations (P02)", () => {
     expect(wordmark.hasAttribute("data-brand")).toBe(false)
     expect(wordmark.querySelector(".rm-wordmark-dot")).toBeNull()
   })
+
+  it("U09 : sous l'opt-in adaptatif, aucune porte Messages, même avec l'en-tête des chartes", () => {
+    const i18n = createAppI18n({ locale: "fr", appResources: { fr: {}, en: {} }, defaultNS: "social" })
+    render(
+      <I18nextProvider i18n={i18n}>
+        <RouterProvider implementation={memoryRouter({ pathname: TEST_ROUTES.home() }).implementation}>
+          <NetworkProvider networkId={TEST_NETWORK_ID} slug="test" personId={TEST_PERSON_ID} charte="antsia" routes={ROUTES} navigation="destinations" navigationLayout="adaptive" postPresentation="charte" wordmark="ANTSIA">
+            <ReseauMobileHeader onSearch={vi.fn()} searchQuery="" profileHref={null} avatarUrl={null} displayName="Awa Ndong" unreadMessages={3} />
+          </NetworkProvider>
+        </RouterProvider>
+      </I18nextProvider>,
+    )
+    expect(screen.queryByRole("link", { name: /Ouvrir iCom/ })).toBeNull()
+    expect(screen.getByRole("button", { name: BELL.label })).toBeTruthy()
+    expect(screen.getByRole("button", { name: "Ouvrir la recherche" })).toBeTruthy()
+  })
 })

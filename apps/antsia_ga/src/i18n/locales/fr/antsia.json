@@ -230,7 +230,7 @@
     "pageDecisionsUnavailable": "Les décisions de cette page ne sont pas accessibles pour le moment."
   },
   "settings": {
-    "title": "Paramètres",
+    "title": "Réglages",
     "lead": "Réglez l’affichage d’{{brand}}, sa langue et votre fuseau horaire.",
     "displayTitle": "Affichage",
     "displayLead": "Votre thème est enregistré sur votre compte et vous suit sur vos autres appareils. L’apparence et le motif de fond restent propres à cet appareil.",
@@ -424,5 +424,9 @@
     "delayed": "La démo met plus de temps à répondre. Vous pouvez patienter ou réessayer.",
     "retry": "Réessayer",
     "unavailable": "La démo est momentanément indisponible. Vous pouvez revenir à ANTSIA."
+  },
+  "account": {
+    "menu": "Mon compte",
+    "appearance": "Apparence"
   }
 }

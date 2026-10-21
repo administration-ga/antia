@@ -1,4 +1,4 @@
-// U02 — scénarios du rail adaptatif écrits sans exécution ni recette visuelle.
+// U02 — scénarios du rail adaptatif ; U09 (épure) : destinations, Boutiques, Créer, Réglages.
 // @vitest-environment jsdom
 
 import { NetworkProvider, type EngineNavigation, type EngineNavigationLayout, type EngineRoutes } from "@antsia/api/network"
@@ -11,7 +11,6 @@ import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest"
 import { createAppI18n } from "../i18n"
 import { memoryRouter, TEST_NETWORK_ID, TEST_PERSON_ID, TEST_ROUTES } from "../tests/engine-wrapper"
 import { AppearanceProvider } from "./appearance"
-import { reseauAgentGroupeHref, reseauAgentHref } from "./reseau-agent-nav"
 import { RESEAU_MENU_RAIL_ADAPTIVE_CSS } from "./reseau-menu-rail-styles"
 
 const mocks = vi.hoisted(() => ({
@@ -97,51 +96,50 @@ describe("ReseauMenuRail — capacité adaptative U02", () => {
     const create = vi.fn()
     render(rail(<ReseauMenuRail activeTab="fil" onCreate={create} />, { routes: { ...ROUTES, clips: () => "/clips-test" }, clipsLabel: "Clips" }))
     const primary = screen.getByRole("navigation", { name: "Navigation principale" })
-    expect(within(within(primary).getByRole("list")).getAllByRole("link").map(link => link.textContent)).toEqual(["Fil", "Clips", "Messages", "Découvrir", "Profil"])
+    expect(within(within(primary).getByRole("list")).getAllByRole("link").map(link => link.getAttribute("title"))).toEqual(["Fil", "Clips", "Messages", "Découvrir", "Profil"])
     const trigger = screen.getByRole("button", { name: "Créer" })
     fireEvent.click(trigger)
     fireEvent.click(within(screen.getByRole("group", { name: "Formats" })).getByRole("button", { name: /Actu/ }))
     expect(create).toHaveBeenCalledWith("actu")
     expect(document.activeElement).toBe(trigger)
   })
-  it("conserve toutes les portes nommées, les volets actifs et les raccourcis dans la colonne compacte", () => {
-    const select = vi.fn()
-    const { container } = render(rail(<ReseauMenuRail activeTab="groupes" onSelectTab={select} onCreate={vi.fn()} />))
+  it("U09 : ne garde que les destinations, Boutiques, Créer et Réglages, sans doublon", () => {
+    const { container } = render(rail(<ReseauMenuRail activeTab="groupes" onSelectTab={vi.fn()} onCreate={vi.fn()} />))
     expect(container.querySelector('[data-reseau-menu-layout="adaptive"]')).toBeTruthy()
     const primary = screen.getByRole("navigation", { name: "Navigation principale" })
-    expect(within(primary).getAllByRole("listitem").map(item => item.textContent)).toEqual(["Fil", "Découvrir", "Créer", "Messages", "Profil"])
+    expect(within(primary).getAllByRole("listitem").map(item => item.textContent)).toEqual(["Fil", "Découvrir", "Créer", "Messages", "ANProfil"])
+    // Boutiques suit les destinations, dans la même navigation, avant Créer.
+    const shops = within(primary).getByRole("link", { name: "Boutiques" })
+    expect(shops).toHaveAttribute("href", ROUTES.shops!())
+    expect(shops.style.minHeight).toBe("44px")
+    // Réglages : seule entrée du pied de rail.
     const network = screen.getByRole("navigation", { name: "Menu du réseau" })
+    expect(within(network).getAllByRole("link").map(link => link.textContent)).toEqual(["Paramètres"])
+    expect(within(network).getByRole("link", { name: "Paramètres" })).toHaveAttribute("href", ROUTES.settings!())
+    // « Dans le réseau », les raccourcis, la carte d'identité et l'apparence quittent le rail.
     for (const label of ["Relations", "Groupes", "Pages", "Conférences", "Évènements", "Enregistrements"]) {
-      const item = within(network).getByRole("button", { name: label })
-      expect(item).toHaveAttribute("title", label)
-      expect(item.style.minHeight).toBe("44px")
+      expect(screen.queryByRole("button", { name: label })).toBeNull()
     }
-    const groups = within(network).getByRole("button", { name: "Groupes" })
-    expect(groups).toHaveAttribute("aria-current", "page")
-    fireEvent.click(groups)
-    expect(select).toHaveBeenCalledWith("groupes")
-    expect(screen.getByRole("link", { name: "Atelier local" })).toHaveAttribute("href", ROUTES.page("atelier"))
-    expect(screen.getByRole("link", { name: "Entraide locale" })).toHaveAttribute("href", reseauAgentGroupeHref("group-test", ROUTES.home()))
-    expect(screen.getByRole("link", { name: "Boutiques" })).toHaveAttribute("href", ROUTES.shops!())
-    expect(screen.getByRole("link", { name: "Paramètres" })).toHaveAttribute("href", ROUTES.settings!())
-    expect(container.querySelector(".rmr-appearance-link")).toHaveAttribute("href", ROUTES.settings!())
-    expect(container.querySelector(".rmr-appearance-link")).toHaveAttribute("title", "Apparence")
-    // Présence et unicité seulement : jsdom ne prouve pas le rendu à une largeur donnée.
-    expect(container.querySelectorAll(".rmr-appearance-controls")).toHaveLength(1)
-    expect(screen.getAllByRole("combobox", { name: "Apparence" })).toHaveLength(1)
+    expect(screen.queryByRole("link", { name: "Atelier local" })).toBeNull()
+    expect(screen.queryByRole("link", { name: "Entraide locale" })).toBeNull()
+    expect(container.querySelector(".rmr-identity")).toBeNull()
+    expect(container.querySelector(".rmr-appearance-controls")).toBeNull()
+    expect(screen.queryByRole("combobox", { name: "Apparence" })).toBeNull()
   })
 
   it("garde les mêmes éléments interactifs entre 768 et 1200 sans second arbre ni perte du choix Créer", () => {
     const create = vi.fn()
     const { rerender } = render(rail(<ReseauMenuRail activeTab="fil" onCreate={create} />))
     const trigger = screen.getByRole("button", { name: "Créer" })
-    const profile = screen.getByRole("link", { name: /Awa NDONG/ })
-    expect(profile).toHaveAttribute("title", "Awa NDONG · @awa.ndong")
+    const profile = screen.getByRole("link", { name: "Profil" })
+    expect(profile).toHaveAttribute("href", ROUTES.me!())
+    // U09 : la photo (ici les initiales) tient lieu d'icône ; le nom accessible reste « Profil ».
+    expect(profile.textContent).toBe("ANProfil")
     for (const width of [1199, 1200, 768]) {
       act(() => { viewportWidth = width; for (const listener of mediaListeners) listener({ matches: false } as MediaQueryListEvent) })
       rerender(rail(<ReseauMenuRail activeTab="fil" onCreate={create} />))
       expect(screen.getByRole("button", { name: "Créer" })).toBe(trigger)
-      expect(screen.getByRole("link", { name: /Awa NDONG/ })).toBe(profile)
+      expect(screen.getByRole("link", { name: "Profil" })).toBe(profile)
       expect(screen.getAllByRole("navigation", { name: "Navigation principale" })).toHaveLength(1)
     }
     fireEvent.click(trigger)
@@ -152,21 +150,22 @@ describe("ReseauMenuRail — capacité adaptative U02", () => {
     expect(document.activeElement).toBe(trigger)
   })
 
-  it("préserve les noms de décompte et les badges plafonnés quand les labels sont masqués visuellement", () => {
+  it("préserve le nom de décompte et le badge plafonné de Messages quand les labels sont masqués visuellement", () => {
     mocks.unread = 99
     render(rail(<ReseauMenuRail activeTab="relations" counts={{ invitations: 105 }} onSelectTab={vi.fn()} />))
     const messages = screen.getByRole("link", { name: "Messages 99 conversations non lues" })
-    const relations = screen.getByRole("button", { name: /Relations.*105 invitations en attente/ })
     expect(messages.querySelector('.rmr-badge [aria-hidden="true"]')?.textContent).toBe("99+")
-    expect(relations.querySelector('.rmr-badge [aria-hidden="true"]')?.textContent).toBe("99+")
-    expect(relations).toHaveAttribute("aria-current", "page")
+    // U09 : les invitations se signalent dans le fil et par la cloche, plus dans un volet du rail.
+    expect(screen.queryByRole("button", { name: /Relations/ })).toBeNull()
   })
 
   it("reste une navigation par liens hors fil et ne montre jamais une identité non publiée", () => {
     mocks.published = false
-    render(rail(<ReseauMenuRail activeTab={null} onCreate={vi.fn()} />))
+    const { container } = render(rail(<ReseauMenuRail activeTab={null} onCreate={vi.fn()} />))
     expect(screen.queryByRole("link", { name: /Awa NDONG/ })).toBeNull()
-    expect(screen.getByRole("link", { name: "Groupes" })).toHaveAttribute("href", reseauAgentHref("groupes", ROUTES.home()))
+    expect(container.textContent).not.toContain("awa.ndong")
+    expect(screen.getByRole("link", { name: "Profil" })).toHaveAttribute("href", ROUTES.me!())
+    expect(screen.getByRole("link", { name: "Découvrir" })).toHaveAttribute("href", ROUTES.discover!())
   })
 
   it.each([
