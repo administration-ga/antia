@@ -357,5 +357,11 @@
     "followFailed": "L'abonnement n'a pas pu être enregistré.",
     "write": "Écrire",
     "writeLabel": "Écrire à {{name}}"
+  },
+  "feedClips": {
+    "title": "Clips du fil",
+    "hide": "Masquer les aperçus de clips",
+    "open": "Voir la vidéo de {{name}}",
+    "seeAll": "Voir tous les clips"
   }
 }

@@ -37,7 +37,8 @@ import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 
-import { RESEAU_PILL_ACTION_STYLE, RESEAU_SURFACE_STYLE } from "../../shell/design-styles"
+import { RESEAU_SURFACE_STYLE } from "../../shell/design-styles"
+import { COMPACT_SOCIAL_ACTION_STYLE } from "../social-action-style"
 import { useConnectionRequest } from "./use-connection-request"
 import { Avatar } from "./Avatar"
 import { personHref } from "./author-link"
@@ -52,11 +53,8 @@ const RAIL_SUGGESTIONS_SCAN = 24
 
 /** La géométrie de la pilule, sans couleur : la variante `social` garde la sienne (ADR-0027). */
 const PILL_SHAPE_STYLE = {
-  ...RESEAU_PILL_ACTION_STYLE,
-  padding: "6px 10px",
-  minHeight: 44,
-  fontSize: 11.5,
-  fontWeight: 700,
+  ...COMPACT_SOCIAL_ACTION_STYLE,
+  fontSize: 12,
 } as const
 
 /** Une demande déjà envoyée ou reçue : le bouton redevient neutre (ADR-0027). */
@@ -90,6 +88,18 @@ const DISCOVERY_CONTROLS_CSS = `
           .rp-discovery-module * { scroll-behavior: auto !important; }
         }
       `
+
+/** La photo est exclusivement l'URL publique délivrée par le DTO du catalogue. */
+function SuggestionPortrait({ displayName, avatarUrl }: { displayName: string; avatarUrl: string | null }) {
+  const [failedUrl, setFailedUrl] = useState<string | null>(null)
+  return (
+    <div style={{ aspectRatio: "4 / 3", width: "100%", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--ink-100)", overflow: "hidden" }}>
+      {avatarUrl && avatarUrl !== failedUrl ? (
+        <img src={avatarUrl} alt="" loading="lazy" decoding="async" onError={() => setFailedUrl(avatarUrl)} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+      ) : <Avatar displayName={displayName} size={80} />}
+    </div>
+  )
+}
 
 export function SuggestionsPanel({ presentation = "rail" }: { presentation?: DiscoveryPresentation }) {
   const { t } = useTranslation("reseau")
@@ -224,22 +234,25 @@ export function SuggestionsPanel({ presentation = "rail" }: { presentation?: Dis
                 display: "flex",
                 flex: presentation === "carousel" ? "0 0 min(212px, 76vw)" : undefined,
                 flexDirection: "column",
-                gap: 8,
+                gap: presentation === "carousel" ? 0 : 8,
                 minWidth: 0,
-                padding: presentation === "carousel" ? "var(--esp-card-padding, 10px)" : "0 44px 0 0",
+                padding: presentation === "carousel" ? 0 : "0 44px 0 0",
                 border: presentation === "carousel" ? "1px solid var(--esp-primitive-surface-border, var(--ink-200))" : undefined,
                 borderRadius: presentation === "carousel" ? "var(--esp-primitive-card-radius, var(--radius-md))" : undefined,
                 scrollSnapAlign: presentation === "carousel" ? "start" : undefined,
                 background: presentation === "carousel" ? "var(--ink-0)" : undefined,
+                overflow: presentation === "carousel" ? "hidden" : undefined,
               }}
             >
               <button
                 type="button"
                 className="rp-discovery-dismiss"
                 aria-label={t("suggestionsPanel.dismissLabel", { name: person.displayName })}
+                disabled={isBusy || connectionRequest.pendingHandle === person.handle}
                 onClick={() => void handleDismiss(person.handle)}
                 style={{
                   position: "absolute",
+                  zIndex: 1,
                   top: presentation === "carousel" ? 2 : -5,
                   right: presentation === "carousel" ? 2 : -5,
                   display: "inline-flex",
@@ -249,28 +262,34 @@ export function SuggestionsPanel({ presentation = "rail" }: { presentation?: Dis
                   justifyContent: "center",
                   border: 0,
                   borderRadius: "var(--esp-primitive-button-radius, var(--radius-lg))",
-                  background: "transparent",
+                  background: presentation === "carousel" ? "var(--ink-0)" : "transparent",
                   color: "var(--ink-500)",
                   cursor: "pointer",
                 }}
               >
                 <Icon name="x" size={16} />
               </button>
+              {presentation === "carousel" ? (
+                <Link href={href} aria-label={t("suggestionsPanel.profileOf", { name: person.displayName })} style={{ display: "block" }}>
+                  <SuggestionPortrait displayName={person.displayName} avatarUrl={person.avatarUrl} />
+                </Link>
+              ) : null}
               <div
                 style={{
                   display: "flex",
                   gap: 10,
                   alignItems: "center",
                   minWidth: 0,
+                  padding: presentation === "carousel" ? "12px 12px 0" : undefined,
                 }}
               >
-                <Link
+                {presentation === "rail" ? <Link
                   href={href}
                   aria-label={t("suggestionsPanel.profileOf", { name: person.displayName })}
                   style={{ display: "inline-flex", flexShrink: 0 }}
                 >
-                  <Avatar displayName={person.displayName} avatarUrl={person.avatarUrl} size={presentation === "carousel" ? 44 : 34} />
-                </Link>
+                  <Avatar displayName={person.displayName} avatarUrl={person.avatarUrl} size={34} />
+                </Link> : null}
                 <div style={{ minWidth: 0, flex: 1, overflow: "hidden" }}>
                   <Link
                     href={href}
@@ -304,18 +323,23 @@ export function SuggestionsPanel({ presentation = "rail" }: { presentation?: Dis
                   </p>
                 </div>
               </div>
-              <div style={{ display: "flex", justifyContent: "flex-end" }}>
-                <Button
+              <div style={{ display: "flex", justifyContent: "flex-end", padding: presentation === "carousel" ? 12 : undefined }}>
+                {person.relationState === "requested_by_them" ? (
+                  <Link href={peopleViewHref("invitations", routes.home())} style={{ ...PILL_SETTLED_STYLE, display: "inline-flex", alignItems: "center", justifyContent: "center", textDecoration: "none", width: presentation === "carousel" ? "100%" : undefined }}>
+                    {t("peopleActions.answerInvitation")}
+                  </Link>
+                ) : <Button
                   size="sm"
                   icon="userPlus"
                   // Se connecter : couleur des relations tant que la demande est possible (ADR-0027).
                   variant={person.relationState === "none" ? "social" : "ghost"}
                   disabled={relationActionDisabled(person.relationState, isBusy) || connectionRequest.disabled}
+                  aria-busy={isBusy}
                   onClick={() => void handleConnect(person.handle)}
-                  style={person.relationState === "none" ? PILL_SHAPE_STYLE : PILL_SETTLED_STYLE}
+                  style={{ ...(person.relationState === "none" ? PILL_SHAPE_STYLE : PILL_SETTLED_STYLE), width: presentation === "carousel" ? "100%" : undefined }}
                 >
-                  {(person.relationState === "none" && connectionRequest.waitLabel) || relationActionLabel(person.relationState, isBusy, t)}
-                </Button>
+                  {(person.relationState === "none" && connectionRequest.waitLabel) || (person.relationState === "none" && !isBusy ? t("peopleActions.add") : relationActionLabel(person.relationState, isBusy, t))}
+                </Button>}
               </div>
             </li>
           )

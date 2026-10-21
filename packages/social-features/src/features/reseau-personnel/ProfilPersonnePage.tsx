@@ -65,7 +65,8 @@
  * j'ai retiré mon profil, me ramène à sa gestion pour le republier.
  */
 
-import { themedActionStyle } from "../themed-action-style"
+import { COMPACT_SOCIAL_ACTION_STYLE } from "../social-action-style"
+import { peopleViewHref } from "./people-panel"
 import { api } from "@antsia/api/engine"
 import type { Id } from "@antsia/api/engine"
 import { useAuthenticatedConvexQuery } from "@antsia/api/hooks"
@@ -104,7 +105,6 @@ import {
 import { useConnectionRequest } from "./use-connection-request"
 import { Avatar } from "./Avatar"
 import {
-  RESEAU_ACTION_SHAPE_STYLE,
   RESEAU_CARD_STYLE,
   RESEAU_PRIMARY_ACTION_STYLE,
   RESEAU_SECONDARY_ACTION_STYLE,
@@ -904,6 +904,8 @@ function ConnectionButton({
   const { t } = useTranslation("reseau")
   const { networkId } = useNetwork()
   const connectionRequest = useConnectionRequest()
+  const routes = useRoutes()
+  const router = useRouter()
   const respond = useMutation(api.modules.graph.connections.respondToConnection)
   const [pending, setPending] = useState(false)
 
@@ -916,7 +918,7 @@ function ConnectionButton({
           variant="secondary"
           icon="userCheck"
           disabled
-          style={RESEAU_SECONDARY_ACTION_STYLE}
+          style={{ ...RESEAU_SECONDARY_ACTION_STYLE, ...COMPACT_SOCIAL_ACTION_STYLE }}
         >
           {t("profilPersonnePage.connection.connected")}
         </Button>
@@ -926,8 +928,8 @@ function ConnectionButton({
         <Button
           variant="secondary"
           icon="clock"
-          disabled
-          style={RESEAU_SECONDARY_ACTION_STYLE}
+          onClick={() => router.push(peopleViewHref("invitations", routes.home()))}
+          style={{ ...RESEAU_SECONDARY_ACTION_STYLE, ...COMPACT_SOCIAL_ACTION_STYLE }}
         >
           {t("profilPersonnePage.connection.requested")}
         </Button>
@@ -950,26 +952,25 @@ function ConnectionButton({
           .finally(() => setPending(false))
       }
       return (
-        <>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 8, width: "100%", maxWidth: 400 }}>
           <Button
-            // Accepter : couleur de validation, relations en repli hors ANTSIA (ADR-0027).
-            variant="success"
+            variant="social"
             icon="userCheck"
             disabled={pending}
-            style={themedActionStyle("success", "social", RESEAU_PRIMARY_ACTION_STYLE)}
+            style={COMPACT_SOCIAL_ACTION_STYLE}
             onClick={() => answer(true)}
           >
-            {t("profilPersonnePage.connection.accept")}
+            {t("peopleActions.confirm")}
           </Button>
           <Button
-            variant="danger"
+            variant="outline"
             disabled={pending}
-            style={themedActionStyle("danger", "ghost", RESEAU_SECONDARY_ACTION_STYLE)}
+            style={COMPACT_SOCIAL_ACTION_STYLE}
             onClick={() => answer(false)}
           >
             {t("profilPersonnePage.connection.decline")}
           </Button>
-        </>
+        </div>
       )
     }
     case "blocked_by_me":
@@ -978,7 +979,7 @@ function ConnectionButton({
           variant="ghost"
           icon="shieldAlert"
           disabled
-          style={RESEAU_SECONDARY_ACTION_STYLE}
+          style={{ ...RESEAU_SECONDARY_ACTION_STYLE, ...COMPACT_SOCIAL_ACTION_STYLE }}
         >
           {t("profilPersonnePage.connection.blocked")}
         </Button>
@@ -992,7 +993,7 @@ function ConnectionButton({
           variant="social"
           icon="userPlus"
           disabled={pending || connectionRequest.disabled}
-          style={RESEAU_PRIMARY_ACTION_STYLE}
+          style={COMPACT_SOCIAL_ACTION_STYLE}
           onClick={() => {
             setPending(true)
             void connectionRequest.send({ handle })
@@ -1005,7 +1006,7 @@ function ConnectionButton({
         >
           {connectionRequest.waitLabel ?? (pending
             ? t("profilPersonnePage.connection.sending")
-            : t("profilPersonnePage.connection.connect"))}
+            : t("peopleActions.add"))}
         </Button>
       )
   }
@@ -1035,7 +1036,7 @@ function FollowButton({
       variant={isFollowing ? "outline" : "social"}
       icon={isFollowing ? "check" : "plus"}
       disabled={pending}
-      style={RESEAU_ACTION_SHAPE_STYLE}
+      style={COMPACT_SOCIAL_ACTION_STYLE}
       onClick={() => {
         setPending(true)
         const action = isFollowing
@@ -1099,7 +1100,7 @@ function ContactButtons({ person }: { person: PublicProfile }) {
         // Écrire : bouton tonal, couleur des messages (ADR-0027).
         variant="message"
         icon="messageCircle"
-        style={RESEAU_ACTION_SHAPE_STYLE}
+        style={COMPACT_SOCIAL_ACTION_STYLE}
         onClick={write}
       >
         {t("profilPersonnePage.contact.write")}
@@ -1111,7 +1112,7 @@ function ContactButtons({ person }: { person: PublicProfile }) {
         aria-label={t("profilPersonnePage.contact.callLabel", {
           name: person.displayName,
         })}
-        style={RESEAU_SECONDARY_ACTION_STYLE}
+        style={{ ...RESEAU_SECONDARY_ACTION_STYLE, ...COMPACT_SOCIAL_ACTION_STYLE }}
         onClick={() =>
           void ring({
             personId: person.personId,

@@ -44,6 +44,29 @@ describe("vitrine publique rendue sans fournisseur membre", () => {
     expect(container.querySelector("button, form, [role=tablist]")).toBeNull()
   })
 
+  it.each(["catalog", "services"] as const)("le bandeau %s mène au vrai catalogue sans retirer le contenu injecté ni l’accès membre", (block) => {
+    const value: PublicStorefront = { ...storefront, blocks: ["about", block] }
+    const html = renderToStaticMarkup(<PublicStorefrontCard storefront={value} locale="fr" catalog={<section data-real-catalog>Contenu du catalogue</section>} />)
+    const container = document.createElement("div")
+    container.innerHTML = html
+    const links = Array.from(container.querySelectorAll("a"))
+    const catalogLink = links.find((link) => link.textContent === getAppT("fr").t("shops:catalog.openCatalog"))
+    expect(catalogLink?.getAttribute("href")).toBe(routes.publicShopCatalog(value.handle))
+    expect(links.some((link) => link.getAttribute("href") === routes.storefront(value.handle))).toBe(true)
+    expect(container.querySelector("[data-real-catalog]")?.textContent).toBe("Contenu du catalogue")
+    expect(container.textContent).toContain(value.description)
+    expect(container.querySelector("button, form")).toBeNull()
+  })
+
+  it("une vitrine sans bloc catalogue conserve la présentation sans promettre de produits", () => {
+    const html = renderToStaticMarkup(<PublicStorefrontCard storefront={storefront} locale="fr" />)
+    const container = document.createElement("div")
+    container.innerHTML = html
+    expect(Array.from(container.querySelectorAll("a")).some((link) => link.getAttribute("href") === routes.publicShopCatalog(storefront.handle))).toBe(false)
+    expect(container.querySelector("ul, img")).toBeNull()
+    expect(container.textContent).toContain(storefront.specialty)
+  })
+
   it("échappe les textes usagers et distingue l’origine projetée d’une mention dans la description", () => {
     const value: PublicStorefront = { ...storefront, name: '<script>Atelier</script>', description: 'Origine : FAUSSE <img onerror="injection()">', origin: { slug: "antsia", name: '<svg onload="injection()">ANTSIA</svg>' } }
     const html = renderToStaticMarkup(<PublicStorefrontCard storefront={value} locale="fr" />)

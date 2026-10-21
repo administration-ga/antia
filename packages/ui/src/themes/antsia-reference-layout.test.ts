@@ -7,6 +7,7 @@ import { ANTSIA_THEME_IDS, antsiaCharteFor } from "./antsia-themes"
 const read = (path: string) => readFileSync(new URL(path, import.meta.url), "utf8")
 const base = ["theme", "charte", "communication"].map((name) => ({ name, css: read(`../styles/${name}.css`) }))
 const geometry = {
+  "--esp-social-action-radius": "8px",
   "--esp-page-title-size": "26px", "--esp-page-title-leading": "1.1",
   "--esp-section-title-size": "20px", "--esp-section-title-leading": "1.2",
   "--esp-content-font-size": "15px", "--esp-field-font-size": "16px",

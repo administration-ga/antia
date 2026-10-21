@@ -1,0 +1,21 @@
+{
+  "connections": {
+    "before": 51,
+    "after": 52,
+    "missing": [],
+    "changed": [],
+    "added": [
+      {
+        "id": "mn7c9ww4c77dbkm57r1n4bwvkn8gqpxy",
+        "status": "accepted"
+      }
+    ]
+  },
+  "follows": {
+    "before": 14,
+    "after": 14,
+    "missing": [],
+    "changed": [],
+    "added": []
+  }
+}

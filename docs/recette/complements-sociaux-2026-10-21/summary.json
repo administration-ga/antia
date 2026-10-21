@@ -1,0 +1,74 @@
+{
+  "date": "2026-10-21",
+  "scope": "local anonymous backend and localhost:3030",
+  "feature": "Social interactions and shop presentation merged into existing ANTSIA components",
+  "testSuites": {
+    "socialFeatures": {
+      "files": 275,
+      "tests": 4157,
+      "passed": true
+    },
+    "antsiaApp": {
+      "files": 121,
+      "tests": 1115,
+      "passed": true
+    },
+    "themeGeometry": {
+      "tests": 8,
+      "passed": true
+    },
+    "targetedRatchets": {
+      "files": 6,
+      "tests": 17,
+      "passed": true
+    }
+  },
+  "typechecks": [
+    "local Convex codegen/typecheck",
+    "social-features",
+    "antsia_ga"
+  ],
+  "responsiveWidths": [
+    390,
+    834,
+    1440
+  ],
+  "visualTheme": "Gaboma dark",
+  "tokenTests": "seven ANTSIA themes, light/dark, nested context",
+  "localRecipe": "Demo moderation sends invitation; demo press confirms in notification",
+  "preservation": {
+    "connections": {
+      "before": 51,
+      "after": 52,
+      "missing": [],
+      "changed": [],
+      "added": [
+        {
+          "id": "mn7c9ww4c77dbkm57r1n4bwvkn8gqpxy",
+          "status": "accepted"
+        }
+      ]
+    },
+    "follows": {
+      "before": 14,
+      "after": 14,
+      "missing": [],
+      "changed": [],
+      "added": []
+    }
+  },
+  "browserConsole": {
+    "errors": 0,
+    "warnings": 2,
+    "scope": "final local storefront and offer detail only"
+  },
+  "notVerified": [
+    "production build",
+    "global verify",
+    "all seven themes visually",
+    "physical devices",
+    "video playback in browser for the new rail"
+  ],
+  "applicationCommitted": false,
+  "deployed": false
+}

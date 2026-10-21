@@ -1,4 +1,4 @@
-import { ImageOff } from "lucide-react"
+import { ArrowUpRight, ImageOff, Store } from "lucide-react"
 import Image from "next/image"
 import { browserAppPath } from "@/lib/app-path"
 import Link from "next/link"
@@ -6,9 +6,9 @@ import type { ReactNode } from "react"
 
 import { routes } from "@/lib/routes"
 import { catalogAvailability, catalogDate, catalogPrice, catalogVariantPrice, type CatalogAudience, type CatalogOffer, type CatalogTranslate } from "./catalog-model"
-import { OFFER_DETAIL_CSS } from "./offer-experience-styles"
+import { OFFER_CARD_CSS, OFFER_DETAIL_CSS, SHOP_ACTION_CLASS } from "./offer-experience-styles"
 
-const linkClass = "inline-flex min-h-11 items-center rounded-[var(--ui2-button-radius)] text-sm font-medium text-primary underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+const linkClass = "inline-flex min-h-11 items-center rounded-[var(--esp-social-action-radius,var(--ui2-button-radius))] text-sm font-medium text-primary underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
 
 export function OfferMedia({ media, title, t, className = "aspect-square" }: { media: CatalogOffer["media"][number] | undefined; title: string; t: CatalogTranslate; className?: string }) {
   if (!media || media.withheld !== null || !media.url) return <div className={`flex flex-col items-center justify-center gap-2 rounded-[var(--esp-media-radius)] bg-muted p-4 text-center text-sm text-muted-foreground ${className}`} role="img" aria-label={t(media?.withheld ? "catalog.mediaWithheld" : "catalog.noPhoto")}><ImageOff className="size-6" aria-hidden /><span>{t(media?.withheld ? "catalog.mediaWithheld" : "catalog.noPhoto")}</span></div>
@@ -19,18 +19,29 @@ export function OfferMedia({ media, title, t, className = "aspect-square" }: { m
 export function OfferCard({ offer, audience, locale, t, compact = false }: { offer: CatalogOffer; audience: CatalogAudience; locale: string; t: CatalogTranslate; compact?: boolean }) {
   const href = audience === "public" ? routes.publicShopOffer(offer.shopHandle, offer.offerRef) : routes.shopOffer(offer.shopHandle, offer.offerRef)
   const storefront = audience === "public" ? routes.publicStorefront(offer.shopHandle) : routes.storefront(offer.shopHandle)
-  return <article className={`antsia-panel flex h-full min-w-0 gap-3 [overflow-wrap:anywhere] ${compact ? "flex-row" : "flex-col"}`}>
-    <Link href={href} prefetch={false} className={`rounded-[var(--esp-media-radius)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${compact ? "w-20 shrink-0 self-start sm:w-28" : ""}`} aria-label={t("catalog.openOfferNamed", { title: offer.title })}><OfferMedia media={offer.media[0]} title={offer.title} t={t} /></Link>
-    <div className="flex min-w-0 flex-1 flex-col gap-2">
-      <p className="text-xs font-medium text-muted-foreground">{t(`catalog.kinds.${offer.kind}`)}</p>
-      <h3 className="font-display text-base font-bold leading-snug break-words"><Link href={href} prefetch={false} className="rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">{offer.title}</Link></h3>
-      <Link href={storefront} prefetch={false} className="inline-flex min-h-11 items-center self-start rounded text-sm text-muted-foreground underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">{t("catalog.soldBy", { handle: offer.shopHandle })}</Link>
-      <p className="break-words text-lg font-semibold">{catalogPrice(offer.price, locale, t)}</p>
-      {offer.variants.length ? <p className="text-xs text-muted-foreground">{t("catalog.hasVariants", { count: offer.variants.length })}</p> : null}
-      <p className="text-xs font-medium text-muted-foreground">{t("catalog.availability.title")}</p>
-      <p className="text-sm text-muted-foreground">{catalogAvailability(offer.availability, t)}</p>
-      {offer.availability.updatedAt !== null ? <p className="text-xs text-muted-foreground">{t("catalog.availability.updated", { date: catalogDate(offer.availability.updatedAt, locale) })}</p> : null}
-      <Link href={href} prefetch={false} className={`${linkClass} mt-auto self-start`}>{t("catalog.openOffer")}</Link>
+  return <article data-offer-card data-offer-compact={compact || undefined} className="flex h-full min-w-0 flex-col overflow-hidden rounded-[var(--ui2-card-radius)] border border-[color:var(--esp-surface-border)] bg-card text-card-foreground shadow-[var(--esp-surface-shadow)] [overflow-wrap:anywhere]">
+    <style>{OFFER_CARD_CSS}</style>
+    <Link href={href} prefetch={false} className="block min-w-0 p-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring" aria-label={t("catalog.openOfferNamed", { title: offer.title })}><OfferMedia media={offer.media[0]} title={offer.title} t={t} className={compact ? "aspect-[16/10]" : "aspect-[4/3]"} /></Link>
+    {offer.media.length > 1 ? <ul aria-label={t("catalog.offerPhotos")} className="flex min-w-0 snap-x gap-2 overflow-x-auto overscroll-x-contain px-2 pb-2">{offer.media.slice(1).map((media, index) => <li key={index} className="w-24 shrink-0 snap-start"><Link href={href} prefetch={false} aria-label={t("catalog.openOfferPhoto", { title: offer.title, index: index + 2 })} className="block min-h-11 rounded-[var(--esp-media-radius)] border border-border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"><OfferMedia media={media} title={offer.title} t={t} /></Link></li>)}</ul> : null}
+    <div className="flex min-w-0 flex-1 flex-col gap-3 p-[var(--esp-card-padding,16px)]">
+      <div className="flex min-w-0 flex-wrap items-center justify-between gap-x-3 gap-y-1">
+        <Link href={storefront} prefetch={false} className="inline-flex min-h-11 min-w-0 items-center gap-2 rounded text-sm font-medium text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"><Store className="size-4 shrink-0 text-[color:var(--role-commerce-ink,var(--primary))]" aria-hidden /><span className="break-words">{t("catalog.soldBy", { handle: offer.shopHandle })}</span></Link>
+        <span className="rounded-[var(--esp-social-action-radius,var(--ui2-button-radius))] bg-muted px-2 py-1 text-xs font-semibold">{t(`catalog.kinds.${offer.kind}`)}</span>
+      </div>
+      <div className="grid min-w-0 gap-2">
+        <p className="break-words text-lg font-semibold text-[color:var(--role-commerce-ink,var(--foreground))]">{catalogPrice(offer.price, locale, t)}</p>
+        {offer.variants.length ? <p className="text-xs text-muted-foreground">{t("catalog.hasVariants", { count: offer.variants.length })}</p> : null}
+        <p className="text-xs font-medium text-muted-foreground">{t("catalog.availability.title")}</p>
+        <p className="text-sm text-muted-foreground">{catalogAvailability(offer.availability, t)}</p>
+        {offer.availability.updatedAt !== null ? <p className="text-xs text-muted-foreground">{t("catalog.availability.updated", { date: catalogDate(offer.availability.updatedAt, locale) })}</p> : null}
+      </div>
+    </div>
+    <div className="offer-card-band mt-auto border-t border-border bg-muted p-[var(--esp-card-padding,16px)]">
+      <div className="grid min-w-0 gap-1">
+        <h3 className="break-words font-display text-base font-bold leading-snug"><Link href={href} prefetch={false} className="rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">{offer.title}</Link></h3>
+        <p className="line-clamp-2 whitespace-pre-wrap break-words text-sm text-muted-foreground">{offer.description || t("catalog.noDescription")}</p>
+      </div>
+      <Link href={href} prefetch={false} className={`${SHOP_ACTION_CLASS} offer-card-action`}>{t("catalog.openOffer")}<ArrowUpRight className="size-4 shrink-0" aria-hidden /></Link>
     </div>
   </article>
 }

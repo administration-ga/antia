@@ -240,7 +240,9 @@
       "nextOffers": "Offres suivantes",
       "previousPosts": "Publications précédentes",
       "nextPosts": "Publications suivantes"
-    }
+    },
+    "offerPhotos": "Photos de l’offre",
+    "openOfferPhoto": "Consulter {{title}}, photo {{index}}"
   },
   "link": {
     "title": "Mon activité PRO.GA",

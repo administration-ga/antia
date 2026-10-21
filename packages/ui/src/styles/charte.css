@@ -690,6 +690,8 @@
      sans avoir adopté ces composants ; leurs replis restent donc inchangés. */
   --esp-primitive-card-radius: initial;
   --esp-primitive-button-radius: initial;
+  /* Actions de relation et de catalogue, distinctes des filtres en pilule. */
+  --esp-social-action-radius: initial;
   --esp-primitive-badge-radius: initial;
   --esp-primitive-chip-radius: initial;
   --esp-primitive-chip-bg: initial;

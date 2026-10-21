@@ -177,6 +177,78 @@ beforeEach(() => {
   mocks.relations.isError = false
   mocks.relations.isLoading = false
   mocks.relations.hasMore = false
+  mocks.relations.remove.mockReset()
+})
+
+describe("PeoplePanel — gestes des invitations reçues", () => {
+  const invitation = {
+    connectionId: "connections_elise", otherPersonId: "persons_elise", handle: "elise.ndong",
+    displayName: "Élise NDONG", headline: "Journaliste", avatarUrl: null,
+    message: null, at: Date.UTC(2026, 9, 21, 12),
+  }
+
+  it.each([
+    { label: "Confirmer", accept: true },
+    { label: "Refuser", accept: false },
+  ])("$label répond à la demande exacte, puis retire la ligne confirmée par le serveur", async ({ label, accept }) => {
+    mocks.relations.items = [invitation]
+    monter("vue=invitations")
+    expect(screen.getByText("Élise NDONG")).toBeTruthy()
+    expect(screen.getByText("@elise.ndong")).toBeTruthy()
+    expect(screen.getByText(/^Demande du /).getAttribute("datetime")).toBe("2026-10-21T12:00:00.000Z")
+    await act(async () => { fireEvent.click(screen.getByRole("button", { name: label })) })
+    expect(mocks.mutations.respondToConnection).toHaveBeenCalledExactlyOnceWith({ networkId: TEST_NETWORK_ID, connectionId: invitation.connectionId, accept })
+    expect(mocks.relations.remove).toHaveBeenCalledExactlyOnceWith(invitation.connectionId)
+  })
+
+  it("une réponse en attente désarme les deux gestes ; un refus serveur conserve la demande", async () => {
+    let reject: (error: Error) => void = () => undefined
+    mocks.mutations.respondToConnection = vi.fn(() => new Promise((_resolve, fail) => { reject = fail }))
+    mocks.relations.items = [invitation]
+    monter("vue=invitations")
+    fireEvent.click(screen.getByRole("button", { name: "Confirmer" }))
+    fireEvent.click(screen.getByRole("button", { name: "Refuser" }))
+    expect(screen.getByRole("button", { name: "Confirmer" })).toBeDisabled()
+    expect(screen.getByRole("button", { name: "Refuser" })).toBeDisabled()
+    expect(mocks.mutations.respondToConnection).toHaveBeenCalledTimes(1)
+    await act(async () => { reject(new Error("refused")) })
+    expect(mocks.relations.remove).not.toHaveBeenCalled()
+    expect(screen.getByText("Élise NDONG")).toBeTruthy()
+    expect(screen.getByRole("button", { name: "Confirmer" })).not.toBeDisabled()
+  })
+})
+
+describe("PeoplePanel — attente et échec des gestes sociaux", () => {
+  it("Ajouter conserve le verrou partagé et revient disponible après un échec sans inventer un état envoyé", async () => {
+    let reject: (error: Error) => void = () => undefined
+    mocks.mutations.requestConnection = vi.fn(() => new Promise((_resolve, fail) => { reject = fail }))
+    mocks.queries.suggestionsPaginate = ok(pageOf([suggestion("elise", "Élise NDONG")]))
+    monter("vue=suggestions")
+    fireEvent.click(screen.getByRole("button", { name: "Ajouter" }))
+    expect(screen.getByRole("button", { name: "Connexion…" })).toBeDisabled()
+    expect(mocks.mutations.requestConnection).toHaveBeenCalledExactlyOnceWith({ networkId: TEST_NETWORK_ID, handle: "elise", returnRateLimit: true })
+    await act(async () => { reject(new Error("refused")) })
+    expect(screen.getByRole("button", { name: "Ajouter" })).not.toBeDisabled()
+    expect(screen.queryByRole("button", { name: "Demande envoyée" })).toBeNull()
+  })
+
+  it("l'annulation attend la réponse serveur et garde sa version et sa carte après un échec", async () => {
+    let reject: (error: Error) => void = () => undefined
+    mocks.mutations.cancelSentRequest = vi.fn(() => new Promise((_resolve, fail) => { reject = fail }))
+    mocks.queries.paginateSentInvitations = ok(pageOf([{
+      connectionId: "connections_elise", otherPersonId: "persons_elise", handle: "elise.ndong", displayName: "Élise NDONG", headline: null, avatarUrl: null, at: 84,
+    }]))
+    monter("vue=invitations")
+    const cancel = screen.getByRole("button", { name: "Annuler la demande envoyée à Élise NDONG" })
+    fireEvent.click(cancel)
+    fireEvent.click(cancel)
+    expect(cancel).toBeDisabled()
+    expect(mocks.mutations.cancelSentRequest).toHaveBeenCalledExactlyOnceWith({ networkId: TEST_NETWORK_ID, connectionId: "connections_elise", expectedRequestedAt: 84 })
+    expect(screen.getByText("Élise NDONG")).toBeTruthy()
+    await act(async () => { reject(new Error("staleRequest")) })
+    expect(screen.getByText("Élise NDONG")).toBeTruthy()
+    expect(cancel).not.toBeDisabled()
+  })
 })
 
 afterEach(cleanup)
