@@ -101,6 +101,12 @@ La marketplace ajoute treize tables et des fonctions Convex. Les publications pr
 
 Ces gestes restent soumis à la décision explicite du propriétaire (CLAUDE.md du dépôt, PA9).
 
+Script préparé, non lancé : `scripts/convex-deploy-demo-production.sh`. Il part d'un export propre de `origin/main` et refuse de continuer si la marketplace n'y est pas. Il vérifie que chaque clé (`ANTSIA_CONVEX_DEMO_DEPLOY_KEY`, `ANTSIA_CONVEX_PROD_DEPLOY_KEY`, lues dans l'environnement, jamais affichées) désigne le bon déploiement. Il montre l'aperçu `--dry-run`, fait retaper le nom de chaque cible, et marque une pause entre démonstration et production pour les graines de démo. Le mode `verifier` ne fait que les contrôles.
+
+```bash
+ANTSIA_CONVEX_DEMO_DEPLOY_KEY='…' ANTSIA_CONVEX_PROD_DEPLOY_KEY='…' bash scripts/convex-deploy-demo-production.sh verifier
+```
+
 Schéma : sur les tables existantes, seulement des champs optionnels et des unions élargies ; les champs obligatoires appartiennent aux tables nouvelles. Si Convex refusait la validation sur les données réelles, la version en service resterait active.
 
 ## Retour arrière
