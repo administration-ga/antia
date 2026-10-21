@@ -59,3 +59,23 @@ Autres contrôles :
 2. Le front de `main` 9927c9c (PR 41, « Mes signalements ») reste à publier.
 3. La fiche boutique laisse beaucoup de vide à 1440 px : catalogue sur deux colonnes étroites
    dans un cadre de 768 px (ShopFrame `max-w-3xl`), déjà relevé le 21/10.
+
+## Mise à jour — publication de `main` 1942aa7 (iCom en colonne droite)
+
+- Entre-temps : backend 9927c9c (PR 41), fronts 3ba59c7 publiés par la session marketplace ; recette
+  connectée conforme (cloche : 3 demandes ; marketplace : 13 produits et 20 services).
+- Les 7 actus du jour sont posées (images 54/54), sans clé, par la connexion CLI du Mac.
+- PR 44 : `MessagerieDock` revient en tête de la colonne droite du fil (décision du propriétaire).
+  Front seul, aucun changement sous `convex/`.
+- Fronts promus (accord écrit du propriétaire) :
+  - enfant démo : `dpl_CXq6fxP6AjzaP4te2C9p2gZFACi5` (antsia-demo-g8bhjmocb), version `main-1942aa7ebfb5-demo` ;
+  - principal : `dpl_DR58SLXdJnfHYhgG1xuD8pSgoJAn` (antsia-fl8eoqzvl), version `main-1942aa7ebfb5-production`.
+  - Contexte : ANTSIA 1942aa7 et DIASPORALE 214831c, 3 236 fichiers, empreinte `35dac378…`.
+  - Retour arrière : antsia-fqt7jo4yd (principal) et antsia-demo-9wd9liokh (enfant).
+- Recette :
+  - 1440 : iCom (« Messages ») en tête de la colonne droite, puis Personnes à découvrir ;
+  - 834 : colonne droite repliée, comme prévu ;
+  - 390 : bande des actus avec images ;
+  - aucun débordement horizontal, aucune ressource en erreur.
+- Reste : la démo n'a encore aucune conversation, donc iCom affiche « Aucune conversation » pour
+  les comptes de démonstration.
