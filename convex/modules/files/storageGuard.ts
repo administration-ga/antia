@@ -60,14 +60,16 @@ export async function servableUrl(ctx: UrlCtx, storageId: Id<"_storage">): Promi
   return (await resolveFileDelivery(ctx, storageId)).url
 }
 
-/** Le code d'un fichier que la garde RETIENT : en cours d'analyse, ou bloqué. */
-export type WithheldCode = "fileScanPending" | "fileQuarantined"
+/** Le code d'un fichier que la garde RETIENT : analyse en cours, indisponible, ou bloqué. */
+export type WithheldCode = "fileScanPending" | "fileScanUnavailable" | "fileQuarantined"
 
 /** Validateur du code de retenue, pour une réponse qui le rend en donnée. */
-export const withheldCodeValidator = v.union(v.literal("fileScanPending"), v.literal("fileQuarantined"))
+export const withheldCodeValidator = v.union(v.literal("fileScanPending"), v.literal("fileScanUnavailable"), v.literal("fileQuarantined"))
 
 /** Pourquoi la garde retient ce fichier — `null` s'il est servable (sain ou sauté). */
 export function withheldCodeOf(status: FileScanStatus | null | undefined): WithheldCode | null {
+  // Une analyse en échec retient le fichier sans le déclarer dangereux (comportement des backends en ligne).
+  if (status === "error") return "fileScanUnavailable"
   switch (serviceStateOf(status)) {
     case "servable":
       return null
