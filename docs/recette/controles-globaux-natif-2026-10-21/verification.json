@@ -1,0 +1,91 @@
+{
+  "command": "bun run verify",
+  "exitCode": 0,
+  "node": "22.22.3",
+  "started": 1792541112.553788,
+  "finished": 1792542202.866463,
+  "durationSeconds": 1090.31,
+  "backend": {
+    "testFiles": 179,
+    "tests": 2716,
+    "result": "passed"
+  },
+  "workspaceScripts": {
+    "typecheck": 12,
+    "test": 12,
+    "lint": 11
+  },
+  "workspaceTests": {
+    "@antsia/social-domain": "899 passed | 3 skipped (902)",
+    "@antsia/social-contracts": "86 passed (86)",
+    "@antsia/api": "219 passed (219)",
+    "@antsia/social-native": "31 passed (31)",
+    "@antsia/ui": "2286 passed (2286)",
+    "@antsia/social-features": "4119 passed (4119)",
+    "@diasporale/domain": "697 passed",
+    "@diasporale/features": "878 passed (878)",
+    "admin-antsia-ga": "81 passed (81)",
+    "antsia-ga": "763 passed (763)",
+    "antsia-mobile": "58 passed (58)",
+    "diasporale-com": "1402 passed (1402)"
+  },
+  "lint": {
+    "errors": 0,
+    "warnings": 253
+  },
+  "verifyLogSha256": "1e089e01c1e1c298ca035babfe7cf441117a073bb12cca0bc2fcdf6f0a43b75d",
+  "frozenInstallResult": "passed; no changes",
+  "sourceVersion": "global-native-20261021-08edc2d08cb9b596",
+  "sourceDigest": "08edc2d08cb9b596fd9bf050f6e31f9e8bd51602ce46bed7831583edfdfa45bf",
+  "commits": [
+    {
+      "product": "ANTSIA",
+      "parent": "5b8939470887d6b85ac8d56045fbd3002d06be11",
+      "baseline": "5b8939470887d6b85ac8d56045fbd3002d06be11",
+      "sourceCommit": "1b6a45e2498935d5bffd055e8f27a2b1f7a56938",
+      "branch": "codex/controles-globaux-natif-20261021",
+      "files": 2430,
+      "tree": "c92c5a071a0a6a275268d89bf4eb6639cabd1f94",
+      "priorSourceCommit": "8200ba8abe4192294800539505eacbe42d12cbef"
+    },
+    {
+      "product": "DIASPORALE",
+      "parent": "fab55ef0b2101aac70c4351f02fdfc74b5ee3f3a",
+      "baseline": "fab55ef0b2101aac70c4351f02fdfc74b5ee3f3a",
+      "sourceCommit": "0ea572a2042534a338481e45771a272b6a30bf77",
+      "branch": "codex/contrats-medias-20261021",
+      "files": 752,
+      "tree": "951c20299f1f4dd59e2e5d1dd7461dbbe95eb5d9"
+    }
+  ],
+  "preservation": {
+    "productionBackendDeployed": false,
+    "productionDataMutated": false,
+    "environmentFilesEdited": false,
+    "sharedIndexesUnchanged": true,
+    "newerResponsiveReleaseRetained": "5b8939470887d6b85ac8d56045fbd3002d06be11",
+    "mobileDistributionPerformed": false,
+    "physicalDeviceTestsPerformed": false,
+    "concurrentFavicon": {
+      "deploymentId": "dpl_HnnqfRxbwo88ui8uq12Bhawn63xJ",
+      "version": "favicon-20261021-da994563d25d2e11",
+      "sha256": "17d852570781ea593894532cff3ef4e5c57481d873db9eabbf911ccec3ea9149",
+      "path": "ANTSIA/apps/antsia_ga/src/app/favicon.ico",
+      "commit": "1b6a45e2498935d5bffd055e8f27a2b1f7a56938"
+    }
+  },
+  "codegen": "read-only code generation against the existing local backend 127.0.0.1:3210",
+  "postVerifyChanges": [
+    {
+      "kind": "documentation",
+      "reason": "retain already committed reports of the parallel responsive release",
+      "runtimeChanged": false
+    },
+    {
+      "kind": "published asset",
+      "path": "ANTSIA/apps/antsia_ga/src/app/favicon.ico",
+      "sha256": "17d852570781ea593894532cff3ef4e5c57481d873db9eabbf911ccec3ea9149",
+      "validation": "second production build and staged/public binary hashes"
+    }
+  ]
+}

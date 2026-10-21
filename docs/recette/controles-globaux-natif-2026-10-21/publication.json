@@ -1,0 +1,143 @@
+{
+  "publishedAt": "2026-10-21T00:32:20.833309+00:00",
+  "status": "published",
+  "url": "https://antsia.vercel.app",
+  "deploymentId": "dpl_8CeRkqMNT7reNhCQcvVXZ3q5UWjt",
+  "deploymentUrl": "https://antsia-p3pqifg4f-okatechs-projects-f0102678.vercel.app",
+  "version": "global-native-20261021-08edc2d08cb9b596",
+  "sourceCommit": "1b6a45e2498935d5bffd055e8f27a2b1f7a56938",
+  "diasporaleSourceCommit": "0ea572a2042534a338481e45771a272b6a30bf77",
+  "build": {
+    "exitCode": 0,
+    "url": "https://antsia-p3pqifg4f-okatechs-projects-f0102678.vercel.app",
+    "version": "global-native-20261021-08edc2d08cb9b596",
+    "sourceCommit": "1b6a45e2498935d5bffd055e8f27a2b1f7a56938",
+    "branch": "codex/controles-globaux-natif-20261021",
+    "started": 1792542562.18175,
+    "finished": 1792542600.59091,
+    "changedSourcesAfterCLI": [],
+    "target": "staged production; canonical alias unchanged"
+  },
+  "stagedChecks": {
+    "checkedAt": "2026-10-21T00:30:32.614369+00:00",
+    "target": "staged",
+    "url": "https://antsia-p3pqifg4f-okatechs-projects-f0102678.vercel.app",
+    "version": "global-native-20261021-08edc2d08cb9b596",
+    "checks": [
+      {
+        "path": "/api/sante-fonctionnelle",
+        "status": 200,
+        "productionBackendInCsp": true,
+        "health": {
+          "status": "ok",
+          "application": "antsia-ga",
+          "version": "global-native-20261021-08edc2d08cb9b596",
+          "backend": "configured"
+        }
+      },
+      {
+        "path": "/entrer",
+        "status": 200,
+        "productionBackendInCsp": true,
+        "title": "Entrer sur ANTSIA"
+      },
+      {
+        "path": "/decouvrir",
+        "status": 200,
+        "productionBackendInCsp": true,
+        "title": "Explorer le réseau"
+      },
+      {
+        "path": "/sante-fonctionnelle",
+        "status": 200,
+        "productionBackendInCsp": true,
+        "title": "ANTSIA — le réseau social public gabonais"
+      },
+      {
+        "path": "/favicon.ico",
+        "status": 200,
+        "sha256": "17d852570781ea593894532cff3ef4e5c57481d873db9eabbf911ccec3ea9149",
+        "concurrentPublicationPreserved": true
+      }
+    ],
+    "authenticatedPagesVerified": false,
+    "dataMutations": false
+  },
+  "publicChecks": {
+    "checkedAt": "2026-10-21T00:30:59.176778+00:00",
+    "target": "public",
+    "url": "https://antsia.vercel.app",
+    "version": "global-native-20261021-08edc2d08cb9b596",
+    "checks": [
+      {
+        "path": "/api/sante-fonctionnelle",
+        "status": 200,
+        "productionBackendInCsp": true,
+        "health": {
+          "status": "ok",
+          "application": "antsia-ga",
+          "version": "global-native-20261021-08edc2d08cb9b596",
+          "backend": "configured"
+        }
+      },
+      {
+        "path": "/entrer",
+        "status": 200,
+        "productionBackendInCsp": true,
+        "title": "Entrer sur ANTSIA"
+      },
+      {
+        "path": "/decouvrir",
+        "status": 200,
+        "productionBackendInCsp": true,
+        "title": "Explorer le réseau"
+      },
+      {
+        "path": "/sante-fonctionnelle",
+        "status": 200,
+        "productionBackendInCsp": true,
+        "title": "ANTSIA — le réseau social public gabonais"
+      },
+      {
+        "path": "/favicon.ico",
+        "status": 200,
+        "sha256": "17d852570781ea593894532cff3ef4e5c57481d873db9eabbf911ccec3ea9149",
+        "concurrentPublicationPreserved": true
+      }
+    ],
+    "authenticatedPagesVerified": false,
+    "dataMutations": false
+  },
+  "preservation": {
+    "appHeadUnchanged": true,
+    "appIndexUnchanged": true,
+    "diasporaleHeadUnchanged": true,
+    "diasporaleStagedUnchanged": true,
+    "localServer": {
+      "status": 200,
+      "health": {
+        "status": "ok",
+        "application": "antsia-ga",
+        "version": "dev",
+        "backend": "configured"
+      }
+    }
+  },
+  "runtimeErrorScan": {
+    "deploymentId": "dpl_8CeRkqMNT7reNhCQcvVXZ3q5UWjt",
+    "levels": [
+      "error",
+      "fatal"
+    ],
+    "from": "2026-10-21T00:21:34.946Z",
+    "to": "2026-10-21T00:31:34.946Z",
+    "matchingLogs": 0
+  },
+  "visualProof": {
+    "file": "etat-public.png",
+    "sha256": "51fc98a94a4204356073e5c3a90a4bad85e79c3acaad8188510da039df18533c",
+    "visibleVersion": "global-native-20261021-08edc2d08cb9b596"
+  },
+  "noProductionConvexCommand": true,
+  "noMobileDistribution": true
+}
