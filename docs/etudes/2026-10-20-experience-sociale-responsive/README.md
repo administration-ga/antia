@@ -31,11 +31,11 @@ restent la principale source de couleur.
 
 ## État au 21 octobre 2026
 
-- U01–U08 raccordés au Web ANTSIA et publiés sur https://antsia.vercel.app, version `social-responsive-20261021-e34875c094de4b4f`.
+- U01–U08 raccordés au Web ANTSIA et publiés sur https://antsia.vercel.app, version `responsive-recipe-20261021-5e87719d6f0eb0e7`.
 - Navigation téléphone/tablette/ordinateur, cartes et Stories, Explorer/Clips, profils, Messages et commerce contextuel implémentés avec les gardes existantes.
-- Vérifications exécutées et corrections intégrées ; candidat final :763 tests application,4079 social-features, build Next16.4.2 et lint des six workspaces sans erreur. Résultats et reprises datés dans le [bilan U08](rapports/U08_LIVRAISON_2026-10-21.md).
+- Vérifications exécutées et corrections intégrées ; candidat final :763 tests application,4119 social-features, build Next16.4.2 et lint des six workspaces sans erreur. Résultats et reprises datés dans le [bilan U08](rapports/U08_LIVRAISON_2026-10-21.md).
 - Branche `codex/experience-sociale-responsive-20261021` poussée ; backend média et frontend publiés. Correctifs de session et performances de l’autre session conservés.
-- Contrôle global arrêté sur l’application externe DIASPORALE ; recette visuelle/authentifiée et appels physiques non exécutés. Le natif reste distinct du Web responsive et n’est pas publié par cette livraison.
+- Reprise du 21 octobre : contrôle global réussi (11 paquets), recette en ligne 390/834/1440 et correctifs publiés ; [bilan précis](rapports/U08_RECETTE_EN_LIGNE_2026-10-21.md). Les révocations de la recette parallèle interrompent certains parcours ; brouillon réel, appels et appareils physiques restent hors preuve. Le natif reste distinct du Web responsive et n’est pas publié par cette livraison.
 
 Les lectures de fichiers et l'extraction locale d'images vidéo servent l'analyse demandée ;
 elles ne constituent pas une recette de l'application. Les médias d'origine ne sont ni copiés
