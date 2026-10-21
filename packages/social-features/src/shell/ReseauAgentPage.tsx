@@ -1030,8 +1030,9 @@ function ReseauAgentPageInner({ adaptive }: { adaptive: boolean }) {
             une surface autonome ; les modules publics suivent dans le même
             scroller et remontent aussitôt que la carte est détachée. */}
         <aside className="rp-rail-end rp-identity-aside citizen-scrollbar" aria-label={t("reseauAgentPage.railEndLabel")}>
-          {/* U09 : la destination Messages porte la messagerie ; pas de doublon iCom ici. */}
-          {adaptive ? null : <MessagerieDock />}
+          {/* iCom reste en tête de la colonne droite, y compris sous la navigation adaptative
+              (décision du propriétaire du 22/10, qui revient sur ce retrait d'U09). */}
+          <MessagerieDock />
           {rails.suggestions ? <SuggestionsPanel /> : null}
           {rails.pagesToFollow ? <PagesSuggestionsRail /> : null}
           {rails.events ? <EvenementsRail now={now} /> : null}
