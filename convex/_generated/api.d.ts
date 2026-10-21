@@ -370,6 +370,7 @@ import type * as modules_shops_commerceLinkLifecycle from "../modules/shops/comm
 import type * as modules_shops_commerceLinkTables from "../modules/shops/commerceLinkTables.js";
 import type * as modules_shops_commerceLinks from "../modules/shops/commerceLinks.js";
 import type * as modules_shops_decisions from "../modules/shops/decisions.js";
+import type * as modules_shops_demoCatalog from "../modules/shops/demoCatalog.js";
 import type * as modules_shops_jobAccess from "../modules/shops/jobAccess.js";
 import type * as modules_shops_jobApplicationClient from "../modules/shops/jobApplicationClient.js";
 import type * as modules_shops_jobApplicationLifecycle from "../modules/shops/jobApplicationLifecycle.js";
@@ -416,6 +417,10 @@ import type * as modules_suggestions_tables from "../modules/suggestions/tables.
 import type * as modules_thematicGroups_access from "../modules/thematicGroups/access.js";
 import type * as modules_thematicGroups_tables from "../modules/thematicGroups/tables.js";
 import type * as modules_thematicGroups_thematicGroups from "../modules/thematicGroups/thematicGroups.js";
+import type * as seeds_demoContent from "../seeds/demoContent.js";
+import type * as seeds_demoContentConfig from "../seeds/demoContentConfig.js";
+import type * as seeds_demoContentMedia from "../seeds/demoContentMedia.js";
+import type * as seeds_demoMediaManifest from "../seeds/demoMediaManifest.js";
 import type * as seeds_devSocial from "../seeds/devSocial.js";
 import type * as seeds_foundations from "../seeds/foundations.js";
 
@@ -785,6 +790,7 @@ declare const fullApi: ApiFromModules<{
   "modules/shops/commerceLinkTables": typeof modules_shops_commerceLinkTables;
   "modules/shops/commerceLinks": typeof modules_shops_commerceLinks;
   "modules/shops/decisions": typeof modules_shops_decisions;
+  "modules/shops/demoCatalog": typeof modules_shops_demoCatalog;
   "modules/shops/jobAccess": typeof modules_shops_jobAccess;
   "modules/shops/jobApplicationClient": typeof modules_shops_jobApplicationClient;
   "modules/shops/jobApplicationLifecycle": typeof modules_shops_jobApplicationLifecycle;
@@ -831,6 +837,10 @@ declare const fullApi: ApiFromModules<{
   "modules/thematicGroups/access": typeof modules_thematicGroups_access;
   "modules/thematicGroups/tables": typeof modules_thematicGroups_tables;
   "modules/thematicGroups/thematicGroups": typeof modules_thematicGroups_thematicGroups;
+  "seeds/demoContent": typeof seeds_demoContent;
+  "seeds/demoContentConfig": typeof seeds_demoContentConfig;
+  "seeds/demoContentMedia": typeof seeds_demoContentMedia;
+  "seeds/demoMediaManifest": typeof seeds_demoMediaManifest;
   "seeds/devSocial": typeof seeds_devSocial;
   "seeds/foundations": typeof seeds_foundations;
 }>;

@@ -11,6 +11,7 @@ import { v } from "convex/values"
 import type { Doc, Id } from "../../_generated/dataModel"
 import type { QueryCtx } from "../../_generated/server"
 import { networkQuery } from "../../lib/functions"
+import { demoContentAllowed } from "../../seeds/demoContentConfig"
 import { commercialThreadAccess } from "../commercialMessaging/access"
 import { isServableStorage } from "../files/storageGuard"
 import { canReadModeratedContent } from "../moderation/policy"
@@ -18,6 +19,7 @@ import { findPageByHandle } from "../pages/access"
 import { isStorefrontInReadingContext, shopOfPage, storefrontPolicyOf } from "./access"
 import { resolveCatalogOffer } from "./catalogRead"
 import { catalogOfferValidator, type CatalogOffer } from "./catalogValidators"
+import { demoCatalogForShop } from "./demoCatalog"
 import { storefrontsOpen } from "./rules"
 import { servicePolicyOpen, validServiceId } from "./serviceAccess"
 import { projectServiceRequest, SERVICE_PAGE_MAX, serviceRequestValidator, type ServiceRequestDto } from "./serviceRules"
@@ -129,17 +131,22 @@ async function readingWindowShops(ctx: QueryCtx & { network: Doc<"networks">; ne
 }
 
 /**
- * L'onglet Services existe-t-il ? Oui seulement si au moins une VRAIE offre de service publiée
- * et consentie est lisible parmi les quarante vitrines publiées les plus récentes du contexte.
+ * L'onglet Services exige une offre publiée et consentie parmi quarante vitrines au plus.
+ * Le catalogue fictif est réservé à l'environnement démo et garde ses actions fermées.
  */
 export const discoverAvailability = networkQuery({
   minStatus: "declaree", args: {}, returns: v.object({ available: v.boolean() }),
   handler: async (ctx) => {
-    if (erasing(ctx.person) || !storefrontsOpen(await storefrontPolicyOf(ctx, ctx.networkId)) || !await servicePolicyOpen(ctx, ctx.networkId)) return { available: false }
-    const cache: PolicyCache = new Map([[ctx.networkId, true]])
+    if (erasing(ctx.person) || !storefrontsOpen(await storefrontPolicyOf(ctx, ctx.networkId))) return { available: false }
+    const servicesOpen = await servicePolicyOpen(ctx, ctx.networkId)
+    if (!servicesOpen && !demoContentAllowed()) return { available: false }
+    const cache: PolicyCache = new Map([[ctx.networkId, servicesOpen]])
     const context = { root: ctx.rootNetwork, readerPersonId: ctx.person._id, network: ctx.network }
     for (const shop of await readingWindowShops(ctx, DISCOVER_AVAILABILITY_SHOPS)) {
-      if (!await policyOpen(ctx, cache, shop.networkId) || !await isStorefrontInReadingContext(ctx, shop, ctx.network)) continue
+      if (!await isStorefrontInReadingContext(ctx, shop, ctx.network)) continue
+      const demo = await demoCatalogForShop(ctx, context, shop._id)
+      if (demo?.offers.some((offer) => offer.kind === "service")) return { available: true }
+      if (!servicesOpen || !await policyOpen(ctx, cache, shop.networkId)) continue
       // borné : douze dernières offres actives de la vitrine.
       const heads = await ctx.db.query("commerceCatalogHeads").withIndex("by_network_shop_kind_state_changedAt", (q) => q.eq("networkId", shop.networkId).eq("shopId", shop._id).eq("objectKind", "offer").eq("sequence", "catalog").eq("state", "active")).order("desc").take(12)
       for (const head of heads) {
@@ -153,13 +160,16 @@ export const discoverAvailability = networkQuery({
 /**
  * Rubrique Services de Découvrir : vitrines publiées du contexte de lecture (fenêtre bornée),
  * puis au plus trois offres de SERVICE publiées et consenties par vitrine (projection P09).
- * Politique « services » fermée : rien n'est montré (aucune offre inventée).
+ * La politique commerciale reste exigée pour les vraies offres ; seules les illustrations
+ * explicitement gardées de la démonstration sont visibles sans ouvrir les commandes P14.
  */
 export const discoverServices = networkQuery({
   minStatus: "declaree", args: { paginationOpts: paginationOptsValidator }, returns: paginationResultValidator(catalogOfferValidator),
   handler: async (ctx, args): Promise<PaginationResult<CatalogOffer>> => {
     const empty = { page: [], isDone: true, continueCursor: "" }
-    if (erasing(ctx.person) || !storefrontsOpen(await storefrontPolicyOf(ctx, ctx.networkId)) || !await servicePolicyOpen(ctx, ctx.networkId)) return empty
+    if (erasing(ctx.person) || !storefrontsOpen(await storefrontPolicyOf(ctx, ctx.networkId))) return empty
+    const servicesOpen = await servicePolicyOpen(ctx, ctx.networkId)
+    if (!servicesOpen && !demoContentAllowed()) return empty
     const requested = args.paginationOpts.numItems
     const opts = {
       ...args.paginationOpts,
@@ -169,11 +179,17 @@ export const discoverServices = networkQuery({
     const window = ctx.network.kind === "root"
       ? await ctx.db.query("shops").withIndex("by_storefront_publishedAt", (q) => q.eq("storefront", "published")).order("desc").paginate(opts)
       : await ctx.db.query("shops").withIndex("by_network_storefront_publishedAt", (q) => q.eq("networkId", ctx.networkId).eq("storefront", "published")).order("desc").paginate(opts)
-    const cache: PolicyCache = new Map([[ctx.networkId, true]])
+    const cache: PolicyCache = new Map([[ctx.networkId, servicesOpen]])
     const context = { root: ctx.rootNetwork, readerPersonId: ctx.person._id, network: ctx.network }
     const page: CatalogOffer[] = []
     for (const shop of window.page) {
-      if (!await policyOpen(ctx, cache, shop.networkId) || !await isStorefrontInReadingContext(ctx, shop, ctx.network)) continue
+      if (!await isStorefrontInReadingContext(ctx, shop, ctx.network)) continue
+      const demo = await demoCatalogForShop(ctx, context, shop._id)
+      if (demo) {
+        page.push(...demo.offers.filter((offer) => offer.kind === "service").slice(0, DISCOVER_OFFERS_PER_SHOP))
+        continue
+      }
+      if (!servicesOpen || !await policyOpen(ctx, cache, shop.networkId)) continue
       // borné : douze dernières offres actives de la vitrine, filtrées sur le type « service ».
       const heads = await ctx.db.query("commerceCatalogHeads").withIndex("by_network_shop_kind_state_changedAt", (q) => q.eq("networkId", shop.networkId).eq("shopId", shop._id).eq("objectKind", "offer").eq("sequence", "catalog").eq("state", "active")).order("desc").take(12)
       let shown = 0

@@ -13,9 +13,10 @@ import { findPageByHandle } from "../pages/access"
 import { isStorefrontInReadingContext, shopOfPage } from "./access"
 import { headBelongsToCurrentCatalog, readableCatalogMapping } from "./catalogAccess"
 import type { CatalogList, CatalogOffer } from "./catalogValidators"
+import { demoCatalogForShop, isDemoCollectionRef, isDemoOfferRef, paginateDemoCatalog, resolveDemoCatalogOffer } from "./demoCatalog"
 
 export type CatalogReadContext = { root: Doc<"networks">; readerPersonId?: Id<"persons">; network?: Doc<"networks"> }
-type ReadCtx = Pick<QueryCtx, "db">
+type ReadCtx = Pick<QueryCtx, "db"> & Partial<Pick<QueryCtx, "runQuery">>
 export type CatalogListArgs = { handle: string; kind?: "product" | "service"; collectionRef?: string; query?: string; paginationOpts: PaginationOptions }
 const STALE_MS = 15 * 60 * 1000
 const normalized = (value: string) => value.normalize("NFKD").replace(/\p{M}/gu, "").toLowerCase()
@@ -55,6 +56,7 @@ async function project(ctx: ReadCtx, context: CatalogReadContext, head: Doc<"com
 }
 
 export async function resolveCatalogOffer(ctx: ReadCtx, context: CatalogReadContext, shopId: Id<"shops">, offerRef: string): Promise<CatalogOffer | null> {
+  if (isDemoOfferRef(offerRef)) return await resolveDemoCatalogOffer(ctx, context, shopId, offerRef)
   if (parseCommerceRef(offerRef)?.kind !== "offer") return null
   const live = await contextFor(ctx, context, shopId)
   if (!live) return null
@@ -76,10 +78,13 @@ export async function catalogOfferByHandle(ctx: ReadCtx, context: CatalogReadCon
 export async function listCatalog(ctx: ReadCtx, context: CatalogReadContext, args: CatalogListArgs): Promise<CatalogList> {
   const query = args.query?.normalize("NFC").trim() ?? ""
   if (query.length > 120) return fail("invalidArgument", { field: "query" })
-  if (args.collectionRef && parseCommerceRef(args.collectionRef)?.kind !== "offer_collection") return fail("invalidArgument", { field: "collectionRef" })
   const empty: CatalogList = { page: [], isDone: true, continueCursor: "", collections: [], filteredWindow: false }
   const page = await findPageByHandle(ctx, args.handle)
   const shop = page ? await shopOfPage(ctx, page._id) : null
+  const demo = shop ? await demoCatalogForShop(ctx, context, shop._id) : null
+  if (demo) return paginateDemoCatalog(demo, args)
+  if (args.collectionRef && isDemoCollectionRef(args.collectionRef)) return empty
+  if (args.collectionRef && parseCommerceRef(args.collectionRef)?.kind !== "offer_collection") return fail("invalidArgument", { field: "collectionRef" })
   const live = shop ? await contextFor(ctx, context, shop._id) : null
   if (!live) return empty
   const numItems = Number.isFinite(args.paginationOpts.numItems) ? Math.min(12, Math.max(1, Math.floor(args.paginationOpts.numItems))) : 12
@@ -96,6 +101,8 @@ export async function listCatalog(ctx: ReadCtx, context: CatalogReadContext, arg
 
 /** Prévisualisation P07 : fenêtre explicite de douze, jamais prétendue exhaustive. */
 export async function catalogStorefrontBlocks(ctx: ReadCtx, root: Doc<"networks">, shop: Doc<"shops">, readerPersonId?: Id<"persons">): Promise<Array<"catalog" | "services">> {
+  const demo = await demoCatalogForShop(ctx, { root, readerPersonId }, shop._id)
+  if (demo?.offers.length) return [shop.model === "quote_services" ? "services" : "catalog"]
   const context = { root, readerPersonId }, live = await contextFor(ctx, context, shop._id)
   if (!live) return []
   const heads = await ctx.db.query("commerceCatalogHeads").withIndex("by_network_shop_kind_state_changedAt", (q) => q.eq("networkId", shop.networkId).eq("shopId", shop._id).eq("objectKind", "offer").eq("sequence", "catalog").eq("state", "active")).order("desc").take(12)
