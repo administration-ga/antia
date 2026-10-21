@@ -160,6 +160,29 @@
       "mute": "Restriction de publication",
       "suspension": "Suspension temporaire",
       "exclusion": "Exclusion"
+    },
+    "deadlines": {
+      "title": "Délais légaux",
+      "lead": "Signalements soumis aux délais de l’ordonnance n° 0011/PR/2026, l’échéance la plus proche d’abord.",
+      "empty": "Aucun signalement à délai légal en attente.",
+      "truncated": "Seules les 50 échéances les plus proches sont affichées.",
+      "summary_one": "{{count}} signalement à délai légal",
+      "summary_other": "{{count}} signalements à délai légal",
+      "overdueCount_one": "dont {{count}} en retard",
+      "overdueCount_other": "dont {{count}} en retard",
+      "basis": {
+        "art24": "Art. 24 : décision notifiée sous 72 h",
+        "art32": "Art. 32 : contenu d’IA interdit, retrait sous 24 h",
+        "art33": "Art. 33 : retrait sous 24 h"
+      },
+      "remaining": "Reste {{duration}}",
+      "overdue": "En retard de {{duration}}",
+      "hoursMinutes": "{{hours}} h {{minutes}} min",
+      "minutes": "{{minutes}} min",
+      "dueAt": "Échéance : {{date}}",
+      "acknowledged": "Accusé de réception envoyé le {{date}}",
+      "notAcknowledged": "Accusé de réception non remis",
+      "ordinaryTitle": "Autres signalements"
     }
   }
 }

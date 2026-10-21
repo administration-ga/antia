@@ -80,6 +80,8 @@ export interface EngineRoutes {
   jobApplication?: (applicationId: string) => string
   pageModerationDecisions?: (pageId: string) => string
   personalDecisions?: () => string
+  /** SU01d : « Mes signalements ». */
+  personalReports?: () => string
 }
 
 /**

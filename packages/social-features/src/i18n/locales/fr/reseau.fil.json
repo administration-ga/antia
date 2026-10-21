@@ -151,12 +151,19 @@
       "editorialMedia": "Signaler ce média"
     },
     "description": "La plateforme instruit le signalement. L’auteur ne connaît pas votre identité.",
+    "followUp": "Vous recevrez un accusé de réception, puis la décision, dans vos notifications et dans « Mes données et mes recours ».",
     "reasonLabel": "Motif",
     "reasons": {
-      "harassment": "Harcèlement ou intimidation",
+      "harassment": "Harcèlement, cyberharcèlement ou intimidation",
+      "minor_harm": "Contenu préjudiciable impliquant un mineur",
       "hate": "Haine ou discrimination",
       "violence": "Violence ou menace",
       "sexual_content": "Contenu sexuel inapproprié",
+      "deepfake_of_me": "Hypertrucage qui me représente sans mon accord",
+      "prohibited_ai_content": "Contenu d'IA interdit (hypertrucage sexuel, faux propos…)",
+      "institution_impersonation": "Imitation d'une institution de l'État",
+      "impersonation": "Usurpation d'identité",
+      "privacy_or_honor": "Atteinte à la vie privée ou à l'honneur",
       "misinformation": "Information trompeuse",
       "other": "Autre motif"
     },

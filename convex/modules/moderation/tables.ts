@@ -4,7 +4,7 @@
  * du réseau du contenu les reçoit. La modération à l'échelle (équipes, sanctions,
  * recours, relecture) arrive en PA5 sur cette table.
  */
-import { CONTENT_REPORT_REASONS, CONTENT_REPORT_STATUSES } from "@antsia/social-domain/moderation"
+import { CONTENT_REPORT_REASONS, CONTENT_REPORT_STATUSES, REPORT_LEGAL_BASES } from "@antsia/social-domain/moderation"
 import { MODERATION_SURFACES, SANCTION_KINDS } from "@antsia/social-domain/moderationPolicy"
 import { defineTable } from "convex/server"
 import { v } from "convex/values"
@@ -13,6 +13,7 @@ import { literals } from "../../lib/validators"
 
 export const contentReportReasonValidator = literals(CONTENT_REPORT_REASONS)
 export const contentReportStatusValidator = literals(CONTENT_REPORT_STATUSES)
+export const reportLegalBasisValidator = literals(REPORT_LEGAL_BASES)
 export const moderationSurfaceValidator = literals(MODERATION_SURFACES)
 export const sanctionKindValidator = literals(SANCTION_KINDS)
 export const moderationTargetValidator = v.union(
@@ -58,9 +59,18 @@ export const moderationTables = {
     teamId: v.optional(v.id("moderationTeams")), level: v.union(v.literal("team"), v.literal("network"), v.literal("platform")),
     status: contentReportStatusValidator, removedTarget: v.optional(v.boolean()), createdAt: v.number(), updatedAt: v.number(),
     reviewedAt: v.optional(v.number()), reviewedByPersonId: v.optional(v.id("persons")), decisionReason: v.optional(v.string()),
+    // SU01d (ordonnance n° 0011/PR/2026, art. 24, 32, 33) : le délai légal posé à la transmission, absent hors délai légal ;
+    // le réseau où le DÉCLARANT a signalé (sa cloche), distinct du réseau du contenu ; les dates de ses deux avis.
+    legalBasis: v.optional(reportLegalBasisValidator), dueAt: v.optional(v.number()), reporterNetworkId: v.optional(v.id("networks")),
+    acknowledgedAt: v.optional(v.number()), reporterNotifiedAt: v.optional(v.number()),
   }).index("by_reporter_target", ["reporterPersonId", "targetKind", "targetId"])
     .index("by_network_status_createdAt", ["networkId", "status", "createdAt"])
     .index("by_team_status_createdAt", ["teamId", "status", "createdAt"])
+    // SU01d : la file des délais légaux, l'échéance la plus proche d'abord ; `dueAt` absent = file ordinaire.
+    .index("by_network_status_dueAt", ["networkId", "status", "dueAt"])
+    .index("by_team_status_dueAt", ["teamId", "status", "dueAt"])
+    // SU01d : « Mes signalements », le plus récent d'abord.
+    .index("by_reporter_createdAt", ["reporterPersonId", "createdAt"])
     .index("by_owner_createdAt", ["ownerPersonId", "createdAt"])
     .index("by_createdAt", ["createdAt"])
     .index("by_target_status", ["targetKind", "targetId", "status"])

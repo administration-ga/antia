@@ -160,6 +160,29 @@
       "mute": "Publishing restriction",
       "suspension": "Temporary suspension",
       "exclusion": "Exclusion"
+    },
+    "deadlines": {
+      "title": "Legal deadlines",
+      "lead": "Reports subject to the deadlines of Ordinance No. 0011/PR/2026, nearest deadline first.",
+      "empty": "No report with a legal deadline is waiting.",
+      "truncated": "Only the 50 nearest deadlines are shown.",
+      "summary_one": "{{count}} report with a legal deadline",
+      "summary_other": "{{count}} reports with a legal deadline",
+      "overdueCount_one": "({{count}} overdue)",
+      "overdueCount_other": "({{count}} overdue)",
+      "basis": {
+        "art24": "Art. 24: decision notified within 72 h",
+        "art32": "Art. 32: prohibited AI content, removal within 24 h",
+        "art33": "Art. 33: removal within 24 h"
+      },
+      "remaining": "{{duration}} left",
+      "overdue": "{{duration}} overdue",
+      "hoursMinutes": "{{hours}} h {{minutes}} min",
+      "minutes": "{{minutes}} min",
+      "dueAt": "Deadline: {{date}}",
+      "acknowledged": "Acknowledgement sent on {{date}}",
+      "notAcknowledged": "Acknowledgement not delivered",
+      "ordinaryTitle": "Other reports"
     }
   }
 }
