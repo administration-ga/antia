@@ -49,6 +49,7 @@ async function mount(locale: "fr" | "en" = "fr", shared = false) {
 const buttons = () => [...container.querySelectorAll<HTMLButtonElement>("button")]
 
 beforeEach(() => {
+  vi.stubEnv("NEXT_PUBLIC_APP_BASE_PATH", "")
   state.catalogue = [PRESSE, NOUVEAU]
   state.latestOtp.mockReset().mockResolvedValue({ code: "482913", expiresAt: Date.now() + 300_000 })
   state.send.mockReset().mockResolvedValue({ data: { success: true }, error: null })
@@ -63,6 +64,7 @@ afterEach(async () => {
   root = undefined
   container?.remove()
   vi.unstubAllGlobals()
+  vi.unstubAllEnvs()
   window.sessionStorage.clear()
 })
 
@@ -101,6 +103,16 @@ describe("DemoAccountsPanel", () => {
     // L'acteur attend l'automate d'accueil, dans cet onglet seulement.
     expect(pendingDemoAccount()).toEqual(PRESSE)
     expect(window.sessionStorage.getItem(DEMO_ACCOUNT_KEY)).not.toBeNull()
+  })
+
+  it("garde le parcours OTP du build démo sous /demo après authentification", async () => {
+    vi.stubEnv("NEXT_PUBLIC_APP_BASE_PATH", "/demo")
+    vi.stubEnv("NEXT_PUBLIC_CONVEX_URL", "https://vivid-hedgehog-655.convex.cloud")
+    await mount()
+    await act(async () => buttons()[0]!.click())
+    expect(state.send).toHaveBeenCalledExactlyOnceWith({ email: PRESSE.email, type: "sign-in" })
+    expect(state.verify).toHaveBeenCalledExactlyOnceWith({ email: PRESSE.email, otp: "482913" })
+    expect(state.assign).toHaveBeenCalledExactlyOnceWith("/demo/bienvenue")
   })
 
   it("un refus d'authentification n'ouvre rien, oublie l'acteur et le dit", async () => {

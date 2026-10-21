@@ -127,4 +127,21 @@ describe("îlot de thème des pages publiques", () => {
     expect(mocks.clearAuth).toHaveBeenCalledOnce()
     expect(mocks.setTheme).not.toHaveBeenCalled()
   })
+
+  it("le build /demo conserve une URL Convex absolue sans préfixer le transport du thème", async () => {
+    vi.stubEnv("NEXT_PUBLIC_APP_BASE_PATH", "/demo")
+    vi.stubEnv("NEXT_PUBLIC_CONVEX_URL", "https://vivid-hedgehog-655.convex.cloud")
+    const network = vi.fn<typeof fetch>().mockResolvedValue(new Response("{}"))
+    vi.stubGlobal("fetch", network)
+    mocks.query.mockImplementationOnce(async () => {
+      const adapter = mocks.construct.mock.calls.at(-1)?.[1]?.fetch
+      if (!adapter) throw new Error("missing public fetch adapter")
+      await adapter("https://vivid-hedgehog-655.convex.cloud/api/query", { method: "POST" })
+      return { theme: "sable" }
+    })
+    await act(async () => root!.render(<PublicAccountTheme enabled />))
+    expect(mocks.construct).toHaveBeenCalledExactlyOnceWith("https://vivid-hedgehog-655.convex.cloud", { fetch: expect.any(Function) })
+    expect(network).toHaveBeenCalledWith("https://vivid-hedgehog-655.convex.cloud/api/query", { method: "POST", cache: "no-store", signal: expect.any(AbortSignal) })
+    expect(mocks.setTheme).toHaveBeenCalledExactlyOnceWith("sable")
+  })
 })

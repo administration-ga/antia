@@ -13,6 +13,7 @@ const mocks = vi.hoisted(() => ({
   replace: vi.fn(),
   status: "signedOut",
   callbackURL: undefined as string | undefined,
+  authenticated: undefined as (() => void) | undefined,
 }))
 
 vi.mock("next/navigation", () => ({ useRouter: () => ({ replace: mocks.replace }) }))
@@ -27,8 +28,9 @@ vi.mock("@antsia/api/viewer-preferences", () => ({ useViewerTimeZone: () => "UTC
 vi.mock("@/lib/auth-client", () => ({ authClient: {} }))
 vi.mock("@/lib/session-bridge-client", () => ({ fencedIdentityEntryClient: (client: unknown) => client }))
 vi.mock("@antsia/social-features/identity", () => ({
-  IdentityEntry: ({ callbackURL }: { callbackURL: string }) => {
+  IdentityEntry: ({ callbackURL, onAuthenticated }: { callbackURL: string; onAuthenticated: () => void }) => {
     mocks.callbackURL = callbackURL
+    mocks.authenticated = onAuthenticated
     return <form data-identity-entry="" />
   },
 }))
@@ -51,9 +53,11 @@ async function mount(children: ReactNode) {
 }
 
 beforeEach(() => {
+  vi.stubEnv("NEXT_PUBLIC_APP_BASE_PATH", "")
   vi.clearAllMocks()
   mocks.status = "signedOut"
   mocks.callbackURL = undefined
+  mocks.authenticated = undefined
 })
 
 afterEach(async () => {
@@ -61,6 +65,8 @@ afterEach(async () => {
   host?.remove()
   root = undefined
   host = undefined
+  vi.unstubAllGlobals()
+  vi.unstubAllEnvs()
 })
 
 describe("connexion — retour vers la publication après admission", () => {
@@ -73,6 +79,26 @@ describe("connexion — retour vers la publication après admission", () => {
   it("conserve la publication en revenant de l'inscription à la connexion", async () => {
     await mount(<SignInCard intent="sign-up" publicPostId={POST_ID} />)
     expect(host?.querySelector("a")?.getAttribute("href")).toBe(routes.signIn(undefined, POST_ID))
+  })
+
+  it("préserve la continuation dans le callback et la navigation complète du build démo", async () => {
+    vi.stubEnv("NEXT_PUBLIC_APP_BASE_PATH", "/demo")
+    vi.stubEnv("NEXT_PUBLIC_CONVEX_URL", "https://vivid-hedgehog-655.convex.cloud")
+    const assign = vi.fn()
+    vi.stubGlobal("location", { ...window.location, assign })
+    await mount(<SignInCard publicPostId={POST_ID} />)
+    expect(mocks.callbackURL).toBe(`/demo/bienvenue?publication=${POST_ID}`)
+    await act(async () => mocks.authenticated?.())
+    expect(assign).toHaveBeenCalledExactlyOnceWith(`/demo/bienvenue?publication=${POST_ID}`)
+    expect(host?.querySelector("a")?.getAttribute("href")).toBe(routes.signIn("sign-up", POST_ID))
+  })
+
+  it("conserve une destination logique pour le routeur Next dans le build démo", async () => {
+    vi.stubEnv("NEXT_PUBLIC_APP_BASE_PATH", "/demo")
+    vi.stubEnv("NEXT_PUBLIC_CONVEX_URL", "https://vivid-hedgehog-655.convex.cloud")
+    mocks.status = "member"
+    await mount(<SignInCard publicPostId={POST_ID} />)
+    expect(mocks.replace).toHaveBeenCalledWith(routes.memberPost(POST_ID))
   })
 
   it.each([

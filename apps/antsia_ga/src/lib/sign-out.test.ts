@@ -7,8 +7,13 @@ vi.mock("./session-bridge-client", () => ({ requestSessionBridge: mocks.bridge, 
 import { signOutAndRedirect } from "./sign-out"
 import { routes } from "./routes"
 
-beforeEach(() => { mocks.lock.mockImplementation(async (work: () => Promise<unknown>) => work()) })
-afterEach(() => { vi.unstubAllGlobals(); mocks.sdk.mockReset(); mocks.bridge.mockReset(); mocks.fence.mockReset(); mocks.lock.mockReset() })
+function memoryStorage(): Storage {
+  const data = new Map<string, string>()
+  return { get length() { return data.size }, key: (index) => [...data.keys()][index] ?? null, getItem: (key) => data.get(key) ?? null, setItem: (key, value) => { data.set(key, value) }, removeItem: (key) => { data.delete(key) }, clear: () => { data.clear() } }
+}
+
+beforeEach(() => { vi.stubEnv("NEXT_PUBLIC_APP_BASE_PATH", ""); mocks.lock.mockImplementation(async (work: () => Promise<unknown>) => work()) })
+afterEach(() => { vi.unstubAllGlobals(); vi.unstubAllEnvs(); mocks.sdk.mockReset(); mocks.bridge.mockReset(); mocks.fence.mockReset(); mocks.lock.mockReset() })
 describe("sortie avec purge du pont", () => {
   it("une révocation et deux purges confirmées retournent à l'entrée sans avertissement", async () => {
     const assign = vi.fn()
@@ -18,6 +23,30 @@ describe("sortie avec purge du pont", () => {
     mocks.bridge.mockResolvedValue(true)
     await signOutAndRedirect()
     await vi.waitFor(() => expect(assign).toHaveBeenCalledWith(routes.signedOut(false)))
+  })
+  it.each([true, false])("reste dans la démo après sortie, purge confirmée : %s", async (bridgeCleared) => {
+    vi.stubEnv("NEXT_PUBLIC_APP_BASE_PATH", "/demo")
+    vi.stubEnv("NEXT_PUBLIC_CONVEX_URL", "https://vivid-hedgehog-655.convex.cloud")
+    const assign = vi.fn()
+    vi.stubGlobal("window", { location: { assign }, localStorage: memoryStorage(), sessionStorage: memoryStorage() })
+    mocks.fence.mockReturnValue("generation")
+    mocks.sdk.mockImplementation(async (_client, options) => { options.navigate({ serverRevoked: true, localCleared: true }); return {} })
+    mocks.bridge.mockResolvedValue(bridgeCleared)
+    await signOutAndRedirect()
+    expect(assign).toHaveBeenCalledExactlyOnceWith(bridgeCleared ? "/demo/entrer" : "/demo/entrer?deconnexion=incomplete")
+  })
+  it("un stockage démo indisponible ne replie jamais la purge sur le stockage principal", async () => {
+    vi.stubEnv("NEXT_PUBLIC_APP_BASE_PATH", "/demo")
+    vi.stubEnv("NEXT_PUBLIC_CONVEX_URL", "https://vivid-hedgehog-655.convex.cloud")
+    const assign = vi.fn()
+    vi.stubGlobal("window", { location: { assign } })
+    mocks.fence.mockReturnValue("generation")
+    mocks.sdk.mockImplementation(async (_client, options) => { expect(options.storages).toEqual([]); options.navigate({ serverRevoked: true, localCleared: true }); return {} })
+    mocks.bridge.mockResolvedValue(true)
+    await signOutAndRedirect()
+    expect(mocks.sdk).toHaveBeenCalledOnce()
+    expect(mocks.bridge).toHaveBeenCalledWith("DELETE", { generation: "generation", anonymous: false })
+    expect(assign).toHaveBeenCalledWith("/demo/entrer?deconnexion=incomplete")
   })
   it("ferme synchroniquement, attend la purge locale avant navigation et signale son échec", async () => {
     const order: string[] = [], assign = vi.fn(() => { order.push("navigate") })

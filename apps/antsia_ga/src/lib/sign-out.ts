@@ -1,17 +1,28 @@
 "use client"
 import { signOutEverywhere } from "@antsia/api/sign-out-everywhere"
 import { authClient } from "./auth-client"
+import { demoSessionStorage } from "./demo-storage"
+import { appBasePath, browserAppPath } from "./app-path"
 import { routes } from "./routes"
 import { requestSessionBridge, rotateSessionBridgeFence, withSessionBridgeLock } from "./session-bridge-client"
 
 async function finishSignOut(generation: string | null): Promise<void> {
   let navigation: Promise<void> = Promise.resolve()
+  let storageUnavailable = false
+  let storages: Storage[] | undefined
+  if (appBasePath()) {
+    storages = []
+    try { storages = [demoSessionStorage()!, demoSessionStorage("sessionStorage")!] }
+    catch { storageUnavailable = true }
+  }
   await signOutEverywhere(authClient, {
+    storages,
     navigate: (result) => {
       // Le callback démarre la navigation, le verrou shared reste acquis jusqu'au nouveau document.
       navigation = (async () => {
-        const bridgeCleared = generation !== null && await requestSessionBridge("DELETE", { generation, anonymous: result.localCleared })
-        window.location.assign(routes.signedOut(!result.serverRevoked || !result.localCleared || !bridgeCleared))
+        const localCleared = result.localCleared && !storageUnavailable
+        const bridgeCleared = generation !== null && await requestSessionBridge("DELETE", { generation, anonymous: localCleared })
+        window.location.assign(browserAppPath(routes.signedOut(!result.serverRevoked || !localCleared || !bridgeCleared)))
       })()
     },
   })

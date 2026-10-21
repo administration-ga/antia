@@ -1,3 +1,4 @@
+import { browserAppPath } from "./app-path"
 import type { PublicNetworkSnapshot, PublicPage, PublicPagination, PublicPost, PublicProfile, PublicTransparency } from "@antsia/social-contracts/publicNetwork"
 import { engineErrorCode } from "@antsia/social-contracts/errors"
 import { BADGES } from "@antsia/social-domain/badges"
@@ -82,6 +83,6 @@ export function publicMetadata(title: string, description: string, path: string,
     title,
     description,
     robots: { index: admitted, follow: admitted },
-    ...(origin && admitted ? { alternates: { canonical: new URL(path, origin).href }, openGraph: { title, description, type: "website", url: new URL(path, origin).href }, twitter: { card: "summary", title, description } } : {}),
+    ...(origin && admitted ? { alternates: { canonical: new URL(browserAppPath(path), origin).href }, openGraph: { title, description, type: "website", url: new URL(browserAppPath(path), origin).href }, twitter: { card: "summary", title, description } } : {}),
   }
 }
