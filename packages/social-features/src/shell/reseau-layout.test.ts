@@ -258,6 +258,30 @@ describe("la grille implémente les paliers du module", () => {
     expect(rail).toContain("max-height: calc(100dvh")
   })
 
+  it("UNE gouttière à l'opt-in : marge extérieure = écart entre colonnes, sans largeur maximale (22/10/2026)", () => {
+    const adaptive = cssRules(cssOf(RESEAU_ADAPTIVE_CSS))
+    const scope = '.rp-scope[data-navigation-layout="adaptive"]'
+    // Le jeton de l'application, à défaut les paliers d'U09 (16 px, puis 24 px).
+    expect(ruleBody(adaptive, scope)).toContain("--rp-adaptive-gutter: var(--spacing-gutter, 16px)")
+    expect(ruleBody(adaptive, scope, ["@media (min-width: 1200px)"])).toContain("--rp-adaptive-gutter: var(--spacing-gutter, 24px)")
+    // Les bords de la page et l'écart entre les colonnes lisent le MÊME jeton.
+    expect(ruleBody(adaptive, scope)).toContain("padding: 24px var(--rp-adaptive-gutter) 0")
+    expect(ruleBody(adaptive, `${scope} .rp-grid`)).toContain("gap: var(--rp-adaptive-gutter)")
+    // Ni cadre de 1 400 px, ni colonne centrale bornée puis centrée : l'un comme
+    // l'autre creuserait aux bords ou autour du fil un écart plus large que la gouttière.
+    for (const selector of [`${scope} .rp-grid`, `${scope} .rp-main-col`]) {
+      expect(ruleBody(adaptive, selector)).toContain("max-width: none")
+      expect(ruleBody(adaptive, selector)).toContain("margin-inline: 0")
+    }
+    for (const rule of adaptive) {
+      expect(rule.body).not.toMatch(/max-width:(?!\s*none)/)
+      expect(rule.body).not.toContain("justify-self: center")
+    }
+    expect(ruleBody(adaptive, `${scope} .rp-grid`, ["@media (min-width: 1400px)", "@container rp-page (min-width: 1280px)"])).toContain(
+      "grid-template-columns: var(--rp-adaptive-nav-width) minmax(0, 1fr) 312px"
+    )
+  })
+
   it("ne masque le rappel du profil à AUCUN palier", () => {
     // La barre de profil est l'en-tête de la page réseau : elle porte
     // l'identité ET le geste de publication. Une règle qui la masquerait les

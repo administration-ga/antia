@@ -45,6 +45,11 @@ prix, offres et compteurs ne sont pas injectés dans l’application.
   bas **16 px** ; tablette largeur **540 px**, bas **26 px**.
 - Bureau : grille **248 px / centre flexible / 312 px**, gap **24 px**,
   maximum **1 400 px**, gouttières **20 px** selon la composition.
+  Depuis le 22/10/2026 (demande du propriétaire) : **une seule gouttière**,
+  plus de maximum. La marge extérieure vaut l'écart entre les colonnes, et la
+  barre du haut comme le bandeau démo s'y alignent : **16 px** de 768 à
+  1 199 px, **24 px** au-delà (jeton Tailwind `--spacing-gutter`). La colonne
+  centrale prend la largeur restante ; le téléphone ne change pas.
 - Tablette du fil : colonne **728 px**, padding **8 / 24 / 140 px** ;
   téléphone **4 / 12 / 120 px**.
 - Les exceptions d’ombre de **Soleil** et **Corail** suivent les CSS des maquettes.
@@ -98,6 +103,38 @@ Compte local de démonstration vérifié, sans connexion à une cible de product
 ![Paramètres au téléphone](recette/parametres-mobile.jpg)
 
 ![Sommaire public mobile](recette/page-publique-mobile.jpg)
+
+### Gouttière unique (22/10/2026)
+
+Candidat tiré de `main`, backend Convex local isolé, sept comptes de
+démonstration et contenu fictif semés ; aucune cible de démonstration ni de
+production. Mesures prises dans la page (`getBoundingClientRect`), sur `/fil` :
+
+| Largeur | Marge gauche | Écart rail / fil | Écart fil / colonne droite | Marge droite | Barre du haut (gauche / droite) |
+|---|---|---|---|---|---|
+| 1 024 px | 16 | 16 | — (pas de colonne droite) | 16 | 16 / 16 |
+| 1 280 px | 24 | 24 | — (pas de colonne droite) | 24 | 24 / 24 |
+| 1 440 px | 24 | 24 | 24 | 24 | 24 / 24 |
+| 1 920 px | 24 | 24 | 24 | 24 | 24 / 24 |
+
+- La colonne du fil mesure 880, 960, 784 puis 1 264 px ; les publications
+  l'occupent entière, en Liste comme en Immersion.
+- Réglages et Messages, à 1 440 px : rail à 24 px du bord, écart de 24 px, contenu
+  jusqu'à 24 px du bord droit.
+- Téléphone **390 px** : coquille inchangée (cartes à 12 px des bords), sans
+  défilement horizontal.
+- Le bandeau démo n'existe qu'avec le backend de démonstration : sa classe
+  `px-gutter` a été mesurée dans la page, à 16 px puis 24 px dès 1 200 px.
+
+![Fil à 1 440 px : 24 px aux bords comme entre les colonnes](recette/gouttiere-fil-1440.jpg)
+
+![Fil à 1 920 px](recette/gouttiere-fil-1920.jpg)
+
+![Fil à 1 280 px](recette/gouttiere-fil-1280.jpg)
+
+![Fil à 1 024 px, rail compact](recette/gouttiere-fil-1024.jpg)
+
+![Fil au téléphone, 390 px](recette/gouttiere-fil-390.jpg)
 
 ## Limites de preuve et état Git
 

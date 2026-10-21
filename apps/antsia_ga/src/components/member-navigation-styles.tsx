@@ -1,23 +1,22 @@
 /**
  * U02 : styles propres à ANTSIA ; les thèmes et les seuils des autres réseaux restent intacts.
  * U09 (épure) : un seul cadre pour toutes les pages de membre ET le fil (reseau-adaptive-styles
- * du moteur) — 1 400 px au plus, marges 12/16/24 px, écart 16/24 px, 24 px en tête dès 768 px —,
- * et la barre du haut aligne ses bords sur ce cadre.
+ * du moteur), 24 px en tête dès 768 px, et la barre du haut aligne ses bords sur ce cadre.
+ * Gouttière unique (décision du propriétaire du 22/10/2026) : dès 768 px, la marge extérieure,
+ * l'écart entre le rail et le contenu et le retrait de la barre du haut valent le MÊME jeton,
+ * `--spacing-gutter` (`globals.css` : 16 px, puis 24 px dès 1 200 px), et le cadre n'a plus de
+ * largeur maximale. Au téléphone, 12 px comme avant.
  */
-const MEMBER_NAVIGATION_CSS = `
+export const MEMBER_NAVIGATION_CSS = `
   .antsia-topbar-row {
     box-sizing: border-box;
     width: 100%;
-    max-width: 1400px;
-    margin-inline: auto;
     padding-inline: 12px;
   }
   .antsia-member-frame {
     box-sizing: border-box;
     width: 100%;
-    max-width: 1400px;
     min-width: 0;
-    margin-inline: auto;
     padding-inline: 12px;
   }
   .antsia-member-rail { display: none; }
@@ -44,13 +43,13 @@ const MEMBER_NAVIGATION_CSS = `
     display: flex;
   }
   @media (min-width: 768px) {
-    .antsia-topbar-row { padding-inline: 16px; }
-    .antsia-member-frame { padding-inline: 16px; }
+    .antsia-topbar-row,
+    .antsia-member-frame { padding-inline: var(--spacing-gutter, 16px); }
     .antsia-member-frame[data-with-navigation] {
       display: grid;
       grid-template-columns: 96px minmax(0, 1fr);
       align-items: start;
-      gap: 16px;
+      gap: var(--spacing-gutter, 16px);
     }
     .antsia-member-rail {
       display: block;
@@ -75,11 +74,11 @@ const MEMBER_NAVIGATION_CSS = `
     .antsia-member-workspace .icom-messages-page[data-mobile="true"] { height: 100%; }
   }
   @media (min-width: 1200px) {
-    .antsia-topbar-row { padding-inline: 24px; }
-    .antsia-member-frame { padding-inline: 24px; }
+    .antsia-topbar-row,
+    .antsia-member-frame { padding-inline: var(--spacing-gutter, 24px); }
     .antsia-member-frame[data-with-navigation] {
       grid-template-columns: 248px minmax(0, 1fr);
-      gap: 24px;
+      gap: var(--spacing-gutter, 24px);
     }
   }
 `
