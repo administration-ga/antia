@@ -71,7 +71,7 @@ export function MemberMeScreen() {
         </header>
 
         {handle !== null ? (
-          <section className="flex flex-wrap items-center justify-between gap-4 rounded-[var(--ui2-card-radius)] border border-[color:var(--esp-surface-border)] bg-card p-[var(--esp-card-padding,16px)] text-card-foreground">
+          <section className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-border bg-card p-4 text-card-foreground">
             <div className="flex min-w-0 flex-1 items-start gap-3">
               <UserRound aria-hidden="true" className="mt-1 size-6 shrink-0 text-muted-foreground" />
               <div className="min-w-0">

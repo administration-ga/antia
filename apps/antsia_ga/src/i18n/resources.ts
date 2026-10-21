@@ -37,8 +37,6 @@ import frJobs from "./locales/fr/jobs.json"
 import enJobs from "./locales/en/jobs.json"
 import frServices from "./locales/fr/services.json"
 import enServices from "./locales/en/services.json"
-import frSocialExperience from "./locales/fr/socialExperience.json"
-import enSocialExperience from "./locales/en/socialExperience.json"
 
 /** Espace de noms de l'application. */
 export const APP_NAMESPACE = "antsia"

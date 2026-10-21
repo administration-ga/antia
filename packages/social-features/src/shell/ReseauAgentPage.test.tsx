@@ -120,10 +120,11 @@ vi.mock("../features/stories/StoryCreateSheet", () => ({
   StoryCreateSheet: ({ open }: { open: boolean }) => <div data-testid="StoryCreateSheet" data-open={String(open)} />,
 }))
 vi.mock("./mobile/PostComposerSheet", () => ({
-  PostComposerSheet: ({ open }: { open: boolean }) => <div data-testid="PostComposerSheet" data-open={String(open)} />,
+  PostComposerSheet: ({ open }: { open: boolean }) => <div data-testid="PostComposerSheet" data-open={String(open)}>{open ? <input type="file" data-testid="composer-file-picker" /> : null}</div>,
 }))
 
 import { ReseauAgentPage } from "./ReseauAgentPage"
+import { postDraftStore } from "../features/reseau-personnel/post-draft-store"
 
 function page() {
   return render(
@@ -134,6 +135,7 @@ function page() {
 }
 
 beforeEach(() => {
+  postDraftStore.resetForTests()
   mocks.mobile = false
   mocks.adaptive = false
   mocks.tab = "fil"

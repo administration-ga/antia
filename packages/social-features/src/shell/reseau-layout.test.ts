@@ -183,6 +183,17 @@ function selectorParts(rule: CssRule): string[] {
   return rule.selector.split(",").map((part) => part.trim())
 }
 
+/** Une déclaration doit rester sur son sélecteur ET son palier, pas ailleurs dans la feuille. */
+function ruleBody(rules: readonly CssRule[], selector: string, conditions: readonly string[] = []): string {
+  const matches = rules.filter((rule) =>
+    selectorParts(rule).includes(selector) &&
+    rule.conditions.length === conditions.length &&
+    rule.conditions.every((condition, index) => condition === conditions[index])
+  )
+  expect(matches).toHaveLength(1)
+  return matches[0]?.body ?? ""
+}
+
 describe("la grille implémente les paliers du module", () => {
   const css = cssOf(RESEAU_DESKTOP_CSS)
   const rules = cssRules(css)

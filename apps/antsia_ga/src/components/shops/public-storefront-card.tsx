@@ -36,7 +36,6 @@ export function PublicStorefrontCard({ storefront, locale, catalog }: { storefro
         </div>
         <p className="border-l-2 border-primary pl-3 text-sm text-muted-foreground">{t("shops:publicStorefront.origin", { name: storefront.origin.name })}</p>
         <p className="text-xs text-muted-foreground">{t("shops:publicStorefront.publicAudience")}</p>
-        {storefront.blocks.includes("catalog") || storefront.blocks.includes("services") ? <Link href={routes.publicShopCatalog(storefront.handle)} prefetch={false} className={`${PUBLIC_LINK} self-start`}>{t("commerceExperience:storefront.offers")}</Link> : null}
       </header>
 
       <section aria-labelledby="public-storefront-about" className="flex flex-col gap-4 border-t border-border pt-6">
