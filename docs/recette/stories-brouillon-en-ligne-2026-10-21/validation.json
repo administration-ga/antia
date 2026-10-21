@@ -1,0 +1,59 @@
+{
+  "frozenWeb": [
+    {
+      "step": "story-regression-published-before",
+      "exitCode": 1,
+      "seconds": 2.3
+    },
+    {
+      "step": "tests-features",
+      "exitCode": 0,
+      "seconds": 110.2
+    },
+    {
+      "step": "tests-app",
+      "exitCode": 0,
+      "seconds": 35.5
+    },
+    {
+      "step": "ratchets",
+      "exitCode": 0,
+      "seconds": 16.8
+    },
+    {
+      "step": "stories-test-types-corrected",
+      "exitCode": 0,
+      "seconds": 1.3
+    },
+    {
+      "step": "typecheck-six",
+      "exitCode": 0,
+      "seconds": 11.3
+    },
+    {
+      "step": "lint-six",
+      "exitCode": 0,
+      "seconds": 23.9
+    },
+    {
+      "step": "build",
+      "exitCode": 0,
+      "seconds": 28.0
+    }
+  ],
+  "sharedCheckout": {
+    "exitCode": 1,
+    "seconds": 290.4,
+    "ownSourcesStable": true,
+    "scope": "shared checkout including parallel work; frozen frontend checked separately"
+  },
+  "sharedFailure": "deploy-catalog: native Expo variables NATIVE_EXPO_OWNER, NATIVE_EXPO_PROJECT_ID, NATIVE_RELEASE_BUILD from parallel work are absent from its catalog; no native source changed by this delivery",
+  "webTestCounts": {
+    "socialFeatures": 4129,
+    "application": 763,
+    "ratchets": 144
+  },
+  "backendTestsPassed": 2829,
+  "candidateSourceStable": true,
+  "noBackendDeployment": true
+}
