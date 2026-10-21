@@ -100,6 +100,7 @@ export const routes = {
   settings: () => "/parametres",
   dataSettings: () => "/parametres/donnees",
   authSession: () => "/api/auth/get-session",
+  authBase: () => "/api/auth",
   authToken: () => "/api/auth/convex/token",
   publicSessionBridge: () => "/api/session-bridge",
   apdpvp: () => "https://www.apdpvp.ga/textes-et-decisions/",
