@@ -15,6 +15,7 @@
  * page rendent la même — un seul gabarit à tenir.
  */
 
+import { themedActionStyle } from "../themed-action-style"
 import { api } from "@antsia/api/engine"
 import type { Id } from "@antsia/api/engine"
 import { useNetwork, useRoutes, type EnginePostPresentation } from "@antsia/api/network"
@@ -128,11 +129,12 @@ export function PostCard(props: PostCardProps) {
 
 function PostCardContent({ post, now, onTag, onMention, offer }: PostCardProps) {
   const { t, i18n } = useTranslation("reseau")
-  const { networkId, personId, slug, postPresentation, PostOfferRenderer } = useNetwork()
+  const { networkId, personId, slug, postPresentation, PostOfferRenderer, PostArticleRenderer, navigation, navigationLayout } = useNetwork()
   // La présentation que l'application déclare : « media » ou « charte » sur
   // opt-in, sinon la carte historique (aucune application ne change sans le
   // demander).
   const presentation: EnginePostPresentation = postPresentation === "media" || postPresentation === "charte" ? postPresentation : "classic"
+  const mediaFirst = presentation === "charte" && navigation === "destinations" && navigationLayout === "adaptive"
   const routes = useRoutes()
   const timeZone = useViewerTimeZone()
   const [showComments, setShowComments] = useState(false)
@@ -146,7 +148,7 @@ function PostCardContent({ post, now, onTag, onMention, offer }: PostCardProps) 
   const live = useRef(true)
   const context = `${networkId}:${personId}:${post._id}`
   const latestContext = useRef(context)
-  latestContext.current = context
+  useEffect(() => { latestContext.current = context }, [context])
   useEffect(() => { live.current = true; return () => { live.current = false } }, [])
   const [reportTarget, setReportTarget] = useState<
     | { kind: "post" }
@@ -455,7 +457,8 @@ function PostCardContent({ post, now, onTag, onMention, offer }: PostCardProps) 
               aria-label={t("postCard.editLabel")}
             />
             <div style={{ display: "flex", gap: 8 }}>
-              <Button
+              <Button style={themedActionStyle("success", "primary")}
+                variant="success"
                 size="sm"
                 onClick={() =>
                   void editPost({ networkId, postId: post._id, body: editedBody })
@@ -470,9 +473,9 @@ function PostCardContent({ post, now, onTag, onMention, offer }: PostCardProps) 
               >
                 {t("postCard.save")}
               </Button>
-              <Button
+              <Button style={themedActionStyle("cancel", "ghost")}
                 size="sm"
-                variant="ghost"
+                variant="outline"
                 onClick={() => {
                   setEditedBody(post.body)
                   setEditing(false)
@@ -484,17 +487,17 @@ function PostCardContent({ post, now, onTag, onMention, offer }: PostCardProps) 
           </div>
   )
 
-  const liveBlock = post.live ? <Link href={routes.conference(post.live.sessionId)} className="mt-3 flex min-h-11 items-center justify-between gap-3 rounded-xl border border-border bg-muted p-4"><span>{post.live.title}</span><span>{t(`direct:status.${post.live.status}`)}</span></Link> : null
+  const liveBlock = post.live ? <Link href={routes.conference(post.live.sessionId)} className="mt-3 flex min-h-11 items-center justify-between gap-[var(--esp-card-gap,0.75rem)] rounded-[var(--esp-primitive-card-radius,0.75rem)] border border-[var(--esp-primitive-surface-border,var(--border))] bg-muted p-4"><span>{post.live.title}</span><span>{t(`direct:status.${post.live.status}`)}</span></Link> : null
 
   const eventBlock = post.event !== null ? (
-          <section aria-label={t("post.event.label")} className="grid gap-2 rounded-xl border border-border bg-muted p-4">
+          <section aria-label={t("post.event.label")} className="grid gap-2 rounded-[var(--esp-primitive-card-radius,0.75rem)] border border-[var(--esp-primitive-surface-border,var(--border))] bg-muted p-4">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <span className="text-xs font-semibold text-muted-foreground">{t("post.event.label")}</span>
               <span className={post.event.status === "cancelled" ? "text-xs font-semibold text-destructive" : "text-xs font-semibold text-muted-foreground"}>
                 {t(`post.event.${post.event.status}`)}
               </span>
             </div>
-            <h3 className="m-0 text-sm font-semibold text-foreground">{post.event.title}</h3>
+            <h3 className="m-0 text-sm font-semibold text-foreground" style={{ fontSize: "var(--esp-subsection-title-size, 0.875rem)", fontWeight: "var(--esp-heading-font-weight, 600)", lineHeight: "var(--esp-subsection-title-leading, 1.25rem)" }}>{post.event.title}</h3>
             <p className="m-0 text-sm text-foreground">{formatEventRange(post.event.startAt, post.event.endAt, i18n.language, timeZone)}</p>
             <p className="m-0 text-xs text-muted-foreground">{t("post.event.timeZone", { timeZone })}</p>
             {post.event.myParticipation !== null ? (
@@ -524,7 +527,7 @@ function PostCardContent({ post, now, onTag, onMention, offer }: PostCardProps) 
               minWidth: 44,
               justifyContent: "center",
               padding: "7px 10px",
-              borderRadius: 9,
+              borderRadius: "var(--esp-primitive-button-radius, 9px)",
               fontFamily: "inherit",
               fontSize: 12.5,
               fontWeight: 700,
@@ -561,7 +564,7 @@ function PostCardContent({ post, now, onTag, onMention, offer }: PostCardProps) 
                 minWidth: 44,
                 justifyContent: "center",
                 padding: "7px 10px",
-                borderRadius: 9,
+                borderRadius: "var(--esp-primitive-button-radius, 9px)",
                 fontFamily: "inherit",
                 fontSize: 12.5,
                 fontWeight: 700,
@@ -587,6 +590,7 @@ function PostCardContent({ post, now, onTag, onMention, offer }: PostCardProps) 
         <CommentsSurface
           postId={post._id}
           now={now}
+          readOnly={post.commentsOpen === false}
           onClose={() => setShowComments(false)}
           onTag={onTag}
           onMention={onMention}
@@ -621,10 +625,10 @@ function PostCardContent({ post, now, onTag, onMention, offer }: PostCardProps) 
      * PRÉSENTATION « CHARTE » (opt-in de l'application, ADR-0028) : l'écran
      * des chartes de la série 3, à la lettre — auteur, texte, média posé dans
      * la carte, puis une rangée d'icônes. Le texte reste ENTIER quand il est
-     * seul ; avec un média, il est borné par « Lire la suite » au-dessus de
-     * lui.
+     * seul ; avec un média, il est borné par « Lire la suite ». La coque
+     * adaptive ANTSIA le place après le média et ses actions.
      */
-    const textOnly = post.media.length === 0 && post.share === null && post.event === null && !post.live
+    const textOnly = post.media.length === 0 && post.share === null && post.event === null && !post.live && !post.hasEditorialArticle
     const body = editing ? editor : post.body.length > 0 ? (
       textOnly
         ? <RichText body={post.body} onTag={onTag} onMention={onMention} />
@@ -633,7 +637,7 @@ function PostCardContent({ post, now, onTag, onMention, offer }: PostCardProps) 
     const saved = post.viewer.bookmarked
     return (
       <Card padded={false} style={POST_SURFACE_STYLE}>
-        <article data-post-presentation="charte" className="rp-charte-post">
+        <article data-post-presentation="charte" data-post-layout={mediaFirst ? "media-first" : undefined} className="rp-charte-post">
           <header className="rp-charte-head">
             <Avatar
               displayName={identity.name}
@@ -681,6 +685,7 @@ function PostCardContent({ post, now, onTag, onMention, offer }: PostCardProps) 
                     <span>{signature}</span>
                   </>
                 ) : null}
+                {mediaFirst ? <span className="rp-charte-audience">{audienceLabel(post.audience, t)}</span> : null}
                 <span className="sr-only">
                   {t("postCard.context", {
                     audience: audienceLabel(post.audience, t),
@@ -692,9 +697,11 @@ function PostCardContent({ post, now, onTag, onMention, offer }: PostCardProps) 
             {overflowMenu}
           </header>
 
-          {body}
+          {!mediaFirst || textOnly ? body : null}
 
           {post.media.length > 0 ? <PostMedia media={post.media} presentation="charte" primary /> : null}
+          {post.hasEditorialArticle && PostArticleRenderer ? <PostArticleRenderer networkId={networkId} postId={post._id} /> : null}
+
           {liveBlock}
           {post.event !== null ? <CharteEventBlock event={post.event} now={now} /> : null}
           {post.share ? (
@@ -754,6 +761,10 @@ function PostCardContent({ post, now, onTag, onMention, offer }: PostCardProps) 
             </button>
           </div>
 
+          {/* U03 ANTSIA : le média porte la lecture, puis ses actions et sa
+              légende repliable. Un texte seul garde son corps entier en tête. */}
+          {mediaFirst && !textOnly ? <div className="rp-charte-caption">{body}</div> : null}
+
           {withdrawBlock}
 
           {offer ? (
@@ -781,7 +792,7 @@ function PostCardContent({ post, now, onTag, onMention, offer }: PostCardProps) 
      * aperçu coupé, aucune hauteur imposée. Sinon le corps devient la légende,
      * bornée avec « Lire la suite ».
      */
-    const textOnly = post.media.length === 0 && post.share === null && post.event === null && !post.live
+    const textOnly = post.media.length === 0 && post.share === null && post.event === null && !post.live && !post.hasEditorialArticle
     const body = editing ? editor : post.body.length > 0 ? (
       textOnly
         ? <RichText body={post.body} onTag={onTag} onMention={onMention} />
@@ -793,7 +804,7 @@ function PostCardContent({ post, now, onTag, onMention, offer }: PostCardProps) 
         <article
           data-post-presentation="media"
           style={{
-            padding: `14px ${POST_CARD_GUTTER}px`,
+            padding: `var(--esp-card-padding, 14px) ${POST_CARD_GUTTER}px`,
             display: "flex",
             flexDirection: "column",
             gap: 10,
@@ -808,6 +819,8 @@ function PostCardContent({ post, now, onTag, onMention, offer }: PostCardProps) 
               {post.media.length > 0 ? (
                 <PostMedia media={post.media} gutter={POST_CARD_GUTTER} presentation="media" />
               ) : null}
+              {post.hasEditorialArticle && PostArticleRenderer ? <PostArticleRenderer networkId={networkId} postId={post._id} /> : null}
+
               {liveBlock}
               {eventBlock}
               {post.share ? (
@@ -851,7 +864,7 @@ function PostCardContent({ post, now, onTag, onMention, offer }: PostCardProps) 
                 minWidth: 44,
                 marginInlineStart: "auto",
                 padding: "7px 10px",
-                borderRadius: 9,
+                borderRadius: "var(--esp-primitive-button-radius, 9px)",
                 cursor: saving ? "progress" : "pointer",
                 background: saved ? "var(--primary-50)" : "transparent",
                 color: saved ? "var(--primary-600)" : "var(--ink-500)",
@@ -887,7 +900,7 @@ function PostCardContent({ post, now, onTag, onMention, offer }: PostCardProps) 
     <Card padded={false} style={POST_SURFACE_STYLE}>
       <article
         style={{
-          padding: `14px ${POST_CARD_GUTTER}px`,
+          padding: `var(--esp-card-padding, 14px) ${POST_CARD_GUTTER}px`,
           display: "flex",
           flexDirection: "column",
           gap: 10,
@@ -909,6 +922,8 @@ function PostCardContent({ post, now, onTag, onMention, offer }: PostCardProps) 
         {post.media.length > 0 ? (
           <PostMedia media={post.media} gutter={POST_CARD_GUTTER} presentation="classic" />
         ) : null}
+
+        {post.hasEditorialArticle && PostArticleRenderer ? <PostArticleRenderer networkId={networkId} postId={post._id} /> : null}
 
         {liveBlock}
 
@@ -997,6 +1012,13 @@ const CHARTE_POST_CSS = `
     line-height: 1.35;
     color: var(--muted-foreground);
   }
+  .rp-charte-post[data-post-layout="media-first"] .rp-charte-meta,
+  .rp-charte-post[data-post-layout="media-first"] .rp-charte-name > a,
+  .rp-charte-post[data-post-layout="media-first"] .rp-charte-name > span { overflow-wrap: anywhere; }
+  .rp-charte-post[data-post-layout="media-first"] { font-size: inherit; }
+  .rp-charte-audience { font-weight: 600; }
+  .rp-charte-audience::before { content: "·"; margin-inline-end: 4px; }
+  .rp-charte-caption { min-width: 0; overflow-wrap: anywhere; }
   .rp-charte-badge {
     display: inline-flex;
     align-items: center;
@@ -1223,6 +1245,7 @@ function SharedPostCard({
 }) {
   const { t } = useTranslation("reseau")
   const timeZone = useViewerTimeZone()
+  const { networkId, PostArticleRenderer } = useNetwork()
   if (!share.available) {
     return (
       <div
@@ -1230,8 +1253,8 @@ function SharedPostCard({
           // Le tiret disait « cadre vide » ; la surface teintée suffit
           // (2026-08-21, cartes sans bordure).
           background: "var(--ink-50, var(--ink-0))",
-          borderRadius: 10,
-          padding: 14,
+          borderRadius: "var(--esp-primitive-card-radius, 10px)",
+          padding: "var(--esp-card-padding, 14px)",
           color: "var(--ink-600)",
           fontSize: 13,
         }}
@@ -1257,8 +1280,8 @@ function SharedPostCard({
       style={{
         // Sans liseré (2026-08-21) : la citation se distingue par sa surface
         // teintée.
-        borderRadius: 10,
-        padding: 12,
+        borderRadius: "var(--esp-primitive-card-radius, 10px)",
+        padding: "var(--esp-card-padding, 12px)",
         display: "flex",
         flexDirection: "column",
         gap: 10,
@@ -1291,6 +1314,7 @@ function SharedPostCard({
       </div>
       {share.body.length > 0 ? <RichText body={share.body} onTag={onTag} onMention={onMention} /> : null}
       {share.media.length > 0 ? <PostMedia media={share.media} presentation={presentation} /> : null}
+      {share.hasEditorialArticle && PostArticleRenderer ? <PostArticleRenderer networkId={networkId} postId={share.postId} /> : null}
     </div>
   )
 }

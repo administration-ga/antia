@@ -39,6 +39,14 @@ Les sessions durent sept jours, les JWT trente minutes et portent `sessionId`. L
 
 Le cliquet `sign-out-everywhere` interdit les appels directs à la déconnexion SDK hors de la porte commune. Les gardes d'exécution et les tests du gestionnaire réel complètent ce contrôle statique.
 
+Le 20/10/2026, la recette de la démo a révélé une redirection d'accueil pendant la révocation,
+qui remontait le préflight et invalidait la génération de purge. `useSessionState` et le
+préflight respectent désormais le verrou de sortie jusqu'à la navigation finale. Correctif
+publié sur la démo et changement de compte réel vérifié : [recette dédiée](recette/deconnexion-demo-2026-10-20/README.md).
+Le même contenu est ensuite publié sur ANTSIA en production. Sa recette à deux comptes reste
+bloquée par les portes de connexion désactivées et l'absence de réseau racine actif accessible :
+[publication et limites de la recette production](recette/deconnexion-production-2026-10-20/README.md).
+
 ## Vérification
 
 - `bun run verify` a terminé avec le code 0 : **5 836 tests**, typage Convex/tests et des dix espaces, neuf passages lint sans erreur. Détail : 1 302 backend, 111 cliquets, 24 scripts, 418 domaine social, 86 UI, 56 contrats, 130 API, 2 918 surfaces sociales, 5 ANTSIA, 8 console, 238 domaine DIASPORALE, 259 surfaces DIASPORALE et 281 application DIASPORALE. Trace : `/tmp/antsia-pa4-verify.log`.

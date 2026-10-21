@@ -60,7 +60,7 @@ export function SessionProviders({ children }: { children: ReactNode }) {
   if (!CONVEX_URL) {
     return (
       <main id="contenu" tabIndex={-1} className="mx-auto flex min-h-dvh max-w-xl flex-col justify-center px-6 focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring">
-        <p role="alert" className="rounded-xl border border-border bg-card p-4 text-card-foreground">
+        <p role="alert" className="rounded-[var(--ui2-card-radius)] border border-[color:var(--esp-surface-border)] bg-card p-[var(--esp-card-padding,16px)] text-card-foreground">
           {t("session.backendMissing")}
         </p>
       </main>

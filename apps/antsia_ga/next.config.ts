@@ -9,8 +9,11 @@ import { demoRuntimeOrigin } from "./src/lib/demo-proxy"
  * du moteur en sources, en-têtes de sécurité, déploiement Convex lu dans
  * `ANTSIA/.env.local` en développement et dans les ARG du Dockerfile en production.
  */
-const common = createEngineNextConfig({ appDir: process.cwd(), usageAnalytics: { host: process.env.NEXT_PUBLIC_POSTHOG_HOST, projectToken: process.env.NEXT_PUBLIC_POSTHOG_KEY, euRelayOrigin: process.env.NEXT_PUBLIC_POSTHOG_EU_RELAY_ORIGIN } })
-
+const common = createEngineNextConfig({
+  appDir: process.cwd(),
+  developmentCacheGc: true,
+  usageAnalytics: { host: process.env.NEXT_PUBLIC_POSTHOG_HOST, projectToken: process.env.NEXT_PUBLIC_POSTHOG_KEY, euRelayOrigin: process.env.NEXT_PUBLIC_POSTHOG_EU_RELAY_ORIGIN },
+})
 export default {
   ...common,
   basePath: appBasePath(),

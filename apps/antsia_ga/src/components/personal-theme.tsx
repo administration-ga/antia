@@ -30,13 +30,14 @@ export function PersonalTheme({ signedIn, accountTheme, children }: { signedIn: 
   const { t } = useTranslation("antsia")
   // La synchronisation vit aussi longtemps que le composant : créée au montage,
   // elle relit les fonctions courantes plutôt que celles du premier rendu.
-  const current = useRef({ setTheme: appearance?.setTheme, savePreferences, t })
+  const current = useRef({ setTheme: appearance?.setTheme, savePreferences, signedIn, t })
   const sync = useRef<ThemeAccountSync<MemberThemeId> | null>(null)
   useEffect(() => {
-    current.current = { setTheme: appearance?.setTheme, savePreferences, t }
+    current.current = { setTheme: appearance?.setTheme, savePreferences, signedIn, t }
   })
   useEffect(() => {
-    sync.current = createThemeAccountSync<MemberThemeId>({
+    if (!signedIn) return
+    const accountSync = createThemeAccountSync<MemberThemeId>({
       apply: (theme) => current.current.setTheme?.(theme),
       save: (theme) => current.current.savePreferences({ theme }),
       onSaveFailed: (error) => {
@@ -44,17 +45,19 @@ export function PersonalTheme({ signedIn, accountTheme, children }: { signedIn: 
         toast.error(translate("preferences.theme.saveFailed", { reason: engineErrorMessage(error, translate) }))
       },
     })
+    sync.current = accountSync
     return () => {
+      accountSync.dispose()
       sync.current = null
     }
-  }, [])
+  }, [signedIn])
 
   useEffect(() => {
-    sync.current?.accountChanged(accountTheme)
-  }, [accountTheme])
+    if (signedIn) sync.current?.accountChanged(accountTheme)
+  }, [signedIn, accountTheme])
 
   const choose = useCallback((theme: string) => {
-    if (isMemberThemeId(theme)) sync.current?.choose(theme)
+    if (current.current.signedIn && isMemberThemeId(theme)) sync.current?.choose(theme)
   }, [])
 
   return <ThemeChoiceProvider choose={signedIn ? choose : null}>{children}</ThemeChoiceProvider>

@@ -144,7 +144,11 @@
   "reportContentDialog": {
     "title": {
       "publication": "Report this post",
-      "commentaire": "Report this comment"
+      "commentaire": "Report this comment",
+      "professionalProfile": "Report this professional profile",
+      "professionalCollaboration": "Report this collaboration request",
+      "editorialVersion": "Report this article",
+      "editorialMedia": "Report this media outlet"
     },
     "description": "The platform reviews the report. The author does not learn who you are.",
     "reasonLabel": "Reason",
@@ -294,7 +298,8 @@
       "publishFailed": "The comment could not be posted.",
       "removeFailed": "The removal could not be saved.",
       "editFailed": "The edit could not be saved."
-    }
+    },
+    "closed": "New comments are closed. Existing exchanges remain available to read."
   },
   "postOverflowMenu": {
     "trigger": "More actions on this post",

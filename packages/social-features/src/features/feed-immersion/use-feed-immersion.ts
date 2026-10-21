@@ -17,7 +17,7 @@
  */
 
 import { useNetwork } from "@antsia/api/network"
-import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react"
 
 import type { FeedMode } from "./feed-mode"
 import type { FeedSurfaceMemory } from "./feed-post-memory"
@@ -55,7 +55,7 @@ export function useFeedImmersion(options: { feedId: string | null; depth: number
   const gallery = useRef(new Map<string, number>())
   const lastAnchor = useRef<{ postId: string; offset: number; kind: FeedOffsetKind } | null>(null)
   const depthRef = useRef(options.depth)
-  depthRef.current = options.depth
+  useLayoutEffect(() => { depthRef.current = options.depth }, [options.depth])
   const scopeRef = useRef(scope)
 
   const write = useCallback((anchor: { postId: string; offset: number; kind: FeedOffsetKind }) => {

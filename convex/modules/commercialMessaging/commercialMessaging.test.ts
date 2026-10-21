@@ -78,6 +78,13 @@ async function accepted(f: Fixture) {
 }
 
 describe("P10 — canal autonome et autorité actuelle", () => {
+  it("refuse les références démo même lorsque le canal de contact est ouvert", async () => {
+    const f = await fixture()
+    const error = await caught(f.buyer.as.mutation(request, { networkId: f.root, shopHandle: "contact-shop", offerRef: "demo:offer:epicerie-produits", text: "Une question sur cette illustration.", idempotencyKey: "demo_contact_refused_0001" }))
+    expect(engineErrorCode(error)).toBe("notFound")
+    expect(await f.t.run(async (ctx) => (await ctx.db.query("commercialThreads").take(1)).length)).toBe(0)
+    expect(await f.t.run(async (ctx) => (await ctx.db.query("commercialMessages").take(1)).length)).toBe(0)
+  })
   it("reste fermé sans politique et ne crée ni fil personnel ni adhésion implicite", async () => {
     const f = await fixture(false)
     expect(engineErrorCode(await caught(requested(f)))).toBe("notFound")

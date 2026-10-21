@@ -37,6 +37,7 @@
     "serviceReview": "Service reviews",
     "serviceReviewReply": "Service review replies",
     "commerceOffer": "Store offers",
+    "commerceStorefront": "Store terms",
     "commercialMessage": "Commercial message",
     "contextualMessage": "Request conversation messages",
     "commerceJob": "Job openings",
@@ -48,7 +49,11 @@
     "diasporaKitResource": "DIASPORALE arrival kit resources",
     "diasporaJobOffer": "DIASPORALE job offers",
     "diasporaTalentProfile": "DIASPORALE talent profiles",
-    "diasporaJobApplication": "DIASPORALE job applications"
+    "diasporaJobApplication": "DIASPORALE job applications",
+    "professionalProfile": "Professional profile",
+    "professionalCollaboration": "Collaboration request",
+    "editorialVersion": "Article version",
+    "editorialMedia": "Media presentation"
   },
   "teams": {
     "title": "Moderation teams",
@@ -282,7 +287,8 @@
     "kinds": {
       "diasporaServiceRequest": "Service requests (DIASPORALE)",
       "diasporaMentoring": "Accepted mentorships (DIASPORALE)",
-      "diasporaJobApplication": "Shortlisted applications (DIASPORALE)"
+      "diasporaJobApplication": "Shortlisted applications (DIASPORALE)",
+      "professionalCollaboration": "Professional collaboration"
     }
   },
   "paymentPolicy": {
@@ -294,7 +300,9 @@
     "disabled": "New payment starts closed",
     "enable": "Allow new payments",
     "disable": "Close new payments",
-    "updated": "Last decision on"
+    "updated": "Last decision on",
+    "validationMissing": "New payments remain closed: payment decisions and cross-system acceptance still need validation. A previously enabled setting does not replace these prerequisites.",
+    "validationBlocked": "New payments blocked pending validation"
   },
   "servicePolicy": {
     "title": "Quotes, appointments and services",
@@ -305,7 +313,9 @@
     "disabled": "Service requests closed",
     "enable": "Open service requests",
     "disable": "Close service requests",
-    "updated": "Last decision on"
+    "updated": "Last decision on",
+    "validationMissing": "New service requests remain closed until retention rules and cross-system acceptance are validated. Existing commitments retain their dedicated status and cancellation paths.",
+    "validationBlocked": "New requests blocked pending validation"
   },
   "jobPolicy": {
     "title": "Job openings and applications",
@@ -319,7 +329,9 @@
     "disableJobs": "Hide job openings (and close applications)",
     "enableApplications": "Open applications",
     "disableApplications": "Close applications",
-    "updated": "Last decision on"
+    "updated": "Last decision on",
+    "validationMissing": "Applications remain closed pending validation of retention rules and cross-system acceptance. Openings may remain readable; existing applications retain their dedicated status and withdrawal paths.",
+    "validationBlocked": "New applications blocked pending validation"
   },
   "storefrontPolicy": {
     "title": "Storefront publication",

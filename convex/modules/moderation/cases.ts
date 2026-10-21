@@ -1,6 +1,7 @@
 /** PA5 : dossiers polymorphes, compétence vivante, décisions et recours sans copie de contenu. */
 import { assertDecisionReason, type AuditCapacity } from "@antsia/social-domain/audit"
 import { normalizeBlockedTerm, validSanctionDuration } from "@antsia/social-domain/moderationPolicy"
+import { parseCommercePublicBody } from "@antsia/social-domain/commerce/projection"
 import { paginationOptsValidator } from "convex/server"
 import { v } from "convex/values"
 
@@ -11,10 +12,13 @@ import { checked, fail, notFound } from "../../lib/errors"
 import { networkMutation, networkQuery, operatorMutation, operatorQuery, personMutation, personQuery } from "../../lib/functions"
 import { enforceRateLimit } from "../../lib/rateLimit"
 import { contextualDecisionConflict } from "../contextualMessaging/access"
+import { editorialAccessOrNull } from "../editorial/access"
 import { notifyPerson } from "../notifications/notify"
 import { liveSignatoryRole, signatoryRowsOf } from "../pages/access"
 import { appendAudit, networkRoleCapacity, operatorCapacity } from "../platform/audit"
 import { contentState, owningPageOfReport } from "./policy"
+import { professionalReviewSource } from "./professionalReviewSource"
+import { editorialMediaReviewSource, editorialReviewSource } from "./editorialReviewSource"
 import { refreshSuspension } from "./sanctions"
 import { contentReportStatusValidator, moderationSurfaceValidator, moderationTargetValidator, sanctionKindValidator } from "./tables"
 import { removeTarget, resolveVisibleTarget, restoreTarget } from "./targets"
@@ -29,10 +33,57 @@ const pageOptions = (opts: { cursor: string | null; numItems: number }) => ({ ..
 async function assertNoPageDecisionConflict(ctx: ReadCtx, actorPersonId: Id<"persons">, target: Doc<"reports">["target"]): Promise<void> {
   // CC-2b : une partie au fil contextuel, ou un signataire vivant de sa page, ne tranche jamais un dossier de ce fil.
   if (target.kind === "contextualMessage" && (await contextualDecisionConflict(ctx, target.id, actorPersonId))) return notFound()
+  if (target.kind === "professionalCollaboration") {
+    const collaboration = await ctx.db.get(target.id)
+    if (collaboration && (collaboration.fromPersonId === actorPersonId || collaboration.toPersonId === actorPersonId)) return notFound()
+  }
+  if (target.kind === "editorialMedia") {
+    const media = await ctx.db.get(target.id)
+    if (media && (media.createdByPersonId === actorPersonId || await editorialAccessOrNull(ctx, { networkId: media.networkId, personId: actorPersonId }, media.pageId))) return notFound()
+  }
+  if (target.kind === "editorialVersion") {
+    const version = await ctx.db.get(target.id)
+    if (version && (version.authorPersonId === actorPersonId || await editorialAccessOrNull(ctx, { networkId: version.networkId, personId: actorPersonId }, version.pageId))) return notFound()
+  }
   const state = await contentState(ctx, target.kind, target.id)
   if (!state?.ownerPageId) return
   const page = await ctx.db.get(state.ownerPageId)
   if (page && await liveSignatoryRole(ctx, page, actorPersonId) !== null) return notFound()
+}
+
+/** Une décision commerciale ou professionnelle porte sur la révision effectivement présentée. */
+async function assertCatalogReviewSource(ctx: ReadCtx, networkId: Id<"networks">, target: Doc<"reports">["target"], expectedRevision?: number, expectedDigest?: string): Promise<void> {
+  if (target.kind === "editorialMedia") {
+    if (expectedRevision === undefined || !Number.isSafeInteger(expectedRevision) || expectedRevision < 1 || expectedDigest === undefined || !/^[a-f0-9]{64}$/.test(expectedDigest)) return notFound()
+    const source = await editorialMediaReviewSource(ctx, networkId, target.id)
+    if (!source || source.sourceRevision !== expectedRevision || source.sourceDigest !== expectedDigest) return notFound()
+    return
+  }
+  if (target.kind === "editorialVersion") {
+    if (expectedRevision === undefined || !Number.isSafeInteger(expectedRevision) || expectedRevision < 1 || expectedDigest === undefined || !/^[a-f0-9]{64}$/.test(expectedDigest)) return notFound()
+    const source = await editorialReviewSource(ctx, networkId, target.id)
+    if (!source || source.sourceRevision !== expectedRevision || source.sourceDigest !== expectedDigest) return notFound()
+    return
+  }
+  if (target.kind === "professionalProfile" || target.kind === "professionalCollaboration") {
+    if (expectedRevision === undefined || !Number.isSafeInteger(expectedRevision) || expectedRevision < 1 || expectedDigest === undefined || !/^[a-f0-9]{64}$/.test(expectedDigest)) return notFound()
+    const source = await professionalReviewSource(ctx, networkId, target)
+    if (!source || source.sourceRevision !== expectedRevision || source.sourceDigest !== expectedDigest) return notFound()
+    return
+  }
+  if (target.kind !== "commerceStorefront" && target.kind !== "commerceOffer") return
+  // Dette historique distincte : les anciens appelants commerceOffer sans preuve gardent
+  // leur admission. Les nouveaux aperçus/UI transmettent toujours la paire ; aucun repli
+  // n'est admis pour les conditions de vitrine ajoutées par MP05.
+  const head = await ctx.db.get(target.id)
+  if (target.kind === "commerceOffer" && expectedRevision === undefined && expectedDigest === undefined) {
+    if (!head || head.networkId !== networkId || head.objectKind !== "offer" || head.sequence !== "catalog" || head.state !== "active") return notFound()
+    const parsed = parseCommercePublicBody(head.body, Date.now())
+    if (!parsed.ok || (parsed.value.payload.type !== "offer.published" && parsed.value.payload.type !== "offer.updated")) return notFound()
+    if (!parsed.value.payload.serviceProfile) return
+  }
+  if (expectedRevision === undefined || !Number.isSafeInteger(expectedRevision) || expectedRevision < 1 || expectedDigest === undefined || !/^[a-f0-9]{64}$/.test(expectedDigest)) return notFound()
+  if (!head || head.networkId !== networkId || head.objectKind !== (target.kind === "commerceStorefront" ? "shop" : "offer") || head.sequence !== "catalog" || head.state !== "active" || head.revision !== expectedRevision || head.digest !== expectedDigest) return notFound()
 }
 
 /**
@@ -200,13 +251,14 @@ async function applyDecision(ctx: MutationCtx, row: Doc<"reports">, actorPersonI
 }
 
 export const decide = networkMutation({
-  args: { reportId: v.id("reports"), decision: v.union(v.literal("dismissed"), v.literal("actioned")), reason: v.string(), sanctions: v.array(sanctionInput) },
+  args: { reportId: v.id("reports"), decision: v.union(v.literal("dismissed"), v.literal("actioned")), reason: v.string(), sanctions: v.array(sanctionInput), expectedSourceRevision: v.optional(v.number()), expectedSourceDigest: v.optional(v.string()) },
   handler: async (ctx, args) => {
     const row = await ctx.db.get(args.reportId)
     if (!row || row.networkId !== ctx.networkId) return notFound()
     const capacity = await teamCapacity(ctx, ctx, row.targetKind, row.teamId)
     if (!capacity) return notFound()
     await enforceRateLimit(ctx, "moderation.decide", ctx.person._id)
+    if (row.target.kind === "editorialVersion" || row.target.kind === "editorialMedia") await assertCatalogReviewSource(ctx, ctx.networkId, row.target, args.expectedSourceRevision, args.expectedSourceDigest)
     return await applyDecision(ctx, row, ctx.person._id, capacity, args.decision, motiveOf(args.reason), args.sanctions)
   },
 })
@@ -360,7 +412,7 @@ export const setBlockedTerm = networkMutation({
 })
 
 export const reviewContent = networkMutation({
-  args: { target: moderationTargetValidator, approve: v.boolean(), reason: v.string() },
+  args: { target: moderationTargetValidator, approve: v.boolean(), reason: v.string(), expectedSourceRevision: v.optional(v.number()), expectedSourceDigest: v.optional(v.string()) },
   handler: async (ctx, args) => {
     await enforceRateLimit(ctx, "moderation.decide", ctx.person._id)
     const state = await contentState(ctx, args.target.kind, args.target.id)
@@ -371,6 +423,9 @@ export const reviewContent = networkMutation({
     const team = teams.find((row) => row.scope === args.target.kind) ?? teams.find((row) => row.scope === undefined)
     const capacity = await teamCapacity(ctx, ctx, args.target.kind, team?._id)
     if (!capacity) return notFound()
+    // Lecture dans la même transaction que l'approbation OU le refus : une livraison R+1
+    // concurrente force la relecture, jamais une décision sur son contenu non présenté.
+    await assertCatalogReviewSource(ctx, ctx.networkId, args.target, args.expectedSourceRevision, args.expectedSourceDigest)
     const reason = motiveOf(args.reason)
     if (args.approve) await restoreTarget(ctx, { target: args.target, networkId: ctx.networkId, ownerPersonId: state.ownerPersonId })
     else await removeTarget(ctx, { target: args.target, networkId: ctx.networkId, ownerPersonId: state.ownerPersonId })

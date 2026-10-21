@@ -20,7 +20,7 @@ describe("vitrine publique rendue sans fournisseur membre", () => {
     expect(container.textContent).toContain(t("shops:publicStorefront.origin", { name: "ANTSIA" }))
     expect(container.textContent).toContain(t("shops:badges.community"))
     expect(container.textContent).toContain(t("shops:models.products"))
-    expect(container.querySelectorAll("dt").length).toBe(3)
+    expect(container.querySelectorAll("[aria-labelledby=public-storefront-about] dt").length).toBe(3)
     expect(container.querySelector("a")?.getAttribute("href")).toBe(routes.storefront("atelier"))
     expect(container.querySelector("button, form")).toBeNull()
     expect(html).not.toContain(routes.officialPage("atelier"))
@@ -39,7 +39,7 @@ describe("vitrine publique rendue sans fournisseur membre", () => {
     const container = document.createElement("div")
     container.innerHTML = html
     expect(Array.from(container.querySelectorAll("img")).map((image) => image.getAttribute("src"))).toEqual([value.bannerUrl, value.logoUrl])
-    expect(container.querySelectorAll("dt").length).toBe(2)
+    expect(container.querySelectorAll("[aria-labelledby=public-storefront-about] dt").length).toBe(2)
     expect(container.textContent).toContain(getAppT("fr").t("shops:models.quote_services"))
     expect(container.querySelector("button, form, [role=tablist]")).toBeNull()
   })

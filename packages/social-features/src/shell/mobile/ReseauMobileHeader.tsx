@@ -36,6 +36,7 @@ import { AppearanceToggle } from "../appearance/AppearanceToggle"
 import { Avatar } from "../../features/reseau-personnel/Avatar"
 import { formatUnreadBadge } from "../../features/reseau-personnel/shared"
 import { useReseauDestinationRoutes } from "../reseau-menu-destinations-ui"
+import { ReseauCreateAction } from "../ReseauCreateAction"
 
 export interface ReseauMobileHeaderProps {
   /** Lance la recherche — le parent décide ce que « chercher » veut dire. */
@@ -129,6 +130,7 @@ export function ReseauMobileHeader({ onSearch, searchQuery, profileHref, avatarU
   return (
     <header className="rm-header" data-presentation={charte ? "charte" : undefined}>
       <div className="rm-header-row">
+        {!searchOpen ? <ReseauCreateAction /> : null}
         {searchOpen ? (
           <form role="search" aria-label={t("reseauMobileHeader.searchLabel")} onSubmit={submit} className="rm-search">
             <div style={{ minWidth: 0, flex: 1 }}>

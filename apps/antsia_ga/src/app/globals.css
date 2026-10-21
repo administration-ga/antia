@@ -86,3 +86,70 @@ html {
   --error-border: var(--danger-100);
   --error-text: var(--danger-700);
 }
+
+
+/* Les huit rubriques partagent les mêmes mesures, sur leurs routes réelles. */
+.antsia-page { display: grid; gap: 24px; min-width: 0; }
+.antsia-page-header { display: grid; gap: 8px; min-width: 0; }
+.antsia-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--esp-page-title-size);
+  font-weight: 700;
+  line-height: var(--esp-page-title-leading);
+  letter-spacing: -0.015em;
+}
+.antsia-subtitle, .antsia-page h2 {
+  font-family: var(--font-display);
+  font-size: var(--esp-section-title-size);
+  font-weight: 700;
+  line-height: var(--esp-section-title-leading);
+  letter-spacing: -0.01em;
+}
+.antsia-page h3 {
+  font-family: var(--font-display);
+  font-size: var(--esp-subsection-title-size);
+  font-weight: 700;
+  line-height: var(--esp-subsection-title-leading);
+}
+.antsia-copy { font-size: 15px; line-height: 1.5; }
+.antsia-panel {
+  min-width: 0;
+  padding: var(--esp-card-padding);
+  border: 1px solid var(--esp-surface-border);
+  border-radius: var(--ui2-card-radius);
+  background: var(--card);
+  color: var(--card-foreground);
+  box-shadow: var(--esp-surface-shadow);
+}
+.antsia-form-grid { display: grid; gap: 16px; min-width: 0; }
+
+/* Motifs exacts de la référence, limités à cette application. */
+:root[data-motif="points"] {
+  --esp-motif-image: radial-gradient(circle, var(--esp-motif-ink) 1px, transparent 1.5px);
+}
+:root[data-motif="grain"] {
+  --esp-motif-image: radial-gradient(circle, var(--esp-motif-grain-ink) .7px, transparent .8px), radial-gradient(circle, var(--esp-motif-grain-ink) .6px, transparent .7px), radial-gradient(circle, var(--esp-motif-grain-ink) .5px, transparent .6px);
+  --esp-motif-size: 5px 5px, 7px 7px, 11px 11px;
+  --esp-motif-position: 0 0, 2px 3px, 5px 1px;
+}
+:root[data-motif="projecteur"] {
+  --esp-motif-image: radial-gradient(85% 55% at 50% 0%, var(--esp-motif-reference-glow), transparent 72%);
+}
+body, .esp-page-motif, .rm-shell, .rp-scope {
+  background-position: var(--esp-motif-position, 0 0);
+}
+[data-mobile-nav] > .esp-reseau-tabbar { backdrop-filter: blur(16px); }
+[data-mobile-nav] {
+  right: var(--esp-mobile-dock-inset);
+  left: var(--esp-mobile-dock-inset);
+  bottom: calc(var(--esp-mobile-dock-bottom) + env(safe-area-inset-bottom, 0px));
+}
+@media (min-width: 600px) and (max-width: 959px) {
+  [data-mobile-nav] {
+    width: var(--esp-tablet-dock-width);
+    max-width: calc(100% - 48px);
+    margin-inline: auto;
+    bottom: calc(var(--esp-tablet-dock-bottom) + env(safe-area-inset-bottom, 0px));
+  }
+}

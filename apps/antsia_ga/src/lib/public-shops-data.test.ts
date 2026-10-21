@@ -17,6 +17,13 @@ beforeEach(() => {
 })
 
 describe("vitrine publique — projection fermée et porte de session partagée", () => {
+  it("admet la configuration publique MP02 et refuse ses extensions privées ou incohérentes", () => {
+    const configuration = { version: 1, capabilities: ["products", "services"], template: "fashion", blocks: ["services", "about", "catalog"] }
+    expect(publicStorefrontSchema.safeParse({ ...storefront, activityConfiguration: configuration }).success).toBe(true)
+    for (const value of [{ ...configuration, version: 2 }, { ...configuration, bankAccount: "private" }, { ...configuration, capabilities: ["products"], blocks: ["services"] }, { ...configuration, blocks: ["about", "about"] }]) {
+      expect(publicStorefrontSchema.safeParse({ ...storefront, activityConfiguration: value }).success).toBe(false)
+    }
+  })
   it("ne requête rien pour un transfert en attente ni une session refusée", async () => {
     expect(await loadPublicStorefront("atelier", true)).toEqual({ status: "handoff" })
     expect(mocks.viewer).not.toHaveBeenCalled()

@@ -1,36 +1,33 @@
-import { renderToStaticMarkup } from "react-dom/server"
-import { afterEach, describe, expect, it, vi } from "vitest"
+// @vitest-environment jsdom
+import { act, type ReactNode } from "react"
+import { createRoot, type Root } from "react-dom/client"
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
-vi.mock("@antsia/social-features/messagerie", () => ({ MessagesRoute: () => <section data-messages-content="" /> }))
-vi.mock("@/components/member-chrome", () => ({ MemberTopBar: ({ onMobile }: { onMobile: string }) => <header data-mobile={onMobile} /> }))
-vi.mock("@/components/shops/contact-messages", () => ({ useCommercialMessages: () => undefined }))
+const state = vi.hoisted(() => ({ navigation: "destinations", navigationLayout: "adaptive", contextual: { renderList: vi.fn(), renderConversation: vi.fn() }, commercial: {}, route: vi.fn(), inject: vi.fn() }))
+vi.mock("@antsia/api/network", () => ({ useNetwork: () => ({ navigation: state.navigation, navigationLayout: state.navigationLayout }) }))
+vi.mock("@antsia/social-features/features/messagerie/contextual-entry", () => ({ useContextualMessages: (options: unknown) => { state.inject(options); return state.contextual } }))
+vi.mock("@antsia/social-features/messagerie", () => ({ MessagesRoute: (props: unknown) => { state.route(props); return <div>iCom</div> } }))
+vi.mock("@/components/shops/contact-messages", () => ({ useCommercialMessages: () => state.commercial }))
+vi.mock("@/components/member-chrome", () => ({ MemberPage: ({ children }: { children: ReactNode }) => <main>{children}</main>, MemberTopBar: () => <nav /> }))
 
 import { MessagesScreen } from "./messages-screen"
 
-afterEach(() => vi.unstubAllEnvs())
+let root: Root | undefined
+let container: HTMLDivElement
+beforeEach(() => {
+  Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true })
+  container = document.createElement("div"); document.body.append(container)
+  state.route.mockClear(); state.inject.mockClear()
+})
+afterEach(async () => { await act(async () => { root?.unmount() }); root = undefined; container.remove() })
 
-describe("hauteur de la messagerie sous le bandeau démo", () => {
-  it("borne la messagerie à la hauteur disponible dans la zone démo", () => {
-    vi.stubEnv("NEXT_PUBLIC_APP_BASE_PATH", "/demo")
-    vi.stubEnv("NEXT_PUBLIC_CONVEX_URL", "https://vivid-hedgehog-655.convex.cloud")
-    const html = renderToStaticMarkup(<MessagesScreen route={{}} />)
-    expect(html).toContain('class="esp-page-motif flex h-dvh flex-col overflow-hidden bg-background"')
-    expect(html).toContain('style="height:calc(100dvh - var(--antsia-demo-banner-height, 0px))"')
-    expect(html).toContain('data-mobile="visible"')
-    expect(html).toContain('data-messages-content=""')
-  })
-
-  it("conserve le masquage de la barre dans une conversation immersive de démo", () => {
-    vi.stubEnv("NEXT_PUBLIC_APP_BASE_PATH", "/demo")
-    vi.stubEnv("NEXT_PUBLIC_CONVEX_URL", "https://vivid-hedgehog-655.convex.cloud")
-    expect(renderToStaticMarkup(<MessagesScreen route={{ kind: "personne", id: "fixture" }} />)).toContain('data-mobile="hidden"')
-  })
-
-  it.each(["", "/demo"])("la hauteur du principal reste 100dvh avec basePath %j", (basePath) => {
-    vi.stubEnv("NEXT_PUBLIC_APP_BASE_PATH", basePath)
-    vi.stubEnv("NEXT_PUBLIC_CONVEX_URL", "https://diligent-avocet-585.convex.cloud")
-    const html = renderToStaticMarkup(<MessagesScreen route={{}} />)
-    expect(html).not.toContain('style="')
-    expect(html).toContain('class="esp-page-motif flex h-dvh flex-col overflow-hidden bg-background"')
+describe("MP09 — iCom professionnel réellement injecté dans ANTSIA", () => {
+  it.each(["adaptive", "legacy"])("branche liste et conversation dans la coque %s sans remplacer le canal commercial", async layout => {
+    state.navigationLayout = layout
+    root = createRoot(container)
+    await act(async () => { root?.render(<MessagesScreen route={{ kind: "mise-en-relation", id: "contextual-thread" }} />) })
+    expect(state.inject).toHaveBeenCalledWith({ kind: "professionalCollaboration" })
+    expect(state.route).toHaveBeenLastCalledWith({ kind: "mise-en-relation", id: "contextual-thread", contextual: state.contextual, commercial: state.commercial })
+    expect(container.textContent).toContain("iCom")
   })
 })

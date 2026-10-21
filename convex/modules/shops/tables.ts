@@ -19,7 +19,7 @@ import { v } from "convex/values"
 import { contentVisibilityValidator } from "../../lib/validators"
 import { jobTables } from "./jobTables"
 import { serviceTables } from "./serviceTables"
-import { shopModelValidator, storefrontPolicyValidator, storefrontStateValidator } from "./validators"
+import { activityConfigurationValidator, shopModelValidator, storefrontPolicyValidator, storefrontStateValidator } from "./validators"
 
 export const shopsTables = {
   // P15 : emploi public reflété et candidatures privées (préfixes commerceJob*/commerceApplication*).
@@ -35,6 +35,8 @@ export const shopsTables = {
     /** La page sociale qui porte la boutique ; absente tant que la vitrine n'est pas admise. */
     pageId: v.optional(v.id("pages")),
     model: shopModelValidator,
+    /** MP02 : facultatif pour les lignes historiques ; aucune donnée économique ni référence personnelle. */
+    activityConfiguration: v.optional(activityConfigurationValidator),
     /** Identité du BROUILLON sans page ; avec une page, c'est la page qui la porte (ces champs sont vidés). */
     draftName: v.optional(v.string()),
     draftDescription: v.optional(v.string()),
@@ -80,6 +82,7 @@ export const shopsTables = {
   shopNetworkPolicies: defineTable({
     networkId: v.id("networks"),
     storefront: storefrontPolicyValidator,
+    automaticDecisionVersion: v.optional(v.string()),
     updatedAt: v.number(),
     updatedByPersonId: v.optional(v.id("persons")),
   }).index("by_network", ["networkId"]),

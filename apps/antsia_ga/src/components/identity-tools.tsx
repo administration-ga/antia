@@ -65,7 +65,7 @@ export function IdentityTools() {
         <ShieldCheck aria-hidden="true" className="size-4" />
       </Button>
       {open ? (
-        <section id={panelId} ref={panel} aria-label={t("identity.title")} className="absolute right-0 top-full z-40 mt-2 flex w-72 max-w-[calc(100vw-2rem)] flex-col gap-3 rounded-xl border border-border bg-popover p-4 text-popover-foreground shadow-lg">
+        <section id={panelId} ref={panel} aria-label={t("identity.title")} className="absolute right-0 top-full z-40 mt-2 flex w-72 max-w-[calc(100vw-2rem)] flex-col gap-3 rounded-[var(--ui2-card-radius)] border border-border bg-popover p-[var(--esp-card-padding,16px)] text-popover-foreground shadow-[var(--esp-surface-shadow,none)]">
           {!verified ? <>
             <p className="text-sm">{t("identity.lead")}</p>
             <Button pending={linking} disabled={!configuration?.idn || linking} onClick={async () => {
@@ -95,7 +95,7 @@ export function IdentityTools() {
             }}>{linking ? t("identity.pending") : t("identity.verify")}</Button>
             {!configuration?.idn ? <p className="text-xs text-muted-foreground">{t("identity.unavailable")}</p> : null}
           </> : null}
-          <Link href={routes.personalControls()} className="rounded-lg p-2 text-sm font-medium hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring">{t("personal.title")}</Link>
+          <Link href={routes.personalControls()} className="rounded-[var(--ui2-button-radius)] p-2 text-sm font-medium hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring">{t("personal.title")}</Link>
           <p className="text-sm font-medium">{t("identity.applications")}</p>
           {configuration?.applications.filter((app) => app.key !== "antsia_ga").map((app) => (
             <Button key={app.key} variant="ghost" disabled={sso.pending} onClick={async () => {

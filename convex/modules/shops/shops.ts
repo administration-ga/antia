@@ -1,3 +1,4 @@
+import { readableStorefrontTerms } from "./storefrontTerms"
 /**
  * Les BOUTIQUES d'un réseau, côté membre (P07, ADR-0019) — préparer, présenter,
  * demander la publication de la vitrine, la retirer, régler sa diffusion
@@ -15,6 +16,7 @@
  * (absente : aucune fonction ne l'ouvre, l'éditeur dit les étapes qui restent).
  */
 import { computePageBadge } from "@antsia/social-domain/badges"
+import { effectiveActivityConfiguration, parseActivityConfiguration, visibleActivityBlocks } from "@antsia/social-domain/activityConfiguration"
 import { catalogStorefrontBlocks } from "./catalogRead"
 import { paginationOptsValidator, paginationResultValidator, type PaginationResult } from "convex/server"
 import { v } from "convex/values"
@@ -60,14 +62,13 @@ import {
   SHOP_DRAFTS_PER_PERSON_MAX,
   SHOP_MANAGEMENT_PAGES_MAX,
   SHOP_PUBLIC_LISTING_TEXT_VERSION,
-  shopBlockStates,
   type ShopFieldResult,
   STOREFRONT_DISCARDABLE,
   STOREFRONT_REQUESTABLE,
   storefrontsOpen,
-  visibleStorefrontBlocks,
 } from "./rules"
 import {
+  activityConfigurationValidator,
   eligibleShopPagesValidator,
   myShopsValidator,
   type ShopEditor,
@@ -128,11 +129,14 @@ async function editorOf(ctx: ReadCtx, managed: ManagedShop, viewer: { personId: 
   const publicNow = (await publicStorefrontPage(ctx, viewer.rootNetwork, shop, viewer.personId)) !== null
   const consenting = hasPublicConsent(shop)
   const commerceLinked = (await liveShopCommerceLink(ctx, shop.networkId, shop._id)) !== null
-  const catalogReady = (await catalogStorefrontBlocks(ctx, viewer.rootNetwork, shop, viewer.personId)).length > 0
+  const configuration = effectiveActivityConfiguration(shop.activityConfiguration, shop.model)
+  const catalogBlocks = await catalogStorefrontBlocks(ctx, viewer.rootNetwork, shop, viewer.personId)
+  const catalogReady = catalogBlocks.length > 0
   return {
     shopId: shop._id,
     role,
     model: shop.model,
+    activityConfiguration: configuration,
     name: identity.name,
     description: identity.description,
     specialty: shop.specialty ?? null,
@@ -161,7 +165,7 @@ async function editorOf(ctx: ReadCtx, managed: ManagedShop, viewer: { personId: 
       currentTextVersion: SHOP_PUBLIC_LISTING_TEXT_VERSION,
       publicNow,
     },
-    blocks: shopBlockStates(shop.model, page !== null, commerceLinked, catalogReady),
+    blocks: configuration.blocks.map((id) => ({ id, state: id === "catalog" || id === "services" ? catalogBlocks.includes(id) ? "active" : commerceLinked ? "awaiting_pro_catalog" : "awaiting_pro_link" : id === "publications" && page === null ? "awaiting_page" : "active" })),
     capabilities: { ...shopCapabilities(shop, servable), catalog: catalogReady },
     checkout: { available: false as const, missing: SHOP_CHECKOUT_MISSING.filter((step) => (step !== "pro_link" || !commerceLinked) && (step !== "pro_catalog" || !catalogReady)) },
     updatedAt: shop.updatedAt,
@@ -170,6 +174,7 @@ async function editorOf(ctx: ReadCtx, managed: ManagedShop, viewer: { personId: 
 
 /** La vitrine vue par un membre : identité de la page, présentation commerciale, blocs NON VIDES. */
 async function storefrontOf(ctx: ReadCtx, shop: Doc<"shops">, page: Doc<"pages">, rootNetwork: Doc<"networks">, readerPersonId: Id<"persons">): Promise<Storefront> {
+  const configuration = effectiveActivityConfiguration(shop.activityConfiguration, shop.model)
   const [logoUrl, bannerUrl, following, role, publicView] = await Promise.all([
     logoUrlOf(ctx, page.logoStorageId),
     logoUrlOf(ctx, page.bannerStorageId),
@@ -177,7 +182,9 @@ async function storefrontOf(ctx: ReadCtx, shop: Doc<"shops">, page: Doc<"pages">
     liveSignatoryRole(ctx, page, readerPersonId),
     publicStorefrontPage(ctx, rootNetwork, shop, readerPersonId),
   ])
+  const storefrontTerms = await readableStorefrontTerms(ctx, rootNetwork, shop._id, readerPersonId)
   return {
+    ...(storefrontTerms ? { storefrontTerms } : {}),
     pageId: page._id,
     handle: page.handle,
     name: page.name,
@@ -185,11 +192,12 @@ async function storefrontOf(ctx: ReadCtx, shop: Doc<"shops">, page: Doc<"pages">
     logoUrl,
     bannerUrl,
     model: shop.model,
+    activityConfiguration: configuration,
     specialty: shop.specialty ?? null,
     serviceArea: shop.serviceArea ?? null,
     hours: shop.hours ?? null,
     badge: computePageBadge(page.trust),
-    blocks: [...await catalogStorefrontBlocks(ctx, rootNetwork, shop, readerPersonId), ...visibleStorefrontBlocks(shop.model, true)],
+    blocks: visibleActivityBlocks(configuration, [...await catalogStorefrontBlocks(ctx, rootNetwork, shop, readerPersonId), "publications", "about"]),
     publishedAt: shop.publishedAt ?? shop.updatedAt,
     // La vitrine a-t-elle aussi une adresse PUBLIQUE en ce moment (la même porte que la projection anonyme) ?
     publicListing: publicView !== null,
@@ -197,7 +205,7 @@ async function storefrontOf(ctx: ReadCtx, shop: Doc<"shops">, page: Doc<"pages">
   }
 }
 
-async function cardOf(ctx: ReadCtx, shop: Doc<"shops">, page: Doc<"pages">): Promise<StorefrontCard> {
+export async function cardOf(ctx: ReadCtx, shop: Doc<"shops">, page: Doc<"pages">): Promise<StorefrontCard> {
   return {
     handle: page.handle,
     name: page.name,
@@ -338,10 +346,12 @@ export const directory = networkQuery({
  * créé ici.
  */
 export const startShop = networkMutation({
-  args: { model: shopModelValidator, name: v.optional(v.string()), pageId: v.optional(v.id("pages")) },
+  args: { model: shopModelValidator, name: v.optional(v.string()), pageId: v.optional(v.id("pages")), activityConfiguration: v.optional(activityConfigurationValidator) },
   returns: v.object({ shopId: v.id("shops") }),
   handler: async (ctx, args) => {
     await enforceRateLimit(ctx, "shop.create", ctx.person._id)
+    const configuration = args.activityConfiguration === undefined ? undefined : parseActivityConfiguration(args.activityConfiguration)
+    if (configuration === null) return fail("invalidArgument", { field: "activityConfiguration" })
     const now = Date.now()
     if (args.pageId !== undefined) {
       const page = await ctx.db.get(args.pageId)
@@ -354,6 +364,7 @@ export const startShop = networkMutation({
         preparedByPersonId: ctx.person._id,
         pageId: page._id,
         model: args.model,
+        ...(configuration ? { activityConfiguration: configuration } : {}),
         storefront: "draft",
         visibility: "network",
         createdAt: now,
@@ -373,6 +384,7 @@ export const startShop = networkMutation({
       ownerPersonId: ctx.person._id,
       preparedByPersonId: ctx.person._id,
       model: args.model,
+      ...(configuration ? { activityConfiguration: configuration } : {}),
       draftName: name,
       storefront: "draft",
       visibility: "network",
@@ -394,6 +406,7 @@ export const updateShop = networkMutation({
   args: {
     shopId: v.id("shops"),
     model: v.optional(shopModelValidator),
+    activityConfiguration: v.optional(activityConfigurationValidator),
     name: v.optional(v.string()),
     description: v.optional(v.union(v.string(), v.null())),
     specialty: v.optional(v.union(v.string(), v.null())),
@@ -404,6 +417,8 @@ export const updateShop = networkMutation({
   handler: async (ctx, args) => {
     await enforceRateLimit(ctx, "shop.edit", ctx.person._id)
     const { shop, page } = await requireManagedShop(ctx, { networkId: ctx.networkId, personId: ctx.person._id }, args.shopId)
+    const configuration = args.activityConfiguration === undefined ? undefined : parseActivityConfiguration(args.activityConfiguration)
+    if (configuration === null) return fail("invalidArgument", { field: "activityConfiguration" })
     const name = args.name === undefined ? undefined : accepted(checkShopName(args.name))
     const description = args.description === undefined ? undefined : args.description === null ? null : (accepted(checkShopDescription(args.description)) ?? null)
     const lines = {
@@ -413,6 +428,7 @@ export const updateShop = networkMutation({
     }
     const patch: Partial<Doc<"shops">> = {}
     if (args.model !== undefined && args.model !== shop.model) patch.model = args.model
+    if (configuration && JSON.stringify(configuration) !== JSON.stringify(parseActivityConfiguration(shop.activityConfiguration))) patch.activityConfiguration = configuration
     for (const field of ["specialty", "serviceArea", "hours"] as const) {
       const next = lines[field]
       if (next === undefined) continue

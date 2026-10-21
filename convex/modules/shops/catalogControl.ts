@@ -1,6 +1,6 @@
 /** P09 : seule une décision opérateur ouvre politique/mapping ; aucune configuration exécutée ici. */
 import { assertDecisionReason } from "@antsia/social-domain/audit"
-import { COMMERCE_PUBLIC_CONTRACT } from "@antsia/social-domain/commerce/primitives"
+import { isCommercePublicContract } from "@antsia/social-domain/commerce/primitives"
 import { federationEnvironment } from "@antsia/social-domain/federationProtocol"
 import { v } from "convex/values"
 
@@ -56,7 +56,7 @@ export const configureMapping = operatorMutation({
     } else {
       const link = await liveShopCommerceLink(ctx, args.networkId, args.shopId)
       const emitter = await ctx.db.get(args.emitterId)
-      if (!link || !link.permissions.includes("publish_catalog") || !emitter?.enabled || emitter.networkId !== args.networkId || emitter.environment !== link.environment || emitter.environment !== federationEnvironment(process.env.FEDERATION_ENVIRONMENT) || !emitter.allowedContracts.includes(COMMERCE_PUBLIC_CONTRACT)) return fail("policyRefused")
+      if (!link || !link.permissions.includes("publish_catalog") || !emitter?.enabled || emitter.networkId !== args.networkId || emitter.environment !== link.environment || emitter.environment !== federationEnvironment(process.env.FEDERATION_ENVIRONMENT) || !emitter.allowedContracts.some(isCommercePublicContract)) return fail("policyRefused")
       const other = await ctx.db.query("commerceCatalogMappings").withIndex("by_emitter_shop_ref", (q) => q.eq("emitterId", emitter._id).eq("shopRef", link.shopRef)).unique()
       if (other && other._id !== previous?._id) return fail("conflict")
       const fields = { networkId: args.networkId, shopId: args.shopId, emitterId: emitter._id, environment: emitter.environment, shopRef: link.shopRef, linkRef: link.linkRef, enabled: true, generation: (previous?.generation ?? 0) + 1, updatedAt: now, updatedByPersonId: ctx.person._id }

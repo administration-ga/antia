@@ -12,12 +12,12 @@ import { ThemeChoiceProvider } from "./theme-choice"
 const THEMES = [{ id: "gaboma", charte: "antsia" }, { id: "soleil", charte: "antsia-soleil" }] as const
 const NAMES: Record<string, string> = { gaboma: "Gaboma", soleil: "Soleil" }
 
-function themed(choose: ((theme: string) => void) | null = null) {
+function themed(choose: ((theme: string) => void) | null = null, showTheme = true) {
   const i18n = createAppI18n({ locale: "fr", appResources: { fr: {}, en: {} }, defaultNS: "shell" })
   return (
     <I18nextProvider i18n={i18n}>
       <AppearanceProvider storagePrefix="antsia:test:" themes={THEMES} themeName={(id) => NAMES[id] ?? id}>
-        <ThemeChoiceProvider choose={choose}><AppearanceControl /></ThemeChoiceProvider>
+        <ThemeChoiceProvider choose={choose}><AppearanceControl showTheme={showTheme} /></ThemeChoiceProvider>
       </AppearanceProvider>
     </I18nextProvider>
   )
@@ -73,6 +73,12 @@ describe("AppearanceControl", () => {
   it("sans nom de thème fourni par l'application, ne propose que l'apparence", () => {
     render(appearance())
     expect(screen.getAllByRole("combobox")).toHaveLength(1)
+  })
+
+  it("laisse le choix de thème au nuancier quand les réglages le proposent déjà", () => {
+    render(themed(null, false))
+    expect(screen.getByRole("combobox", { name: "Apparence" })).toBeInTheDocument()
+    expect(screen.queryByRole("combobox", { name: "Thème" })).toBeNull()
   })
 
   it("propose le thème sous son nom et le pose sur l'appareil hors session (ADR-0030)", () => {

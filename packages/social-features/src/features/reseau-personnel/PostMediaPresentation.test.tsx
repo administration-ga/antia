@@ -13,13 +13,13 @@ const second: PostMediaDto = { ...first, url: "https://media.example/second.jpg"
 
 // La même surface sert aussi la carte publique : uniquement i18n, aucun
 // NetworkProvider, aucun client Convex, aucun identifiant de stockage.
-function renderMedia(media: readonly PostMediaDto[], presentation?: "media" | "classic") {
-  const i18n = createAppI18n({ locale: "fr", appResources: { fr: {}, en: {} }, defaultNS: "social" })
+function renderMedia(media: readonly PostMediaDto[], presentation?: "media" | "classic", locale: "fr" | "en" = "fr") {
+  const i18n = createAppI18n({ locale, appResources: { fr: {}, en: {} }, defaultNS: "social" })
   const surface = (items: readonly PostMediaDto[]) => (
     <I18nextProvider i18n={i18n}><PostMedia media={items} presentation={presentation} /></I18nextProvider>
   )
   const view = render(surface(media))
-  return { ...view, replace: (items: readonly PostMediaDto[]) => view.rerender(surface(items)) }
+  return { ...view, i18n, replace: (items: readonly PostMediaDto[]) => view.rerender(surface(items)) }
 }
 
 describe("Médias P03", () => {
@@ -82,6 +82,22 @@ describe("Médias P03", () => {
     view.replace([second])
     expect(screen.getByRole("img", { name: "Deuxième image" })).toHaveAttribute("src", second.url)
     expect(screen.queryByText("Image indisponible")).toBeNull()
+  })
+
+  it.each([
+    ["media", "fr"], ["classic", "fr"], ["media", "en"], ["classic", "en"],
+  ] as const)("distingue analyse indisponible et quarantaine sans média servi (%s, %s)", (presentation, locale) => {
+    for (const kind of ["image", "video"] as const) {
+      const view = renderMedia([{ ...first, kind, mimeType: kind === "video" ? "video/mp4" : first.mimeType, withheld: "fileScanUnavailable" }], presentation, locale)
+      expect(screen.getByText(view.i18n.t("errors:fileScanUnavailable"))).toBeInTheDocument()
+      expect(screen.queryByText(view.i18n.t("errors:fileQuarantined"))).toBeNull()
+      expect(view.container.querySelector("img, video, [src], a[href]")).toBeNull()
+      view.replace([{ ...first, kind, withheld: "fileQuarantined" }])
+      expect(screen.getByText(view.i18n.t("errors:fileQuarantined"))).toBeInTheDocument()
+      expect(screen.queryByText(view.i18n.t("errors:fileScanUnavailable"))).toBeNull()
+      expect(view.container.querySelector("img, video, [src], a[href]")).toBeNull()
+      view.unmount()
+    }
   })
 
   it("ferme la visionneuse et remet l'index à zéro quand une galerie de même taille remplace la précédente", async () => {

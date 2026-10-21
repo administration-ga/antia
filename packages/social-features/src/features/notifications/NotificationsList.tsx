@@ -157,7 +157,9 @@ function NotificationsListContent({
 					<h2
 						style={{
 							margin: 0,
-							fontSize: compact ? 10.5 : 15,
+							fontFamily: compact ? "inherit" : "var(--esp-heading-font-family, inherit)",
+							fontSize: compact ? 10.5 : "var(--esp-section-title-size, 15px)",
+							lineHeight: compact ? "inherit" : "var(--esp-section-title-leading, inherit)",
 							fontWeight: 700,
 							letterSpacing: compact ? "0.09em" : "normal",
 							textTransform: compact ? "uppercase" : "none",

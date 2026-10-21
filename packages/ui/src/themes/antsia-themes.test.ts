@@ -124,7 +124,7 @@ const INHERITED_IN_DARK = new Set([
   "--chart-2", "--chart-3", "--chart-4", "--chart-5",
   "--esp-tone-blue", "--esp-tone-blue-bg", "--esp-tone-amber", "--esp-tone-amber-bg",
   "--esp-tone-rose", "--esp-tone-rose-bg", "--esp-tone-green", "--esp-tone-green-bg",
-  "--esp-mobilebar-shadow", "--esp-shadow-card", "--border-light",
+  "--esp-shadow-card", "--border-light",
   "--esp-segment-on", "--esp-segment-on-fg",
 ])
 
@@ -151,7 +151,7 @@ const declarationsOf = (css: string, selectors: readonly string[]) =>
 const sharedOf = (charte: string) =>
   new Map(declarationsOf(read(`./${charte}.css`), [`[data-charte="${charte}"]`, `.dark[data-charte="${charte}"]`, `.dark [data-charte="${charte}"]`]))
 /** Les jetons propres à chaque thème dans son bloc commun : le voile, le contour et l'aperçu. */
-const OWN_SHARED = new Set(["--ui2-scrim", "--esp-surface-border", "--esp-mobilebar-border", "--esp-theme-swatch-1", "--esp-theme-swatch-2", "--esp-theme-swatch-3"])
+const OWN_SHARED = new Set(["--esp-post-shadow", "--ui2-scrim", "--esp-surface-border", "--esp-mobilebar-border", "--esp-theme-swatch-1", "--esp-theme-swatch-2", "--esp-theme-swatch-3"])
 const GABOMA_SHARED = sharedOf("antsia")
 
 describe("les sept thèmes d'antsia.ga (ADR-0027)", () => {
@@ -282,6 +282,7 @@ describe("les sept thèmes d'antsia.ga (ADR-0027)", () => {
 
     const sheet = (charte: string) => [...BASE_SHEETS, { name: `${charte}.css`, css: read(`./${charte}.css`) }]
     const antsia = ANTSIA_THEME_IDS.map(antsiaCharteFor)
+    const antsiaSheets = antsia.map((theme) => ({ name: `${theme}.css`, css: read(`./${theme}.css`) }))
     for (const charte of ["diasporale", "diasporale-gaboma", "admin-antsia", ...antsia]) {
       const cascade = new TokenCascade(sheet(charte))
       for (const dark of [false, true]) {
@@ -296,8 +297,15 @@ describe("les sept thèmes d'antsia.ga (ADR-0027)", () => {
           }
           const card = paint("var(--card)")
           const messageFill = cascade.resolve(node, "--role-message-fill")
-          // antsia.ga déclare l'aplat des messages ; DIASPORALE et la console le laissent à `initial`.
-          expect(messageFill === undefined, label).toBe(!antsia.includes(charte))
+          // ANTSIA déclare toujours son aplat. Un autre réseau peut choisir son
+          // propre aplat ; charger les sept chartes ANTSIA ne doit pas le changer.
+          if (antsia.includes(charte)) expect(messageFill, label).toBeDefined()
+          else {
+            const own = { name: `${charte}.css`, css: read(`./${charte}.css`) }
+            for (const sheets of [[...BASE_SHEETS, ...antsiaSheets, own], [...sheet(charte), ...antsiaSheets]]) {
+              expect(new TokenCascade(sheets).resolve(node, "--role-message-fill"), label).toBe(messageFill)
+            }
+          }
           if (messageFill !== undefined) expect(cascade.resolveValue(node, declaration(MESSAGE, "background")), label).toBe(messageFill)
           for (const selector of [NEUTRAL, MESSAGE]) {
             const icon = paint(declaration(selector, "color"))
@@ -388,11 +396,13 @@ describe("les sept thèmes d'antsia.ga (ADR-0027)", () => {
   it("le contrat de la base laisse DIASPORALE intact : chaque jeton du système épuré est à `initial`", () => {
     const base = new TokenCascade(BASE_SHEETS)
     const tokens = [...Object.keys(ANGLES).filter((token) => token !== "--rp-surface-radius"), "--primary-fill-on", "--esp-theme-swatch-1",
-      "--ui2-button-outline-bg", "--ui2-button-outline-border", "--ui2-button-secondary-bg", "--ui2-button-secondary-border", "--ui2-button-secondary-fg",
+      "--ui2-button-outline-bg", "--ui2-button-outline-fg", "--ui2-button-outline-border", "--ui2-button-secondary-bg", "--ui2-button-secondary-border", "--ui2-button-secondary-fg",
       "--esp-chip-bg", "--esp-chip-border", "--esp-header-icon-bg", "--esp-story-ring-fill", "--esp-fab-shadow", "--esp-tab-active-bg", "--esp-tab-active-fg",
       ...["social", "message", "react", "commerce"].flatMap((role) => [`--role-${role}-fill`, `--role-${role}-on`, `--role-${role}-ink`]),
       ...["success", "danger"].flatMap((role) => [`--role-${role}-fill`, `--role-${role}-on`, `--role-${role}-ink`]),
-      "--esp-identity-fill", "--esp-identity-fill-hover",
+      "--esp-identity-fill", "--esp-identity-fill-hover", "--esp-field-border",
+      "--esp-card-padding", "--esp-card-gap", "--esp-surface-shadow", "--esp-raised-border", "--esp-control-min-size",
+      "--esp-alert-border", "--esp-alert-accent-width",
       "--role-message-soft", "--role-react-soft", "--role-react-label"]
     for (const dark of [false, true]) {
       for (const token of tokens) expect(base.resolve({ charte: "diasporale", dark, nested: false }, token), token).toBeUndefined()

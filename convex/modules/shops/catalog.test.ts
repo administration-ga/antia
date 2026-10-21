@@ -1,7 +1,9 @@
 // @vitest-environment edge-runtime
 /** P09 : scénarios backend rédigés seulement ; aucune commande de test exécutée. */
 import { engineErrorCode } from "@antsia/social-contracts/errors"
-import { COMMERCE_PUBLIC_CONTRACT, commerceCanonicalJson } from "@antsia/social-domain/commerce/primitives"
+import { COMMERCE_PUBLIC_CONTRACT, COMMERCE_PUBLIC_CONTRACT_V2, commerceCanonicalJson, type CommercePublicContract } from "@antsia/social-domain/commerce/primitives"
+import type { CommerceServiceProfile } from "@antsia/social-domain/commerce/serviceProfile"
+import type { CommerceCatalogFacets } from "@antsia/social-domain/commerce/catalogFacets"
 import { commercePublicEffect, type CommerceMedia, type CommerceOfferEvent, type CommercePublicEvent, type CommerceShopEvent } from "@antsia/social-domain/commerce/projection"
 import { COMMERCE_LINK_CONSENT_VERSION } from "@antsia/social-domain/commerce-link"
 import { federationSigningText } from "@antsia/social-domain/federationProtocol"
@@ -13,8 +15,13 @@ import type { Id } from "../../_generated/dataModel"
 import { SEED_CONFIRMATION } from "../../seeds/foundations"
 import { createTestOperatorProof, testConvex } from "../../test.setup"
 import type { CatalogMediaLeaseArgs } from "../federation/commerceCatalogMedia"
+import { applyCommerceCatalog } from "../federation/commerceCatalog"
 import { readCommerceLinkConfig } from "./commerceLinkConfig"
 import { SHOP_PUBLIC_LISTING_TEXT_VERSION } from "./rules"
+import type { CatalogListArgs } from "./catalogRead"
+import type { PublicStorefront, Storefront } from "./validators"
+import type { CommerceStorefrontTerms } from "@antsia/social-domain/commerce/storefrontTerms"
+import { marketplaceIndexFields } from "./marketplaceIndexFields"
 import type { CatalogList, CatalogOffer } from "./catalogValidators"
 
 const NOW = Date.UTC(2026, 9, 18, 12)
@@ -28,7 +35,10 @@ const policy = makeFunctionReference<"mutation", { networkId: Id<"networks">; en
 const mapping = makeFunctionReference<"mutation", ShopArgs & { emitterId: Id<"federationEmitters">; enabled: boolean; reason: string }, null>("modules/shops/catalogControl:configureMapping")
 const getOffer = makeFunctionReference<"query", { networkId: Id<"networks">; handle: string; offerRef: string }, CatalogOffer | null>("modules/shops/catalog:offer")
 const getPublicOffer = makeFunctionReference<"query", { networkId: Id<"networks">; handle: string; offerRef: string }, CatalogOffer | null>("modules/public/catalog:offer")
-const list = makeFunctionReference<"query", { networkId: Id<"networks">; handle: string; query?: string; paginationOpts: { cursor: string | null; numItems: number } }, CatalogList>("modules/shops/catalog:list")
+const list = makeFunctionReference<"query", CatalogListArgs & { networkId: Id<"networks"> }, CatalogList>("modules/shops/catalog:list")
+const publicList = makeFunctionReference<"query", CatalogListArgs & { networkId: Id<"networks"> }, CatalogList>("modules/public/catalog:list")
+const memberStorefront = makeFunctionReference<"query", { networkId: Id<"networks">; handle: string }, Storefront | null>("modules/shops/shops:storefront")
+const publicStorefront = makeFunctionReference<"query", { networkId: Id<"networks">; handle: string }, PublicStorefront | null>("modules/public/shops:getStorefront")
 const slot = makeFunctionReference<"query", { networkId: Id<"networks">; postId: Id<"posts"> }, CatalogOffer | null>("modules/shops/catalog:postOffer")
 const setSlot = makeFunctionReference<"mutation", ShopArgs & { postId: Id<"posts">; offerRef: string | null }, { changed: true }>("modules/shops/catalogPosts:setPostOffer")
 const claim = makeFunctionReference<"mutation", CatalogMediaLeaseArgs, boolean>("modules/federation/commerceCatalogMedia:claim")
@@ -52,7 +62,7 @@ beforeEach(() => {
 })
 afterEach(() => { vi.useRealTimers(); vi.unstubAllEnvs(); vi.restoreAllMocks() })
 
-async function fixture() {
+async function fixture(contracts: readonly CommercePublicContract[] = [COMMERCE_PUBLIC_CONTRACT]) {
   const t = testConvex()
   const { root } = await t.mutation(internal.seeds.foundations.run, { confirmNonProduction: SEED_CONFIRMATION })
   const as = t.withIdentity({ subject: "catalogue-operator-fixture" })
@@ -73,7 +83,7 @@ async function fixture() {
     await ctx.db.insert("moderationPolicies", { networkId: root, surface: "commerceOffer", preReview: false, maxLinks: 20, maxWrites: 100, windowMs: 60_000, updatedAt: NOW })
     return { pageId, signatoryId, shopId, linkId }
   })
-  const emitterId = await as.mutation(api.modules.federation.emitters.configure, { networkId: root, slug: "pro-catalog-test", environment: "sandbox", enabled: true, keyEnvName: KEY_NAME, allowedContracts: [COMMERCE_PUBLIC_CONTRACT], reason: "Émetteur fictif du catalogue dans le harnais" })
+  const emitterId = await as.mutation(api.modules.federation.emitters.configure, { networkId: root, slug: "pro-catalog-test", environment: "sandbox", enabled: true, keyEnvName: KEY_NAME, allowedContracts: [...contracts], reason: "Émetteur fictif du catalogue dans le harnais" })
   await as.mutation(policy, { networkId: root, enabled: true, reason: "Politique fictive de lecture du catalogue" })
   await as.mutation(mapping, { networkId: root, shopId: owned.shopId, emitterId, enabled: true, reason: "Mapping fictif de la boutique et du catalogue" })
   return { t, as, root, personId, emitterId, ...owned, offerArgs: { networkId: root, handle: "catalogue-test", offerRef: OFFER } }
@@ -86,19 +96,129 @@ function shop(revision = 1, extra: Partial<CommerceShopEvent> = {}): CommerceSho
 function offer(revision = 1, extra: Partial<CommerceOfferEvent> = {}): CommerceOfferEvent {
   return { type: revision === 1 ? "offer.published" : "offer.updated", shopRef: SHOP, offerRef: OFFER, revision, changedAt: NOW, kind: "product", title: "Article de recette", description: "Une description publique du produit.", collectionRefs: [COLLECTION], tags: ["recette"], price: { mode: "fixed", currency: "XAF", amount: 12_000 }, showsAvailability: true, variants: [], variantAxes: [], media: [], ...extra }
 }
-async function deliver(f: Fixture, payload: CommercePublicEvent) {
-  const raw = commerceCanonicalJson({ contract: COMMERCE_PUBLIC_CONTRACT, eventId: `catalog-event-${++eventSequence}`, objectRef: commercePublicEffect(payload).objectRef, payload, version: 1 })!
+function bodyOf(payload: CommercePublicEvent, contract: CommercePublicContract = COMMERCE_PUBLIC_CONTRACT) {
+  return commerceCanonicalJson({ contract, eventId: `catalog-event-${++eventSequence}`, objectRef: commercePublicEffect(payload).objectRef, payload, version: 1 })!
+}
+async function deliver(f: Fixture, payload: CommercePublicEvent, contract: CommercePublicContract = COMMERCE_PUBLIC_CONTRACT) {
+  const raw = bodyOf(payload, contract)
   const timestamp = String(Math.floor(Date.now() / 1000))
   const key = await crypto.subtle.importKey("raw", new TextEncoder().encode(KEY), { name: "HMAC", hash: "SHA-256" }, false, ["sign"])
   const bytes = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(federationSigningText("sandbox", timestamp, raw)))
   const signature = Array.from(new Uint8Array(bytes), (byte) => byte.toString(16).padStart(2, "0")).join("")
   return await f.t.fetch("/federation/inbox", { method: "POST", body: raw, headers: { "x-antsia-emitter": "pro-catalog-test", "x-antsia-environment": "sandbox", "x-antsia-timestamp": timestamp, "x-antsia-signature": signature } })
 }
-async function applied(f: Fixture, payload: CommercePublicEvent) { const response = await deliver(f, payload); expect(response.status).toBe(202); expect(await response.json()).toMatchObject({ status: "applied", applicationStatus: "applied" }) }
+async function applied(f: Fixture, payload: CommercePublicEvent, contract: CommercePublicContract = COMMERCE_PUBLIC_CONTRACT) { const response = await deliver(f, payload, contract); expect(response.status).toBe(202); expect(await response.json()).toMatchObject({ status: "applied", applicationStatus: "applied" }) }
 async function published(f: Fixture, payload = offer()) { await applied(f, shop()); await applied(f, payload) }
 async function head(f: Fixture) { return await f.t.run(async (ctx) => ctx.db.query("commerceCatalogHeads").withIndex("by_emitter_object_sequence", (q) => q.eq("emitterId", f.emitterId).eq("objectRef", OFFER).eq("sequence", "catalog")).unique()) }
 async function post(f: Fixture, pageId = f.pageId) { return await f.t.run(async (ctx) => ctx.db.insert("posts", { networkId: f.root, authorPersonId: f.personId, pageId, body: "Publication de recette", audience: "public", visibility: "root", onRoot: true, status: "published", searchText: "publication recette", publishedAt: NOW, createdAt: NOW, updatedAt: NOW })) }
 async function code(work: Promise<unknown>) { try { await work; return null } catch (error) { return engineErrorCode(error) } }
+
+const FACETS: CommerceCatalogFacets = { taxonomyVersion: 1, categoryPath: ["fashion", "fashion.women", "fashion.women.clothing"], attributes: [{ key: "material", type: "text", value: "Lin" }, { key: "audience", type: "choice", value: "women" }] }
+
+async function allowOnlyV1(f: Fixture) {
+  await f.as.mutation(api.modules.federation.emitters.configure, { networkId: f.root, slug: "pro-catalog-test", environment: "sandbox", enabled: true, keyEnvName: KEY_NAME, allowedContracts: [COMMERCE_PUBLIC_CONTRACT], reason: "Révocation V2 de recette, conservation explicite V1" })
+}
+
+describe("MP03 — catalogue V2 et autorisation du contrat exact", () => {
+  it("admet un émetteur V2 seul, son parent et son offre classée sur les mêmes projections", async () => {
+    const f = await fixture([COMMERCE_PUBLIC_CONTRACT_V2])
+    await applied(f, shop(), COMMERCE_PUBLIC_CONTRACT_V2)
+    await applied(f, offer(1, { facets: FACETS }), COMMERCE_PUBLIC_CONTRACT_V2)
+    const member = await f.as.query(getOffer, f.offerArgs)
+    expect(member).toMatchObject({ facets: FACETS, actions: { quote: false, purchase: false } })
+    expect(await f.t.query(getPublicOffer, f.offerArgs)).toEqual(member)
+    expect((await f.as.query(list, { networkId: f.root, handle: "catalogue-test", paginationOpts: { cursor: null, numItems: 12 } })).page).toMatchObject([{ offerRef: OFFER, facets: FACETS }])
+    expect(JSON.parse((await head(f))!.body).contract).toBe(COMMERCE_PUBLIC_CONTRACT_V2)
+  })
+
+  it("refuse toujours les facettes dans V1, puis accepte explicitement V2 sans adopter la demande refusée", async () => {
+    const f = await fixture([COMMERCE_PUBLIC_CONTRACT, COMMERCE_PUBLIC_CONTRACT_V2])
+    await applied(f, shop())
+    const refused = await deliver(f, offer(1, { facets: FACETS }))
+    expect(refused.status).toBe(400)
+    expect(await refused.json()).toEqual({ outcome: "invalid_envelope" })
+    expect(await f.t.run(async (ctx) => ctx.db.query("federationInboxReceipts").withIndex("by_emitter_environment_event", (q) => q.eq("emitterId", f.emitterId).eq("environment", "sandbox").eq("eventId", "catalog-event-2")).unique())).toBeNull()
+    expect(await head(f)).toBeNull()
+    expect(await f.as.query(getOffer, f.offerArgs)).toBeNull()
+    await applied(f, offer(1, { facets: FACETS }), COMMERCE_PUBLIC_CONTRACT_V2)
+    expect(await f.t.query(getPublicOffer, f.offerArgs)).toMatchObject({ facets: FACETS })
+  })
+
+  it("la confirmation identique V1 vers V2 conserve sa preuve après révocation de V1", async () => {
+    const f = await fixture([COMMERCE_PUBLIC_CONTRACT, COMMERCE_PUBLIC_CONTRACT_V2])
+    await published(f)
+    const initial = await f.as.query(getOffer, f.offerArgs)
+    expect(initial).not.toBeNull()
+    expect(initial).not.toHaveProperty("facets")
+    await applied(f, shop(), COMMERCE_PUBLIC_CONTRACT_V2)
+    await applied(f, offer(), COMMERCE_PUBLIC_CONTRACT_V2)
+    await f.as.mutation(api.modules.federation.emitters.configure, { networkId: f.root, slug: "pro-catalog-test", environment: "sandbox", enabled: true, keyEnvName: KEY_NAME, allowedContracts: [COMMERCE_PUBLIC_CONTRACT_V2], reason: "Révocation V1 après confirmation du même catalogue en V2" })
+    expect(await f.as.query(getOffer, f.offerArgs)).toEqual(initial)
+    expect(await f.t.query(getPublicOffer, f.offerArgs)).toEqual(initial)
+    expect((await f.as.query(list, { networkId: f.root, handle: "catalogue-test", paginationOpts: { cursor: null, numItems: 12 } })).page).toEqual([initial])
+    const confirmed = (await head(f))!
+    expect(confirmed.revision).toBe(1)
+    expect(JSON.parse(confirmed.body).contract).toBe(COMMERCE_PUBLIC_CONTRACT_V2)
+  })
+
+  it.each([COMMERCE_PUBLIC_CONTRACT, COMMERCE_PUBLIC_CONTRACT_V2] as const)("révoquer V2 ferme l'offre V2 sous parent %s même si V1 reste permis", async (parentContract) => {
+    const f = await fixture([COMMERCE_PUBLIC_CONTRACT, COMMERCE_PUBLIC_CONTRACT_V2])
+    await applied(f, shop(), parentContract)
+    await applied(f, offer(1, { facets: FACETS }), COMMERCE_PUBLIC_CONTRACT_V2)
+    const postId = await post(f)
+    await f.as.mutation(setSlot, { networkId: f.root, shopId: f.shopId, postId, offerRef: OFFER })
+    expect(await f.as.query(slot, { networkId: f.root, postId })).toMatchObject({ facets: FACETS })
+    const before = (await head(f))!
+    await allowOnlyV1(f)
+    expect(await f.as.query(getOffer, f.offerArgs)).toBeNull()
+    expect(await f.t.query(getPublicOffer, f.offerArgs)).toBeNull()
+    expect((await f.as.query(list, { networkId: f.root, handle: "catalogue-test", paginationOpts: { cursor: null, numItems: 12 } })).page).toEqual([])
+    expect(await f.as.query(slot, { networkId: f.root, postId })).toBeNull()
+    // L'interdiction vient de la relecture des droits, pas de la disparition du snapshot.
+    expect(await head(f)).toMatchObject({ body: before.body, state: "active", revision: before.revision })
+  })
+
+  it("le parent V2 révoqué ferme aussi une offre V1 dont le contrat reste permis", async () => {
+    const f = await fixture([COMMERCE_PUBLIC_CONTRACT, COMMERCE_PUBLIC_CONTRACT_V2])
+    await applied(f, shop(), COMMERCE_PUBLIC_CONTRACT_V2)
+    await applied(f, offer())
+    expect(await f.as.query(getOffer, f.offerArgs)).not.toBeNull()
+    await allowOnlyV1(f)
+    expect(await f.as.query(getOffer, f.offerArgs)).toBeNull()
+    expect(await f.t.query(getPublicOffer, f.offerArgs)).toBeNull()
+    expect((await f.as.query(list, { networkId: f.root, handle: "catalogue-test", paginationOpts: { cursor: null, numItems: 12 } })).page).toEqual([])
+    expect(JSON.parse((await head(f))!.body).contract).toBe(COMMERCE_PUBLIC_CONTRACT)
+  })
+
+  it("un appel interne ne réutilise pas une ancienne autorisation V2 après révocation", async () => {
+    const f = await fixture([COMMERCE_PUBLIC_CONTRACT, COMMERCE_PUBLIC_CONTRACT_V2])
+    await applied(f, shop())
+    const previouslyAllowed = await f.t.run(async (ctx) => ctx.db.get(f.emitterId))
+    if (!previouslyAllowed) throw new Error("Émetteur de fixture absent")
+    await allowOnlyV1(f)
+    const raw = bodyOf(offer(1, { facets: FACETS }), COMMERCE_PUBLIC_CONTRACT_V2)
+    expect(await f.t.run(async (ctx) => await applyCommerceCatalog(ctx, previouslyAllowed, raw, Date.now()))).toEqual({ applied: false, reason: "contract_not_allowed" })
+    expect(await head(f)).toBeNull()
+  })
+
+  it.each(["mapping", "consent", "link"])("V2 conserve la garde courante %s", async (gate) => {
+    const f = await fixture([COMMERCE_PUBLIC_CONTRACT_V2])
+    await applied(f, shop(), COMMERCE_PUBLIC_CONTRACT_V2)
+    await applied(f, offer(1, { facets: FACETS }), COMMERCE_PUBLIC_CONTRACT_V2)
+    expect(await f.as.query(getOffer, f.offerArgs)).toMatchObject({ facets: FACETS })
+    await f.t.run(async (ctx) => {
+      if (gate === "mapping") {
+        const row = await ctx.db.query("commerceCatalogMappings").withIndex("by_network_shop", (q) => q.eq("networkId", f.root).eq("shopId", f.shopId)).unique()
+        if (!row) throw new Error("Mapping de fixture absent")
+        await ctx.db.patch(row._id, { enabled: false })
+      }
+      if (gate === "consent") await ctx.db.patch(f.shopId, { publicConsentRevokedAt: NOW })
+      if (gate === "link") await ctx.db.patch(f.linkId, { state: "revoked", revokedAt: NOW })
+    })
+    expect(await f.as.query(getOffer, f.offerArgs)).toBeNull()
+    expect(await f.t.query(getPublicOffer, f.offerArgs)).toBeNull()
+  })
+})
 
 async function image() {
   const binary = atob("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aE6kAAAAASUVORK5CYII=")
@@ -277,5 +397,371 @@ describe("P09 — slot et médias révoquables", () => {
     expect(await f.as.query(slot, { networkId: f.root, postId })).toBeNull()
     expect((await f.t.fetch(path)).status).toBe(404)
     expect(await f.t.query(getPublicOffer, f.offerArgs)).toBeNull()
+  })
+})
+
+
+const indexedRef = (index: number) => `pro.ga:offer:${String(index).padStart(26, "0")}`
+const SECOND_COLLECTION = "pro.ga:offer_collection:01JA00000000000000000000C2"
+const catalogArgs = (f: Fixture, extra: Partial<CatalogListArgs> = {}): CatalogListArgs & { networkId: Id<"networks"> } => ({ networkId: f.root, handle: "catalogue-test", paginationOpts: { cursor: null, numItems: 12 }, ...extra })
+
+describe("MP05d — catalogue de boutique avant pagination", () => {
+  it("trouve une offre au-delà de la première fenêtre par collection, facettes, prix et recherche", async () => {
+    const f = await fixture([COMMERCE_PUBLIC_CONTRACT_V2])
+    await applied(f, shop(1, { collections: [{ collectionRef: COLLECTION, label: "Collection", position: 0 }, { collectionRef: SECOND_COLLECTION, label: "Sélection", position: 1 }] }), COMMERCE_PUBLIC_CONTRACT_V2)
+    for (let index = 1; index <= 16; index++) await applied(f, offer(1, { offerRef: indexedRef(index), changedAt: NOW - index * 1000, title: `Veste de recette ${index}`, facets: { taxonomyVersion: 1, categoryPath: ["fashion", "fashion.men"], attributes: [{ key: "material", type: "text", value: "Coton" }] } }), COMMERCE_PUBLIC_CONTRACT_V2)
+    await applied(f, offer(1, { offerRef: indexedRef(17), changedAt: NOW - 17_000, title: "Veste élégante", collectionRefs: [SECOND_COLLECTION], facets: FACETS, price: { mode: "range", currency: "XAF", minAmount: 2000, maxAmount: 3000 } }), COMMERCE_PUBLIC_CONTRACT_V2)
+    const args = catalogArgs(f, { collectionRef: SECOND_COLLECTION, category: ["fashion.women"], material: ["LIN"], audience: ["women"], minPrice: 2500, maxPrice: 2800 })
+    const member = await f.as.query(list, args), anonymous = await f.t.query(publicList, args)
+    expect(member.page.map(item => item.offerRef)).toEqual([indexedRef(17)])
+    expect(anonymous).toEqual(member)
+    expect(member.collections).toEqual([{ collectionRef: COLLECTION, label: "Collection" }, { collectionRef: SECOND_COLLECTION, label: "Sélection" }])
+    expect((await f.as.query(list, catalogArgs(f, { query: "elegante", sort: "relevance" }))).page.map(item => item.offerRef)).toEqual([indexedRef(17)])
+    expect((await f.as.query(list, catalogArgs(f, { collectionRef: SECOND_COLLECTION, material: ["coton"] }))).page).toEqual([])
+  })
+
+  it("trie les prix publiés avant pagination, conserve les collections et place les devis à la fin", async () => {
+    const f = await fixture()
+    await applied(f, shop())
+    for (const [index, price] of [[1, { mode: "fixed", currency: "XAF", amount: 8000 }], [2, { mode: "range", currency: "XAF", minAmount: 2000, maxAmount: 9000 }], [3, { mode: "quote", currency: "XAF" }]] as const) await applied(f, offer(1, { offerRef: indexedRef(index), price }))
+    const args = catalogArgs(f, { sort: "price_asc", paginationOpts: { cursor: null, numItems: 1 } })
+    const first = await f.as.query(list, args)
+    expect(first.page.map(item => item.offerRef)).toEqual([indexedRef(2)])
+    expect(first.isDone).toBe(false)
+    const second = await f.as.query(list, { ...args, paginationOpts: { cursor: first.continueCursor, numItems: 1 } })
+    expect(second.page.map(item => item.offerRef)).toEqual([indexedRef(1)])
+    expect(second.collections).toEqual(first.collections)
+    const last = await f.as.query(list, { ...args, paginationOpts: { cursor: second.continueCursor, numItems: 1 } })
+    expect(last.page.map(item => item.offerRef)).toEqual([indexedRef(3)])
+    expect((await f.as.query(list, catalogArgs(f, { sort: "price_desc" }))).page.map(item => item.offerRef)).toEqual([indexedRef(2), indexedRef(1), indexedRef(3)])
+    expect((await f.as.query(list, catalogArgs(f, { minPrice: 8500 }))).page.map(item => item.offerRef)).toEqual([indexedRef(2)])
+    expect((await f.as.query(list, catalogArgs(f, { category: ["fashion"] }))).page).toEqual([])
+  })
+
+  it("lie la continuation aux filtres, au lecteur, au mapping et à la génération", async () => {
+    const f = await fixture()
+    await applied(f, shop()); await applied(f, offer(1, { offerRef: indexedRef(1) })); await applied(f, offer(1, { offerRef: indexedRef(2) }))
+    const args = catalogArgs(f, { paginationOpts: { cursor: null, numItems: 1 } })
+    const first = await f.as.query(list, args)
+    const next = { ...args, paginationOpts: { cursor: first.continueCursor, numItems: 1 } }
+    expect(first.continueCursor).not.toBe("")
+    expect(await code(f.as.query(list, { ...next, sort: "price_asc" }))).toBe("invalidArgument")
+    expect(await code(f.t.query(publicList, next))).toBe("invalidArgument")
+    await f.t.run(async ctx => { await ctx.db.insert("commerceCatalogIndexes", { networkId: f.root, generation: 2, status: "ready", updatedAt: NOW }) })
+    expect(await code(f.as.query(list, next))).toBe("invalidArgument")
+    const renewed = await f.as.query(list, args)
+    await f.as.mutation(mapping, { networkId: f.root, shopId: f.shopId, emitterId: f.emitterId, enabled: true, reason: "Nouvelle génération du mapping de recette" })
+    // Un mapping réactivé peut fermer toute l'incarnation ; aucune ancienne offre n'est réadoptée.
+    expect((await f.as.query(list, { ...args, paginationOpts: { cursor: renewed.continueCursor, numItems: 1 } })).page).toEqual([])
+  })
+
+  it("conserve une continuation vide après relecture de modération, puis ferme les offres retirées", async () => {
+    const f = await fixture()
+    await applied(f, shop()); await applied(f, offer(1, { offerRef: indexedRef(1), changedAt: NOW })); await applied(f, offer(1, { offerRef: indexedRef(2), changedAt: NOW - 1000 }))
+    await f.t.run(async ctx => { const current = await ctx.db.query("commerceCatalogHeads").withIndex("by_emitter_object_sequence", q => q.eq("emitterId", f.emitterId).eq("objectRef", indexedRef(1)).eq("sequence", "catalog")).unique(); const state = await ctx.db.query("moderationContentStates").withIndex("by_target", q => q.eq("targetKind", "commerceOffer").eq("targetId", current!._id)).unique(); await ctx.db.patch(state!._id, { status: "removed" }) })
+    const args = catalogArgs(f, { paginationOpts: { cursor: null, numItems: 1 } }), first = await f.as.query(list, args)
+    expect(first).toMatchObject({ page: [], isDone: false, filteredWindow: true })
+    expect(first.continueCursor).not.toBe("")
+    expect((await f.as.query(list, { ...args, paginationOpts: { cursor: first.continueCursor, numItems: 1 } })).page.map(item => item.offerRef)).toEqual([indexedRef(2)])
+    await applied(f, { type: "offer.withdrawn", shopRef: SHOP, offerRef: indexedRef(2), revision: 2, changedAt: NOW, reason: "consent_withdrawn" })
+    expect((await f.t.query(publicList, catalogArgs(f))).page).toEqual([])
+  })
+
+  it("annonce l'indexation héritée puis active les filtres seulement après reconstruction", async () => {
+    const f = await fixture()
+    await published(f)
+    const before = (await head(f))!
+    await f.t.run(async ctx => { await ctx.db.patch(before._id, { localIndexVersion: undefined, collection1: undefined }) })
+    const legacy = await f.as.query(list, catalogArgs(f))
+    expect(legacy).toMatchObject({ indexStatus: "building", page: [{ offerRef: OFFER }] })
+    const pending = await f.as.query(list, catalogArgs(f, { collectionRef: COLLECTION }))
+    expect(pending).toMatchObject({ indexStatus: "building", page: [], collections: [{ collectionRef: COLLECTION }] })
+    await f.t.run(async ctx => { const current = (await ctx.db.get(before._id))!; await ctx.db.patch(current._id, marketplaceIndexFields(current.body, current.state, current.objectKind, current.sequence, NOW)) })
+    const ready = await f.as.query(list, catalogArgs(f, { collectionRef: COLLECTION }))
+    expect(ready.page.map(item => item.offerRef)).toEqual([OFFER])
+    expect(ready.indexStatus).not.toBe("building")
+  })
+
+  it("refuse les bornes, tris incompatibles, facettes inconnues et requêtes ponctuées trop longues", async () => {
+    const f = await fixture(); await published(f)
+    for (const args of [{ minPrice: -1 }, { minPrice: 300, maxPrice: 200 }, { query: "a-b-c-d-e-f-g-h-i-j-k-l-m-n-o-p-q" }, { query: "veste", sort: "newest" as const }, { category: ["not-a-category"] }, { brand: Array.from({ length: 7 }, (_, index) => String(index)) }]) expect(await code(f.as.query(list, catalogArgs(f, args)))).toBe("invalidArgument")
+  })
+})
+
+const TERMS: CommerceStorefrontTerms = { version: 1, publishedAt: NOW, pickup: { points: [{ establishmentRef: "pro.ga:establishment:01JA00000000000000000000E1", label: "Point centre" }] }, delivery: { country: "GA", localities: ["Libreville"], label: "Livraison locale", fee: { amount: 1500, currency: "XAF" } }, returns: { summary: "Contactez la boutique avant tout retour." } }
+async function termsPolicy(f: Fixture, preReview: boolean) { await f.t.run(async ctx => { await ctx.db.insert("moderationPolicies", { networkId: f.root, surface: "commerceStorefront", preReview, maxLinks: 20, maxWrites: 100, windowMs: 60_000, updatedAt: NOW }) }) }
+const storefrontArgs = (f: Fixture) => ({ networkId: f.root, handle: "catalogue-test" })
+async function termsState(f: Fixture) { return await f.t.run(async ctx => { const parent = await ctx.db.query("commerceCatalogHeads").withIndex("by_emitter_object_sequence", q => q.eq("emitterId", f.emitterId).eq("objectRef", SHOP).eq("sequence", "catalog")).unique(); return parent ? await ctx.db.query("moderationContentStates").withIndex("by_target", q => q.eq("targetKind", "commerceStorefront").eq("targetId", parent._id)).unique() : null }) }
+
+describe("MP05 — conditions publiques du vendeur sous modération", () => {
+  it("projette les conditions V2 publiées dans les vitrines membre et publique, sans ouvrir la vente", async () => {
+    const f = await fixture([COMMERCE_PUBLIC_CONTRACT_V2]); await termsPolicy(f, false)
+    await applied(f, shop(1, { storefrontTerms: TERMS }), COMMERCE_PUBLIC_CONTRACT_V2)
+    expect((await termsState(f))?.status).toBe("published")
+    const member = await f.as.query(memberStorefront, storefrontArgs(f)), anonymous = await f.t.query(publicStorefront, storefrontArgs(f))
+    expect(member?.storefrontTerms).toEqual(TERMS)
+    expect(anonymous?.storefrontTerms).toEqual(TERMS)
+    expect(member).not.toHaveProperty("checkout")
+  })
+  it.each(["preReview", "blocked"] as const)("omet les conditions en attente pour leur auteur, administrateur et anonyme : %s", async mode => {
+    const f = await fixture([COMMERCE_PUBLIC_CONTRACT_V2]); await termsPolicy(f, mode === "preReview")
+    if (mode === "blocked") await f.t.run(async ctx => { await ctx.db.insert("blockedTerms", { networkId: f.root, term: "livraison", active: true, updatedAt: NOW }) })
+    await applied(f, shop(1, { storefrontTerms: TERMS }), COMMERCE_PUBLIC_CONTRACT_V2)
+    expect((await termsState(f))?.status).toBe("pending_review")
+    expect(await f.as.query(memberStorefront, storefrontArgs(f))).not.toHaveProperty("storefrontTerms")
+    expect(await f.t.query(publicStorefront, storefrontArgs(f))).not.toHaveProperty("storefrontTerms")
+  })
+  it("une nouvelle révision ne republie pas des conditions retirées", async () => {
+    const f = await fixture([COMMERCE_PUBLIC_CONTRACT_V2]); await termsPolicy(f, false)
+    await applied(f, shop(1, { storefrontTerms: TERMS }), COMMERCE_PUBLIC_CONTRACT_V2)
+    const state = (await termsState(f))!
+    await f.t.run(async ctx => { await ctx.db.patch(state._id, { status: "removed" }) })
+    await applied(f, shop(2, { storefrontTerms: { ...TERMS, returns: { summary: "Nouvelles conditions publiques." } } }), COMMERCE_PUBLIC_CONTRACT_V2)
+    expect((await termsState(f))?.status).toBe("removed")
+    expect(await f.as.query(memberStorefront, storefrontArgs(f))).not.toHaveProperty("storefrontTerms")
+  })
+  it.each(["contract", "mapping", "parent"] as const)("ferme immédiatement les conditions après retrait %s", async gate => {
+    const f = await fixture([COMMERCE_PUBLIC_CONTRACT, COMMERCE_PUBLIC_CONTRACT_V2]); await termsPolicy(f, false)
+    await applied(f, shop(1, { storefrontTerms: TERMS }), COMMERCE_PUBLIC_CONTRACT_V2)
+    expect((await f.t.query(publicStorefront, storefrontArgs(f)))?.storefrontTerms).toEqual(TERMS)
+    if (gate === "contract") await allowOnlyV1(f)
+    if (gate === "mapping") await f.t.run(async ctx => { const mapping = await ctx.db.query("commerceCatalogMappings").withIndex("by_network_shop", q => q.eq("networkId", f.root).eq("shopId", f.shopId)).unique(); await ctx.db.patch(mapping!._id, { generation: mapping!.generation + 1 }) })
+    if (gate === "parent") await applied(f, { type: "shop.withdrawn", shopRef: SHOP, linkRef: LINK, revision: 2, changedAt: NOW, reason: "consent_withdrawn" }, COMMERCE_PUBLIC_CONTRACT_V2)
+    expect(await f.as.query(memberStorefront, storefrontArgs(f))).not.toHaveProperty("storefrontTerms")
+    expect(await f.t.query(publicStorefront, storefrontArgs(f))).not.toHaveProperty("storefrontTerms")
+  })
+})
+
+async function catalogReviewer(f: Fixture, role: "member" | "network_admin" = "network_admin") {
+  const as = f.t.withIdentity({ subject: `catalogue-reviewer-${role}` })
+  const personId = await as.mutation(api.modules.people.persons.ensureMyPerson, {})
+  await as.mutation(api.modules.people.consents.recordConsent, { purpose: "social_profile", origin: "onboarding" })
+  await as.mutation(api.modules.people.profile.publishMyProfile, { handle: `catalog-review-${role.replace("_", "-")}`, displayName: "Recette modération" })
+  await as.mutation(api.modules.people.memberships.joinNetwork, { networkId: f.root })
+  await f.t.run(async ctx => { const membership = await ctx.db.query("networkMemberships").withIndex("by_network_and_person", q => q.eq("networkId", f.root).eq("personId", personId)).unique(); await ctx.db.patch(membership!._id, { role }) })
+  return { as, personId }
+}
+async function pendingTermsFixture(terms = TERMS) {
+  const f = await fixture([COMMERCE_PUBLIC_CONTRACT_V2])
+  await termsPolicy(f, true)
+  await applied(f, shop(1, { storefrontTerms: terms }), COMMERCE_PUBLIC_CONTRACT_V2)
+  const state = (await termsState(f))!
+  return { ...f, target: { kind: "commerceStorefront" as const, id: state.targetId as Id<"commerceCatalogHeads"> } }
+}
+
+describe("MP05 — revue des conditions réellement présentées", () => {
+  it.each([true, false])("une livraison R+1 interdit la décision %s fondée sur l'aperçu R", async approve => {
+    const f = await pendingTermsFixture(), reviewer = await catalogReviewer(f)
+    const preview = await reviewer.as.query(api.modules.moderation.reviewProjection.preview, { networkId: f.root, target: f.target })
+    expect(preview).toMatchObject({ available: true, sourceRevision: 1 })
+    expect(preview.sourceDigest).toMatch(/^[a-f0-9]{64}$/)
+    const args = { networkId: f.root, target: f.target, approve, reason: "Décision après lecture des conditions.", expectedSourceRevision: preview.sourceRevision!, expectedSourceDigest: preview.sourceDigest! }
+    expect(await code(reviewer.as.mutation(api.modules.moderation.cases.reviewContent, { ...args, expectedSourceDigest: "0".repeat(64) }))).toBe("notFound")
+    await applied(f, shop(2, { storefrontTerms: { ...TERMS, returns: { summary: "Nouvelle clause à relire avant décision." } } }), COMMERCE_PUBLIC_CONTRACT_V2)
+    expect(await code(reviewer.as.mutation(api.modules.moderation.cases.reviewContent, args))).toBe("notFound")
+    expect((await termsState(f))?.status).toBe("pending_review")
+    expect(await f.t.query(publicStorefront, storefrontArgs(f))).not.toHaveProperty("storefrontTerms")
+    const current = await reviewer.as.query(api.modules.moderation.reviewProjection.preview, { networkId: f.root, target: f.target })
+    expect(current.sourceRevision).toBe(2)
+    expect(current.sourceDigest).not.toBe(preview.sourceDigest)
+    expect(current.body).toContain("Nouvelle clause à relire")
+    await reviewer.as.mutation(api.modules.moderation.cases.reviewContent, { ...args, expectedSourceRevision: current.sourceRevision!, expectedSourceDigest: current.sourceDigest! })
+    expect((await termsState(f))?.status).toBe(approve ? "published" : "removed")
+    if (approve) expect((await f.t.query(publicStorefront, storefrontArgs(f)))?.storefrontTerms?.returns?.summary).toBe("Nouvelle clause à relire avant décision.")
+    else expect(await f.t.query(publicStorefront, storefrontArgs(f))).not.toHaveProperty("storefrontTerms")
+  })
+
+  it("présente intégralement la clause finale d'un document contractuel dépassant 4000 caractères", async () => {
+    const finalClause = "CLAUSE FINALE A EXAMINER AVANT TOUTE DECISION."
+    const terms: CommerceStorefrontTerms = { ...TERMS,
+      pickup: { points: Array.from({ length: 20 }, (_, index) => ({ establishmentRef: `pro.ga:establishment:${String(index + 1).padStart(26, "0")}`, label: `Point ${index} ${"a".repeat(65)}` })) },
+      delivery: { ...TERMS.delivery!, localities: Array.from({ length: 20 }, (_, index) => `Localité ${index} ${"b".repeat(90)}`) },
+      returns: { summary: "r".repeat(950) }, warranty: { summary: finalClause },
+    }
+    const f = await pendingTermsFixture(terms), reviewer = await catalogReviewer(f)
+    const preview = await reviewer.as.query(api.modules.moderation.reviewProjection.preview, { networkId: f.root, target: f.target })
+    expect(preview.available).toBe(true)
+    expect(preview.body!.length).toBeGreaterThan(4000)
+    expect(preview.body!.indexOf(finalClause)).toBeGreaterThan(4000)
+    expect(preview.body!.endsWith(finalClause)).toBe(true)
+    expect(preview).not.toHaveProperty("rawBody")
+    expect(preview).not.toHaveProperty("shopRef")
+  })
+
+  it("un signataire de la page devenu administrateur ne peut pas juger ses propres conditions", async () => {
+    const f = await pendingTermsFixture(), reviewer = await catalogReviewer(f)
+    const preview = await reviewer.as.query(api.modules.moderation.reviewProjection.preview, { networkId: f.root, target: f.target })
+    await f.t.run(async ctx => { const membership = await ctx.db.query("networkMemberships").withIndex("by_network_and_person", q => q.eq("networkId", f.root).eq("personId", f.personId)).unique(); await ctx.db.patch(membership!._id, { role: "network_admin" }) })
+    for (const approve of [true, false]) expect(await code(f.as.mutation(api.modules.moderation.cases.reviewContent, { networkId: f.root, target: f.target, approve, reason: "Revue des conditions de ma propre page.", expectedSourceRevision: preview.sourceRevision!, expectedSourceDigest: preview.sourceDigest! }))).toBe("notFound")
+    expect((await termsState(f))?.status).toBe("pending_review")
+  })
+
+  it("un simple membre ne peut ni prévisualiser ni approuver les conditions en attente", async () => {
+    const f = await pendingTermsFixture(), member = await catalogReviewer(f, "member"), state = (await termsState(f))!
+    const parent = await f.t.run(async ctx => await ctx.db.get(f.target.id))
+    expect(await code(member.as.query(api.modules.moderation.reviewProjection.preview, { networkId: f.root, target: f.target }))).toBe("notFound")
+    expect(await code(member.as.mutation(api.modules.moderation.cases.reviewContent, { networkId: f.root, target: f.target, approve: true, reason: "Tentative sans habilitation de modération.", expectedSourceRevision: parent!.revision, expectedSourceDigest: parent!.digest }))).toBe("notFound")
+    expect((await termsState(f))?._id).toBe(state._id)
+    expect((await termsState(f))?.status).toBe("pending_review")
+  })
+
+  it("une habilitation d'équipe révoquée après lecture ferme immédiatement la décision", async () => {
+    const f = await pendingTermsFixture(), admin = await catalogReviewer(f), member = await catalogReviewer(f, "member")
+    const { teamId } = await admin.as.mutation(api.modules.moderation.cases.createTeam, { networkId: f.root, name: "Conditions des boutiques", scope: "commerceStorefront", reason: "Équipe de recette des conditions." })
+    await admin.as.mutation(api.modules.moderation.cases.setTeamMember, { networkId: f.root, teamId, personId: member.personId, active: true, reason: "Habilitation temporaire de recette." })
+    const preview = await member.as.query(api.modules.moderation.reviewProjection.preview, { networkId: f.root, target: f.target })
+    expect(preview.available).toBe(true)
+    await admin.as.mutation(api.modules.moderation.cases.setTeamMember, { networkId: f.root, teamId, personId: member.personId, active: false, reason: "Révocation avant décision de recette." })
+    expect(await code(member.as.query(api.modules.moderation.reviewProjection.preview, { networkId: f.root, target: f.target }))).toBe("notFound")
+    expect(await code(member.as.mutation(api.modules.moderation.cases.reviewContent, { networkId: f.root, target: f.target, approve: true, reason: "Tentative après révocation de compétence.", expectedSourceRevision: preview.sourceRevision!, expectedSourceDigest: preview.sourceDigest! }))).toBe("notFound")
+    expect((await termsState(f))?.status).toBe("pending_review")
+  })
+})
+
+
+it("MP05d — une continuation ne traverse pas le retrait et la republication du parent", async () => {
+  const f = await fixture()
+  await applied(f, shop()); await applied(f, offer(1, { offerRef: indexedRef(1) })); await applied(f, offer(1, { offerRef: indexedRef(2) }))
+  const args = catalogArgs(f, { paginationOpts: { cursor: null, numItems: 1 } })
+  const first = await f.as.query(list, args)
+  expect(first.continueCursor).not.toBe("")
+  await applied(f, { type: "shop.withdrawn", shopRef: SHOP, linkRef: LINK, revision: 2, changedAt: NOW, reason: "consent_withdrawn" })
+  await applied(f, shop(3))
+  await applied(f, offer(2, { offerRef: indexedRef(1) })); await applied(f, offer(2, { offerRef: indexedRef(2) }))
+  expect(await code(f.as.query(list, { ...args, paginationOpts: { cursor: first.continueCursor, numItems: 1 } }))).toBe("invalidArgument")
+  expect((await f.as.query(list, args)).page).toHaveLength(1)
+})
+
+const SERVICE_PROFILE: CommerceServiceProfile = {
+  version: 1, commercialModes: ["quote", "booking"], languageCodes: ["fr-GA", "en"],
+  zones: [{ countryCode: "GA", locality: "Île témoin" }], deliverables: ["Rapport public"],
+  inclusions: ["Diagnostic"], exclusions: ["Déplacement hors zone"],
+  portfolio: [{ title: "Projet public", description: "Réalisation publique", mediaIndexes: [] }],
+}
+async function enableServicePresentation(f: Fixture) {
+  await f.t.run(async ctx => ctx.db.patch(f.shopId, { activityConfiguration: { version: 1, capabilities: ["products", "services"], template: "expert", blocks: ["services", "catalog", "about"] } }))
+}
+async function serviceFixture(profile = SERVICE_PROFILE, preReview = false) {
+  const f = await fixture([COMMERCE_PUBLIC_CONTRACT_V2])
+  await enableServicePresentation(f)
+  if (preReview) await f.t.run(async ctx => { const policy = await ctx.db.query("moderationPolicies").withIndex("by_network_surface", q => q.eq("networkId", f.root).eq("surface", "commerceOffer")).unique(); await ctx.db.patch(policy!._id, { preReview: true }) })
+  await applied(f, shop(), COMMERCE_PUBLIC_CONTRACT_V2)
+  await applied(f, offer(1, { kind: "service", serviceProfile: profile }), COMMERCE_PUBLIC_CONTRACT_V2)
+  return f
+}
+async function offerModerationState(f: Fixture) {
+  const current = (await head(f))!
+  return await f.t.run(async ctx => await ctx.db.query("moderationContentStates").withIndex("by_target", q => q.eq("targetKind", "commerceOffer").eq("targetId", current._id)).unique())
+}
+
+describe("MP06 — profil public et catalogue local des services", () => {
+  it("projette seulement le profil publié dans les mêmes DTO membre et public, sans effet commercial", async () => {
+    const f = await serviceFixture()
+    const member = await f.as.query(getOffer, f.offerArgs)
+    expect(member).toMatchObject({ kind: "service", serviceProfile: SERVICE_PROFILE, actions: { quote: false, purchase: false } })
+    expect(await f.t.query(getPublicOffer, f.offerArgs)).toEqual(member)
+    expect(member).not.toHaveProperty("agenda")
+    expect(member).not.toHaveProperty("rawBody")
+    expect(member).not.toHaveProperty("subjectRef")
+    expect((await f.t.query(publicList, catalogArgs(f, { kind: "service", languageCode: "FR-ga", serviceZone: "ile temoin", commercialMode: "booking" }))).page).toEqual([member])
+    await applied(f, offer(2, { kind: "service", serviceProfile: { ...SERVICE_PROFILE, portfolio: [] } }), COMMERCE_PUBLIC_CONTRACT_V2)
+    expect((await f.as.query(getOffer, f.offerArgs))?.serviceProfile?.portfolio).toEqual([])
+  })
+
+  it("refuse un profil V1, un profil de produit, un champ privé et un média hors manifeste", async () => {
+    const f = await fixture([COMMERCE_PUBLIC_CONTRACT, COMMERCE_PUBLIC_CONTRACT_V2])
+    await enableServicePresentation(f); await applied(f, shop(), COMMERCE_PUBLIC_CONTRACT_V2)
+    for (const [payload, contract] of [
+      [offer(1, { kind: "service", serviceProfile: SERVICE_PROFILE }), COMMERCE_PUBLIC_CONTRACT],
+      [offer(1, { serviceProfile: SERVICE_PROFILE }), COMMERCE_PUBLIC_CONTRACT_V2],
+      [offer(1, { kind: "service", serviceProfile: { ...SERVICE_PROFILE, portfolio: [{ title: "Projet", description: "Public", mediaIndexes: [0] }] } }), COMMERCE_PUBLIC_CONTRACT_V2],
+    ] as const) expect((await deliver(f, payload, contract)).status).toBe(400)
+    const invalid = { ...SERVICE_PROFILE, portfolio: [{ title: "Projet", description: "Public", mediaIndexes: [], email: "private@example.test" }] }
+    // Le champ voisin excédentaire reste un vrai objet d'entrée, jamais un profil nettoyé par la fixture.
+    expect((await deliver(f, offer(1, { kind: "service", serviceProfile: invalid }), COMMERCE_PUBLIC_CONTRACT_V2)).status).toBe(400)
+    expect(await head(f)).toBeNull()
+  })
+
+  it("filtre les services locaux avant pagination et garde une projection publique identique", async () => {
+    const f = await fixture([COMMERCE_PUBLIC_CONTRACT_V2])
+    await enableServicePresentation(f); await applied(f, shop(), COMMERCE_PUBLIC_CONTRACT_V2)
+    for (let index = 1; index <= 14; index++) await applied(f, offer(1, { offerRef: indexedRef(index), kind: "service", changedAt: NOW - index * 1000, serviceProfile: { ...SERVICE_PROFILE, commercialModes: ["quote"], languageCodes: ["en"], zones: [{ countryCode: "GA", locality: "Owendo" }] } }), COMMERCE_PUBLIC_CONTRACT_V2)
+    await applied(f, offer(1, { offerRef: indexedRef(15), kind: "service", serviceProfile: SERVICE_PROFILE, facets: { taxonomyVersion: 1, categoryPath: ["services", "services.digital"], attributes: [{ key: "durationMinutes", type: "number", value: 90 }] } }), COMMERCE_PUBLIC_CONTRACT_V2)
+    const args = catalogArgs(f, { kind: "service", commercialMode: ["booking", "fixed_order"], languageCode: ["FR-ga", "pt"], serviceZone: ["ÎLE TÉMOIN", "Libreville"], minDurationMinutes: 60, maxDurationMinutes: 120, sort: "price_asc", paginationOpts: { cursor: null, numItems: 1 } })
+    const member = await f.as.query(list, args)
+    expect(member.page.map(item => item.offerRef)).toEqual([indexedRef(15)])
+    expect(member.isDone).toBe(true)
+    expect(await f.t.query(publicList, args)).toEqual(member)
+    expect((await f.as.query(list, { ...args, maxDurationMinutes: 80 })).page).toEqual([])
+    expect((await f.t.query(publicList, { ...args, query: "realisation", sort: "relevance" })).page.map(item => item.offerRef)).toEqual([indexedRef(15)])
+  })
+
+  it("relit le retrait de capacité services sans fermer les produits d'une activité mixte", async () => {
+    const f = await serviceFixture()
+    await applied(f, offer(1, { offerRef: indexedRef(2) }), COMMERCE_PUBLIC_CONTRACT_V2)
+    expect(await f.as.query(getOffer, f.offerArgs)).not.toBeNull()
+    await f.t.run(async ctx => ctx.db.patch(f.shopId, { activityConfiguration: { version: 1, capabilities: ["products"], template: "general", blocks: ["catalog", "about"] } }))
+    expect(await f.as.query(getOffer, f.offerArgs)).toBeNull()
+    expect(await f.t.query(getPublicOffer, f.offerArgs)).toBeNull()
+    expect((await f.as.query(list, catalogArgs(f, { kind: "service" }))).page).toEqual([])
+    expect((await f.t.query(publicList, catalogArgs(f))).page.map(item => item.offerRef)).toEqual([indexedRef(2)])
+    await enableServicePresentation(f)
+    expect((await f.as.query(getOffer, f.offerArgs))?.serviceProfile).toEqual(SERVICE_PROFILE)
+  })
+
+  it("trouve une ancienne version locale 1 au-delà de la première page et ne la déclare pas reconstruite", async () => {
+    const f = await serviceFixture()
+    for (let index = 1; index <= 14; index++) await applied(f, offer(1, { offerRef: indexedRef(index), changedAt: NOW - index * 1000 }), COMMERCE_PUBLIC_CONTRACT_V2)
+    const old = await f.t.run(async ctx => { const row = await ctx.db.query("commerceCatalogHeads").withIndex("by_emitter_object_sequence", q => q.eq("emitterId", f.emitterId).eq("objectRef", indexedRef(14)).eq("sequence", "catalog")).unique(); await ctx.db.patch(row!._id, { localIndexVersion: 1, discoveryVersion: 1 }); return row!._id })
+    expect(await f.as.query(list, catalogArgs(f, { commercialMode: "booking" }))).toMatchObject({ indexStatus: "building", page: [] })
+    expect(await f.as.query(list, catalogArgs(f))).toMatchObject({ indexStatus: "building" })
+    await f.t.run(async ctx => { const row = (await ctx.db.get(old))!; await ctx.db.patch(old, marketplaceIndexFields(row.body, row.state, row.objectKind, row.sequence, NOW)) })
+    expect((await f.t.query(publicList, catalogArgs(f, { commercialMode: "booking" }))).page.map(item => item.offerRef)).toEqual([OFFER])
+  })
+})
+
+function longServiceProfile(finalClause: string): CommerceServiceProfile {
+  return { ...SERVICE_PROFILE,
+    deliverables: Array.from({ length: 8 }, (_, index) => `Livrable ${index} ${"d".repeat(180)}`),
+    inclusions: Array.from({ length: 8 }, (_, index) => `Inclusion ${index} ${"i".repeat(180)}`),
+    exclusions: Array.from({ length: 8 }, (_, index) => `Exclusion ${index} ${"e".repeat(180)}`),
+    portfolio: Array.from({ length: 6 }, (_, index) => ({ title: `Projet ${index}`, description: index === 5 ? finalClause : `Projet ${index} ${"p".repeat(480)}`, mediaIndexes: [] })),
+  }
+}
+describe("MP06 — modération du profil complet de prestation", () => {
+  it("examine une clause de portfolio au-delà de 4000 caractères et ferme tous les lecteurs si elle est bloquée", async () => {
+    const finalClause = "Dernière clause sentinelleportfolio à examiner."
+    const f = await fixture([COMMERCE_PUBLIC_CONTRACT_V2])
+    await enableServicePresentation(f)
+    await f.t.run(async ctx => ctx.db.insert("blockedTerms", { networkId: f.root, term: "sentinelleportfolio", active: true, updatedAt: NOW }))
+    await applied(f, shop(), COMMERCE_PUBLIC_CONTRACT_V2)
+    await applied(f, offer(1, { kind: "service", serviceProfile: longServiceProfile(finalClause) }), COMMERCE_PUBLIC_CONTRACT_V2)
+    expect((await offerModerationState(f))?.status).toBe("pending_review")
+    const reviewer = await catalogReviewer(f)
+    const target = { kind: "commerceOffer" as const, id: (await head(f))!._id }
+    const preview = await reviewer.as.query(api.modules.moderation.reviewProjection.preview, { networkId: f.root, target })
+    expect(preview).toMatchObject({ available: true, sourceRevision: 1 })
+    expect(preview.body!.indexOf(finalClause)).toBeGreaterThan(4000)
+    expect(preview.body).toContain(finalClause)
+    expect(await f.as.query(getOffer, f.offerArgs)).toBeNull()
+    expect(await reviewer.as.query(getOffer, f.offerArgs)).toBeNull()
+    expect(await f.t.query(getPublicOffer, f.offerArgs)).toBeNull()
+  })
+
+  it.each([true, false])("exige la preuve courante du profil complet avant une décision %s", async approve => {
+    const f = await serviceFixture(longServiceProfile("Clause finale version un."), true), reviewer = await catalogReviewer(f)
+    const target = { kind: "commerceOffer" as const, id: (await head(f))!._id }
+    const preview = await reviewer.as.query(api.modules.moderation.reviewProjection.preview, { networkId: f.root, target })
+    const args = { networkId: f.root, target, approve, reason: "Lecture complète du profil et de son portfolio." }
+    expect(await code(reviewer.as.mutation(api.modules.moderation.cases.reviewContent, args))).toBe("notFound")
+    await applied(f, offer(2, { kind: "service", serviceProfile: longServiceProfile("Clause finale version deux.") }), COMMERCE_PUBLIC_CONTRACT_V2)
+    expect(await code(reviewer.as.mutation(api.modules.moderation.cases.reviewContent, { ...args, expectedSourceRevision: preview.sourceRevision!, expectedSourceDigest: preview.sourceDigest! }))).toBe("notFound")
+    expect((await offerModerationState(f))?.status).toBe("pending_review")
+    const current = await reviewer.as.query(api.modules.moderation.reviewProjection.preview, { networkId: f.root, target })
+    expect(current.body).toContain("Clause finale version deux.")
+    expect(current.sourceRevision).toBe(2)
+    await reviewer.as.mutation(api.modules.moderation.cases.reviewContent, { ...args, expectedSourceRevision: current.sourceRevision!, expectedSourceDigest: current.sourceDigest! })
+    expect((await offerModerationState(f))?.status).toBe(approve ? "published" : "removed")
+    expect((await f.t.query(getPublicOffer, f.offerArgs)) !== null).toBe(approve)
   })
 })
