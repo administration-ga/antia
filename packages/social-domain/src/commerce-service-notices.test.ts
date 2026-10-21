@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { commerceCanonicalJson } from "./commerce/primitives";
 import {
   COMMERCE_SERVICE_NOTICE_CONTRACT, COMMERCE_SERVICE_NOTICE_PROFILE,
@@ -7,6 +7,7 @@ import {
 } from "./commerce-service-notices";
 const TWIN_URL = "../../../../PRO_GA/packages/pro-domain/src/commerce-service-notices.ts";
 const LOCAL_URL = "./commerce-service-notices.ts";
+const twin = new URL(TWIN_URL, import.meta.url);
 
 // P19 / DP39 : scénarios écrits seulement ; aucune exécution dans cette reprise.
 const now = 1_800_000_000_000;
@@ -87,8 +88,9 @@ describe("signal privé neutre de suivi service", () => {
     expect(parseCommerceServiceNoticeBody(JSON.stringify(input(), null, 2), now).ok).toBe(false);
     expect(parseCommerceServiceNoticeBody("x".repeat(COMMERCE_SERVICE_NOTICE_BODY_MAX_BYTES + 1), now).ok).toBe(false);
   });
-  it("conserve le nouveau contrat jumeau sans modifier le manifeste P06", () => {
-    expect(readFileSync(new URL(TWIN_URL, import.meta.url), "utf8"))
+  // Comme les autres jumeaux : comparé quand le dépôt voisin porte le fichier, sauté sinon (export propre, CI).
+  it.skipIf(!existsSync(twin))("conserve le nouveau contrat jumeau sans modifier le manifeste P06", () => {
+    expect(readFileSync(twin, "utf8"))
       .toBe(readFileSync(new URL(LOCAL_URL, import.meta.url), "utf8"));
   });
 });
