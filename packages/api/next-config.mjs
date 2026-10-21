@@ -43,7 +43,7 @@ export function readEnvFile(file) {
  *   d'environnement à recopier par application.
  * - En production, les valeurs arrivent par les ARG du Dockerfile (catalogue).
  *
- * @param {{ appDir: string, engineRoot?: string, transpilePackages?: string[], developmentCacheGc?: boolean, usageAnalytics?: { host?: string, projectToken?: string, euRelayOrigin?: string } }} options
+ * @param {{ appDir: string, engineRoot?: string, transpilePackages?: string[], developmentCacheGc?: boolean, usageAnalytics?: { host?: string, projectToken?: string, euRelayOrigin?: string }, iframeSources?: readonly string[], frameAncestors?: readonly string[] }} options
  * @returns {import("next").NextConfig}
  */
 export function createEngineNextConfig(options) {
@@ -94,7 +94,7 @@ export function createEngineNextConfig(options) {
       CONVEX_SITE_URL: convexSiteUrl,
     },
     async headers() {
-      return [{ source: "/(.*)", headers: securityHeaders({ convexUrl, livekitUrl, isDev, extraConnect: analyticsOrigin ? [analyticsOrigin] : [] }) }]
+      return [{ source: "/(.*)", headers: securityHeaders({ convexUrl, livekitUrl, isDev, extraConnect: analyticsOrigin ? [analyticsOrigin] : [], iframeSources: options.iframeSources, frameAncestors: options.frameAncestors }) }]
     },
   }
 }

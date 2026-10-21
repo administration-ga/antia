@@ -31,6 +31,7 @@ export function pageDecisionsAnchor(pageId: string): string {
  */
 export const routes = {
   home: () => "/",
+  demo: () => "/demo",
   signIn: (intent?: "sign-up", postId?: string, notificationReference?: string, shopContact?: ShopContactContinuation) => {
     const query = new URLSearchParams()
     if (intent === "sign-up") query.set("inscription", "1")

@@ -18,6 +18,7 @@ import { APPEARANCE } from "@/lib/appearance"
 import { authClient } from "@/lib/auth-client"
 import { UsagePermissionProvider } from "./analytics-permission"
 import { DemoAccountBootstrap } from "./demo-account-bootstrap"
+import { DemoEmbedBridge } from "./demo-embed"
 import { PersonalTheme } from "./personal-theme"
 import { SessionBridge, SessionBridgePreflight } from "./session-bridge"
 import { ToastRegion } from "./toast-region"
@@ -72,7 +73,7 @@ export function SessionProviders({ children }: { children: ReactNode }) {
       isSessionActive={api.modules.platform.authentication.mySession}
       labels={{ loading: t("session.loading"), failed: t("session.failed"), retry: t("session.retry") }}
     >
-      <SessionBridge><PersonalLocale><DemoAccountBootstrap />{children}</PersonalLocale></SessionBridge>
+      <SessionBridge><PersonalLocale><DemoEmbedBridge /><DemoAccountBootstrap />{children}</PersonalLocale></SessionBridge>
     </EngineConvexProvider></SessionBridgePreflight></SessionProvidersContext.Provider>
   )
 }
