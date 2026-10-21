@@ -1,0 +1,34 @@
+{
+  "publishedAt": "2026-10-21T10:24:49.085058+00:00",
+  "mainPromoted": true,
+  "childPrivate": true,
+  "public": {
+    "production": {
+      "health": {
+        "status": "ok",
+        "application": "antsia-ga",
+        "version": "social-20261021-production-2966feaafc0f",
+        "backend": "configured"
+      },
+      "backendCspCorrect": true,
+      "noRelayTokenInHeaders": true,
+      "deploymentId": "dpl_EpqwAiwbS4BzDTec73RL2AWCbNNK",
+      "commit": "2966feaafc0f4c86176845c3ba4c07d5a7297422"
+    },
+    "demo": {
+      "health": {
+        "status": "ok",
+        "application": "antsia-ga",
+        "version": "social-20261021-demo-df82f10ac50a",
+        "backend": "configured"
+      },
+      "backendCspCorrect": true,
+      "noRelayTokenInHeaders": true,
+      "deploymentId": "dpl_9d6JWNqASpK8KbdejSw2ozKpPDxX",
+      "commit": "df82f10ac50a5058ef236e20ed2578bbcd9386c2"
+    }
+  },
+  "oldDemoHttpStatus": 404,
+  "technicalChildHttpStatus": 302,
+  "technicalChildVercelSsoRedirect": true
+}

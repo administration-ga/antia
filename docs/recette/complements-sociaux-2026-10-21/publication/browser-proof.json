@@ -1,0 +1,34 @@
+{
+  "production": {
+    "profile": "existing-member",
+    "connectionsEmpty": true,
+    "incomingInvitationsEmpty": true,
+    "outgoingInvitationsEmpty": true,
+    "clipPreviews": 2,
+    "clipsDecoded": true,
+    "clipsAutoplay": false,
+    "consoleWarnings": 0,
+    "consoleErrors": 0
+  },
+  "demo": {
+    "profile": "@presse.demo",
+    "relationsTextUnchanged": true,
+    "invitationsTextUnchanged": true,
+    "connections": 3,
+    "follows": 2,
+    "invitationChanges": 0,
+    "suggestionAction": {
+      "height": 44,
+      "radius": 8
+    },
+    "offerAction": {
+      "height": 44,
+      "radius": 8
+    },
+    "offerDetailsReached": true,
+    "consoleWarnings": 0,
+    "consoleErrors": 0
+  },
+  "noSocialMutation": true,
+  "noAccountSwitch": true
+}
