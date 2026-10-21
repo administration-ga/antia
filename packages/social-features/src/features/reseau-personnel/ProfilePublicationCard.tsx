@@ -116,8 +116,8 @@ export function ProfilePublicationCard() {
     delivery: ProfileImageDelivery,
     usage: ProfileImageUsage,
   ) => {
-    if (delivery.withheld === "fileQuarantined") {
-      toast.error(t("errors:fileQuarantined"))
+    if (delivery.withheld === "fileQuarantined" || delivery.withheld === "fileScanUnavailable") {
+      toast.error(t(`errors:${delivery.withheld}`))
       return
     }
     if (delivery.withheld === "fileScanPending") {
@@ -374,14 +374,18 @@ export function ProfilePublicationCard() {
             carte le dit, au lieu d'un médaillon vide sans explication. */}
         {avatarWithheld !== null ? (
           <p style={{ margin: 0, fontSize: 12.5, color: "var(--ink-600)" }}>
-            {avatarWithheld === "fileScanPending"
+            {avatarWithheld === "fileScanUnavailable"
+              ? t("errors:fileScanUnavailable")
+              : avatarWithheld === "fileScanPending"
               ? t("profilePublicationCard.withheld.avatarPending")
               : t("profilePublicationCard.withheld.avatarBlocked")}
           </p>
         ) : null}
         {coverWithheld !== null ? (
           <p style={{ margin: 0, fontSize: 12.5, color: "var(--ink-600)" }}>
-            {coverWithheld === "fileScanPending"
+            {coverWithheld === "fileScanUnavailable"
+              ? t("errors:fileScanUnavailable")
+              : coverWithheld === "fileScanPending"
               ? t("profilePublicationCard.withheld.coverPending")
               : t("profilePublicationCard.withheld.coverBlocked")}
           </p>

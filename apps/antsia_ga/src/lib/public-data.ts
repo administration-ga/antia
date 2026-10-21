@@ -22,7 +22,7 @@ const assetUrl = z.string().url().refine((value) => {
 })
 const origin = z.object({ slug: shortText, name: shortText }).strict()
 const author = z.object({ kind: z.enum(["person", "page"]), handle: shortText.nullable(), displayName: shortText.nullable(), badges: z.array(z.enum(BADGES)).max(4), avatarUrl: assetUrl.nullable() }).strict()
-const media = z.object({ url: assetUrl.nullable(), withheld: z.enum(["fileScanPending", "fileQuarantined"]).nullable(), kind: z.enum(["image", "video"]), mimeType: shortText, width: z.number().int().positive().max(20_000).optional(), height: z.number().int().positive().max(20_000).optional(), durationMs: timestamp.optional(), altText: shortText.optional() }).strict()
+const media = z.object({ url: assetUrl.nullable(), withheld: z.enum(["fileScanPending", "fileScanUnavailable", "fileQuarantined"]).nullable(), kind: z.enum(["image", "video"]), mimeType: shortText, width: z.number().int().positive().max(20_000).optional(), height: z.number().int().positive().max(20_000).optional(), durationMs: timestamp.optional(), altText: shortText.optional() }).strict()
 const shared = z.union([z.object({ available: z.literal(false) }).strict(), z.object({ available: z.literal(true), id: shortText, body: text, publishedAt: timestamp, author, origin, media: z.array(media).max(20) }).strict()])
 
 export const publicPostSchema: z.ZodType<PublicPost> = z.object({ id: shortText, body: text, publishedAt: timestamp, editedAt: timestamp.nullable(), tags: z.array(shortText).max(10), province: z.enum(PROVINCE_SLUGS).nullable(), author, origin, media: z.array(media).max(20), shared: shared.nullable(), hasCommerceOffer: z.boolean().optional() }).strict()

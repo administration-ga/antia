@@ -35,6 +35,12 @@ describe("projections publiques : aucun fallback de session", () => {
     expect(publicPostSchema.safeParse({ ...post, shared: { available: false, body: "private-original" } }).success).toBe(false)
     expect(publicPostSchema.safeParse({ ...post, media: [{ kind: "image", mimeType: "image/png", url: "javascript:alert(1)", withheld: null }] }).success).toBe(false)
   })
+  it("accepte chaque motif de retenue renvoyé par la garde des fichiers, et lui seul", () => {
+    for (const withheld of ["fileScanPending", "fileScanUnavailable", "fileQuarantined"]) {
+      expect(publicPostSchema.safeParse({ ...post, media: [{ kind: "image", mimeType: "image/png", url: null, withheld }] }).success).toBe(true)
+    }
+    expect(publicPostSchema.safeParse({ ...post, media: [{ kind: "image", mimeType: "image/png", url: null, withheld: "fileScanUnknown" }] }).success).toBe(false)
+  })
   it("distingue refus métier et panne sans montrer le message du backend", async () => {
     mocks.query.mockImplementation(async (reference) => {
       if (getFunctionName(reference).endsWith(":getBySlug")) return { _id: "root" }

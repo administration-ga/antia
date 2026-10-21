@@ -114,7 +114,7 @@ export interface ContextualMessageView {
     sizeBytes: number
     durationMs: number | null
     url: string | null
-    withheld: "fileScanPending" | "fileQuarantined" | null
+    withheld: "fileScanPending" | "fileScanUnavailable" | "fileQuarantined" | null
   }[]
   createdAt: number
 }
