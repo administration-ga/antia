@@ -91,11 +91,13 @@ export function __resetFeedModeMemoryForTests(): void {
   memory.clear()
 }
 
-export function useFeedMode(): FeedModeState | null {
+export function useFeedMode(options: { surface?: "clips"; phoneDefault?: FeedMode } = {}): FeedModeState | null {
   const { storagePrefix, feedPresentation, postPresentation } = useNetwork()
   const mobile = useIsReseauMobile()
   const reducedMotion = useReducedMotion() === true
-  const key = feedModeStorageKey(storagePrefix)
+  // Clips garde son choix sans changer le mode du fil. La clé reste sous le
+  // préfixe personnel déjà effacé à la déconnexion.
+  const key = feedModeStorageKey(`${storagePrefix}${options.surface ? `${options.surface}:` : ""}`)
   const stored = useSyncExternalStore(subscribeStoredModes, () => readStoredModes(key), () => EMPTY)
   const height = useSyncExternalStore(subscribeViewport, viewportHeight, () => null)
   const pose: FeedPose = mobile === false ? "desktop" : "phone"
@@ -109,7 +111,7 @@ export function useFeedMode(): FeedModeState | null {
 
   if (feedPresentation !== "immersive") return null
   // L'écran des chartes (ADR-0028) ouvre le fil du téléphone en liste.
-  const phoneDefault: FeedMode = postPresentation === "charte" ? "list" : "immersive"
+  const phoneDefault: FeedMode = options.phoneDefault ?? (postPresentation === "charte" ? "list" : "immersive")
   const resolution = resolveFeedMode({ pose, stored, reducedMotion, viewportHeight: height, phoneDefault })
   if (mobile === null) {
     // Largeur inconnue : aucun arbre immersif monté « en attendant ».

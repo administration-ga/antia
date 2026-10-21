@@ -1,0 +1,11 @@
+{
+  "base": "46b780bed977c4293ef634e920785a90fe6ba5b9",
+  "trackedFiles": 2537,
+  "selectedChanges": 88,
+  "unownedTrackedDifferences": [],
+  "sharedCheckoutUnchanged": true,
+  "selectedChangesBeforeCodegen": 87,
+  "generatedOutputPaths": [
+    "convex/_generated/api.d.ts"
+  ]
+}

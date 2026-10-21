@@ -128,6 +128,15 @@ export const routes = {
   paymentAttempt: (paymentAttemptId: string) => `/mes-paiements/${encodeURIComponent(paymentAttemptId)}`,
   paymentReturn: (paymentAttemptId: string) => `/mes-paiements/${encodeURIComponent(paymentAttemptId)}/retour`,
   shopDirectory: () => "/explorer#boutiques",
+  clips: (handle?: string) => handle ? `/clips?${new URLSearchParams({ auteur: handle })}` : "/clips",
+  mediaWindow: (input: { mode: "explore" | "clips"; cursor?: string; handle?: string; query?: string }) => {
+    const search = new URLSearchParams()
+    if (input.cursor) search.set("curseur", input.cursor)
+    if (input.handle) search.set("auteur", input.handle)
+    if (input.query) search.set("q", input.query)
+    const base = input.mode === "clips" ? "/clips" : "/explorer"
+    return search.size ? `${base}?${search}` : base
+  },
   shopLinkCallback: () => "/mes-boutiques/liaison/retour",
   shopEditor: (id: string) => `/mes-boutiques/${encodeURIComponent(id)}`,
   storefront: (handle: string) => `/boutique/${encodeURIComponent(handle)}`,
@@ -198,6 +207,7 @@ export const engineRoutes: EngineRoutes = {
   // l'application, déclarées avec `NetworkProvider navigation="destinations"`.
   discover: routes.memberDiscover,
   me: routes.me,
+  clips: routes.clips,
   // P14B : destinations typées des avis (cloche, ouverture d'une notification poussée).
   serviceRequest: routes.serviceRequest,
   jobApplication: routes.jobApplication,

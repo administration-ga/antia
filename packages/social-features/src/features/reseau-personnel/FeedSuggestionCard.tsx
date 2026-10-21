@@ -36,6 +36,7 @@ import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 
+import { COMPACT_SOCIAL_ACTION_STYLE } from "../social-action-style"
 import { POST_SURFACE_STYLE } from "../../shell/design-styles"
 import { dockStore } from "../messagerie/dock-store"
 import { draftKey } from "../messagerie/messagerie-dock"
@@ -51,7 +52,7 @@ const SUGGESTIONS_WINDOW = 3
  * La feuille de la carte, hors du JSX : un littéral enfant de `<style>`
  * passerait pour une chaîne d'interface (cliquet `no-hardcoded-strings`).
  * Mêmes mesures que la publication de la charte : 16 px dedans, 12 px entre
- * les blocs, boutons en pilule de 44 px.
+ * les blocs, boutons compacts de 44 px.
  */
 const FEED_SUGGESTION_CSS = `
   .rp-feed-suggestion {
@@ -99,10 +100,9 @@ const FEED_SUGGESTION_CSS = `
   .rp-feed-suggestion-row > button { flex: 1 1 0; min-width: max-content; }
 `
 
-/** La géométrie d'un bouton de la charte : pilule de 44 px, sa variante garde sa couleur. */
+/** Actions compactes ; la variante conserve sa couleur métier. */
 const ACTION_STYLE = {
-  borderRadius: "var(--ui2-button-radius, 999px)",
-  minHeight: 44,
+  ...COMPACT_SOCIAL_ACTION_STYLE,
   padding: "0 18px",
   fontSize: 14,
   fontWeight: 600,
@@ -152,7 +152,7 @@ export function FeedSuggestionCard() {
       <section className="rp-feed-suggestion" aria-label={t("feedSuggestion.label", { name: person.displayName })}>
         <div className="rp-feed-suggestion-who">
           <Link href={href} aria-label={t("feedSuggestion.profileOf", { name: person.displayName })} style={{ display: "inline-flex", flexShrink: 0 }}>
-            <Avatar displayName={person.displayName} avatarUrl={person.avatarUrl} size={40} />
+            <Avatar displayName={person.displayName} avatarUrl={person.avatarUrl} size={56} />
           </Link>
           <div className="rp-feed-suggestion-text">
             <Link href={href} className="rp-feed-suggestion-name">

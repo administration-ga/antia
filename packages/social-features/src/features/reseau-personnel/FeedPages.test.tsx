@@ -22,6 +22,7 @@ vi.mock("@antsia/api/sign-out-everywhere", () => ({ isSigningOutEverywhere: () =
 vi.mock("./PostCard", () => ({ PostCard: ({ post }: { post: { body: string } }) => <p>{post.body}</p> }))
 vi.mock("./PagesSuggestionsRail", () => ({ PagesSuggestionsRail: () => <p>Carrousel des pages</p> }))
 vi.mock("./SuggestionsPanel", () => ({ SuggestionsPanel: () => <p>Carrousel des personnes</p> }))
+vi.mock("./FeedClipsRail", () => ({ FeedClipsRail: () => <p>Aperçus vidéos</p> }))
 vi.mock("./FeedSuggestionCard", () => ({ FeedSuggestionCard: () => <p>Suggestion des chartes</p> }))
 
 import { FeedPage } from "./FeedPages"
@@ -151,15 +152,16 @@ describe("FeedPage — écran des chartes (ADR-0028)", () => {
   const fourPosts = () => ({ items: [post("posts_1", "Un"), post("posts_2", "Deux"), post("posts_3", "Trois"), post("posts_4", "Quatre")], nextCursor: null, lacunar: false })
   const afterThird = (count: number) => (count > 3 ? 3 : null)
 
-  it("la suggestion ouvre la première page, avant la première publication, sans carrousels", () => {
+  it("la suggestion reste en tête et les carrousels complètent le fil après la troisième publication", () => {
     state.data = fourPosts()
     mount(true, { postPresentation: "charte", interleaveAfter: afterThird })
     const suggestion = screen.getByText("Suggestion des chartes")
     expect(suggestion.compareDocumentPosition(screen.getByText("Un")) & Node.DOCUMENT_POSITION_FOLLOWING).not.toBe(0)
     // Au téléphone seulement : le rail droit du bureau porte déjà les suggestions.
     expect(suggestion.closest(".rp-feed-inline")).not.toBeNull()
-    expect(screen.queryByText("Carrousel des personnes")).toBeNull()
-    expect(screen.queryByText("Carrousel des pages")).toBeNull()
+    expect(screen.getByText("Trois").compareDocumentPosition(screen.getByText("Carrousel des personnes")) & Node.DOCUMENT_POSITION_FOLLOWING).not.toBe(0)
+    expect(screen.getByText("Carrousel des pages")).toBeTruthy()
+    expect(screen.getByText("Quatre").compareDocumentPosition(screen.getByText("Aperçus vidéos")) & Node.DOCUMENT_POSITION_FOLLOWING).not.toBe(0)
   })
 
   it("un fil vide garde la suggestion au-dessus de son état vide", () => {

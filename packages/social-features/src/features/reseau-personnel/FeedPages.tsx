@@ -32,6 +32,7 @@ import {
   useImmersivePageReport,
   type ImmersivePageReport,
 } from "../feed-immersion/ImmersiveFeedReader"
+import { FeedClipsRail } from "./FeedClipsRail"
 import { FeedSuggestionCard } from "./FeedSuggestionCard"
 import { PostCard } from "./PostCard"
 import { PagesSuggestionsRail } from "./PagesSuggestionsRail"
@@ -254,7 +255,7 @@ export function FeedPage({
   const history = isFirst && page.data?.materializedSince !== undefined ? <p className="text-sm text-muted-foreground">{t("feedPages.historySince", { date: new Intl.DateTimeFormat(i18n.resolvedLanguage ?? i18n.language, { dateStyle: "medium" }).format(page.data.materializedSince) })}</p> : null
   if (items.length === 0) return <>{preparation}{history}{lacuna}{leadingSuggestion}{isFirst && !page.data?.lacunar && nextCursor === null ? emptyFallback : null}</>
 
-  const interleaveIndex = interleaveAfter && !charte ? interleaveAfter(items.length) : null
+  const interleaveIndex = interleaveAfter ? interleaveAfter(items.length) : null
 
   return (
     <>
@@ -280,6 +281,7 @@ export function FeedPage({
               modules distincts, personnes réciproques puis pages unilatérales.
               Le bureau masque cette pile car son rail droit porte les mêmes
               données en vertical. */}
+          {charte && isFirst && tag === undefined && index === Math.min(4, items.length - 1) ? <FeedClipsRail posts={items} /> : null}
           {index + 1 === interleaveIndex ? (
             <div
               className="rp-feed-inline"

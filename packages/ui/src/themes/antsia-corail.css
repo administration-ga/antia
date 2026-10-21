@@ -259,6 +259,10 @@
   --ui2-button-radius: 999px; /* boutons d'action en pilule */
   --ui2-badge-radius: 6px;
   --ui2-card-radius: 24px; /* cartes d'ui-v2, comme les surfaces du réseau */
+  --esp-content-font-size: 15px;
+  --ui2-button-outline-fg: var(--foreground);
+  --esp-primitive-surface-border: var(--esp-surface-border);
+  --esp-social-action-radius: 8px;
   --esp-chip-radius: 10px;
   --esp-avatar-page-radius: 12px; /* les pages en carré arrondi, les personnes en rond */
   --esp-field-radius: 14px;

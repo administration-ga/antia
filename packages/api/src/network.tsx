@@ -65,6 +65,8 @@ export interface EngineRoutes {
    * garde sa navigation par volets.
    */
   me?: () => string
+  /** U04 : vrai lecteur vidéo ; le filtre auteur reste jugé par le serveur. */
+  clips?: (handle?: string) => string
   /**
    * P14B — destinations TYPÉES d'un avis (cloche, ouverture d'une notification
    * poussée), injectées par l'application qui les sert : une demande de service

@@ -357,5 +357,11 @@
     "followFailed": "The follow could not be saved.",
     "write": "Write",
     "writeLabel": "Write to {{name}}"
+  },
+  "feedClips": {
+    "title": "Videos from your feed",
+    "hide": "Hide video previews",
+    "open": "Watch the video by {{name}}",
+    "seeAll": "See all videos"
   }
 }

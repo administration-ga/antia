@@ -1,0 +1,14 @@
+[
+  {
+    "level": "warn",
+    "message": "Image with src \"http://127.0.0.1:3210/api/storage/37d4d4b0-d1d4-44d9-9f20-1c611e3af41a\" was detected as the Largest Contentful Paint (LCP). Please add the `loading=\"eager\"` property if this image is above the fold.\nRead more: https://nextjs.org/docs/app/api-reference/components/image#loading",
+    "timestamp": "2026-10-21T09:39:41.969Z",
+    "url": "http://localhost:3030/_next/static/chunks/0z_w_next_dist_0lwo956dnz8u4._.js"
+  },
+  {
+    "level": "warn",
+    "message": "Detected `scroll-behavior: smooth` on the `<html>` element. To disable smooth scrolling during route transitions, add `data-scroll-behavior=\"smooth\"` to your <html> element. Learn more: https://nextjs.org/docs/messages/missing-data-scroll-behavior",
+    "timestamp": "2026-10-21T09:40:23.285Z",
+    "url": "http://localhost:3030/_next/static/chunks/0z_w_next_dist_0lwo956dnz8u4._.js"
+  }
+]
