@@ -424,5 +424,9 @@
     "delayed": "The demo is taking longer to respond. You can wait or try again.",
     "retry": "Try again",
     "unavailable": "The demo is temporarily unavailable. You can return to ANTSIA."
+  },
+  "account": {
+    "menu": "My account",
+    "appearance": "Appearance"
   }
 }

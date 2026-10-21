@@ -61,13 +61,17 @@ export function MemberTopBar({ onMobile = "visible" }: { onMobile?: "visible" | 
         onMobile === "hidden" && (adaptive ? "hidden min-[768px]:block" : "hidden min-[960px]:block"),
       )}
     >
-      <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-2 px-4 py-2 sm:px-5">
+      <div className={adaptive ? "antsia-topbar-row flex items-center justify-between gap-2 py-2" : "mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-2 px-4 py-2 sm:px-5"}>
         {/* La marque comme en tête du téléphone (ADR-0028, ADR-0030) : Familjen Grotesk, son
-            point à l'aplat d'identité, l'encre du texte — jamais l'encre d'identité. */}
+            point à l'aplat d'identité, l'encre du texte — jamais l'encre d'identité.
+            U09 : au téléphone, « + » Créer précède la marque, comme sur le fil. */}
+        <div className="flex min-w-0 items-center gap-1">
+        {adaptive && onMobile === "visible" ? <span className="min-[768px]:hidden"><ReseauCreateAction /></span> : null}
         <Link href={routes.feed()} data-brand="" className="inline-flex min-h-11 items-center gap-1.5 rounded-lg px-1 text-[22px] font-bold tracking-[0.06em] text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" style={{ fontFamily: "var(--font-display, inherit)" }}>
           {BRAND_NAME}
           <span aria-hidden="true" className="inline-block size-[7px] rounded-full bg-[var(--primary-fill)]" />
         </Link>
+        </div>
         <Tools aria-label={destinations ? t("nav.sessionTools") : t("nav.label")} role={destinations ? "group" : undefined} className="flex flex-wrap items-center gap-1">
           {destinations ? null : (
             <>
@@ -77,10 +81,12 @@ export function MemberTopBar({ onMobile = "visible" }: { onMobile?: "visible" | 
               <Link href={routes.moderation()} className={NAV_LINK} aria-label={tMember("nav.moderation")}><ShieldCheck aria-hidden="true" className="size-4" /><span className="hidden lg:inline">{tMember("nav.moderation")}</span></Link>
             </>
           )}
-          {onMobile === "visible" ? <ReseauCreateAction /> : null}
-          <AppearanceToggle />
+          {/* U09 (épure) : la cloche et le menu du compte (identité, apparence,
+              déconnexion) ; Créer vit dans le rail, et au téléphone devant la marque. */}
+          {!adaptive && onMobile === "visible" ? <ReseauCreateAction /> : null}
+          {adaptive ? null : <AppearanceToggle />}
           <NotificationBell />
-          <IdentityTools />
+          {adaptive ? <span className="hidden min-[768px]:inline-flex"><IdentityTools account /></span> : <IdentityTools />}
           {destinations ? null : (
             <Link href={routes.messages()} className={NAV_LINK} aria-label={t("nav.messages")}>
               <MessageCircle aria-hidden="true" className="size-4" />
@@ -95,19 +101,21 @@ export function MemberTopBar({ onMobile = "visible" }: { onMobile?: "visible" | 
           ) : null}
           {/* Se déconnecter est un geste NEUTRE : le bouton gris du système épuré
               (pilule sans filet dans les thèmes ANTSIA), comme Annuler ou Plus tard. */}
-          <Button
-            variant="outline"
-            pending={signingOut}
-            aria-label={t("nav.signOut")}
-            className="px-3"
-            onClick={async () => {
-              setSigningOut(true)
-              await signOutAndRedirect()
-            }}
-          >
-            <LogOut aria-hidden="true" className="size-4" />
-            <span className="hidden sm:inline">{t("nav.signOut")}</span>
-          </Button>
+          {adaptive ? null : (
+            <Button
+              variant="outline"
+              pending={signingOut}
+              aria-label={t("nav.signOut")}
+              className="px-3"
+              onClick={async () => {
+                setSigningOut(true)
+                await signOutAndRedirect()
+              }}
+            >
+              <LogOut aria-hidden="true" className="size-4" />
+              <span className="hidden sm:inline">{t("nav.signOut")}</span>
+            </Button>
+          )}
         </Tools>
       </div>
     </header>

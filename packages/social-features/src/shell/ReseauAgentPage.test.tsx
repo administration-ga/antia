@@ -298,4 +298,16 @@ describe("ReseauAgentPage — la page réseau", () => {
     expect(screen.getByTestId("PostComposerSheet").getAttribute("data-open")).toBe("true")
     expect(mocks.push).not.toHaveBeenCalled()
   })
+
+  it("U09 : en adaptatif, la porte de publication remplace la carte d'identité et la colonne droite n'a plus d'iCom", () => {
+    mocks.adaptive = true
+    page()
+    expect(screen.queryByTestId("ProfileMiniCard")).toBeNull()
+    expect(screen.getByRole("region", { name: "Publier dans le fil" })).toBeTruthy()
+    fireEvent.click(screen.getByRole("button", { name: /^Quoi de neuf/ }))
+    expect(screen.getByTestId("PostComposerSheet").getAttribute("data-open")).toBe("true")
+    const rail = screen.getByLabelText("iCom et découverte du réseau")
+    const modules = Array.from(rail.querySelectorAll("[data-testid]")).map((node) => node.getAttribute("data-testid"))
+    expect(modules).toEqual(["SuggestionsPanel", "PagesSuggestionsRail", "EvenementsRail"])
+  })
 })
