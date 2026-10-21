@@ -93,7 +93,7 @@ export function IcomMessagesPage({ conversationKey = null, compose, isMobile, co
 		/>
 		: <div className="icom-page-empty"><h2>{t("icomViews.chooseConversation")}</h2><p>{t("icomViews.chooseConversationBody")}</p></div>
 
-	if (isMobile && hasDetail) return <><MessagerieStyles />{adaptive ? <style>{ICOM_WORKSPACE_CSS}</style> : null}<div className={adaptive ? "icom-adaptive-phone-detail" : undefined}><div className="msg-panel" data-variant="page" data-fill="screen" data-open="true">{detail}</div></div></>
+	if (!adaptive && isMobile && hasDetail) return <><MessagerieStyles /><div><div className="msg-panel" data-variant="page" data-fill="screen" data-open="true">{detail}</div></div></>
 
 	return <>
 		<MessagerieStyles />
@@ -116,7 +116,8 @@ export function IcomMessagesPage({ conversationKey = null, compose, isMobile, co
 						/>}
 					</div>
 				</aside>
-				{!isMobile ? <div className="msg-panel icom-page-detail" data-variant="page" data-open="true" data-call={callMode === "none" ? undefined : callMode}>
+				{/* En adaptatif, le détail garde sa place React au seuil téléphone/tablette. */}
+				{adaptive || !isMobile ? <div className="msg-panel icom-page-detail" data-variant="page" data-fill={isMobile ? "screen" : undefined} data-open="true" data-call={!isMobile && callMode !== "none" ? callMode : undefined}>
 					<div className="icom-call-host" data-pose="medium" ref={setCallHost} />
 					{detail}
 				</div> : null}

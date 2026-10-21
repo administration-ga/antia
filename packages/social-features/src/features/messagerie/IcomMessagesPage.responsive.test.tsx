@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { cleanup, fireEvent, render, screen } from "@testing-library/react"
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import type { MessagerieNav } from "./messagerie-views"
 
@@ -29,7 +29,8 @@ vi.mock("../../shell/mobile/IcomMobileTabBar", () => ({ IcomMobileTabBar: () => 
 vi.mock("./MessagerieListView", () => ({ MessagerieListView: ({ nav }: { nav: MessagerieNav }) => <button onClick={() => nav.openConversation("chat:thread-a")}>Ouvrir l’échange</button> }))
 vi.mock("./MessagerieConversationView", () => ({ MessagerieConversationView: ({ nav, draft }: { nav: MessagerieNav; draft: string }) => {
   useEffect(() => { state.mounts += 1 }, [])
-  return <><button onClick={nav.back}>Retour à la liste</button><textarea aria-label="Brouillon" defaultValue={draft} /></>
+  const [reply, setReply] = useState("")
+  return <><button onClick={nav.back}>Retour à la liste</button><textarea aria-label="Brouillon" defaultValue={draft} /><input aria-label="Réponse locale" value={reply} onChange={(event) => setReply(event.target.value)} /></>
 } }))
 vi.mock("./MessagerieComposeView", () => ({ MessagerieComposeView: () => <p>Composeur personnel</p> }))
 vi.mock("./MessagerieGroupeCompose", () => ({ MessagerieGroupeCompose: () => <p>Composeur groupe</p> }))
@@ -76,6 +77,45 @@ describe("U06 : espace Messages selon la largeur utile", () => {
     expect(state.register).toHaveBeenCalledTimes(1)
     expect(ICOM_WORKSPACE_SPLIT_MIN).toBe(880)
     expect(ICOM_WORKSPACE_CSS).toContain("@container icom-workspace (min-width: 880px)")
+  })
+  it("conserve le détail, son état local et son focus entre tablette, téléphone et tablette", () => {
+    const view = render(<IcomMessagesPage isMobile={false} conversationKey="chat:thread-a" />)
+    const detail = view.container.querySelector(".icom-page-detail")
+    const host = view.container.querySelector(".icom-call-host")
+    const field = screen.getByRole("textbox", { name: "Brouillon" }) as HTMLTextAreaElement
+    const reply = screen.getByRole("textbox", { name: "Réponse locale" }) as HTMLInputElement
+    fireEvent.change(field, { target: { value: "Texte conservé au seuil mobile" } })
+    fireEvent.change(reply, { target: { value: "Réponse en cours" } })
+    field.focus()
+    field.setSelectionRange(3, 8)
+
+    for (const isMobile of [true, false]) {
+      view.rerender(<IcomMessagesPage isMobile={isMobile} conversationKey="chat:thread-a" />)
+      expect(view.container.querySelector(".icom-page-detail")).toBe(detail)
+      expect(view.container.querySelector(".icom-call-host")).toBe(host)
+      expect(screen.getByRole("textbox", { name: "Brouillon" })).toBe(field)
+      expect(screen.getByRole("textbox", { name: "Réponse locale" })).toBe(reply)
+      expect(field.value).toBe("Texte conservé au seuil mobile")
+      expect(reply.value).toBe("Réponse en cours")
+      expect(document.activeElement).toBe(field)
+      expect([field.selectionStart, field.selectionEnd]).toEqual([3, 8])
+      expect(state.mounts).toBe(1)
+      expect(detail?.getAttribute("data-fill")).toBe(isMobile ? "screen" : null)
+      fireEvent.click(screen.getByRole("button", { name: "Retour à la liste" }))
+      expect(state.push).toHaveBeenLastCalledWith("/messages", { scroll: false })
+      // Le clic de test ne change pas la route mockée ; remettre le focus avant le seuil suivant.
+      field.focus()
+    }
+    expect(view.container.querySelectorAll(".icom-page-detail")).toHaveLength(1)
+    expect(screen.queryByRole("navigation", { name: "Barre iCom historique" })).toBeNull()
+  })
+  it("garde la conversation immersive historique hors présentation adaptative", () => {
+    state.adaptive = false
+    const view = render(<IcomMessagesPage isMobile conversationKey="chat:thread-a" />)
+    expect(view.container.querySelector(".icom-messages-page")).toBeNull()
+    expect(view.container.querySelector('.msg-panel[data-fill="screen"]')).not.toBeNull()
+    expect(screen.getByRole("textbox", { name: "Brouillon" })).toBeTruthy()
+    expect(state.register).not.toHaveBeenCalled()
   })
   it("mémorise une référence de retour sans perdre filtre, recherche ou profondeur", () => {
     writeListState(scope, { query: "atelier", filter: "non_lues", loadedThreadCount: 60 })

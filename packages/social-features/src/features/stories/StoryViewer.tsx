@@ -45,7 +45,7 @@ import { useAuthenticatedConvexQuery } from "@antsia/api/hooks"
 import { useNetwork } from "@antsia/api/network"
 import { Button } from "@antsia/ui"
 import { useMutation } from "convex/react"
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react"
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { SWIPE_HYSTERESIS_PX } from "../../shell/mobile/gestures"
@@ -71,6 +71,9 @@ import { storyEngineErrorText } from "./story-create"
 
 /** Au-delà, un appui n'est plus un tap mais une pause volontaire. */
 const LONG_PRESS_MS = 400
+
+/** La cible reste utilisable même si le lecteur est monté sans sa feuille. */
+const PLAYBACK_CONTROL_STYLE = { minWidth: 44, minHeight: 44 } as const
 
 /**
  * Un média RETENU par la garde (analyse en cours, ou bloqué) n'a rien à jouer :
@@ -142,6 +145,8 @@ function StoryViewerContent({
 	const [index, setIndex] = useState(0)
 	const [timer, setTimer] = useState(STORY_TIMER_ZERO)
 	const [paused, setPaused] = useState(false)
+	// L'intention explicite ne se relâche ni au pointerup, ni au pointerleave.
+	const [userPaused, setUserPaused] = useState(false)
 	const [stalled, setStalled] = useState(false)
 	const [muted, setMuted] = useState(true)
 	const [viewersOpen, setViewersOpen] = useState(false)
@@ -164,6 +169,7 @@ function StoryViewerContent({
 	const expiredAdvance = useRef<string | null>(null)
 	const pressed = useRef<{ x: number; y: number; t: number } | null>(null)
 	const videoRef = useRef<HTMLVideoElement>(null)
+	const playbackAttempt = useRef(0)
 
 	const selected = stories[index]
 	// Le serveur reste l'autorité ; une date d'expiration déjà reçue interdit
@@ -193,7 +199,7 @@ function StoryViewerContent({
 	// défiler une story que personne ne regarde (vécu avec l'autoplay refusé).
 	const halted = isPlaybackHalted({
 		active,
-		paused,
+		paused: paused || userPaused,
 		stalled,
 		viewersOpen,
 		needsTap,
@@ -205,7 +211,7 @@ function StoryViewerContent({
 	// C'est le gel « écran noir » de toutes les vidéos d'actu (2026-08-20).
 	const mediaHalted = isMediaHalted({
 		active,
-		paused,
+		paused: paused || userPaused,
 		stalled,
 		viewersOpen,
 		needsTap,
@@ -224,6 +230,11 @@ function StoryViewerContent({
 	/** Chaque story repart de zéro. */
 	const currentId = current === undefined ? null : String(current.storyId)
 	useLayoutEffect(() => { shownStory.current = currentId }, [currentId])
+	// Une promesse play() peut aboutir après une pause ou le réemploi du même
+	// élément vidéo pour une autre story. Elle ne décide plus de cette lecture.
+	useLayoutEffect(() => {
+		playbackAttempt.current += 1
+	}, [active, currentId, failed, paused, userPaused, viewersOpen])
 	useEffect(() => {
 		setTimer(STORY_TIMER_ZERO)
 		setRemoveArmed(false)
@@ -315,13 +326,19 @@ function StoryViewerContent({
 	 * un refus ferait clignoter le chip à chaque pause au doigt.
 	 */
 	const startPlayback = useCallback((node: HTMLVideoElement) => {
+		const attempt = ++playbackAttempt.current
+		const storyId = shownStory.current
+		const sourceUrl = node.getAttribute("src")
+		const isCurrentAttempt = () => alive.current && videoRef.current === node
+			&& shownStory.current === storyId && playbackAttempt.current === attempt
+			&& node.getAttribute("src") === sourceUrl
 		node
 			.play()
 			.then(() => {
-				if (alive.current && videoRef.current === node) setNeedsTap(false)
+				if (isCurrentAttempt()) setNeedsTap(false)
 			})
 			.catch((err: unknown) => {
-				if (!alive.current || videoRef.current !== node) return
+				if (!isCurrentAttempt()) return
 				if (err instanceof DOMException && err.name === "NotAllowedError") {
 					setNeedsTap(true)
 					setStalled(false)
@@ -341,7 +358,10 @@ function StoryViewerContent({
 			return
 		}
 		startPlayback(node)
-	}, [mediaHalted, muted, currentId, startPlayback])
+		// Les raisons sont aussi suivies séparément : pendant un play() manuel,
+		// needsTap tient encore mediaHalted à true ; une nouvelle pause doit
+		// néanmoins interrompre cette tentative avant sa résolution.
+	}, [mediaHalted, muted, currentId, startPlayback, active, paused, userPaused, viewersOpen, failed])
 
 	/**
 	 * Rejoue quand la DÉCISION dit « joue » et que l'élément s'est pourtant
@@ -363,6 +383,16 @@ function StoryViewerContent({
 	const goNext = () => {
 		if (index + 1 < stories.length) setIndex(index + 1)
 		else onExhausted(1)
+	}
+	const onStoryKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+		if (!active || event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return
+		const target = event.target
+		if (target instanceof HTMLElement && target.closest('input, textarea, select, [contenteditable]:not([contenteditable="false"]), [role="textbox"], [role="combobox"], [role="slider"], [role="spinbutton"]')) return
+		if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return
+		event.preventDefault()
+		event.stopPropagation()
+		if (event.key === "ArrowLeft") goPrev()
+		else goNext()
 	}
 
 	// ─── États où il n'y a rien à lire ──────────────────────────────────────
@@ -412,6 +442,11 @@ function StoryViewerContent({
 	return (
 		<div
 			className="st-stage esp-story-stage"
+			role="group"
+			aria-label={t("storyViewer.playbackControls")}
+			aria-keyshortcuts="ArrowLeft ArrowRight"
+			tabIndex={active ? 0 : -1}
+			onKeyDown={onStoryKeyDown}
 			onPointerDown={(event) => {
 				pressed.current = {
 					x: event.clientX,
@@ -556,13 +591,13 @@ function StoryViewerContent({
 					type="button"
 					className="st-chip esp-story-chip st-play"
 					aria-label={t("storyViewer.play")}
+					disabled={!active || paused || userPaused || viewersOpen}
 					onPointerDown={(event) => event.stopPropagation()}
 					onPointerUp={(event) => event.stopPropagation()}
 					onClick={() => {
-						void videoRef.current
-							?.play()
-							.then(() => setNeedsTap(false))
-							.catch(() => {})
+						if (!active || paused || userPaused || viewersOpen || failed) return
+						const node = videoRef.current
+						if (node !== null) startPlayback(node)
 					}}
 				>
 					{t("storyViewer.play")}
@@ -598,6 +633,17 @@ function StoryViewerContent({
 				onClose={onClose}
 				actions={
 					<>
+						<div role="group" aria-label={t("storyViewer.playbackControls")} style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+							<button type="button" className="st-chip esp-story-chip" style={PLAYBACK_CONTROL_STYLE} disabled={!active} onClick={goPrev}>
+								{t("storyViewer.previous")}
+							</button>
+							<button type="button" className="st-chip esp-story-chip" style={PLAYBACK_CONTROL_STYLE} disabled={!active} onClick={() => setUserPaused(value => !value)}>
+								{t(userPaused ? "storyViewer.resume" : "storyViewer.pause")}
+							</button>
+							<button type="button" className="st-chip esp-story-chip" style={PLAYBACK_CONTROL_STYLE} disabled={!active} onClick={goNext}>
+								{t("storyViewer.next")}
+							</button>
+						</div>
 						{playableVideo ? (
 							<button
 								type="button"

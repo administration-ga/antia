@@ -1,0 +1,261 @@
+{
+  "date": "2026-10-21",
+  "kind": "browser-viewport-emulation",
+  "physicalDevicesTested": false,
+  "beforePublication": true,
+  "checks": [
+    {
+      "screen": "/fil",
+      "label": "avant-fil-834",
+      "width": 834,
+      "height": 1112,
+      "documentWidth": 834,
+      "horizontalOverflow": false,
+      "background": "rgb(255, 255, 255)",
+      "alertCount": 0
+    },
+    {
+      "screen": "/fil",
+      "label": "avant-fil-1440",
+      "width": 1440,
+      "height": 1000,
+      "documentWidth": 1440,
+      "horizontalOverflow": false,
+      "background": "rgb(255, 255, 255)",
+      "alertCount": 0
+    },
+    {
+      "screen": "/explorer",
+      "label": "avant-explorer-1440",
+      "width": 1440,
+      "height": 1000,
+      "documentWidth": 1440,
+      "horizontalOverflow": false,
+      "background": "rgb(255, 255, 255)",
+      "alertCount": 0
+    },
+    {
+      "screen": "/explorer",
+      "label": "avant-explorer-834",
+      "width": 834,
+      "height": 1112,
+      "documentWidth": 834,
+      "horizontalOverflow": false,
+      "background": "rgb(255, 255, 255)",
+      "alertCount": 0
+    },
+    {
+      "screen": "/explorer",
+      "label": "avant-explorer-390",
+      "width": 390,
+      "height": 844,
+      "documentWidth": 390,
+      "horizontalOverflow": false,
+      "background": "rgb(255, 255, 255)",
+      "alertCount": 0
+    },
+    {
+      "screen": "/clips",
+      "label": "avant-clips-390",
+      "width": 390,
+      "height": 844,
+      "documentWidth": 390,
+      "horizontalOverflow": false,
+      "background": "rgb(255, 255, 255)",
+      "alertCount": 0
+    },
+    {
+      "screen": "/clips",
+      "label": "avant-clips-navigation-390",
+      "width": 390,
+      "height": 844,
+      "documentWidth": 390,
+      "horizontalOverflow": false,
+      "background": "rgb(21, 19, 17)",
+      "alertCount": 0
+    },
+    {
+      "screen": "/clips",
+      "label": "avant-clips-834",
+      "width": 834,
+      "height": 1112,
+      "documentWidth": 834,
+      "horizontalOverflow": false,
+      "background": "rgb(21, 19, 17)",
+      "alertCount": 0
+    },
+    {
+      "screen": "/clips",
+      "label": "avant-clips-1440",
+      "width": 1440,
+      "height": 1000,
+      "documentWidth": 1440,
+      "horizontalOverflow": false,
+      "background": "rgb(21, 19, 17)",
+      "alertCount": 0
+    },
+    {
+      "screen": "/moi",
+      "label": "avant-espace-1440",
+      "width": 1440,
+      "height": 1000,
+      "documentWidth": 1440,
+      "horizontalOverflow": false,
+      "background": "rgb(255, 255, 255)",
+      "alertCount": 0
+    },
+    {
+      "screen": "/moi",
+      "label": "avant-espace-834",
+      "width": 834,
+      "height": 1112,
+      "documentWidth": 834,
+      "horizontalOverflow": false,
+      "background": "rgb(255, 255, 255)",
+      "alertCount": 0
+    },
+    {
+      "screen": "/moi",
+      "label": "avant-espace-390",
+      "width": 390,
+      "height": 844,
+      "documentWidth": 390,
+      "horizontalOverflow": false,
+      "background": "rgb(255, 255, 255)",
+      "alertCount": 0
+    },
+    {
+      "screen": "/entrer",
+      "label": "entree-390",
+      "width": 390,
+      "height": 844,
+      "documentWidth": 390,
+      "horizontalOverflow": false,
+      "background": "rgb(255, 255, 255)",
+      "alertCount": 0
+    },
+    {
+      "screen": "/entrer",
+      "label": "entree-834",
+      "width": 834,
+      "height": 1112,
+      "documentWidth": 834,
+      "horizontalOverflow": false,
+      "background": "rgb(255, 255, 255)",
+      "alertCount": 0
+    },
+    {
+      "screen": "/entrer",
+      "label": "entree-1440",
+      "width": 1440,
+      "height": 1000,
+      "documentWidth": 1440,
+      "horizontalOverflow": false,
+      "background": "rgb(255, 255, 255)",
+      "alertCount": 0
+    },
+    {
+      "screen": "/fil",
+      "label": "connecte-fil-390",
+      "width": 390,
+      "height": 844,
+      "documentWidth": 390,
+      "horizontalOverflow": false,
+      "background": "rgb(255, 255, 255)",
+      "alertCount": 0
+    },
+    {
+      "screen": "/messages",
+      "label": "connecte-messages-1440",
+      "width": 1440,
+      "height": 1000,
+      "documentWidth": 1440,
+      "horizontalOverflow": false,
+      "background": "rgb(255, 255, 255)",
+      "alertCount": 0
+    },
+    {
+      "screen": "/messages",
+      "label": "connecte-messages-390",
+      "width": 390,
+      "height": 844,
+      "documentWidth": 390,
+      "horizontalOverflow": false,
+      "background": "rgb(255, 255, 255)",
+      "alertCount": 0
+    },
+    {
+      "screen": "/messages",
+      "label": "connecte-messages-834",
+      "width": 834,
+      "height": 1112,
+      "documentWidth": 834,
+      "horizontalOverflow": false,
+      "background": "rgb(255, 255, 255)",
+      "alertCount": 0
+    },
+    {
+      "screen": "/profil/[handle]",
+      "label": "connecte-profil-1440",
+      "width": 1440,
+      "height": 1000,
+      "documentWidth": 1440,
+      "horizontalOverflow": false,
+      "background": "rgb(255, 255, 255)",
+      "alertCount": 0
+    },
+    {
+      "screen": "/profil/[handle]",
+      "label": "connecte-profil-390",
+      "width": 390,
+      "height": 844,
+      "documentWidth": 390,
+      "horizontalOverflow": false,
+      "background": "rgb(255, 255, 255)",
+      "alertCount": 0
+    },
+    {
+      "screen": "/profil/[handle]",
+      "label": "connecte-profil-834",
+      "width": 834,
+      "height": 1112,
+      "documentWidth": 834,
+      "horizontalOverflow": false,
+      "background": "rgb(255, 255, 255)",
+      "alertCount": 0
+    },
+    {
+      "screen": "/a-propos",
+      "label": "public-a-propos-1440",
+      "width": 1440,
+      "height": 1000,
+      "documentWidth": 1440,
+      "horizontalOverflow": false,
+      "background": "rgb(255, 255, 255)",
+      "alertCount": 0
+    },
+    {
+      "screen": "/a-propos",
+      "label": "public-a-propos-390",
+      "width": 390,
+      "height": 844,
+      "documentWidth": 390,
+      "horizontalOverflow": false,
+      "background": "rgb(255, 255, 255)",
+      "alertCount": 0
+    },
+    {
+      "screen": "/a-propos",
+      "label": "public-a-propos-834",
+      "width": 834,
+      "height": 1112,
+      "documentWidth": 834,
+      "horizontalOverflow": false,
+      "background": "rgb(255, 255, 255)",
+      "alertCount": 0
+    }
+  ],
+  "sessionInterruption": "Parallel recipe explicitly signed out the shared account; no credentials were extracted or entered by this recipe.",
+  "noExternalMessagesCallsOrCommerceCreated": true,
+  "privateScreenshotsCommitted": false
+}
