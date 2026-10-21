@@ -1,5 +1,7 @@
 "use client"
 
+import { browserAppPath } from "@/lib/app-path"
+
 import type { CatalogOffer } from "@convex/modules/shops/catalogValidators"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useId, useState } from "react"
@@ -47,7 +49,7 @@ export function OfferShareButton({ handle, offerRef }: { handle: string; offerRe
       if (!origin) { setMessage("shareUnavailable"); return }
       const parsed = new URL(origin)
       if (parsed.username || parsed.password || parsed.pathname !== "/" || parsed.search || parsed.hash || parsed.protocol !== "https:" && !(process.env.NODE_ENV !== "production" && parsed.protocol === "http:" && parsed.hostname === "localhost")) { setMessage("shareUnavailable"); return }
-      const url = new URL(routes.publicShopOffer(handle, offerRef), parsed.origin).href
+      const url = new URL(browserAppPath(routes.publicShopOffer(handle, offerRef)), parsed.origin).href
       if (navigator.share) await navigator.share({ url })
       else { await navigator.clipboard.writeText(url); setMessage("copied") }
     } catch { setMessage("shareUnavailable") }

@@ -16,9 +16,10 @@ import { useTranslation } from "react-i18next"
 import { APP_NAMESPACE, appResources } from "@/i18n/resources"
 import { APPEARANCE } from "@/lib/appearance"
 import { authClient } from "@/lib/auth-client"
+import { demoSessionStorage } from "@/lib/demo-storage"
 import { UsagePermissionProvider } from "./analytics-permission"
 import { DemoAccountBootstrap } from "./demo-account-bootstrap"
-import { DemoEmbedBridge } from "./demo-embed"
+import { DemoModeBanner } from "./demo-embed"
 import { PersonalTheme } from "./personal-theme"
 import { SessionBridge, SessionBridgePreflight } from "./session-bridge"
 import { ToastRegion } from "./toast-region"
@@ -69,11 +70,12 @@ export function SessionProviders({ children }: { children: ReactNode }) {
     <SessionProvidersContext.Provider value><SessionBridgePreflight><EngineConvexProvider
       convexUrl={CONVEX_URL}
       authClient={authClient as unknown as RefreshableCrossDomainAuthClient}
+      storage={demoSessionStorage()}
       ensurePerson={api.modules.people.persons.ensureMyPerson}
       isSessionActive={api.modules.platform.authentication.mySession}
       labels={{ loading: t("session.loading"), failed: t("session.failed"), retry: t("session.retry") }}
     >
-      <SessionBridge><PersonalLocale><DemoEmbedBridge /><DemoAccountBootstrap />{children}</PersonalLocale></SessionBridge>
+      <SessionBridge><PersonalLocale><DemoAccountBootstrap />{children}</PersonalLocale></SessionBridge>
     </EngineConvexProvider></SessionBridgePreflight></SessionProvidersContext.Provider>
   )
 }
@@ -97,7 +99,7 @@ export function Providers({ locale, children }: { locale: Locale; children: Reac
   return (
     <I18nProvider locale={locale} appResources={appResources} defaultNS={APP_NAMESPACE} defaultVariables={{ brand: BRAND_NAME }}>
       <AppAppearance>
-        <UsagePermissionProvider>{children}</UsagePermissionProvider>
+        <UsagePermissionProvider><DemoModeBanner />{children}</UsagePermissionProvider>
         <EngineToaster />
       </AppAppearance>
     </I18nProvider>

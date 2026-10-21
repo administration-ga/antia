@@ -8,6 +8,7 @@ import { useTranslation } from "react-i18next"
 
 import { Button, Card } from "@/components/shared/controls"
 import { routes } from "@/lib/routes"
+import { browserAppPath } from "@/lib/app-path"
 import { ShopFrame, ShopLink, useShopAction } from "./shop-ui"
 
 export function ShopLinkCallbackScreen({ state, code }: { state: string | null; code: string | null }) {
@@ -35,7 +36,7 @@ function ShopLinkCallback({ state, code }: { state: string | null; code: string 
 
   useEffect(() => {
     // Retire les preuves de la barre d'adresse ; aucune persistance navigateur.
-    window.history.replaceState(window.history.state, "", routes.shopLinkCallback())
+    window.history.replaceState(window.history.state, "", browserAppPath(routes.shopLinkCallback()))
   }, [])
   useEffect(() => {
     if (started.current || !isAuthenticated || !state || !code) return

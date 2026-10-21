@@ -4,10 +4,12 @@ import { clearCrossDomainSessionResidue } from "@antsia/api/cross-domain-session
 import { isSigningOutEverywhere } from "@antsia/api/sign-out-everywhere"
 import type { IdentityAuthClient } from "@antsia/social-features/identity"
 import { authClient } from "./auth-client"
+import { appBasePath, browserAppPath } from "./app-path"
+import { demoSessionStorage } from "./demo-storage"
 import { routes } from "./routes"
 import { BRIDGE_CLIENT_TIMEOUT_MS, BRIDGE_RESUME_EVENT, BRIDGE_TTL_SECONDS, bridgeCookieNames, isBridgeGeneration, sdkSessionCookie } from "./session-bridge"
 
-const SESSION_BRIDGE_LOCK_NAME = "antsia:session-transition"
+const SESSION_BRIDGE_LOCK_NAME = appBasePath() ? "antsia-demo-scope:session-transition" : "antsia:session-transition"
 export const SESSION_BRIDGE_LOCK_WAIT_MS = 30_000
 const SESSION_ENTRY_TIMEOUT_MS = 10_000
 
@@ -61,7 +63,7 @@ export async function requestSessionBridge(method: "POST" | "DELETE", body: { ge
   controller.signal.addEventListener("abort", rejectAbort, { once: true })
   try {
     const response = await Promise.race([
-      fetchImpl(routes.publicSessionBridge(), { method, credentials: "same-origin", cache: "no-store", redirect: "error", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body), signal: controller.signal }),
+      fetchImpl(browserAppPath(routes.publicSessionBridge()), { method, credentials: "same-origin", cache: "no-store", redirect: "error", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body), signal: controller.signal }),
       interrupted,
       new Promise<never>((_resolve, reject) => { timer = setTimeout(() => { controller.abort(); reject(new Error("bridgeTimeout")) }, BRIDGE_CLIENT_TIMEOUT_MS) }),
     ])
@@ -75,7 +77,7 @@ export function clearLocalSessionForAnonymousBridge(): boolean {
   try {
     // Un autre onglet peut avoir connecté B depuis notre amorçage anonyme.
     if (sdkSessionCookie(authClient.getCookie()) || authClient.getSessionData() !== null) return false
-    clearCrossDomainSessionResidue(window.localStorage, authClient)
+    clearCrossDomainSessionResidue(demoSessionStorage() ?? window.localStorage, authClient)
     return !sdkSessionCookie(authClient.getCookie()) && authClient.getSessionData() === null
   } catch { return false }
 }

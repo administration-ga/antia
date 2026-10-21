@@ -1,6 +1,7 @@
 import type { EngineRoutes } from "@antsia/api/network"
 import type { UsageScreen } from "@antsia/social-features/shell/analytics"
 import type { ReseauDestinationMatch } from "@antsia/social-features/shell/reseau-menu-destinations"
+import { browserAppPath } from "./app-path"
 
 import { parsePublicPostContinuation, PUBLIC_POST_CONTINUATION_PARAM } from "./public-post-continuation"
 import { NOTIFICATION_REFERENCE_PARAM, parseNotificationReference } from "./notification-open"
@@ -188,6 +189,7 @@ export function shopContactFromLocation(pathname: string, search: string): ShopC
 
 /** Les adresses que les surfaces du moteur lisent par `useRoutes()`. */
 export const engineRoutes: EngineRoutes = {
+  sharePath: browserAppPath,
   home: routes.feed,
   post: routes.memberPost,
   messages: routes.messages,

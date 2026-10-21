@@ -12,6 +12,7 @@ import Link from "next/link"
 import { useMemberSession } from "./network-shell"
 import { Button } from "./shared/controls"
 import { authClient } from "@/lib/auth-client"
+import { browserAppPath } from "@/lib/app-path"
 import { routes } from "@/lib/routes"
 import { resumeSessionBridge, rotateSessionBridgeFence, withSessionBridgeLock } from "@/lib/session-bridge-client"
 
@@ -78,7 +79,7 @@ export function IdentityTools() {
                   controller.signal.throwIfAborted()
                   rotateSessionBridgeFence()
                   return Promise.race([
-                    authClient.oauth2.link({ providerId: "idn", callbackURL: routes.feed(), fetchOptions: { signal: controller.signal } }),
+                    authClient.oauth2.link({ providerId: "idn", callbackURL: browserAppPath(routes.feed()), fetchOptions: { signal: controller.signal } }),
                     new Promise<never>((_resolve, reject) => {
                       timer = setTimeout(() => { controller.abort(); reject(new Error("timeout")) }, 10_000)
                     }),

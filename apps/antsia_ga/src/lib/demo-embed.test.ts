@@ -1,67 +1,42 @@
 import { afterEach, describe, expect, it, vi } from "vitest"
 
-import { canonicalHttpsOrigin, demoEmbedOrigin, demoParentOrigin } from "./demo-embed"
-
-const MAIN_ORIGIN = "https://antsia.vercel.app"
-const DEMO_ORIGIN = "https://antsia-demo.vercel.app"
-const DEMO_BACKEND = "https://vivid-hedgehog-655.convex.cloud"
+import { appBasePath } from "./app-path"
+import { demoEntryEnabled } from "./demo-embed"
 
 afterEach(() => vi.unstubAllEnvs())
 
-describe("origines fermées du cadre démo", () => {
-  it.each([MAIN_ORIGIN, DEMO_ORIGIN, "https://example.test"])("admet une origine HTTPS canonique : %s", (origin) => {
-    expect(canonicalHttpsOrigin(origin)).toBe(origin)
+describe("entrée publique de démonstration", () => {
+  it("reste fermée sans déclaration explicite", () => {
+    vi.stubEnv("NEXT_PUBLIC_DEMO_ENTRY_ENABLED", undefined)
+    expect(demoEntryEnabled()).toBe(false)
   })
 
-  it.each([
-    undefined, "", "https:", "http://antsia-demo.vercel.app", "//antsia-demo.vercel.app",
-    `${DEMO_ORIGIN}/`, `${DEMO_ORIGIN}/entrer`, `${DEMO_ORIGIN}:443`, `${DEMO_ORIGIN}:8443`,
-    `${DEMO_ORIGIN}?mode=demo`, `${DEMO_ORIGIN}#demo`, "https://user:password@antsia-demo.vercel.app",
-    ` ${DEMO_ORIGIN}`, `${DEMO_ORIGIN} `, `${DEMO_ORIGIN}\n`, "https://antsia-demo.vercel.app\t",
-    "https://*.vercel.app", "https://ANTSIA-DEMO.vercel.app", "https://antsia-demo.vercel.app\\",
-    "https://antsia-demo.vercel.app/../", "https://antsia-demo.vercel.app?", "https://antsia-demo.vercel.app#",
-  ])("refuse toute normalisation ou permission élargie : %s", (origin) => {
-    expect(canonicalHttpsOrigin(origin)).toBeNull()
+  it.each(["", "false", "TRUE", "True", "1", " true", "true ", "true/", "/demo"])("refuse une bascule non exacte : %j", (flag) => {
+    vi.stubEnv("NEXT_PUBLIC_DEMO_ENTRY_ENABLED", flag)
+    expect(demoEntryEnabled()).toBe(false)
   })
 
-  it("reste fermé par défaut et exige le site principal valide", () => {
-    vi.stubEnv("NEXT_PUBLIC_DEMO_EMBED_ORIGIN", "")
-    vi.stubEnv("NEXT_PUBLIC_SITE_URL", MAIN_ORIGIN)
-    expect(demoEmbedOrigin()).toBeNull()
-    vi.stubEnv("NEXT_PUBLIC_DEMO_EMBED_ORIGIN", DEMO_ORIGIN)
-    vi.stubEnv("NEXT_PUBLIC_SITE_URL", "")
-    expect(demoEmbedOrigin()).toBeNull()
-    vi.stubEnv("NEXT_PUBLIC_SITE_URL", `${MAIN_ORIGIN}/`)
-    expect(demoEmbedOrigin()).toBeNull()
+  it("la seule valeur true active le lien, sans changer le backend ni le mode de l'application", () => {
+    vi.stubEnv("NEXT_PUBLIC_DEMO_ENTRY_ENABLED", "true")
+    vi.stubEnv("NEXT_PUBLIC_APP_BASE_PATH", "")
+    vi.stubEnv("NEXT_PUBLIC_CONVEX_URL", "https://diligent-avocet-585.convex.cloud")
+    expect(demoEntryEnabled()).toBe(true)
+    expect(appBasePath()).toBe("")
   })
 
-  it("exige deux origines distinctes, sans accepter une URL fournie par le navigateur", () => {
-    vi.stubEnv("NEXT_PUBLIC_SITE_URL", MAIN_ORIGIN)
-    vi.stubEnv("NEXT_PUBLIC_DEMO_EMBED_ORIGIN", MAIN_ORIGIN)
-    expect(demoEmbedOrigin()).toBeNull()
-    vi.stubEnv("NEXT_PUBLIC_DEMO_EMBED_ORIGIN", `${DEMO_ORIGIN}/entrer`)
-    expect(demoEmbedOrigin()).toBeNull()
-    vi.stubEnv("NEXT_PUBLIC_DEMO_EMBED_ORIGIN", DEMO_ORIGIN)
-    expect(demoEmbedOrigin()).toBe(DEMO_ORIGIN)
-  })
-
-  it("n'autorise le signal parent que sur le backend cloud démo exact", () => {
-    vi.stubEnv("NEXT_PUBLIC_DEMO_PARENT_ORIGIN", MAIN_ORIGIN)
-    vi.stubEnv("NEXT_PUBLIC_CONVEX_URL", DEMO_BACKEND)
-    expect(demoParentOrigin()).toBe(MAIN_ORIGIN)
-    vi.stubEnv("NEXT_PUBLIC_DEMO_PARENT_ORIGIN", `${MAIN_ORIGIN}:443`)
-    expect(demoParentOrigin()).toBeNull()
-    vi.stubEnv("NEXT_PUBLIC_DEMO_PARENT_ORIGIN", "")
-    expect(demoParentOrigin()).toBeNull()
-  })
-
-  it.each([
-    "", "http://127.0.0.1:3210", "http://localhost:3210", "https://diligent-avocet-585.convex.cloud",
-    "https://other.convex.cloud", `${DEMO_BACKEND}/`, `${DEMO_BACKEND}:443`,
-    `${DEMO_BACKEND}.evil.test`, `${DEMO_BACKEND}?demo=1`, "https://vivid-hedgehog-655.convex.cloud@evil.test",
-  ])("ne signale rien hors du cloud démo déclaré : %s", (backend) => {
-    vi.stubEnv("NEXT_PUBLIC_DEMO_PARENT_ORIGIN", MAIN_ORIGIN)
+  it.each(["http://127.0.0.1:3210", "https://diligent-avocet-585.convex.cloud", "https://vivid-hedgehog-655.convex.cloud"])("le flag d'entrée ne déclare pas à lui seul le build enfant sur %s", (backend) => {
+    vi.stubEnv("NEXT_PUBLIC_DEMO_ENTRY_ENABLED", "true")
     vi.stubEnv("NEXT_PUBLIC_CONVEX_URL", backend)
-    expect(demoParentOrigin()).toBeNull()
+    vi.stubEnv("NEXT_PUBLIC_APP_BASE_PATH", "")
+    expect(demoEntryEnabled()).toBe(true)
+    expect(appBasePath()).toBe("")
+  })
+
+  it("le build démo conserve son double accord chemin et backend", () => {
+    vi.stubEnv("NEXT_PUBLIC_APP_BASE_PATH", "/demo")
+    vi.stubEnv("NEXT_PUBLIC_CONVEX_URL", "https://vivid-hedgehog-655.convex.cloud")
+    vi.stubEnv("NEXT_PUBLIC_DEMO_ENTRY_ENABLED", "false")
+    expect(appBasePath()).toBe("/demo")
+    expect(demoEntryEnabled()).toBe(false)
   })
 })

@@ -48,7 +48,7 @@ export function SharePostDialog({ postId, authorName, excerpt, canQuote = true, 
   const [copying, setCopying] = useState(false)
   const [copyFailed, setCopyFailed] = useState(false)
   const link = routes.post && typeof window !== "undefined"
-    ? new URL(routes.post(postId), window.location.origin).href
+    ? new URL(routes.sharePath?.(routes.post(postId)) ?? routes.post(postId), window.location.origin).href
     : null
   // Les applications sans route de publication gardent leur formulaire existant.
   const [quoting, setQuoting] = useState(link === null)

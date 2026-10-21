@@ -1,6 +1,8 @@
 import { z } from "zod"
 import { commerceCanonicalJson, COMMERCE_MAX_AMOUNT_XAF } from "@antsia/social-domain/commerce/primitives"
 
+import { demoStorageNamespace } from "./demo-storage"
+
 export const CART_LINES_MAX = 10
 export const CART_DRAFT_TTL_MS = 24 * 60 * 60 * 1000
 export const CART_CHANGED_EVENT = "antsia:cart-changed"
@@ -18,7 +20,7 @@ export type CartDraft = z.infer<typeof cartDraftSchema>
 export type CartSubmittedIntent = z.infer<typeof submittedSchema>
 export type CartStorage = Pick<Storage, "getItem" | "setItem" | "removeItem">
 export function cartItemKey(item: Pick<CartItem, "offerRef" | "variantRef">): string { return `${item.offerRef}#${item.variantRef ?? ""}` }
-export function cartDraftKey(networkId: string, personId: string): string { return `antsia:cart:${encodeURIComponent(networkId)}:${encodeURIComponent(personId)}` }
+export function cartDraftKey(networkId: string, personId: string): string { return `${demoStorageNamespace()}antsia:cart:${encodeURIComponent(networkId)}:${encodeURIComponent(personId)}` }
 /** Empreinte seulement : le texte d'adresse et l'accord ne sont jamais persistés. */
 export async function cartIntentDigest(value: unknown): Promise<string | null> {
   const canonical = commerceCanonicalJson(value)

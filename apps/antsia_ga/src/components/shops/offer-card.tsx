@@ -1,5 +1,6 @@
 import { ImageOff } from "lucide-react"
 import Image from "next/image"
+import { browserAppPath } from "@/lib/app-path"
 import Link from "next/link"
 import type { ReactNode } from "react"
 
@@ -11,7 +12,7 @@ const linkClass = "inline-flex min-h-11 items-center rounded-[var(--ui2-button-r
 
 export function OfferMedia({ media, title, t, className = "aspect-square" }: { media: CatalogOffer["media"][number] | undefined; title: string; t: CatalogTranslate; className?: string }) {
   if (!media || media.withheld !== null || !media.url) return <div className={`flex flex-col items-center justify-center gap-2 rounded-[var(--esp-media-radius)] bg-muted p-4 text-center text-sm text-muted-foreground ${className}`} role="img" aria-label={t(media?.withheld ? "catalog.mediaWithheld" : "catalog.noPhoto")}><ImageOff className="size-6" aria-hidden /><span>{t(media?.withheld ? "catalog.mediaWithheld" : "catalog.noPhoto")}</span></div>
-  return <Image unoptimized src={media.url} alt={media.altText ?? title} width={media.width ?? 800} height={media.height ?? 800} loading="lazy" className={`w-full rounded-[var(--esp-media-radius)] bg-muted object-contain ${className}`} />
+  return <Image unoptimized src={media.url.startsWith("/") && !media.url.startsWith("//") ? browserAppPath(media.url) : media.url} alt={media.altText ?? title} width={media.width ?? 800} height={media.height ?? 800} loading="lazy" className={`w-full rounded-[var(--esp-media-radius)] bg-muted object-contain ${className}`} />
 }
 
 /** Présentation commune SSR/membre : aucun hook ni fournisseur de compte requis. */
