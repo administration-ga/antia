@@ -15,7 +15,7 @@ import { signOutAndRedirect } from "@/lib/sign-out"
 import { meActivityEntries, meEntriesIn, type MeEntry, type MeSection } from "./me-model"
 
 const ENTRY_LINK =
-  "flex min-h-11 items-start justify-between gap-3 rounded-[var(--ui2-card-radius)] border border-[color:var(--esp-surface-border)] bg-card p-[var(--esp-card-padding,16px)] text-card-foreground shadow-[var(--esp-surface-shadow)] hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+  "flex min-h-11 items-start justify-between gap-3 rounded-xl border border-border bg-card p-4 text-card-foreground hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
 
 /** Une liste d'entrées menant à des pages déjà servies (Profil, Paramètres). */
 export function EntryList({ entries }: { entries: readonly MeEntry[] }) {
@@ -56,10 +56,10 @@ export function MemberMeScreen() {
 
   return (
     <MemberPage>
-      <div className="antsia-page mx-auto w-full max-w-3xl">
-        <header className="antsia-page-header">
+      <div className="mx-auto flex w-full max-w-3xl min-w-0 flex-col gap-8">
+        <header className="flex flex-col gap-2">
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <h1 className="antsia-title ">{t("me.title")}</h1>
+            <h1 className="text-2xl font-semibold tracking-tight">{t("me.title")}</h1>
             {/* Les paramètres (affichage, thème, langue) à portée dès l'arrivée : au
                 téléphone, Profil est leur seul chemin et ses Préférences suivent l'activité. */}
             <Link href={routes.settings()} className={buttonClassName("outline")}>
@@ -90,15 +90,15 @@ export function MemberMeScreen() {
         </section>
 
         <section aria-labelledby={titles.preferences} className="flex flex-col gap-4">
-          <h2 id={titles.preferences} className="antsia-subtitle ">{t("me.preferencesTitle")}</h2>
+          <h2 id={titles.preferences} className="text-lg font-semibold">{t("me.preferencesTitle")}</h2>
           <EntryList entries={meEntriesIn("preferences", handle)} />
-          <div className="rounded-[var(--ui2-card-radius)] border border-[color:var(--esp-surface-border)] bg-card p-[var(--esp-card-padding,16px)] ">
+          <div className="rounded-xl border border-border bg-card p-2">
             <AppearanceControl />
           </div>
         </section>
 
         <section aria-labelledby={titles.account} className="flex flex-col gap-4">
-          <h2 id={titles.account} className="antsia-subtitle ">{t("me.accountTitle")}</h2>
+          <h2 id={titles.account} className="text-lg font-semibold">{t("me.accountTitle")}</h2>
           <EntryList entries={meEntriesIn("account", handle)} />
           <DemoEntryLink />
           {/* La MÊME sortie que la barre du haut : la porte partagée

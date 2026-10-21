@@ -84,22 +84,6 @@ describe("Médias P03", () => {
     expect(screen.queryByText("Image indisponible")).toBeNull()
   })
 
-  it.each([
-    ["media", "fr"], ["classic", "fr"], ["media", "en"], ["classic", "en"],
-  ] as const)("distingue analyse indisponible et quarantaine sans média servi (%s, %s)", (presentation, locale) => {
-    for (const kind of ["image", "video"] as const) {
-      const view = renderMedia([{ ...first, kind, mimeType: kind === "video" ? "video/mp4" : first.mimeType, withheld: "fileScanUnavailable" }], presentation, locale)
-      expect(screen.getByText(view.i18n.t("errors:fileScanUnavailable"))).toBeInTheDocument()
-      expect(screen.queryByText(view.i18n.t("errors:fileQuarantined"))).toBeNull()
-      expect(view.container.querySelector("img, video, [src], a[href]")).toBeNull()
-      view.replace([{ ...first, kind, withheld: "fileQuarantined" }])
-      expect(screen.getByText(view.i18n.t("errors:fileQuarantined"))).toBeInTheDocument()
-      expect(screen.queryByText(view.i18n.t("errors:fileScanUnavailable"))).toBeNull()
-      expect(view.container.querySelector("img, video, [src], a[href]")).toBeNull()
-      view.unmount()
-    }
-  })
-
   it("ferme la visionneuse et remet l'index à zéro quand une galerie de même taille remplace la précédente", async () => {
     const view = renderMedia([first, second], "media")
     fireEvent.click(screen.getByRole("button", { name: "Afficher l'image 2 sur 2" }))

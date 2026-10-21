@@ -289,9 +289,9 @@ const PEOPLE_PANEL_CSS = `
         min-width: 0;
         flex-direction: column;
         gap: 8px;
-        padding: var(--esp-card-padding, 14px);
-        border: 1px solid var(--esp-primitive-surface-border, var(--ink-200));
-        border-radius: var(--esp-primitive-card-radius, 16px);
+        padding: 14px;
+        border: 1px solid var(--ink-200);
+        border-radius: 16px;
         background: var(--ink-0);
       }
       /* DEUX lignes pour le nom : un patronyme composé ne tient pas sur une
@@ -524,7 +524,7 @@ function SearchCard({ compact = false }: { compact?: boolean }) {
                 style={
                   compact
                     ? {
-                        borderRadius: "var(--esp-input-radius, 11px)",
+                        borderRadius: 11,
                         border: "1px solid var(--ink-300)",
                         padding: "10px 12px",
                         fontSize: 13,
@@ -539,7 +539,7 @@ function SearchCard({ compact = false }: { compact?: boolean }) {
                 size="sm"
                 variant="ghost"
                 style={{
-                  borderRadius: "var(--esp-primitive-button-radius, 11px)",
+                  borderRadius: 11,
                   background: "var(--ink-150)",
                   color: "var(--ink-900)",
                   padding: "10px 13px",

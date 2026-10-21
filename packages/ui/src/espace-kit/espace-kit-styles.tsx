@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/components/espace-kit/espace-kit-styles.tsx @ ad2e7fdc2 — adaptations : feuille sortie du JSX dans une constante de module (`ESPACE_KIT_CSS`) — un littéral enfant de `<style>` passerait pour une chaîne d'interface ; pont du Poste retiré (sélecteurs `[data-charte="espace-structure"]`, `.poste-workspace` et jetons `--poste-radius-*`, absents du moteur) ; AUCUNE couleur littérale — jetons de la charte seulement, y compris dans les commentaires ; commentaires rapportés au moteur (cliquets `no-hardcoded-colors` et `theme-contract`) ; règles, sélecteurs et paliers du kit inchangés. ; contour des surfaces posées sur la page lu dans --esp-surface-border, filet d'origine en repli (aucun contour quand le thème distingue déjà la carte du fond) ; aplats d'identité et leur texte selon les chartes (`--esp-identity-fill`, `--primary-fill-on`, pastille tonale des états actifs ; ADR-0027), facture d'origine en repli. nouveaux raccords géométrie, surfaces, onglets et boutons derrière les alias opt-in ANTSIA `--esp-primitive-*` ; rembourrage 16 px, cibles 44 px, valeurs historiques en repli.
+// Dupliqué de socle/packages/agent-features/src/components/espace-kit/espace-kit-styles.tsx @ ad2e7fdc2 — adaptations : feuille sortie du JSX dans une constante de module (`ESPACE_KIT_CSS`) — un littéral enfant de `<style>` passerait pour une chaîne d'interface ; pont du Poste retiré (sélecteurs `[data-charte="espace-structure"]`, `.poste-workspace` et jetons `--poste-radius-*`, absents du moteur) ; AUCUNE couleur littérale — jetons de la charte seulement, y compris dans les commentaires ; commentaires rapportés au moteur (cliquets `no-hardcoded-colors` et `theme-contract`) ; règles, sélecteurs et paliers du kit inchangés. ; contour des surfaces posées sur la page lu dans --esp-surface-border, filet d'origine en repli (aucun contour quand le thème distingue déjà la carte du fond) ; aplats d'identité et leur texte selon les chartes (`--esp-identity-fill`, `--primary-fill-on`, pastille tonale des états actifs ; ADR-0027), facture d'origine en repli.
 "use client"
 
 /**
@@ -30,20 +30,18 @@ const ESPACE_KIT_CSS = `
       .esk-card {
         background: var(--esp-surface-card, var(--secondary));
         border: 1px solid var(--esp-surface-border, var(--border));
-        border-radius: var(--esp-primitive-card-radius, 18px);
-        box-shadow: var(--esp-surface-shadow, none);
+        border-radius: 18px;
+        box-shadow: none;
       }
       .esk-card-head {
         display: flex;
         align-items: center;
         gap: 8px;
-        margin-bottom: var(--esp-card-gap, 12px);
+        margin-bottom: 12px;
       }
       .esk-card-title {
         margin: 0;
-        font-family: var(--esp-heading-font-family, inherit);
-        font-size: var(--esp-subsection-title-size, 14px);
-        line-height: var(--esp-subsection-title-leading, normal);
+        font-size: 14px;
         font-weight: 700;
         color: var(--ink-900);
       }
@@ -62,7 +60,7 @@ const ESPACE_KIT_CSS = `
         min-width: 22px;
         height: 22px;
         padding: 0 7px;
-        border-radius: var(--esp-primitive-badge-radius, 999px);
+        border-radius: 999px;
         background: var(--ink-200);
         color: var(--ink-800);
         font-family: var(--font-mono);
@@ -101,17 +99,17 @@ const ESPACE_KIT_CSS = `
         color: var(--ink-600);
       }
       .esk-btn {
-        min-height: var(--esp-control-min-size, 38px);
+        min-height: 38px;
         padding: 9px 13px;
-        border-radius: var(--esp-primitive-button-radius, 11px);
-        border: 1px solid var(--esp-primitive-neutral-border, var(--border));
-        background: var(--esp-primitive-neutral-bg, var(--card));
+        border-radius: 11px;
+        border: 1px solid var(--border);
+        background: var(--card);
         color: var(--muted-foreground);
         font-size: 12.5px;
         font-weight: 700;
         cursor: pointer;
       }
-      .esk-btn:hover { background: var(--esp-primitive-neutral-bg, var(--ink-100)); }
+      .esk-btn:hover { background: var(--ink-100); }
       .esk-btn:focus-visible {
         outline: 2px solid var(--ring);
         outline-offset: 2px;
@@ -130,9 +128,9 @@ const ESPACE_KIT_CSS = `
         gap: 14px;
         flex-wrap: wrap;
         background: var(--esp-surface-card, var(--secondary));
-        border: 1px solid var(--esp-primitive-surface-border, var(--border));
-        border-radius: var(--esp-primitive-card-radius, 18px);
-        padding: var(--esp-card-padding, 16px 18px);
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        padding: 16px 18px;
       }
       .esk-jauge {
         display: block;
@@ -165,10 +163,9 @@ const ESPACE_KIT_CSS = `
         gap: 7px;
         border: 1px solid transparent;
         border-bottom: none;
-        border-radius: var(--esp-primitive-button-radius, 12px 12px 0 0);
+        border-radius: 12px 12px 0 0;
         background: transparent;
         padding: 9px 15px 11px;
-        min-height: var(--esp-control-min-size, 0px);
         font-size: 13px;
         font-weight: 700;
         color: var(--ink-600);
@@ -182,9 +179,9 @@ const ESPACE_KIT_CSS = `
       }
 
       .esk-tab[aria-selected="true"] {
-        background: var(--esp-primitive-tab-bg, var(--esp-surface-card, var(--secondary)));
-        border-color: var(--esp-primitive-tab-border, var(--border));
-        color: var(--esp-primitive-tab-fg, var(--ink-900));
+        background: var(--esp-surface-card, var(--secondary));
+        border-color: var(--border);
+        color: var(--ink-900);
         margin-bottom: -1px;
         padding-bottom: 12px;
       }
@@ -195,20 +192,20 @@ const ESPACE_KIT_CSS = `
       }
       .esk-tabpanel {
         background: var(--esp-surface-card, var(--secondary));
-        border: 1px solid var(--esp-primitive-surface-border, var(--border));
-        border-radius: var(--esp-primitive-card-radius, 18px);
+        border: 1px solid var(--border);
+        border-radius: 18px;
         flex: 1;
         min-height: 0;
         overflow-y: auto;
-        padding: var(--esp-card-padding, 20px 24px 24px);
+        padding: 20px 24px 24px;
       }
 
       /* -- Etat vide -- */
       .esk-empty {
         border: 1px solid var(--esp-surface-border, var(--border));
-        border-radius: var(--esp-primitive-card-radius, 18px);
+        border-radius: 18px;
         background: var(--esp-surface-card, var(--secondary));
-        padding: var(--esp-card-padding, 24px);
+        padding: 24px;
         color: var(--ink-600);
         font-size: 13.5px;
         text-align: center;
@@ -226,7 +223,7 @@ const ESPACE_KIT_CSS = `
         justify-content: space-between;
         flex-wrap: wrap;
         gap: 6px 14px;
-        padding: var(--esp-card-padding, 12px 14px);
+        padding: 12px 14px;
         text-align: left;
       }
       .esk-empty[data-density="compact"] > p { flex: 1 1 auto; min-width: 0; }
@@ -237,18 +234,18 @@ const ESPACE_KIT_CSS = `
         display: inline-flex;
         align-items: center;
         gap: 6px;
-        min-height: var(--esp-control-min-size, 32px);
+        min-height: 32px;
         padding: 0 12px;
-        border: 1px solid var(--esp-primitive-secondary-border, var(--border));
-        border-radius: var(--esp-primitive-button-radius, 999px);
-        background: var(--esp-primitive-secondary-bg, var(--esp-surface-card, var(--secondary)));
-        color: var(--esp-primitive-secondary-fg, var(--primary));
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        background: var(--esp-surface-card, var(--secondary));
+        color: var(--primary);
         font-size: 13px;
         font-weight: 700;
         text-decoration: none;
         cursor: pointer;
       }
-      .esk-empty-action > *:hover { border-color: var(--esp-primitive-secondary-border, var(--primary)); }
+      .esk-empty-action > *:hover { border-color: var(--primary); }
       .esk-empty-action > *:focus-visible {
         outline: 2px solid var(--ring);
         outline-offset: 2px;
@@ -274,9 +271,9 @@ const ESPACE_KIT_CSS = `
         min-width: 44px;
         min-height: 44px;
         padding: 0 10px;
-        border-radius: var(--esp-primitive-button-radius, 10px);
-        border: 1px solid var(--esp-primitive-neutral-border, var(--border));
-        background: var(--esp-primitive-neutral-bg, var(--card));
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        background: var(--card);
         color: var(--ink-700);
         font-weight: 700;
         font-size: 12.5px;
@@ -301,10 +298,7 @@ const ESPACE_KIT_CSS = `
       }
       .esk-pagination-nav:hover:not(:disabled),
       .esk-pagination-num:hover:not(:disabled) {
-        background: var(--esp-primitive-neutral-bg, var(--ink-100));
-      }
-      .esk-pagination-num[aria-current="page"]:hover:not(:disabled) {
-        background: var(--esp-primitive-identity-fill, var(--ink-100));
+        background: var(--ink-100);
       }
       .esk-pagination-nav:focus-visible,
       .esk-pagination-num:focus-visible {
@@ -339,22 +333,21 @@ const ESPACE_KIT_CSS = `
         min-width: 0;
         overflow: hidden;
         background: var(--esp-surface-raised, var(--esp-surface-card, var(--secondary)));
-        border: 1px solid var(--esp-raised-border, var(--border));
-        border-radius: var(--esp-primitive-card-radius, 18px);
-        box-shadow: var(--esp-floating-shadow, none);
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        box-shadow: none;
       }
       .esk-dialog-header {
         flex-shrink: 0;
         min-width: 0;
-        padding: var(--esp-card-padding, 16px) 60px 12px var(--esp-card-padding, 20px);
+        padding: 16px 60px 12px 20px;
         border-bottom: 1px solid var(--border);
       }
       .esk-dialog-title {
         margin: 0;
-        font-family: var(--esp-heading-font-family, inherit);
-        font-size: var(--esp-section-title-size, 16px);
+        font-size: 16px;
         font-weight: 700;
-        line-height: var(--esp-section-title-leading, 1.35);
+        line-height: 1.35;
         color: var(--ink-900);
         overflow-wrap: anywhere;
       }
@@ -370,7 +363,7 @@ const ESPACE_KIT_CSS = `
         min-width: 0;
         overflow-y: auto;
         overscroll-behavior: contain;
-        padding: var(--esp-card-padding, 16px 20px);
+        padding: 16px 20px;
       }
       .esk-dialog-footer {
         flex-shrink: 0;
@@ -379,7 +372,7 @@ const ESPACE_KIT_CSS = `
         align-items: center;
         justify-content: flex-end;
         gap: 8px;
-        padding: 12px var(--esp-card-padding, 20px);
+        padding: 12px 20px;
         border-top: 1px solid var(--border);
       }
       .esk-dialog-close {
@@ -389,15 +382,15 @@ const ESPACE_KIT_CSS = `
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        width: var(--esp-control-min-size, 32px);
-        height: var(--esp-control-min-size, 32px);
+        width: 32px;
+        height: 32px;
         border: none;
         border-radius: 999px;
-        background: var(--esp-primitive-icon-bg, transparent);
+        background: transparent;
         color: var(--ink-600);
         cursor: pointer;
       }
-      .esk-dialog-close:hover { background: var(--esp-primitive-icon-bg, var(--ink-100)); }
+      .esk-dialog-close:hover { background: var(--ink-100); }
       .esk-dialog-close:focus-visible {
         outline: 2px solid var(--ring);
         outline-offset: 2px;
@@ -406,7 +399,7 @@ const ESPACE_KIT_CSS = `
       /* -- Pagination compacte : cibles tactiles réduites sur les rangées
          denses. Le pointeur grossier (tactile) reste sur 44px, la borne
          d'accessibilité usuelle, indépendamment de la densité choisie. -- */
-      .esk-pagination[data-density="compact"] :is(.esk-pagination-nav,.esk-pagination-num) { min-height: var(--esp-control-min-size, 32px); min-width: var(--esp-control-min-size, 32px); padding: 0 8px; }
+      .esk-pagination[data-density="compact"] :is(.esk-pagination-nav,.esk-pagination-num) { min-height: 32px; min-width: 32px; padding: 0 8px; }
       @media (pointer: coarse) { .esk-pagination[data-density="compact"] :is(.esk-pagination-nav,.esk-pagination-num) { min-height: 44px; min-width: 44px; } }
 
       /* -- Cible tactile des onglets (X-10) -- L'onglet mesure 9+13x1.2+11

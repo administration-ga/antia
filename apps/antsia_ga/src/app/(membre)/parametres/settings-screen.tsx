@@ -27,16 +27,16 @@ export function SettingsScreen() {
 
   return (
     <MemberPage>
-      <div className="antsia-page mx-auto w-full max-w-3xl">
-        <header className="antsia-page-header">
-          <h1 className="antsia-title ">{t("settings.title")}</h1>
-          <p className="antsia-copy text-muted-foreground">{t("settings.lead")}</p>
+      <div className="mx-auto flex w-full max-w-3xl min-w-0 flex-col gap-8">
+        <header className="flex flex-col gap-2">
+          <h1 className="text-2xl font-semibold tracking-tight">{t("settings.title")}</h1>
+          <p className="text-base text-muted-foreground">{t("settings.lead")}</p>
         </header>
 
         <Card className="min-w-0">
           <section aria-labelledby={displayTitle} className="flex min-w-0 flex-col gap-5 [overflow-wrap:anywhere]">
-            <div className="antsia-page-header">
-              <h2 id={displayTitle} className="antsia-subtitle ">{t("settings.displayTitle")}</h2>
+            <div className="flex flex-col gap-2">
+              <h2 id={displayTitle} className="text-xl font-semibold">{t("settings.displayTitle")}</h2>
               <p className="text-sm text-muted-foreground">{t("settings.displayLead")}</p>
             </div>
             <DisplayPreferences />
@@ -46,7 +46,7 @@ export function SettingsScreen() {
         <PreferencesControls variant="language" />
 
         <section aria-labelledby={relatedTitle} className="flex flex-col gap-4">
-          <h2 id={relatedTitle} className="antsia-subtitle ">{t("settings.moreTitle")}</h2>
+          <h2 id={relatedTitle} className="text-lg font-semibold">{t("settings.moreTitle")}</h2>
           <EntryList entries={related} />
         </section>
       </div>

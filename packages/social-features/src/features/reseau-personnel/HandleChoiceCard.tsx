@@ -131,7 +131,7 @@ export function HandleChoiceCard({
                 alignItems: "center",
                 gap: 10,
                 padding: "9px 11px",
-                borderRadius: "var(--esp-primitive-chip-radius, 10px)",
+                borderRadius: 10,
                 border:
                   typed === option.handle
                     ? "1px solid var(--primary-600)"

@@ -32,9 +32,9 @@ function ModerationContent({ search }: { search: ModerationSearch }) {
   const guard = useModerationGuard()
   const id = useId()
   const capacity = useAuthenticatedConvexQuery(api.modules.moderation.cases.myCapacity, { networkId })
-  if (capacity.error) return <div role="alert"><h1 className="antsia-title ">{t("moderation.title")}</h1><p>{t("common.failed")}</p><Button variant="outline" onClick={() => void capacity.refetch()}>{t("common.retry")}</Button></div>
+  if (capacity.error) return <div role="alert"><h1 className="text-2xl font-semibold">{t("moderation.title")}</h1><p>{t("common.failed")}</p><Button variant="outline" onClick={() => void capacity.refetch()}>{t("common.retry")}</Button></div>
   if (!capacity.data) return <p role="status">{t("common.loading")}</p>
-  if (!capacity.data.networkWide && capacity.data.teams.length === 0) return <div className="mx-auto flex max-w-3xl flex-col gap-4"><h1 className="antsia-title ">{t("moderation.title")}</h1><p role="status">{t("moderation.noCapacity")}</p><Link href={routes.feed()} className="inline-flex min-h-11 items-center self-start rounded-[var(--ui2-button-radius)] px-3 underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">{t("discovery.back")}</Link></div>
+  if (!capacity.data.networkWide && capacity.data.teams.length === 0) return <div className="mx-auto flex max-w-3xl flex-col gap-4"><h1 className="text-2xl font-semibold">{t("moderation.title")}</h1><p role="status">{t("moderation.noCapacity")}</p><Link href={routes.feed()} className="inline-flex min-h-11 items-center self-start rounded-lg px-3 underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">{t("discovery.back")}</Link></div>
   const window = moderationWindow(search, capacity.data)
   const team = capacity.data.teams.find((item) => item.teamId === window.team)
   const navigate = (view: ModerationView, teamId?: string, cursor?: string) => { if (guard.canLeave()) router.push(routes.moderationView(view, teamId, cursor)) }
@@ -42,9 +42,9 @@ function ModerationContent({ search }: { search: ModerationSearch }) {
   if (capacity.data.canReviewAppeals) views.push("appeals")
 
   return <div className="mx-auto flex max-w-4xl flex-col gap-5 pb-[env(safe-area-inset-bottom)]">
-    <header className="antsia-page-header"><h1 className="antsia-title ">{t("moderation.title")}</h1><p className="text-sm text-muted-foreground">{t("moderation.lead")}</p></header>
+    <header className="flex flex-col gap-2"><h1 className="text-2xl font-semibold">{t("moderation.title")}</h1><p className="text-sm text-muted-foreground">{t("moderation.lead")}</p></header>
     {window.view !== "appeals" ? <Field id={id} label={t("moderation.team")}>
-      <select id={id} value={window.team ?? ""} disabled={guard.pending} className="min-h-11 w-full rounded-[var(--esp-field-radius)] border border-input bg-muted px-3 text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" onChange={(event) => navigate(window.view, event.target.value || undefined)}>
+      <select id={id} value={window.team ?? ""} disabled={guard.pending} className="min-h-11 w-full rounded-lg border border-input bg-background px-3 text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" onChange={(event) => navigate(window.view, event.target.value || undefined)}>
         <option value="" disabled={!capacity.data.networkWide}>{t(capacity.data.networkWide ? "moderation.networkWide" : "moderation.chooseTeam")}</option>
         {capacity.data.teams.map((item) => <option key={item.teamId} value={item.teamId}>{item.name} — {t(item.scope ? `moderation.surfaces.${item.scope}` : "moderation.allSurfaces")}</option>)}
       </select>
@@ -52,7 +52,7 @@ function ModerationContent({ search }: { search: ModerationSearch }) {
     <nav aria-label={t("moderation.views")} className="flex flex-wrap gap-2">
       {views.map((view) => <Button key={view} variant={window.view === view ? "primary" : "outline"} aria-current={window.view === view ? "page" : undefined} disabled={guard.pending} onClick={() => navigate(view, view === "appeals" ? undefined : window.team)}>{t(`moderation.${view}`)}</Button>)}
     </nav>
-    {!window.valid ? <p role="alert" className="rounded-[var(--ui2-card-radius)] border border-transparent bg-muted p-[var(--esp-card-padding,16px)]">{t("moderation.invalidSelection")}</p> : window.view === "appeals" ? <NetworkAppealRows key={`appeals:${window.cursor ?? "first"}`} cursor={window.cursor} onFirst={() => navigate("appeals")} onNext={(cursor) => navigate("appeals", undefined, cursor)} /> : <ModerationRows key={`${window.view}:${window.team ?? "network"}:${window.cursor ?? "first"}`} view={window.view} teamId={team?.teamId} cursor={window.cursor} onFirst={() => navigate(window.view, window.team)} onNext={(cursor) => navigate(window.view, window.team, cursor)} />}
+    {!window.valid ? <p role="alert" className="rounded-xl border border-border bg-muted p-4">{t("moderation.invalidSelection")}</p> : window.view === "appeals" ? <NetworkAppealRows key={`appeals:${window.cursor ?? "first"}`} cursor={window.cursor} onFirst={() => navigate("appeals")} onNext={(cursor) => navigate("appeals", undefined, cursor)} /> : <ModerationRows key={`${window.view}:${window.team ?? "network"}:${window.cursor ?? "first"}`} view={window.view} teamId={team?.teamId} cursor={window.cursor} onFirst={() => navigate(window.view, window.team)} onNext={(cursor) => navigate(window.view, window.team, cursor)} />}
   </div>
 }
 
@@ -67,18 +67,18 @@ function ModerationRows({ view, teamId, cursor, onFirst, onNext }: { view: Exclu
   const pending = useAuthenticatedConvexQuery(api.modules.moderation.cases.paginatePending, view === "pending" ? args : "skip")
   const data = view === "reports" ? reports.data : pending.data
   const error = view === "reports" ? reports.error : pending.error
-  if (error) return <div role="alert" className="rounded-[var(--ui2-card-radius)] border border-destructive p-[var(--esp-card-padding,16px)]"><p>{t("common.failed")}</p><Button variant="outline" onClick={() => void (view === "reports" ? reports.refetch() : pending.refetch())}>{t("common.retry")}</Button></div>
+  if (error) return <div role="alert" className="rounded-xl border border-destructive p-4"><p>{t("common.failed")}</p><Button variant="outline" onClick={() => void (view === "reports" ? reports.refetch() : pending.refetch())}>{t("common.retry")}</Button></div>
   if (!data) return <p role="status">{t("common.loading")}</p>
   return <>
-    {data.page.length === 0 ? <p role="status" className="rounded-[var(--ui2-card-radius)] border border-[color:var(--esp-surface-border)] bg-card p-[var(--esp-card-padding,16px)] text-muted-foreground">{t(data.isDone ? "moderation.empty" : "moderation.emptyWindow")}</p> : null}
-    {view === "reports" ? reports.data?.page.map((row) => <article key={row.reportId} className="flex min-w-0 flex-col gap-3 rounded-[var(--ui2-card-radius)] border border-[color:var(--esp-surface-border)] bg-card p-[var(--esp-card-padding,16px)] ">
-      <h2 className="antsia-subtitle ">{t(`moderation.surfaces.${row.target.kind}`)}</h2>
+    {data.page.length === 0 ? <p role="status" className="rounded-xl border border-border bg-card p-5 text-muted-foreground">{t(data.isDone ? "moderation.empty" : "moderation.emptyWindow")}</p> : null}
+    {view === "reports" ? reports.data?.page.map((row) => <article key={row.reportId} className="flex min-w-0 flex-col gap-3 rounded-xl border border-border bg-card p-4 sm:p-5">
+      <h2 className="text-lg font-semibold">{t(`moderation.surfaces.${row.target.kind}`)}</h2>
       <p className="break-words text-sm text-muted-foreground">{t("moderation.reference", { reference: row.target.id })}</p>
-      {row.target.kind === "post" ? <Link href={routes.memberPost(row.target.id)} className="inline-flex min-h-11 items-center self-start rounded-[var(--ui2-button-radius)] px-3 text-sm underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">{t("moderation.openPost")}</Link> : null}
+      {row.target.kind === "post" ? <Link href={routes.memberPost(row.target.id)} className="inline-flex min-h-11 items-center self-start rounded-lg px-3 text-sm underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">{t("moderation.openPost")}</Link> : null}
       <time dateTime={new Date(row.createdAt).toISOString()} className="text-sm text-muted-foreground">{formatViewerDate(row.createdAt, i18n.language, { dateStyle: "medium", timeStyle: "short" }, timeZone)}</time>
       <p className="break-words whitespace-pre-wrap">{t("moderation.reportReason", { reason: (CONTENT_REPORT_REASONS as readonly string[]).includes(row.reason) ? t(`reseau:reportContentDialog.reasons.${row.reason}`) : row.reason })}</p>
       <ReportDecision reportId={row.reportId} />
-    </article>) : pending.data?.page.map((row) => <article key={row.stateId} className="flex min-w-0 flex-col gap-3 rounded-[var(--ui2-card-radius)] border border-[color:var(--esp-surface-border)] bg-card p-[var(--esp-card-padding,16px)] "><h2 className="antsia-subtitle ">{t(`moderation.surfaces.${row.targetKind}`)}</h2><p className="break-words text-sm text-muted-foreground">{t("moderation.reference", { reference: row.targetId })}</p>{row.targetKind === "post" ? <Link href={routes.memberPost(row.targetId)} className="inline-flex min-h-11 items-center self-start rounded-[var(--ui2-button-radius)] px-3 text-sm underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">{t("moderation.openPost")}</Link> : null}<PendingDecision targetKind={row.targetKind as ModerationSurface} targetId={row.targetId} /></article>)}
+    </article>) : pending.data?.page.map((row) => <article key={row.stateId} className="flex min-w-0 flex-col gap-3 rounded-xl border border-border bg-card p-4 sm:p-5"><h2 className="text-lg font-semibold">{t(`moderation.surfaces.${row.targetKind}`)}</h2><p className="break-words text-sm text-muted-foreground">{t("moderation.reference", { reference: row.targetId })}</p>{row.targetKind === "post" ? <Link href={routes.memberPost(row.targetId)} className="inline-flex min-h-11 items-center self-start rounded-lg px-3 text-sm underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">{t("moderation.openPost")}</Link> : null}<PendingDecision targetKind={row.targetKind as ModerationSurface} targetId={row.targetId} /></article>)}
     <nav aria-label={t("moderation.pagination")} className="flex flex-wrap items-center justify-between gap-2">
       {cursor ? <Button variant="outline" disabled={guard.pending} onClick={onFirst}>{t("common.firstPage")}</Button> : <span />}
       {!data.isDone ? <Button variant="outline" disabled={guard.pending || !data.continueCursor || data.continueCursor === cursor} onClick={() => onNext(data.continueCursor)}>{t("common.next")}</Button> : <p role="status" className="text-sm text-muted-foreground">{t("common.end")}</p>}

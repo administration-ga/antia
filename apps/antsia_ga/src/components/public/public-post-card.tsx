@@ -19,8 +19,8 @@ export function PublicIdentity({ author, locale }: { author: PublicAuthor; local
   return <div className="flex min-w-0 items-center gap-3">
     {author.avatarUrl ? <Image unoptimized src={author.avatarUrl} width={44} height={44} alt="" loading="lazy" className={`size-11 shrink-0 ${portraitRadius} object-cover`} /> : <span aria-hidden="true" className={`flex size-11 shrink-0 items-center justify-center ${portraitRadius} bg-muted font-semibold`}>{author.displayName?.slice(0, 1) ?? "·"}</span>}
     <div className="min-w-0"><p className="break-words font-semibold">{href ? <Link href={href} prefetch={false} className="rounded-sm hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring">{label}</Link> : label}</p>
-      {author.handle ? <p className="break-all text-[12.5px] text-muted-foreground">@{author.handle}</p> : null}
-      {author.badges.length ? <ul aria-label={t("post.badges")} className="mt-1 flex flex-wrap gap-2 text-xs text-muted-foreground">{author.badges.map((badge) => <li key={badge} className="rounded-[var(--ui2-badge-radius)] bg-muted px-2 py-1 font-semibold">{t(`badges.${badge}`)}</li>)}</ul> : null}
+      {author.handle ? <p className="break-all text-sm text-muted-foreground">@{author.handle}</p> : null}
+      {author.badges.length ? <ul aria-label={t("post.badges")} className="mt-1 flex flex-wrap gap-2 text-xs text-muted-foreground">{author.badges.map((badge) => <li key={badge}>{t(`badges.${badge}`)}</li>)}</ul> : null}
     </div>
   </div>
 }
@@ -33,7 +33,7 @@ export function PublicIdentity({ author, locale }: { author: PublicAuthor; local
 export const PUBLIC_INLINE_LINK_CLASS = "rounded-sm font-medium text-primary [text-decoration-line:var(--esp-inline-link-decoration,underline)] underline-offset-[0.16em] focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring"
 
 function PublicBody({ body }: { body: string }) {
-  return <p className="antsia-copy whitespace-pre-wrap break-words">{splitBodyRich(body).map((part, index) => <Fragment key={index}>{part.type === "text" ? part.value : <Link href={part.type === "tag" ? routes.tag(part.value) : routes.publicProfile(part.value)} prefetch={false} className={PUBLIC_INLINE_LINK_CLASS}>{part.type === "tag" ? "#" : "@"}{part.value}</Link>}</Fragment>)}</p>
+  return <p className="whitespace-pre-wrap break-words leading-relaxed">{splitBodyRich(body).map((part, index) => <Fragment key={index}>{part.type === "text" ? part.value : <Link href={part.type === "tag" ? routes.tag(part.value) : routes.publicProfile(part.value)} prefetch={false} className={PUBLIC_INLINE_LINK_CLASS}>{part.type === "tag" ? "#" : "@"}{part.value}</Link>}</Fragment>)}</p>
 }
 
 /** Le texte intégral demeure dans le HTML ; la divulgation fonctionne sans JavaScript. */
@@ -59,14 +59,14 @@ function PublicMedia({ media }: { media: PostMediaDto[] }) {
 function SharedPublicPost({ shared, locale }: { shared: PublicSharedPost; locale: Locale }) {
   const t = getPublicT(locale)
   if (!shared.available) return <p className="rounded-[var(--ui2-card-radius)] border border-transparent bg-muted p-4 text-sm text-muted-foreground">{t("post.originalUnavailable")}</p>
-  return <blockquote className="flex min-w-0 flex-col gap-4 rounded-[var(--esp-media-radius)] border border-border p-4"><PublicIdentity author={shared.author} locale={locale} /><p className="border-l-2 border-primary pl-3 text-xs text-muted-foreground">{t("post.origin", { name: shared.origin.name })}</p><PublicCaption body={shared.body} locale={locale} full={shared.media.length === 0} /><PublicMedia media={shared.media} /><Link href={routes.publication(shared.id)} prefetch={false} className="inline-flex min-h-11 items-center rounded-[var(--ui2-button-radius)] text-sm font-medium text-primary hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring">{t("post.original")}</Link></blockquote>
+  return <blockquote className="flex min-w-0 flex-col gap-4 rounded-[var(--ui2-card-radius)] border border-border p-4"><PublicIdentity author={shared.author} locale={locale} /><p className="border-l-2 border-primary pl-3 text-xs text-muted-foreground">{t("post.origin", { name: shared.origin.name })}</p><PublicMedia media={shared.media} /><PublicCaption body={shared.body} locale={locale} full={shared.media.length === 0} /><Link href={routes.publication(shared.id)} prefetch={false} className="inline-flex min-h-11 items-center rounded-[var(--ui2-button-radius)] text-sm font-medium text-primary hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring">{t("post.original")}</Link></blockquote>
 }
 
 /** Projection SSR allowlistée, ordre des chartes (ADR-0028) : identité, texte, média et actions. */
 export function PublicPostCard({ post, locale }: { post: PublicPost; locale: Locale }) {
   const t = getPublicT(locale)
   const textOnly = post.media.length === 0 && post.shared === null
-  return <article data-post-presentation="charte" className="antsia-panel antsia-copy flex min-w-0 flex-col gap-4 overflow-hidden">
+  return <article data-post-presentation="charte" className="flex min-w-0 flex-col gap-4 overflow-hidden rounded-[var(--ui2-card-radius)] border border-[color:var(--esp-surface-border)] bg-card p-4 text-card-foreground">
     <div className="flex flex-wrap items-start justify-between gap-4"><PublicIdentity author={post.author} locale={locale} /><Link href={routes.publication(post.id)} prefetch={false} className="inline-flex min-h-11 shrink-0 items-center rounded-[var(--ui2-button-radius)] px-1 py-2 text-xs text-muted-foreground hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring"><time dateTime={new Date(post.publishedAt).toISOString()}>{publicDate(post.publishedAt, locale)}</time></Link></div>
     <p className="border-l-2 border-primary pl-3 text-xs font-medium text-muted-foreground">{t("post.origin", { name: post.origin.name })}</p>
     <PublicCaption body={post.body} locale={locale} full={textOnly} />

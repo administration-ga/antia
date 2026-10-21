@@ -73,7 +73,7 @@ function JobFilesBody({ files, onUploaded, disabled = false, onReview }: JobFile
     <JobReviewNotice review={review} onReview={onReview ?? (async () => false)} />
     <h3 id={`${kindId}-title`} className="font-display text-base font-bold leading-snug">{t("files.title")}</h3>
     <p className="text-sm text-muted-foreground">{t("files.pdfOnly")}</p>
-    {files.length === 0 ? <p className="text-sm text-muted-foreground">{t("files.empty")}</p> : <ul className="grid gap-2">{files.map((file) => <li key={file.fileId} className="flex flex-wrap items-center justify-between gap-2 rounded-[var(--ui2-card-radius)] border border-border p-[var(--esp-card-padding,16px)]">
+    {files.length === 0 ? <p className="text-sm text-muted-foreground">{t("files.empty")}</p> : <ul className="grid gap-2">{files.map((file) => <li key={file.fileId} className="flex flex-wrap items-center justify-between gap-2 rounded-[var(--ui2-card-radius)] border border-border p-4">
       <span className="grid min-w-0 gap-0.5"><span className="font-medium">{file.filename ?? t("files.unnamed")}</span><span className="text-sm text-muted-foreground">{t(`files.kind.${file.kind}`)} · {t("files.size", { size: jobFileSizeKb(file.byteSize) })} · {t(`files.scan.${file.scan}`)}</span></span>
       <Button type="button" variant="danger" pending={action.pending} disabled={paused} onClick={() => { if (!paused && navigator.onLine && action.current() && window.confirm(t("files.retireConfirm")) && navigator.onLine && action.current()) void action.run(async () => await retireFile({ fileId: file.fileId }), () => { toast.success(t("files.retired")) }) }}><Trash2 aria-hidden="true" className="size-4" />{t("files.retire")}</Button>
     </li>)}</ul>}
@@ -163,9 +163,9 @@ function JobApplicationFields({ job, sourceAvailable = true, onReview, initialDr
     }, (result) => { if (result && action.current()) { toast.success(t("apply.sent")); intent.complete(result.applicationId) } })
   })
 
-  return <Card><section className="grid gap-5" aria-labelledby={`${ids.first}-title`}><JobReviewNotice review={review} onReview={reread} /><JobIntentRecovery intent={intent} onStopped={() => { setValue("consent", false); review.invalidate() }} /><form id={ids.form} noValidate onSubmit={(event) => { void submit(event) }} className="antsia-form-grid">
-    <fieldset disabled={locked || form.formState.isSubmitting} className="antsia-form-grid">
-    <header className="antsia-page-header"><h2 id={`${ids.first}-title`} className="antsia-subtitle">{t("apply.title")}</h2><p className="text-sm text-muted-foreground">{t("apply.lead")}</p></header>
+  return <Card><section className="grid gap-5" aria-labelledby={`${ids.first}-title`}><JobReviewNotice review={review} onReview={reread} /><JobIntentRecovery intent={intent} onStopped={() => { setValue("consent", false); review.invalidate() }} /><form id={ids.form} noValidate onSubmit={(event) => { void submit(event) }} className="grid min-w-0 gap-4">
+    <fieldset disabled={locked || form.formState.isSubmitting} className="grid min-w-0 gap-4">
+    <header className="grid min-w-0 gap-2"><h2 id={`${ids.first}-title`} className="text-lg font-semibold">{t("apply.title")}</h2><p className="text-sm text-muted-foreground">{t("apply.lead")}</p></header>
     <div className="grid gap-4 sm:grid-cols-2">
       <Field id={ids.last} label={t("apply.lastName")} error={errors.lastName?.message}><TextInput id={ids.last} autoComplete="family-name" aria-invalid={errors.lastName ? true : undefined} aria-describedby={errors.lastName ? `${ids.last}-error` : undefined} {...form.register("lastName")} /></Field>
       <Field id={ids.first} label={t("apply.firstName")} error={errors.firstName?.message}><TextInput id={ids.first} autoComplete="given-name" aria-invalid={errors.firstName ? true : undefined} aria-describedby={errors.firstName ? `${ids.first}-error` : undefined} {...form.register("firstName")} /></Field>
@@ -181,7 +181,7 @@ function JobApplicationFields({ job, sourceAvailable = true, onReview, initialDr
   </form>
     {/* HORS du formulaire de candidature : le dépôt de pièce a son propre formulaire (A19). */}
     <JobFilesManager files={filesReady ? filesQuery.data ?? [] : []} disabled={locked} onReview={reread} />
-    <section className="grid gap-2 rounded-[var(--ui2-card-radius)] border border-border p-[var(--esp-card-padding,16px)]"><h3 className="font-display text-base font-bold leading-snug">{t("apply.consentTitle")}</h3><p className="text-sm">{t("apply.consentText")}</p>
+    <section className="grid gap-2 rounded-[var(--ui2-card-radius)] border border-border p-4"><h3 className="font-display text-base font-bold leading-snug">{t("apply.consentTitle")}</h3><p className="text-sm">{t("apply.consentText")}</p>
       <label htmlFor={ids.consent} className="flex min-h-11 items-center gap-3"><input id={ids.consent} form={ids.form} type="checkbox" disabled={locked || form.formState.isSubmitting} aria-invalid={errors.consent ? true : undefined} {...form.register("consent")} /><span>{t("apply.consentLabel")}</span></label>
       {errors.consent?.message ? <p role="alert" className="text-sm text-destructive">{errors.consent.message}</p> : null}
     </section>

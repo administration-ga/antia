@@ -99,7 +99,7 @@ export function ServiceSlotPicker({ handle, offerRef, serviceRef, selected, onPi
       <Button type="submit" variant="outline" disabled={disabled || pending || !review.online}>{t("slots.jump")}</Button>
     </form>
     {jumpError ? <p role="alert" className="text-sm">{jumpError}</p> : null}
-    {ambiguous.length > 1 ? <div role="alert" className="grid gap-2 rounded-[var(--ui2-card-radius)] border border-border p-[var(--esp-card-padding,16px)] text-sm"><p>{t("slots.ambiguous", { zone })}</p><div className="flex flex-wrap gap-2">{ambiguous.map((instant) => <Button key={instant} variant="outline" onClick={() => { setAmbiguous([]); setFromAt(Math.max(instant, now)) }}>{t("slots.ambiguousChoice", { time: serviceTime(instant, zone, locale), offset: formatUtcOffset(zonedWallTime(instant, zone)?.offsetMinutes ?? 0) })}</Button>)}</div></div> : null}
+    {ambiguous.length > 1 ? <div role="alert" className="grid gap-2 rounded-[var(--ui2-card-radius)] border border-border p-4 text-sm"><p>{t("slots.ambiguous", { zone })}</p><div className="flex flex-wrap gap-2">{ambiguous.map((instant) => <Button key={instant} variant="outline" onClick={() => { setAmbiguous([]); setFromAt(Math.max(instant, now)) }}>{t("slots.ambiguousChoice", { time: serviceTime(instant, zone, locale), offset: formatUtcOffset(zonedWallTime(instant, zone)?.offsetMinutes ?? 0) })}</Button>)}</div></div> : null}
     <nav aria-label={t("slots.navigation")} className="flex flex-wrap gap-2">
       <Button variant="outline" disabled={paused || fromAt <= now} onClick={() => setFromAt((value) => Math.max(now, value - WINDOW_MS))}>{t("slots.previous")}</Button>
       <Button variant="outline" disabled={paused} onClick={() => setFromAt((value) => value + WINDOW_MS)}>{t("slots.next")}</Button>
@@ -110,7 +110,7 @@ export function ServiceSlotPicker({ handle, offerRef, serviceRef, selected, onPi
     {failure || result && result.outcome !== "ready" ? <Button type="button" variant="outline" disabled={disabled || pending || !review.online} onClick={() => { void review.refresh(read) }}>{t("common.retry")}</Button> : null}
     {ready ? <div className="grid gap-3" aria-busy={pending || undefined}>
       <p className="text-sm text-muted-foreground">{t("slots.window", { from: serviceDateTime(ready.fromAt, zone, locale), to: serviceDateTime(ready.toAt, zone, locale) })}</p>
-      {ready.slots.length === 0 ? <p className="rounded-[var(--ui2-card-radius)] border border-dashed border-border p-[var(--esp-card-padding,16px)] text-sm text-muted-foreground">{t("slots.empty")}</p> : slotsByDay(ready.slots, zone, locale).map((group) => <div key={group.day} className="grid gap-2">
+      {ready.slots.length === 0 ? <p className="rounded-[var(--ui2-card-radius)] border border-dashed border-border p-4 text-sm text-muted-foreground">{t("slots.empty")}</p> : slotsByDay(ready.slots, zone, locale).map((group) => <div key={group.day} className="grid gap-2">
         <h4 className="text-sm font-semibold">{group.day}</h4>
         <ul className="flex flex-wrap gap-2">{group.slots.map((slot) => {
           const picked = selected?.startAt === slot.startAt && selected.resourceRef === slot.resourceRef
@@ -129,7 +129,7 @@ export function ServiceSlotPicker({ handle, offerRef, serviceRef, selected, onPi
 export function SlotSummary({ slot, zone }: { slot: Pick<PickedSlot, "startAt" | "endAt" | "resourceLabel">; zone: string }) {
   const { t, i18n } = useTranslation("services")
   const locale = i18n.resolvedLanguage ?? "fr"
-  return <div className="grid gap-1 rounded-[var(--ui2-card-radius)] border border-transparent bg-muted p-[var(--esp-card-padding,16px)] text-sm" role="status">
+  return <div className="grid gap-1 rounded-[var(--ui2-card-radius)] border border-transparent bg-muted p-4 text-sm" role="status">
     <p className="font-medium">{t("slots.selected", { start: serviceDateTime(slot.startAt, zone, locale), end: serviceTime(slot.endAt, zone, locale) })}</p>
     <p className="text-muted-foreground">{serviceZoneName(slot.startAt, zone, locale)}</p>
     {zone !== SERVICE_AGENDA_TIME_ZONE ? <p className="text-muted-foreground">{t("slots.agendaTime", { start: serviceDateTime(slot.startAt, SERVICE_AGENDA_TIME_ZONE, locale), zone: serviceZoneName(slot.startAt, SERVICE_AGENDA_TIME_ZONE, locale) })}</p> : null}

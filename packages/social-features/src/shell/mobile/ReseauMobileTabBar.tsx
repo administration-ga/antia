@@ -156,7 +156,7 @@ function DestinationsTabBar({ routes, onCreate, handle = null, current }: Reseau
                   className={cn(
                     "relative flex items-center justify-center",
                     isCreate
-                      ? "size-[var(--esp-fab-size,48px)] rounded-[var(--esp-fab-radius,10px)] bg-[var(--primary-fill)] text-[color:var(--primary-fill-on,var(--on-fill))] shadow-[var(--esp-fab-shadow,none)]"
+                      ? "size-12 rounded-[var(--esp-fab-radius,10px)] bg-[var(--primary-fill)] text-[color:var(--primary-fill-on,var(--on-fill))] shadow-[var(--esp-fab-shadow,none)]"
                       : "size-7 rounded-[var(--esp-chip-radius,10px)]",
                     // Onglet actif : pastille tonale du thème (ADR-0027), accent plein en repli.
                     ariaCurrent !== undefined && "bg-[var(--esp-tab-active-bg,var(--accent))] text-[color:var(--esp-tab-active-fg,var(--accent-foreground))]",
@@ -164,7 +164,7 @@ function DestinationsTabBar({ routes, onCreate, handle = null, current }: Reseau
                 >
                   <DestinationIcon aria-hidden="true" className={isCreate ? "size-[22px]" : "size-5"} strokeWidth={isCreate ? 2.4 : undefined} />
                   {badge !== null ? (
-                    <span className="absolute -top-1.5 -right-2 flex h-4 min-w-4 items-center justify-center rounded-[var(--esp-primitive-badge-radius,999px)] bg-[var(--role-react-fill,var(--primary))] px-1 font-mono text-[9px] font-bold tabular-nums text-[color:var(--role-react-on,var(--primary-foreground))]">
+                    <span className="absolute -top-1.5 -right-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-[var(--role-react-fill,var(--primary))] px-1 font-mono text-[9px] font-bold tabular-nums text-[color:var(--role-react-on,var(--primary-foreground))]">
                       <span aria-hidden="true">{badge}</span>
                     </span>
                   ) : null}

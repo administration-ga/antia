@@ -75,7 +75,7 @@ const STORIES_CSS = `
         width: 100%;
         aspect-ratio: 9 / 16;
         overflow: hidden;
-        border-radius: var(--esp-primitive-card-radius, 12px);
+        border-radius: 12px;
         background: var(--muted);
       }
       .st-card-media {
@@ -196,7 +196,7 @@ const STORIES_CSS = `
       .st-tray-tile:focus-visible {
         outline: 2px solid var(--ring);
         outline-offset: 3px;
-        border-radius: var(--esp-primitive-card-radius, 12px);
+        border-radius: 12px;
       }
       /* L'anneau. Il ne porte AUCUNE couleur : elle vient des classes
          .esp-story-ring / -seen / -self, posees a cote de celle-ci. */
@@ -229,12 +229,6 @@ const STORIES_CSS = `
         height: 100%;
         object-fit: cover;
       }
-      .st-tray-fallback {
-        display: inline-grid;
-        place-items: center;
-        width: 100%;
-        height: 100%;
-      }
 
       /* ── LES MÉDAILLONS (présentation « rings », ADR-0027) ────────────────
          Déclarés par l'application (storiesPresentation) : un rond par
@@ -243,8 +237,8 @@ const STORIES_CSS = `
          tuile garde une largeur figée : la rangée ne se recompose pas selon
          la longueur des prénoms, tronqués d'une ellipse. */
       .st-tray[data-presentation="rings"] {
-        gap: 12px;
-        padding: 2px 2px 4px;
+        gap: 10px;
+        padding: 4px 2px 8px;
       }
       .st-tray[data-presentation="rings"] .st-tray-tile {
         width: 64px;
@@ -256,15 +250,15 @@ const STORIES_CSS = `
         align-items: center;
         gap: 6px;
       }
-      /* Les mesures du canevas actualisé : 62 px, 3 px d'anneau et
-         3 px de séparation de la couleur de page. */
+      /* Les mesures de la maquette des chartes (ADR-0028) : un anneau de
+         2,5 px, séparé du portrait par 2,5 px de la couleur de page. */
       .st-ring-tile .st-tray-ring {
-        width: 62px;
-        height: 62px;
-        padding: 3px;
+        width: 60px;
+        height: 60px;
+        padding: 2.5px;
       }
       .st-ring-tile .st-tray-disc {
-        border-width: 3px;
+        border-width: 2.5px;
       }
       /* « Vous » : mon portrait (ou la silhouette), et son « + » à l'aplat
          d'identité, comme le bouton Créer. Sans série en ligne, un disque
@@ -272,8 +266,8 @@ const STORIES_CSS = `
       .st-ring-self {
         position: relative;
         display: flex;
-        width: 62px;
-        height: 62px;
+        width: 60px;
+        height: 60px;
       }
       .st-ring-self > .st-tray-disc {
         border: none;
@@ -299,46 +293,31 @@ const STORIES_CSS = `
         right: -2px;
         bottom: -2px;
         display: flex;
-        width: 24px;
-        height: 24px;
+        width: 22px;
+        height: 22px;
         align-items: center;
         justify-content: center;
-        border: none;
+        border: 2.5px solid var(--background);
         border-radius: 999px;
-        box-shadow: 0 0 0 3px var(--background);
         background: var(--primary-fill);
         color: var(--primary-fill-on, var(--on-fill));
       }
-      /* Le « + » est un bouton frère du médaillon quand ma série est en ligne.
-         Sa cible mesure au moins 44 px ; seule la pastille visible mesure 24 px.
-         Le centre reste celui du rond historique, sans déplacer la rangée. */
+      /* Le « + » est un bouton à part entière quand ma série est en ligne :
+         sa zone de toucher déborde son rond de 22 px. */
       .st-ring-plus-button {
-        position: absolute;
-        right: calc(-2px - (max(44px, var(--esp-control-min-size, 44px)) - 24px) / 2);
-        bottom: calc(-2px - (max(44px, var(--esp-control-min-size, 44px)) - 24px) / 2);
-        display: flex;
-        width: max(44px, var(--esp-control-min-size, 44px));
-        height: max(44px, var(--esp-control-min-size, 44px));
-        min-width: 44px;
-        min-height: 44px;
-        align-items: center;
-        justify-content: center;
         padding: 0;
-        border: none;
-        border-radius: 999px;
-        background: transparent;
-        color: inherit;
         cursor: pointer;
       }
-      .st-ring-plus-button > .st-ring-plus {
-        position: static;
-        flex: 0 0 24px;
-        pointer-events: none;
+      .st-ring-plus-button::before {
+        content: "";
+        position: absolute;
+        inset: -9px;
+        border-radius: 999px;
       }
       .st-ring-name {
-        max-width: 66px;
+        max-width: 64px;
         overflow: hidden;
-        font-size: 11.5px;
+        font-size: 12px;
         font-weight: 500;
         line-height: 1.25;
         white-space: nowrap;
@@ -477,8 +456,8 @@ const STORIES_CSS = `
       }
       .st-caption {
         margin: 0;
-        font-size: var(--esp-content-font-size, 14px);
-        line-height: var(--esp-content-line-height, 1.45);
+        font-size: 14px;
+        line-height: 1.45;
         overflow-wrap: anywhere;
       }
       /* Les commandes du bandeau. Leur FOND est translucide pour rester
@@ -494,7 +473,7 @@ const STORIES_CSS = `
         gap: 6px;
         padding: 8px 12px;
         border: none;
-        border-radius: var(--esp-primitive-chip-radius, 999px);
+        border-radius: 999px;
         font: inherit;
         font-size: 12.5px;
         font-weight: 700;
@@ -523,7 +502,7 @@ const STORIES_CSS = `
         align-items: center;
         gap: 7px;
         padding: 5px 12px;
-        border-radius: var(--esp-primitive-chip-radius, 999px);
+        border-radius: 999px;
         font-size: 11px;
         font-weight: 800;
         letter-spacing: 0.08em;
@@ -547,11 +526,9 @@ const STORIES_CSS = `
       }
       .st-live-title {
         margin: 0;
-        font-family: var(--esp-heading-font-family, inherit);
-        font-size: var(--esp-section-title-size, 20px);
-        font-weight: var(--esp-heading-font-weight, 800);
-        line-height: var(--esp-section-title-leading, 1.25);
-        letter-spacing: var(--esp-section-title-tracking, normal);
+        font-size: 20px;
+        font-weight: 800;
+        line-height: 1.25;
         overflow-wrap: anywhere;
       }
       .st-live-host {
@@ -582,17 +559,14 @@ const STORIES_CSS = `
       }
       .st-empty-title {
         margin: 0;
-        font-family: var(--esp-heading-font-family, inherit);
-        font-size: var(--esp-section-title-size, 17px);
-        line-height: var(--esp-section-title-leading, inherit);
-        letter-spacing: var(--esp-section-title-tracking, normal);
+        font-size: 17px;
         font-weight: 700;
       }
       .st-empty-text {
         margin: 0;
         max-width: 34ch;
-        font-size: var(--esp-content-font-size, 13.5px);
-        line-height: var(--esp-content-line-height, 1.5);
+        font-size: 13.5px;
+        line-height: 1.5;
         color: var(--muted-foreground);
       }
 
@@ -618,8 +592,8 @@ const STORIES_CSS = `
         width: min(430px, 100%);
         max-height: min(760px, 92dvh);
         overflow: hidden;
-        border-radius: var(--esp-primitive-card-radius, 18px);
-        border: 1px solid var(--esp-raised-border, var(--border));
+        border-radius: 18px;
+        border: 1px solid var(--border);
         background: var(--background);
       }
 `

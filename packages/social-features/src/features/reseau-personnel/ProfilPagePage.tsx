@@ -33,7 +33,6 @@
  * qui défile ; la variante carrée de la pastille est celle d'une page.
  */
 
-import { themedActionStyle } from "../themed-action-style"
 import { useViewerTimeZone } from "@antsia/api/viewer-preferences"
 import { api, type Id } from "@antsia/api/engine"
 import { useAuthenticatedConvexQuery } from "@antsia/api/hooks"
@@ -115,9 +114,9 @@ type Signatory = FunctionReturnType<typeof api.modules.pages.signatories.listPag
 /** Combien de mes revendications la fiche relit pour trouver celle de CETTE page (une personne en dépose peu). */
 const MY_CLAIMS_SCAN = 50
 
-const SECTION_TITLE_STYLE = { margin: 0, fontFamily: "var(--esp-heading-font-family, inherit)", fontSize: "var(--esp-section-title-size, 16px)", fontWeight: "var(--esp-heading-font-weight, inherit)", lineHeight: "var(--esp-section-title-leading, inherit)", letterSpacing: "var(--esp-section-title-tracking, normal)", color: "var(--ink-900)" } as const
-const SUBSECTION_TITLE_STYLE = { margin: 0, fontSize: "var(--esp-subsection-title-size, 14px)", lineHeight: "var(--esp-subsection-title-leading, inherit)", fontWeight: 700, color: "var(--ink-900)" } as const
-const MUTED_TEXT_STYLE = { margin: 0, color: "var(--ink-600)", fontSize: "var(--esp-content-font-size, 13px)", lineHeight: "var(--esp-content-line-height, 1.55)" } as const
+const SECTION_TITLE_STYLE = { margin: 0, fontSize: 16, color: "var(--ink-900)" } as const
+const SUBSECTION_TITLE_STYLE = { margin: 0, fontSize: 14, fontWeight: 700, color: "var(--ink-900)" } as const
+const MUTED_TEXT_STYLE = { margin: 0, color: "var(--ink-600)", fontSize: 13, lineHeight: 1.55 } as const
 const STACK_STYLE = { display: "flex", flexDirection: "column", gap: 12 } as const
 const ACTIONS_STYLE = { display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" } as const
 
@@ -159,7 +158,7 @@ export function ProfilPagePage({ handle }: ProfilPagePageProps) {
       <ProfilFrame>
         <Card style={RESEAU_CARD_STYLE}>
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            <h1 style={{ margin: 0, fontFamily: "var(--esp-heading-font-family, inherit)", fontSize: "var(--esp-page-title-size, 18px)", lineHeight: "var(--esp-page-title-leading, inherit)", letterSpacing: "var(--esp-page-title-tracking, normal)", fontWeight: "var(--esp-heading-font-weight, inherit)", color: "var(--ink-900)" }}>{refusal.title}</h1>
+            <h1 style={{ margin: 0, fontSize: 18, color: "var(--ink-900)" }}>{refusal.title}</h1>
             {/* Une seule phrase, choisie pour ne trancher entre AUCUNE des
                 causes possibles : `getPage` ne distingue pas non plus. */}
             <p style={{ margin: 0, fontSize: 14, color: "var(--ink-600)" }}>{refusal.body}</p>
@@ -432,7 +431,7 @@ function EmptyPageWall({ text }: { text: string }) {
         margin: 0,
         padding: 24,
         border: "1px dashed var(--ink-200)",
-        borderRadius: "var(--esp-primitive-card-radius, 8px)",
+        borderRadius: 8,
         color: "var(--ink-600)",
         fontSize: 14,
       }}
@@ -561,10 +560,10 @@ function PageInvitationBanner({ pageId }: { pageId: Id<"pages"> }) {
         </h2>
         <p style={MUTED_TEXT_STYLE}>{pageInvitationText(invitation.role, t)}</p>
         <div style={ACTIONS_STYLE}>
-          <Button style={themedActionStyle("success", "social")} size="sm" variant="success" disabled={busy} onClick={() => void answer(true)}>
+          <Button size="sm" variant="social" disabled={busy} onClick={() => void answer(true)}>
             {t("pagesPanel.invitation.accept")}
           </Button>
-          <Button style={themedActionStyle("danger", "secondary")} size="sm" variant="danger" disabled={busy} onClick={() => void answer(false)}>
+          <Button size="sm" variant="secondary" disabled={busy} onClick={() => void answer(false)}>
             {t("pagesPanel.invitation.decline")}
           </Button>
         </div>
@@ -728,7 +727,7 @@ function PageClaimSection({
             {t(pending ? "profilPagePage.claim.submitting" : "profilPagePage.claim.submit")}
           </Button>
           {onClose === undefined ? null : (
-            <Button type="button" variant="outline" disabled={pending} style={themedActionStyle("cancel", "secondary", RESEAU_SECONDARY_ACTION_STYLE)} onClick={onClose}>
+            <Button type="button" variant="secondary" disabled={pending} style={RESEAU_SECONDARY_ACTION_STYLE} onClick={onClose}>
               {t("profilPagePage.claim.cancel")}
             </Button>
           )}
@@ -838,7 +837,7 @@ function PageIdentityForm({ page }: { page: PageDto }) {
       </Field>
       <p style={MUTED_TEXT_STYLE}>{t("profilPagePage.identity.handleNote", { handle: page.handle })}</p>
       <div style={ACTIONS_STYLE}>
-        <Button style={themedActionStyle("success", "primary")} type="submit" variant="success" disabled={pending}>
+        <Button type="submit" variant="primary" disabled={pending}>
           {t(pending ? "profilPagePage.identity.saving" : "profilPagePage.identity.save")}
         </Button>
       </div>
@@ -921,7 +920,7 @@ function PageImagesForm({ page }: { page: PageDto }) {
           </Field>
           {page.logoUrl === null ? null : (
             <div>
-              <Button style={themedActionStyle("danger", "ghost")} size="sm" variant="danger" icon="trash" disabled={busySlot !== null} onClick={() => void remove("logo")}>
+              <Button size="sm" variant="ghost" icon="trash" disabled={busySlot !== null} onClick={() => void remove("logo")}>
                 {t("profilPagePage.images.removeLogo")}
               </Button>
             </div>
@@ -929,13 +928,13 @@ function PageImagesForm({ page }: { page: PageDto }) {
         </div>
       </div>
       <div style={{ ...STACK_STYLE, gap: 8 }}>
-        <div aria-hidden="true" style={{ ...bannerStyle(page.bannerUrl), height: 64, borderRadius: "var(--esp-primitive-media-radius, 12px)" }} />
+        <div aria-hidden="true" style={{ ...bannerStyle(page.bannerUrl), height: 64, borderRadius: 12 }} />
         <Field label={t("profilPagePage.images.chooseBanner")}>
           <input type="file" accept={pageUploadAccept("page_banner")} disabled={busySlot !== null} onChange={onPick("banner")} />
         </Field>
         {page.bannerUrl === null ? null : (
           <div>
-            <Button style={themedActionStyle("danger", "ghost")} size="sm" variant="danger" icon="trash" disabled={busySlot !== null} onClick={() => void remove("banner")}>
+            <Button size="sm" variant="ghost" icon="trash" disabled={busySlot !== null} onClick={() => void remove("banner")}>
               {t("profilPagePage.images.removeBanner")}
             </Button>
           </div>
@@ -1074,9 +1073,9 @@ function PageSignatories({ page, canManage }: { page: PageDto; canManage: boolea
                     {t("profilPagePage.signatories.leave")}
                   </Button>
                 ) : canManage ? (
-                  <Button style={themedActionStyle("danger", "ghost")}
+                  <Button
                     size="sm"
-                    variant="danger"
+                    variant="ghost"
                     disabled={busy}
                     aria-label={t("profilPagePage.signatories.removeLabel", { name })}
                     onClick={() => removeRow(row)}

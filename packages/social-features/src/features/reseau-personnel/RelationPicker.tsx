@@ -56,7 +56,7 @@ const ROW_STYLE = {
   gap: 10,
   minHeight: 44,
   padding: "6px 8px",
-  borderRadius: "var(--esp-primitive-chip-radius, 8px)",
+  borderRadius: 8,
   cursor: "pointer",
 } as const
 
@@ -144,7 +144,7 @@ export function RelationPicker({ label, candidates, truncated = false, submitVer
         gap: 10,
         padding: 12,
         border: "1px solid var(--ink-200)",
-        borderRadius: "var(--esp-primitive-card-radius, 10px)",
+        borderRadius: 10,
       }}
     >
       <TextInput

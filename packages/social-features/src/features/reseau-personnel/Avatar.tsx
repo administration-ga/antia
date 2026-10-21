@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/Avatar.tsx @ ad2e7fdc2 — adaptations : primitives de `@antsia/ui` ; contour carré des pages et initiales du nom publié ; angle des pages lu dans `--esp-avatar-page-radius` (ADR-0027), `--radius-lg` en repli ; teinte publique stable et tailles d'initiales opt-in des sept chartes ; échec de photo lié à son adresse.
+// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/Avatar.tsx @ ad2e7fdc2 — adaptations : primitives de `@antsia/ui` ; commentaires du contour carré (une PAGE du moteur, plus une administration) et du repli d'initiales (nom publié de `persons`) ; code inchangé ; angle des pages lu dans `--esp-avatar-page-radius` (ADR-0027), `--radius-lg` en repli.
 "use client"
 
 /**
@@ -11,7 +11,6 @@
 
 import { Icon } from "@antsia/ui"
 import { useState } from "react"
-import { avatarInitialsFontSize, identityToneStyle } from "./avatar-presentation"
 
 interface AvatarProps {
   displayName: string
@@ -47,34 +46,28 @@ export function Avatar({
   hasIdentity = true,
   shape = "round",
 }: AvatarProps) {
-  const [failedUrl, setFailedUrl] = useState<string | null>(null)
-  const showImage = Boolean(avatarUrl) && failedUrl !== avatarUrl
+  const [failed, setFailed] = useState(false)
+  const showImage = Boolean(avatarUrl) && !failed
   const initials = hasIdentity ? initialsOf(displayName) : ""
-  const renderedSize = size === 104 ? `var(--esp-profile-avatar-size, ${size}px)` : size
-  const tone = identityToneStyle(displayName, hasIdentity)
 
   return (
     <span
       aria-hidden="true"
       style={{
-        width: renderedSize,
-        height: renderedSize,
+        width: size,
+        height: size,
         flexShrink: 0,
         // Le rayon de la tuile est un JETON, jamais une valeur : la charte
         // scopée de l'espace le remappe avec le reste.
         // Les pages en carré arrondi, les personnes en rond (ADR-0027).
-        borderRadius: shape === "square"
-          ? size === 104
-            ? "var(--esp-profile-avatar-page-radius, var(--esp-avatar-page-radius, var(--radius-lg)))"
-            : "var(--esp-avatar-page-radius, var(--radius-lg))"
-          : size / 2,
+        borderRadius: shape === "square" ? "var(--esp-avatar-page-radius, var(--radius-lg))" : size / 2,
         overflow: "hidden",
-        background: showImage ? "var(--ink-100)" : tone.background,
-        color: tone.color,
+        background: showImage ? "var(--ink-100)" : "var(--primary-50)",
+        color: "var(--primary-600)",
         display: "inline-flex",
         alignItems: "center",
         justifyContent: "center",
-        fontSize: avatarInitialsFontSize(size),
+        fontSize: Math.round(size * 0.38),
         fontWeight: 700,
         letterSpacing: "0.02em",
       }}
@@ -90,7 +83,7 @@ export function Avatar({
           // pas clignoter après le reste de sa ligne : elle charge avec elle.
           loading="eager"
           decoding="async"
-          onError={() => setFailedUrl(avatarUrl ?? null)}
+          onError={() => setFailed(true)}
           style={{ width: "100%", height: "100%", objectFit: "cover" }}
         />
       ) : initials.length > 0 ? (

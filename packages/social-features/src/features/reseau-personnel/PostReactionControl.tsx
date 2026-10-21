@@ -503,7 +503,7 @@ export function PostReactionControl({
             minHeight: 44,
             padding: "8px 4px",
             border: "none",
-            borderRadius: "var(--esp-primitive-button-radius, 10px)",
+            borderRadius: 10,
             background: "transparent",
             color: "var(--ink-600)",
             cursor: pending ? "progress" : "pointer",
@@ -529,9 +529,9 @@ export function PostReactionControl({
             gap: 4,
             padding: 6,
             border: "1px solid var(--ink-150)",
-            borderRadius: "var(--esp-primitive-card-radius, 14px)",
+            borderRadius: 14,
             background: "var(--ink-0)",
-            boxShadow: "var(--esp-surface-shadow, var(--shadow-lg))",
+            boxShadow: "var(--shadow-lg)",
           }}
         >
           {REACTION_OPTIONS.map((option, index) => {
@@ -571,7 +571,7 @@ export function PostReactionControl({
                   minHeight: 48,
                   padding: 4,
                   border: "none",
-                  borderRadius: "var(--esp-primitive-button-radius, 10px)",
+                  borderRadius: 10,
                   display: "inline-flex",
                   flexDirection: "column",
                   alignItems: "center",

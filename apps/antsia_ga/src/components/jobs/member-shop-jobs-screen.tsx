@@ -48,7 +48,7 @@ export function MemberShopJobsPreview({ handle }: { handle: string }) {
 function ShopJobsHeading({ id, label, handle }: { id: string; label: string; handle: string }) {
   const { networkId } = useNetwork()
   const query = useAuthenticatedConvexQuery(api.modules.shops.jobs.listForShop, { networkId, handle, paginationOpts: { cursor: null, numItems: 3 } })
-  return query.data && query.data.page.length > 0 ? <h2 id={id} className="antsia-subtitle">{label}</h2> : null
+  return query.data && query.data.page.length > 0 ? <h2 id={id} className="text-lg font-semibold">{label}</h2> : null
 }
 
 /** La fiche membre : contenu public allowlisté, état de MA candidature, formulaire si l'offre reçoit des candidatures. */
@@ -67,7 +67,7 @@ function MemberJobQuery({ handle, jobRef }: { handle: string; jobRef: string }) 
   return <ShopFrame title={t("details.title")}><ShopLink href={routes.shopJobs(handle)}>{t("details.backToJobs")}</ShopLink>
     {query.isError ? <ShopQueryFailure href={routes.storefront(handle)} retry={() => { void query.refetch() }} />
       : query.isPending || query.data === undefined ? <CenteredStatus label={t("details.loading")} />
-        : query.data === null ? <Card><div className="grid gap-2"><h2 className="antsia-subtitle">{t("details.unavailableTitle")}</h2><p>{t("details.unavailableBody")}</p><ShopLink href={routes.storefront(handle)}>{t("shop.backToShop")}</ShopLink></div></Card>
+        : query.data === null ? <Card><div className="grid gap-2"><h2 className="text-lg font-semibold">{t("details.unavailableTitle")}</h2><p>{t("details.unavailableBody")}</p><ShopLink href={routes.storefront(handle)}>{t("shop.backToShop")}</ShopLink></div></Card>
           : <JobDetails job={query.data} locale={i18n.resolvedLanguage ?? "fr"} t={(key, options) => t(key, options)} employerHref={routes.storefront(query.data.shopHandle)} heading="h2" actionSlot={<JobApplicationSlot job={query.data} onReview={refreshJob} initialDraft={draft.current} onDraft={saveDraft} />} />}
   </ShopFrame>
 }

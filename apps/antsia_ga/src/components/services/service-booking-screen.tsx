@@ -72,7 +72,7 @@ function BookingFlow({ handle, offerRef, services, review, onReview }: { handle:
       else setFailure(result.outcome === "refused" ? "booking.refused" : "common.unavailable")
     })
   })
-  return <div className="antsia-page">
+  return <div className="grid min-w-0 gap-6">
     <ServiceReviewNotice review={review} onReview={onReview} />
     <ServiceIntentRecovery intent={intent} onStopped={() => { form.setValue("consent", false); review.invalidate() }} />
     <Card><div className="grid gap-3">
@@ -86,7 +86,7 @@ function BookingFlow({ handle, offerRef, services, review, onReview }: { handle:
       </ul> : null}
     </div></Card>
     {service ? <Card><ServiceSlotPicker key={service.serviceRef} handle={handle} offerRef={offerRef} serviceRef={service.serviceRef} selected={slot} onPick={pick} disabled={locked} onContextChange={() => { setSlot(null); form.setValue("consent", false) }} /></Card> : null}
-    {service && slot ? <Card><form noValidate className="antsia-form-grid" onSubmit={submit} aria-busy={action.pending || undefined}>
+    {service && slot ? <Card><form noValidate className="grid min-w-0 gap-4" onSubmit={submit} aria-busy={action.pending || undefined}>
       <fieldset disabled={locked} className="grid min-w-0 gap-4">
       <Field id={`${id}-note`} label={t("booking.note")} hint={t("booking.noteHint", { max: COMMERCE_SERVICE_LIMITS.noteMax })} error={errors.note?.message}><TextArea id={`${id}-note`} aria-invalid={errors.note ? true : undefined} {...form.register("note")} /></Field>
       <fieldset className="grid gap-3 sm:grid-cols-2"><legend className="text-sm font-medium sm:col-span-2">{t("contact.legend")}</legend>

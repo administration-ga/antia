@@ -725,7 +725,7 @@ function MessageComposerContent({
 								<button
 									type="button"
 									className="msg-icon-btn"
-									style={{ width: "var(--esp-control-min-size, 22px)", height: "var(--esp-control-min-size, 22px)" }}
+									style={{ width: 22, height: 22 }}
 									aria-label={t("messageComposer.remove", { name: item.name })}
 									onClick={() => retirer(item.localId)}
 								>
@@ -797,7 +797,6 @@ function MessageComposerContent({
 					<button
 						type="button"
 						className="msg-send-btn"
-						data-role={enEdition ? "success" : undefined}
 						aria-label={
 							enEdition
 								? uploading

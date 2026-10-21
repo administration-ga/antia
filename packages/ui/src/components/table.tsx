@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/ui-v2/src/components/table.tsx @ ad2e7fdc2 — adaptations : aucune (copie textuelle) ; en-tête de provenance. cadre raccordé aux jetons opt-in ANTSIA de carte et contour, valeurs historiques en repli.
+// Dupliqué de socle/packages/ui-v2/src/components/table.tsx @ ad2e7fdc2 — adaptations : aucune (copie textuelle) ; en-tête de provenance.
 "use client"
 
 import type { CSSProperties, MouseEventHandler, ReactNode } from "react"
@@ -28,8 +28,8 @@ export const Table = ({
       overflowX: "auto",
       overflowY: "visible",
       overscrollBehaviorX: "contain",
-      border: "1px solid var(--esp-primitive-surface-border, var(--ink-200))",
-      borderRadius: "var(--esp-primitive-card-radius, 8px)",
+      border: "1px solid var(--ink-200)",
+      borderRadius: 8,
       background: "var(--ink-0)",
     }}
   >

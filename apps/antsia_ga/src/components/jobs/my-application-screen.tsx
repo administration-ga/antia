@@ -48,8 +48,8 @@ function ApplicationReader({ applicationId }: { applicationId: string }) {
     : t(`applications.state.${application.state}`)
   return <Card><article className="grid gap-3" aria-busy={query.isFetching || undefined}>
     <p role="status" aria-live="polite" aria-atomic="true" className="sr-only">{announcement}</p>
-    <header className="antsia-page-header">
-      <h2 className="antsia-subtitle">{application.jobTitle}</h2>
+    <header className="grid min-w-0 gap-2">
+      <h2 className="text-lg font-semibold">{application.jobTitle}</h2>
       {application.shopName ? <p className="text-sm text-muted-foreground">{t("applications.employer", { name: application.shopName })}</p> : null}
     </header>
     <p className="font-medium">{status}</p>

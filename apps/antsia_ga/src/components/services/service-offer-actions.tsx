@@ -39,9 +39,9 @@ function ServiceOfferOptions({ offer }: { offer: CatalogOffer }) {
     </div>
   }
   const modes = [options.quote.available, options.booking !== null, options.fixedOrder !== null].filter(Boolean).length
-  return <section aria-label={t("offer.title")} className="grid w-full gap-3 rounded-[var(--ui2-card-radius)] border border-[color:var(--esp-surface-border)] bg-background p-[var(--esp-card-padding,16px)]">
+  return <section aria-label={t("offer.title")} className="grid w-full gap-3 rounded-[var(--ui2-card-radius)] border border-[color:var(--esp-surface-border)] bg-background p-4">
     <ServiceReviewNotice review={review} onReview={read} />
-    <h2 className="antsia-subtitle">{t("offer.title")}</h2>
+    <h2 className="text-lg font-semibold">{t("offer.title")}</h2>
     {modes === 0 ? <p className="text-sm text-muted-foreground">{t("offer.none")}</p> : review.paused ? null : <div className="flex flex-wrap gap-3">
       {options.quote.available ? <Link className={ACTION_LINK} href={routes.serviceQuote(offer.shopHandle, offer.offerRef)}><FileText aria-hidden="true" className="size-4" />{t("offer.quote")}</Link> : null}
       {options.booking ? <Link className={ACTION_LINK} href={routes.serviceBooking(offer.shopHandle, offer.offerRef)}><CalendarClock aria-hidden="true" className="size-4" />{t("offer.booking")}</Link> : null}
