@@ -392,5 +392,16 @@
         "description": "Moderator of the network."
       }
     }
+  },
+  "demoIntegration": {
+    "title": "Demo mode",
+    "lead": "Fictional accounts and content are shared between visitors. Your ANTSIA account stays separate.",
+    "entry": "Demo accounts",
+    "back": "Back to ANTSIA",
+    "frameTitle": "ANTSIA — isolated demo accounts and network",
+    "loading": "Loading the demo…",
+    "delayed": "The demo is taking longer to respond. You can wait or try again.",
+    "retry": "Try again",
+    "unavailable": "The demo is temporarily unavailable. You can return to ANTSIA."
   }
 }

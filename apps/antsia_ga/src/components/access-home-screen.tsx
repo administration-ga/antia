@@ -8,6 +8,7 @@ import { useTranslation } from "react-i18next"
 
 import { SessionProviders } from "@/components/providers"
 import { SignInCard } from "@/components/sign-in-screen"
+import { DemoEntryLink } from "@/components/demo-embed"
 import type { ShopContactContinuation } from "@/lib/shop-contact-continuation"
 import { routes } from "@/lib/routes"
 
@@ -53,6 +54,7 @@ export function AccessHomeScreen({ intent = "sign-in", signOutIncomplete = false
             </main>
           </SessionProviders>
           <div className="mt-3 text-center">
+            <DemoEntryLink />
             <Link href={routes.discover()} prefetch={false} className="inline-flex min-h-11 items-center justify-center rounded-lg px-4 text-sm text-muted-foreground underline underline-offset-4 hover:text-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring">{t("access.discover")}</Link>
           </div>
         </div>

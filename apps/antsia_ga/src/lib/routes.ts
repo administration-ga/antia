@@ -1,3 +1,4 @@
+import { browserAppPath } from "./app-path"
 import type { EngineRoutes } from "@antsia/api/network"
 import type { UsageScreen } from "@antsia/social-features/shell/analytics"
 import type { ReseauDestinationMatch } from "@antsia/social-features/shell/reseau-menu-destinations"
@@ -31,6 +32,7 @@ export function pageDecisionsAnchor(pageId: string): string {
  */
 export const routes = {
   home: () => "/",
+  demo: () => "/demo",
   signIn: (intent?: "sign-up", postId?: string, notificationReference?: string, shopContact?: ShopContactContinuation) => {
     const query = new URLSearchParams()
     if (intent === "sign-up") query.set("inscription", "1")
@@ -98,6 +100,7 @@ export const routes = {
   settings: () => "/parametres",
   dataSettings: () => "/parametres/donnees",
   authSession: () => "/api/auth/get-session",
+  authBase: () => "/api/auth",
   authToken: () => "/api/auth/convex/token",
   publicSessionBridge: () => "/api/session-bridge",
   apdpvp: () => "https://www.apdpvp.ga/textes-et-decisions/",
@@ -178,6 +181,7 @@ export function shopContactFromLocation(pathname: string, search: string): ShopC
 
 /** Les adresses que les surfaces du moteur lisent par `useRoutes()`. */
 export const engineRoutes: EngineRoutes = {
+  sharePath: browserAppPath,
   home: routes.feed,
   post: routes.memberPost,
   messages: routes.messages,

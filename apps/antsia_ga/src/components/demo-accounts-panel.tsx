@@ -8,6 +8,7 @@ import { useTranslation } from "react-i18next"
 
 import { type DemoAccount, forgetDemoAccount, rememberDemoAccount } from "@/lib/demo-accounts"
 import { routes } from "@/lib/routes"
+import { browserAppPath } from "@/lib/app-path"
 
 /** Le code enregistré par l'envoi se relit aussitôt ; quelques essais couvrent le délai du backend local. */
 const CODE_READS = 8
@@ -53,7 +54,7 @@ export function DemoAccountsPanel({ authClient, shared = false }: { authClient: 
       }
       if (code === null) throw new Error("code")
       if (refused(await authClient.signIn.emailOtp({ email: account.email, otp: code }))) throw new Error("verify")
-      window.location.assign(routes.welcome())
+      window.location.assign(browserAppPath(routes.welcome()))
     } catch {
       forgetDemoAccount()
       setPending(null)

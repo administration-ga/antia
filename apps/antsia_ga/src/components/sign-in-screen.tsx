@@ -12,6 +12,7 @@ import { DemoAccountsPanel } from "@/components/demo-accounts-panel"
 import { CenteredStatus } from "@/components/shared/controls"
 import { useSessionState } from "@/components/use-session-state"
 import { authClient } from "@/lib/auth-client"
+import { browserAppPath } from "@/lib/app-path"
 import { parsePublicPostContinuation } from "@/lib/public-post-continuation"
 import { parseNotificationReference } from "@/lib/notification-open"
 import { parseShopContactContinuation, type ShopContactContinuation } from "@/lib/shop-contact-continuation"
@@ -64,8 +65,8 @@ export function SignInCard({ compact = false, intent = "sign-in", signOutIncompl
         key={intent}
         authClient={entryClient}
         configuration={configuration}
-        callbackURL={routes.welcome(continuationPostId, notification, contact)}
-        onAuthenticated={() => window.location.assign(routes.welcome(continuationPostId, notification, contact))}
+        callbackURL={browserAppPath(routes.welcome(continuationPostId, notification, contact))}
+        onAuthenticated={() => window.location.assign(browserAppPath(routes.welcome(continuationPostId, notification, contact)))}
         renderLocalCode={(identifier) => <DevCodeHint identifier={identifier} />}
         presentation={compact ? "compact" : "default"}
         headingLevel={compact ? 2 : 1}
@@ -80,7 +81,7 @@ export function SignInCard({ compact = false, intent = "sign-in", signOutIncompl
         {!signUp ? <p className="mt-3 text-xs leading-relaxed text-muted-foreground">{t("access.accountPromise")}</p> : null}
       </div>
       {/* Développement local, ou déploiement de démonstration déclaré : le serveur en décide, le catalogue est vide ailleurs. */}
-      {configuration?.localCodes || configuration?.demoAccounts ? <DemoAccountsPanel authClient={entryClient} shared={!configuration.localCodes} /> : null}
+      {configuration && (configuration.localCodes || "demoAccounts" in configuration && configuration.demoAccounts === true) ? <DemoAccountsPanel authClient={entryClient} shared={!configuration.localCodes} /> : null}
     </div>
   )
 }

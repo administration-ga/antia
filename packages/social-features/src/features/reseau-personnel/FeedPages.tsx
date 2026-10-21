@@ -17,6 +17,7 @@
 import { api } from "@antsia/api/engine"
 import { useAuthenticatedConvexQuery, useConvexMutationQuery } from "@antsia/api/hooks"
 import { useNetwork } from "@antsia/api/network"
+import { isSigningOutEverywhere } from "@antsia/api/sign-out-everywhere"
 import { SkeletonCard } from "@antsia/ui"
 import { EspaceEmptyState } from "@antsia/ui/espace-kit"
 import { Fragment, useEffect, useMemo, useRef, type ReactNode } from "react"
@@ -148,7 +149,8 @@ export function FeedPage({
   useEffect(() => {
     // Une fois par clé de version/génération manquante ; une erreur d'accès désarme le verrou.
     if (page.isError) { preparedNetwork.current = null; return }
-    if (!isFirst || !canPrepare) return
+    // La sortie révoque la session avant de quitter le document : ne plus amorcer de travail.
+    if (!isFirst || !canPrepare || isSigningOutEverywhere()) return
     const previous = preparedNetwork.current
     if (previous?.networkId === networkId) {
       if (preparationKey === "mounted") { preparedNetwork.current = { networkId, key: preparationKey }; return }

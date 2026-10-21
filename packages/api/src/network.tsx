@@ -27,6 +27,8 @@ export interface EngineRoutes {
   home: () => string
   /** Adresse membre d'une publication, quand l'application sert ce lien direct. */
   post?: (postId: string) => string
+  /** Chemin physique pour un lien copié ; le routeur conserve ses chemins logiques. */
+  sharePath?: (path: string) => string
   /** Base de la messagerie en pages (iCom au téléphone, anciens liens). */
   messages: () => string
   /** Canal commercial facultatif, injecté par ANTSIA seulement. */
@@ -235,6 +237,8 @@ export function resolveEngineWordmark(requested: string | undefined): string | n
 export function NetworkProvider(props: {
   networkId: Id<"networks">
   slug: string
+  /** Isole une application servie sur la même origine ; vide = stockage historique du réseau. */
+  storageNamespace?: string
   personId: Id<"persons">
   charte: string
   routes: EngineRoutes
@@ -252,33 +256,38 @@ export function NetworkProvider(props: {
   PostOfferRenderer?: EnginePostOfferRenderer
   children: ReactNode
 }) {
+  const storageNamespace = props.storageNamespace ?? ""
+  const storageScope = `${storageNamespace}${props.slug}`
   const [initializedSlug, setInitializedSlug] = useState<string | null>(null)
 
   useEffect(() => {
     // La reprise précède le montage des enfants : les stores du dock, des
     // brouillons et des appels ne doivent pas hydrater le nouveau préfixe vide.
     // Chaque stockage est indépendant, y compris si son accès lui-même échoue.
-    try {
-      migrateNetworkStorage(window.localStorage, props.slug)
-    } catch {
-      // Le navigateur peut refuser l'accès à localStorage (mode privé/politique).
+    // Un espace isolé ne reprend jamais les brouillons du vrai réseau.
+    if (!storageNamespace) {
+      try {
+        migrateNetworkStorage(window.localStorage, props.slug)
+      } catch {
+        // Le navigateur peut refuser l'accès à localStorage (mode privé/politique).
+      }
+      try {
+        migrateNetworkStorage(window.sessionStorage, props.slug)
+      } catch {
+        // L'absence de persistance n'empêche jamais l'accès au réseau.
+      }
     }
-    try {
-      migrateNetworkStorage(window.sessionStorage, props.slug)
-    } catch {
-      // L'absence de persistance n'empêche jamais l'accès au réseau.
-    }
-    setInitializedSlug(props.slug)
-  }, [props.slug])
+    setInitializedSlug(storageScope)
+  }, [props.slug, storageNamespace, storageScope])
 
-  if (initializedSlug !== props.slug) return null
+  if (initializedSlug !== storageScope) return null
 
   const value: NetworkContextValue = {
     networkId: props.networkId,
     slug: props.slug,
     personId: props.personId,
     charte: props.charte,
-    storagePrefix: `antsia:${props.slug}:`,
+    storagePrefix: `${storageNamespace}antsia:${props.slug}:`,
     liveAvailable: props.liveAvailable === true,
     navigation: resolveEngineNavigation(props.navigation, props.routes),
     postPresentation: resolveEnginePostPresentation(props.postPresentation),

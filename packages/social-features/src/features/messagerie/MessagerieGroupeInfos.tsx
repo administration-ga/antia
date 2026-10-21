@@ -232,7 +232,7 @@ export function MessagerieGroupeInfos({
 	const generateUploadUrl = useConvexMutationQuery(api.modules.groups.threads.generateGroupAvatarUploadUrl)
 	const inviteUrl = inviteToken === null || shareOrigin.length === 0
 		? null
-		: invitationGroupeHref(inviteToken, routes.messages(), shareOrigin)
+		: invitationGroupeHref(inviteToken, routes.sharePath?.(routes.messages()) ?? routes.messages(), shareOrigin)
 
 	const membres = useMemo(
 		() => membresPages.results.map((membre) => membreDuGroupe(membre, t)),

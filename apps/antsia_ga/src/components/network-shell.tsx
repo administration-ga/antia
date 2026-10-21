@@ -1,5 +1,7 @@
 "use client"
 
+import { demoStorageNamespace } from "@/lib/demo-storage"
+
 import { NetworkProvider } from "@antsia/api/network"
 import { NextRouterAdapter } from "@antsia/api/routing/next"
 import { BRAND_NAME } from "@antsia/social-contracts/brand"
@@ -98,7 +100,7 @@ export function NetworkShell({ children }: { children: ReactNode }) {
 
   return (
     <NextRouterAdapter>
-      <NetworkProvider networkId={session.root._id} slug={session.root.slug} personId={session.person._id} charte={appearance?.charte ?? CHARTE} routes={engineRoutes} liveAvailable navigation="destinations" postPresentation="charte" feedPresentation="immersive" storiesPresentation="rings" wordmark={BRAND_NAME} PostOfferRenderer={OfferPostSlot}>
+      <NetworkProvider networkId={session.root._id} slug={session.root.slug} storageNamespace={demoStorageNamespace()} personId={session.person._id} charte={appearance?.charte ?? CHARTE} routes={engineRoutes} liveAvailable navigation="destinations" postPresentation="charte" feedPresentation="immersive" storiesPresentation="rings" wordmark={BRAND_NAME} PostOfferRenderer={OfferPostSlot}>
         <MemberSessionContext.Provider value={session}>
           <PostHogProvider configuration={usageConfiguration} consented={!permission.paused && session.person.consentsInForce.includes("usage_analytics")} screen={usageScreenForPath(pathname)} networkSlug={session.root.slug} locale={i18n.resolvedLanguage === "en" ? "en" : "fr"}>
             <CommunicationShell />
