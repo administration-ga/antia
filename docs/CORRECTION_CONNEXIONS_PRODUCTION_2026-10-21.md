@@ -16,7 +16,7 @@ Le raccord natif réenveloppait les handlers crossDomain déjà décorés par Be
 
 Tests : régression OAuth navigateur rouge avant correction ; 69 tests auth/OTP/natif verts après, dans l’arbre réel et dans le candidat isolé ; codegen/typages stricts verts. La simulation de publication cible `diligent-avocet-585`, valide le schéma et ne supprime aucun index. Publication backend terminée sur la cible exacte, typage strict et schéma validés, aucun index supprimé. Comparaison exhaustive avant/après : les 949 fonctions et routes sont inchangées (signatures et visibilité). Le transport avec `Better-Auth-Cookie` vide renvoie désormais HTTP 200 avec `url`, `redirect: true`, client ID, état et PKCE S256 présents ; cookie navigateur transmis, aucune valeur sensible conservée.
 
-Preuves : `docs/recette/connexions-production-2026-10-21/`. Candidat backend et manifeste : `/Users/okatech/Library/Caches/antsia-releases/20261021-connections-production-auth/`. Aucun `.env*` ni paramètre d’hébergement modifié.
+Preuves : `docs/recette/connexions-production-2026-10-21/`. Candidat backend et manifeste : `~/Library/Caches/antsia-releases/20261021-connections-production-auth/`. Aucun `.env*` ni paramètre d’hébergement modifié.
 
 ## Recette connectée terminée
 

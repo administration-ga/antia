@@ -19,4 +19,4 @@ La sortie IDN normale est confirmée, adresse vide et nouvelle connexion exigée
 
 Le formulaire officiel du compte distinct est préparé avec prompt de connexion et PKCE S256 ; son authentification privée reste requise. Le Mac s’est reverrouillé avant le contrôle du premier plan. Le cycle réel A→B→A reste non vérifié. Aucun identifiant/PIN extrait ni session fabriquée.
 
-Preuves : `docs/recette/favicon-2026-10-21/` et `docs/recette/comptes-reels-aller-retour-2026-10-21/`. Manifestes de livraison exacts : `/Users/okatech/Library/Caches/antsia-releases/20261021-favicon/{production,demo}/manifest.json`. Aucun commit/push applicatif dans l’arbre partagé pour cette reprise.
+Preuves : `docs/recette/favicon-2026-10-21/` et `docs/recette/comptes-reels-aller-retour-2026-10-21/`. Manifestes de livraison exacts : `~/Library/Caches/antsia-releases/20261021-favicon/{production,demo}/manifest.json`. Aucun commit/push applicatif dans l’arbre partagé pour cette reprise.

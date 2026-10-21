@@ -62,7 +62,7 @@ Le relevé Vercel filtré sur chaque déploiement et les vingt dernières minute
 trouve aucun journal au niveau erreur ; il ne remplace pas la recette du fichier.
 
 Archive, manifeste et logs :
-`/Users/okatech/Library/Caches/antsia-releases/20261020-media-picker-complet/`.
+`~/Library/Caches/antsia-releases/20261020-media-picker-complet/`.
 Preuves navigateur :
 [`recette/idn-2026-10-20/selecteur-apres-correctif/`](recette/idn-2026-10-20/selecteur-apres-correctif/).
 

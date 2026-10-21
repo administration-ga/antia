@@ -44,7 +44,7 @@ Version publiée : `audio-gesture-20261020-82c4108726107498`.
 Base publique : `media-picker-20261020-74d5cac88d25892d`.
 Paquet de 2 969 fichiers, deux seules substitutions vérifiées par SHA-256 ;
 aucun travail parallèle ajouté. Archive et manifeste :
-`/Users/okatech/Library/Caches/antsia-releases/20261020-audio-gesture/`.
+`~/Library/Caches/antsia-releases/20261020-audio-gesture/`.
 
 | Cible | Déploiement | État |
 |---|---|---|

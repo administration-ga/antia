@@ -8,11 +8,11 @@ prouvent ni une disposition universelle d'Instagram ni l'efficacité d'un classe
 
 | Référence locale | Options et hiérarchie observées | Adaptation ANTSIA retenue |
 |---|---|---|
-| [IMG_7310.PNG](/Users/okatech/Downloads/IMG_7310.PNG) | Recherche au-dessus d'une grille visuelle de trois colonnes ; vignette, compteur de vues, marque-page et menu ; navigation basse persistante | Explorer visuel, recherche dont le périmètre est explicite, vignettes ouvrant le détail en conservant la position. Compteurs issus du serveur, aucune métrique inventée |
-| [IMG_7311.PNG](/Users/okatech/Downloads/IMG_7311.PNG) | Profil professionnel : avatar, présentation, compteurs, lien, tableau de bord, modifier/partager/contacter, suggestions, stories conservées, onglets du contenu | Distinguer profil personnel, page et boutique ; profil public immédiatement identifiable, outils du propriétaire séparés. Lier la boutique à PRO.GA plutôt que recréer son back-office |
-| [IMG_7312.PNG](/Users/okatech/Downloads/IMG_7312.PNG) | Vidéo verticale dominante, actions sur le côté, auteur et légende en bas, progression, vue sociale et raccourci création | Clips dédié aux vidéos ; boutons accessibles aimer/commenter/republier/envoyer/enregistrer, une lecture active, pause et son explicites |
-| [IMG_7313.PNG](/Users/okatech/Downloads/IMG_7313.PNG) | Accueil « Pour vous », création et activité en haut, stories par avatars, post dans le flux, navigation basse | Accueil pour tous les posts et stories ; séparation de la navigation principale, du classement et des actions sur le post |
-| [IMG_7315.PNG](/Users/okatech/Downloads/IMG_7315.PNG) | Post sponsorisé : auteur, libellé commercial, galerie, CTA, actions et légende | Carte d'offre liée claire et CTA correspondant à l'objet réel. Ne pas reprendre « Installer l'application » pour une vente interne ni activer un système publicitaire inexistant |
+| [IMG_7310.PNG](~/Downloads/IMG_7310.PNG) | Recherche au-dessus d'une grille visuelle de trois colonnes ; vignette, compteur de vues, marque-page et menu ; navigation basse persistante | Explorer visuel, recherche dont le périmètre est explicite, vignettes ouvrant le détail en conservant la position. Compteurs issus du serveur, aucune métrique inventée |
+| [IMG_7311.PNG](~/Downloads/IMG_7311.PNG) | Profil professionnel : avatar, présentation, compteurs, lien, tableau de bord, modifier/partager/contacter, suggestions, stories conservées, onglets du contenu | Distinguer profil personnel, page et boutique ; profil public immédiatement identifiable, outils du propriétaire séparés. Lier la boutique à PRO.GA plutôt que recréer son back-office |
+| [IMG_7312.PNG](~/Downloads/IMG_7312.PNG) | Vidéo verticale dominante, actions sur le côté, auteur et légende en bas, progression, vue sociale et raccourci création | Clips dédié aux vidéos ; boutons accessibles aimer/commenter/republier/envoyer/enregistrer, une lecture active, pause et son explicites |
+| [IMG_7313.PNG](~/Downloads/IMG_7313.PNG) | Accueil « Pour vous », création et activité en haut, stories par avatars, post dans le flux, navigation basse | Accueil pour tous les posts et stories ; séparation de la navigation principale, du classement et des actions sur le post |
+| [IMG_7315.PNG](~/Downloads/IMG_7315.PNG) | Post sponsorisé : auteur, libellé commercial, galerie, CTA, actions et légende | Carte d'offre liée claire et CTA correspondant à l'objet réel. Ne pas reprendre « Installer l'application » pour une vente interne ni activer un système publicitaire inexistant |
 
 Les teintes de la barre basse varient dans ces références. ANTSIA conserve un fond de contrôle
 stable et lisible, clair ou sombre, avec une transparence limitée. Les marges doivent protéger
@@ -21,8 +21,8 @@ Dynamic Island appartiennent au système : elles ne sont pas dessinées dans le 
 
 ## 2. Ce que les vidéos ajoutent
 
-[Vidéo 1](</Users/okatech/Downloads/ScreenRecording_10-20-2026 22-40-27_1.MP4>) : environ
-114 secondes, image 1290 × 2796. [Vidéo 2](</Users/okatech/Downloads/ScreenRecording_10-20-2026 22-43-23_1.MP4>) :
+[Vidéo 1](<~/Downloads/ScreenRecording_10-20-2026 22-40-27_1.MP4>) : environ
+114 secondes, image 1290 × 2796. [Vidéo 2](<~/Downloads/ScreenRecording_10-20-2026 22-43-23_1.MP4>) :
 environ 61 secondes, même définition. Analyse visuelle par planches échantillonnées puis
 extractions ciblées ; pas de transcription audio ni affirmation de lecture exhaustive image
 par image. Les repères suivants désignent le temps dans le fichier, pas l'heure de la barre iOS.

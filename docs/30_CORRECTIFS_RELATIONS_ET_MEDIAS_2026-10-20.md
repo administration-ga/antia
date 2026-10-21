@@ -48,6 +48,6 @@ Les deux blobs sont conservés. Aucun verdict forcé, libération manuelle ou mo
 
 Suite autorisée : la démo a ensuite été raccordée au même service, avec deux nouvelles publications vidéo et lectures complètes après rechargement, sans avertissement. Voir [la recette dédiée](31_RECETTE_ANTIVIRUS_DEMO_2026-10-20.md) ; aucun changement de configuration de production lors de cette suite.
 
-Preuves : docs/recette/relations-media-2026-10-20/. Sources/manifeste/bundles et journaux de publication : /Users/okatech/Library/Caches/antsia-releases/20261020-connection-request/.
+Preuves : docs/recette/relations-media-2026-10-20/. Sources/manifeste/bundles et journaux de publication : ~/Library/Caches/antsia-releases/20261020-connection-request/.
 
 Arbre, branche, index et travaux parallèles conservés ; aucun commit applicatif, push ou fichier .env modifié. Nettoyage limité aux deux anciennes copies node_modules et aux dépendances temporaires de cette publication, dans le cache de livraison, après lsof vide et absence de processus dépendant. La dernière copie de dépendances du backend a été retirée après la recette ; sources, manifestes et preuves sont conservés. Aucun projet ni donnée supprimé. Les variations df incluent les écritures des autres sessions ; ne pas attribuer toute variation au nettoyage.

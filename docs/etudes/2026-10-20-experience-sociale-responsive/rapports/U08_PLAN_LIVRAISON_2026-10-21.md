@@ -4,7 +4,7 @@ Lecture seule des sources, manifestes et preuves historiques ; aucun test, codeg
 
 ## Deux bases publiées distinctes à conserver
 
-Racine conservée : `/Users/okatech/Library/Caches/antsia-releases/20261020-connection-request/`.
+Racine conservée : `~/Library/Caches/antsia-releases/20261020-connection-request/`.
 
 | Cible | Source de référence | Inventaire et preuve |
 |---|---|---|

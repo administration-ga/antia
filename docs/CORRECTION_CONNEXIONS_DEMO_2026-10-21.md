@@ -25,4 +25,4 @@ Recette sur la session Chrome existante : Awa MBA `@membre.demo` conservée, pan
 
 Les deux fichiers applicatifs publiés sont identiques aux fichiers réels de l’arbre partagé. Aucun contenu de test créé, supprimé ou accepté pour obtenir un résultat artificiel.
 
-Preuves : `docs/recette/connexions-demo-2026-10-21/`. Manifeste exact : `/Users/okatech/Library/Caches/antsia-releases/20261021-connections-pagination/demo/manifest.json`.
+Preuves : `docs/recette/connexions-demo-2026-10-21/`. Manifeste exact : `~/Library/Caches/antsia-releases/20261021-connections-pagination/demo/manifest.json`.

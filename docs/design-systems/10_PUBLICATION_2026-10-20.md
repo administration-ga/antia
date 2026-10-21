@@ -94,4 +94,4 @@ Aucun message, appel, achat ou publication de contenu n'a été effectué.
 - [Accueil téléphone clair](recette/publication-accueil-mobile.jpg)
 
 Paquet, manifeste, journaux et sondes conservés dans
-`/Users/okatech/Library/Caches/antsia-releases/20261020-sept-design-systems/`.
+`~/Library/Caches/antsia-releases/20261020-sept-design-systems/`.

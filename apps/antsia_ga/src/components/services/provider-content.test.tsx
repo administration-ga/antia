@@ -40,7 +40,8 @@ describe("MP06 — présentation prestataire et profil publics", () => {
     const container = dom(html)
     expect(container.querySelector("h1, main")).toBeNull()
     expect([...container.querySelectorAll("a")].some(link => link.getAttribute("href") === routes.serviceRequests())).toBe(true)
-    expect([...container.querySelectorAll("a")].some(link => link.getAttribute("href") === routes.feed())).toBe(true)
+    // Le retour au fil appartient à la coque spécialisée (MP01, specialized-page.test) ; le contenu mène à la page sociale.
+    expect([...container.querySelectorAll("a")].some(link => link.getAttribute("href") === routes.page("atelier"))).toBe(true)
   })
   it("n'infère aucune modalité depuis un tarif fixe et donne un état honnête pour l'ancien catalogue", () => {
     const t = translations().t
