@@ -1,0 +1,306 @@
+{
+  "checkedAt": "2026-10-21T00:35:44.456751+00:00",
+  "production": {
+    "project": "antsia",
+    "version": "global-native-20261021-08edc2d08cb9b596",
+    "sourceCommit": "1b6a45e2498935d5bffd055e8f27a2b1f7a56938",
+    "deploymentId": "dpl_8CeRkqMNT7reNhCQcvVXZ3q5UWjt",
+    "deploymentUrl": "https://antsia-p3pqifg4f-okatechs-projects-f0102678.vercel.app",
+    "readyState": "READY",
+    "retainedConcurrentPublication": true,
+    "ourStagedDeploymentNotPromoted": "dpl_388vHtPYBhiUfKAsKtf2pgFnd1ZF",
+    "webAndBackendSourcesMatchOurValidatedCandidate": true,
+    "exceptions": "two DIASPORALE themes not imported by ANTSIA; native acceptance tools and documentation remain on their owner branch",
+    "publicChecks": {
+      "health": {
+        "status": "ok",
+        "application": "antsia-ga",
+        "version": "global-native-20261021-08edc2d08cb9b596",
+        "backend": "configured"
+      },
+      "entryHttp": 200,
+      "correctBackendCsp": true,
+      "faviconSha256": "17d852570781ea593894532cff3ef4e5c57481d873db9eabbf911ccec3ea9149"
+    }
+  },
+  "demo": {
+    "target": "demo",
+    "project": "antsia-demo",
+    "projectId": "prj_EVmqRAr7i4vKF25o6mpNKVbajgLC",
+    "exitCode": 0,
+    "seconds": 107.49,
+    "deploymentUrl": "https://antsia-demo-n40mxgy1h-okatechs-projects-f0102678.vercel.app",
+    "version": "verification-20261021-demo-070aafd886c4337a",
+    "sourceFingerprint": "070aafd886c4337aacb3ba761ca946371103ed2d2f1da55a695d18808a548cd9",
+    "sourceCommits": {
+      "antsia": "c7c96bc8df480e1bd7ad25a0434336997127e024",
+      "diasporale": "57ebf513cce75c7c7f07f89be1173bc2629bc00a"
+    },
+    "publicBefore": {
+      "status": "ok",
+      "application": "antsia-ga",
+      "version": "favicon-20261021-f2be15a6cd2d90e6",
+      "backend": "configured"
+    },
+    "promoted": true,
+    "urlSource": "Vercel build log exact Production URL",
+    "stagedHealth": {
+      "status": "ok",
+      "application": "antsia-ga",
+      "version": "verification-20261021-demo-070aafd886c4337a",
+      "backend": "configured"
+    },
+    "publicHealth": {
+      "status": "ok",
+      "application": "antsia-ga",
+      "version": "verification-20261021-demo-070aafd886c4337a",
+      "backend": "configured"
+    },
+    "publicEntryHttp": 200,
+    "backendCspCorrect": true,
+    "checkedAt": "2026-10-21T00:34:53.797271+00:00"
+  },
+  "backendProduction": {
+    "target": "prod",
+    "deployment": "diligent-avocet-585",
+    "sourceCommit": "b91a0f860c6e755da42acf8757207937608e95c7",
+    "exitCode": 0,
+    "seconds": 32.17,
+    "concurrentModuleHashGuard": true,
+    "seedsRun": false,
+    "environmentChanged": false,
+    "publicNetworkQuery": "success"
+  },
+  "backendDemo": {
+    "target": "demo",
+    "deployment": "vivid-hedgehog-655",
+    "sourceCommit": "68d29f938b1a4b30badbd03a9d3c09d7714ad86b",
+    "exitCode": 0,
+    "seconds": 34.83,
+    "concurrentModuleHashGuard": true,
+    "seedsRun": false,
+    "environmentChanged": false,
+    "publicNetworkQuery": "success"
+  },
+  "commonVerification": {
+    "codegen": "offline official 1.45 template; local inventory, unchanged components; no backend push",
+    "resumedAfter": "two DIASPORALE CSS/test-helper prerequisites; backend and ratchet inputs unchanged",
+    "steps": [
+      {
+        "step": "types-convex",
+        "exitCode": 0,
+        "seconds": 6.17
+      },
+      {
+        "step": "types-tests",
+        "exitCode": 0,
+        "seconds": 0.19
+      },
+      {
+        "step": "backend",
+        "exitCode": 0,
+        "seconds": 405.26
+      },
+      {
+        "step": "ratchets",
+        "exitCode": 0,
+        "seconds": 23.44
+      },
+      {
+        "step": "scripts",
+        "exitCode": 0,
+        "seconds": 0.14
+      },
+      {
+        "step": "types-workspaces",
+        "exitCode": 0,
+        "seconds": 45.95
+      },
+      {
+        "step": "tests-workspaces",
+        "exitCode": 0,
+        "seconds": 277.15
+      },
+      {
+        "step": "lint-workspaces",
+        "exitCode": 0,
+        "seconds": 55.15
+      }
+    ],
+    "exitCode": 0,
+    "seconds": 378.25,
+    "complete": true
+  },
+  "workspaceTestCounts": [
+    {
+      "workspace": "@antsia/social-domain",
+      "passed": 899
+    },
+    {
+      "workspace": "@antsia/social-contracts",
+      "passed": 86
+    },
+    {
+      "workspace": "@antsia/api",
+      "passed": 219
+    },
+    {
+      "workspace": "@antsia/social-native",
+      "passed": 10
+    },
+    {
+      "workspace": "@antsia/ui",
+      "passed": 2286
+    },
+    {
+      "workspace": "@antsia/social-features",
+      "passed": 4119
+    },
+    {
+      "workspace": "@diasporale/domain",
+      "passed": 697
+    },
+    {
+      "workspace": "@diasporale/features",
+      "passed": 962
+    },
+    {
+      "workspace": "admin-antsia-ga",
+      "passed": 81
+    },
+    {
+      "workspace": "antsia-ga",
+      "passed": 763
+    },
+    {
+      "workspace": "antsia-mobile",
+      "passed": 58
+    },
+    {
+      "workspace": "diasporale-com",
+      "passed": 1399
+    }
+  ],
+  "demoVerification": {
+    "steps": [
+      {
+        "step": "frozen-install",
+        "exitCode": 0,
+        "seconds": 0.08
+      },
+      {
+        "step": "types-convex",
+        "exitCode": 0,
+        "seconds": 18.5
+      },
+      {
+        "step": "types-tests",
+        "exitCode": 0,
+        "seconds": 0.24
+      },
+      {
+        "step": "backend",
+        "exitCode": 0,
+        "seconds": 38.84
+      },
+      {
+        "step": "ratchets",
+        "exitCode": 0,
+        "seconds": 46.21
+      },
+      {
+        "step": "types-web",
+        "exitCode": 0,
+        "seconds": 20.5
+      },
+      {
+        "step": "tests-web",
+        "exitCode": 0,
+        "seconds": 34.14
+      },
+      {
+        "step": "lint-web",
+        "exitCode": 0,
+        "seconds": 18.36
+      }
+    ],
+    "exitCode": 0,
+    "complete": true,
+    "seconds": 176.88,
+    "commonValidation": "candidate-verification.json; unchanged shared packages verified there"
+  },
+  "onlineChecks": {
+    "prod": {
+      "health": {
+        "status": "ok",
+        "application": "antsia-ga",
+        "version": "global-native-20261021-08edc2d08cb9b596",
+        "backend": "configured"
+      },
+      "entryHttp": 200,
+      "correctBackendCsp": true,
+      "faviconSha256": "17d852570781ea593894532cff3ef4e5c57481d873db9eabbf911ccec3ea9149"
+    },
+    "demo": {
+      "health": {
+        "status": "ok",
+        "application": "antsia-ga",
+        "version": "verification-20261021-demo-070aafd886c4337a",
+        "backend": "configured"
+      },
+      "entryHttp": 200,
+      "correctBackendCsp": true,
+      "faviconSha256": "17d852570781ea593894532cff3ef4e5c57481d873db9eabbf911ccec3ea9149"
+    },
+    "demoAssets": [
+      {
+        "path": "demo-media/animation-20261020/savon-artisanal.png",
+        "status": 200,
+        "hashMatchesPublishedSource": true
+      },
+      {
+        "path": "demo-media/animation-20261020/service-photo.png",
+        "status": 200,
+        "hashMatchesPublishedSource": true
+      },
+      {
+        "path": "demo-media/animation-20261020/association-littoral.png",
+        "status": 200,
+        "hashMatchesPublishedSource": true
+      },
+      {
+        "path": "demo-media/animation-20261020/panier-raphia.png",
+        "status": 200,
+        "hashMatchesPublishedSource": true
+      },
+      {
+        "path": "demo-media/animation-20261020/service-informatique.png",
+        "status": 200,
+        "hashMatchesPublishedSource": true
+      },
+      {
+        "path": "demo-media/animation-20261020/association-lecture.png",
+        "status": 200,
+        "hashMatchesPublishedSource": true
+      },
+      {
+        "path": "demo-media/animation-20261020/epicerie-produits.png",
+        "status": 200,
+        "hashMatchesPublishedSource": true
+      },
+      {
+        "path": "demo-media/animation-20261020/sac-wax.png",
+        "status": 200,
+        "hashMatchesPublishedSource": true
+      }
+    ],
+    "checkedAt": "2026-10-21T00:35:44.456751+00:00"
+  },
+  "prs": [
+    "https://github.com/administration-ga/antsia/pull/19",
+    "https://github.com/administration-ga/antsia/pull/20",
+    "https://github.com/administration-ga/diasporale/pull/21"
+  ],
+  "dataOrSecretsChanged": false,
+  "nativeBinaryOrPhysicalCallTested": false
+}
