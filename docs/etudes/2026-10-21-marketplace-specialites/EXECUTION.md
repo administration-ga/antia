@@ -26,8 +26,12 @@ Autorisation : propriétaire, 21 octobre 2026. Ordre demandé : MP00 puis suites
 | MP10 | Admission fermée raccordée ; profils conditionnels | /rencontres informative et API fermée ; preuve de majorité non fournie. Aucune participation, préférence ou donnée sensible recueillie. |
 | MP11 | Maintenu fermé | Aucune source iCom personnelle ni intérêt/réciprocité ; admission MP10 requise selon la décision du propriétaire. |
 | MP12 | Sources raccordées, contrôles ciblés verts ; validation finale en attente | Modèle éditorial, habilitations acceptées, versions, workflow et médias gardés ;29backend et9nouveauxUI verts, lint ciblé0 ; voir14_PRESSE_MP12_MP13. Ces preuves ne couvrent pas les dernières extensions MP13. |
-| MP13 | Sources raccordées, vérifications en attente | Sites médias membre/public, annuaire, référence sociale canonique, fermeture des nouveaux commentaires ; génération/recette finales après récupération du disque. |
-| MP14 | Préparation du candidat | Vérifications intégrées et composition préservant les publications concurrentes ; voir15_ADMISSION_MP14. |
+| MP13 | Sources raccordées, contrôles verts sur le candidat MP14 | Sites médias membre/public, annuaire, référence sociale canonique, fermeture des nouveaux commentaires. Vérifiés dans le candidat composé : génération, typages et suites moteur/application vertes (voir 16_RAPPORT_LIVRAISON_MP00_MP14). Aucun article réel publié. |
+| MP14 | Candidat composé et vérifié ; publication en attente de l'accord du propriétaire | Branche `claude/marketplace-mp00-mp14-20261021` : `main` d2ac0be + instantané de l'arbre partagé eea4f0c (P, U, MP) + correctifs. 13 227 tests ANTSIA verts, typages et cliquets verts. Production non déployée : `convex deploy` puis Vercel exigent l'accord explicite. Voir 16_RAPPORT_LIVRAISON_MP00_MP14. |
+
+## MP14 — candidat du 21 octobre (reprise après interruption Codex)
+
+Les sessions Codex ont été interrompues à 17 h 50 pendant la composition dans un bac à sable Vercel inaccessible à la reprise. Le candidat a été recomposé localement, hors de l'arbre partagé (instantané par index privé, fusion dans un dossier temporaire, backend Convex local propre au dossier). Détails, chiffres, conditions DIASPORALE et plan de mise en ligne : [16_RAPPORT_LIVRAISON_MP00_MP14](16_RAPPORT_LIVRAISON_MP00_MP14.md).
 
 ## Conditions externes
 
