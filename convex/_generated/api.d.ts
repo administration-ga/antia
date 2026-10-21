@@ -466,7 +466,9 @@ import type * as modules_thematicGroups_thematicGroups from "../modules/thematic
 import type * as seeds_demoContent from "../seeds/demoContent.js";
 import type * as seeds_demoContentConfig from "../seeds/demoContentConfig.js";
 import type * as seeds_demoContentMedia from "../seeds/demoContentMedia.js";
+import type * as seeds_demoFigurants from "../seeds/demoFigurants.js";
 import type * as seeds_demoMediaManifest from "../seeds/demoMediaManifest.js";
+import type * as seeds_demoPhotoManifest from "../seeds/demoPhotoManifest.js";
 import type * as seeds_devSocial from "../seeds/devSocial.js";
 import type * as seeds_foundations from "../seeds/foundations.js";
 
@@ -935,7 +937,9 @@ declare const fullApi: ApiFromModules<{
   "seeds/demoContent": typeof seeds_demoContent;
   "seeds/demoContentConfig": typeof seeds_demoContentConfig;
   "seeds/demoContentMedia": typeof seeds_demoContentMedia;
+  "seeds/demoFigurants": typeof seeds_demoFigurants;
   "seeds/demoMediaManifest": typeof seeds_demoMediaManifest;
+  "seeds/demoPhotoManifest": typeof seeds_demoPhotoManifest;
   "seeds/devSocial": typeof seeds_devSocial;
   "seeds/foundations": typeof seeds_foundations;
 }>;

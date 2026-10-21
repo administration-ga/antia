@@ -4,12 +4,13 @@
 # À lancer par le propriétaire, sur sa machine, avec ses clés de déploiement :
 #
 #   ANTSIA_CONVEX_DEMO_DEPLOY_KEY='…' ANTSIA_CONVEX_PROD_DEPLOY_KEY='…' \
-#     bash scripts/convex-deploy-demo-production.sh [verifier|demo|production|tout]
+#     bash scripts/convex-deploy-demo-production.sh [verifier|demo|graines|production|tout]
 #
 #   verifier    contrôles seulement (clés, cible, main, disque) : rien n'est déployé ;
 #   demo        déploie la démonstration seule ;
+#   graines     graines de la démonstration seules (comptes OTP, contenus, figurants, images) ;
 #   production  déploie la production seule ;
-#   tout        démonstration, pause pour les graines de démo, puis production (défaut).
+#   tout        démonstration, graines de démo, pause de contrôle, puis production (défaut).
 #
 # Garde-fous :
 # - le code vient d'un export propre de origin/main (jamais de l'arbre de travail partagé,
@@ -29,7 +30,7 @@ MARKETPLACE_MARKER="convex/modules/shops/marketplaceRead.ts"
 MIN_FREE_MIB=3072
 
 mode="${1:-tout}"
-case "$mode" in verifier|demo|production|tout) ;; *) echo "Mode inconnu : $mode (verifier, demo, production ou tout)." >&2; exit 2 ;; esac
+case "$mode" in verifier|demo|graines|production|tout) ;; *) echo "Mode inconnu : $mode (verifier, demo, graines, production ou tout)." >&2; exit 2 ;; esac
 
 ANTSIA_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 ECOSYSTEMS="$(cd "$ANTSIA_DIR/.." && pwd)"
@@ -53,7 +54,7 @@ step "Contrôles"
 command -v git >/dev/null || fail "git introuvable."
 command -v bun >/dev/null || fail "bun introuvable."
 if [ "$mode" != "production" ]; then check_key "démonstration" ANTSIA_CONVEX_DEMO_DEPLOY_KEY "$DEMO_DEPLOYMENT"; fi
-if [ "$mode" != "demo" ]; then check_key "production" ANTSIA_CONVEX_PROD_DEPLOY_KEY "$PROD_DEPLOYMENT"; fi
+if [ "$mode" != "demo" ] && [ "$mode" != "graines" ]; then check_key "production" ANTSIA_CONVEX_PROD_DEPLOY_KEY "$PROD_DEPLOYMENT"; fi
 
 git -C "$ANTSIA_DIR" fetch --quiet origin main
 git -C "$DIASPORALE_DIR" fetch --quiet origin main
@@ -95,10 +96,15 @@ if [ "$mode" = "demo" ] || [ "$mode" = "tout" ]; then
   deploy "la démonstration" ANTSIA_CONVEX_DEMO_DEPLOY_KEY "$DEMO_DEPLOYMENT"
 fi
 
+if [ "$mode" = "graines" ] || [ "$mode" = "tout" ]; then
+  step "Graines de démonstration ($DEMO_DEPLOYMENT)"
+  # Rejouables : rien n'est recréé, rien de retiré n'est republié ; la clé reste dans l'environnement.
+  (cd "$WORK/ANTSIA" && node scripts/seed-demo-content.mjs)
+fi
+
 if [ "$mode" = "tout" ]; then
-  step "Pause : graines de démonstration"
-  echo "Lancez maintenant les graines de démonstration sur $DEMO_DEPLOYMENT,"
-  echo "contrôlez la démo, puis appuyez sur Entrée pour passer à la production."
+  step "Pause : contrôle de la démonstration"
+  echo "Contrôlez la démo sur https://antsia.vercel.app/demo, puis appuyez sur Entrée pour passer à la production."
   read -r -p "Entrée pour continuer, Ctrl-C pour s'arrêter ici. " _
 fi
 

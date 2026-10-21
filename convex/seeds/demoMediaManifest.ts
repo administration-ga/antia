@@ -1,4 +1,6 @@
 /** Assets de démonstration produits par la plateforme ; empreintes vérifiées avant toute inscription serveur. */
+import { DEMO_PHOTO_COLLECTION, DEMO_PHOTO_MANIFEST } from "./demoPhotoManifest"
+
 export const DEMO_MEDIA_MANIFEST: Record<string, {filename:string;sha256:string;width:number;height:number;bytes:number;mimeType:"image/png";altText:string}> = {
   "epicerie-produits": {
     "filename": "epicerie-produits.png",
@@ -72,4 +74,17 @@ export const DEMO_MEDIA_MANIFEST: Record<string, {filename:string;sha256:string;
     "mimeType": "image/png",
     "altText": "Groupe d’adultes gabonais participant au ramassage de déchets sur une plage tropicale verdoyante. Illustration de démonstration générée par IA."
   }
+}
+
+/** Dossier public des illustrations générées (`apps/antsia_ga/public/demo-media/<collection>`). */
+export const DEMO_ILLUSTRATION_COLLECTION = "animation-20261020"
+
+export type DemoMediaAsset = { collection: string; filename: string; sha256: string; width: number; height: number; bytes: number; mimeType: "image/png" | "image/jpeg"; altText: string }
+
+/** Un asset du catalogue fermé (illustration générée ou photo libre), jamais une clé héritée de l'objet. */
+export function demoMediaAsset(slug: string): DemoMediaAsset | null {
+  const illustration = Object.prototype.hasOwnProperty.call(DEMO_MEDIA_MANIFEST, slug) ? DEMO_MEDIA_MANIFEST[slug] : undefined
+  if (illustration) return { ...illustration, collection: DEMO_ILLUSTRATION_COLLECTION }
+  const photo = Object.prototype.hasOwnProperty.call(DEMO_PHOTO_MANIFEST, slug) ? DEMO_PHOTO_MANIFEST[slug] : undefined
+  return photo ? { ...photo, mimeType: "image/jpeg", collection: DEMO_PHOTO_COLLECTION } : null
 }
