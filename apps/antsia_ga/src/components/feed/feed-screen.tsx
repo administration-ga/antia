@@ -1,6 +1,8 @@
 "use client"
 
 import { useNetwork } from "@antsia/api/network"
+import type { CSSProperties } from "react"
+import { demoWorkspaceHeight } from "@/lib/demo-embed"
 import { ReseauAgentPage } from "@antsia/social-features/reseau-personnel"
 
 import { MemberPage, MemberTopBar } from "@/components/member-chrome"
@@ -32,7 +34,7 @@ export function FeedScreen({ filter = { kind: "personal" } }: { filter?: MemberF
     return <div className="min-h-dvh bg-background"><MemberTopBar /><main id="contenu" className="mx-auto flex max-w-3xl flex-col gap-4 p-6">{invalid}</main></div>
   }
   return (
-    <div className="flex min-h-dvh flex-col bg-background min-[960px]:h-dvh">
+    <div className="flex [--antsia-workspace-height:100dvh] min-h-[var(--antsia-workspace-height,100dvh)] flex-col bg-background min-[960px]:h-[var(--antsia-workspace-height,100dvh)]" style={{ "--antsia-workspace-height": demoWorkspaceHeight() } as CSSProperties}>
       <MemberTopBar onMobile="hidden" />
       {destinations ? null : <nav aria-label={t("nav.discover")} className="flex flex-wrap items-center gap-1 border-b border-border px-3 min-[960px]:hidden">
         <Link href={routes.feedPreferences()} className="inline-flex min-h-11 items-center rounded-lg px-3 text-sm underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">{tApp("feedPreferences.title")}</Link>

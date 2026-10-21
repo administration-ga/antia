@@ -7,6 +7,7 @@ import { useId, useState } from "react"
 import { useTranslation } from "react-i18next"
 
 import { MemberPage } from "@/components/member-chrome"
+import { DemoEntryLink } from "@/components/demo-embed"
 import { useMemberSession } from "@/components/network-shell"
 import { Button, buttonClassName } from "@/components/shared/controls"
 import { routes } from "@/lib/routes"
@@ -90,6 +91,7 @@ export function MemberMeScreen() {
         <section aria-labelledby={titles.account} className="flex flex-col gap-4">
           <h2 id={titles.account} className="text-lg font-semibold">{t("me.accountTitle")}</h2>
           <EntryList entries={meEntriesIn("account", handle)} />
+          <DemoEntryLink />
           {/* La MÊME sortie que la barre du haut : la porte partagée
               (`signOutEverywhere`), puis une navigation complète. */}
           <Button

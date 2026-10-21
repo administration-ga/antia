@@ -12,8 +12,9 @@ import Link from "next/link"
 import { useMemberSession } from "./network-shell"
 import { Button } from "./shared/controls"
 import { authClient } from "@/lib/auth-client"
+import { browserAppPath } from "@/lib/app-path"
 import { routes } from "@/lib/routes"
-import { resumeSessionBridge, rotateSessionBridgeFence } from "@/lib/session-bridge-client"
+import { resumeSessionBridge, rotateSessionBridgeFence, withSessionBridgeLock } from "@/lib/session-bridge-client"
 
 /** Identité et passage entre applications, ouverts par un contrôle explicite. */
 export function IdentityTools() {
@@ -74,13 +75,16 @@ export function IdentityTools() {
               setLinking(true)
               let timer: ReturnType<typeof setTimeout> | undefined
               try {
-                rotateSessionBridgeFence()
-                const result = await Promise.race([
-                  authClient.oauth2.link({ providerId: "idn", callbackURL: routes.feed(), fetchOptions: { signal: controller.signal } }),
-                  new Promise<never>((_resolve, reject) => {
-                    timer = setTimeout(() => { controller.abort(); reject(new Error("timeout")) }, 10_000)
-                  }),
-                ])
+                const result = await withSessionBridgeLock(async () => {
+                  controller.signal.throwIfAborted()
+                  rotateSessionBridgeFence()
+                  return Promise.race([
+                    authClient.oauth2.link({ providerId: "idn", callbackURL: browserAppPath(routes.feed()), fetchOptions: { signal: controller.signal } }),
+                    new Promise<never>((_resolve, reject) => {
+                      timer = setTimeout(() => { controller.abort(); reject(new Error("timeout")) }, 10_000)
+                    }),
+                  ])
+                }, controller.signal)
                 if (result.error) toast.error(t("identity.handoffFailed"))
               } catch { toast.error(t("identity.handoffFailed")) }
               finally {
@@ -96,13 +100,15 @@ export function IdentityTools() {
           {configuration?.applications.filter((app) => app.key !== "antsia_ga").map((app) => (
             <Button key={app.key} variant="ghost" disabled={sso.pending} onClick={async () => {
               try {
-              rotateSessionBridgeFence()
-              const result = await sso.navigateExternal(routes.application(app.origin))
-              if (result.kind === "refused") toast.error(t("identity.handoffFailed"))
+                const result = await withSessionBridgeLock(async () => {
+                  rotateSessionBridgeFence()
+                  return sso.navigateExternal(routes.application(app.origin))
+                })
+                if (result.kind === "refused") toast.error(t("identity.handoffFailed"))
               } catch { toast.error(t("identity.handoffFailed")) }
             }}>{t(`identity.${app.key}`)}</Button>
           ))}
-          <Button variant="outline" onClick={() => { try { resumeSessionBridge() } catch { toast.error(t("identity.handoffFailed")) } }}>{tPublic("session.resume")}</Button>
+          <Button variant="outline" onClick={async () => { try { await resumeSessionBridge() } catch { toast.error(t("identity.handoffFailed")) } }}>{tPublic("session.resume")}</Button>
         </section>
       ) : null}
     </div>
