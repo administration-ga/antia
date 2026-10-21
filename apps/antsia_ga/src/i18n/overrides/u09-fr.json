@@ -69,6 +69,9 @@
       "close": {
         "done": "Discussion close."
       }
+    },
+    "messagerieGroupeInfos": {
+      "settingsLabel": "Contenu et réglages du groupe"
     }
   },
   "iappel": {
@@ -81,7 +84,8 @@
       "tabs": {
         "evenements": {
           "label": "Événements",
-          "shortLabel": "Événements"
+          "shortLabel": "Événements",
+          "description": "Vos invitations et les événements que vous organisez. Répondez, annoncez-les au réseau."
         }
       }
     },
@@ -116,16 +120,36 @@
     "evenementsPanel": {
       "toast": {
         "cancelled": "Événement annulé.",
-        "created": "Événement créé."
+        "created": "Événement créé.",
+        "cancelFailed": "Impossible d'annuler cet événement.",
+        "createFailed": "L'événement n'a pas pu être créé."
+      },
+      "errorMessage": "Vos événements n'ont pas pu être chargés.",
+      "truncated": "Votre agenda est long : seuls les événements les plus proches sont affichés.",
+      "create": "Créer un événement",
+      "card": {
+        "confirmCancelStatus": "Confirmez l'annulation de l'événement, ou revenez en arrière.",
+        "askCancel": "Annuler l'événement"
+      },
+      "composer": {
+        "form": "Créer un événement",
+        "title": "Nouvel événement",
+        "zone": "Un événement de votre agenda — le fuseau ({{timeZone}}) est fixé à la création.",
+        "missingTiming": "Renseignez la date et les heures de l'événement.",
+        "submit": "Créer l'événement"
       }
     },
     "evenementsRail": {
-      "title": "Événements"
+      "title": "Événements",
+      "error": "Les événements sont momentanément indisponibles."
     },
     "announceEventDialog": {
       "toast": {
-        "announced": "Événement annoncé dans votre fil."
-      }
+        "announced": "Événement annoncé dans votre fil.",
+        "failed": "Impossible d'annoncer cet événement."
+      },
+      "bodyPlaceholder": "Pourquoi cet événement compte, ce qu'on y fera…",
+      "audienceHint": "L'annonce est une publication de votre fil. Elle n'invite personne : les invitations, elles, se font depuis l'événement."
     },
     "reseauMenuRail": {
       "settings": "Réglages"
@@ -145,10 +169,20 @@
     },
     "reseauAgentPage": {
       "railEndLabel": "Découverte du réseau"
+    },
+    "shared": {
+      "notification": {
+        "eventInvite": "{{actor}} vous invite à un événement."
+      }
+    },
+    "evenementsList": {
+      "emptyAgenda": "Votre agenda personnel est vide. Créez un événement pour inviter vos connexions, ou attendez une invitation.",
+      "titleLength": "Un titre d'événement compte entre {{min}} et {{max}} caractères."
     }
   },
   "errors": {
-    "liveRoleRequired": "Votre rôle dans ce direct ne permet pas ce geste."
+    "liveRoleRequired": "Votre rôle dans ce direct ne permet pas ce geste.",
+    "eventOrganizerRequired": "Seul l'organisateur de cet événement peut faire ce geste."
   },
   "rules": {
     "LIVE_TITLE_REQUIRED": "Un direct doit porter un titre.",
@@ -174,6 +208,13 @@
     "LIVE_REPLAY_WITHDRAWN": "Ce replay a été retiré : il n'y a plus rien à publier.",
     "LIVE_REPLAY_RETRY_AFTER_END": "Le direct doit être terminé pour relancer son replay.",
     "LIVE_REPLAY_NOTHING_TO_RETRY": "Il n'y a pas de replay à relancer pour ce direct.",
-    "LIVE_REPLAY_UNAVAILABLE": "Ce direct n'a pas de replay disponible."
+    "LIVE_REPLAY_UNAVAILABLE": "Ce direct n'a pas de replay disponible.",
+    "EVENT_TITLE_LENGTH": "Un titre d'événement compte entre {{min}} et {{max}} caractères.",
+    "EVENT_DESCRIPTION_TOO_LONG": "Une description d'événement est limitée à {{max}} caractères.",
+    "EVENT_LOCATION_TOO_LONG": "Un lieu d'événement est limité à {{max}} caractères.",
+    "EVENT_WINDOW_INVALID": "Les dates de l'événement sont invalides : la fin suit strictement le début.",
+    "EVENT_TOO_LONG": "Un événement est limité à {{maxDays}} jours.",
+    "EVENT_TIMEZONE_INVALID": "Le fuseau horaire de l'événement est invalide.",
+    "EVENT_CANCELLED": "Cet événement est annulé."
   }
 }
