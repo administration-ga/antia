@@ -31,7 +31,8 @@ export const RESEAU_ADAPTIVE_CSS = `
     height: auto;
     min-height: 0;
     width: 100%;
-    max-width: 1400px;
+    /* 1 400 px marges comprises, comme .antsia-member-frame (box-sizing: border-box). */
+    max-width: calc(1400px - 2 * var(--rp-adaptive-gutter));
     margin-inline: auto;
     overflow: visible;
     padding-bottom: 48px;
@@ -90,7 +91,7 @@ export const RESEAU_ADAPTIVE_CSS = `
     @container rp-page (min-width: 1280px) {
       .rp-scope[data-navigation-layout="adaptive"] .rp-grid {
         grid-template-columns: var(--rp-adaptive-nav-width) minmax(0, 1fr) 312px;
-        max-width: 1400px;
+        max-width: calc(1400px - 2 * var(--rp-adaptive-gutter));
       }
       .rp-scope[data-navigation-layout="adaptive"] .rp-rail-end {
         display: flex;
