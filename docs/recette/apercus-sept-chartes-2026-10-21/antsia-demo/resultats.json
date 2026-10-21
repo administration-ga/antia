@@ -1,0 +1,2963 @@
+{
+  "testedAt": "2026-10-21T06:10:52.417Z",
+  "url": "https://antsia-demo.vercel.app/fil",
+  "accountType": "existing demo member",
+  "authenticatedAfterReload": true,
+  "restored": {
+    "appearance": {
+      "label": "Clair",
+      "value": "light"
+    },
+    "theme": {
+      "label": "Gaboma",
+      "value": "gaboma"
+    }
+  },
+  "viewportReset": true,
+  "noDraft": true,
+  "composerClosed": true,
+  "published": false,
+  "console": [],
+  "checks": [
+    {
+      "theme": "Gaboma",
+      "size": "bureau",
+      "appearance": "clair",
+      "kind": "photo",
+      "charte": "antsia",
+      "colorScheme": "light",
+      "dark": false,
+      "dialog": {
+        "clientWidth": 1440,
+        "scrollWidth": 1440
+      },
+      "media": [
+        {
+          "bottom": 554.75,
+          "decoded": true,
+          "error": null,
+          "height": 170.25,
+          "left": 479,
+          "local": true,
+          "naturalHeight": 1024,
+          "naturalWidth": 1536,
+          "right": 706,
+          "tag": "IMG",
+          "top": 384.5,
+          "visible": true,
+          "width": 227
+        }
+      ],
+      "viewport": {
+        "height": 1000,
+        "width": 1440
+      },
+      "path": "captures/gaboma-bureau-clair-photo.jpg"
+    },
+    {
+      "theme": "Gaboma",
+      "size": "tablette",
+      "appearance": "clair",
+      "kind": "photo",
+      "charte": "antsia",
+      "colorScheme": "light",
+      "dark": false,
+      "dialog": {
+        "clientWidth": 820,
+        "scrollWidth": 820
+      },
+      "media": [
+        {
+          "bottom": 370,
+          "decoded": true,
+          "error": null,
+          "height": 123.75,
+          "left": 38,
+          "local": true,
+          "naturalHeight": 1024,
+          "naturalWidth": 1536,
+          "right": 203,
+          "tag": "IMG",
+          "top": 246.25,
+          "visible": true,
+          "width": 165
+        }
+      ],
+      "viewport": {
+        "height": 1180,
+        "width": 820
+      },
+      "path": "captures/gaboma-tablette-clair-photo.jpg"
+    },
+    {
+      "theme": "Gaboma",
+      "size": "mobile",
+      "appearance": "clair",
+      "kind": "photo",
+      "charte": "antsia",
+      "colorScheme": "light",
+      "dark": false,
+      "dialog": {
+        "clientWidth": 390,
+        "scrollWidth": 390
+      },
+      "media": [
+        {
+          "bottom": 499,
+          "decoded": true,
+          "error": null,
+          "height": 235.5,
+          "left": 38,
+          "local": true,
+          "naturalHeight": 1024,
+          "naturalWidth": 1536,
+          "right": 352,
+          "tag": "IMG",
+          "top": 263.5,
+          "visible": true,
+          "width": 314
+        }
+      ],
+      "viewport": {
+        "height": 844,
+        "width": 390
+      },
+      "path": "captures/gaboma-mobile-clair-photo.jpg"
+    },
+    {
+      "theme": "Gaboma",
+      "size": "mobile",
+      "appearance": "clair",
+      "kind": "video",
+      "charte": "antsia",
+      "colorScheme": "light",
+      "dark": false,
+      "dialog": {
+        "clientWidth": 390,
+        "scrollWidth": 390
+      },
+      "media": [
+        {
+          "bottom": 499,
+          "decoded": true,
+          "error": null,
+          "height": 235.5,
+          "left": 38,
+          "local": true,
+          "naturalHeight": 180,
+          "naturalWidth": 320,
+          "right": 352,
+          "tag": "VIDEO",
+          "top": 263.5,
+          "visible": true,
+          "width": 314
+        }
+      ],
+      "viewport": {
+        "height": 844,
+        "width": 390
+      },
+      "path": "captures/gaboma-mobile-clair-video.jpg"
+    },
+    {
+      "theme": "Gaboma",
+      "size": "tablette",
+      "appearance": "clair",
+      "kind": "video",
+      "charte": "antsia",
+      "colorScheme": "light",
+      "dark": false,
+      "dialog": {
+        "clientWidth": 820,
+        "scrollWidth": 820
+      },
+      "media": [
+        {
+          "bottom": 370,
+          "decoded": true,
+          "error": null,
+          "height": 123.75,
+          "left": 38,
+          "local": true,
+          "naturalHeight": 180,
+          "naturalWidth": 320,
+          "right": 203,
+          "tag": "VIDEO",
+          "top": 246.25,
+          "visible": true,
+          "width": 165
+        }
+      ],
+      "viewport": {
+        "height": 1180,
+        "width": 820
+      },
+      "path": "captures/gaboma-tablette-clair-video.jpg"
+    },
+    {
+      "theme": "Gaboma",
+      "size": "bureau",
+      "appearance": "clair",
+      "kind": "video",
+      "charte": "antsia",
+      "colorScheme": "light",
+      "dark": false,
+      "dialog": {
+        "clientWidth": 1440,
+        "scrollWidth": 1440
+      },
+      "media": [
+        {
+          "bottom": 554.75,
+          "decoded": true,
+          "error": null,
+          "height": 170.25,
+          "left": 479,
+          "local": true,
+          "naturalHeight": 180,
+          "naturalWidth": 320,
+          "right": 706,
+          "tag": "VIDEO",
+          "top": 384.5,
+          "visible": true,
+          "width": 227
+        }
+      ],
+      "viewport": {
+        "height": 1000,
+        "width": 1440
+      },
+      "path": "captures/gaboma-bureau-clair-video.jpg"
+    },
+    {
+      "theme": "Gaboma",
+      "size": "bureau",
+      "appearance": "sombre",
+      "kind": "photo",
+      "charte": "antsia",
+      "colorScheme": "dark",
+      "dark": true,
+      "dialog": {
+        "clientWidth": 1440,
+        "scrollWidth": 1440
+      },
+      "media": [
+        {
+          "bottom": 554.75,
+          "decoded": true,
+          "error": null,
+          "height": 170.25,
+          "left": 479,
+          "local": true,
+          "naturalHeight": 1024,
+          "naturalWidth": 1536,
+          "right": 706,
+          "tag": "IMG",
+          "top": 384.5,
+          "visible": true,
+          "width": 227
+        }
+      ],
+      "viewport": {
+        "height": 1000,
+        "width": 1440
+      },
+      "path": "captures/gaboma-bureau-sombre-photo.jpg"
+    },
+    {
+      "theme": "Gaboma",
+      "size": "tablette",
+      "appearance": "sombre",
+      "kind": "photo",
+      "charte": "antsia",
+      "colorScheme": "dark",
+      "dark": true,
+      "dialog": {
+        "clientWidth": 820,
+        "scrollWidth": 820
+      },
+      "media": [
+        {
+          "bottom": 370,
+          "decoded": true,
+          "error": null,
+          "height": 123.75,
+          "left": 38,
+          "local": true,
+          "naturalHeight": 1024,
+          "naturalWidth": 1536,
+          "right": 203,
+          "tag": "IMG",
+          "top": 246.25,
+          "visible": true,
+          "width": 165
+        }
+      ],
+      "viewport": {
+        "height": 1180,
+        "width": 820
+      },
+      "path": "captures/gaboma-tablette-sombre-photo.jpg"
+    },
+    {
+      "theme": "Gaboma",
+      "size": "mobile",
+      "appearance": "sombre",
+      "kind": "photo",
+      "charte": "antsia",
+      "colorScheme": "dark",
+      "dark": true,
+      "dialog": {
+        "clientWidth": 390,
+        "scrollWidth": 390
+      },
+      "media": [
+        {
+          "bottom": 499,
+          "decoded": true,
+          "error": null,
+          "height": 235.5,
+          "left": 38,
+          "local": true,
+          "naturalHeight": 1024,
+          "naturalWidth": 1536,
+          "right": 352,
+          "tag": "IMG",
+          "top": 263.5,
+          "visible": true,
+          "width": 314
+        }
+      ],
+      "viewport": {
+        "height": 844,
+        "width": 390
+      },
+      "path": "captures/gaboma-mobile-sombre-photo.jpg"
+    },
+    {
+      "theme": "Gaboma",
+      "size": "mobile",
+      "appearance": "sombre",
+      "kind": "video",
+      "charte": "antsia",
+      "colorScheme": "dark",
+      "dark": true,
+      "dialog": {
+        "clientWidth": 390,
+        "scrollWidth": 390
+      },
+      "media": [
+        {
+          "bottom": 499,
+          "decoded": true,
+          "error": null,
+          "height": 235.5,
+          "left": 38,
+          "local": true,
+          "naturalHeight": 180,
+          "naturalWidth": 320,
+          "right": 352,
+          "tag": "VIDEO",
+          "top": 263.5,
+          "visible": true,
+          "width": 314
+        }
+      ],
+      "viewport": {
+        "height": 844,
+        "width": 390
+      },
+      "path": "captures/gaboma-mobile-sombre-video.jpg"
+    },
+    {
+      "theme": "Gaboma",
+      "size": "tablette",
+      "appearance": "sombre",
+      "kind": "video",
+      "charte": "antsia",
+      "colorScheme": "dark",
+      "dark": true,
+      "dialog": {
+        "clientWidth": 820,
+        "scrollWidth": 820
+      },
+      "media": [
+        {
+          "bottom": 370,
+          "decoded": true,
+          "error": null,
+          "height": 123.75,
+          "left": 38,
+          "local": true,
+          "naturalHeight": 180,
+          "naturalWidth": 320,
+          "right": 203,
+          "tag": "VIDEO",
+          "top": 246.25,
+          "visible": true,
+          "width": 165
+        }
+      ],
+      "viewport": {
+        "height": 1180,
+        "width": 820
+      },
+      "path": "captures/gaboma-tablette-sombre-video.jpg"
+    },
+    {
+      "theme": "Gaboma",
+      "size": "bureau",
+      "appearance": "sombre",
+      "kind": "video",
+      "charte": "antsia",
+      "colorScheme": "dark",
+      "dark": true,
+      "dialog": {
+        "clientWidth": 1440,
+        "scrollWidth": 1440
+      },
+      "media": [
+        {
+          "bottom": 554.75,
+          "decoded": true,
+          "error": null,
+          "height": 170.25,
+          "left": 479,
+          "local": true,
+          "naturalHeight": 180,
+          "naturalWidth": 320,
+          "right": 706,
+          "tag": "VIDEO",
+          "top": 384.5,
+          "visible": true,
+          "width": 227
+        }
+      ],
+      "viewport": {
+        "height": 1000,
+        "width": 1440
+      },
+      "path": "captures/gaboma-bureau-sombre-video.jpg"
+    },
+    {
+      "theme": "Soleil",
+      "size": "bureau",
+      "appearance": "clair",
+      "kind": "photo",
+      "charte": "antsia-soleil",
+      "colorScheme": "light",
+      "dark": false,
+      "dialog": {
+        "clientWidth": 1440,
+        "scrollWidth": 1440
+      },
+      "media": [
+        {
+          "bottom": 554.75,
+          "decoded": true,
+          "error": null,
+          "height": 170.25,
+          "left": 479,
+          "local": true,
+          "naturalHeight": 1024,
+          "naturalWidth": 1536,
+          "right": 706,
+          "tag": "IMG",
+          "top": 384.5,
+          "visible": true,
+          "width": 227
+        }
+      ],
+      "viewport": {
+        "height": 1000,
+        "width": 1440
+      },
+      "path": "captures/soleil-bureau-clair-photo.jpg"
+    },
+    {
+      "theme": "Soleil",
+      "size": "tablette",
+      "appearance": "clair",
+      "kind": "photo",
+      "charte": "antsia-soleil",
+      "colorScheme": "light",
+      "dark": false,
+      "dialog": {
+        "clientWidth": 820,
+        "scrollWidth": 820
+      },
+      "media": [
+        {
+          "bottom": 370,
+          "decoded": true,
+          "error": null,
+          "height": 123.75,
+          "left": 38,
+          "local": true,
+          "naturalHeight": 1024,
+          "naturalWidth": 1536,
+          "right": 203,
+          "tag": "IMG",
+          "top": 246.25,
+          "visible": true,
+          "width": 165
+        }
+      ],
+      "viewport": {
+        "height": 1180,
+        "width": 820
+      },
+      "path": "captures/soleil-tablette-clair-photo.jpg"
+    },
+    {
+      "theme": "Soleil",
+      "size": "mobile",
+      "appearance": "clair",
+      "kind": "photo",
+      "charte": "antsia-soleil",
+      "colorScheme": "light",
+      "dark": false,
+      "dialog": {
+        "clientWidth": 390,
+        "scrollWidth": 390
+      },
+      "media": [
+        {
+          "bottom": 499,
+          "decoded": true,
+          "error": null,
+          "height": 235.5,
+          "left": 38,
+          "local": true,
+          "naturalHeight": 1024,
+          "naturalWidth": 1536,
+          "right": 352,
+          "tag": "IMG",
+          "top": 263.5,
+          "visible": true,
+          "width": 314
+        }
+      ],
+      "viewport": {
+        "height": 844,
+        "width": 390
+      },
+      "path": "captures/soleil-mobile-clair-photo.jpg"
+    },
+    {
+      "theme": "Soleil",
+      "size": "mobile",
+      "appearance": "clair",
+      "kind": "video",
+      "charte": "antsia-soleil",
+      "colorScheme": "light",
+      "dark": false,
+      "dialog": {
+        "clientWidth": 390,
+        "scrollWidth": 390
+      },
+      "media": [
+        {
+          "bottom": 499,
+          "decoded": true,
+          "error": null,
+          "height": 235.5,
+          "left": 38,
+          "local": true,
+          "naturalHeight": 180,
+          "naturalWidth": 320,
+          "right": 352,
+          "tag": "VIDEO",
+          "top": 263.5,
+          "visible": true,
+          "width": 314
+        }
+      ],
+      "viewport": {
+        "height": 844,
+        "width": 390
+      },
+      "path": "captures/soleil-mobile-clair-video.jpg"
+    },
+    {
+      "theme": "Soleil",
+      "size": "tablette",
+      "appearance": "clair",
+      "kind": "video",
+      "charte": "antsia-soleil",
+      "colorScheme": "light",
+      "dark": false,
+      "dialog": {
+        "clientWidth": 820,
+        "scrollWidth": 820
+      },
+      "media": [
+        {
+          "bottom": 370,
+          "decoded": true,
+          "error": null,
+          "height": 123.75,
+          "left": 38,
+          "local": true,
+          "naturalHeight": 180,
+          "naturalWidth": 320,
+          "right": 203,
+          "tag": "VIDEO",
+          "top": 246.25,
+          "visible": true,
+          "width": 165
+        }
+      ],
+      "viewport": {
+        "height": 1180,
+        "width": 820
+      },
+      "path": "captures/soleil-tablette-clair-video.jpg"
+    },
+    {
+      "theme": "Soleil",
+      "size": "bureau",
+      "appearance": "clair",
+      "kind": "video",
+      "charte": "antsia-soleil",
+      "colorScheme": "light",
+      "dark": false,
+      "dialog": {
+        "clientWidth": 1440,
+        "scrollWidth": 1440
+      },
+      "media": [
+        {
+          "bottom": 554.75,
+          "decoded": true,
+          "error": null,
+          "height": 170.25,
+          "left": 479,
+          "local": true,
+          "naturalHeight": 180,
+          "naturalWidth": 320,
+          "right": 706,
+          "tag": "VIDEO",
+          "top": 384.5,
+          "visible": true,
+          "width": 227
+        }
+      ],
+      "viewport": {
+        "height": 1000,
+        "width": 1440
+      },
+      "path": "captures/soleil-bureau-clair-video.jpg"
+    },
+    {
+      "theme": "Soleil",
+      "size": "bureau",
+      "appearance": "sombre",
+      "kind": "photo",
+      "charte": "antsia-soleil",
+      "colorScheme": "dark",
+      "dark": true,
+      "dialog": {
+        "clientWidth": 1440,
+        "scrollWidth": 1440
+      },
+      "media": [
+        {
+          "bottom": 554.75,
+          "decoded": true,
+          "error": null,
+          "height": 170.25,
+          "left": 479,
+          "local": true,
+          "naturalHeight": 1024,
+          "naturalWidth": 1536,
+          "right": 706,
+          "tag": "IMG",
+          "top": 384.5,
+          "visible": true,
+          "width": 227
+        }
+      ],
+      "viewport": {
+        "height": 1000,
+        "width": 1440
+      },
+      "path": "captures/soleil-bureau-sombre-photo.jpg"
+    },
+    {
+      "theme": "Soleil",
+      "size": "tablette",
+      "appearance": "sombre",
+      "kind": "photo",
+      "charte": "antsia-soleil",
+      "colorScheme": "dark",
+      "dark": true,
+      "dialog": {
+        "clientWidth": 820,
+        "scrollWidth": 820
+      },
+      "media": [
+        {
+          "bottom": 370,
+          "decoded": true,
+          "error": null,
+          "height": 123.75,
+          "left": 38,
+          "local": true,
+          "naturalHeight": 1024,
+          "naturalWidth": 1536,
+          "right": 203,
+          "tag": "IMG",
+          "top": 246.25,
+          "visible": true,
+          "width": 165
+        }
+      ],
+      "viewport": {
+        "height": 1180,
+        "width": 820
+      },
+      "path": "captures/soleil-tablette-sombre-photo.jpg"
+    },
+    {
+      "theme": "Soleil",
+      "size": "mobile",
+      "appearance": "sombre",
+      "kind": "photo",
+      "charte": "antsia-soleil",
+      "colorScheme": "dark",
+      "dark": true,
+      "dialog": {
+        "clientWidth": 390,
+        "scrollWidth": 390
+      },
+      "media": [
+        {
+          "bottom": 499,
+          "decoded": true,
+          "error": null,
+          "height": 235.5,
+          "left": 38,
+          "local": true,
+          "naturalHeight": 1024,
+          "naturalWidth": 1536,
+          "right": 352,
+          "tag": "IMG",
+          "top": 263.5,
+          "visible": true,
+          "width": 314
+        }
+      ],
+      "viewport": {
+        "height": 844,
+        "width": 390
+      },
+      "path": "captures/soleil-mobile-sombre-photo.jpg"
+    },
+    {
+      "theme": "Soleil",
+      "size": "mobile",
+      "appearance": "sombre",
+      "kind": "video",
+      "charte": "antsia-soleil",
+      "colorScheme": "dark",
+      "dark": true,
+      "dialog": {
+        "clientWidth": 390,
+        "scrollWidth": 390
+      },
+      "media": [
+        {
+          "bottom": 499,
+          "decoded": true,
+          "error": null,
+          "height": 235.5,
+          "left": 38,
+          "local": true,
+          "naturalHeight": 180,
+          "naturalWidth": 320,
+          "right": 352,
+          "tag": "VIDEO",
+          "top": 263.5,
+          "visible": true,
+          "width": 314
+        }
+      ],
+      "viewport": {
+        "height": 844,
+        "width": 390
+      },
+      "path": "captures/soleil-mobile-sombre-video.jpg"
+    },
+    {
+      "theme": "Soleil",
+      "size": "tablette",
+      "appearance": "sombre",
+      "kind": "video",
+      "charte": "antsia-soleil",
+      "colorScheme": "dark",
+      "dark": true,
+      "dialog": {
+        "clientWidth": 820,
+        "scrollWidth": 820
+      },
+      "media": [
+        {
+          "bottom": 370,
+          "decoded": true,
+          "error": null,
+          "height": 123.75,
+          "left": 38,
+          "local": true,
+          "naturalHeight": 180,
+          "naturalWidth": 320,
+          "right": 203,
+          "tag": "VIDEO",
+          "top": 246.25,
+          "visible": true,
+          "width": 165
+        }
+      ],
+      "viewport": {
+        "height": 1180,
+        "width": 820
+      },
+      "path": "captures/soleil-tablette-sombre-video.jpg"
+    },
+    {
+      "theme": "Soleil",
+      "size": "bureau",
+      "appearance": "sombre",
+      "kind": "video",
+      "charte": "antsia-soleil",
+      "colorScheme": "dark",
+      "dark": true,
+      "dialog": {
+        "clientWidth": 1440,
+        "scrollWidth": 1440
+      },
+      "media": [
+        {
+          "bottom": 554.75,
+          "decoded": true,
+          "error": null,
+          "height": 170.25,
+          "left": 479,
+          "local": true,
+          "naturalHeight": 180,
+          "naturalWidth": 320,
+          "right": 706,
+          "tag": "VIDEO",
+          "top": 384.5,
+          "visible": true,
+          "width": 227
+        }
+      ],
+      "viewport": {
+        "height": 1000,
+        "width": 1440
+      },
+      "path": "captures/soleil-bureau-sombre-video.jpg"
+    },
+    {
+      "theme": "Forêt",
+      "size": "bureau",
+      "appearance": "clair",
+      "kind": "photo",
+      "charte": "antsia-foret",
+      "colorScheme": "light",
+      "dark": false,
+      "dialog": {
+        "clientWidth": 1440,
+        "scrollWidth": 1440
+      },
+      "media": [
+        {
+          "bottom": 554.75,
+          "decoded": true,
+          "error": null,
+          "height": 170.25,
+          "left": 479,
+          "local": true,
+          "naturalHeight": 1024,
+          "naturalWidth": 1536,
+          "right": 706,
+          "tag": "IMG",
+          "top": 384.5,
+          "visible": true,
+          "width": 227
+        }
+      ],
+      "viewport": {
+        "height": 1000,
+        "width": 1440
+      },
+      "path": "captures/foret-bureau-clair-photo.jpg"
+    },
+    {
+      "theme": "Forêt",
+      "size": "tablette",
+      "appearance": "clair",
+      "kind": "photo",
+      "charte": "antsia-foret",
+      "colorScheme": "light",
+      "dark": false,
+      "dialog": {
+        "clientWidth": 820,
+        "scrollWidth": 820
+      },
+      "media": [
+        {
+          "bottom": 370,
+          "decoded": true,
+          "error": null,
+          "height": 123.75,
+          "left": 38,
+          "local": true,
+          "naturalHeight": 1024,
+          "naturalWidth": 1536,
+          "right": 203,
+          "tag": "IMG",
+          "top": 246.25,
+          "visible": true,
+          "width": 165
+        }
+      ],
+      "viewport": {
+        "height": 1180,
+        "width": 820
+      },
+      "path": "captures/foret-tablette-clair-photo.jpg"
+    },
+    {
+      "theme": "Forêt",
+      "size": "mobile",
+      "appearance": "clair",
+      "kind": "photo",
+      "charte": "antsia-foret",
+      "colorScheme": "light",
+      "dark": false,
+      "dialog": {
+        "clientWidth": 390,
+        "scrollWidth": 390
+      },
+      "media": [
+        {
+          "bottom": 499,
+          "decoded": true,
+          "error": null,
+          "height": 235.5,
+          "left": 38,
+          "local": true,
+          "naturalHeight": 1024,
+          "naturalWidth": 1536,
+          "right": 352,
+          "tag": "IMG",
+          "top": 263.5,
+          "visible": true,
+          "width": 314
+        }
+      ],
+      "viewport": {
+        "height": 844,
+        "width": 390
+      },
+      "path": "captures/foret-mobile-clair-photo.jpg"
+    },
+    {
+      "theme": "Forêt",
+      "size": "mobile",
+      "appearance": "clair",
+      "kind": "video",
+      "charte": "antsia-foret",
+      "colorScheme": "light",
+      "dark": false,
+      "dialog": {
+        "clientWidth": 390,
+        "scrollWidth": 390
+      },
+      "media": [
+        {
+          "bottom": 499,
+          "decoded": true,
+          "error": null,
+          "height": 235.5,
+          "left": 38,
+          "local": true,
+          "naturalHeight": 180,
+          "naturalWidth": 320,
+          "right": 352,
+          "tag": "VIDEO",
+          "top": 263.5,
+          "visible": true,
+          "width": 314
+        }
+      ],
+      "viewport": {
+        "height": 844,
+        "width": 390
+      },
+      "path": "captures/foret-mobile-clair-video.jpg"
+    },
+    {
+      "theme": "Forêt",
+      "size": "tablette",
+      "appearance": "clair",
+      "kind": "video",
+      "charte": "antsia-foret",
+      "colorScheme": "light",
+      "dark": false,
+      "dialog": {
+        "clientWidth": 820,
+        "scrollWidth": 820
+      },
+      "media": [
+        {
+          "bottom": 370,
+          "decoded": true,
+          "error": null,
+          "height": 123.75,
+          "left": 38,
+          "local": true,
+          "naturalHeight": 180,
+          "naturalWidth": 320,
+          "right": 203,
+          "tag": "VIDEO",
+          "top": 246.25,
+          "visible": true,
+          "width": 165
+        }
+      ],
+      "viewport": {
+        "height": 1180,
+        "width": 820
+      },
+      "path": "captures/foret-tablette-clair-video.jpg"
+    },
+    {
+      "theme": "Forêt",
+      "size": "bureau",
+      "appearance": "clair",
+      "kind": "video",
+      "charte": "antsia-foret",
+      "colorScheme": "light",
+      "dark": false,
+      "dialog": {
+        "clientWidth": 1440,
+        "scrollWidth": 1440
+      },
+      "media": [
+        {
+          "bottom": 554.75,
+          "decoded": true,
+          "error": null,
+          "height": 170.25,
+          "left": 479,
+          "local": true,
+          "naturalHeight": 180,
+          "naturalWidth": 320,
+          "right": 706,
+          "tag": "VIDEO",
+          "top": 384.5,
+          "visible": true,
+          "width": 227
+        }
+      ],
+      "viewport": {
+        "height": 1000,
+        "width": 1440
+      },
+      "path": "captures/foret-bureau-clair-video.jpg"
+    },
+    {
+      "theme": "Forêt",
+      "size": "bureau",
+      "appearance": "sombre",
+      "kind": "photo",
+      "charte": "antsia-foret",
+      "colorScheme": "dark",
+      "dark": true,
+      "dialog": {
+        "clientWidth": 1440,
+        "scrollWidth": 1440
+      },
+      "media": [
+        {
+          "bottom": 554.75,
+          "decoded": true,
+          "error": null,
+          "height": 170.25,
+          "left": 479,
+          "local": true,
+          "naturalHeight": 1024,
+          "naturalWidth": 1536,
+          "right": 706,
+          "tag": "IMG",
+          "top": 384.5,
+          "visible": true,
+          "width": 227
+        }
+      ],
+      "viewport": {
+        "height": 1000,
+        "width": 1440
+      },
+      "path": "captures/foret-bureau-sombre-photo.jpg"
+    },
+    {
+      "theme": "Forêt",
+      "size": "tablette",
+      "appearance": "sombre",
+      "kind": "photo",
+      "charte": "antsia-foret",
+      "colorScheme": "dark",
+      "dark": true,
+      "dialog": {
+        "clientWidth": 820,
+        "scrollWidth": 820
+      },
+      "media": [
+        {
+          "bottom": 370,
+          "decoded": true,
+          "error": null,
+          "height": 123.75,
+          "left": 38,
+          "local": true,
+          "naturalHeight": 1024,
+          "naturalWidth": 1536,
+          "right": 203,
+          "tag": "IMG",
+          "top": 246.25,
+          "visible": true,
+          "width": 165
+        }
+      ],
+      "viewport": {
+        "height": 1180,
+        "width": 820
+      },
+      "path": "captures/foret-tablette-sombre-photo.jpg"
+    },
+    {
+      "theme": "Forêt",
+      "size": "mobile",
+      "appearance": "sombre",
+      "kind": "photo",
+      "charte": "antsia-foret",
+      "colorScheme": "dark",
+      "dark": true,
+      "dialog": {
+        "clientWidth": 390,
+        "scrollWidth": 390
+      },
+      "media": [
+        {
+          "bottom": 499,
+          "decoded": true,
+          "error": null,
+          "height": 235.5,
+          "left": 38,
+          "local": true,
+          "naturalHeight": 1024,
+          "naturalWidth": 1536,
+          "right": 352,
+          "tag": "IMG",
+          "top": 263.5,
+          "visible": true,
+          "width": 314
+        }
+      ],
+      "viewport": {
+        "height": 844,
+        "width": 390
+      },
+      "path": "captures/foret-mobile-sombre-photo.jpg"
+    },
+    {
+      "theme": "Forêt",
+      "size": "mobile",
+      "appearance": "sombre",
+      "kind": "video",
+      "charte": "antsia-foret",
+      "colorScheme": "dark",
+      "dark": true,
+      "dialog": {
+        "clientWidth": 390,
+        "scrollWidth": 390
+      },
+      "media": [
+        {
+          "bottom": 499,
+          "decoded": true,
+          "error": null,
+          "height": 235.5,
+          "left": 38,
+          "local": true,
+          "naturalHeight": 180,
+          "naturalWidth": 320,
+          "right": 352,
+          "tag": "VIDEO",
+          "top": 263.5,
+          "visible": true,
+          "width": 314
+        }
+      ],
+      "viewport": {
+        "height": 844,
+        "width": 390
+      },
+      "path": "captures/foret-mobile-sombre-video.jpg"
+    },
+    {
+      "theme": "Forêt",
+      "size": "tablette",
+      "appearance": "sombre",
+      "kind": "video",
+      "charte": "antsia-foret",
+      "colorScheme": "dark",
+      "dark": true,
+      "dialog": {
+        "clientWidth": 820,
+        "scrollWidth": 820
+      },
+      "media": [
+        {
+          "bottom": 370,
+          "decoded": true,
+          "error": null,
+          "height": 123.75,
+          "left": 38,
+          "local": true,
+          "naturalHeight": 180,
+          "naturalWidth": 320,
+          "right": 203,
+          "tag": "VIDEO",
+          "top": 246.25,
+          "visible": true,
+          "width": 165
+        }
+      ],
+      "viewport": {
+        "height": 1180,
+        "width": 820
+      },
+      "path": "captures/foret-tablette-sombre-video.jpg"
+    },
+    {
+      "theme": "Forêt",
+      "size": "bureau",
+      "appearance": "sombre",
+      "kind": "video",
+      "charte": "antsia-foret",
+      "colorScheme": "dark",
+      "dark": true,
+      "dialog": {
+        "clientWidth": 1440,
+        "scrollWidth": 1440
+      },
+      "media": [
+        {
+          "bottom": 554.75,
+          "decoded": true,
+          "error": null,
+          "height": 170.25,
+          "left": 479,
+          "local": true,
+          "naturalHeight": 180,
+          "naturalWidth": 320,
+          "right": 706,
+          "tag": "VIDEO",
+          "top": 384.5,
+          "visible": true,
+          "width": 227
+        }
+      ],
+      "viewport": {
+        "height": 1000,
+        "width": 1440
+      },
+      "path": "captures/foret-bureau-sombre-video.jpg"
+    },
+    {
+      "theme": "Corail",
+      "size": "bureau",
+      "appearance": "clair",
+      "kind": "photo",
+      "charte": "antsia-corail",
+      "colorScheme": "light",
+      "dark": false,
+      "dialog": {
+        "clientWidth": 1440,
+        "scrollWidth": 1440
+      },
+      "media": [
+        {
+          "bottom": 554.75,
+          "decoded": true,
+          "error": null,
+          "height": 170.25,
+          "left": 479,
+          "local": true,
+          "naturalHeight": 1024,
+          "naturalWidth": 1536,
+          "right": 706,
+          "tag": "IMG",
+          "top": 384.5,
+          "visible": true,
+          "width": 227
+        }
+      ],
+      "viewport": {
+        "height": 1000,
+        "width": 1440
+      },
+      "path": "captures/corail-bureau-clair-photo.jpg"
+    },
+    {
+      "theme": "Corail",
+      "size": "tablette",
+      "appearance": "clair",
+      "kind": "photo",
+      "charte": "antsia-corail",
+      "colorScheme": "light",
+      "dark": false,
+      "dialog": {
+        "clientWidth": 820,
+        "scrollWidth": 820
+      },
+      "media": [
+        {
+          "bottom": 370,
+          "decoded": true,
+          "error": null,
+          "height": 123.75,
+          "left": 38,
+          "local": true,
+          "naturalHeight": 1024,
+          "naturalWidth": 1536,
+          "right": 203,
+          "tag": "IMG",
+          "top": 246.25,
+          "visible": true,
+          "width": 165
+        }
+      ],
+      "viewport": {
+        "height": 1180,
+        "width": 820
+      },
+      "path": "captures/corail-tablette-clair-photo.jpg"
+    },
+    {
+      "theme": "Corail",
+      "size": "mobile",
+      "appearance": "clair",
+      "kind": "photo",
+      "charte": "antsia-corail",
+      "colorScheme": "light",
+      "dark": false,
+      "dialog": {
+        "clientWidth": 390,
+        "scrollWidth": 390
+      },
+      "media": [
+        {
+          "bottom": 499,
+          "decoded": true,
+          "error": null,
+          "height": 235.5,
+          "left": 38,
+          "local": true,
+          "naturalHeight": 1024,
+          "naturalWidth": 1536,
+          "right": 352,
+          "tag": "IMG",
+          "top": 263.5,
+          "visible": true,
+          "width": 314
+        }
+      ],
+      "viewport": {
+        "height": 844,
+        "width": 390
+      },
+      "path": "captures/corail-mobile-clair-photo.jpg"
+    },
+    {
+      "theme": "Corail",
+      "size": "mobile",
+      "appearance": "clair",
+      "kind": "video",
+      "charte": "antsia-corail",
+      "colorScheme": "light",
+      "dark": false,
+      "dialog": {
+        "clientWidth": 390,
+        "scrollWidth": 390
+      },
+      "media": [
+        {
+          "bottom": 499,
+          "decoded": true,
+          "error": null,
+          "height": 235.5,
+          "left": 38,
+          "local": true,
+          "naturalHeight": 180,
+          "naturalWidth": 320,
+          "right": 352,
+          "tag": "VIDEO",
+          "top": 263.5,
+          "visible": true,
+          "width": 314
+        }
+      ],
+      "viewport": {
+        "height": 844,
+        "width": 390
+      },
+      "path": "captures/corail-mobile-clair-video.jpg"
+    },
+    {
+      "theme": "Corail",
+      "size": "tablette",
+      "appearance": "clair",
+      "kind": "video",
+      "charte": "antsia-corail",
+      "colorScheme": "light",
+      "dark": false,
+      "dialog": {
+        "clientWidth": 820,
+        "scrollWidth": 820
+      },
+      "media": [
+        {
+          "bottom": 370,
+          "decoded": true,
+          "error": null,
+          "height": 123.75,
+          "left": 38,
+          "local": true,
+          "naturalHeight": 180,
+          "naturalWidth": 320,
+          "right": 203,
+          "tag": "VIDEO",
+          "top": 246.25,
+          "visible": true,
+          "width": 165
+        }
+      ],
+      "viewport": {
+        "height": 1180,
+        "width": 820
+      },
+      "path": "captures/corail-tablette-clair-video.jpg"
+    },
+    {
+      "theme": "Corail",
+      "size": "bureau",
+      "appearance": "clair",
+      "kind": "video",
+      "charte": "antsia-corail",
+      "colorScheme": "light",
+      "dark": false,
+      "dialog": {
+        "clientWidth": 1440,
+        "scrollWidth": 1440
+      },
+      "media": [
+        {
+          "bottom": 554.75,
+          "decoded": true,
+          "error": null,
+          "height": 170.25,
+          "left": 479,
+          "local": true,
+          "naturalHeight": 180,
+          "naturalWidth": 320,
+          "right": 706,
+          "tag": "VIDEO",
+          "top": 384.5,
+          "visible": true,
+          "width": 227
+        }
+      ],
+      "viewport": {
+        "height": 1000,
+        "width": 1440
+      },
+      "path": "captures/corail-bureau-clair-video.jpg"
+    },
+    {
+      "theme": "Corail",
+      "size": "bureau",
+      "appearance": "sombre",
+      "kind": "photo",
+      "charte": "antsia-corail",
+      "colorScheme": "dark",
+      "dark": true,
+      "dialog": {
+        "clientWidth": 1440,
+        "scrollWidth": 1440
+      },
+      "media": [
+        {
+          "bottom": 554.75,
+          "decoded": true,
+          "error": null,
+          "height": 170.25,
+          "left": 479,
+          "local": true,
+          "naturalHeight": 1024,
+          "naturalWidth": 1536,
+          "right": 706,
+          "tag": "IMG",
+          "top": 384.5,
+          "visible": true,
+          "width": 227
+        }
+      ],
+      "viewport": {
+        "height": 1000,
+        "width": 1440
+      },
+      "path": "captures/corail-bureau-sombre-photo.jpg"
+    },
+    {
+      "theme": "Corail",
+      "size": "tablette",
+      "appearance": "sombre",
+      "kind": "photo",
+      "charte": "antsia-corail",
+      "colorScheme": "dark",
+      "dark": true,
+      "dialog": {
+        "clientWidth": 820,
+        "scrollWidth": 820
+      },
+      "media": [
+        {
+          "bottom": 370,
+          "decoded": true,
+          "error": null,
+          "height": 123.75,
+          "left": 38,
+          "local": true,
+          "naturalHeight": 1024,
+          "naturalWidth": 1536,
+          "right": 203,
+          "tag": "IMG",
+          "top": 246.25,
+          "visible": true,
+          "width": 165
+        }
+      ],
+      "viewport": {
+        "height": 1180,
+        "width": 820
+      },
+      "path": "captures/corail-tablette-sombre-photo.jpg"
+    },
+    {
+      "theme": "Corail",
+      "size": "mobile",
+      "appearance": "sombre",
+      "kind": "photo",
+      "charte": "antsia-corail",
+      "colorScheme": "dark",
+      "dark": true,
+      "dialog": {
+        "clientWidth": 390,
+        "scrollWidth": 390
+      },
+      "media": [
+        {
+          "bottom": 499,
+          "decoded": true,
+          "error": null,
+          "height": 235.5,
+          "left": 38,
+          "local": true,
+          "naturalHeight": 1024,
+          "naturalWidth": 1536,
+          "right": 352,
+          "tag": "IMG",
+          "top": 263.5,
+          "visible": true,
+          "width": 314
+        }
+      ],
+      "viewport": {
+        "height": 844,
+        "width": 390
+      },
+      "path": "captures/corail-mobile-sombre-photo.jpg"
+    },
+    {
+      "theme": "Corail",
+      "size": "mobile",
+      "appearance": "sombre",
+      "kind": "video",
+      "charte": "antsia-corail",
+      "colorScheme": "dark",
+      "dark": true,
+      "dialog": {
+        "clientWidth": 390,
+        "scrollWidth": 390
+      },
+      "media": [
+        {
+          "bottom": 499,
+          "decoded": true,
+          "error": null,
+          "height": 235.5,
+          "left": 38,
+          "local": true,
+          "naturalHeight": 180,
+          "naturalWidth": 320,
+          "right": 352,
+          "tag": "VIDEO",
+          "top": 263.5,
+          "visible": true,
+          "width": 314
+        }
+      ],
+      "viewport": {
+        "height": 844,
+        "width": 390
+      },
+      "path": "captures/corail-mobile-sombre-video.jpg"
+    },
+    {
+      "theme": "Corail",
+      "size": "tablette",
+      "appearance": "sombre",
+      "kind": "video",
+      "charte": "antsia-corail",
+      "colorScheme": "dark",
+      "dark": true,
+      "dialog": {
+        "clientWidth": 820,
+        "scrollWidth": 820
+      },
+      "media": [
+        {
+          "bottom": 370,
+          "decoded": true,
+          "error": null,
+          "height": 123.75,
+          "left": 38,
+          "local": true,
+          "naturalHeight": 180,
+          "naturalWidth": 320,
+          "right": 203,
+          "tag": "VIDEO",
+          "top": 246.25,
+          "visible": true,
+          "width": 165
+        }
+      ],
+      "viewport": {
+        "height": 1180,
+        "width": 820
+      },
+      "path": "captures/corail-tablette-sombre-video.jpg"
+    },
+    {
+      "theme": "Corail",
+      "size": "bureau",
+      "appearance": "sombre",
+      "kind": "video",
+      "charte": "antsia-corail",
+      "colorScheme": "dark",
+      "dark": true,
+      "dialog": {
+        "clientWidth": 1440,
+        "scrollWidth": 1440
+      },
+      "media": [
+        {
+          "bottom": 554.75,
+          "decoded": true,
+          "error": null,
+          "height": 170.25,
+          "left": 479,
+          "local": true,
+          "naturalHeight": 180,
+          "naturalWidth": 320,
+          "right": 706,
+          "tag": "VIDEO",
+          "top": 384.5,
+          "visible": true,
+          "width": 227
+        }
+      ],
+      "viewport": {
+        "height": 1000,
+        "width": 1440
+      },
+      "path": "captures/corail-bureau-sombre-video.jpg"
+    },
+    {
+      "theme": "Lagon",
+      "size": "bureau",
+      "appearance": "clair",
+      "kind": "photo",
+      "charte": "antsia-lagon",
+      "colorScheme": "light",
+      "dark": false,
+      "dialog": {
+        "clientWidth": 1440,
+        "scrollWidth": 1440
+      },
+      "media": [
+        {
+          "bottom": 554.75,
+          "decoded": true,
+          "error": null,
+          "height": 170.25,
+          "left": 479,
+          "local": true,
+          "naturalHeight": 1024,
+          "naturalWidth": 1536,
+          "right": 706,
+          "tag": "IMG",
+          "top": 384.5,
+          "visible": true,
+          "width": 227
+        }
+      ],
+      "viewport": {
+        "height": 1000,
+        "width": 1440
+      },
+      "path": "captures/lagon-bureau-clair-photo.jpg"
+    },
+    {
+      "theme": "Lagon",
+      "size": "tablette",
+      "appearance": "clair",
+      "kind": "photo",
+      "charte": "antsia-lagon",
+      "colorScheme": "light",
+      "dark": false,
+      "dialog": {
+        "clientWidth": 820,
+        "scrollWidth": 820
+      },
+      "media": [
+        {
+          "bottom": 370,
+          "decoded": true,
+          "error": null,
+          "height": 123.75,
+          "left": 38,
+          "local": true,
+          "naturalHeight": 1024,
+          "naturalWidth": 1536,
+          "right": 203,
+          "tag": "IMG",
+          "top": 246.25,
+          "visible": true,
+          "width": 165
+        }
+      ],
+      "viewport": {
+        "height": 1180,
+        "width": 820
+      },
+      "path": "captures/lagon-tablette-clair-photo.jpg"
+    },
+    {
+      "theme": "Lagon",
+      "size": "mobile",
+      "appearance": "clair",
+      "kind": "photo",
+      "charte": "antsia-lagon",
+      "colorScheme": "light",
+      "dark": false,
+      "dialog": {
+        "clientWidth": 390,
+        "scrollWidth": 390
+      },
+      "media": [
+        {
+          "bottom": 499,
+          "decoded": true,
+          "error": null,
+          "height": 235.5,
+          "left": 38,
+          "local": true,
+          "naturalHeight": 1024,
+          "naturalWidth": 1536,
+          "right": 352,
+          "tag": "IMG",
+          "top": 263.5,
+          "visible": true,
+          "width": 314
+        }
+      ],
+      "viewport": {
+        "height": 844,
+        "width": 390
+      },
+      "path": "captures/lagon-mobile-clair-photo.jpg"
+    },
+    {
+      "theme": "Lagon",
+      "size": "mobile",
+      "appearance": "clair",
+      "kind": "video",
+      "charte": "antsia-lagon",
+      "colorScheme": "light",
+      "dark": false,
+      "dialog": {
+        "clientWidth": 390,
+        "scrollWidth": 390
+      },
+      "media": [
+        {
+          "bottom": 499,
+          "decoded": true,
+          "error": null,
+          "height": 235.5,
+          "left": 38,
+          "local": true,
+          "naturalHeight": 180,
+          "naturalWidth": 320,
+          "right": 352,
+          "tag": "VIDEO",
+          "top": 263.5,
+          "visible": true,
+          "width": 314
+        }
+      ],
+      "viewport": {
+        "height": 844,
+        "width": 390
+      },
+      "path": "captures/lagon-mobile-clair-video.jpg"
+    },
+    {
+      "theme": "Lagon",
+      "size": "tablette",
+      "appearance": "clair",
+      "kind": "video",
+      "charte": "antsia-lagon",
+      "colorScheme": "light",
+      "dark": false,
+      "dialog": {
+        "clientWidth": 820,
+        "scrollWidth": 820
+      },
+      "media": [
+        {
+          "bottom": 370,
+          "decoded": true,
+          "error": null,
+          "height": 123.75,
+          "left": 38,
+          "local": true,
+          "naturalHeight": 180,
+          "naturalWidth": 320,
+          "right": 203,
+          "tag": "VIDEO",
+          "top": 246.25,
+          "visible": true,
+          "width": 165
+        }
+      ],
+      "viewport": {
+        "height": 1180,
+        "width": 820
+      },
+      "path": "captures/lagon-tablette-clair-video.jpg"
+    },
+    {
+      "theme": "Lagon",
+      "size": "bureau",
+      "appearance": "clair",
+      "kind": "video",
+      "charte": "antsia-lagon",
+      "colorScheme": "light",
+      "dark": false,
+      "dialog": {
+        "clientWidth": 1440,
+        "scrollWidth": 1440
+      },
+      "media": [
+        {
+          "bottom": 554.75,
+          "decoded": true,
+          "error": null,
+          "height": 170.25,
+          "left": 479,
+          "local": true,
+          "naturalHeight": 180,
+          "naturalWidth": 320,
+          "right": 706,
+          "tag": "VIDEO",
+          "top": 384.5,
+          "visible": true,
+          "width": 227
+        }
+      ],
+      "viewport": {
+        "height": 1000,
+        "width": 1440
+      },
+      "path": "captures/lagon-bureau-clair-video.jpg"
+    },
+    {
+      "theme": "Lagon",
+      "size": "bureau",
+      "appearance": "sombre",
+      "kind": "photo",
+      "charte": "antsia-lagon",
+      "colorScheme": "dark",
+      "dark": true,
+      "dialog": {
+        "clientWidth": 1440,
+        "scrollWidth": 1440
+      },
+      "media": [
+        {
+          "bottom": 554.75,
+          "decoded": true,
+          "error": null,
+          "height": 170.25,
+          "left": 479,
+          "local": true,
+          "naturalHeight": 1024,
+          "naturalWidth": 1536,
+          "right": 706,
+          "tag": "IMG",
+          "top": 384.5,
+          "visible": true,
+          "width": 227
+        }
+      ],
+      "viewport": {
+        "height": 1000,
+        "width": 1440
+      },
+      "path": "captures/lagon-bureau-sombre-photo.jpg"
+    },
+    {
+      "theme": "Lagon",
+      "size": "tablette",
+      "appearance": "sombre",
+      "kind": "photo",
+      "charte": "antsia-lagon",
+      "colorScheme": "dark",
+      "dark": true,
+      "dialog": {
+        "clientWidth": 820,
+        "scrollWidth": 820
+      },
+      "media": [
+        {
+          "bottom": 370,
+          "decoded": true,
+          "error": null,
+          "height": 123.75,
+          "left": 38,
+          "local": true,
+          "naturalHeight": 1024,
+          "naturalWidth": 1536,
+          "right": 203,
+          "tag": "IMG",
+          "top": 246.25,
+          "visible": true,
+          "width": 165
+        }
+      ],
+      "viewport": {
+        "height": 1180,
+        "width": 820
+      },
+      "path": "captures/lagon-tablette-sombre-photo.jpg"
+    },
+    {
+      "theme": "Lagon",
+      "size": "mobile",
+      "appearance": "sombre",
+      "kind": "photo",
+      "charte": "antsia-lagon",
+      "colorScheme": "dark",
+      "dark": true,
+      "dialog": {
+        "clientWidth": 390,
+        "scrollWidth": 390
+      },
+      "media": [
+        {
+          "bottom": 499,
+          "decoded": true,
+          "error": null,
+          "height": 235.5,
+          "left": 38,
+          "local": true,
+          "naturalHeight": 1024,
+          "naturalWidth": 1536,
+          "right": 352,
+          "tag": "IMG",
+          "top": 263.5,
+          "visible": true,
+          "width": 314
+        }
+      ],
+      "viewport": {
+        "height": 844,
+        "width": 390
+      },
+      "path": "captures/lagon-mobile-sombre-photo.jpg"
+    },
+    {
+      "theme": "Lagon",
+      "size": "mobile",
+      "appearance": "sombre",
+      "kind": "video",
+      "charte": "antsia-lagon",
+      "colorScheme": "dark",
+      "dark": true,
+      "dialog": {
+        "clientWidth": 390,
+        "scrollWidth": 390
+      },
+      "media": [
+        {
+          "bottom": 499,
+          "decoded": true,
+          "error": null,
+          "height": 235.5,
+          "left": 38,
+          "local": true,
+          "naturalHeight": 180,
+          "naturalWidth": 320,
+          "right": 352,
+          "tag": "VIDEO",
+          "top": 263.5,
+          "visible": true,
+          "width": 314
+        }
+      ],
+      "viewport": {
+        "height": 844,
+        "width": 390
+      },
+      "path": "captures/lagon-mobile-sombre-video.jpg"
+    },
+    {
+      "theme": "Lagon",
+      "size": "tablette",
+      "appearance": "sombre",
+      "kind": "video",
+      "charte": "antsia-lagon",
+      "colorScheme": "dark",
+      "dark": true,
+      "dialog": {
+        "clientWidth": 820,
+        "scrollWidth": 820
+      },
+      "media": [
+        {
+          "bottom": 370,
+          "decoded": true,
+          "error": null,
+          "height": 123.75,
+          "left": 38,
+          "local": true,
+          "naturalHeight": 180,
+          "naturalWidth": 320,
+          "right": 203,
+          "tag": "VIDEO",
+          "top": 246.25,
+          "visible": true,
+          "width": 165
+        }
+      ],
+      "viewport": {
+        "height": 1180,
+        "width": 820
+      },
+      "path": "captures/lagon-tablette-sombre-video.jpg"
+    },
+    {
+      "theme": "Lagon",
+      "size": "bureau",
+      "appearance": "sombre",
+      "kind": "video",
+      "charte": "antsia-lagon",
+      "colorScheme": "dark",
+      "dark": true,
+      "dialog": {
+        "clientWidth": 1440,
+        "scrollWidth": 1440
+      },
+      "media": [
+        {
+          "bottom": 554.75,
+          "decoded": true,
+          "error": null,
+          "height": 170.25,
+          "left": 479,
+          "local": true,
+          "naturalHeight": 180,
+          "naturalWidth": 320,
+          "right": 706,
+          "tag": "VIDEO",
+          "top": 384.5,
+          "visible": true,
+          "width": 227
+        }
+      ],
+      "viewport": {
+        "height": 1000,
+        "width": 1440
+      },
+      "path": "captures/lagon-bureau-sombre-video.jpg"
+    },
+    {
+      "theme": "Électrique",
+      "size": "bureau",
+      "appearance": "clair",
+      "kind": "photo",
+      "charte": "antsia-electrique",
+      "colorScheme": "light",
+      "dark": false,
+      "dialog": {
+        "clientWidth": 1440,
+        "scrollWidth": 1440
+      },
+      "media": [
+        {
+          "bottom": 554.75,
+          "decoded": true,
+          "error": null,
+          "height": 170.25,
+          "left": 479,
+          "local": true,
+          "naturalHeight": 1024,
+          "naturalWidth": 1536,
+          "right": 706,
+          "tag": "IMG",
+          "top": 384.5,
+          "visible": true,
+          "width": 227
+        }
+      ],
+      "viewport": {
+        "height": 1000,
+        "width": 1440
+      },
+      "path": "captures/electrique-bureau-clair-photo.jpg"
+    },
+    {
+      "theme": "Électrique",
+      "size": "tablette",
+      "appearance": "clair",
+      "kind": "photo",
+      "charte": "antsia-electrique",
+      "colorScheme": "light",
+      "dark": false,
+      "dialog": {
+        "clientWidth": 820,
+        "scrollWidth": 820
+      },
+      "media": [
+        {
+          "bottom": 370,
+          "decoded": true,
+          "error": null,
+          "height": 123.75,
+          "left": 38,
+          "local": true,
+          "naturalHeight": 1024,
+          "naturalWidth": 1536,
+          "right": 203,
+          "tag": "IMG",
+          "top": 246.25,
+          "visible": true,
+          "width": 165
+        }
+      ],
+      "viewport": {
+        "height": 1180,
+        "width": 820
+      },
+      "path": "captures/electrique-tablette-clair-photo.jpg"
+    },
+    {
+      "theme": "Électrique",
+      "size": "mobile",
+      "appearance": "clair",
+      "kind": "photo",
+      "charte": "antsia-electrique",
+      "colorScheme": "light",
+      "dark": false,
+      "dialog": {
+        "clientWidth": 390,
+        "scrollWidth": 390
+      },
+      "media": [
+        {
+          "bottom": 499,
+          "decoded": true,
+          "error": null,
+          "height": 235.5,
+          "left": 38,
+          "local": true,
+          "naturalHeight": 1024,
+          "naturalWidth": 1536,
+          "right": 352,
+          "tag": "IMG",
+          "top": 263.5,
+          "visible": true,
+          "width": 314
+        }
+      ],
+      "viewport": {
+        "height": 844,
+        "width": 390
+      },
+      "path": "captures/electrique-mobile-clair-photo.jpg"
+    },
+    {
+      "theme": "Électrique",
+      "size": "mobile",
+      "appearance": "clair",
+      "kind": "video",
+      "charte": "antsia-electrique",
+      "colorScheme": "light",
+      "dark": false,
+      "dialog": {
+        "clientWidth": 390,
+        "scrollWidth": 390
+      },
+      "media": [
+        {
+          "bottom": 499,
+          "decoded": true,
+          "error": null,
+          "height": 235.5,
+          "left": 38,
+          "local": true,
+          "naturalHeight": 180,
+          "naturalWidth": 320,
+          "right": 352,
+          "tag": "VIDEO",
+          "top": 263.5,
+          "visible": true,
+          "width": 314
+        }
+      ],
+      "viewport": {
+        "height": 844,
+        "width": 390
+      },
+      "path": "captures/electrique-mobile-clair-video.jpg"
+    },
+    {
+      "theme": "Électrique",
+      "size": "tablette",
+      "appearance": "clair",
+      "kind": "video",
+      "charte": "antsia-electrique",
+      "colorScheme": "light",
+      "dark": false,
+      "dialog": {
+        "clientWidth": 820,
+        "scrollWidth": 820
+      },
+      "media": [
+        {
+          "bottom": 370,
+          "decoded": true,
+          "error": null,
+          "height": 123.75,
+          "left": 38,
+          "local": true,
+          "naturalHeight": 180,
+          "naturalWidth": 320,
+          "right": 203,
+          "tag": "VIDEO",
+          "top": 246.25,
+          "visible": true,
+          "width": 165
+        }
+      ],
+      "viewport": {
+        "height": 1180,
+        "width": 820
+      },
+      "path": "captures/electrique-tablette-clair-video.jpg"
+    },
+    {
+      "theme": "Électrique",
+      "size": "bureau",
+      "appearance": "clair",
+      "kind": "video",
+      "charte": "antsia-electrique",
+      "colorScheme": "light",
+      "dark": false,
+      "dialog": {
+        "clientWidth": 1440,
+        "scrollWidth": 1440
+      },
+      "media": [
+        {
+          "bottom": 554.75,
+          "decoded": true,
+          "error": null,
+          "height": 170.25,
+          "left": 479,
+          "local": true,
+          "naturalHeight": 180,
+          "naturalWidth": 320,
+          "right": 706,
+          "tag": "VIDEO",
+          "top": 384.5,
+          "visible": true,
+          "width": 227
+        }
+      ],
+      "viewport": {
+        "height": 1000,
+        "width": 1440
+      },
+      "path": "captures/electrique-bureau-clair-video.jpg"
+    },
+    {
+      "theme": "Électrique",
+      "size": "bureau",
+      "appearance": "sombre",
+      "kind": "photo",
+      "charte": "antsia-electrique",
+      "colorScheme": "dark",
+      "dark": true,
+      "dialog": {
+        "clientWidth": 1440,
+        "scrollWidth": 1440
+      },
+      "media": [
+        {
+          "bottom": 554.75,
+          "decoded": true,
+          "error": null,
+          "height": 170.25,
+          "left": 479,
+          "local": true,
+          "naturalHeight": 1024,
+          "naturalWidth": 1536,
+          "right": 706,
+          "tag": "IMG",
+          "top": 384.5,
+          "visible": true,
+          "width": 227
+        }
+      ],
+      "viewport": {
+        "height": 1000,
+        "width": 1440
+      },
+      "path": "captures/electrique-bureau-sombre-photo.jpg"
+    },
+    {
+      "theme": "Électrique",
+      "size": "tablette",
+      "appearance": "sombre",
+      "kind": "photo",
+      "charte": "antsia-electrique",
+      "colorScheme": "dark",
+      "dark": true,
+      "dialog": {
+        "clientWidth": 820,
+        "scrollWidth": 820
+      },
+      "media": [
+        {
+          "bottom": 370,
+          "decoded": true,
+          "error": null,
+          "height": 123.75,
+          "left": 38,
+          "local": true,
+          "naturalHeight": 1024,
+          "naturalWidth": 1536,
+          "right": 203,
+          "tag": "IMG",
+          "top": 246.25,
+          "visible": true,
+          "width": 165
+        }
+      ],
+      "viewport": {
+        "height": 1180,
+        "width": 820
+      },
+      "path": "captures/electrique-tablette-sombre-photo.jpg"
+    },
+    {
+      "theme": "Électrique",
+      "size": "mobile",
+      "appearance": "sombre",
+      "kind": "photo",
+      "charte": "antsia-electrique",
+      "colorScheme": "dark",
+      "dark": true,
+      "dialog": {
+        "clientWidth": 390,
+        "scrollWidth": 390
+      },
+      "media": [
+        {
+          "bottom": 499,
+          "decoded": true,
+          "error": null,
+          "height": 235.5,
+          "left": 38,
+          "local": true,
+          "naturalHeight": 1024,
+          "naturalWidth": 1536,
+          "right": 352,
+          "tag": "IMG",
+          "top": 263.5,
+          "visible": true,
+          "width": 314
+        }
+      ],
+      "viewport": {
+        "height": 844,
+        "width": 390
+      },
+      "path": "captures/electrique-mobile-sombre-photo.jpg"
+    },
+    {
+      "theme": "Électrique",
+      "size": "mobile",
+      "appearance": "sombre",
+      "kind": "video",
+      "charte": "antsia-electrique",
+      "colorScheme": "dark",
+      "dark": true,
+      "dialog": {
+        "clientWidth": 390,
+        "scrollWidth": 390
+      },
+      "media": [
+        {
+          "bottom": 499,
+          "decoded": true,
+          "error": null,
+          "height": 235.5,
+          "left": 38,
+          "local": true,
+          "naturalHeight": 180,
+          "naturalWidth": 320,
+          "right": 352,
+          "tag": "VIDEO",
+          "top": 263.5,
+          "visible": true,
+          "width": 314
+        }
+      ],
+      "viewport": {
+        "height": 844,
+        "width": 390
+      },
+      "path": "captures/electrique-mobile-sombre-video.jpg"
+    },
+    {
+      "theme": "Électrique",
+      "size": "tablette",
+      "appearance": "sombre",
+      "kind": "video",
+      "charte": "antsia-electrique",
+      "colorScheme": "dark",
+      "dark": true,
+      "dialog": {
+        "clientWidth": 820,
+        "scrollWidth": 820
+      },
+      "media": [
+        {
+          "bottom": 370,
+          "decoded": true,
+          "error": null,
+          "height": 123.75,
+          "left": 38,
+          "local": true,
+          "naturalHeight": 180,
+          "naturalWidth": 320,
+          "right": 203,
+          "tag": "VIDEO",
+          "top": 246.25,
+          "visible": true,
+          "width": 165
+        }
+      ],
+      "viewport": {
+        "height": 1180,
+        "width": 820
+      },
+      "path": "captures/electrique-tablette-sombre-video.jpg"
+    },
+    {
+      "theme": "Électrique",
+      "size": "bureau",
+      "appearance": "sombre",
+      "kind": "video",
+      "charte": "antsia-electrique",
+      "colorScheme": "dark",
+      "dark": true,
+      "dialog": {
+        "clientWidth": 1440,
+        "scrollWidth": 1440
+      },
+      "media": [
+        {
+          "bottom": 554.75,
+          "decoded": true,
+          "error": null,
+          "height": 170.25,
+          "left": 479,
+          "local": true,
+          "naturalHeight": 180,
+          "naturalWidth": 320,
+          "right": 706,
+          "tag": "VIDEO",
+          "top": 384.5,
+          "visible": true,
+          "width": 227
+        }
+      ],
+      "viewport": {
+        "height": 1000,
+        "width": 1440
+      },
+      "path": "captures/electrique-bureau-sombre-video.jpg"
+    },
+    {
+      "theme": "Sable",
+      "size": "bureau",
+      "appearance": "clair",
+      "kind": "photo",
+      "charte": "antsia-sable",
+      "colorScheme": "light",
+      "dark": false,
+      "dialog": {
+        "clientWidth": 1440,
+        "scrollWidth": 1440
+      },
+      "media": [
+        {
+          "bottom": 554.75,
+          "decoded": true,
+          "error": null,
+          "height": 170.25,
+          "left": 479,
+          "local": true,
+          "naturalHeight": 1024,
+          "naturalWidth": 1536,
+          "right": 706,
+          "tag": "IMG",
+          "top": 384.5,
+          "visible": true,
+          "width": 227
+        }
+      ],
+      "viewport": {
+        "height": 1000,
+        "width": 1440
+      },
+      "path": "captures/sable-bureau-clair-photo.jpg"
+    },
+    {
+      "theme": "Sable",
+      "size": "tablette",
+      "appearance": "clair",
+      "kind": "photo",
+      "charte": "antsia-sable",
+      "colorScheme": "light",
+      "dark": false,
+      "dialog": {
+        "clientWidth": 820,
+        "scrollWidth": 820
+      },
+      "media": [
+        {
+          "bottom": 370,
+          "decoded": true,
+          "error": null,
+          "height": 123.75,
+          "left": 38,
+          "local": true,
+          "naturalHeight": 1024,
+          "naturalWidth": 1536,
+          "right": 203,
+          "tag": "IMG",
+          "top": 246.25,
+          "visible": true,
+          "width": 165
+        }
+      ],
+      "viewport": {
+        "height": 1180,
+        "width": 820
+      },
+      "path": "captures/sable-tablette-clair-photo.jpg"
+    },
+    {
+      "theme": "Sable",
+      "size": "mobile",
+      "appearance": "clair",
+      "kind": "photo",
+      "charte": "antsia-sable",
+      "colorScheme": "light",
+      "dark": false,
+      "dialog": {
+        "clientWidth": 390,
+        "scrollWidth": 390
+      },
+      "media": [
+        {
+          "bottom": 499,
+          "decoded": true,
+          "error": null,
+          "height": 235.5,
+          "left": 38,
+          "local": true,
+          "naturalHeight": 1024,
+          "naturalWidth": 1536,
+          "right": 352,
+          "tag": "IMG",
+          "top": 263.5,
+          "visible": true,
+          "width": 314
+        }
+      ],
+      "viewport": {
+        "height": 844,
+        "width": 390
+      },
+      "path": "captures/sable-mobile-clair-photo.jpg"
+    },
+    {
+      "theme": "Sable",
+      "size": "mobile",
+      "appearance": "clair",
+      "kind": "video",
+      "charte": "antsia-sable",
+      "colorScheme": "light",
+      "dark": false,
+      "dialog": {
+        "clientWidth": 390,
+        "scrollWidth": 390
+      },
+      "media": [
+        {
+          "bottom": 499,
+          "decoded": true,
+          "error": null,
+          "height": 235.5,
+          "left": 38,
+          "local": true,
+          "naturalHeight": 180,
+          "naturalWidth": 320,
+          "right": 352,
+          "tag": "VIDEO",
+          "top": 263.5,
+          "visible": true,
+          "width": 314
+        }
+      ],
+      "viewport": {
+        "height": 844,
+        "width": 390
+      },
+      "path": "captures/sable-mobile-clair-video.jpg"
+    },
+    {
+      "theme": "Sable",
+      "size": "tablette",
+      "appearance": "clair",
+      "kind": "video",
+      "charte": "antsia-sable",
+      "colorScheme": "light",
+      "dark": false,
+      "dialog": {
+        "clientWidth": 820,
+        "scrollWidth": 820
+      },
+      "media": [
+        {
+          "bottom": 370,
+          "decoded": true,
+          "error": null,
+          "height": 123.75,
+          "left": 38,
+          "local": true,
+          "naturalHeight": 180,
+          "naturalWidth": 320,
+          "right": 203,
+          "tag": "VIDEO",
+          "top": 246.25,
+          "visible": true,
+          "width": 165
+        }
+      ],
+      "viewport": {
+        "height": 1180,
+        "width": 820
+      },
+      "path": "captures/sable-tablette-clair-video.jpg"
+    },
+    {
+      "theme": "Sable",
+      "size": "bureau",
+      "appearance": "clair",
+      "kind": "video",
+      "charte": "antsia-sable",
+      "colorScheme": "light",
+      "dark": false,
+      "dialog": {
+        "clientWidth": 1440,
+        "scrollWidth": 1440
+      },
+      "media": [
+        {
+          "bottom": 554.75,
+          "decoded": true,
+          "error": null,
+          "height": 170.25,
+          "left": 479,
+          "local": true,
+          "naturalHeight": 180,
+          "naturalWidth": 320,
+          "right": 706,
+          "tag": "VIDEO",
+          "top": 384.5,
+          "visible": true,
+          "width": 227
+        }
+      ],
+      "viewport": {
+        "height": 1000,
+        "width": 1440
+      },
+      "path": "captures/sable-bureau-clair-video.jpg"
+    },
+    {
+      "theme": "Sable",
+      "size": "bureau",
+      "appearance": "sombre",
+      "kind": "photo",
+      "charte": "antsia-sable",
+      "colorScheme": "dark",
+      "dark": true,
+      "dialog": {
+        "clientWidth": 1440,
+        "scrollWidth": 1440
+      },
+      "media": [
+        {
+          "bottom": 554.75,
+          "decoded": true,
+          "error": null,
+          "height": 170.25,
+          "left": 479,
+          "local": true,
+          "naturalHeight": 1024,
+          "naturalWidth": 1536,
+          "right": 706,
+          "tag": "IMG",
+          "top": 384.5,
+          "visible": true,
+          "width": 227
+        }
+      ],
+      "viewport": {
+        "height": 1000,
+        "width": 1440
+      },
+      "path": "captures/sable-bureau-sombre-photo.jpg"
+    },
+    {
+      "theme": "Sable",
+      "size": "tablette",
+      "appearance": "sombre",
+      "kind": "photo",
+      "charte": "antsia-sable",
+      "colorScheme": "dark",
+      "dark": true,
+      "dialog": {
+        "clientWidth": 820,
+        "scrollWidth": 820
+      },
+      "media": [
+        {
+          "bottom": 370,
+          "decoded": true,
+          "error": null,
+          "height": 123.75,
+          "left": 38,
+          "local": true,
+          "naturalHeight": 1024,
+          "naturalWidth": 1536,
+          "right": 203,
+          "tag": "IMG",
+          "top": 246.25,
+          "visible": true,
+          "width": 165
+        }
+      ],
+      "viewport": {
+        "height": 1180,
+        "width": 820
+      },
+      "path": "captures/sable-tablette-sombre-photo.jpg"
+    },
+    {
+      "theme": "Sable",
+      "size": "mobile",
+      "appearance": "sombre",
+      "kind": "photo",
+      "charte": "antsia-sable",
+      "colorScheme": "dark",
+      "dark": true,
+      "dialog": {
+        "clientWidth": 390,
+        "scrollWidth": 390
+      },
+      "media": [
+        {
+          "bottom": 499,
+          "decoded": true,
+          "error": null,
+          "height": 235.5,
+          "left": 38,
+          "local": true,
+          "naturalHeight": 1024,
+          "naturalWidth": 1536,
+          "right": 352,
+          "tag": "IMG",
+          "top": 263.5,
+          "visible": true,
+          "width": 314
+        }
+      ],
+      "viewport": {
+        "height": 844,
+        "width": 390
+      },
+      "path": "captures/sable-mobile-sombre-photo.jpg"
+    },
+    {
+      "theme": "Sable",
+      "size": "mobile",
+      "appearance": "sombre",
+      "kind": "video",
+      "charte": "antsia-sable",
+      "colorScheme": "dark",
+      "dark": true,
+      "dialog": {
+        "clientWidth": 390,
+        "scrollWidth": 390
+      },
+      "media": [
+        {
+          "bottom": 499,
+          "decoded": true,
+          "error": null,
+          "height": 235.5,
+          "left": 38,
+          "local": true,
+          "naturalHeight": 180,
+          "naturalWidth": 320,
+          "right": 352,
+          "tag": "VIDEO",
+          "top": 263.5,
+          "visible": true,
+          "width": 314
+        }
+      ],
+      "viewport": {
+        "height": 844,
+        "width": 390
+      },
+      "path": "captures/sable-mobile-sombre-video.jpg"
+    },
+    {
+      "theme": "Sable",
+      "size": "tablette",
+      "appearance": "sombre",
+      "kind": "video",
+      "charte": "antsia-sable",
+      "colorScheme": "dark",
+      "dark": true,
+      "dialog": {
+        "clientWidth": 820,
+        "scrollWidth": 820
+      },
+      "media": [
+        {
+          "bottom": 370,
+          "decoded": true,
+          "error": null,
+          "height": 123.75,
+          "left": 38,
+          "local": true,
+          "naturalHeight": 180,
+          "naturalWidth": 320,
+          "right": 203,
+          "tag": "VIDEO",
+          "top": 246.25,
+          "visible": true,
+          "width": 165
+        }
+      ],
+      "viewport": {
+        "height": 1180,
+        "width": 820
+      },
+      "path": "captures/sable-tablette-sombre-video.jpg"
+    },
+    {
+      "theme": "Sable",
+      "size": "bureau",
+      "appearance": "sombre",
+      "kind": "video",
+      "charte": "antsia-sable",
+      "colorScheme": "dark",
+      "dark": true,
+      "dialog": {
+        "clientWidth": 1440,
+        "scrollWidth": 1440
+      },
+      "media": [
+        {
+          "bottom": 554.75,
+          "decoded": true,
+          "error": null,
+          "height": 170.25,
+          "left": 479,
+          "local": true,
+          "naturalHeight": 180,
+          "naturalWidth": 320,
+          "right": 706,
+          "tag": "VIDEO",
+          "top": 384.5,
+          "visible": true,
+          "width": 227
+        }
+      ],
+      "viewport": {
+        "height": 1000,
+        "width": 1440
+      },
+      "path": "captures/sable-bureau-sombre-video.jpg"
+    }
+  ]
+}
