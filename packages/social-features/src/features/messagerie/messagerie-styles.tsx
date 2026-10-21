@@ -1447,7 +1447,7 @@ export const MESSAGERIE_STYLES_CSS = `
         .icom-page-heading h1 {
           margin: 0;
           font-family: var(--esp-heading-font-family, inherit);
-          font-size: var(--esp-page-title-size, 22px);
+          font-size: var(--esp-messages-heading-size, var(--esp-page-title-size, 22px));
           font-weight: 700;
           line-height: var(--esp-page-title-leading, inherit);
           letter-spacing: var(--esp-page-title-tracking, normal);

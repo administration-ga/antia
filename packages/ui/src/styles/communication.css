@@ -220,7 +220,7 @@ body,
 /* Déjà regardée : un filet discret, pas un anneau. C'est ce qui fait qu'une
    barre SE VIDE à l'œil en la parcourant. */
 .esp-story-ring-seen {
-  background: color-mix(in srgb, var(--muted-foreground) 38%, transparent);
+  background: var(--esp-story-ring-seen-fill, color-mix(in srgb, var(--muted-foreground) 38%, transparent));
 }
 
 /* La mienne — ni « à voir » ni « vue » : le point de départ. */

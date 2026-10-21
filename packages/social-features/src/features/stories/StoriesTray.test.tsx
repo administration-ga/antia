@@ -201,10 +201,10 @@ describe("StoriesTray — branchement sur le plateau du moteur", () => {
 })
 
 describe("StoriesTray — médaillons déclarés par l'application (ADR-0027)", () => {
-	function ringsTray(onOpen = vi.fn(), onCreate = vi.fn()) {
+	function ringsTray(onOpen = vi.fn(), onCreate = vi.fn(), myAvatarUrl: string | null = null) {
 		return (
 			<NetworkProvider networkId={TEST_NETWORK_ID} personId={TEST_PERSON_ID} slug="stories-rings" charte="antsia" routes={TEST_ROUTES} storiesPresentation="rings">
-				<StoriesTray myHandle="moi" now={BASE} onOpen={onOpen} onCreate={onCreate} />
+				<StoriesTray myHandle="moi" myAvatarUrl={myAvatarUrl} now={BASE} onOpen={onOpen} onCreate={onCreate} />
 			</NetworkProvider>
 		)
 	}
@@ -272,6 +272,57 @@ describe("StoriesTray — médaillons déclarés par l'application (ADR-0027)", 
 		fireEvent.click(create)
 		expect(onCreate).toHaveBeenCalledTimes(1)
 		expect(onOpen).toHaveBeenCalledTimes(1)
+	})
+
+	it("le ton suit chaque auteur lorsque l'ordre et l'état vu changent", () => {
+		const awa = group("awa", { unseenCount: 1, author: { ...group("awa").author, displayName: "Awa NDONG" } })
+		const eloise = group("eloise", { author: { ...group("eloise").author, displayName: "Éloïse MBA" } })
+		mocks.byInstant.set(BASE, { groups: [awa, eloise], truncated: false })
+		const view = renderWithEngine(ringsTray())
+		const initialTone = screen.getByRole("button", { name: /Awa NDONG/ }).querySelector(".st-tray-fallback")!.getAttribute("style")
+		expect([...document.querySelectorAll(".st-ring-name")].map((name) => name.textContent)).toEqual(["Vous", "Awa", "Éloïse"])
+
+		mocks.byInstant.set(BASE, { groups: [{ ...awa, unseenCount: 0 }, { ...eloise, unseenCount: 1 }], truncated: false })
+		view.rerender(ringsTray())
+		expect([...document.querySelectorAll(".st-ring-name")].map((name) => name.textContent)).toEqual(["Vous", "Éloïse", "Awa"])
+		const seenAwa = screen.getByRole("button", { name: /Awa NDONG/ })
+		expect(seenAwa.querySelector(".st-tray-fallback")).toHaveAttribute("style", initialTone)
+		expect(seenAwa.querySelector(".esp-story-ring-seen")).not.toBeNull()
+		expect(screen.getByRole("button", { name: /Éloïse MBA/ }).querySelector(".esp-story-ring")).not.toBeNull()
+	})
+
+	it("« Vous » sans série garde sa photo valide, une silhouette en cas d'erreur et reprend une nouvelle URL", () => {
+		mocks.byInstant.set(BASE, { groups: [], truncated: false })
+		const view = renderWithEngine(ringsTray(vi.fn(), vi.fn(), "/my-portrait"))
+		const create = screen.getByRole("button", { name: "Publier une actu" })
+		expect(create.querySelector("img")).toHaveAttribute("src", "/my-portrait")
+		expect(create.querySelector(".st-tray-disc svg")).toBeNull()
+		expect(document.querySelector(".st-tray-ring")).toBeNull()
+
+		fireEvent.error(create.querySelector("img")!)
+		expect(create.querySelector("img")).toBeNull()
+		expect(create.querySelector(".st-tray-disc svg")).not.toBeNull()
+		expect(create.querySelector(".st-tray-fallback")).toBeNull()
+		view.rerender(ringsTray(vi.fn(), vi.fn(), "/new-portrait"))
+		expect(create.querySelector("img")).toHaveAttribute("src", "/new-portrait")
+		expect([...document.querySelectorAll(".st-ring-name")].map((name) => name.textContent)).toEqual(["Vous"])
+	})
+
+	it("les médaillons emploient le portrait publié et gardent un auteur sans nom neutre", () => {
+		mocks.byInstant.set(BASE, {
+			groups: [
+				group("awa", { author: { ...group("awa").author, displayName: "Awa NDONG", avatarUrl: "/awa-portrait" } }),
+				group(null),
+			],
+			truncated: false,
+		})
+		renderWithEngine(ringsTray())
+		const awa = screen.getByRole("button", { name: /Awa NDONG/ })
+		expect(awa.querySelector("img")).toHaveAttribute("src", "/awa-portrait")
+		expect(awa.querySelector(".st-tray-fallback")).toBeNull()
+		const unknown = screen.getByRole("button", { name: /Membre du réseau/ })
+		expect(unknown.querySelector(".st-tray-fallback")?.getAttribute("style")).toContain("--esp-avatar-neutral-bg")
+		expect(unknown.querySelector("svg")).not.toBeNull()
 	})
 
 	it("sans droit de créer, ma série garde « Vous » sans « + »", () => {

@@ -229,6 +229,12 @@ const STORIES_CSS = `
         height: 100%;
         object-fit: cover;
       }
+      .st-tray-fallback {
+        display: inline-grid;
+        place-items: center;
+        width: 100%;
+        height: 100%;
+      }
 
       /* ── LES MÉDAILLONS (présentation « rings », ADR-0027) ────────────────
          Déclarés par l'application (storiesPresentation) : un rond par
@@ -237,8 +243,8 @@ const STORIES_CSS = `
          tuile garde une largeur figée : la rangée ne se recompose pas selon
          la longueur des prénoms, tronqués d'une ellipse. */
       .st-tray[data-presentation="rings"] {
-        gap: 10px;
-        padding: 4px 2px 8px;
+        gap: 12px;
+        padding: 2px 2px 4px;
       }
       .st-tray[data-presentation="rings"] .st-tray-tile {
         width: 64px;
@@ -250,15 +256,15 @@ const STORIES_CSS = `
         align-items: center;
         gap: 6px;
       }
-      /* Les mesures de la maquette des chartes (ADR-0028) : un anneau de
-         2,5 px, séparé du portrait par 2,5 px de la couleur de page. */
+      /* Les mesures du canevas actualisé : 62 px, 3 px d'anneau et
+         3 px de séparation de la couleur de page. */
       .st-ring-tile .st-tray-ring {
-        width: 60px;
-        height: 60px;
-        padding: 2.5px;
+        width: 62px;
+        height: 62px;
+        padding: 3px;
       }
       .st-ring-tile .st-tray-disc {
-        border-width: 2.5px;
+        border-width: 3px;
       }
       /* « Vous » : mon portrait (ou la silhouette), et son « + » à l'aplat
          d'identité, comme le bouton Créer. Sans série en ligne, un disque
@@ -266,8 +272,8 @@ const STORIES_CSS = `
       .st-ring-self {
         position: relative;
         display: flex;
-        width: 60px;
-        height: 60px;
+        width: 62px;
+        height: 62px;
       }
       .st-ring-self > .st-tray-disc {
         border: none;
@@ -293,25 +299,28 @@ const STORIES_CSS = `
         right: -2px;
         bottom: -2px;
         display: flex;
-        width: 22px;
-        height: 22px;
+        width: 24px;
+        height: 24px;
         align-items: center;
         justify-content: center;
-        border: 2.5px solid var(--background);
+        border: none;
         border-radius: 999px;
+        box-shadow: 0 0 0 3px var(--background);
         background: var(--primary-fill);
         color: var(--primary-fill-on, var(--on-fill));
       }
       /* Le « + » est un bouton frère du médaillon quand ma série est en ligne.
-         La cible ANTSIA mesure 44 px ; seule la pastille visible mesure 22 px.
+         Sa cible mesure au moins 44 px ; seule la pastille visible mesure 24 px.
          Le centre reste celui du rond historique, sans déplacer la rangée. */
       .st-ring-plus-button {
         position: absolute;
-        right: calc(-2px - (var(--esp-control-min-size, 22px) - 22px) / 2);
-        bottom: calc(-2px - (var(--esp-control-min-size, 22px) - 22px) / 2);
+        right: calc(-2px - (max(44px, var(--esp-control-min-size, 44px)) - 24px) / 2);
+        bottom: calc(-2px - (max(44px, var(--esp-control-min-size, 44px)) - 24px) / 2);
         display: flex;
-        width: var(--esp-control-min-size, 22px);
-        height: var(--esp-control-min-size, 22px);
+        width: max(44px, var(--esp-control-min-size, 44px));
+        height: max(44px, var(--esp-control-min-size, 44px));
+        min-width: 44px;
+        min-height: 44px;
         align-items: center;
         justify-content: center;
         padding: 0;
@@ -323,25 +332,13 @@ const STORIES_CSS = `
       }
       .st-ring-plus-button > .st-ring-plus {
         position: static;
-        flex: 0 0 22px;
+        flex: 0 0 24px;
         pointer-events: none;
       }
-      /* Hors ANTSIA, le bouton reste à 22 px et conserve son ancienne zone de
-         toucher de 40 px. Dans ANTSIA, ce pseudo-élément ne dépasse pas les 44 px. */
-      .st-ring-plus-button::before {
-        content: "";
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        width: max(40px, var(--esp-control-min-size, 22px));
-        height: max(40px, var(--esp-control-min-size, 22px));
-        transform: translate(-50%, -50%);
-        border-radius: 999px;
-      }
       .st-ring-name {
-        max-width: 64px;
+        max-width: 66px;
         overflow: hidden;
-        font-size: 12px;
+        font-size: 11.5px;
         font-weight: 500;
         line-height: 1.25;
         white-space: nowrap;

@@ -20,6 +20,7 @@
 import { Icon } from "@antsia/ui"
 import { useState, type ReactNode } from "react"
 import { initialsOf } from "../reseau-personnel/Avatar"
+import { identityToneStyle } from "../reseau-personnel/avatar-presentation"
 import type { StoryRingState } from "./stories-tray"
 
 const RING_CLASS: Record<StoryRingState, string> = {
@@ -34,6 +35,8 @@ export interface StoryRingProps {
 	/** La vignette de la story la plus récente ; à défaut, l'avatar. */
 	coverUrl?: string | null
 	avatarUrl?: string | null
+	/** Les tons décoratifs du nom public ne concernent que les médaillons. */
+	presentation?: "cards" | "rings"
 }
 
 export function StoryRing({
@@ -41,12 +44,17 @@ export function StoryRing({
 	displayName,
 	coverUrl,
 	avatarUrl,
+	presentation = "cards",
 }: StoryRingProps) {
 	// La COUVERTURE d'abord : c'est ce que la personne vient de publier, et
 	// c'est ce qui donne envie d'ouvrir. L'avatar n'est qu'un repli — une
 	// rangée de portraits ne dit pas ce qu'il y a derrière.
 	const image = coverUrl ?? avatarUrl ?? null
-	const fallback = displayName.trim().length > 0 ? <span style={{ fontSize: 18, fontWeight: 700, letterSpacing: "0.02em" }}>{initialsOf(displayName)}</span> : <Icon name="user" size={22} />
+	const identity = displayName.trim().length > 0 ? <span style={{ fontSize: presentation === "rings" ? 15 : 18, fontWeight: 700, letterSpacing: "0.02em" }}>{initialsOf(displayName)}</span> : <Icon name="user" size={22} />
+	// Le ton est décoratif, stable pour le même nom PUBLIC et sans rapport
+	// avec l'anneau de lecture ou les badges de confiance. Une image valide
+	// garde toute sa place ; seule son absence ou son erreur révèle ce repli.
+	const fallback = presentation === "rings" ? <span className="st-tray-fallback" style={identityToneStyle(displayName)}>{identity}</span> : identity
 
 	return (
 		<span className={`st-tray-ring ${RING_CLASS[state]}`} aria-hidden="true">

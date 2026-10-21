@@ -193,7 +193,7 @@
   --esp-surface-card: var(--card);
   --esp-surface-raised: var(--popover);
   --esp-surface-border: var(--border); /* carte et fond de même couleur : un filet */
-  --esp-story-ring-fill: conic-gradient(from 210deg, var(--esp-theme-swatch-1), var(--esp-theme-swatch-2), var(--esp-theme-swatch-3), var(--esp-theme-swatch-1)); /* l'anneau « à voir » des actus : les trois couleurs du thème, celles du sélecteur */
+  --esp-story-ring-fill: conic-gradient(from 200deg, var(--esp-theme-swatch-1), var(--esp-theme-swatch-2), var(--esp-theme-swatch-3), var(--esp-theme-swatch-1)); /* l'anneau « à voir » des actus : les trois couleurs du thème, celles du sélecteur */
   --esp-neutral-chip: var(--muted);
   --esp-neutral-hover: var(--muted);
   --esp-mobilebar-border: var(--border);
@@ -293,6 +293,28 @@
   --esp-content-line-height: 1.5;
   --esp-profile-avatar-page-radius: 24px;
   --esp-profile-avatar-size: 104px;
+  --esp-avatar-1-bg: color-mix(in srgb, var(--role-social-fill) 15%, var(--card));
+  --esp-avatar-1-fg: var(--role-social-ink);
+  --esp-avatar-2-bg: var(--primary-fill);
+  --esp-avatar-2-fg: var(--primary-fill-on);
+  --esp-avatar-3-bg: var(--role-commerce-fill);
+  --esp-avatar-3-fg: var(--role-commerce-on);
+  --esp-avatar-4-bg: var(--role-message-soft);
+  --esp-avatar-4-fg: var(--role-message-ink);
+  --esp-avatar-5-bg: var(--role-social-fill);
+  --esp-avatar-5-fg: var(--role-social-on);
+  --esp-avatar-6-bg: var(--foreground);
+  --esp-avatar-6-fg: var(--background);
+  --esp-avatar-neutral-bg: var(--muted);
+  --esp-avatar-neutral-fg: var(--foreground);
+  --esp-avatar-font-24: 9.5px;
+  --esp-avatar-font-32: 11.5px;
+  --esp-avatar-font-40: 13px;
+  --esp-avatar-font-48: 15px;
+  --esp-avatar-font-64: 20px;
+  --esp-avatar-font-104: 32px;
+  --esp-story-ring-seen-fill: var(--border);
+  --esp-messages-heading-size: 22px;
   --esp-fab-size: 52px;
   --esp-layout-max-width: 1400px;
   --esp-layout-gutter: 20px;

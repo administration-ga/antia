@@ -608,6 +608,8 @@
      version claire, écrit en repli là où il est lu. Un thème à trois couleurs
      (ADR-0027) y fait tourner ses trois couleurs (ses nuanciers), comme la maquette. */
   --esp-story-ring-fill: initial;
+  /* L'anneau vu est décoratif ; son état reste nommé par le contrôle. */
+  --esp-story-ring-seen-fill: initial;
   /* Trait des liens du TEXTE COURANT (mots-dièse et mentions d'une publication
      ou d'un commentaire), jamais des liens de navigation : aucun par défaut. */
   --esp-inline-link-decoration: none;
@@ -755,6 +757,7 @@
   --esp-field-line-height: initial;
   --esp-textarea-min-height: initial;
   --esp-page-title-size: initial;
+  --esp-messages-heading-size: initial;
   --esp-page-title-leading: initial;
   --esp-section-title-size: initial;
   --esp-section-title-leading: initial;
@@ -765,6 +768,27 @@
   --esp-content-line-height: initial;
   --esp-profile-avatar-page-radius: initial;
   --esp-profile-avatar-size: initial;
+  /* Teintes du nom PUBLIC : aucune relation avec les preuves ou les droits. */
+  --esp-avatar-1-bg: initial;
+  --esp-avatar-1-fg: initial;
+  --esp-avatar-2-bg: initial;
+  --esp-avatar-2-fg: initial;
+  --esp-avatar-3-bg: initial;
+  --esp-avatar-3-fg: initial;
+  --esp-avatar-4-bg: initial;
+  --esp-avatar-4-fg: initial;
+  --esp-avatar-5-bg: initial;
+  --esp-avatar-5-fg: initial;
+  --esp-avatar-6-bg: initial;
+  --esp-avatar-6-fg: initial;
+  --esp-avatar-neutral-bg: initial;
+  --esp-avatar-neutral-fg: initial;
+  --esp-avatar-font-24: initial;
+  --esp-avatar-font-32: initial;
+  --esp-avatar-font-40: initial;
+  --esp-avatar-font-48: initial;
+  --esp-avatar-font-64: initial;
+  --esp-avatar-font-104: initial;
   --esp-fab-size: initial;
   --esp-layout-max-width: initial;
   --esp-layout-gutter: initial;
