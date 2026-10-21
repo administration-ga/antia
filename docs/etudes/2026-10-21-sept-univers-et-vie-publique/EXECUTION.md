@@ -45,12 +45,18 @@ Ordonnance n° 0011/PR/2026, art. 24, 32 et 33.
   - file prioritaire et compétence des équipes ;
   - cloche, réseau du déclarant et chemin historique des publications.
 - Tests du domaine (motifs, fondements, échéances, issue) et de l'interface (chronomètre, file prioritaire, cloche).
+- Recette navigateur du 22/10/2026, sur le backend local isolé d'un candidat tiré de `main` (variables posées avec l'accord du propriétaire), avec les comptes de démonstration :
+  - Awa MBA signale trois publications fictives de Jean-Rémy NDONG : un hypertrucage, un harcèlement et une information trompeuse ; le dialogue propose les 12 motifs et annonce l'accusé et la décision ;
+  - trois accusés de réception arrivent dans sa cloche dès la transmission, chacun menant à « Mes signalements », qui affiche les échéances : 22/10, 23:37 (art. 33) et 24/10, 23:37 (art. 24) ; aucune pour la désinformation ;
+  - dans `/moderation`, Nadège KOUMBA voit « Délais légaux » en tête, l'hypertrucage avant le harcèlement, avec l'accusé affiché ; les chronomètres passent de 58 à 57 min sans rechargement ; la désinformation est seule dans « Autres signalements » ;
+  - retrait de l'hypertrucage à 23:41, avant l'échéance, et classement de la désinformation : Awa reçoit deux avis « Une décision a été prise sur votre signalement. », et « Mes signalements » dit « Contenu retiré », « En cours d'examen » et « Aucun manquement retenu », sans sanction ni motif de modération ;
+  - à 390 px : pas de défilement horizontal, l'ancre `#mes-signalements` reçoit le focus ; aucune erreur dans la console.
+  - Limite : le navigateur intégré bloque les dialogues natifs ; la confirmation du retrait a donc été acceptée en remplaçant `window.confirm` dans l'onglet.
 
 **Reste**
 - Déploiement du backend, avec celui de la marketplace : `scripts/convex-deploy-demo-production.sh`, lancé par le propriétaire.
-- Recette dans le navigateur, connecté en modérateur : non faite, car le backend local isolé exige deux variables d'authentification.
 - Indicateurs publiés (délais tenus) sur `/transparence`.
-- Côté DIASPORALE : phrases propres aux deux avis (elles s'affichent aujourd'hui comme « nouvelle activité ») et libellés des nouveaux motifs dans son bureau de modération.
+- Côté DIASPORALE : les libellés des motifs sont faits (diasporale#24) ; restent les phrases propres aux deux avis (aujourd'hui « nouvelle activité ») et l'offre des nouveaux motifs dans son menu de signalement.
 
 ## Conditions externes
 
