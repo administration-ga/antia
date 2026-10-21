@@ -8,9 +8,9 @@ Les sessions Codex ont été interrompues à 17 h 50 pendant la composition, dan
 
 | Élément | Valeur |
 |---|---|
-| Base | `main` `d2ac0be` (PR 28), puis `main` `5851d02` (PR 29, U03–U08), en production depuis le 21/10 au soir |
+| Base | `main` `0773370` (PR 31), en production depuis le 21/10 au soir ; fusions successives de `d2ac0be` (PR 28), `5851d02` (PR 29, U03–U08) et `0773370` |
 | Instantané de l'arbre partagé | `eea4f0c` (parent `c4d36f3`), construit avec un index privé |
-| Fusion puis correctifs | `1994827`, `884fa37`, `6c3b0c4`, fusion de `main` `72b0042`, `561b162` et ce rapport |
+| Fusion puis correctifs | `1994827`, `884fa37`, `6c3b0c4`, `72b0042`, `561b162`, style de main `8688e0d`, `1e6bccf` (PR 31), thèmes de main et classes `mp-*`, puis ce rapport |
 | Arbre, index et HEAD partagés | Inchangés (`codex/pa4-identite-session`) |
 
 L'instantané couvre `apps/` (hors `apps/antsia_mobile`, laissé à `main`), `packages/`, `convex/`, `tests/`, `scripts/`, `ops/`, `deploy/` et `docs/` hors recettes, contenus de démonstration, maintenance et mémoire. Il porte **trois couches non publiées** :
@@ -25,7 +25,14 @@ La marketplace dépend des deux premières couches : tables et contrats P (inten
 
 Pendant la vérification, une autre session a remis U03–U08 dans `main` (PR 29, `5851d02`) **dans le style des chartes**, sans la passe de design du 20/10 (« sept systèmes appliqués aux huit rubriques » : classes `antsia-*`, jetons `esp-card-*`, repli coloré des médaillons). Elle a été déployée avec l'accord du propriétaire. Fusion de `main` dans la branche (30 fichiers) : le style de `main` l'emporte sur les composants partagés ; la marketplace garde ses ajouts fonctionnels (routes et pages spécialisées, onglet Boutiques vers la marketplace, iCom professionnel, rendu d'article, gabarit et blocs de vitrine, facettes et profil de service, image prioritaire).
 
-**Décision du propriétaire attendue.** Hors des 30 fichiers en conflit, la branche réapplique encore cette passe de design sur **88 fichiers hors marketplace** (contre 22 fichiers utilisant ces classes dans `main`). Soit on la garde (elle avait été publiée le 20/10, puis perdue le 21/10 à 10 h 46), soit on ramène ces fichiers au style de `main` avant fusion. Les définitions CSS restent nécessaires aux 35 fichiers marketplace qui les emploient.
+**Décision du propriétaire (21/10) : le style de `main` hors marketplace.** Appliquée ainsi :
+
+- la passe du 20/10 (`3507e4a`) est annulée en trois voies sur les fichiers hors marketplace ; les fichiers qui ne diffèrent de `main` que par le style (classes, objets `style`, variantes, CSS embarqué, commentaires) reprennent la version de `main` ;
+- les lots P gardent leurs fonctions (candidatures, services, achats, appels de modération, effacement) : seules leurs classes de la passe sont remplacées par les classes d'origine ;
+- thèmes, charte et `communication.css` sont **identiques à `main`** : aucune couleur, taille de texte ni jeton de thème ne change ; les thèmes DIASPORALE restent ceux de `main` ;
+- les écrans marketplace emploient leurs propres classes `mp-*` (titre, sous-titre, page, panneau, formulaire), définies en valeurs fixes à la fin de `globals.css` : les écrans de `main` qui portent `antsia-title` sans définition restent inchangés ;
+- retirés, car devenus sans usage : l'aperçu public de l'accueil, la présentation des avatars par tons et les tests de géométrie de la passe.
+- écrans partagés touchés par le chantier (accueil, coque publique, connexion, bienvenue, cadre membre) : version de `main` + le seul apport marketplace (destination spécialisée transmise, navigation spécialisée, aiguillage MP01) ; les autres écrans partagés gardent leurs blocs fonctionnels et reprennent les blocs purement stylistiques de `main`.
 
 ### Conflits (54 fichiers)
 
@@ -33,7 +40,7 @@ Pendant la vérification, une autre session a remis U03–U08 dans `main` (PR 29
 - Démo intégrée de `main` préservée : hauteur sous le bandeau (`demoWorkspaceHeight`), espace de stockage démo, codes démo lisibles (`demoCodeReadable`), catalogue démo fermé.
 - Sept thèmes et charte : jetons `esp-` de l'arbre, qui contiennent déjà les quatre jetons ajoutés par `main`.
 - Traductions : aucune clé en double, mêmes clés FR/EN.
-- Next 16.4.2 (lot U) et `bun.lock` de l'arbre, cohérent avec `main` + DIASPORALE (`bun install --lockfile-only` ne change rien).
+- Next 16.4.2 et `bun.lock` de l'arbre, cohérent avec `main` + DIASPORALE (`bun install --lockfile-only` ne change rien).
 - Le test de hauteur démo de la messagerie (`main`) est conservé dans `messages-screen-demo.test.tsx`, à côté du test MP09 de l'arbre.
 
 ### Correctifs apportés à la vérification
@@ -46,24 +53,23 @@ Pendant la vérification, une autre session a remis U03–U08 dans `main` (PR 29
 
 ## Vérifications du candidat exact
 
-| Contrôle | Résultat |
+| Contrôle | Résultat (vérification finale, 21/10 21 h 18, sur `0c62c67`) |
 |---|---|
-| Génération Convex | Verte, sur un backend local propre au dossier candidat : schéma validé, onze composants installés. Le backend local de l'arbre partagé n'a reçu aucun déploiement. |
+| Génération Convex | Verte, sur un backend local propre au dossier candidat : schéma validé, composants installés. Le backend local de l'arbre partagé n'a reçu aucun déploiement. |
 | `typecheck:convex`, `typecheck:tests` | 0 erreur |
-| Tests du moteur (`test:convex`) | 3 197/3 197 au passage complet après fusion de la PR 29 |
-| Cliquets / scripts | 146/146 · 70/70 |
-| Typage des espaces de travail | 11/12 verts ; `diasporale-com` : voir DIASPORALE ci-dessous |
-| Tests des espaces ANTSIA | domaine 998 · contrats 86 · api 291 · natif 75 · ui 2 286 · social-features 4 168 · console 87 · antsia_ga 1 737 · mobile 84 |
+| Tests du moteur (`test:convex`) | 3 197/3 197 |
+| Cliquets / scripts | 146/146 (dont `theme-contract` : aucun jeton fantôme) · 70/70 |
+| Typage des 12 espaces de travail | 12/12, DIASPORALE `ad898b5` compris |
+| Tests des espaces ANTSIA | domaine 998 · contrats 86 · api 291 · natif 75 · ui 2 178 · social-features 4 150 · console 87 · antsia_ga 1 735 · mobile 84 |
+| Tests DIASPORALE (`ad898b5`) | domaine 697 · features 877 · application 1 398/1 399 (voir ci-dessous) |
 | Lint | 0 erreur (avertissements préexistants) |
-| Build Next `antsia_ga` | Vert (Next 16.4.2, 36 pages statiques générées), après fusion de la PR 29 |
+| Build Next `antsia_ga` | Vert (Next 16.4.2) |
 
-Total ANTSIA : **13 225 tests verts** (moteur, cliquets 146, scripts 70 et neuf espaces).
+Total ANTSIA : **13 097 tests verts**.
 
 ### DIASPORALE (dépôt voisin, non modifié)
 
-Avec la version publiée de DIASPORALE (`fab55ef`), le nouveau moteur laisse 6 erreurs de typage dans `diasporale-com`, 10 tests de contraste du thème en échec dans `diasporale-features` et 1 cliquet de traductions dans `diasporale-com`. Avec les retouches **non publiées** de son arbre de travail : typage vert, 963/963 tests de `features`, et `diasporale-com` à 1 401/1 402. Le dernier échec demande dix clés FR/EN pour cinq nouvelles surfaces de modération (`commerceStorefront`, `professionalProfile`, `professionalCollaboration`, `editorialVersion`, `editorialMedia`) dans `settings.dataRights.decisions.surface` et `moderationDesk.surface`.
-
-Ces fichiers appartiennent à la session DIASPORALE : publier ses retouches et ajouter ces clés est la condition pour que DIASPORALE adopte ce moteur. Le déploiement d'antsia.vercel.app n'en dépend pas.
+Avec son `main` actuel (`ad898b5`, qui intègre `789e9ec`), DIASPORALE type sans erreur face à ce moteur et ses thèmes restent ceux de `main`. Un seul cliquet échoue dans `diasporale-com` : il demande les libellés FR/EN de cinq nouvelles surfaces de modération (`commerceStorefront`, `professionalProfile`, `professionalCollaboration`, `editorialVersion`, `editorialMedia`) dans `settings.dataRights.decisions.surface` et `moderationDesk.surface`, soit dix clés. Ces fichiers appartiennent à DIASPORALE : les ajouter est la condition de son adoption de ce moteur. Le déploiement d'antsia.vercel.app n'en dépend pas.
 
 ### Parité des contrats jumeaux
 
