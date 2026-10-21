@@ -1,0 +1,37 @@
+{
+  "projection": {
+    "sourceFile": "cache-removal.json",
+    "sourceSha256": "3c938d72c4971d1252408172be5197a86382fd20b59eb8f9125d65f170e9e07d",
+    "rawSourceRetainedLocally": true
+  },
+  "evidence": {
+    "items": [
+      {
+        "type": "dépendances recréables de copie de livraison ou build inactive",
+        "apparentKiB": 1093784,
+        "deleted": true,
+        "sourcePackageAndLockUnchanged": true
+      },
+      {
+        "type": "dépendances recréables de copie de livraison ou build inactive",
+        "apparentKiB": 149368,
+        "deleted": true,
+        "sourcePackageAndLockUnchanged": true
+      },
+      {
+        "type": "dépendances recréables de copie de livraison ou build inactive",
+        "apparentKiB": 1105108,
+        "deleted": true,
+        "sourcePackageAndLockUnchanged": true
+      },
+      {
+        "type": "cache macOS protégé",
+        "apparentKiB": null,
+        "deleted": false,
+        "reason": "Permissions macOS refusées ; aucune élévation demandée"
+      }
+    ],
+    "deletedItems": 3,
+    "refusedItems": 1
+  }
+}

@@ -1,0 +1,51 @@
+{
+  "projection": {
+    "sourceFile": "production-reloads.json",
+    "sourceSha256": "71c0ac873c6c32a9ccba15e2f721d92221f1743302b08cc63ab848795b395b4e",
+    "rawSourceRetainedLocally": true
+  },
+  "evidence": {
+    "checkedAt": "2026-10-21T11:36:39.348Z",
+    "method": "wait for signed-in control after each reload",
+    "baseline": {
+      "path": "/fil",
+      "preferences": [
+        "system",
+        "gaboma",
+        "pour_vous"
+      ]
+    },
+    "checks": [
+      {
+        "attempt": 1,
+        "path": "/fil",
+        "preferences": [
+          "system",
+          "gaboma",
+          "pour_vous"
+        ],
+        "signedIn": true
+      },
+      {
+        "attempt": 2,
+        "path": "/fil",
+        "preferences": [
+          "system",
+          "gaboma",
+          "pour_vous"
+        ],
+        "signedIn": true
+      },
+      {
+        "attempt": 3,
+        "path": "/fil",
+        "preferences": [
+          "system",
+          "gaboma",
+          "pour_vous"
+        ],
+        "signedIn": true
+      }
+    ]
+  }
+}

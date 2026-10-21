@@ -1,0 +1,25 @@
+{
+  "projection": {
+    "sourceFile": "npm-cache-removals.json",
+    "sourceSha256": "89f2468868c186e3094b2c25c97cb59559c312d717d0b69cb919877bc4603909",
+    "rawSourceRetainedLocally": true
+  },
+  "evidence": [
+    {
+      "package": "@modelcontextprotocol/server-pdf",
+      "packageSpec": "^2.0.3",
+      "apparentKiB": 135444,
+      "packageJsonSha256": "3a4ad42f008f06973b49437966e60dd9ead9d8d30c63c7ae90c6b0baa02d6230",
+      "noActiveProcessOrOpenFile": true,
+      "deleted": true
+    },
+    {
+      "package": "eas-cli-local-build-plugin",
+      "packageSpec": "^25.3.0",
+      "apparentKiB": 182656,
+      "packageJsonSha256": "1c552787c53e0e89133cb1af35e419dcb7a7f735c59f10b67612dbe0ff95e3f6",
+      "noActiveProcessOrOpenFile": true,
+      "deleted": true
+    }
+  ]
+}

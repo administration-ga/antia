@@ -1,0 +1,101 @@
+{
+  "projection": {
+    "sourceFile": "publication-proof.json",
+    "sourceSha256": "22faa1f096d020026b5d5ec7ecc8091ea03fde5200a0752c05eb3d65f9291402",
+    "rawSourceRetainedLocally": true
+  },
+  "evidence": {
+    "startedAt": "2026-10-21T11:20:40.054009+00:00",
+    "passed": true,
+    "promoted": true,
+    "promotionAttempted": true,
+    "failures": [],
+    "otpRequested": false,
+    "socialContentPublished": false,
+    "applicationSessionProvided": false,
+    "mainCommit": "d50c5a014daedd2c4b32571cf70461867121eb26",
+    "sourceFingerprint": "824797881ad006fe597098dab02be4afaefb12473e9b55fa1beac1e932d8e9dc",
+    "versions": {
+      "production": "main-d50c5a014dae-production",
+      "demo": "main-d50c5a014dae-demo"
+    },
+    "verificationGuardPassed": true,
+    "stagedGuardPassed": true,
+    "privacyGuardPassed": true,
+    "oldAliasBefore": {
+      "url": "https://antsia-demo.vercel.app",
+      "httpStatus": 404,
+      "noRelaySecretInResponse": true
+    },
+    "domainConfigurationBefore": {
+      "oldDemoDomainAbsent": true,
+      "queriedFromVercel": true
+    },
+    "concurrencyGuard": {
+      "expectedVersion": "social-20261021-production-2966feaafc0f",
+      "observedVersion": "social-20261021-production-2966feaafc0f",
+      "passed": true
+    },
+    "promotion": {
+      "target": "parent_only",
+      "exitCode": 0,
+      "durationSeconds": 5.17
+    },
+    "public": {
+      "production": {
+        "url": "https://antsia.vercel.app/api/sante-fonctionnelle",
+        "httpStatus": 200,
+        "health": {
+          "status": "ok",
+          "application": "antsia-ga",
+          "version": "main-d50c5a014dae-production",
+          "backend": "configured"
+        },
+        "correctBackendCsp": true,
+        "otherZoneBackendAbsent": true,
+        "noRelaySecretInResponse": true
+      },
+      "demo": {
+        "url": "https://antsia.vercel.app/demo/api/sante-fonctionnelle",
+        "httpStatus": 200,
+        "health": {
+          "status": "ok",
+          "application": "antsia-ga",
+          "version": "main-d50c5a014dae-demo",
+          "backend": "configured"
+        },
+        "correctBackendCsp": true,
+        "otherZoneBackendAbsent": true,
+        "noRelaySecretInResponse": true
+      }
+    },
+    "healthConvergenceAttempts": 1,
+    "oldAliasAfter": {
+      "url": "https://antsia-demo.vercel.app",
+      "httpStatus": 404,
+      "noRelaySecretInResponse": true
+    },
+    "finishedAt": "2026-10-21T11:22:10.339334+00:00",
+    "childDirectAccessProtected": true,
+    "publishedAt": "2026-10-21T11:20:51.454045+00:00",
+    "resolvedFailures": [
+      {
+        "error": "child_direct_access_not_protected_status_302",
+        "resolution": "302 is the Vercel SSO challenge; exact origin/path and actual project protection mode verified, no app health exposed"
+      }
+    ],
+    "childDirectAccess": {
+      "httpStatus": 302,
+      "challengeOrigin": "https://vercel.com",
+      "challengePath": "/sso-api",
+      "challengeQueryOmitted": true,
+      "projectSsoProtection": "all_except_custom_domains",
+      "noBypassProvided": true,
+      "noApplicationSessionProvided": true,
+      "protected": true,
+      "applicationHealthExposed": false,
+      "bodySha256": "078d44efe538819a52deef2d03cc221b5b81ea1ae1f577dc80710db061c3766f",
+      "deploymentUrlOmitted": true
+    }
+  }
+}

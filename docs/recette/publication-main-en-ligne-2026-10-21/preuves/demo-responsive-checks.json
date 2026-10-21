@@ -1,0 +1,96 @@
+{
+  "projection": {
+    "sourceFile": "demo-responsive-checks.json",
+    "sourceSha256": "4cb86792d696447ce5db2aaeed1365d1d132071ab5ba8b23fd6aef6add3f19d9",
+    "rawSourceRetainedLocally": true
+  },
+  "evidence": [
+    {
+      "charte": [
+        "antsia"
+      ],
+      "dark": false,
+      "error": false,
+      "height": 900,
+      "member": true,
+      "path": "/demo/fil",
+      "scrollWidth": 1440,
+      "width": 1440,
+      "mode": "light",
+      "screenshotFile": "demo-light-1440.png",
+      "screenshotIncluded": false,
+      "screenshotRetainedLocally": true
+    },
+    {
+      "charte": [
+        "antsia"
+      ],
+      "dark": false,
+      "error": false,
+      "height": 1112,
+      "member": true,
+      "path": "/demo/fil",
+      "scrollWidth": 834,
+      "width": 834,
+      "mode": "light",
+      "screenshotFile": "demo-light-834.png",
+      "screenshotIncluded": false,
+      "screenshotRetainedLocally": true
+    },
+    {
+      "charte": [
+        "antsia"
+      ],
+      "dark": false,
+      "error": false,
+      "height": 844,
+      "member": true,
+      "path": "/demo/fil",
+      "scrollWidth": 390,
+      "width": 390,
+      "mode": "light",
+      "screenshotFile": "demo-light-390.png",
+      "screenshotIncluded": false,
+      "screenshotRetainedLocally": true
+    },
+    {
+      "dark": true,
+      "error": false,
+      "height": 900,
+      "member": true,
+      "path": "/demo/fil",
+      "scrollWidth": 1440,
+      "width": 1440,
+      "mode": "dark",
+      "screenshotFile": "demo-dark-1440.png",
+      "screenshotIncluded": false,
+      "screenshotRetainedLocally": true
+    },
+    {
+      "dark": true,
+      "error": false,
+      "height": 1112,
+      "member": true,
+      "path": "/demo/fil",
+      "scrollWidth": 834,
+      "width": 834,
+      "mode": "dark",
+      "screenshotFile": "demo-dark-834.png",
+      "screenshotIncluded": false,
+      "screenshotRetainedLocally": true
+    },
+    {
+      "dark": true,
+      "error": false,
+      "height": 844,
+      "member": true,
+      "path": "/demo/fil",
+      "scrollWidth": 390,
+      "width": 390,
+      "mode": "dark",
+      "screenshotFile": "demo-dark-390.png",
+      "screenshotIncluded": false,
+      "screenshotRetainedLocally": true
+    }
+  ]
+}

@@ -1,0 +1,39 @@
+{
+  "projection": {
+    "sourceFile": "final-report.json",
+    "sourceSha256": "7cf877fe6a2874171127c797a05e1d85da4bc136ed894eb875eec266b9f4763b",
+    "rawSourceRetainedLocally": true
+  },
+  "evidence": {
+    "checkedAt": "2026-10-21T13:47:38.844815",
+    "initialDiskAvailableKiB": 1151308,
+    "finalDiskAvailableKiB": 2080008,
+    "gainBytes": 950988800,
+    "freeGB": 2.13,
+    "gainGB": 0.95,
+    "stoppedRoots": 18,
+    "stoppedProcesses": 45,
+    "initialResidentMiBOfTargets": 1085.6,
+    "pressureLevel": 1,
+    "memoryFreePercentage": 52,
+    "initialSwapMiB": 5393.88,
+    "localHttp": {
+      "3030": 200,
+      "3210": 200,
+      "3211": 404
+    },
+    "remainingTargetProcesses": 0,
+    "finalSwapUsedMiB": 4633.69,
+    "preservedClasses": [
+      "sources des projets",
+      "dépendances actives",
+      "sessions et historiques",
+      "mémoire Obsidian",
+      "preuves et captures",
+      "profil Chrome et caches ouverts",
+      "sorties Xcode actives",
+      "serveurs Next et Convex"
+    ],
+    "timestampTimezone": "not specified in original"
+  }
+}

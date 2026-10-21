@@ -1,0 +1,16 @@
+{
+  "projection": {
+    "sourceFile": "mcp-additional-stopped.json",
+    "sourceSha256": "37b26da0a2d933ce903797c3ef32609ade0205792ee7f049d442c6d7365107a6",
+    "rawSourceRetainedLocally": true
+  },
+  "evidence": {
+    "additionalRootCount": 8,
+    "additionalProcessCount": 20,
+    "allNoTcp": true,
+    "processTypes": [
+      "auxiliaires MCP inactifs et leur lanceur Node/npm"
+    ],
+    "pidsAndMachinePathsOmitted": true
+  }
+}

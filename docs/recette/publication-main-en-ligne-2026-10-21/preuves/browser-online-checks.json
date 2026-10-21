@@ -1,0 +1,234 @@
+{
+  "projection": {
+    "sourceFile": "browser-online-checks.json",
+    "sourceSha256": "759e4d8c4304fe4ff2497f23154ba0205479f8d6adeafc7e9cd2fe362ad2dfbc",
+    "rawSourceRetainedLocally": true
+  },
+  "evidence": {
+    "checkedAt": "2026-10-21T11:37:46.128793+00:00",
+    "passed": true,
+    "deploymentPassed": true,
+    "publicChecksPassed": true,
+    "demo": {
+      "responsiveChecks": [
+        {
+          "charte": [
+            "antsia"
+          ],
+          "dark": false,
+          "error": false,
+          "height": 900,
+          "member": true,
+          "path": "/demo/fil",
+          "scrollWidth": 1440,
+          "width": 1440,
+          "mode": "light",
+          "screenshotFile": "demo-light-1440.png",
+          "screenshotIncluded": false,
+          "screenshotRetainedLocally": true
+        },
+        {
+          "charte": [
+            "antsia"
+          ],
+          "dark": false,
+          "error": false,
+          "height": 1112,
+          "member": true,
+          "path": "/demo/fil",
+          "scrollWidth": 834,
+          "width": 834,
+          "mode": "light",
+          "screenshotFile": "demo-light-834.png",
+          "screenshotIncluded": false,
+          "screenshotRetainedLocally": true
+        },
+        {
+          "charte": [
+            "antsia"
+          ],
+          "dark": false,
+          "error": false,
+          "height": 844,
+          "member": true,
+          "path": "/demo/fil",
+          "scrollWidth": 390,
+          "width": 390,
+          "mode": "light",
+          "screenshotFile": "demo-light-390.png",
+          "screenshotIncluded": false,
+          "screenshotRetainedLocally": true
+        },
+        {
+          "dark": true,
+          "error": false,
+          "height": 900,
+          "member": true,
+          "path": "/demo/fil",
+          "scrollWidth": 1440,
+          "width": 1440,
+          "mode": "dark",
+          "screenshotFile": "demo-dark-1440.png",
+          "screenshotIncluded": false,
+          "screenshotRetainedLocally": true
+        },
+        {
+          "dark": true,
+          "error": false,
+          "height": 1112,
+          "member": true,
+          "path": "/demo/fil",
+          "scrollWidth": 834,
+          "width": 834,
+          "mode": "dark",
+          "screenshotFile": "demo-dark-834.png",
+          "screenshotIncluded": false,
+          "screenshotRetainedLocally": true
+        },
+        {
+          "dark": true,
+          "error": false,
+          "height": 844,
+          "member": true,
+          "path": "/demo/fil",
+          "scrollWidth": 390,
+          "width": 390,
+          "mode": "dark",
+          "screenshotFile": "demo-dark-390.png",
+          "screenshotIncluded": false,
+          "screenshotRetainedLocally": true
+        }
+      ],
+      "reloadProof": "demo-reloads.json",
+      "console": {
+        "checkedAt": "2026-10-21T11:30:53.900Z",
+        "errors": 0,
+        "warnings": 0,
+        "restoredAppearance": "system",
+        "viewportReset": true
+      },
+      "appearanceRestoredAndReloaded": "system",
+      "themePreserved": "gaboma",
+      "passed": true
+    },
+    "production": {
+      "passed": true,
+      "authenticatedRecipe": "passed_after_owner_login",
+      "reloadProof": "production-reloads.json",
+      "reloadCount": 4,
+      "responsiveChecks": [
+        {
+          "dark": false,
+          "error": false,
+          "height": 900,
+          "member": true,
+          "path": "/fil",
+          "scrollWidth": 1440,
+          "videoCount": 4,
+          "videoErrors": 0,
+          "width": 1440,
+          "mode": "light",
+          "screenshotFile": "production-light-1440.png",
+          "screenshotIncluded": false,
+          "screenshotRetainedLocally": true
+        },
+        {
+          "dark": false,
+          "error": false,
+          "height": 1112,
+          "member": true,
+          "path": "/fil",
+          "scrollWidth": 834,
+          "videoCount": 4,
+          "videoErrors": 0,
+          "width": 834,
+          "mode": "light",
+          "screenshotFile": "production-light-834.png",
+          "screenshotIncluded": false,
+          "screenshotRetainedLocally": true
+        },
+        {
+          "dark": false,
+          "error": false,
+          "height": 844,
+          "member": true,
+          "path": "/fil",
+          "scrollWidth": 390,
+          "videoCount": 4,
+          "videoErrors": 0,
+          "width": 390,
+          "mode": "light",
+          "screenshotFile": "production-light-390.png",
+          "screenshotIncluded": false,
+          "screenshotRetainedLocally": true
+        },
+        {
+          "dark": true,
+          "error": false,
+          "height": 900,
+          "member": true,
+          "path": "/fil",
+          "scrollWidth": 1440,
+          "videoCount": 4,
+          "videoErrors": 0,
+          "width": 1440,
+          "mode": "dark",
+          "screenshotFile": "production-dark-1440.png",
+          "screenshotIncluded": false,
+          "screenshotRetainedLocally": true
+        },
+        {
+          "dark": true,
+          "error": false,
+          "height": 1112,
+          "member": true,
+          "path": "/fil",
+          "scrollWidth": 834,
+          "videoCount": 4,
+          "videoErrors": 0,
+          "width": 834,
+          "mode": "dark",
+          "screenshotFile": "production-dark-834.png",
+          "screenshotIncluded": false,
+          "screenshotRetainedLocally": true
+        },
+        {
+          "dark": true,
+          "error": false,
+          "height": 844,
+          "member": true,
+          "path": "/fil",
+          "scrollWidth": 390,
+          "videoCount": 4,
+          "videoErrors": 0,
+          "width": 390,
+          "mode": "dark",
+          "screenshotFile": "production-dark-390.png",
+          "screenshotIncluded": false,
+          "screenshotRetainedLocally": true
+        }
+      ],
+      "finalCheck": {
+        "checkedAt": "2026-10-21T11:37:08.156Z",
+        "state": {
+          "path": "/fil",
+          "preferences": [
+            "system",
+            "gaboma",
+            "pour_vous"
+          ],
+          "signedIn": true
+        },
+        "viewportReset": true,
+        "errors": 0,
+        "warnings": 0
+      },
+      "causeOfMissingInitialSessionNotEstablished": true
+    },
+    "viewportReset": true,
+    "contentPublished": false,
+    "historicalSevenThemeMediaCampaignRerun": false,
+    "productionMemberRecipePending": false,
+    "physicallyTestedDevices": false
+  }
+}

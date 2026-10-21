@@ -1,0 +1,33 @@
+{
+  "projection": {
+    "sourceFile": "public-final-health.json",
+    "sourceSha256": "7709ef0c08f0ce65a4577744553a828ecb4519e93e1e2e7397c480a82dad147b",
+    "rawSourceRetainedLocally": true
+  },
+  "evidence": {
+    "checkedAt": "2026-10-21T11:37:46.128793+00:00",
+    "zones": {
+      "production": {
+        "status": 200,
+        "health": {
+          "status": "ok",
+          "application": "antsia-ga",
+          "version": "main-d50c5a014dae-production",
+          "backend": "configured"
+        },
+        "passed": true
+      },
+      "demo": {
+        "status": 200,
+        "health": {
+          "status": "ok",
+          "application": "antsia-ga",
+          "version": "main-d50c5a014dae-demo",
+          "backend": "configured"
+        },
+        "passed": true
+      }
+    },
+    "passed": true
+  }
+}

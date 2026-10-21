@@ -1,0 +1,50 @@
+{
+  "projection": {
+    "sourceFile": "production-existing-media-ready.json",
+    "sourceSha256": "00adf74e5e15cbfa2e8a859847dba6628fc3f1b3210326e38cd4896745530037",
+    "rawSourceRetainedLocally": true
+  },
+  "evidence": {
+    "checkedAt": "2026-10-21T11:38:32.211Z",
+    "path": "/fil",
+    "signedIn": true,
+    "videos": [
+      {
+        "currentTime": 0,
+        "duration": 14.92,
+        "error": 0,
+        "height": 2796,
+        "paused": true,
+        "readyState": 4,
+        "width": 1290
+      },
+      {
+        "currentTime": 0,
+        "duration": 14.92,
+        "error": 0,
+        "height": 2796,
+        "paused": true,
+        "readyState": 4,
+        "width": 1290
+      },
+      {
+        "currentTime": 0,
+        "duration": 14.92,
+        "error": 0,
+        "height": 2796,
+        "paused": true,
+        "readyState": 4,
+        "width": 1290
+      },
+      {
+        "currentTime": 0,
+        "duration": 14.92,
+        "error": 0,
+        "height": 2796,
+        "paused": true,
+        "readyState": 4,
+        "width": 1290
+      }
+    ]
+  }
+}

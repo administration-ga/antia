@@ -1,0 +1,17 @@
+{
+  "projection": {
+    "sourceFile": "old-otp-dependencies-removal.json",
+    "sourceSha256": "763190268f0d890b66e0a74102f57655c21ee0553bf95e60676abc27689ba6da",
+    "rawSourceRetainedLocally": true
+  },
+  "evidence": {
+    "apparentKiB": 1832824,
+    "noTrackedDependencyFiles": true,
+    "noProcessOrOpenFileUnderSnapshot": true,
+    "deleted": true,
+    "sourcesAndGitPreserved": true,
+    "type": "dépendances non suivies d’une copie datée inactive",
+    "preservedFileHashCount": 3,
+    "gitIndexHashPreserved": true
+  }
+}

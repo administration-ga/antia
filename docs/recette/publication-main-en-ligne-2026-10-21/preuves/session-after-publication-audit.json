@@ -1,0 +1,57 @@
+{
+  "projection": {
+    "sourceFile": "session-after-publication-audit.json",
+    "sourceSha256": "905f6f30533a1c41f64bf55f7dc2d2af9288a395d2e47f5f1025cb130987ebef",
+    "rawSourceRetainedLocally": true
+  },
+  "evidence": {
+    "audit": "Comparaison en lecture seule de la reprise des sessions après publication",
+    "createdAtUtc": "2026-10-21T11:26:24.426174+00:00",
+    "outcome": "Audit terminé ; aucune régression directe des clés ou du bootstrap démontrée ; cause de la perte de session non déterminable à partir des seules sources.",
+    "sourceOnly": true,
+    "sourcesModified": false,
+    "executedTests": false,
+    "executedCodegen": false,
+    "browserOrProductionAction": false,
+    "secretsCookiesTokensRead": false,
+    "refs": {
+      "after": "d50c5a014daedd2c4b32571cf70461867121eb26",
+      "before": [
+        "2966feaafc0f4c86176845c3ba4c07d5a7297422",
+        "df82f10ac50a5058ef236e20ed2578bbcd9386c2"
+      ],
+      "exportHasGitRepository": false,
+      "exportComparedToAfterBlobForCoreAuthFiles": true,
+      "beforeRefsHaveSameAuthStorageBootstrapSources": true
+    },
+    "unchangedCoreFiles": [
+      "apps/antsia_ga/src/lib/auth-client.ts",
+      "apps/antsia_ga/src/lib/demo-storage.ts",
+      "apps/antsia_ga/src/lib/app-path.ts",
+      "apps/antsia_ga/src/lib/session-bridge.ts",
+      "apps/antsia_ga/src/lib/session-bridge-client.ts",
+      "apps/antsia_ga/src/lib/session-bridge-server.ts",
+      "apps/antsia_ga/src/lib/server-session.ts",
+      "apps/antsia_ga/src/lib/sign-out.ts",
+      "apps/antsia_ga/src/proxy.ts",
+      "apps/antsia_ga/src/lib/demo-proxy.ts",
+      "apps/antsia_ga/src/app/api/auth/[...path]/route.ts",
+      "packages/api/src/auth-client.ts",
+      "packages/api/src/auth-proxy.ts",
+      "packages/api/src/cross-domain-session-bootstrap.ts",
+      "packages/api/src/stable-convex-better-auth-provider.tsx",
+      "packages/api/src/next-provider.tsx",
+      "packages/api/src/sign-out-everywhere.ts",
+      "packages/api/src/scoped-storage.ts"
+    ],
+    "limits": [
+      "Les observations de navigateur sont rapportées par le coordinateur ; cet audit n’a ouvert ni piloté de navigateur.",
+      "Aucune valeur de stockage, cookie, jeton, session serveur, secret ou fichier .env n’a été lue.",
+      "Les sources seules ne distinguent pas une révocation externe, une expiration effective, un stockage déjà absent ou une défaillance indirecte de reprise/build.",
+      "Les durées configurées ne prouvent pas l’expiration des sessions observées ; aucune cause d’expiration ou de révocation n’est affirmée.",
+      "Les valeurs publiques effectivement incorporées aux builds et les réponses réseau des nouveaux onglets n’ont pas été inspectées.",
+      "Aucun test, codegen, serveur, installation, commande backend de production ou révocation n’a été exécuté."
+    ],
+    "scopeNote": "Comparaison des sources uniquement ; aucune cause de disparition de session établie. Noms et valeurs de clés de stockage/cookies exclus de cette projection publique."
+  }
+}
