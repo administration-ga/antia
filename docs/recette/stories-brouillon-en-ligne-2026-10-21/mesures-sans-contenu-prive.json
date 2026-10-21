@@ -1,0 +1,52 @@
+{
+  "stories": [
+    {
+      "format": "telephone",
+      "width": 390,
+      "height": 844,
+      "seconds": 54.256,
+      "storyUnchanged": true,
+      "progressUnchanged": true,
+      "pausedBeforeAndAfter": true,
+      "visibleBeforeAndAfter": true,
+      "readerHeight": 844,
+      "videoTested": false
+    },
+    {
+      "format": "tablette",
+      "width": 834,
+      "height": 1112,
+      "seconds": 57.76,
+      "storyUnchanged": true,
+      "progressUnchanged": true,
+      "pausedBeforeAndAfter": true,
+      "visibleBeforeAndAfter": true,
+      "readerHeight": 1023.0390625,
+      "videoTested": false
+    },
+    {
+      "format": "ordinateur",
+      "width": 1440,
+      "height": 1000,
+      "seconds": 56.252,
+      "storyUnchanged": true,
+      "progressUnchanged": true,
+      "pausedBeforeAndAfter": true,
+      "visibleBeforeAndAfter": true,
+      "readerHeight": 920,
+      "videoTested": false
+    }
+  ],
+  "storyResumeButtonChangedToPause": true,
+  "storySeriesNaturallyCompletedAfterResume": true,
+  "draft": {
+    "status": "pending_existing_accepted_connection",
+    "actualComposerOpened": false,
+    "reason": "Connected account has no accepted relation; no test relationship created",
+    "noMessageSent": true
+  },
+  "console": {
+    "warnings": 0,
+    "errors": 0
+  }
+}
