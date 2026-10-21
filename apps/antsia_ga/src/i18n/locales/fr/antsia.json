@@ -17,7 +17,7 @@
     "status": "Le service ouvrira par étapes. Cette version de développement permet déjà d'entrer, de choisir son identifiant, de publier et de réagir.",
     "healthLink": "État du service",
     "enter": "Entrer",
-    "goToFeed": "Aller au fil"
+    "goToFeed": "Aller à l'accueil"
   },
   "health": {
     "title": "État du service",
@@ -36,7 +36,7 @@
     "checking": "Vérification de votre session…"
   },
   "nav": {
-    "feed": "Fil",
+    "feed": "Accueil",
     "signOut": "Se déconnecter",
     "home": "Accueil",
     "messages": "Messages",
@@ -52,7 +52,7 @@
     "accountTitle": "Compte et données",
     "profile": "Voir mon profil public",
     "profileHint": "Ce que les membres voient de vous : publications, albums et relations.",
-    "storiesHint": "Vos actus et celles de votre réseau, en plein écran.",
+    "storiesHint": "Vos stories et celles de votre réseau, en plein écran.",
     "feedPreferencesHint": "Les publications masquées et les auteurs mis en sourdine, à réafficher quand vous voulez.",
     "settingsHint": "Affichage, thème, motif de fond, langue et fuseau horaire.",
     "moderationHint": "Les files de modération, pour les équipes habilitées.",
@@ -106,7 +106,7 @@
     "invalidTimeZone": "Saisissez un fuseau horaire valable."
   },
   "feed": {
-    "title": "Le fil"
+    "title": "Accueil"
   },
   "feedPreferences": {
     "title": "Mon fil",
@@ -137,7 +137,7 @@
     "fallback": "Voir mes notifications"
   },
   "stories": {
-    "title": "Statuts"
+    "title": "Stories"
   },
   "profile": {
     "title": "Profil de @{{handle}}"
@@ -163,7 +163,7 @@
   "personal": {
     "title": "Mes données et mes recours",
     "lead": "Consultez les décisions qui vous concernent et gardez la main sur vos données.",
-    "home": "Retour au fil",
+    "home": "Retour à l'accueil",
     "exportTitle": "Exporter mes données",
     "exportLead": "Un fichier personnel contient vos informations et contenus. Les clés de connexion et de notification en sont exclues.",
     "export": "Télécharger mon export",
@@ -259,13 +259,34 @@
       "hintDevice": "Chaque thème a trois couleurs, chacune pour une famille d’actions : publier, suivre et écrire, réagir et participer. Les fonds restent clairs ou sombres selon l’apparence. Le changement est immédiat et conservé pour ce réseau sur cet appareil.",
       "saveFailed": "Le thème n’a pas pu être enregistré sur votre compte. {{reason}}",
       "options": {
-        "gaboma": { "name": "Gaboma", "description": "Vert, jaune et bleu du drapeau. Le thème du réseau." },
-        "soleil": { "name": "Soleil", "description": "Mandarine, azur et coquelicot." },
-        "foret": { "name": "Forêt", "description": "Vert forêt, olive et miel." },
-        "corail": { "name": "Corail", "description": "Rose corail, mandarine et lilas." },
-        "lagon": { "name": "Lagon", "description": "Turquoise, corail et jaune de Naples." },
-        "electrique": { "name": "Électrique", "description": "Bleu, rose et citron vert." },
-        "sable": { "name": "Sable", "description": "Bleu Gabon, sarcelle et sable doré. Le thème de DIASPORALE." }
+        "gaboma": {
+          "name": "Gaboma",
+          "description": "Vert, jaune et bleu du drapeau. Le thème du réseau."
+        },
+        "soleil": {
+          "name": "Soleil",
+          "description": "Mandarine, azur et coquelicot."
+        },
+        "foret": {
+          "name": "Forêt",
+          "description": "Vert forêt, olive et miel."
+        },
+        "corail": {
+          "name": "Corail",
+          "description": "Rose corail, mandarine et lilas."
+        },
+        "lagon": {
+          "name": "Lagon",
+          "description": "Turquoise, corail et jaune de Naples."
+        },
+        "electrique": {
+          "name": "Électrique",
+          "description": "Bleu, rose et citron vert."
+        },
+        "sable": {
+          "name": "Sable",
+          "description": "Bleu Gabon, sarcelle et sable doré. Le thème de DIASPORALE."
+        }
       }
     },
     "motif": {
@@ -342,7 +363,7 @@
     "newHere": "Vous découvrez {{brand}} ?",
     "accountPromise": "Votre profil, vos publications, vos communautés.",
     "existingAccount": "J’ai déjà un compte : me connecter",
-    "discover": "Découvrir les publications publiques",
+    "discover": "Explorer les publications publiques",
     "footer": "Informations et langues",
     "about": "À propos",
     "signature": "{{brand}} · Le réseau social public gabonais",

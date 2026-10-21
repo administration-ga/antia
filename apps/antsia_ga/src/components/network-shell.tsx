@@ -19,6 +19,7 @@ import { engineRoutes, routes, shopContactFromLocation, usageScreenForPath } fro
 import { NOTIFICATION_REFERENCE_PARAM, parseNotificationReference } from "@/lib/notification-open"
 import { usageConfiguration, useUsagePermission } from "./analytics-permission"
 import { OfferPostSlot } from "./shops/offer-post-slot"
+import { MemberNavigationStyles } from "./member-navigation-styles"
 
 /**
  * La charte d'origine d'antsia.ga, redéclarée par les surfaces portalisées (dock,
@@ -50,6 +51,9 @@ export function useMemberSession(): MemberSession {
  * propres (`discover`, `me`). Retirer cette prop rend la navigation par volets,
  * à l'identique — c'est le retour arrière. La couche de communication, elle,
  * ne bouge pas : toujours montée ICI, une fois, quelle que soit la navigation.
+ * `navigationLayout="adaptive"` (U02) réserve la barre basse aux fenêtres
+ * de moins de 768 px, un même rail compact jusqu'à 1199 px puis nommé dès
+ * 1200 px. Les autres applications gardent le seuil historique de 960 px.
  *
  * `postPresentation="charte"` (ADR-0028) : antsia.ga reprend à la lettre
  * l'écran des chartes de la série 3 — publication (texte, photo posée dans la
@@ -62,8 +66,8 @@ export function useMemberSession(): MemberSession {
  * l'identique — c'est le retour arrière.
  *
  * `feedPresentation="immersive"` (P04) : antsia.ga propose le fil immersif —
- * une publication par hauteur disponible, par défaut au téléphone, sur demande
- * au bureau, le mode Liste toujours offert et mémorisé par réseau (sous le
+ * une publication par hauteur disponible ; avec la présentation charte,
+ * Liste reste le mode initial, le choix étant mémorisé par réseau (sous le
  * préfixe de stockage du réseau, purgé à la déconnexion). Le coordinateur de
  * lecture (`MediaPlaybackProvider`, une vidéo à la fois, suspension pendant un
  * appel ou onglet masqué) et la frontière de la mémoire de retour du fil
@@ -100,9 +104,10 @@ export function NetworkShell({ children }: { children: ReactNode }) {
 
   return (
     <NextRouterAdapter>
-      <NetworkProvider networkId={session.root._id} slug={session.root.slug} storageNamespace={demoStorageNamespace()} personId={session.person._id} charte={appearance?.charte ?? CHARTE} routes={engineRoutes} liveAvailable navigation="destinations" postPresentation="charte" feedPresentation="immersive" storiesPresentation="rings" wordmark={BRAND_NAME} PostOfferRenderer={OfferPostSlot}>
+      <NetworkProvider networkId={session.root._id} slug={session.root.slug} storageNamespace={demoStorageNamespace()} personId={session.person._id} charte={appearance?.charte ?? CHARTE} routes={engineRoutes} liveAvailable navigation="destinations" navigationLayout="adaptive" navigationLabels={{ shops: t("memberNetwork:commerce.shops"), clips: t("socialExperience:clips") }} postPresentation="charte" feedPresentation="immersive" storiesPresentation="rings" wordmark={BRAND_NAME} PostOfferRenderer={OfferPostSlot}>
         <MemberSessionContext.Provider value={session}>
           <PostHogProvider configuration={usageConfiguration} consented={!permission.paused && session.person.consentsInForce.includes("usage_analytics")} screen={usageScreenForPath(pathname)} networkSlug={session.root.slug} locale={i18n.resolvedLanguage === "en" ? "en" : "fr"}>
+            <MemberNavigationStyles />
             <CommunicationShell />
             <IcomListSessionBoundary />
             <FeedReturnSessionBoundary />

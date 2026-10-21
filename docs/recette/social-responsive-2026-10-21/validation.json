@@ -1,0 +1,109 @@
+{
+  "version": "social-responsive-20261021-e34875c094de4b4f",
+  "scope": "ANTSIA Web and all six runtime workspaces",
+  "backend": {
+    "suites": 176,
+    "passed": 2681
+  },
+  "ratchets": {
+    "suites": 25,
+    "passed": 140
+  },
+  "scripts": {
+    "passed": 33
+  },
+  "workspaces": {
+    "social-domain": {
+      "passed": 899,
+      "skipped": 3
+    },
+    "social-contracts": {
+      "passed": 84
+    },
+    "api": {
+      "passed": 216
+    },
+    "ui": {
+      "passed": 2263
+    },
+    "social-features": {
+      "suites": 267,
+      "passed": 4079
+    },
+    "antsia-ga": {
+      "suites": 99,
+      "passedBeforeCorrection": 744,
+      "failedBeforeCorrection": 1,
+      "correctedSuitePassed": 11
+    }
+  },
+  "typecheck": "Convex, tests and six ANTSIA workspaces passed; final Next build includes TypeScript",
+  "lint": "Six ANTSIA workspaces passed, zero errors; pre-existing warnings retained. Scoped modified files pass strict lint.",
+  "build": "Final Next16.4.2 production build passed, TypeScript included",
+  "globalVerify": {
+    "status": "failed_external",
+    "reason": "DIASPORALE app still narrows withheld codes and does not admit already published fileScanUnavailable",
+    "changedByThisRelease": false
+  },
+  "browserRecipe": "NOT RUN: browser tool URL policy denied access; no workaround",
+  "physicalCalls": "NOT RUN",
+  "commerceCapabilities": "unchanged, not activated",
+  "featureCommit": "71c93a55eadff5da45ec9cf2010cef01b03c4b8b",
+  "branch": "codex/experience-sociale-responsive-20261021",
+  "backendPublication": {
+    "modules": 711,
+    "remoteEntries": 713,
+    "mismatches": [],
+    "schemaUnchanged": true,
+    "convexConfigUnchanged": true
+  },
+  "anonymousGuard": {
+    "checkedAt": "2026-10-20T22:42:31.346562+00:00",
+    "backend": "https://diligent-avocet-585.convex.cloud",
+    "function": "modules/posts/mediaFeed:paginate",
+    "anonymousRejected": true,
+    "httpStatus": 200,
+    "returnedContent": false
+  },
+  "sessionIntegration": {
+    "publishedFiles": 7,
+    "appSuites": 99,
+    "appTests": 756,
+    "build": "passed",
+    "baseline": {
+      "version": "session-coordination-20261021-03548f8c8f01470e",
+      "deploymentId": "dpl_UxMyjdTakahwkCjfRSyy7PFF9gAL",
+      "url": "https://antsia-5383efgvc-okatechs-projects-f0102678.vercel.app",
+      "backend": "diligent-avocet-585"
+    }
+  },
+  "performanceIntegration": {
+    "frozenLockInstall": true,
+    "apiConfigTests": 7,
+    "appSuites": 101,
+    "appTests": 763,
+    "build": "Next16.4.2 passed, TypeScript included",
+    "lint": "6 ANTSIA workspaces passed, zero errors; historical warnings retained"
+  },
+  "releaseCommit": "68f8ad92bd6f87acc53a8ae85563bd781863c4fc",
+  "frontendPublication": {
+    "origin": "https://antsia.vercel.app",
+    "deploymentId": "dpl_57gtmHo6kvFvPqUBBym6VhxgExrX",
+    "health": {
+      "status": "ok",
+      "application": "antsia-ga",
+      "version": "social-responsive-20261021-e34875c094de4b4f",
+      "backend": "configured"
+    },
+    "checkedAt": "2026-10-20T23:15:59.177479+00:00",
+    "cspProductionBackend": true
+  },
+  "git": {
+    "branch": "codex/experience-sociale-responsive-20261021",
+    "featureCommit": "71c93a55eadff5da45ec9cf2010cef01b03c4b8b",
+    "sessionIntegrationCommit": "0c273d7a36051514ebbfe53f49c68bb344b7c9ba",
+    "performanceIntegrationCommit": "68f8ad92bd6f87acc53a8ae85563bd781863c4fc",
+    "remoteConfirmed": true,
+    "sharedHeadAndIndexPreserved": true
+  }
+}

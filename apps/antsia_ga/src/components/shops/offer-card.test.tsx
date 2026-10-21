@@ -104,4 +104,22 @@ describe("cartes et fiches d'offre communes au membre et au SSR", () => {
     expect(node.textContent).toContain(offer.description)
     expect(node.querySelector("script, img, [onerror]")).toBeNull()
   })
+
+  it.each(["member", "public"] as const)("identifie la boutique séparément du titre d'offre (%s)", audience => {
+    const offer = catalogOfferFixture()
+    const node = dom(renderToStaticMarkup(<OfferCard offer={offer} audience={audience} locale="fr" t={translate("fr")} compact />))
+    const expected = audience === "public" ? routes.publicStorefront(offer.shopHandle) : routes.storefront(offer.shopHandle)
+    const shop = Array.from(node.querySelectorAll("a")).find(link => link.getAttribute("href") === expected)
+    expect(shop?.textContent).toContain(offer.shopHandle)
+    expect(node.querySelector("button, form")).toBeNull()
+  })
+
+  it("ne rend jamais un slot d'action membre dans la fiche publique", () => {
+    const offer = catalogOfferFixture()
+    const publicHtml = renderToStaticMarkup(<OfferDetails offer={offer} audience="public" locale="fr" t={translate("fr")} actionSlot={<button>Action privée</button>} />)
+    expect(publicHtml).not.toContain("Action privée")
+    const memberHtml = renderToStaticMarkup(<OfferDetails offer={offer} audience="member" locale="fr" t={translate("fr")} actionSlot={<a href={routes.checkoutPrepare(offer.shopHandle, offer.offerRef)}>Préparation autorisée</a>} />)
+    expect(memberHtml).toContain("Préparation autorisée")
+    expect(memberHtml).not.toContain(">Payer<")
+  })
 })

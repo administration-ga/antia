@@ -1,37 +1,76 @@
+// @vitest-environment jsdom
+// U02 : scénarios écrits seulement ; aucune exécution pendant le gel de vérification.
+import { act, useEffect, useState } from "react"
+import { createRoot, type Root } from "react-dom/client"
 import { renderToStaticMarkup } from "react-dom/server"
-import { beforeEach, describe, expect, it, vi } from "vitest"
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 const state = vi.hoisted(() => ({
   navigation: "destinations" as "destinations" | "volets",
+  adaptive: false,
   mobile: false as boolean | null,
   pathname: "/profil/autre",
   search: "",
+  openCreation: vi.fn(),
+  contentMounted: vi.fn(),
+  contentUnmounted: vi.fn(),
 }))
 
-vi.mock("@antsia/api/network", () => ({ useNetwork: () => ({ navigation: state.navigation }) }))
+vi.mock("@antsia/api/network", () => ({
+  useNetwork: () => ({ navigation: state.navigation }),
+  useNetworkNavigationLayout: () => ({ adaptive: state.adaptive && state.navigation === "destinations", mobile: state.mobile }),
+}))
 vi.mock("@/components/network-shell", () => ({ useMemberSession: () => ({ person: { published: true, handle: "awa.ndong", displayName: "Awa Ndong", badges: [] } }) }))
 vi.mock("@antsia/social-features/notifications", () => ({ NotificationBell: () => <span data-bell="" /> }))
 vi.mock("@/components/identity-tools", () => ({ IdentityTools: () => <span data-identity="" /> }))
 vi.mock("@/lib/sign-out", () => ({ signOutAndRedirect: vi.fn() }))
 vi.mock("@antsia/social-features/reseau-personnel", () => ({
-  ReseauMenuRail: (props: { activeTab: unknown; current?: unknown; onCreate?: unknown; onSelectTab?: unknown }) => (
-    <div data-rail={JSON.stringify({ activeTab: props.activeTab, current: props.current ?? "auto", create: typeof props.onCreate === "function", select: props.onSelectTab !== undefined })} />
+  ReseauCreateAction: () => <button type="button" data-create-action="">Créer</button>,
+  ReseauMenuRail: (props: { activeTab: unknown; current?: unknown; onCreate?: (kind: "publication") => void; onSelectTab?: unknown }) => (
+    <div data-rail={JSON.stringify({ activeTab: props.activeTab, current: props.current ?? "auto", create: typeof props.onCreate === "function", select: props.onSelectTab !== undefined })}>
+      <button type="button" data-create-trigger="" onClick={() => props.onCreate?.("publication")}>Créer</button>
+    </div>
   ),
-  ReseauMobileTabBar: (props: { active: unknown; handle?: unknown; current?: unknown; onCreate?: unknown }) => (
-    <div data-bar={JSON.stringify({ active: props.active, handle: props.handle, current: props.current ?? "auto", create: typeof props.onCreate === "function" })} />
+  ReseauMobileTabBar: (props: { active: unknown; handle?: unknown; current?: unknown; onCreate?: (kind: "publication") => void }) => (
+    <div data-bar={JSON.stringify({ active: props.active, handle: props.handle, current: props.current ?? "auto", create: typeof props.onCreate === "function" })}>
+      <button type="button" data-create-trigger="" onClick={() => props.onCreate?.("publication")}>Créer</button>
+    </div>
   ),
   PostComposerSheet: (props: { open: boolean }) => <div data-post-sheet={String(props.open)} />,
 }))
 vi.mock("@antsia/social-features/stories", () => ({ StoryCreateSheet: (props: { open: boolean }) => <div data-story-sheet={String(props.open)} /> }))
 vi.mock("@antsia/social-features/features/reseau-personnel/use-creation-controller", () => ({
-  useCreationController: () => ({ open: null, openCreation: vi.fn(), close: vi.fn() }),
+  useCreationController: () => ({ open: null, openCreation: state.openCreation, close: vi.fn() }),
 }))
+vi.mock("@antsia/social-features/shell/appearance", () => ({ AppearanceToggle: () => <button type="button" data-appearance="">Apparence</button> }))
 vi.mock("@antsia/ui/overlay", () => ({ DESKTOP_ONLY_CLASS: "hidden min-[960px]:block", useIsReseauMobile: () => state.mobile }))
 vi.mock("next/navigation", () => ({ usePathname: () => state.pathname, useSearchParams: () => new URLSearchParams(state.search) }))
 vi.mock("react-i18next", () => ({ useTranslation: () => ({ t: (key: string) => key }) }))
 
 import { routes } from "@/lib/routes"
 import { MemberPage, MemberTopBar } from "./member-chrome"
+
+let root: Root | undefined
+let host: HTMLDivElement | undefined
+
+function StatefulContent() {
+  const [count, setCount] = useState(0)
+  useEffect(() => {
+    state.contentMounted()
+    return () => { state.contentUnmounted() }
+  }, [])
+  return <button type="button" data-member-content="" onClick={() => setCount(value => value + 1)}>contenu propre {count}</button>
+}
+
+async function renderMember() {
+  if (!host) {
+    host = document.createElement("div")
+    document.body.append(host)
+    root = createRoot(host)
+  }
+  await act(async () => { root?.render(<MemberPage><StatefulContent /></MemberPage>) })
+  return host
+}
 
 function hrefsOf(html: string): string[] {
   return [...html.matchAll(/href="([^"]+)"/g)].map((match) => (match[1] ?? "").replaceAll("&amp;", "&"))
@@ -43,10 +82,20 @@ function attribute(html: string, name: string): Record<string, unknown> | null {
 }
 
 beforeEach(() => {
+  vi.clearAllMocks()
+  vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true)
   state.navigation = "destinations"
+  state.adaptive = false
   state.mobile = false
   state.pathname = "/profil/autre"
   state.search = ""
+})
+afterEach(async () => {
+  await act(async () => { root?.unmount() })
+  host?.remove()
+  root = undefined
+  host = undefined
+  vi.unstubAllGlobals()
 })
 
 describe("MemberTopBar — la barre du haut sous les deux navigations", () => {
@@ -78,6 +127,17 @@ describe("MemberTopBar — la barre du haut sous les deux navigations", () => {
       routes.profile("awa.ndong"),
     ])
     expect(html).toContain('<nav aria-label="nav.label"')
+  })
+
+  it("masque la barre sous 768 seulement en adaptive ; classic garde son seuil 960", () => {
+    state.adaptive = true
+    const adaptive = renderToStaticMarkup(<MemberTopBar onMobile="hidden" />)
+    expect(adaptive).toContain("hidden min-[768px]:block")
+    expect(adaptive).not.toContain("min-[960px]:block")
+    state.adaptive = false
+    const classic = renderToStaticMarkup(<MemberTopBar onMobile="hidden" />)
+    expect(classic).toContain("hidden min-[960px]:block")
+    expect(classic).not.toContain("min-[768px]:block")
   })
 })
 
@@ -139,5 +199,101 @@ describe("MemberPage — les mêmes destinations que le fil, une coque d'appel i
     expect(html).not.toContain("data-bar")
     expect(html).not.toContain("data-post-sheet")
     expect(html).toContain('<main id="contenu" tabindex="-1" class="focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring mx-auto w-full max-w-7xl px-4 py-6 sm:px-5">')
+  })
+})
+
+describe("MemberPage — transition adaptive sans remontage du contenu", () => {
+  it("Messages garde le même cadre : navigation sur la liste, détail immersif au téléphone et rail sur tablette", () => {
+    state.adaptive = true
+    state.pathname = routes.messages()
+    state.mobile = true
+    const list = renderToStaticMarkup(<MemberPage workspace><section data-messages-content="" /></MemberPage>)
+    expect(list).toContain("antsia-member-workspace")
+    expect(list).toContain('data-workspace=""')
+    // Messages est reconnu par le moteur : le parent lui laisse ce calcul.
+    expect(attribute(list, "data-bar")?.current).toBe("auto")
+    expect(list).not.toContain("data-rail")
+
+    const conversation = renderToStaticMarkup(<MemberPage workspace immersiveOnPhone><section data-messages-content="" /></MemberPage>)
+    expect(conversation).not.toContain("data-bar")
+    expect(conversation).not.toContain("data-rail")
+    expect(conversation).toContain("hidden min-[768px]:block")
+    expect(conversation.match(/data-messages-content=""/g)).toHaveLength(1)
+
+    state.mobile = false
+    const tablet = renderToStaticMarkup(<MemberPage workspace immersiveOnPhone><section data-messages-content="" /></MemberPage>)
+    expect(attribute(tablet, "data-rail")?.current).toBe("auto")
+    expect(tablet).not.toContain("data-bar")
+    expect(tablet.match(/<main\b/g)).toHaveLength(1)
+    expect(tablet.match(/data-post-sheet="false"/g)).toHaveLength(1)
+  })
+
+  it("l'espace borné retranche le bandeau de la démo, et lui seul", () => {
+    state.adaptive = true
+    state.pathname = routes.messages()
+    state.mobile = false
+    try {
+      vi.stubEnv("NEXT_PUBLIC_APP_BASE_PATH", "/demo")
+      vi.stubEnv("NEXT_PUBLIC_CONVEX_URL", "https://vivid-hedgehog-655.convex.cloud")
+      expect(renderToStaticMarkup(<MemberPage workspace><section data-messages-content="" /></MemberPage>)).toContain('style="height:calc(100dvh - var(--antsia-demo-banner-height, 0px))"')
+      expect(renderToStaticMarkup(<MemberPage><section data-page-content="" /></MemberPage>)).not.toContain("--antsia-demo-banner-height")
+      vi.stubEnv("NEXT_PUBLIC_APP_BASE_PATH", "")
+      vi.stubEnv("NEXT_PUBLIC_CONVEX_URL", "https://diligent-avocet-585.convex.cloud")
+      expect(renderToStaticMarkup(<MemberPage workspace><section data-messages-content="" /></MemberPage>)).not.toContain("--antsia-demo-banner-height")
+    } finally {
+      vi.unstubAllEnvs()
+    }
+  })
+
+  it("null puis rail/barre/rail conservent le même main et son état ; un seul créateur répond", async () => {
+    state.adaptive = true
+    state.mobile = null
+    const container = await renderMember()
+    const main = container.querySelector("main")
+    expect(main).not.toBeNull()
+    expect(main?.id).toBe("contenu")
+    expect(main?.classList.contains("antsia-member-content")).toBe(true)
+    expect(container.querySelector(".antsia-member-frame")).not.toBeNull()
+    expect(container.querySelector(".antsia-member-rail")).not.toBeNull()
+    expect(container.querySelectorAll("[data-rail], [data-bar], [data-create-trigger]")).toHaveLength(0)
+    const content = container.querySelector<HTMLButtonElement>("[data-member-content]")
+    await act(async () => { content?.click() })
+    expect(content?.textContent).toBe("contenu propre 1")
+
+    for (const [index, mobile] of [false, true, false].entries()) {
+      state.mobile = mobile
+      await renderMember()
+      expect(container.querySelector("main")).toBe(main)
+      expect(container.querySelector("[data-member-content]")).toBe(content)
+      expect(content?.textContent).toBe("contenu propre 1")
+      expect(container.querySelectorAll("main#contenu")).toHaveLength(1)
+      expect(container.querySelectorAll("[data-member-content]")).toHaveLength(1)
+      expect(container.querySelectorAll("[data-rail]")).toHaveLength(mobile ? 0 : 1)
+      expect(container.querySelectorAll("[data-bar]")).toHaveLength(mobile ? 1 : 0)
+      expect(container.querySelectorAll('[data-post-sheet="false"]')).toHaveLength(1)
+      expect(container.querySelectorAll('[data-story-sheet="false"]')).toHaveLength(1)
+      expect(container.querySelectorAll("[data-create-trigger]")).toHaveLength(1)
+      await act(async () => { container.querySelector<HTMLButtonElement>("[data-create-trigger]")?.click() })
+      expect(state.openCreation).toHaveBeenCalledTimes(index + 1)
+      expect(state.openCreation).toHaveBeenLastCalledWith("publication")
+      expect(state.contentMounted).toHaveBeenCalledOnce()
+      expect(state.contentUnmounted).not.toHaveBeenCalled()
+    }
+  })
+
+  it("un direct ou son alias ne monte aucune navigation, même dans la pose adaptive connue", () => {
+    state.adaptive = true
+    for (const pathname of [routes.direct("s1"), routes.conference("s1")]) {
+      state.pathname = pathname
+      for (const mobile of [null, false, true]) {
+        state.mobile = mobile
+        const html = renderToStaticMarkup(<MemberPage><p data-direct-content="">direct</p></MemberPage>)
+        expect(html).not.toContain("data-rail")
+        expect(html).not.toContain("data-bar")
+        expect(html).not.toContain("data-create-trigger")
+        expect(html.match(/<main\b/g)).toHaveLength(1)
+        expect(html.match(/data-direct-content=""/g)).toHaveLength(1)
+      }
+    }
   })
 })

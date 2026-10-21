@@ -112,7 +112,7 @@ const DESTINATION_ITEM_CLASS =
  */
 function DestinationsTabBar({ routes, onCreate, handle = null, current }: ReseauMobileTabBarProps & { routes: ReseauDestinationRoutes }) {
   const { t } = useTranslation("reseau")
-  const { liveAvailable } = useNetwork()
+  const { liveAvailable, navigationLayout } = useNetwork()
   const pathname = usePathname()
   const searchParams = useSearchParams()
   const { open, setOpen, triggerRef } = useChoiceTrigger<HTMLButtonElement>()
@@ -135,7 +135,7 @@ function DestinationsTabBar({ routes, onCreate, handle = null, current }: Reseau
       data-mobile-nav=""
       data-reseau-mobile-nav=""
       data-reseau-destinations=""
-      className={`fixed right-3 bottom-[calc(0.75rem+env(safe-area-inset-bottom,0px))] left-3 z-40 print:hidden ${MOBILE_ONLY_CLASS}`}
+      className={`fixed right-3 bottom-[calc(0.75rem+env(safe-area-inset-bottom,0px))] left-3 z-40 print:hidden ${navigationLayout === "adaptive" ? "min-[768px]:hidden" : MOBILE_ONLY_CLASS}`}
     >
       <div className="esp-reseau-tabbar border backdrop-blur-md">
         <ul className="m-0 flex h-16 list-none items-stretch gap-0.5 p-1">
@@ -169,7 +169,7 @@ function DestinationsTabBar({ routes, onCreate, handle = null, current }: Reseau
                     </span>
                   ) : null}
                 </span>
-                <span className={isCreate ? "sr-only" : "max-w-full truncate text-[10px] font-semibold"}>{t(destination.labelKey)}</span>
+                <span className={isCreate ? "sr-only" : "max-w-full truncate text-[10px] font-semibold"}>{destination.label ?? t(destination.labelKey)}</span>
                 {/* Un espace ENTRE le libellé et la phrase : le nom accessible se
                     lit « Messages 3 conversations non lues », jamais « Messages3… ». */}
                 {badge !== null ? (

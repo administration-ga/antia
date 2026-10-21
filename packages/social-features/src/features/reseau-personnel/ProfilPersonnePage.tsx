@@ -138,6 +138,7 @@ import {
   montreSquelette,
 } from "../../shell/query-state"
 import { ReseauQueryError } from "../../shell/ReseauQueryError"
+import { badgeLabelKey, signalBadges } from "../../components/identity"
 
 /** La fiche telle que le moteur la rend à un membre du réseau. */
 type PublicProfile = NonNullable<
@@ -200,9 +201,10 @@ export interface ProfilPersonnePageProps {
  * bascule en rendu dynamique.
  */
 export function ProfilPersonnePage(props: ProfilPersonnePageProps) {
+  const { networkId, personId } = useNetwork()
   return (
     <Suspense fallback={null}>
-      <ProfilPersonnePageInner {...props} />
+      <ProfilPersonnePageInner key={`${networkId}:${personId}:${props.handle}`} {...props} />
     </Suspense>
   )
 }
@@ -211,7 +213,9 @@ function ProfilPersonnePageInner({ handle }: ProfilPersonnePageProps) {
   const { t } = useTranslation("reseau")
   const router = useRouter()
   const routes = useRoutes()
-  const { networkId } = useNetwork()
+  const { networkId, navigation, navigationLayout, navigationLabels } = useNetwork()
+  const adaptive = navigation === "destinations" && navigationLayout === "adaptive"
+  const personalHubHref = adaptive ? routes.me?.() : undefined
   const searchParams = useSearchParams()
   /**
    * ⚠️ L'aperçu ne se DEMANDE pas au serveur : `getPublicProfile` rend
@@ -418,6 +422,7 @@ function ProfilPersonnePageInner({ handle }: ProfilPersonnePageProps) {
   const person = profile.data
   const coverUrl = person.cover.url
   const wallError = wallErrorText(t)
+  const clipsHref = adaptive && navigationLabels?.clips?.trim() ? routes.clips?.(person.handle) : undefined
 
   return (
     <ProfilFrame>
@@ -484,21 +489,31 @@ function ProfilPersonnePageInner({ handle }: ProfilPersonnePageProps) {
             ) : null}
           </div>
           <p className="pp-handle">@{person.handle}</p>
+          {adaptive ? (
+            <div className="pp-trust-badges">
+              {signalBadges(person).map((badge) => (
+                <Badge key={badge} tone="primary" size="sm">{t(badgeLabelKey(badge))}</Badge>
+              ))}
+            </div>
+          ) : null}
           {person.headline ? (
             <p className="pp-headline">{person.headline}</p>
           ) : null}
 
           <div className="pp-actions">
             {isSelf ? (
-              <Button
-                icon="edit"
-                aria-expanded={manage}
-                aria-controls={MANAGE_PANEL_ID}
-                onClick={() => setManage((open) => !open)}
-                style={RESEAU_PRIMARY_ACTION_STYLE}
-              >
-                {t("profilPersonnePage.actions.editProfile")}
-              </Button>
+              <>
+                <Button
+                  icon="edit"
+                  aria-expanded={manage}
+                  aria-controls={MANAGE_PANEL_ID}
+                  onClick={() => setManage((open) => !open)}
+                  style={RESEAU_PRIMARY_ACTION_STYLE}
+                >
+                  {t("profilPersonnePage.actions.editProfile")}
+                </Button>
+                {personalHubHref ? <Button variant="secondary" icon="user" style={RESEAU_SECONDARY_ACTION_STYLE} onClick={() => router.push(personalHubHref)}>{t("antsia:me.title")}</Button> : null}
+              </>
             ) : (
               <>
                 <ConnectionButton
@@ -515,6 +530,9 @@ function ProfilPersonnePageInner({ handle }: ProfilPersonnePageProps) {
                 ) : null}
               </>
             )}
+            {clipsHref ? (
+              <Button variant="secondary" icon="video" style={RESEAU_SECONDARY_ACTION_STYLE} onClick={() => router.push(clipsHref)}>{navigationLabels?.clips}</Button>
+            ) : null}
           </div>
 
           {isSelf ? (
@@ -1062,7 +1080,6 @@ function ContactButtons({ person }: { person: PublicProfile }) {
   const { t } = useTranslation("reseau")
   const router = useRouter()
   const routes = useRoutes()
-  const { networkId } = useNetwork()
   const isMobile = useIsReseauMobile()
   const { busyHandle, ring } = useRingRelation()
 

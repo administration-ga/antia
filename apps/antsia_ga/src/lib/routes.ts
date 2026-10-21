@@ -207,6 +207,7 @@ export const engineRoutes: EngineRoutes = {
   // l'application, déclarées avec `NetworkProvider navigation="destinations"`.
   discover: routes.memberDiscover,
   me: routes.me,
+  shops: routes.shopDirectory,
   clips: routes.clips,
   // P14B : destinations typées des avis (cloche, ouverture d'une notification poussée).
   serviceRequest: routes.serviceRequest,

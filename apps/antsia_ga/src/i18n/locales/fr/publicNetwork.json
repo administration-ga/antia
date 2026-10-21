@@ -2,10 +2,10 @@
   "nav": {
     "label": "Navigation publique",
     "footer": "Informations et droits",
-    "discover": "Découvrir",
+    "discover": "Explorer",
     "transparency": "Transparence",
     "enter": "Entrer",
-    "myFeed": "Mon fil",
+    "myFeed": "Accueil",
     "about": "À propos",
     "legal": "Mentions légales",
     "privacy": "Confidentialité",
@@ -42,7 +42,7 @@
     "next": "Page suivante"
   },
   "discover": {
-    "title": "Découvrir le réseau",
+    "title": "Explorer le réseau",
     "lead": "Suivre une province ou un sujet, puis lire les contributions que leurs auteurs ont choisies de rendre publiques.",
     "member": "Ouvrir la vue membre",
     "trends": "Sujets mesurés",

@@ -13,13 +13,13 @@ const second: PostMediaDto = { ...first, url: "https://media.example/second.jpg"
 
 // La même surface sert aussi la carte publique : uniquement i18n, aucun
 // NetworkProvider, aucun client Convex, aucun identifiant de stockage.
-function renderMedia(media: readonly PostMediaDto[], presentation?: "media" | "classic") {
-  const i18n = createAppI18n({ locale: "fr", appResources: { fr: {}, en: {} }, defaultNS: "social" })
+function renderMedia(media: readonly PostMediaDto[], presentation?: "media" | "classic", locale: "fr" | "en" = "fr") {
+  const i18n = createAppI18n({ locale, appResources: { fr: {}, en: {} }, defaultNS: "social" })
   const surface = (items: readonly PostMediaDto[]) => (
     <I18nextProvider i18n={i18n}><PostMedia media={items} presentation={presentation} /></I18nextProvider>
   )
   const view = render(surface(media))
-  return { ...view, replace: (items: readonly PostMediaDto[]) => view.rerender(surface(items)) }
+  return { ...view, i18n, replace: (items: readonly PostMediaDto[]) => view.rerender(surface(items)) }
 }
 
 describe("Médias P03", () => {

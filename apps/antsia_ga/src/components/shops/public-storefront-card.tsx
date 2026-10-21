@@ -17,7 +17,7 @@ export function PublicStorefrontCard({ storefront, locale, catalog }: { storefro
     { key: "hours", value: storefront.hours },
   ] as const
 
-  return <article className="mx-auto w-full max-w-3xl overflow-hidden rounded-2xl border border-border bg-card text-card-foreground">
+  return <article className="mx-auto w-full max-w-5xl overflow-hidden rounded-2xl border border-border bg-card text-card-foreground [overflow-wrap:anywhere]">
     {storefront.bannerUrl ? <div className="bg-muted"><Image unoptimized src={storefront.bannerUrl} width={1200} height={400} alt="" loading="lazy" className="aspect-[3/1] max-h-96 w-full object-cover" /></div> : null}
     <div className="flex flex-col gap-6 p-5 sm:p-8">
       <header className="flex flex-col gap-4">

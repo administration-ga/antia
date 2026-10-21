@@ -10,6 +10,8 @@ vi.mock("@/components/shops/member-shop-directory", () => ({ MemberShopDirectory
 vi.mock("@/components/jobs/member-job-directory", () => ({ MemberJobDirectory: () => null, useJobsDiscoverable: () => false }))
 // P14 : sans offre de service publiée montrée par le moteur, ni onglet ni rubrique Services (écrit, non exécuté).
 vi.mock("@/components/services/member-service-directory", () => ({ MemberServiceDirectory: () => null, useServicesDiscoverable: () => false }))
+// La grille possède ses souscriptions et sa recette dans media-discovery-screen.test.
+vi.mock("./media-discovery-screen", () => ({ MediaDiscoveryScreen: ({ mode }: { mode: string }) => <section data-media-discovery={mode} /> }))
 
 import { routes } from "@/lib/routes"
 import { discoverHrefs } from "./discover-model"
@@ -50,5 +52,11 @@ describe("Découvrir — l'écran rend chaque entrée du modèle, et rien d'autr
     expect(html).toContain("data-shop-directory")
     expect(hrefsOf(html)).toContain(routes.shopDirectory())
     expect(html).not.toMatch(/commerce\.(?:services|jobs)|emplois/i)
+  })
+
+  it("monte la découverte média avant les annuaires en conservant toutes leurs entrées", () => {
+    expect(html).toContain('data-media-discovery="explore"')
+    expect(html.indexOf("data-media-discovery")).toBeLessThan(html.indexOf("data-shop-directory"))
+    expect(hrefsOf(html)).toEqual([routes.memberDiscover(), routes.shopDirectory(), ...discoverHrefs().filter((href) => href !== routes.shopDirectory())])
   })
 })
