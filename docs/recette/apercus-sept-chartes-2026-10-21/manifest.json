@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-21",
+  "scope": "Aperçus du composeur, sans publication ; fenêtres Chrome émulées",
+  "environments": [
+    {
+      "environment": "antsia",
+      "url": "https://antsia.vercel.app/fil",
+      "testedAt": "2026-10-21T05:36:17.019Z",
+      "checks": 84,
+      "rawCaptures": 84,
+      "contactSheets": 7,
+      "finalCapture": 1,
+      "report": "antsia/rapport.md",
+      "results": "antsia/resultats.json",
+      "hashes": "antsia/SHA256SUMS",
+      "published": false,
+      "consoleWarnings": 0,
+      "consoleErrors": 0,
+      "authenticatedAfterReload": true,
+      "noDraft": true,
+      "originalPreferencesRestored": true
+    },
+    {
+      "environment": "antsia-demo",
+      "url": "https://antsia-demo.vercel.app/fil",
+      "testedAt": "2026-10-21T06:10:52.417Z",
+      "checks": 84,
+      "rawCaptures": 84,
+      "contactSheets": 7,
+      "finalCapture": 1,
+      "report": "antsia-demo/rapport.md",
+      "results": "antsia-demo/resultats.json",
+      "hashes": "antsia-demo/SHA256SUMS",
+      "published": false,
+      "consoleWarnings": 0,
+      "consoleErrors": 0,
+      "authenticatedAfterReload": true,
+      "noDraft": true,
+      "originalPreferencesRestored": true
+    }
+  ]
+}
