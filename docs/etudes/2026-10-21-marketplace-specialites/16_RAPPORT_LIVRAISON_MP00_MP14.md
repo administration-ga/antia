@@ -8,9 +8,9 @@ Les sessions Codex ont été interrompues à 17 h 50 pendant la composition, dan
 
 | Élément | Valeur |
 |---|---|
-| Base | `main` `d2ac0be` (PR 28) ; même code que la production `main-086cd43b8686` |
+| Base | `main` `d2ac0be` (PR 28), puis `main` `5851d02` (PR 29, U03–U08), en production depuis le 21/10 au soir |
 | Instantané de l'arbre partagé | `eea4f0c` (parent `c4d36f3`), construit avec un index privé |
-| Fusion puis correctifs | `1994827`, `884fa37`, `6c3b0c4` et ce rapport |
+| Fusion puis correctifs | `1994827`, `884fa37`, `6c3b0c4`, fusion de `main` `72b0042`, `561b162` et ce rapport |
 | Arbre, index et HEAD partagés | Inchangés (`codex/pa4-identite-session`) |
 
 L'instantané couvre `apps/` (hors `apps/antsia_mobile`, laissé à `main`), `packages/`, `convex/`, `tests/`, `scripts/`, `ops/`, `deploy/` et `docs/` hors recettes, contenus de démonstration, maintenance et mémoire. Il porte **trois couches non publiées** :
@@ -19,7 +19,13 @@ L'instantané couvre `apps/` (hors `apps/antsia_mobile`, laissé à `main`), `pa
 2. le responsive U03–U08 (`71c93a5` … `e2c3819`), publié dans la nuit puis **absent de `main` et de la production depuis le 21/10 à 10 h 46** ;
 3. la marketplace MP01–MP13.
 
-La marketplace dépend des deux premières couches : tables et contrats P (intentions de service, candidatures V2), classes et jetons du système U. Le candidat les publie donc ensemble et les vérifie ensemble. Une autre session prépare en parallèle une PR U03–U08 dédiée : la branche sera remise à jour sur `main` après sa fusion.
+La marketplace dépend des deux premières couches : tables et contrats P (intentions de service, candidatures V2), classes et jetons du système U. Le candidat les publie donc ensemble et les vérifie ensemble.
+
+### Mise à jour sur la PR 29
+
+Pendant la vérification, une autre session a remis U03–U08 dans `main` (PR 29, `5851d02`) **dans le style des chartes**, sans la passe de design du 20/10 (« sept systèmes appliqués aux huit rubriques » : classes `antsia-*`, jetons `esp-card-*`, repli coloré des médaillons). Elle a été déployée avec l'accord du propriétaire. Fusion de `main` dans la branche (30 fichiers) : le style de `main` l'emporte sur les composants partagés ; la marketplace garde ses ajouts fonctionnels (routes et pages spécialisées, onglet Boutiques vers la marketplace, iCom professionnel, rendu d'article, gabarit et blocs de vitrine, facettes et profil de service, image prioritaire).
+
+**Décision du propriétaire attendue.** Hors des 30 fichiers en conflit, la branche réapplique encore cette passe de design sur **88 fichiers hors marketplace** (contre 22 fichiers utilisant ces classes dans `main`). Soit on la garde (elle avait été publiée le 20/10, puis perdue le 21/10 à 10 h 46), soit on ramène ces fichiers au style de `main` avant fusion. Les définitions CSS restent nécessaires aux 35 fichiers marketplace qui les emploient.
 
 ### Conflits (54 fichiers)
 
@@ -44,14 +50,14 @@ La marketplace dépend des deux premières couches : tables et contrats P (inten
 |---|---|
 | Génération Convex | Verte, sur un backend local propre au dossier candidat : schéma validé, onze composants installés. Le backend local de l'arbre partagé n'a reçu aucun déploiement. |
 | `typecheck:convex`, `typecheck:tests` | 0 erreur |
-| Tests du moteur (`test:convex`) | 203 fichiers, 3 197 tests : 3 195 verts au passage complet ; les 2 échecs corrigés puis rejoués verts (65/65 sur leurs deux fichiers) |
+| Tests du moteur (`test:convex`) | 3 197/3 197 au passage complet après fusion de la PR 29 |
 | Cliquets / scripts | 146/146 · 70/70 |
 | Typage des espaces de travail | 11/12 verts ; `diasporale-com` : voir DIASPORALE ci-dessous |
-| Tests des espaces ANTSIA | domaine 998 · contrats 86 · api 291 · natif 75 · ui 2 286 · social-features 4 172 · console 87 · antsia_ga 1 735 · mobile 84 |
+| Tests des espaces ANTSIA | domaine 998 · contrats 86 · api 291 · natif 75 · ui 2 286 · social-features 4 168 · console 87 · antsia_ga 1 737 · mobile 84 |
 | Lint | 0 erreur (avertissements préexistants) |
-| Build Next `antsia_ga` | RESULTAT_BUILD |
+| Build Next `antsia_ga` | Vert (Next 16.4.2, 36 pages statiques générées), après fusion de la PR 29 |
 
-Total ANTSIA : **13 227 tests verts**.
+Total ANTSIA : **13 225 tests verts** (moteur, cliquets 146, scripts 70 et neuf espaces).
 
 ### DIASPORALE (dépôt voisin, non modifié)
 
@@ -82,7 +88,7 @@ Aucune capacité conditionnelle n'est activée par ce candidat.
 
 La marketplace ajoute treize tables et des fonctions Convex. Les publications précédentes n'avaient déployé que le front ; celle-ci exige, dans l'ordre :
 
-1. fusionner la PR dans `main`, après la PR U03–U08 si elle passe avant, et revérifier le résultat ;
+1. trancher la passe de design (ci-dessus), fusionner la PR dans `main` et revérifier le résultat ;
 2. `convex deploy` sur la démonstration, puis sur la production (`diligent-avocet-585`) ;
 3. `vercel deploy --prod` de l'enfant démo, puis du principal ;
 4. recette en ligne aux trois formats, comptes démo et compte réel.
@@ -93,5 +99,5 @@ Schéma : sur les tables existantes, seulement des champs optionnels et des unio
 
 ## Retour arrière
 
-- Front : promouvoir de nouveau le déploiement `dpl_DF9PM1Zp117xVN7eYDiUqmcaGrKP` (`main-086cd43b8686-production`).
-- Backend : redéployer `main` `d2ac0be`. Les tables nouvelles restent vides tant que les capacités sont fermées ; ce retour n'a pas été répété.
+- Front : promouvoir de nouveau `dpl_9Ga4gMfBVAzkh656teP4Vo2Ei8ix` (`main-5851d025af92-production`, en ligne au 21/10 au soir).
+- Backend : redéployer `main` `5851d02`. Les tables nouvelles restent vides tant que les capacités sont fermées ; ce retour n'a pas été répété.
