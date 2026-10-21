@@ -2,7 +2,7 @@
   "date": "2026-10-21",
   "kind": "browser-viewport-emulation",
   "physicalDevicesTested": false,
-  "beforePublication": true,
+  "beforePublication": false,
   "checks": [
     {
       "screen": "/fil",
@@ -257,5 +257,75 @@
   ],
   "sessionInterruption": "Parallel recipe explicitly signed out the shared account; no credentials were extracted or entered by this recipe.",
   "noExternalMessagesCallsOrCommerceCreated": true,
-  "privateScreenshotsCommitted": false
+  "privateScreenshotsCommitted": false,
+  "afterPublicationChecks": [
+    {
+      "screen": "/fil",
+      "label": "apres-fil-1440",
+      "width": 1440,
+      "height": 1000,
+      "documentWidth": 1440,
+      "horizontalOverflow": false,
+      "background": "rgb(255, 255, 255)",
+      "alertCount": 0
+    },
+    {
+      "screen": "/fil",
+      "label": "apres-fil-390",
+      "width": 390,
+      "height": 844,
+      "documentWidth": 390,
+      "horizontalOverflow": false,
+      "background": "rgb(255, 255, 255)",
+      "alertCount": 0
+    },
+    {
+      "screen": "/fil",
+      "label": "apres-fil-834",
+      "width": 834,
+      "height": 1112,
+      "documentWidth": 834,
+      "horizontalOverflow": false,
+      "background": "rgb(255, 255, 255)",
+      "alertCount": 0
+    },
+    {
+      "screen": "/a-propos",
+      "label": "apres-public-a-propos-1440",
+      "width": 1440,
+      "height": 1000,
+      "documentWidth": 1440,
+      "horizontalOverflow": false,
+      "background": "rgb(255, 255, 255)",
+      "alertCount": 0
+    },
+    {
+      "screen": "/a-propos",
+      "label": "apres-public-a-propos-390",
+      "width": 390,
+      "height": 844,
+      "documentWidth": 390,
+      "horizontalOverflow": false,
+      "background": "rgb(255, 255, 255)",
+      "alertCount": 0
+    },
+    {
+      "screen": "/a-propos",
+      "label": "apres-public-a-propos-834",
+      "width": 834,
+      "height": 1112,
+      "documentWidth": 834,
+      "horizontalOverflow": false,
+      "background": "rgb(255, 255, 255)",
+      "alertCount": 0
+    }
+  ],
+  "limitations": {
+    "physicalDevicesTested": false,
+    "realConversationDraftResizeTested": false,
+    "actualCallsOrPurchasesTested": false,
+    "storyControlsRenderedOnline": true,
+    "storyPausePersistenceConfirmedOnline": false,
+    "storyPauseNote": "Commands rendered on existing content; confirmation was interrupted while parallel account-switch recipe repeatedly signed out the shared identity. No content created for this recipe."
+  }
 }
