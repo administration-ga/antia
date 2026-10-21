@@ -22,9 +22,9 @@ export function PublicStorefrontCard({ storefront, locale, catalog }: { storefro
     { key: "hours", value: storefront.hours },
   ] as const
 
-  return <article data-activity-template={configuration.template} className="mx-auto w-full max-w-5xl overflow-hidden rounded-[var(--ui2-card-radius)] border border-[color:var(--esp-surface-border)] bg-card text-card-foreground [overflow-wrap:anywhere]">
+  return <article data-activity-template={configuration.template} className="mx-auto w-full max-w-5xl overflow-hidden rounded-2xl border border-border bg-card text-card-foreground [overflow-wrap:anywhere]">
     {storefront.bannerUrl ? <div className="bg-muted"><Image unoptimized src={storefront.bannerUrl} width={1200} height={400} alt="" loading="eager" className="aspect-[3/1] max-h-96 w-full object-cover" /></div> : null}
-    <div className="flex flex-col gap-6 p-[var(--esp-card-padding,16px)]">
+    <div className="flex flex-col gap-6 p-5 sm:p-8">
       <header className="flex flex-col gap-4">
         <p className="text-sm font-medium text-primary">{t("shops:publicStorefront.title", { name: storefront.name })}</p>
         <div className="flex items-start gap-4">

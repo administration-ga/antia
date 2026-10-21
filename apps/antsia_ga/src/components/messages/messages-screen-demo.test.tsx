@@ -1,16 +1,36 @@
 import { renderToStaticMarkup } from "react-dom/server"
 import { afterEach, describe, expect, it, vi } from "vitest"
 
+const network = vi.hoisted(() => ({ navigationLayout: undefined as "adaptive" | undefined }))
+
+vi.mock("@antsia/api/network", () => ({ useNetwork: () => ({ navigation: "destinations", navigationLayout: network.navigationLayout }) }))
 vi.mock("@antsia/social-features/messagerie", () => ({ MessagesRoute: () => <section data-messages-content="" /> }))
-vi.mock("@/components/member-chrome", () => ({ MemberTopBar: ({ onMobile }: { onMobile: string }) => <header data-mobile={onMobile} /> }))
+vi.mock("@/components/member-chrome", () => ({
+  MemberTopBar: ({ onMobile }: { onMobile: string }) => <header data-mobile={onMobile} />,
+  MemberPage: ({ children, workspace, immersiveOnPhone }: { children: React.ReactNode; workspace?: boolean; immersiveOnPhone?: boolean }) => <div data-member-page={JSON.stringify({ workspace, immersiveOnPhone })}>{children}</div>,
+}))
 vi.mock("@/components/shops/contact-messages", () => ({ useCommercialMessages: () => undefined }))
-// Coque historique : la coque adaptative a ses propres tests (messages-screen.test.tsx).
-vi.mock("@antsia/api/network", () => ({ useNetwork: () => ({ navigation: "destinations", navigationLayout: "legacy" }) }))
+// MP09 : l’injection contextuelle a ses propres tests (messages-screen.test.tsx).
 vi.mock("@antsia/social-features/features/messagerie/contextual-entry", () => ({ useContextualMessages: () => undefined }))
 
 import { MessagesScreen } from "./messages-screen"
 
-afterEach(() => vi.unstubAllEnvs())
+afterEach(() => {
+  vi.unstubAllEnvs()
+  network.navigationLayout = undefined
+})
+
+describe("messagerie dans l'opt-in adaptatif", () => {
+  it("confie la messagerie au cadre borné du membre, détail immersif au téléphone", () => {
+    network.navigationLayout = "adaptive"
+    const list = renderToStaticMarkup(<MessagesScreen route={{}} />)
+    expect(list).toContain(`data-member-page="${JSON.stringify({ workspace: true, immersiveOnPhone: false }).replaceAll('"', "&quot;")}"`)
+    expect(list).toContain('data-messages-content=""')
+    expect(list).not.toContain("h-dvh")
+    const conversation = renderToStaticMarkup(<MessagesScreen route={{ kind: "personne", id: "fixture" }} />)
+    expect(conversation).toContain("&quot;immersiveOnPhone&quot;:true")
+  })
+})
 
 describe("hauteur de la messagerie sous le bandeau démo", () => {
   it("borne la messagerie à la hauteur disponible dans la zone démo", () => {

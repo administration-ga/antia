@@ -142,7 +142,7 @@ export function ProfilFrame({ children }: { children: ReactNode }) {
       style={{
         display: "flex",
         flexDirection: "column",
-        gap: "var(--esp-card-gap, 16px)",
+        gap: 16,
         height: adaptive ? "auto" : "100%",
         overflowY: adaptive ? "visible" : "auto",
         maxWidth: adaptive ? 1120 : 760,

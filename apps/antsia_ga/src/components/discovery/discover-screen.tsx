@@ -110,7 +110,7 @@ export function MemberDiscoverScreen() {
 
   return (
     <MemberPage>
-      <div className="antsia-page mx-auto w-full max-w-6xl">
+      <div className="mx-auto flex w-full max-w-6xl min-w-0 flex-col gap-8">
         <header className="flex flex-col gap-2">
           <h1 className="antsia-title ">{t("nav.discover")}</h1>
           <p className="antsia-copy text-muted-foreground">{t("discoverHub.lead")}</p>

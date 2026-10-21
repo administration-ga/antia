@@ -58,7 +58,7 @@ export function MemberTopBar({ onMobile = "visible" }: { onMobile?: "visible" | 
   return (
     <header
       className={cn(
-        "sticky top-0 z-30 border-b border-transparent bg-background/90 backdrop-blur",
+        "sticky top-0 z-30 border-b border-border bg-background/90 backdrop-blur",
         onMobile === "hidden" && (adaptive ? "hidden min-[768px]:block" : "hidden min-[960px]:block"),
       )}
     >
@@ -168,12 +168,13 @@ function DestinationsMemberPage({ children, workspace, immersiveOnPhone }: { chi
   const withNavigation = !isLiveSessionPath(pathname)
 
   return (
+    // Dans la démo, le bandeau reste en flux : l'espace borné retranche sa hauteur (comme Messages hors opt-in).
     <div className={boundedWorkspace ? "antsia-member-workspace esp-page-motif flex h-dvh flex-col overflow-hidden bg-background" : "esp-page-motif min-h-dvh bg-background"} style={boundedWorkspace ? { height: demoWorkspaceHeight() } : undefined}>
       <MemberTopBar onMobile={boundedWorkspace && immersiveOnPhone ? "hidden" : "visible"} />
       <div
         data-with-navigation={withNavigation ? "" : undefined}
         data-workspace={boundedWorkspace ? "" : undefined}
-        className={adaptive ? "antsia-member-frame" : cn("mx-auto w-full max-w-[1400px] px-3 sm:px-6 min-[960px]:px-5", withNavigation && "min-[960px]:grid min-[960px]:grid-cols-[248px_minmax(0,1fr)] min-[960px]:gap-6")}
+        className={adaptive ? "antsia-member-frame" : cn("mx-auto w-full max-w-7xl px-4 sm:px-5", withNavigation && "min-[960px]:grid min-[960px]:grid-cols-[minmax(200px,248px)_minmax(0,1fr)] min-[960px]:gap-6")}
       >
         {withNavigation ? (
           <div className={adaptive ? "antsia-member-rail citizen-scrollbar" : cn(DESKTOP_ONLY_CLASS, "sticky top-16 max-h-[calc(100dvh-4rem)] self-start overflow-y-auto py-6")}>
@@ -189,9 +190,9 @@ function DestinationsMemberPage({ children, workspace, immersiveOnPhone }: { chi
           tabIndex={-1}
           className={cn(
             "focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring",
-            adaptive ? "antsia-member-content" : "min-w-0 py-4 min-[960px]:py-6",
+            adaptive ? "antsia-member-content" : "min-w-0 py-6",
             // La barre basse est FIXE : le bas de page lui laisse sa place (barre, gouttière, encoche).
-            withNavigation && !adaptive && "max-[959px]:pb-[calc(120px+env(safe-area-inset-bottom,0px))]",
+            withNavigation && !adaptive && "max-[959px]:pb-[calc(6rem+env(safe-area-inset-bottom,0px))]",
           )}
         >
           {children}

@@ -2,8 +2,8 @@
 
 import { useContextualMessages } from "@antsia/social-features/features/messagerie/contextual-entry"
 import { MessagesRoute } from "@antsia/social-features/messagerie"
-import { demoWorkspaceHeight } from "@/lib/demo-embed"
 import { useNetwork } from "@antsia/api/network"
+import { demoWorkspaceHeight } from "@/lib/demo-embed"
 import { Suspense } from "react"
 import { MemberPage, MemberTopBar } from "@/components/member-chrome"
 import { useCommercialMessages } from "@/components/shops/contact-messages"

@@ -247,6 +247,23 @@ describe("MemberPage — transition adaptive sans remontage du contenu", () => {
     expect(tablet.match(/data-post-sheet="false"/g)).toHaveLength(1)
   })
 
+  it("l'espace borné retranche le bandeau de la démo, et lui seul", () => {
+    state.adaptive = true
+    state.pathname = routes.messages()
+    state.mobile = false
+    try {
+      vi.stubEnv("NEXT_PUBLIC_APP_BASE_PATH", "/demo")
+      vi.stubEnv("NEXT_PUBLIC_CONVEX_URL", "https://vivid-hedgehog-655.convex.cloud")
+      expect(renderToStaticMarkup(<MemberPage workspace><section data-messages-content="" /></MemberPage>)).toContain('style="height:calc(100dvh - var(--antsia-demo-banner-height, 0px))"')
+      expect(renderToStaticMarkup(<MemberPage><section data-page-content="" /></MemberPage>)).not.toContain("--antsia-demo-banner-height")
+      vi.stubEnv("NEXT_PUBLIC_APP_BASE_PATH", "")
+      vi.stubEnv("NEXT_PUBLIC_CONVEX_URL", "https://diligent-avocet-585.convex.cloud")
+      expect(renderToStaticMarkup(<MemberPage workspace><section data-messages-content="" /></MemberPage>)).not.toContain("--antsia-demo-banner-height")
+    } finally {
+      vi.unstubAllEnvs()
+    }
+  })
+
   it("null puis rail/barre/rail conservent le même main et son état ; un seul créateur répond", async () => {
     state.adaptive = true
     state.mobile = null

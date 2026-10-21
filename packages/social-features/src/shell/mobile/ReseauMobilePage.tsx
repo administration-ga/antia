@@ -152,8 +152,9 @@ export function ReseauMobilePage() {
         onCompose={() => creation.openCreation("publication")}
         onCreateStory={() => creation.openCreation("actu")}
       />
-      {/* L'actu reste propre à la coquille ; la publication est montée
-          au-dessus de la bascule mobile/bureau pour conserver son sélecteur. */}
+      {/* Les surfaces de création, montées UNE fois pour toute la coquille —
+          donc atteignables depuis n'importe quel volet, ce que l'arbre mobile
+          ne permettait pas (R-02). */}
       <StoryCreateSheet open={creation.open === "actu"} onClose={creation.close} onPublished={creation.close} />
 
     </ReseauMobileShell>

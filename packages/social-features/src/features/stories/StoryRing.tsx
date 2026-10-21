@@ -50,11 +50,7 @@ export function StoryRing({
 	// c'est ce qui donne envie d'ouvrir. L'avatar n'est qu'un repli — une
 	// rangée de portraits ne dit pas ce qu'il y a derrière.
 	const image = coverUrl ?? avatarUrl ?? null
-	const identity = displayName.trim().length > 0 ? <span style={{ fontSize: presentation === "rings" ? 15 : 18, fontWeight: 700, letterSpacing: "0.02em" }}>{initialsOf(displayName)}</span> : <Icon name="user" size={22} />
-	// Le ton est décoratif, stable pour le même nom PUBLIC et sans rapport
-	// avec l'anneau de lecture ou les badges de confiance. Une image valide
-	// garde toute sa place ; seule son absence ou son erreur révèle ce repli.
-	const fallback = presentation === "rings" ? <span className="st-tray-fallback" style={identityToneStyle(displayName)}>{identity}</span> : identity
+	const fallback = displayName.trim().length > 0 ? <span style={{ fontSize: 18, fontWeight: 700, letterSpacing: "0.02em" }}>{initialsOf(displayName)}</span> : <Icon name="user" size={22} />
 
 	return (
 		<span className={`st-tray-ring ${RING_CLASS[state]}`} aria-hidden="true">

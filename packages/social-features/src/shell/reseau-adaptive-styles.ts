@@ -14,7 +14,7 @@ export const RESEAU_ADAPTIVE_CSS = `
     height: auto;
     min-height: 0;
     overflow: visible;
-    padding: 14px var(--esp-layout-gutter, 16px) 0;
+    padding: 14px 16px 0;
   }
   .rp-scope[data-navigation-layout="adaptive"] .rp-grid {
     grid-template-columns: var(--rp-adaptive-nav-width) minmax(0, 1fr);
@@ -24,7 +24,7 @@ export const RESEAU_ADAPTIVE_CSS = `
     flex: 0 0 auto;
     height: auto;
     min-height: 0;
-    max-width: min(var(--esp-layout-max-width, 1400px), calc(var(--rp-adaptive-nav-width) + 16px + var(--rp-adaptive-main-max)));
+    max-width: min(1400px, calc(var(--rp-adaptive-nav-width) + 16px + var(--rp-adaptive-main-max)));
     overflow: visible;
     padding-bottom: 48px;
   }
@@ -78,7 +78,7 @@ export const RESEAU_ADAPTIVE_CSS = `
     @container rp-page (min-width: 1280px) {
       .rp-scope[data-navigation-layout="adaptive"] .rp-grid {
         grid-template-columns: var(--rp-adaptive-nav-width) minmax(0, 1fr) 312px;
-        max-width: min(var(--esp-layout-max-width, 1400px), calc(var(--rp-adaptive-nav-width) + 32px + var(--rp-adaptive-main-max) + 312px));
+        max-width: min(1400px, calc(var(--rp-adaptive-nav-width) + 32px + var(--rp-adaptive-main-max) + 312px));
       }
       .rp-scope[data-navigation-layout="adaptive"] .rp-rail-end {
         display: flex;
