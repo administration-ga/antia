@@ -68,6 +68,7 @@ export const withheldCodeValidator = v.union(v.literal("fileScanPending"), v.lit
 
 /** Pourquoi la garde retient ce fichier — `null` s'il est servable (sain ou sauté). */
 export function withheldCodeOf(status: FileScanStatus | null | undefined): WithheldCode | null {
+  // Une analyse en échec retient le fichier sans le déclarer dangereux (comportement des backends en ligne).
   if (status === "error") return "fileScanUnavailable"
   switch (serviceStateOf(status)) {
     case "servable":

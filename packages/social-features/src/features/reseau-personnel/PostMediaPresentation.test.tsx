@@ -84,6 +84,20 @@ describe("Médias P03", () => {
     expect(screen.queryByText("Image indisponible")).toBeNull()
   })
 
+  it.each([
+    ["media", "fr"], ["classic", "fr"], ["media", "en"], ["classic", "en"],
+  ] as const)("dit « analyse impossible » sans clé brute ni média servi (%s, %s)", (presentation, locale) => {
+    for (const kind of ["image", "video"] as const) {
+      const view = renderMedia([{ ...first, kind, mimeType: kind === "video" ? "video/mp4" : first.mimeType, url: null, withheld: "fileScanUnavailable" }], presentation, locale)
+      const message = view.i18n.t("errors:fileScanUnavailable")
+      expect(message).not.toBe("fileScanUnavailable")
+      expect(screen.getByText(message)).toBeInTheDocument()
+      expect(screen.queryByText("fileScanUnavailable")).toBeNull()
+      expect(view.container.querySelector("img, video, [src]")).toBeNull()
+      view.unmount()
+    }
+  })
+
   it("ferme la visionneuse et remet l'index à zéro quand une galerie de même taille remplace la précédente", async () => {
     const view = renderMedia([first, second], "media")
     fireEvent.click(screen.getByRole("button", { name: "Afficher l'image 2 sur 2" }))

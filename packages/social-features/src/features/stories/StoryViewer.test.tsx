@@ -264,3 +264,13 @@ describe("StoryViewer — expiration reçue et contexte de lecture", () => {
     expect(play).toHaveBeenCalledTimes(3)
   })
 })
+
+describe("StoryViewer — média retenu par la garde des fichiers", () => {
+  it("dit en clair qu'une analyse n'a pas pu aboutir, sans clé brute ni média servi", () => {
+    mocks.items = [{ ...story("scan", NOW + 60_000), media: { kind: "image", url: null, withheld: "fileScanUnavailable", mimeType: "image/jpeg" } }]
+    render(<EngineTestWrapper><StoryViewer {...props} now={NOW} onExhausted={vi.fn()} /></EngineTestWrapper>)
+    expect(screen.getByText("L'analyse de sécurité n'a pas pu être terminée. Le fichier reste indisponible jusqu'à sa vérification.")).toBeInTheDocument()
+    expect(screen.queryByText("fileScanUnavailable")).toBeNull()
+    expect(screen.queryByRole("img", { name: "scan" })).toBeNull()
+  })
+})
