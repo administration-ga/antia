@@ -55,9 +55,48 @@ describe("catalogue réel du moteur", () => {
   test("refuse une application inconnue", () => {
     expect(() => buildPlan(readCatalog(), "inconnue", {})).toThrow("inconnue")
   })
+
+  test("le natif possède un contrat Expo réel et refuse tout plan Cloud Run", () => {
+    const catalog = readCatalog()
+    const native = catalog.applications.antsia_mobile
+    expect(native.platform).toBe("expo-native")
+    expect(native.platforms).toEqual(["ios", "android"])
+    expect(native.config).toBe("app.config.ts")
+    expect(native.entry).toBe("index.ts")
+    expect(native.public_env).toContain("EXPO_PUBLIC_CONVEX_URL")
+    expect(native.config_env).toContain("NATIVE_IOS_BUNDLE_ID")
+    for (const field of ["service", "dockerfile", "site_url", "dev_port", "build_args"]) expect(native[field]).toBeUndefined()
+    expect(() => buildPlan(catalog, "antsia_mobile", {})).toThrow("Publication native non raccordée")
+  })
+
+  test("une plateforme inconnue ne contourne ni le contrôle ni le plan web", () => {
+    const catalog = readCatalog()
+    catalog.applications.antsia_ga.platform = "inconnue"
+    expect(checkCatalog(catalog)).toContain("antsia_ga : plateforme inconnue inconnue")
+    expect(() => buildPlan(catalog, "antsia_ga", {})).toThrow("Plateforme inconnue")
+  })
 })
 
 describe("contrôle d'un catalogue", () => {
+  test("détecte un contrat natif incomplet ou déguisé en service web", () => {
+    const catalog = readCatalog()
+    const native = catalog.applications.antsia_mobile
+    native.platforms = ["web"]
+    native.config = "absent.config.ts"
+    native.entry = "absent.ts"
+    native.public_env.push("NATIVE_PRIVATE_VALUE")
+    native.config_env.push("EXPO_PUBLIC_PRIVATE_VALUE")
+    native.dockerfile = "ANTSIA/apps/antsia_ga/Dockerfile"
+    const problems = checkCatalog(catalog)
+    expect(problems).toContain("antsia_mobile : plateformes natives attendues : ios et android")
+    expect(problems).toContain("antsia_mobile : config natif introuvable")
+    expect(problems).toContain("antsia_mobile : entry natif introuvable")
+    expect(problems).toContain("antsia_mobile : le point d'entrée ne correspond pas au manifeste")
+    expect(problems).toContain("antsia_mobile : public_env natif invalide")
+    expect(problems).toContain("antsia_mobile : config_env natif invalide")
+    expect(problems).toContain("antsia_mobile : champ web « dockerfile » interdit au natif")
+  })
+
   test("détecte un ARG manquant, un port faux et une liste blanche absente", () => {
     const ecosystems = mkdtempSync(join(tmpdir(), "catalogue-"))
     const root = join(ecosystems, "ANTSIA")

@@ -14,7 +14,14 @@ export function parseOriginList(raw: string | undefined): string[] {
   }))]
 }
 
-export type ApplicationKey = keyof typeof catalog.applications
+type Applications = typeof catalog.applications
+export type ApplicationKey = { [Key in keyof Applications]: Applications[Key] extends { site_url: string; dev_port: number } ? Key : never }[keyof Applications]
+
+// Seules les applications web ont une origine HTTP. Une entrée native du
+// catalogue ne crée ni origine de confiance, ni schéma OAuth autorisé.
+const webApplications = Object.entries(catalog.applications).flatMap(([key, app]) =>
+  app.platform === "web" && "site_url" in app && "dev_port" in app ? [{ ...app, key: key as ApplicationKey }] : [],
+)
 
 /**
  * L'application du catalogue servie à cette origine : son adresse publique, ou son
@@ -24,16 +31,16 @@ export function applicationOfOrigin(origin: string | null | undefined, env: Env 
   const [normalized] = parseOriginList(origin ?? "")
   if (!normalized) return null
   const local = devToolsAllowed(env)
-  for (const [key, app] of Object.entries(catalog.applications) as [ApplicationKey, (typeof catalog.applications)[ApplicationKey]][]) {
-    if (parseOriginList(app.site_url).includes(normalized)) return key
-    if (local && [`http://localhost:${app.dev_port}`, `http://127.0.0.1:${app.dev_port}`].includes(normalized)) return key
+  for (const app of webApplications) {
+    if (parseOriginList(app.site_url).includes(normalized)) return app.key
+    if (local && [`http://localhost:${app.dev_port}`, `http://127.0.0.1:${app.dev_port}`].includes(normalized)) return app.key
   }
   return null
 }
 
 export function trustedOrigins(env: Env = process.env): string[] {
   const origins = [...parseOriginList(env.SITE_URL), ...parseOriginList(env.TRUSTED_ORIGINS)]
-  for (const app of Object.values(catalog.applications)) {
+  for (const app of webApplications) {
     origins.push(...parseOriginList(app.site_url))
     if (devToolsAllowed(env)) origins.push(`http://localhost:${app.dev_port}`, `http://127.0.0.1:${app.dev_port}`)
   }
@@ -73,8 +80,8 @@ export function authenticationConfiguration(env: Env = process.env) {
     localCodes,
     demoAccounts,
     trustedOrigins: allowed,
-    applications: Object.entries(catalog.applications).map(([key, app]) => ({
-      key,
+    applications: webApplications.map((app) => ({
+      key: app.key,
       origin: localCodes ? `http://localhost:${app.dev_port}` : new URL(app.site_url).origin,
     })).filter((app) => allowed.includes(app.origin)),
   }

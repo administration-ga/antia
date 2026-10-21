@@ -32,6 +32,8 @@ const COMMERCE_TABLES = [
   "commerceServicePolicies", "commerceServiceRequests", "commerceServiceCommands",
   // P15 — emploi et candidatures.
   "commerceJobPolicies", "commerceJobHeads", "commerceApplicationSubjects", "commerceApplicationFiles", "commerceApplications",
+  // DG-011–016 — catalogue de page, demandes personnelles, propositions, rendez-vous et avis.
+  "serviceOffers", "serviceRequests", "serviceProposals", "serviceBookings", "serviceReviews", "serviceReviewReplies",
 ] as const
 
 const OWNER = "owner_person", STRANGER = "stranger_person"
@@ -46,7 +48,7 @@ describe("P16 — inventaire des tables commerciales", () => {
   })
 
   it("aucune table commerciale nouvelle n'échappe à cette revue (classement à relire avant ajout)", () => {
-    const commerceLike = dataTableNames().filter((name) => /^(shop|commerce|commercial|checkout)/u.test(name) || name === "federationCommerceProbes")
+    const commerceLike = dataTableNames().filter((name) => /^(shop|commerce|commercial|checkout|service)/u.test(name) || name === "federationCommerceProbes")
     expect(commerceLike.filter((name) => !(COMMERCE_TABLES as readonly string[]).includes(name))).toEqual([])
   })
 
@@ -68,6 +70,60 @@ describe("P16 — inventaire des tables commerciales", () => {
     expect(exportableRecord("commercialMessages", reply, "buyer")).toBeNull()
     expect(directlyOwned("commercialMessages", reply, "buyer")).toBe(false)
     expect(directlyOwned("commercialMessages", reply, "team_member")).toBe(true)
+  })
+})
+
+describe("P16 — revue des services ajoutés à l'inventaire", () => {
+  const metadata = { _id: "row", _creationTime: 1, networkId: "network", createdAt: 1 }
+
+  it("DG-011 : le catalogue appartient à la page, sans droit personnel sur son contenu", () => {
+    const offer: DataRecord = { ...metadata, pageId: "page", title: "Offre de la page" }
+    expect(DATA_TABLE_POLICIES.serviceOffers).toEqual({ shared: true })
+    for (const person of [OWNER, STRANGER]) {
+      expect(directlyOwned("serviceOffers", offer, person)).toBe(false)
+      expect(exportableRecord("serviceOffers", offer, person)).toBeNull()
+    }
+  })
+
+  it("DG-014 : seul le demandeur possède sa demande ; le signataire de clôture reste une référence", () => {
+    const request: DataRecord = { ...metadata, requesterPersonId: OWNER, closedByPersonId: STRANGER, need: "Besoin du demandeur" }
+    expect(DATA_TABLE_POLICIES.serviceRequests).toEqual({ owners: ["requesterPersonId"] })
+    expect(directlyOwned("serviceRequests", request, OWNER)).toBe(true)
+    expect(exportableRecord("serviceRequests", request, OWNER)).toMatchObject({ need: request.need })
+    expect(directlyOwned("serviceRequests", request, STRANGER)).toBe(false)
+    expect(exportableRecord("serviceRequests", request, STRANGER)).toBeNull()
+    expect(anonymizeReferences(request, shapeFor("serviceRequests"), STRANGER, "anonymous")).toEqual({ ...metadata, requesterPersonId: OWNER, need: request.need })
+  })
+
+  it.each([
+    ["serviceProposals", "requestId"],
+    ["serviceReviewReplies", "reviewId"],
+  ] as const)("%s : la signature de page ne possède pas le contenu ; l'effacement suit %s", (table, parent) => {
+    const row: DataRecord = { ...metadata, [parent]: "parent", authorPersonId: OWNER, body: "Contenu de la page", details: "Proposition de la page" }
+    expect(DATA_TABLE_POLICIES[table]).toEqual({ owners: [], parents: [parent] })
+    for (const person of [OWNER, STRANGER]) {
+      expect(directlyOwned(table, row, person)).toBe(false)
+      expect(exportableRecord(table, row, person)).toBeNull()
+    }
+    expect(anonymizeReferences(row, shapeFor(table), OWNER, "anonymous")).toEqual({ ...row, authorPersonId: "anonymous" })
+  })
+
+  it("DG-015 : le rendez-vous suit sa demande, sans référence personnelle propriétaire", () => {
+    const booking: DataRecord = { ...metadata, requestId: "request", proposalId: "proposal", pageId: "page", reason: "Motif de clôture" }
+    expect(DATA_TABLE_POLICIES.serviceBookings).toEqual({ parents: ["requestId"] })
+    for (const person of [OWNER, STRANGER]) {
+      expect(directlyOwned("serviceBookings", booking, person)).toBe(false)
+      expect(exportableRecord("serviceBookings", booking, person)).toBeNull()
+    }
+  })
+
+  it("DG-016 : l'avis est au seul auteur et disparaît avec la demande", () => {
+    const review: DataRecord = { ...metadata, authorPersonId: OWNER, requestId: "request", body: "Avis personnel" }
+    expect(DATA_TABLE_POLICIES.serviceReviews).toEqual({ owners: ["authorPersonId"], parents: ["requestId"] })
+    expect(directlyOwned("serviceReviews", review, OWNER)).toBe(true)
+    expect(exportableRecord("serviceReviews", review, OWNER)).toMatchObject({ body: review.body })
+    expect(directlyOwned("serviceReviews", review, STRANGER)).toBe(false)
+    expect(exportableRecord("serviceReviews", review, STRANGER)).toBeNull()
   })
 })
 

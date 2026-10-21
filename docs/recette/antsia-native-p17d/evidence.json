@@ -1,0 +1,296 @@
+{
+  "schemaVersion": 1,
+  "contract": "ANTSIA-NATIVE-ACCEPTANCE-P17D-V1",
+  "artifacts": [],
+  "records": [],
+  "cases": [
+    {
+      "caseId": "audio_bidirectional:ios",
+      "status": "NOT_RUN",
+      "reason": null,
+      "recordIds": []
+    },
+    {
+      "caseId": "audio_bidirectional:android",
+      "status": "NOT_RUN",
+      "reason": null,
+      "recordIds": []
+    },
+    {
+      "caseId": "video_bidirectional:ios",
+      "status": "NOT_RUN",
+      "reason": null,
+      "recordIds": []
+    },
+    {
+      "caseId": "video_bidirectional:android",
+      "status": "NOT_RUN",
+      "reason": null,
+      "recordIds": []
+    },
+    {
+      "caseId": "locked_incoming:ios",
+      "status": "NOT_RUN",
+      "reason": null,
+      "recordIds": []
+    },
+    {
+      "caseId": "locked_incoming:android",
+      "status": "NOT_RUN",
+      "reason": null,
+      "recordIds": []
+    },
+    {
+      "caseId": "background_incoming:ios",
+      "status": "NOT_RUN",
+      "reason": null,
+      "recordIds": []
+    },
+    {
+      "caseId": "background_incoming:android",
+      "status": "NOT_RUN",
+      "reason": null,
+      "recordIds": []
+    },
+    {
+      "caseId": "cold_start_system_terminated:ios",
+      "status": "NOT_RUN",
+      "reason": null,
+      "recordIds": []
+    },
+    {
+      "caseId": "cold_start_system_terminated:android",
+      "status": "NOT_RUN",
+      "reason": null,
+      "recordIds": []
+    },
+    {
+      "caseId": "bluetooth:ios",
+      "status": "NOT_RUN",
+      "reason": null,
+      "recordIds": []
+    },
+    {
+      "caseId": "bluetooth:android",
+      "status": "NOT_RUN",
+      "reason": null,
+      "recordIds": []
+    },
+    {
+      "caseId": "cellular_interruption:ios",
+      "status": "NOT_RUN",
+      "reason": null,
+      "recordIds": []
+    },
+    {
+      "caseId": "cellular_interruption:android",
+      "status": "NOT_RUN",
+      "reason": null,
+      "recordIds": []
+    },
+    {
+      "caseId": "wifi_mobile:ios",
+      "status": "NOT_RUN",
+      "reason": null,
+      "recordIds": []
+    },
+    {
+      "caseId": "wifi_mobile:android",
+      "status": "NOT_RUN",
+      "reason": null,
+      "recordIds": []
+    },
+    {
+      "caseId": "network_loss_recovery:ios",
+      "status": "NOT_RUN",
+      "reason": null,
+      "recordIds": []
+    },
+    {
+      "caseId": "network_loss_recovery:android",
+      "status": "NOT_RUN",
+      "reason": null,
+      "recordIds": []
+    },
+    {
+      "caseId": "remote_end:ios",
+      "status": "NOT_RUN",
+      "reason": null,
+      "recordIds": []
+    },
+    {
+      "caseId": "remote_end:android",
+      "status": "NOT_RUN",
+      "reason": null,
+      "recordIds": []
+    },
+    {
+      "caseId": "reject:ios",
+      "status": "NOT_RUN",
+      "reason": null,
+      "recordIds": []
+    },
+    {
+      "caseId": "reject:android",
+      "status": "NOT_RUN",
+      "reason": null,
+      "recordIds": []
+    },
+    {
+      "caseId": "ring_expiry:ios",
+      "status": "NOT_RUN",
+      "reason": null,
+      "recordIds": []
+    },
+    {
+      "caseId": "ring_expiry:android",
+      "status": "NOT_RUN",
+      "reason": null,
+      "recordIds": []
+    },
+    {
+      "caseId": "double_claim:ios",
+      "status": "NOT_RUN",
+      "reason": null,
+      "recordIds": []
+    },
+    {
+      "caseId": "double_claim:android",
+      "status": "NOT_RUN",
+      "reason": null,
+      "recordIds": []
+    },
+    {
+      "caseId": "session_revocation:ios",
+      "status": "NOT_RUN",
+      "reason": null,
+      "recordIds": []
+    },
+    {
+      "caseId": "session_revocation:android",
+      "status": "NOT_RUN",
+      "reason": null,
+      "recordIds": []
+    },
+    {
+      "caseId": "navigation:ios",
+      "status": "NOT_RUN",
+      "reason": null,
+      "recordIds": []
+    },
+    {
+      "caseId": "navigation:android",
+      "status": "NOT_RUN",
+      "reason": null,
+      "recordIds": []
+    },
+    {
+      "caseId": "share:ios",
+      "status": "NOT_RUN",
+      "reason": null,
+      "recordIds": []
+    },
+    {
+      "caseId": "share:android",
+      "status": "NOT_RUN",
+      "reason": null,
+      "recordIds": []
+    },
+    {
+      "caseId": "theme:ios",
+      "status": "NOT_RUN",
+      "reason": null,
+      "recordIds": []
+    },
+    {
+      "caseId": "theme:android",
+      "status": "NOT_RUN",
+      "reason": null,
+      "recordIds": []
+    },
+    {
+      "caseId": "media_off:ios",
+      "status": "NOT_RUN",
+      "reason": null,
+      "recordIds": []
+    },
+    {
+      "caseId": "media_off:android",
+      "status": "NOT_RUN",
+      "reason": null,
+      "recordIds": []
+    },
+    {
+      "caseId": "permissions_denied:ios",
+      "status": "NOT_RUN",
+      "reason": null,
+      "recordIds": []
+    },
+    {
+      "caseId": "permissions_denied:android",
+      "status": "NOT_RUN",
+      "reason": null,
+      "recordIds": []
+    },
+    {
+      "caseId": "dnd_battery:ios",
+      "status": "NOT_RUN",
+      "reason": null,
+      "recordIds": []
+    },
+    {
+      "caseId": "dnd_battery:android",
+      "status": "NOT_RUN",
+      "reason": null,
+      "recordIds": []
+    },
+    {
+      "caseId": "feed_parity:ios",
+      "status": "NOT_RUN",
+      "reason": null,
+      "recordIds": []
+    },
+    {
+      "caseId": "feed_parity:android",
+      "status": "NOT_RUN",
+      "reason": null,
+      "recordIds": []
+    },
+    {
+      "caseId": "messages_parity:ios",
+      "status": "NOT_RUN",
+      "reason": null,
+      "recordIds": []
+    },
+    {
+      "caseId": "messages_parity:android",
+      "status": "NOT_RUN",
+      "reason": null,
+      "recordIds": []
+    },
+    {
+      "caseId": "commerce_parity:ios",
+      "status": "NOT_RUN",
+      "reason": null,
+      "recordIds": []
+    },
+    {
+      "caseId": "commerce_parity:android",
+      "status": "NOT_RUN",
+      "reason": null,
+      "recordIds": []
+    },
+    {
+      "caseId": "force_stop_observation:ios",
+      "status": "NOT_RUN",
+      "reason": null,
+      "recordIds": []
+    },
+    {
+      "caseId": "force_stop_observation:android",
+      "status": "NOT_RUN",
+      "reason": null,
+      "recordIds": []
+    }
+  ]
+}

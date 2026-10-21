@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "contract": "ANTSIA-NATIVE-ACCEPTANCE-P17D-V1",
+  "id": "antsia-p17d-2026-10-20",
+  "source": {
+    "head": "c4d36f3",
+    "snapshotSha256": null,
+    "frozen": false,
+    "dirty": true,
+    "capturedAt": null
+  },
+  "builds": [],
+  "devices": []
+}
