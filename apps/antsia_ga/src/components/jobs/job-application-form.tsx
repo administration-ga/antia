@@ -48,15 +48,15 @@ export function JobFilesManager({ files, onUploaded }: { files: readonly JobFile
   }, (result) => { form.reset({ kind: values.kind }); toast.success(t("files.uploaded")); onUploaded?.(result.fileId) }))
 
   return <section aria-labelledby={`${kindId}-title`} className="grid gap-3">
-    <h3 id={`${kindId}-title`} className="text-base font-semibold">{t("files.title")}</h3>
+    <h3 id={`${kindId}-title`} className="font-display text-base font-bold leading-snug">{t("files.title")}</h3>
     <p className="text-sm text-muted-foreground">{t("files.pdfOnly")}</p>
-    {files.length === 0 ? <p className="text-sm text-muted-foreground">{t("files.empty")}</p> : <ul className="grid gap-2">{files.map((file) => <li key={file.fileId} className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border p-3">
+    {files.length === 0 ? <p className="text-sm text-muted-foreground">{t("files.empty")}</p> : <ul className="grid gap-2">{files.map((file) => <li key={file.fileId} className="flex flex-wrap items-center justify-between gap-2 rounded-[var(--ui2-card-radius)] border border-border p-[var(--esp-card-padding,16px)]">
       <span className="grid min-w-0 gap-0.5"><span className="font-medium">{file.filename ?? t("files.unnamed")}</span><span className="text-sm text-muted-foreground">{t(`files.kind.${file.kind}`)} · {t("files.size", { size: jobFileSizeKb(file.byteSize) })} · {t(`files.scan.${file.scan}`)}</span></span>
-      <Button type="button" variant="ghost" pending={action.pending} onClick={() => { if (window.confirm(t("files.retireConfirm"))) void action.run(async () => await retireFile({ fileId: file.fileId }), () => { toast.success(t("files.retired")) }) }}><Trash2 aria-hidden="true" className="size-4" />{t("files.retire")}</Button>
+      <Button type="button" variant="danger" pending={action.pending} onClick={() => { if (window.confirm(t("files.retireConfirm"))) void action.run(async () => await retireFile({ fileId: file.fileId }), () => { toast.success(t("files.retired")) }) }}><Trash2 aria-hidden="true" className="size-4" />{t("files.retire")}</Button>
     </li>)}</ul>}
     <form noValidate onSubmit={(event) => { void upload(event) }} className="grid gap-3 sm:grid-cols-[minmax(0,12rem)_minmax(0,1fr)_auto] sm:items-end">
       <Field id={kindId} label={t("files.kindLabel")}><select id={kindId} className={SHOP_SELECT_CLASS} {...form.register("kind")}>{COMMERCE_JOBS_ATTACHMENT_KINDS.map((kind) => <option key={kind} value={kind}>{t(`files.kind.${kind}`)}</option>)}</select></Field>
-      <Field id={fileId} label={t("files.pick")} error={fileError}><input id={fileId} type="file" accept={JOB_FILE_ACCEPT} aria-invalid={fileError ? true : undefined} aria-describedby={fileError ? `${fileId}-error` : undefined} className="min-h-11 w-full text-sm" onChange={(event) => form.setValue("file", event.target.files?.[0] as File, { shouldValidate: true })} /></Field>
+      <Field id={fileId} label={t("files.pick")} error={fileError}><input id={fileId} type="file" accept={JOB_FILE_ACCEPT} aria-invalid={fileError ? true : undefined} aria-describedby={fileError ? `${fileId}-error` : undefined} className="min-h-11 w-full rounded-[var(--esp-field-radius)] border border-input bg-muted px-3 py-2 text-base text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" onChange={(event) => form.setValue("file", event.target.files?.[0] as File, { shouldValidate: true })} /></Field>
       <Button type="submit" variant="outline" pending={action.pending}><FileUp aria-hidden="true" className="size-4" />{action.pending ? t("files.uploading") : t("files.pick")}</Button>
     </form>
     {action.error ? <p role="alert" className="text-sm text-destructive">{action.error}</p> : null}
@@ -106,8 +106,8 @@ export function JobApplicationForm({ job }: { job: JobDto }) {
     } catch (reason) { setError(jobErrorText(reason, (key, options) => t(key, options))) }
   })
 
-  return <Card><section className="grid gap-5" aria-labelledby={`${ids.first}-title`}><form id={ids.form} noValidate onSubmit={(event) => { void submit(event) }} className="grid gap-5">
-    <header className="grid gap-1"><h2 id={`${ids.first}-title`} className="text-lg font-semibold">{t("apply.title")}</h2><p className="text-sm text-muted-foreground">{t("apply.lead")}</p></header>
+  return <Card><section className="grid gap-5" aria-labelledby={`${ids.first}-title`}><form id={ids.form} noValidate onSubmit={(event) => { void submit(event) }} className="antsia-form-grid">
+    <header className="antsia-page-header"><h2 id={`${ids.first}-title`} className="antsia-subtitle">{t("apply.title")}</h2><p className="text-sm text-muted-foreground">{t("apply.lead")}</p></header>
     <div className="grid gap-4 sm:grid-cols-2">
       <Field id={ids.last} label={t("apply.lastName")} error={errors.lastName?.message}><TextInput id={ids.last} autoComplete="family-name" aria-invalid={errors.lastName ? true : undefined} aria-describedby={errors.lastName ? `${ids.last}-error` : undefined} {...form.register("lastName")} /></Field>
       <Field id={ids.first} label={t("apply.firstName")} error={errors.firstName?.message}><TextInput id={ids.first} autoComplete="given-name" aria-invalid={errors.firstName ? true : undefined} aria-describedby={errors.firstName ? `${ids.first}-error` : undefined} {...form.register("firstName")} /></Field>
@@ -116,17 +116,17 @@ export function JobApplicationForm({ job }: { job: JobDto }) {
     {preview ? <p className="text-sm" aria-live="polite">{t("apply.namePreview", { name: preview })}</p> : null}
     <Field id={ids.motivation} label={t("apply.motivation")} hint={t("apply.motivationHint")} error={errors.motivation?.message}><TextArea id={ids.motivation} aria-invalid={errors.motivation ? true : undefined} aria-describedby={errors.motivation ? `${ids.motivation}-error` : `${ids.motivation}-hint`} {...form.register("motivation")} /></Field>
     <fieldset className="grid gap-2"><legend className="text-sm font-medium">{t("apply.files")}</legend><p className="text-sm text-muted-foreground">{t("apply.filesHint")}</p>
-      {files.map((file) => <label key={file.fileId} className="flex min-h-11 items-center gap-3 rounded-lg border border-border px-3"><input type="checkbox" value={file.fileId} disabled={!(chosen ?? []).includes(file.fileId) && (chosen ?? []).length >= COMMERCE_JOBS_LIMITS.attachmentsMax} {...form.register("fileIds")} /><span>{file.filename ?? t("files.unnamed")} · {t(`files.kind.${file.kind}`)}</span></label>)}
+      {files.map((file) => <label key={file.fileId} className="flex min-h-11 items-center gap-3 rounded-[var(--ui2-card-radius)] border border-border px-3"><input type="checkbox" value={file.fileId} disabled={!(chosen ?? []).includes(file.fileId) && (chosen ?? []).length >= COMMERCE_JOBS_LIMITS.attachmentsMax} {...form.register("fileIds")} /><span>{file.filename ?? t("files.unnamed")} · {t(`files.kind.${file.kind}`)}</span></label>)}
       {errors.fileIds?.message ? <p role="alert" className="text-sm text-destructive">{errors.fileIds.message}</p> : null}
     </fieldset>
   </form>
     {/* HORS du formulaire de candidature : le dépôt de pièce a son propre formulaire (A19). */}
     <JobFilesManager files={filesQuery.data ?? []} />
-    <section className="grid gap-2 rounded-lg border border-border p-4"><h3 className="text-base font-semibold">{t("apply.consentTitle")}</h3><p className="text-sm">{t("apply.consentText")}</p>
+    <section className="grid gap-2 rounded-[var(--ui2-card-radius)] border border-border p-[var(--esp-card-padding,16px)]"><h3 className="font-display text-base font-bold leading-snug">{t("apply.consentTitle")}</h3><p className="text-sm">{t("apply.consentText")}</p>
       <label htmlFor={ids.consent} className="flex min-h-11 items-center gap-3"><input id={ids.consent} form={ids.form} type="checkbox" aria-invalid={errors.consent ? true : undefined} {...form.register("consent")} /><span>{t("apply.consentLabel")}</span></label>
       {errors.consent?.message ? <p role="alert" className="text-sm text-destructive">{errors.consent.message}</p> : null}
     </section>
     {error ? <p role="alert" className="text-sm text-destructive">{error}</p> : null}
-    <Button type="submit" form={ids.form} variant="commerce" pending={form.formState.isSubmitting} className="justify-self-start"><Send aria-hidden="true" className="size-4" />{t("apply.submit")}</Button>
+    <Button type="submit" form={ids.form} variant="commerce" pending={form.formState.isSubmitting} className="w-full sm:w-auto sm:justify-self-start"><Send aria-hidden="true" className="size-4" />{t("apply.submit")}</Button>
   </section></Card>
 }

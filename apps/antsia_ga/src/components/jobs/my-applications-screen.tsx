@@ -32,11 +32,11 @@ function MyApplicationsWindow() {
   const [cursors, setCursors] = useState<(string | null)[]>([null])
   const cursor = cursors[cursors.length - 1] ?? null
   const query = useAuthenticatedConvexQuery(api.modules.shops.jobApplications.myApplications, { networkId, paginationOpts: { cursor, numItems: JOB_PAGE_SIZE } })
-  if (query.isError) return <Card><div role="alert" className="grid gap-3"><p>{t("applications.unavailable")}</p><Button variant="outline" className="justify-self-start" onClick={() => { void query.refetch() }}>{t("directory.retry")}</Button></div></Card>
+  if (query.isError) return <Card><div role="alert" className="grid gap-3"><p>{t("applications.unavailable")}</p><Button variant="outline" className="w-full sm:w-auto sm:justify-self-start" onClick={() => { void query.refetch() }}>{t("directory.retry")}</Button></div></Card>
   if (query.isPending || !query.data) return <CenteredStatus label={t("applications.loading")} />
   return <div className="grid gap-3" aria-busy={query.isFetching || undefined}>
     {query.data.page.length === 0 ? <Card><p>{t("applications.empty")}</p></Card> : <ul className="grid gap-3">{query.data.page.map((application) => <li key={application.applicationId}><ApplicationCard application={application} /></li>)}</ul>}
-    {!query.data.isDone ? <Button variant="outline" className="justify-self-start" onClick={() => setCursors((current) => [...current, query.data?.continueCursor ?? null])}>{t("applications.more")}</Button> : null}
+    {!query.data.isDone ? <Button variant="outline" className="w-full sm:w-auto sm:justify-self-start" onClick={() => setCursors((current) => [...current, query.data?.continueCursor ?? null])}>{t("applications.more")}</Button> : null}
   </div>
 }
 
@@ -51,7 +51,7 @@ function ApplicationCard({ application }: { application: MyApplication }) {
   const [details, setDetails] = useState(false)
   const status = application.state === "submitted" && application.candidateState ? t(`applications.candidateState.${application.candidateState}`) : t(`applications.state.${application.state}`)
   return <Card><article className="grid gap-3">
-    <header className="grid gap-1"><h2 className="text-lg font-semibold">{application.jobTitle}</h2>{application.shopName ? <p className="text-sm text-muted-foreground">{t("applications.employer", { name: application.shopName })}</p> : null}</header>
+    <header className="antsia-page-header"><h2 className="antsia-subtitle">{application.jobTitle}</h2>{application.shopName ? <p className="text-sm text-muted-foreground">{t("applications.employer", { name: application.shopName })}</p> : null}</header>
     <p className="font-medium">{status}</p>
     {application.rejection ? <p className="text-sm">{t(`applications.rejection.${application.rejection}`)}</p> : null}
     {application.remoteUnconfirmed ? <p className="text-sm text-muted-foreground">{t("applications.remoteUnconfirmed")}</p> : null}

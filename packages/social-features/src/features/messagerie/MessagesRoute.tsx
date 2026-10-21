@@ -26,8 +26,7 @@
  * remplir ce qu'on lui laisse.
  */
 
-import { useIsReseauMobile } from "@antsia/ui/overlay"
-import { useNetwork } from "@antsia/api/network"
+import { useNetwork, useNetworkNavigationLayout } from "@antsia/api/network"
 import { useTranslation } from "react-i18next"
 import { useEffect, type ReactNode } from "react"
 import { MessagerieComposePage } from "./MessagerieComposePage"
@@ -72,7 +71,7 @@ export interface MessagesRouteProps {
 
 export function MessagesRoute({ kind, id, compose, commercial, contextual }: MessagesRouteProps) {
 	const { t } = useTranslation("messagerie")
-	const isMobile = useIsReseauMobile()
+	const { mobile: isMobile } = useNetworkNavigationLayout()
 	const { navigation } = useNetwork()
 	const conversationKey =
 		kind === undefined || id === undefined

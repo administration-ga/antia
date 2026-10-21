@@ -28,7 +28,7 @@ function Decision({ label, submitLabel, pending, onConfirm, variant = "primary" 
   const form = useForm<DecisionValues>({ resolver: zodResolver(decisionSchema(t)), defaultValues: { consent: false } })
   const error = form.formState.errors.consent?.message
   return <form noValidate className="grid gap-3" onSubmit={form.handleSubmit(() => { form.reset({ consent: false }); onConfirm() })}>
-    <label className="flex items-start gap-3 text-sm"><input type="checkbox" className="mt-1 size-4" aria-invalid={error ? true : undefined} {...form.register("consent")} /><span>{label}</span></label>
+    <label className="flex min-h-11 items-start gap-3 text-sm"><input type="checkbox" className="mt-1 size-4" aria-invalid={error ? true : undefined} {...form.register("consent")} /><span>{label}</span></label>
     {error ? <p role="alert" className="text-sm text-destructive">{error}</p> : null}
     <Button type="submit" variant={variant} pending={pending}>{submitLabel}</Button>
   </form>
@@ -46,8 +46,8 @@ export function QuotePanel({ request }: { request: ServiceRequestDto }) {
   const [open, setOpen] = useState<string | null>(null)
   const accepted = request.acceptedQuote
   return <Card><section className="grid gap-4" aria-label={t("quotes.title")}>
-    <h2 className="text-lg font-semibold">{t("quotes.title")}</h2>
-    {accepted ? <div className="grid gap-1 rounded-lg border border-border p-3 text-sm" role="status">
+    <h2 className="antsia-subtitle">{t("quotes.title")}</h2>
+    {accepted ? <div className="grid gap-1 rounded-[var(--ui2-card-radius)] border border-border p-[var(--esp-card-padding,16px)] text-sm" role="status">
       <p className="font-medium">{t("quotes.acceptedProof", { version: accepted.quoteVersion, total: serviceAmount(accepted.acceptedTotal.amount, locale), date: serviceDateTime(accepted.acceptedAt, SERVICE_AGENDA_TIME_ZONE, locale) })}</p>
       <p>{accepted.orderRef ? t("quotes.orderOpened") : t("quotes.noOrderYet")}</p>
     </div> : null}
@@ -92,7 +92,7 @@ function QuoteDetail({ request, quoteRef, onClose }: { request: ServiceRequestDt
   const quote: ReadyQuote | null = detail?.outcome === "ready" ? detail.quote : null
   const expired = quote?.validUntil !== null && quote?.validUntil !== undefined && quote.validUntil <= Date.now()
   const load = () => { setMessage(null); void action.run(() => read({ networkId, requestRowId: request.requestRowId, quoteRef }), (result) => { setDetail(result); setClientRequestId(newClientRequestId()) }) }
-  return <div className="mt-3 grid gap-3 rounded-lg border border-border p-3">
+  return <div className="mt-3 grid gap-3 rounded-[var(--ui2-card-radius)] border border-border p-[var(--esp-card-padding,16px)]">
     {!detail ? <Button variant="outline" pending={action.pending} onClick={load}>{t("quotes.loadDetail")}</Button> : null}
     {detail && detail.outcome !== "ready" ? <p role="alert" className="text-sm">{t(detail.outcome === "refused" ? "quotes.refused" : "common.unavailable")}</p> : null}
     {quote ? <>
@@ -118,7 +118,7 @@ function QuoteDetail({ request, quoteRef, onClose }: { request: ServiceRequestDt
     </> : null}
     {message ? <p role="status" className="text-sm">{t(message)}</p> : null}
     {action.error ? <p role="alert" className="text-sm">{action.error}</p> : null}
-    <Button variant="ghost" onClick={onClose}>{t("common.close")}</Button>
+    <Button variant="outline" onClick={onClose}>{t("common.close")}</Button>
   </div>
 }
 
@@ -129,7 +129,7 @@ function OrderSnapshot({ request }: { request: ServiceRequestDto }) {
   const locale = i18n.resolvedLanguage ?? "fr"
   const order = request.order
   if (!order) return null
-  return <div className="grid gap-1 rounded-lg border border-border p-3 text-sm">
+  return <div className="grid gap-1 rounded-[var(--ui2-card-radius)] border border-border p-[var(--esp-card-padding,16px)] text-sm">
     <p className="font-medium">{t(`orderStates.${order.state}`)}</p>
     {order.total ? <p>{t("order.totalLabel", { amount: serviceAmount(order.total.amount, locale) })}</p> : null}
     <p className="text-xs text-muted-foreground">{t("common.observed", { date: serviceDateTime(order.observedAt, SERVICE_AGENDA_TIME_ZONE, locale) })}</p>
@@ -142,7 +142,7 @@ export function OrderPanel({ request }: { request: ServiceRequestDto }) {
   const last = request.lastCommand
   const reconfirm = last?.kind === "order" && last.state === "reconfirm" && last.currentUnitAmount && last.currentCatalogRevision !== null ? { amount: last.currentUnitAmount, revision: last.currentCatalogRevision } : null
   return <Card><section className="grid gap-3" aria-label={t("order.panel")}>
-    <h2 className="text-lg font-semibold">{t("order.panel")}</h2>
+    <h2 className="antsia-subtitle">{t("order.panel")}</h2>
     {request.order ? <OrderSnapshot request={request} /> : <p className="text-sm text-muted-foreground">{t("order.noOrder")}</p>}
     {reconfirm ? <div className="grid gap-3">
       <p role="status" className="text-sm">{t("order.priceChanged", { amount: serviceAmount(reconfirm.amount.amount, locale) })}</p>
@@ -159,7 +159,7 @@ function BookingCard({ booking, title }: { booking: ServiceBookingSnapshot; titl
   const locale = i18n.resolvedLanguage ?? "fr"
   const [zones] = useState(() => displayTimeZones(deviceTimeZone(), booking.startAt))
   const consequences = bookingConsequences(booking)
-  return <div className="grid gap-1 rounded-lg border border-border p-3 text-sm">
+  return <div className="grid gap-1 rounded-[var(--ui2-card-radius)] border border-border p-[var(--esp-card-padding,16px)] text-sm">
     <p className="font-medium">{title}</p>
     <p>{booking.serviceLabel}</p>
     {zones.map((zone) => <p key={zone}>{t("booking.when", { start: serviceDateTime(booking.startAt, zone, locale), end: serviceTime(booking.endAt, zone, locale), zone: serviceZoneName(booking.startAt, zone, locale) })}</p>)}
@@ -182,7 +182,7 @@ export function BookingPanel({ request }: { request: ServiceRequestDto }) {
   const [mode, setMode] = useState<"none" | "change" | "cancel">("none")
   const booking = request.booking
   return <Card><section className="grid gap-4" aria-label={t("booking.panel")}>
-    <h2 className="text-lg font-semibold">{t("booking.panel")}</h2>
+    <h2 className="antsia-subtitle">{t("booking.panel")}</h2>
     {booking ? <BookingCard booking={booking} title={t("booking.current")} /> : <p className="text-sm text-muted-foreground">{t("booking.none")}</p>}
     {request.pendingReplacement ? <><BookingCard booking={request.pendingReplacement} title={t("booking.replacement")} /><p className="text-sm">{t("booking.replacementHint")}</p></> : null}
     {booking ? <div className="flex flex-wrap gap-2">
@@ -203,7 +203,7 @@ function ReschedulePanel({ request, booking, onDone }: { request: ServiceRequest
   const [slot, setSlot] = useState<PickedSlot | null>(null)
   const [clientRequestId, setClientRequestId] = useState(newClientRequestId)
   const [message, setMessage] = useState<string | null>(null)
-  return <div className="grid gap-4 rounded-lg border border-border p-3">
+  return <div className="grid gap-4 rounded-[var(--ui2-card-radius)] border border-border p-[var(--esp-card-padding,16px)]">
     <ServiceSlotPicker handle={request.handle} offerRef={request.offerRef} serviceRef={booking.serviceRef} selected={slot} onPick={(next) => { setSlot(next); setClientRequestId(newClientRequestId()) }} />
     {slot && booking.revision !== null ? <div className="grid gap-3">
       <SlotSummary slot={slot} zone={SERVICE_AGENDA_TIME_ZONE} />
@@ -236,7 +236,7 @@ function CancelPanel({ request, booking, onDone }: { request: ServiceRequestDto;
   const [clientRequestId] = useState(newClientRequestId)
   const [message, setMessage] = useState<string | null>(null)
   const revision = booking.revision
-  return <div className="grid gap-3 rounded-lg border border-border p-3">
+  return <div className="grid gap-3 rounded-[var(--ui2-card-radius)] border border-border p-[var(--esp-card-padding,16px)]">
     <ul className="grid gap-1 text-sm">
       <li>{t("cancel.consequence", { start: serviceDateTime(booking.startAt, SERVICE_AGENDA_TIME_ZONE, locale) })}</li>
       {request.pendingReplacement ? <li>{t("cancel.replacementToo")}</li> : null}

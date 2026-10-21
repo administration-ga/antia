@@ -7,6 +7,7 @@
  * disponible reçoit ce geste ; le moteur relit les droits à la publication.
  * Les médias restent ceux de l'original, aucun téléversement n'est proposé.
  */
+import { themedActionStyle } from "../themed-action-style"
 import { api } from "@antsia/api/engine"
 import type { Id } from "@antsia/api/engine"
 import { useNetwork, useRoutes } from "@antsia/api/network"
@@ -149,7 +150,7 @@ export function SharePostDialog({ postId, authorName, excerpt, canQuote = true, 
                 </Select>
               </Field>
               <div className="flex flex-wrap justify-end gap-2">
-                <Button variant="ghost" onClick={onClose}>{t("sharePostDialog.cancel")}</Button>
+                <Button style={themedActionStyle("cancel", "ghost")} variant="outline" onClick={onClose}>{t("sharePostDialog.cancel")}</Button>
                 <Button icon="share" disabled={sending} onClick={() => void handleShare()}>
                   {sending ? t("sharePostDialog.sending") : t("sharePostDialog.share")}
                 </Button>

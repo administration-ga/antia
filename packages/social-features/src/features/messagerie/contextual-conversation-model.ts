@@ -23,6 +23,7 @@
  * (§2). Module PUR : aucun React, aucun appel au moteur — testé en environnement `node`.
  */
 import { engineErrorAppRule, engineErrorCode, type AppRuleParams } from "@antsia/social-contracts/errors"
+import type { MediaWithheld } from "@antsia/social-contracts/media"
 import type { ContextualKind, ContextualRefusal, ContextualSide, ContextualVoice } from "@antsia/social-domain/contextualMessaging"
 import type { TFunction } from "i18next"
 import type { ReactNode } from "react"
@@ -114,7 +115,7 @@ export interface ContextualMessageView {
     sizeBytes: number
     durationMs: number | null
     url: string | null
-    withheld: "fileScanPending" | "fileQuarantined" | null
+    withheld: MediaWithheld | null
   }[]
   createdAt: number
 }

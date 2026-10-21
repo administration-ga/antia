@@ -61,12 +61,12 @@ export function ReportDecision({ reportId }: { reportId: Id<"reports"> }) {
   })}>
     <ModerationPreview query={preview} allowDismiss />
     <fieldset disabled={operation.pending || !!preview.error || !preview.data} className="flex min-w-0 flex-col gap-3">
-      <Field id={`${id}-action`} label={t("moderation.action")}><select id={`${id}-action`} {...form.register("action")} className="min-h-11 w-full rounded-lg border border-input bg-background px-3 text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">{MODERATION_ACTIONS.map((value) => <option key={value} value={value} disabled={!preview.data?.available && value !== "dismissed"}>{t(`moderation.actions.${value}`)}</option>)}</select></Field>
+      <Field id={`${id}-action`} label={t("moderation.action")}><select id={`${id}-action`} {...form.register("action")} className="min-h-11 w-full rounded-[var(--esp-field-radius)] border border-input bg-muted px-3 text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">{MODERATION_ACTIONS.map((value) => <option key={value} value={value} disabled={!preview.data?.available && value !== "dismissed"}>{t(`moderation.actions.${value}`)}</option>)}</select></Field>
       {action === "suspension" ? <><p className="text-sm text-muted-foreground">{t("moderation.globalSuspension")}</p><Field id={`${id}-until`} label={t("moderation.until", { timeZone })} error={form.formState.errors.until?.message}><TextInput id={`${id}-until`} type="datetime-local" aria-invalid={!!form.formState.errors.until} aria-describedby={form.formState.errors.until ? `${id}-until-error` : undefined} {...form.register("until")} /></Field></> : null}
       <Field id={`${id}-reason`} label={t("moderation.reason")} error={form.formState.errors.reason?.message}><TextArea id={`${id}-reason`} maxLength={DECISION_REASON_MAX} aria-invalid={!!form.formState.errors.reason} aria-describedby={form.formState.errors.reason ? `${id}-reason-error` : undefined} {...form.register("reason")} /></Field>
-      <Button type="submit" pending={operation.pending} disabled={!preview.data?.available && action !== "dismissed"}>{t(`moderation.submit.${action}`)}</Button>
+      <Button type="submit" variant={action === "removal" || action === "suspension" ? "danger" : action === "dismissed" ? "success" : "primary"} pending={operation.pending} disabled={!preview.data?.available && action !== "dismissed"}>{t(`moderation.submit.${action}`)}</Button>
     </fieldset>
-    {operation.error ? <p ref={operation.errorRef} role="alert" tabIndex={-1} className="rounded-lg border border-destructive p-3 text-destructive focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">{operation.error}</p> : null}
+    {operation.error ? <p ref={operation.errorRef} role="alert" tabIndex={-1} className="rounded-[var(--ui2-card-radius)] border border-destructive p-[var(--esp-card-padding,16px)] text-destructive focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">{operation.error}</p> : null}
   </form>
 }
 
@@ -86,11 +86,11 @@ export function PendingDecision({ targetKind, targetId }: { targetKind: Moderati
   })}>
     <ModerationPreview query={preview} />
     <fieldset disabled={operation.pending || !!preview.error || !preview.data?.available} className="flex min-w-0 flex-col gap-3">
-      <Field id={`${id}-decision`} label={t("moderation.action")}><select id={`${id}-decision`} {...form.register("approve")} className="min-h-11 w-full rounded-lg border border-input bg-background px-3 text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"><option value="approve">{t("moderation.approve")}</option><option value="reject">{t("moderation.reject")}</option></select></Field>
+      <Field id={`${id}-decision`} label={t("moderation.action")}><select id={`${id}-decision`} {...form.register("approve")} className="min-h-11 w-full rounded-[var(--esp-field-radius)] border border-input bg-muted px-3 text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"><option value="approve">{t("moderation.approve")}</option><option value="reject">{t("moderation.reject")}</option></select></Field>
       <Field id={`${id}-reason`} label={t("moderation.reason")} error={form.formState.errors.reason?.message}><TextArea id={`${id}-reason`} maxLength={DECISION_REASON_MAX} aria-invalid={!!form.formState.errors.reason} aria-describedby={form.formState.errors.reason ? `${id}-reason-error` : undefined} {...form.register("reason")} /></Field>
-      <Button type="submit" pending={operation.pending}>{t(decision === "approve" ? "moderation.submit.approve" : "moderation.submit.reject")}</Button>
+      <Button type="submit" variant={decision === "approve" ? "success" : "danger"} pending={operation.pending}>{t(decision === "approve" ? "moderation.submit.approve" : "moderation.submit.reject")}</Button>
     </fieldset>
-    {operation.error ? <p ref={operation.errorRef} role="alert" tabIndex={-1} className="rounded-lg border border-destructive p-3 text-destructive focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">{operation.error}</p> : null}
+    {operation.error ? <p ref={operation.errorRef} role="alert" tabIndex={-1} className="rounded-[var(--ui2-card-radius)] border border-destructive p-[var(--esp-card-padding,16px)] text-destructive focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">{operation.error}</p> : null}
   </form>
 }
 
@@ -107,12 +107,12 @@ export function AppealDecision({ appealId, canDecide }: { appealId: Id<"appeals"
     if (!canDecide) return
     return operation.run(() => review({ networkId, appealId, overturn: value.decision === "overturn", reason: value.reason }), () => form.reset(), () => window.confirm(t(`moderation.confirm.${value.decision}`)))
   })}>
-    {!canDecide ? <p id={`${id}-independence`} role="status" className="rounded-lg border border-border bg-muted p-3 text-sm">{t("moderation.anotherDecider")}</p> : null}
+    {!canDecide ? <p id={`${id}-independence`} role="status" className="rounded-[var(--ui2-card-radius)] border border-transparent bg-muted p-[var(--esp-card-padding,16px)] text-sm">{t("moderation.anotherDecider")}</p> : null}
     <fieldset disabled={operation.pending || !canDecide} aria-describedby={!canDecide ? `${id}-independence` : undefined} className="flex min-w-0 flex-col gap-3">
-      <Field id={`${id}-decision`} label={t("moderation.action")}><select id={`${id}-decision`} {...form.register("decision")} className="min-h-11 w-full rounded-lg border border-input bg-background px-3 text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"><option value="uphold">{t("moderation.uphold")}</option><option value="overturn">{t("moderation.overturn")}</option></select></Field>
+      <Field id={`${id}-decision`} label={t("moderation.action")}><select id={`${id}-decision`} {...form.register("decision")} className="min-h-11 w-full rounded-[var(--esp-field-radius)] border border-input bg-muted px-3 text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"><option value="uphold">{t("moderation.uphold")}</option><option value="overturn">{t("moderation.overturn")}</option></select></Field>
       <Field id={`${id}-reason`} label={t("moderation.reason")} error={form.formState.errors.reason?.message}><TextArea id={`${id}-reason`} maxLength={DECISION_REASON_MAX} aria-invalid={!!form.formState.errors.reason} aria-describedby={form.formState.errors.reason ? `${id}-reason-error` : undefined} {...form.register("reason")} /></Field>
-      <Button type="submit" pending={operation.pending}>{t(`moderation.submit.${decision}`)}</Button>
+      <Button type="submit" variant={decision === "overturn" ? "outline" : "success"} pending={operation.pending}>{t(`moderation.submit.${decision}`)}</Button>
     </fieldset>
-    {operation.error ? <p ref={operation.errorRef} role="alert" tabIndex={-1} className="rounded-lg border border-destructive p-3 text-destructive focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">{operation.error}</p> : null}
+    {operation.error ? <p ref={operation.errorRef} role="alert" tabIndex={-1} className="rounded-[var(--ui2-card-radius)] border border-destructive p-[var(--esp-card-padding,16px)] text-destructive focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">{operation.error}</p> : null}
   </form>
 }

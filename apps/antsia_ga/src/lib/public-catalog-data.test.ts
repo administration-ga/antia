@@ -1,6 +1,6 @@
 import { getFunctionName } from "convex/server"
 import { beforeEach, describe, expect, it, vi } from "vitest"
-import { catalogOfferFixture, catalogPageFixture, OFFER_REF } from "@/components/shops/__tests__/catalog-fixtures"
+import { catalogOfferFixture, catalogPageFixture, COLLECTION_REF, OFFER_REF } from "@/components/shops/__tests__/catalog-fixtures"
 
 const mocks = vi.hoisted(() => ({ query: vi.fn(), viewer: vi.fn() }))
 vi.mock("convex/nextjs", () => ({ fetchQuery: mocks.query }))
@@ -33,11 +33,13 @@ describe("catalogue SSR — projection strictement allowlistée", () => {
     expect(await loadPublicCatalog("atelier", {}, null, true)).toEqual({ status: "handoff" })
     expect(mocks.viewer).not.toHaveBeenCalled()
     mocks.viewer.mockResolvedValue({ status: "refused" })
+    expect(await loadPublicCatalog("atelier", {}, null, false)).toEqual({ status: "refused" })
     expect(await loadPublicOffer("atelier", OFFER_REF)).toEqual({ status: "refused" })
     expect(mocks.query).not.toHaveBeenCalled()
   })
   it("une panne de session ne se transforme pas en lecture publique", async () => {
     mocks.viewer.mockResolvedValue({ status: "unavailable" })
+    expect(await loadPublicCatalog("atelier")).toEqual({ status: "unavailable" })
     expect(await loadPublicPostOffer("post-test")).toEqual({ status: "unavailable" })
     expect(mocks.query).not.toHaveBeenCalled()
   })
@@ -46,16 +48,21 @@ describe("catalogue SSR — projection strictement allowlistée", () => {
     mocks.query.mockImplementation(async (reference, args, options) => {
       if (getFunctionName(reference).endsWith(":getBySlug")) return { _id: "root-test" }
       expect(getFunctionName(reference)).toBe("modules/public/catalog:list")
-      expect(args).toEqual({ networkId: "root-test", handle: "atelier", kind: "service", query: "couture", paginationOpts: { cursor: "page-2", numItems: 12 } })
+      expect(args).toEqual({ networkId: "root-test", handle: "atelier", kind: "service", collectionRef: COLLECTION_REF, query: "couture", paginationOpts: { cursor: "page-2", numItems: 12 } })
       expect(options.token).toBe("TEST-JWT")
       return catalogPageFixture()
     })
-    expect(await loadPublicCatalog("atelier", { kind: "service", query: "couture" }, "page-2")).toEqual({ status: "ready", data: catalogPageFixture(), viewer: "authenticated" })
+    expect(await loadPublicCatalog("atelier", { kind: "service", collectionRef: COLLECTION_REF, query: "couture" }, "page-2")).toEqual({ status: "ready", data: catalogPageFixture(), viewer: "authenticated" })
   })
   it("conserve un retrait sous null et refuse un DTO élargi", async () => {
     mocks.query.mockImplementation(async (reference) => getFunctionName(reference).endsWith(":getBySlug") ? { _id: "root-test" } : null)
     expect(await loadPublicOffer("atelier", OFFER_REF)).toEqual({ status: "ready", data: null, viewer: "anonymous" })
     mocks.query.mockImplementation(async (reference) => getFunctionName(reference).endsWith(":getBySlug") ? { _id: "root-test" } : { ...catalogOfferFixture(), source: "private" })
     expect(await loadPublicOffer("atelier", OFFER_REF)).toEqual({ status: "unavailable" })
+  })
+  it("refuse un catalogue contenant un champ privé", async () => {
+    mocks.query.mockImplementation(async (reference) => getFunctionName(reference).endsWith(":getBySlug") ? { _id: "root-test" } : { ...catalogPageFixture(), privateCursorData: "forbidden" })
+    const filters = { kind: "service" as const, collectionRef: COLLECTION_REF, query: "couture" }
+    expect(await loadPublicCatalog("atelier", { ...filters }, "page-2")).toEqual({ status: "unavailable" })
   })
 })

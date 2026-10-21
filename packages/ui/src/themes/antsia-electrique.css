@@ -78,15 +78,19 @@
   --role-danger-fill: #dc2626;
   --role-danger-on: #ffffff;
   --role-danger-ink: #c81e1e;
-  --role-message-soft: #d9e0ff; /* fond tonal du bouton Écrire */
-  --role-react-soft: #fde4e8; /* fond de l'action réagie */
+  --role-message-soft: color-mix(in srgb, var(--role-message-fill) 15%, var(--card)); /* fond tonal du bouton Écrire */
+  --role-react-soft: color-mix(in srgb, var(--role-react-fill) 18%, var(--card)); /* fond de l'action réagie */
   --primary-fill: #0033ff; /* aplat d'identité : bouton Publier, Créer, interrupteur */
   --primary-fill-hover: #002ee6;
   --primary-fill-on: #ffffff; /* texte posé sur l'aplat d'identité */
-  --ui2-button-secondary-bg: #d9e0ff; /* bouton secondaire tonal, sans filet */
+  --ui2-button-secondary-bg: var(--role-message-soft); /* bouton secondaire tonal, sans filet */
   --ui2-button-secondary-fg: #0033ff;
-  --esp-mobilebar-bg: rgb(255 255 255 / 0.9); /* barre flottante, translucide au-dessus du fil */
-  --esp-fab-shadow: 0 10px 20px -8px rgb(0 51 255 / 0.55);
+  --esp-mobilebar-bg: rgb(255 255 255 / 0.88); /* barre flottante, translucide au-dessus du fil */
+  --esp-motif-reference-glow: rgb(0 0 0 / 0.07);
+  --esp-motif-grain-ink: rgb(0 0 0 / 0.07);
+  --esp-theme-card-shadow: none;
+  --esp-mobilebar-shadow: 0 14px 30px -12px rgb(0 0 0 / 0.25), 0 2px 6px rgb(0 0 0 / 0.06);
+  --esp-fab-shadow: 0 10px 20px -8px color-mix(in srgb, var(--primary-fill) 75%, transparent);
   --esp-tab-active-bg: #d6deff; /* onglet actif : pastille tonale */
   --esp-tab-active-fg: #0033ff;
 
@@ -95,7 +99,7 @@
   --rp-surface-radius: 24px; /* cartes du fil et surfaces de premier niveau */
   --esp-inline-link-decoration: underline;
   --esp-sticky-header-inset: 4rem; /* barre de membre collante (P18b, A13) */
-  --body-font-size: 16px;
+  --body-font-size: 15px;
   --font-sans: "Inter Variable", "Inter", system-ui, sans-serif; /* Inter embarquée (`styles.css`) */
   --font-display: var(--font-familjen-grotesk, "Familjen Grotesk Variable"), "Inter", system-ui, sans-serif;
 
@@ -160,15 +164,19 @@
   --role-danger-fill: #f87171;
   --role-danger-on: #2a0505;
   --role-danger-ink: #fc9595;
-  --role-message-soft: #111630; /* fond tonal du bouton Écrire */
-  --role-react-soft: #2b181c; /* fond de l'action réagie */
+  --role-message-soft: color-mix(in srgb, var(--role-message-fill) 15%, var(--card)); /* fond tonal du bouton Écrire */
+  --role-react-soft: color-mix(in srgb, var(--role-react-fill) 18%, var(--card)); /* fond de l'action réagie */
   --primary-fill: #4060ff; /* aplat d'identité : bouton Publier, Créer, interrupteur */
   --primary-fill-hover: #3a56e6;
   --primary-fill-on: #ffffff; /* texte posé sur l'aplat d'identité */
-  --ui2-button-secondary-bg: #111630; /* bouton secondaire tonal, sans filet */
+  --ui2-button-secondary-bg: var(--role-message-soft); /* bouton secondaire tonal, sans filet */
   --ui2-button-secondary-fg: #93a8ff;
-  --esp-mobilebar-bg: rgb(9 9 11 / 0.9); /* barre flottante, translucide au-dessus du fil */
-  --esp-fab-shadow: 0 10px 20px -8px rgb(64 96 255 / 0.45);
+  --esp-mobilebar-bg: rgb(9 9 11 / 0.88); /* barre flottante, translucide au-dessus du fil */
+  --esp-theme-card-shadow: none;
+  --esp-mobilebar-shadow: 0 14px 30px -10px rgb(0 0 0 / 0.8), 0 2px 6px rgb(0 0 0 / 0.45);
+  --esp-motif-reference-glow: rgb(255 255 255 / 0.12);
+  --esp-motif-grain-ink: rgb(255 255 255 / 0.05);
+  --esp-fab-shadow: 0 10px 20px -8px color-mix(in srgb, var(--primary-fill) 75%, transparent);
   --esp-tab-active-bg: #121732; /* onglet actif : pastille tonale */
   --esp-tab-active-fg: #93a8ff;
 }
@@ -185,7 +193,7 @@
   --esp-surface-card: var(--card);
   --esp-surface-raised: var(--popover);
   --esp-surface-border: var(--border); /* carte et fond de même couleur : un filet */
-  --esp-story-ring-fill: conic-gradient(from 210deg, var(--esp-theme-swatch-1), var(--esp-theme-swatch-2), var(--esp-theme-swatch-3), var(--esp-theme-swatch-1)); /* l'anneau « à voir » des actus : les trois couleurs du thème, celles du sélecteur */
+  --esp-story-ring-fill: conic-gradient(from 200deg, var(--esp-theme-swatch-1), var(--esp-theme-swatch-2), var(--esp-theme-swatch-3), var(--esp-theme-swatch-1)); /* l'anneau « à voir » des actus : les trois couleurs du thème, celles du sélecteur */
   --esp-neutral-chip: var(--muted);
   --esp-neutral-hover: var(--muted);
   --esp-mobilebar-border: var(--border);
@@ -259,13 +267,110 @@
   --ui2-button-radius: 999px; /* boutons d'action en pilule */
   --ui2-badge-radius: 6px;
   --ui2-card-radius: 24px; /* cartes d'ui-v2, comme les surfaces du réseau */
+  --esp-card-padding: 16px;
+  --esp-card-gap: 12px;
+  --esp-surface-shadow: var(--esp-theme-card-shadow);
+  --esp-raised-border: transparent;
+  --esp-alert-border: transparent;
+  --esp-alert-accent-width: 0px;
+  --esp-control-min-size: 44px;
+  --esp-heading-font-weight: 700;
+  --esp-page-title-tracking: -0.015em;
+  --esp-section-title-tracking: -0.01em;
+  --esp-floating-shadow: var(--esp-mobilebar-shadow);
+  --esp-post-shadow: inset 0 0 0 1px var(--esp-surface-border);
+  --esp-field-font-size: 16px;
+  --esp-field-line-height: 1.4;
+  --esp-textarea-min-height: 104px;
+  --esp-page-title-size: 26px;
+  --esp-page-title-leading: 1.1;
+  --esp-section-title-size: 20px;
+  --esp-section-title-leading: 1.2;
+  --esp-subsection-title-size: 16px;
+  --esp-subsection-title-leading: 1.3;
+  --esp-heading-font-family: var(--font-display);
+  --esp-content-font-size: 15px;
+  --esp-content-line-height: 1.5;
+  --esp-profile-avatar-page-radius: 24px;
+  --esp-profile-avatar-size: 104px;
+  --esp-avatar-1-bg: color-mix(in srgb, var(--role-social-fill) 15%, var(--card));
+  --esp-avatar-1-fg: var(--role-social-ink);
+  --esp-avatar-2-bg: var(--primary-fill);
+  --esp-avatar-2-fg: var(--primary-fill-on);
+  --esp-avatar-3-bg: var(--role-commerce-fill);
+  --esp-avatar-3-fg: var(--role-commerce-on);
+  --esp-avatar-4-bg: var(--role-message-soft);
+  --esp-avatar-4-fg: var(--role-message-ink);
+  --esp-avatar-5-bg: var(--role-social-fill);
+  --esp-avatar-5-fg: var(--role-social-on);
+  --esp-avatar-6-bg: var(--foreground);
+  --esp-avatar-6-fg: var(--background);
+  --esp-avatar-neutral-bg: var(--muted);
+  --esp-avatar-neutral-fg: var(--foreground);
+  --esp-avatar-font-24: 9.5px;
+  --esp-avatar-font-32: 11.5px;
+  --esp-avatar-font-40: 13px;
+  --esp-avatar-font-48: 15px;
+  --esp-avatar-font-64: 20px;
+  --esp-avatar-font-104: 32px;
+  --esp-story-ring-seen-fill: var(--border);
+  --esp-messages-heading-size: 22px;
+  --esp-fab-size: 52px;
+  --esp-layout-max-width: 1400px;
+  --esp-layout-gutter: 20px;
+  --esp-layout-gap: 24px;
+  --esp-desktop-main-max: none;
+  --esp-grid-compact-columns: 248px minmax(0, 1fr);
+  --esp-grid-wide-columns: 248px minmax(0, 1fr) 312px;
+  --esp-mobile-content-padding: 4px 12px 120px;
+  --esp-tablet-content-padding: 8px 24px 140px;
+  --esp-tablet-content-max: 728px;
+  --esp-mobile-dock-inset: 12px;
+  --esp-mobile-dock-bottom: 16px;
+  --esp-tablet-dock-bottom: 26px;
+  --esp-tablet-dock-width: 540px;
+  --esp-primitive-card-radius: var(--ui2-card-radius);
+  --esp-primitive-button-radius: var(--ui2-button-radius);
+  --esp-primitive-badge-radius: var(--ui2-badge-radius);
+  --esp-primitive-chip-radius: var(--esp-chip-radius);
+  --esp-primitive-chip-bg: var(--esp-chip-bg);
+  --esp-primitive-chip-border: var(--esp-chip-border);
+  --esp-input-radius: var(--esp-field-radius);
+  --esp-primitive-surface-border: var(--esp-surface-border);
+  --esp-primitive-neutral-bg: var(--ui2-button-outline-bg);
+  --esp-primitive-neutral-border: var(--ui2-button-outline-border);
+  --esp-primitive-secondary-bg: var(--ui2-button-secondary-bg);
+  --esp-primitive-secondary-fg: var(--ui2-button-secondary-fg);
+  --esp-primitive-secondary-border: var(--ui2-button-secondary-border);
+  --esp-primitive-tab-bg: var(--esp-tab-active-bg);
+  --esp-primitive-tab-fg: var(--esp-tab-active-fg);
+  --esp-primitive-tab-border: var(--esp-chip-border);
+  --esp-primitive-icon-bg: var(--esp-header-icon-bg);
+  --esp-primitive-identity-fill: var(--esp-identity-fill);
+  --esp-primitive-fill-on: var(--primary-fill-on);
+  --esp-action-success-fill: var(--role-success-fill);
+  --esp-action-success-on: var(--role-success-on);
+  --esp-action-danger-fill: var(--role-danger-fill);
+  --esp-action-danger-on: var(--role-danger-on);
+  --esp-action-cancel-bg: var(--ui2-button-outline-bg);
+  --esp-action-cancel-fg: var(--ui2-button-outline-fg);
+  --esp-action-cancel-border: var(--ui2-button-outline-border);
+  --esp-primitive-media-radius: var(--esp-media-radius);
+  --esp-primitive-avatar-page-radius: var(--esp-avatar-page-radius);
+  --ui2-button-min-h: 44px;
+  --ui2-button-sm-min-h: 44px;
+  --ui2-button-link-min-h: 44px;
+  --ui2-field-min-h: 44px;
+  --ui2-tab-min-h: 44px;
   --esp-chip-radius: 10px;
   --esp-avatar-page-radius: 12px; /* les pages en carré arrondi, les personnes en rond */
   --esp-field-radius: 14px;
+  --esp-field-border: var(--input);
   --esp-media-radius: 16px; /* un média dans une carte : plus petit que la carte */
   --esp-fab-radius: 18px;
   --esp-mobilebar-radius: 28px;
   --ui2-button-outline-bg: var(--muted); /* bouton neutre (Annuler) : gris, sans filet */
+  --ui2-button-outline-fg: var(--foreground);
   --ui2-button-outline-border: transparent;
   --ui2-button-secondary-border: transparent;
   --esp-chip-bg: var(--muted);

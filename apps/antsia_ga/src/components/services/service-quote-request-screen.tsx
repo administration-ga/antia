@@ -38,7 +38,7 @@ function QuoteContext({ handle, offerRef }: { handle: string; offerRef: string }
   const thread = context.data
   if (thread.threadState !== "accepted" || thread.threadId === null) {
     return <Card><div className="grid gap-3">
-      <h2 className="text-lg font-semibold">{offer.data.title}</h2>
+      <h2 className="antsia-subtitle">{offer.data.title}</h2>
       <p>{t(thread.threadState === null ? "quote.needConversation" : thread.threadState === "requested" ? "quote.conversationPending" : "quote.conversationClosed")}</p>
       {thread.threadState === null ? <ShopLink variant="message" href={routes.shopContact(handle, offerRef)}>{t("quote.askContact")}</ShopLink> : null}
       {thread.threadId !== null ? <ShopLink variant="message" href={routes.commercialConversation(thread.threadId)}>{t("quote.openConversation")}</ShopLink> : null}
@@ -75,8 +75,8 @@ function QuoteRequestForm({ handle, offerRef, offerTitle, threadId, attachments,
       else setFailure(result.outcome === "refused" ? "quote.refused" : "common.unavailable")
     })
   })
-  return <Card><form noValidate className="grid gap-4" onSubmit={onSubmit} aria-busy={action.pending || undefined}>
-    <h2 className="text-lg font-semibold">{offerTitle}</h2>
+  return <Card><form noValidate className="antsia-form-grid" onSubmit={onSubmit} aria-busy={action.pending || undefined}>
+    <h2 className="antsia-subtitle">{offerTitle}</h2>
     <p className="text-sm text-muted-foreground">{t("quote.formLead")}</p>
     <Field id={`${id}-need`} label={t("quote.need")} hint={t("quote.needHint", { max: COMMERCE_SERVICE_LIMITS.quoteNeedMax })} error={errors.need?.message}><TextArea id={`${id}-need`} aria-invalid={errors.need ? true : undefined} aria-describedby={`${id}-need-hint`} {...form.register("need")} /></Field>
     <Field id={`${id}-constraints`} label={t("quote.constraints")} hint={t("quote.constraintsHint")} error={errors.constraints?.message}><TextArea id={`${id}-constraints`} aria-invalid={errors.constraints ? true : undefined} {...form.register("constraints")} /></Field>
@@ -88,7 +88,7 @@ function QuoteRequestForm({ handle, offerRef, offerTitle, threadId, attachments,
       <legend className="text-sm font-medium">{t("quote.attachments")}</legend>
       <p className="text-xs text-muted-foreground">{t("quote.attachmentsHint", { max: COMMERCE_SERVICE_LIMITS.quoteAttachmentsMax })}</p>
       {attachments.length === 0 ? <p className="text-sm text-muted-foreground">{t("quote.noAttachments")}</p> : <ul className="grid gap-2">{attachments.map((item) => <li key={item.messageId}>
-        <label className="flex min-h-11 items-start gap-3 rounded-lg border border-border p-3">
+        <label className="flex min-h-11 items-start gap-3 rounded-[var(--ui2-card-radius)] border border-border p-[var(--esp-card-padding,16px)]">
           <input type="checkbox" value={item.messageId} className="mt-1 size-4" {...form.register("attachmentMessageIds")} />
           <span className="grid gap-1 text-sm"><span>{t("quote.attachmentSent", { date: new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeStyle: "short" }).format(item.createdAt) })}</span>{item.files.map((file) => <span key={`${item.messageId}:${file.filename}`} className="break-all text-muted-foreground">{file.filename}</span>)}</span>
         </label>
@@ -96,7 +96,7 @@ function QuoteRequestForm({ handle, offerRef, offerTitle, threadId, attachments,
       {attachmentsTruncated ? <p className="text-xs text-muted-foreground">{t("quote.attachmentsTruncated")}</p> : null}
       {errors.attachmentMessageIds?.message ? <p role="alert" className="text-sm text-destructive">{errors.attachmentMessageIds.message}</p> : null}
     </fieldset>
-    <label className="flex items-start gap-3 text-sm"><input type="checkbox" className="mt-1 size-4" aria-invalid={errors.consent ? true : undefined} {...form.register("consent")} /><span>{t("quote.consent")}</span></label>
+    <label className="flex min-h-11 items-start gap-3 text-sm"><input type="checkbox" className="mt-1 size-4" aria-invalid={errors.consent ? true : undefined} {...form.register("consent")} /><span>{t("quote.consent")}</span></label>
     {errors.consent?.message ? <p role="alert" className="text-sm text-destructive">{errors.consent.message}</p> : null}
     <p className="text-xs text-muted-foreground">{t("quote.privacy")}</p>
     {/* Demander un devis : couleur du commerce (ADR-0027). */}

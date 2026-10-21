@@ -40,10 +40,16 @@ export const catalogOfferSchema: z.ZodType<CatalogOffer> = z.object({
 }).strict()
 export const catalogPageSchema: z.ZodType<CatalogPage> = z.object({ page: z.array(catalogOfferSchema).max(CATALOG_PAGE_SIZE), continueCursor: z.string().max(8192), isDone: z.boolean(), collections: z.array(collection).max(L.shopCollectionsMax), filteredWindow: z.boolean() }).strict()
 
-/** Porte SSR commune : aucun repli anonyme d'une session refusée ou d'un OTT. */
-export const loadPublicCatalog = cache((handle: string, filters: CatalogFilters = {}, cursor: string | null = null, handoff = false) =>
-  projected(api.modules.public.catalog.list, { handle, ...filters, paginationOpts: { cursor, numItems: CATALOG_PAGE_SIZE } }, catalogPageSchema, handoff),
+/** Les métadonnées et le rendu partagent une lecture même si leurs objets de filtres diffèrent. */
+const loadRequestCatalog = cache((handle: string, kind: CatalogFilters["kind"], collectionRef: CatalogFilters["collectionRef"], query: CatalogFilters["query"], cursor: string | null, handoff: boolean) =>
+  projected(api.modules.public.catalog.list, { handle, ...(kind !== undefined ? { kind } : {}), ...(collectionRef !== undefined ? { collectionRef } : {}), ...(query !== undefined ? { query } : {}), paginationOpts: { cursor, numItems: CATALOG_PAGE_SIZE } }, catalogPageSchema, handoff),
 )
+
+/** Porte SSR commune : aucun repli anonyme d'une session refusée ou d'un OTT. */
+export function loadPublicCatalog(handle: string, filters: CatalogFilters = {}, cursor: string | null = null, handoff = false) {
+  return loadRequestCatalog(handle, filters.kind, filters.collectionRef, filters.query, cursor, handoff)
+}
+
 export const loadPublicOffer = cache((handle: string, offerRef: string, handoff = false) =>
   projected(api.modules.public.catalog.offer, { handle, offerRef }, catalogOfferSchema.nullable(), handoff),
 )

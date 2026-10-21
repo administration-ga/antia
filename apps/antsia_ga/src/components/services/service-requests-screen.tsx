@@ -48,8 +48,8 @@ function RequestCard({ request }: { request: ServiceRequestDto }) {
   const { t, i18n } = useTranslation("services")
   const locale = i18n.resolvedLanguage ?? "fr"
   const status = serviceRequestStatus(request)
-  return <article className="grid gap-2 rounded-xl border border-border bg-card p-4 text-card-foreground">
-    <div className="flex flex-wrap items-start justify-between gap-2"><h2 className="break-words font-semibold">{request.offerTitle}</h2><span className="rounded-full border border-border px-3 py-1 text-xs">{t(`status.${status}`)}</span></div>
+  return <article className="grid gap-2 rounded-[var(--ui2-card-radius)] border border-[color:var(--esp-surface-border)] bg-card p-[var(--esp-card-padding,16px)] text-card-foreground">
+    <div className="flex flex-wrap items-start justify-between gap-2"><h2 className="antsia-subtitle break-words">{request.offerTitle}</h2><span className="rounded-[var(--ui2-badge-radius)] border border-transparent bg-muted px-3 py-1 text-xs">{t(`status.${status}`)}</span></div>
     <p className="text-sm text-muted-foreground">{t(`modes.${request.mode}`)}</p>
     {request.booking ? <p className="text-sm">{t("requests.bookingAt", { start: serviceDateTime(request.booking.startAt, SERVICE_AGENDA_TIME_ZONE, locale), zone: SERVICE_AGENDA_TIME_ZONE })}</p> : null}
     {request.desiredDate ? <p className="text-sm">{t("requests.desiredDate", { date: request.desiredDate })}</p> : null}
@@ -78,9 +78,9 @@ function RequestDetail({ request }: { request: ServiceRequestDto }) {
   const { t, i18n } = useTranslation("services")
   const locale = i18n.resolvedLanguage ?? "fr"
   const status = serviceRequestStatus(request)
-  return <div className="grid gap-5">
+  return <div className="antsia-page">
     <Card><div className="grid gap-2">
-      <h2 className="break-words text-xl font-semibold">{request.offerTitle}</h2>
+      <h2 className="antsia-subtitle break-words">{request.offerTitle}</h2>
       <p className="text-sm text-muted-foreground">{t(`modes.${request.mode}`)}</p>
       <p role="status" className="font-medium">{t(`status.${status}`)}</p>
       <p className="text-sm">{t(`statusHint.${status}`)}</p>

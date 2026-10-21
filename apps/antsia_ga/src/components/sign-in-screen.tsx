@@ -9,7 +9,7 @@ import { useEffect } from "react"
 import { useTranslation } from "react-i18next"
 
 import { DemoAccountsPanel } from "@/components/demo-accounts-panel"
-import { CenteredStatus } from "@/components/shared/controls"
+import { buttonClassName, CenteredStatus } from "@/components/shared/controls"
 import { useSessionState } from "@/components/use-session-state"
 import { authClient } from "@/lib/auth-client"
 import { parsePublicPostContinuation } from "@/lib/public-post-continuation"
@@ -25,7 +25,7 @@ function DevCodeHint({ identifier }: { identifier: string }) {
   const { t } = useTranslation("identity")
   const latest = useQuery(api.modules.platform.devTools.latestOtp, { email: identifier })
   if (!latest) return null
-  return <div className="rounded-lg border border-dashed border-border bg-muted px-4 py-3 text-sm"><p className="font-mono text-base">{t("localCode", { code: latest.code })}</p><p className="text-xs text-muted-foreground">{t("localCodeHint")}</p></div>
+  return <div className="rounded-[var(--ui2-card-radius)] border border-dashed border-transparent bg-muted px-4 py-3 text-sm"><p className="font-mono text-base">{t("localCode", { code: latest.code })}</p><p className="text-xs text-muted-foreground">{t("localCodeHint")}</p></div>
 }
 
 /** Même porte sur l'accueil et /entrer ; le fournisseur garde toute l'autorité. */
@@ -58,8 +58,8 @@ export function SignInCard({ compact = false, intent = "sign-in", signOutIncompl
   if (session.status === "loading" || (!signOutIncomplete && (session.status === "restricted" || session.status === "member" || session.status === "welcome"))) return <CenteredStatus label={t("session.checking")} />
 
   return (
-    <div className={compact ? "rounded-xl border border-border bg-card p-5 text-card-foreground shadow-lg sm:p-6" : undefined}>
-      {signOutIncomplete ? <p role="alert" className="mb-6 rounded-lg border border-border bg-muted p-4 text-sm">{tIdentity("signOutIncomplete")}</p> : null}
+    <div className={compact ? "antsia-panel antsia-copy [&_h2]:font-display [&_h2]:text-xl [&_h2]:font-bold [&_h2]:leading-[1.2]" : "antsia-copy"}>
+      {signOutIncomplete ? <p role="alert" className="mb-6 rounded-[var(--ui2-card-radius)] border border-transparent bg-muted p-4 text-sm">{tIdentity("signOutIncomplete")}</p> : null}
       <IdentityEntry
         key={intent}
         authClient={entryClient}
@@ -72,9 +72,9 @@ export function SignInCard({ compact = false, intent = "sign-in", signOutIncompl
         title={signUp ? t("access.signUpTitle") : compact ? t("access.signInTitle") : undefined}
         lead={signUp ? t("access.signUpLead") : compact ? "" : undefined}
       />
-      <div className="mt-5 border-t border-border pt-5 text-center">
+      <div className="mt-4 border-t border-border pt-4 text-center">
         {!signUp ? <p className="mb-3 text-sm text-muted-foreground">{t("access.newHere")}</p> : null}
-        <Link href={routes.signIn(signUp ? undefined : "sign-up", continuationPostId, notification, contact)} prefetch={false} style={compact && !signUp ? { background: "var(--esp-green-strong)", color: "var(--on-fill)" } : undefined} className={compact ? `inline-flex min-h-12 w-full items-center justify-center rounded-lg px-5 py-3 text-base font-semibold transition-opacity hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring focus-visible:outline-offset-2 sm:w-auto ${signUp ? "border border-border text-primary" : ""}` : "inline-flex min-h-11 items-center justify-center rounded-lg px-4 font-medium text-primary underline underline-offset-4 focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring"}>
+        <Link href={routes.signIn(signUp ? undefined : "sign-up", continuationPostId, notification, contact)} prefetch={false} className={buttonClassName(signUp ? "outline" : "primary", compact ? "min-h-12 w-full px-5 py-3 text-base font-semibold sm:w-auto" : "px-4")}>
           {t(signUp ? "access.existingAccount" : "access.createAccount")}
         </Link>
         {!signUp ? <p className="mt-3 text-xs leading-relaxed text-muted-foreground">{t("access.accountPromise")}</p> : null}

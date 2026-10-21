@@ -55,12 +55,15 @@ export function anonymizeReferences(value: unknown, shape: ValidatorJSON, person
 }
 
 const PRIVATE_EXPORT_FIELDS = new Set(["authuserid", "userid", "endpoint", "token", "auth", "p256dh", "keys", "contacts", "identitysubjects", "secret", "privatekey", "keyenvname", "credential", "sessionid", "password", "clientsecret", "accesstoken", "refreshtoken", "idtoken", "authorization", "bearer", "backupcodes"])
+// P17c : corrélations d'appareil/session du contrôle d'appel. Elles ne sont pas
+// nécessaires à l'historique personnel et ne constituent jamais une preuve exportable.
+const NATIVE_CALL_PRIVATE_EXPORT_FIELDS = new Set(["ownersessionid", "ownerdeviceid", "ownerapplicationid", "ownerbindingid", "ownerkind", "nativebindingid", "sessiongeneration", "nativeexpiresat", "systemcalluuid"])
 
 /** Les secrets sont retirés à toute profondeur, y compris dans les objets imbriqués. */
 function redactExportValue(value: unknown): unknown {
   if (Array.isArray(value)) return value.map(redactExportValue)
   if (value && typeof value === "object") {
-    return Object.fromEntries(Object.entries(value).filter(([key]) => !PRIVATE_EXPORT_FIELDS.has(key.toLowerCase()) && !/(?:token|secret|password|credential|privatekey)$/i.test(key)).map(([key, item]) => [key, redactExportValue(item)]))
+    return Object.fromEntries(Object.entries(value).filter(([key]) => !PRIVATE_EXPORT_FIELDS.has(key.toLowerCase()) && !NATIVE_CALL_PRIVATE_EXPORT_FIELDS.has(key.toLowerCase()) && !/(?:token|secret|password|credential|privatekey)$/i.test(key)).map(([key, item]) => [key, redactExportValue(item)]))
   }
   return value
 }

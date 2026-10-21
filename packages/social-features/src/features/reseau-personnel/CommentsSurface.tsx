@@ -1,6 +1,7 @@
 // Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/CommentsSurface.tsx @ ad2e7fdc2 — adaptations : commentaires du moteur avec le réseau courant (`useNetwork().networkId`) — `engagement.engagement.paginateComments` (racines PAGINÉES, « Voir plus de commentaires », aperçu des réponses et leur nombre) au lieu de `listComments` (100 racines, 10 réponses, sans curseur), la suite des réponses par `paginateReplies`, `comment`, `removeComment`, et `editComment` (« Modifier » sur ses propres commentaires) ; une requête paginée LÈVE ses erreurs : l'état d'échec (« Réessayer ») est rendu par une frontière d'erreur dans le cadre du dialogue ; le nombre de conversations ne s'affiche qu'une fois la liste complète (jamais un plancher présenté comme un total) ; nom neutre traduit pour un profil non publié ; identifiants `Id<"posts">` et `Id<"postComments">` ; portail porté par la charte du réseau (`useNetwork().charte`) ; libellés et toasts par l'i18n (clés `reseau:commentsSurface.*`, accords au nombre) ; refus du moteur dit par son code (`postEngineErrorText`) ; voile et ombres par les jetons (`--ui2-scrim`, `--shadow-xl`) au lieu de couleurs littérales ; feuille de style sortie du JSX dans une constante de module (`COMMENTS_SURFACE_CSS`) — un littéral enfant de `<style>` passerait pour une chaîne d'interface — règles inchangées. ; PA6 : dates et jours civils dans le fuseau personnel du lecteur (repli appareil). ; P18b (A06, A07) : la liste n'est plus une région vivante ; seuls l'ajout (« Commentaire publié. ») et l'échec s'annoncent, par deux régions persistantes hors de la vue, l'échec étant redit hors du toast.
 "use client"
 
+import { themedActionStyle } from "../themed-action-style"
 import { useViewerTimeZone } from "@antsia/api/viewer-preferences"
 import { api } from "@antsia/api/engine"
 import type { Id } from "@antsia/api/engine"
@@ -87,9 +88,9 @@ const COMMENTS_SURFACE_CSS = `
           flex-direction: column;
           overflow: hidden;
           outline: none;
-          border-radius: 18px 18px 0 0;
+          border-radius: var(--esp-primitive-card-radius, 18px) var(--esp-primitive-card-radius, 18px) 0 0;
           background: var(--esp-surface-raised, var(--ink-0));
-          box-shadow: var(--shadow-xl);
+          box-shadow: var(--esp-surface-shadow, var(--shadow-xl));
           animation: rp-comments-sheet-in 180ms ease-out both;
         }
         .rp-comments-surface button:focus-visible,
@@ -115,8 +116,8 @@ const COMMENTS_SURFACE_CSS = `
             width: clamp(380px, 32vw, 420px);
             height: var(--vv-height, 100dvh);
             max-height: none;
-            border-radius: 16px 0 0 16px;
-            box-shadow: var(--shadow-xl);
+            border-radius: var(--esp-primitive-card-radius, 16px) 0 0 var(--esp-primitive-card-radius, 16px);
+            box-shadow: var(--esp-surface-shadow, var(--shadow-xl));
             animation-name: rp-comments-drawer-in;
           }
         }
@@ -277,8 +278,11 @@ function CommentsSurfaceContent({
               style={{
                 margin: 0,
                 color: "var(--ink-900)",
-                fontSize: 17,
-                lineHeight: 1.25,
+                fontFamily: "var(--esp-heading-font-family, inherit)",
+                fontSize: "var(--esp-section-title-size, 17px)",
+                fontWeight: "var(--esp-heading-font-weight, inherit)",
+                lineHeight: "var(--esp-section-title-leading, 1.25)",
+                letterSpacing: "var(--esp-section-title-tracking, normal)",
               }}
             >
               {t("commentsSurface.title")}
@@ -305,7 +309,7 @@ function CommentsSurfaceContent({
               display: "inline-grid",
               placeItems: "center",
               border: "none",
-              borderRadius: 10,
+              borderRadius: "var(--esp-primitive-button-radius, 10px)",
               background: "transparent",
               color: "var(--ink-700)",
               cursor: "pointer",
@@ -381,9 +385,9 @@ function CommentsSurfaceContent({
             >
               <span>{t("commentsSurface.replyingTo")}</span>
               <Button
-                variant="link"
+                variant="outline"
                 size="sm"
-                style={{ minHeight: 32 }}
+                style={themedActionStyle("cancel", "link", { minHeight: "var(--esp-control-min-size, 32px)" })}
                 onClick={() => setReplyTo(null)}
               >
                 {t("commentsSurface.cancel")}
@@ -755,8 +759,9 @@ function CommentLine({
             ) : null}
             <div style={{ display: "flex", gap: 8 }}>
               <Button
+                variant="success"
                 size="sm"
-                style={{ minHeight: 44 }}
+                style={themedActionStyle("success", "primary", { minHeight: 44 })}
                 disabled={saving || trimmedDraft.length === 0 || draftTooLong}
                 onClick={() => void save()}
               >
@@ -764,8 +769,8 @@ function CommentLine({
               </Button>
               <Button
                 size="sm"
-                variant="ghost"
-                style={{ minHeight: 44 }}
+                variant="outline"
+                style={themedActionStyle("cancel", "ghost", { minHeight: 44 })}
                 onClick={() => {
                   setDraft(row.body)
                   setEditing(false)
@@ -827,7 +832,7 @@ function CommentAction({
         minHeight: 44,
         padding: "8px 7px",
         border: "none",
-        borderRadius: 8,
+        borderRadius: "var(--esp-primitive-button-radius, 8px)",
         background: "transparent",
         color: "var(--primary-600)",
         fontFamily: "inherit",

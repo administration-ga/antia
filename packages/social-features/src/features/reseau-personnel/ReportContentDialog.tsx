@@ -1,6 +1,7 @@
 // Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/ReportContentDialog.tsx @ ad2e7fdc2 — adaptations : motifs et borne de la précision lus dans le domaine du moteur (`CONTENT_REPORT_REASONS`, `CONTENT_REPORT_NOTE_MAX` de `@antsia/social-domain/moderation`, type `ReportReason` = `ContentReportReason`) ; libellés par l'i18n (clés `reseau:reportContentDialog.*`, le motif par sa clé) ; voile et ombre par les jetons (`--ui2-scrim`, `--shadow-xl`) au lieu de couleurs littérales ; titre accordé (« Signaler cette publication » — le socle écrivait « ce publication ») ; un échec de transmission ne laisse plus de promesse rejetée sans lecteur (l’appelant le dit, la boîte reste ouverte) ; P18b (A03, A07, A30) : accessibilité modale par le hook partagé `useModalA11y` (focus initial sur le motif, piège de Tab, Échap qui ferme hors transmission, inertage du reste de la page, focus rendu au déclencheur), dialogue nommé et décrit par son titre et sa phrase (`aria-labelledby`, `aria-describedby`), échec doublé d'une alerte dans le dialogue (`role="alert"`, hors de la vue : le toast reste le retour visible), nom accessible de la précision = son libellé visible ; rendu inchangé.
 "use client"
 
+import { themedActionStyle } from "../themed-action-style"
 import { Button, TextArea, useModalA11y } from "@antsia/ui"
 import { CONTENT_REPORT_NOTE_MAX, CONTENT_REPORT_REASONS, type ContentReportReason } from "@antsia/social-domain/moderation"
 import { useEffect, useId, useRef, useState } from "react"
@@ -89,12 +90,12 @@ export function ReportContentDialog({ kind, onClose, onSubmit }: {
         }}
         style={{
           width: "min(520px, 100%)",
-          padding: 24,
-          border: "1px solid var(--border)",
-          borderRadius: 12,
+          padding: "var(--esp-card-padding, 24px)",
+          border: "1px solid var(--esp-raised-border, var(--border))",
+          borderRadius: "var(--esp-primitive-card-radius, 12px)",
           background: "var(--esp-surface-raised, var(--card))",
           color: "var(--foreground)",
-          boxShadow: "var(--shadow-xl)",
+          boxShadow: "var(--esp-surface-shadow, var(--shadow-xl))",
           display: "grid",
           gap: 14,
         }}
@@ -121,9 +122,9 @@ export function ReportContentDialog({ kind, onClose, onSubmit }: {
               setReason(event.target.value as ReportReason)
             }
             style={{
-              minHeight: 40,
+              minHeight: "var(--esp-control-min-size, 40px)",
               border: "1px solid var(--input)",
-              borderRadius: 8,
+              borderRadius: "var(--esp-input-radius, 8px)",
               background: "var(--card)",
               color: "var(--foreground)",
               padding: "0 10px",
@@ -151,9 +152,9 @@ export function ReportContentDialog({ kind, onClose, onSubmit }: {
           {failure ?? ""}
         </p>
         <div style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}>
-          <Button
+          <Button style={themedActionStyle("cancel", "ghost")}
             type="button"
-            variant="ghost"
+            variant="outline"
             disabled={pending}
             onClick={onClose}
           >

@@ -35,7 +35,7 @@ function ApplicationReader({ applicationId }: { applicationId: string }) {
   if (query.isError) {
     return <Card><div role="alert" className="grid gap-3">
       <p>{t("applications.detailUnavailable")}</p>
-      <Button variant="outline" className="justify-self-start" onClick={() => { void query.refetch() }}>{t("directory.retry")}</Button>
+      <Button variant="outline" className="w-full sm:w-auto sm:justify-self-start" onClick={() => { void query.refetch() }}>{t("directory.retry")}</Button>
     </div></Card>
   }
   if (query.isPending || query.data === undefined) return <CenteredStatus label={t("applications.loading")} />
@@ -45,8 +45,8 @@ function ApplicationReader({ applicationId }: { applicationId: string }) {
     ? t(`applications.candidateState.${application.candidateState}`)
     : t(`applications.state.${application.state}`)
   return <Card><article className="grid gap-3" aria-busy={query.isFetching || undefined}>
-    <header className="grid gap-1">
-      <h2 className="text-lg font-semibold">{application.jobTitle}</h2>
+    <header className="antsia-page-header">
+      <h2 className="antsia-subtitle">{application.jobTitle}</h2>
       {application.shopName ? <p className="text-sm text-muted-foreground">{t("applications.employer", { name: application.shopName })}</p> : null}
     </header>
     <p className="font-medium">{status}</p>

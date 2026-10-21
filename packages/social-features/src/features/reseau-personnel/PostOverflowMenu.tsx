@@ -393,10 +393,10 @@ export function PostOverflowMenu({
           width: ${MENU_WIDTH}px;
           max-width: calc(100vw - ${VIEWPORT_MARGIN * 2}px);
           padding: 6px;
-          border-radius: 14px;
-          border: 1px solid var(--ink-200);
+          border-radius: var(--esp-primitive-card-radius, 14px);
+          border: 1px solid var(--esp-raised-border, var(--ink-200));
           background: var(--esp-surface-raised, var(--ink-0));
-          box-shadow: var(--shadow-xl);
+          box-shadow: var(--esp-surface-shadow, var(--shadow-xl));
           display: flex;
           flex-direction: column;
           gap: 2px;
@@ -407,7 +407,7 @@ export function PostOverflowMenu({
           text-align: left;
           padding: 9px 11px;
           border: 0;
-          border-radius: 10px;
+          border-radius: var(--esp-primitive-button-radius, 10px);
           background: transparent;
           cursor: pointer;
           font: inherit;
@@ -425,13 +425,13 @@ export function PostOverflowMenu({
         }
         .rp-of-trigger {
           flex: none;
-          width: 34px;
-          height: 34px;
+          width: var(--esp-control-min-size, 34px);
+          height: var(--esp-control-min-size, 34px);
           display: inline-flex;
           align-items: center;
           justify-content: center;
           border: 0;
-          border-radius: 9px;
+          border-radius: var(--esp-primitive-button-radius, 9px);
           background: transparent;
           cursor: pointer;
           color: var(--ink-500);

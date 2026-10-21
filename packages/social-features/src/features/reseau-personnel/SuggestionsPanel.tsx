@@ -38,6 +38,7 @@ import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 
 import { RESEAU_PILL_ACTION_STYLE, RESEAU_SURFACE_STYLE } from "../../shell/design-styles"
+import { useConnectionRequest } from "./use-connection-request"
 import { Avatar } from "./Avatar"
 import { personHref } from "./author-link"
 import { DiscoveryEmptyCard } from "./DiscoveryEmptyCard"
@@ -102,7 +103,7 @@ export function SuggestionsPanel({ presentation = "rail" }: { presentation?: Dis
     networkId,
     paginationOpts: { numItems: RAIL_SUGGESTIONS_SCAN, cursor: null },
   })
-  const requestConnection = useMutation(api.modules.graph.connections.requestConnection)
+  const connectionRequest = useConnectionRequest()
   const dismissSuggestion = useMutation(api.modules.suggestions.suggestions.dismiss)
   const [busyHandle, setBusyHandle] = useState<string | null>(null)
   /* Retrait OPTIMISTE, le temps de l'aller-retour : la persistance, elle, est
@@ -134,7 +135,7 @@ export function SuggestionsPanel({ presentation = "rail" }: { presentation?: Dis
   const handleConnect = async (handle: string) => {
     setBusyHandle(handle)
     try {
-      await requestConnection({ networkId, handle })
+      if (!(await connectionRequest.send({ handle }))) return
       // Aucun état local d'aboutissement : la query se recalcule et rend
       // `relationState: "requested_by_me"` — c'est LUI qui dira « Demande
       // envoyée », y compris au prochain chargement.
@@ -225,9 +226,9 @@ export function SuggestionsPanel({ presentation = "rail" }: { presentation?: Dis
                 flexDirection: "column",
                 gap: 8,
                 minWidth: 0,
-                padding: presentation === "carousel" ? "10px" : "0 44px 0 0",
-                border: presentation === "carousel" ? "1px solid var(--ink-200)" : undefined,
-                borderRadius: presentation === "carousel" ? "var(--radius-md)" : undefined,
+                padding: presentation === "carousel" ? "var(--esp-card-padding, 10px)" : "0 44px 0 0",
+                border: presentation === "carousel" ? "1px solid var(--esp-primitive-surface-border, var(--ink-200))" : undefined,
+                borderRadius: presentation === "carousel" ? "var(--esp-primitive-card-radius, var(--radius-md))" : undefined,
                 scrollSnapAlign: presentation === "carousel" ? "start" : undefined,
                 background: presentation === "carousel" ? "var(--ink-0)" : undefined,
               }}
@@ -247,7 +248,7 @@ export function SuggestionsPanel({ presentation = "rail" }: { presentation?: Dis
                   alignItems: "center",
                   justifyContent: "center",
                   border: 0,
-                  borderRadius: "var(--radius-lg)",
+                  borderRadius: "var(--esp-primitive-button-radius, var(--radius-lg))",
                   background: "transparent",
                   color: "var(--ink-500)",
                   cursor: "pointer",
@@ -309,11 +310,11 @@ export function SuggestionsPanel({ presentation = "rail" }: { presentation?: Dis
                   icon="userPlus"
                   // Se connecter : couleur des relations tant que la demande est possible (ADR-0027).
                   variant={person.relationState === "none" ? "social" : "ghost"}
-                  disabled={relationActionDisabled(person.relationState, isBusy)}
+                  disabled={relationActionDisabled(person.relationState, isBusy) || connectionRequest.disabled}
                   onClick={() => void handleConnect(person.handle)}
                   style={person.relationState === "none" ? PILL_SHAPE_STYLE : PILL_SETTLED_STYLE}
                 >
-                  {relationActionLabel(person.relationState, isBusy, t)}
+                  {(person.relationState === "none" && connectionRequest.waitLabel) || relationActionLabel(person.relationState, isBusy, t)}
                 </Button>
               </div>
             </li>

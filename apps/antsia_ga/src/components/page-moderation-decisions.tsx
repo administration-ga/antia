@@ -43,7 +43,7 @@ function PageDecisionList({ networkId, pageId }: { networkId: Id<"networks">; pa
   const data = decisions.data
   return <div className="flex flex-col gap-3">
     {data.page.length === 0 ? <p className="text-sm text-muted-foreground">{t("personal.pageDecisionsEmpty")}</p> : null}
-    {data.page.map((decision) => <article key={decision.reportId} className="rounded-xl border border-border p-4">
+    {data.page.map((decision) => <article key={decision.reportId} className="rounded-[var(--ui2-card-radius)] border border-border p-[var(--esp-card-padding,16px)]">
       <p className="font-medium">{t(`personal.statuses.${decision.status}`)}</p>
       {decision.decisionReason ? <p className="my-3 break-words text-sm">{decision.decisionReason}</p> : null}
       {decision.status === "actioned" && decision.appeals.length < 2 ? <PageAppealForm reportId={decision.reportId} /> : null}

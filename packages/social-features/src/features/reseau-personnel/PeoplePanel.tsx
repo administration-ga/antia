@@ -11,6 +11,7 @@
  * d'une absence.
  */
 
+import { themedActionStyle } from "../themed-action-style"
 import { api, type Id } from "@antsia/api/engine"
 import { useAuthenticatedConvexQuery } from "@antsia/api/hooks"
 import { useNetwork, useRoutes } from "@antsia/api/network"
@@ -32,6 +33,7 @@ import { PresenceDot, useConnectionsPresence, type PresenceState } from "../iapp
 import { draftKey } from "../messagerie/messagerie-dock"
 import { conversationHref } from "../messagerie/messagerie-routes"
 import { personHref } from "./author-link"
+import { useConnectionRequest } from "./use-connection-request"
 import { Avatar } from "./Avatar"
 import {
   appendCursorPage,
@@ -262,9 +264,9 @@ const PEOPLE_PANEL_CSS = `
         min-width: 0;
         flex-direction: column;
         gap: 8px;
-        padding: 14px;
-        border: 1px solid var(--ink-200);
-        border-radius: 16px;
+        padding: var(--esp-card-padding, 14px);
+        border: 1px solid var(--esp-primitive-surface-border, var(--ink-200));
+        border-radius: var(--esp-primitive-card-radius, 16px);
         background: var(--ink-0);
       }
       /* DEUX lignes pour le nom : un patronyme composé ne tient pas sur une
@@ -458,14 +460,14 @@ function SearchCard({ compact = false }: { compact?: boolean }) {
   // Sans saisie la query est DÉSACTIVÉE : ni attente, ni vide, ni panne (IC-07).
   const resultsEtat = etatDeQuery(results, found.length, query.length > 0)
 
-  const requestConnection = useMutation(api.modules.graph.connections.requestConnection)
+  const connectionRequest = useConnectionRequest()
   const follow = useMutation(api.modules.graph.follows.follow)
 
   const run = async (handle: string, action: () => Promise<unknown>, doneKey: string) => {
     setBusyHandle(handle)
     try {
-      await action()
-      toast.success(t(doneKey))
+      const result = await action()
+      if (result !== false) toast.success(t(doneKey))
     } catch (error) {
       toast.error(relationErrorText(error, "reseau:peoplePanel.search.actionFailed", t))
     } finally {
@@ -497,7 +499,7 @@ function SearchCard({ compact = false }: { compact?: boolean }) {
                 style={
                   compact
                     ? {
-                        borderRadius: 11,
+                        borderRadius: "var(--esp-input-radius, 11px)",
                         border: "1px solid var(--ink-300)",
                         padding: "10px 12px",
                         fontSize: 13,
@@ -512,7 +514,7 @@ function SearchCard({ compact = false }: { compact?: boolean }) {
                 size="sm"
                 variant="ghost"
                 style={{
-                  borderRadius: 11,
+                  borderRadius: "var(--esp-primitive-button-radius, 11px)",
                   background: "var(--ink-150)",
                   color: "var(--ink-900)",
                   padding: "10px 13px",
@@ -583,14 +585,13 @@ function SearchCard({ compact = false }: { compact?: boolean }) {
                       icon="userPlus"
                       // Se connecter : couleur des relations (ADR-0027).
                       variant="social"
-                      disabled={busyHandle === person.handle}
+                      disabled={busyHandle === person.handle || connectionRequest.disabled}
                       style={RESEAU_PILL_ACTION_STYLE}
                       onClick={() =>
                         void run(
                           person.handle,
                           () =>
-                            requestConnection({
-                              networkId,
+                            connectionRequest.send({
                               handle: person.handle,
                               ...(message.trim().length > 0 ? { message: message.trim() } : {}),
                             }),
@@ -599,7 +600,7 @@ function SearchCard({ compact = false }: { compact?: boolean }) {
                       }
                     >
                       {/* Même libellé que les cartes de suggestion : une seule source. */}
-                      {t("suggestionsActions.connect")}
+                      {connectionRequest.waitLabel ?? t("suggestionsActions.connect")}
                     </Button>
                     <Button
                       size="sm"
@@ -694,18 +695,18 @@ function PendingRequestsCard({ pending }: { pending: ReturnType<typeof usePerson
                     size="sm"
                     icon="check"
                     // Accepter : couleur des relations (ADR-0027).
-                    variant="social"
+                    variant="success"
                     disabled={busy === request.connectionId}
-                    style={RESEAU_PILL_ACTION_STYLE}
+                    style={themedActionStyle("success", "social", RESEAU_PILL_ACTION_STYLE)}
                     onClick={() => void decide(request.connectionId, true)}
                   >
                     {t("peoplePanel.pending.accept")}
                   </Button>
                   <Button
                     size="sm"
-                    variant="ghost"
+                    variant="danger"
                     disabled={busy === request.connectionId}
-                    style={RESEAU_PILL_ACTION_STYLE}
+                    style={themedActionStyle("danger", "ghost", RESEAU_PILL_ACTION_STYLE)}
                     onClick={() => void decide(request.connectionId, false)}
                   >
                     {t("peoplePanel.pending.decline")}
@@ -911,7 +912,7 @@ function SuggestionsCatalogCard() {
     networkId,
     paginationOpts: { numItems: DISMISSED_COUNT_WINDOW, cursor: null },
   })
-  const requestConnection = useMutation(api.modules.graph.connections.requestConnection)
+  const connectionRequest = useConnectionRequest()
   const dismiss = useMutation(api.modules.suggestions.suggestions.dismiss)
   const restore = useMutation(api.modules.suggestions.suggestions.restore)
 
@@ -932,8 +933,7 @@ function SuggestionsCatalogCard() {
   const connect = async (handle: string) => {
     setBusyHandle(handle)
     try {
-      await requestConnection({ networkId, handle })
-      toast.success(t("peoplePanel.search.connectionSent"))
+      if (await connectionRequest.send({ handle })) toast.success(t("peoplePanel.search.connectionSent"))
     } catch (error) {
       toast.error(relationErrorText(error, "reseau:peoplePanel.search.actionFailed", t))
     } finally {
@@ -1010,11 +1010,11 @@ function SuggestionsCatalogCard() {
                         icon="userPlus"
                         // Se connecter : couleur des relations tant que la demande est possible (ADR-0027).
                         variant={person.relationState === "none" ? "social" : "secondary"}
-                        disabled={relationActionDisabled(person.relationState, busy)}
+                        disabled={relationActionDisabled(person.relationState, busy) || connectionRequest.disabled}
                         style={{ ...RESEAU_PILL_ACTION_STYLE, minHeight: 44 }}
                         onClick={() => void connect(person.handle)}
                       >
-                        {relationActionLabel(person.relationState, busy, t)}
+                        {(person.relationState === "none" && connectionRequest.waitLabel) || relationActionLabel(person.relationState, busy, t)}
                       </Button>
                       {offersInvitationAnswer(person.relationState) ? (
                         <Link href={peopleViewHref("invitations", routes.home())} className="rp-person-action">

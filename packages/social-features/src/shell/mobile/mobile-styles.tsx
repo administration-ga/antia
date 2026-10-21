@@ -70,7 +70,7 @@ export const RESEAU_MOBILE_CSS = `
         position: relative;
         flex: 1 1 auto;
         min-height: 0;
-        padding: 10px 12px 12px;
+        padding: var(--esp-mobile-content-padding, 10px 12px 12px);
       }
       /* L'en-tête collant : identité, recherche, retour. Il reste au-dessus du
          contenu sans jamais le recouvrir — d'où le fond opaque. */
@@ -250,7 +250,7 @@ export const RESEAU_MOBILE_CSS = `
          @container ; reseau-layout.test.ts confronte les deux. */
       @container rm-scroll (min-width: 600px) {
         .rm-column {
-          max-width: 640px;
+          max-width: var(--esp-tablet-content-max, 640px);
           margin-inline: auto;
         }
         /* Une COLLECTION n'est pas un article : relations, pages et groupes
@@ -264,8 +264,11 @@ export const RESEAU_MOBILE_CSS = `
         /* 680 px = le PLANCHER de lecture du bureau (FEED_COLUMN_MIN) : c'est
            ce qui rend 959 → 960 continu (680 → 646) au lieu de 935 → 646. */
         .rm-column {
-          max-width: 680px;
+          max-width: var(--esp-tablet-content-max, 680px);
         }
+      }
+      @media (min-width: 600px) and (max-width: 959px) {
+        .rm-scroll { padding: var(--esp-tablet-content-padding, 10px 12px 12px); }
       }
       /* La carte de découverte intercalée dans le fil : au téléphone elle
          n'est plus masquée par le rail droit, qui n'existe pas. */
@@ -335,7 +338,7 @@ export const RESEAU_MOBILE_CSS = `
         gap: 2px;
         padding: 6px 2px;
         border: none;
-        border-radius: 12px;
+        border-radius: var(--esp-primitive-chip-radius, 12px);
         background: transparent;
         color: var(--muted-foreground);
         font: inherit;

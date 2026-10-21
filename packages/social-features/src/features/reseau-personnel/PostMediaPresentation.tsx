@@ -60,7 +60,7 @@ export interface MediaBleed {
   marginInline: number
   width: string
   maxWidth: string
-  borderRadius: number
+  borderRadius: number | string
 }
 
 /** Un média servable : une URL de la garde, aucune retenue. */
@@ -92,7 +92,7 @@ const PRESENTATION_CSS = `
         max-height: 75vh;
         max-height: 75svh;
         overflow: hidden;
-        border-radius: var(--radius-lg);
+        border-radius: var(--esp-primitive-media-radius, var(--radius-lg));
         background: var(--ink-150);
         color: var(--ink-600);
       }
@@ -164,7 +164,7 @@ const PRESENTATION_CSS = `
         border-radius: 999px;
         background: var(--popover);
         color: var(--popover-foreground);
-        box-shadow: var(--shadow-sm);
+        box-shadow: var(--esp-surface-shadow, var(--shadow-sm));
         font-size: 13px;
         font-weight: 700;
         font-variant-numeric: tabular-nums;
@@ -183,7 +183,7 @@ const PRESENTATION_CSS = `
         border-radius: 999px;
         background: var(--popover);
         color: var(--popover-foreground);
-        box-shadow: var(--shadow-md);
+        box-shadow: var(--esp-surface-shadow, var(--shadow-md));
         cursor: pointer;
       }
       .rpm-m-arrow-previous { left: var(--sp-2); }
@@ -310,7 +310,7 @@ function PresentationStyles() {
 /** Le cadre d'un média : son ratio (borné), ses bandes, aucun recadrage. */
 function MediaFrame({ kind, ratio, square, children }: { kind: PostMediaDto["kind"]; ratio: number; square: boolean; children: ReactNode }) {
   return (
-    <div className="rpm-m-frame" data-kind={kind} style={{ aspectRatio: aspectRatioValue(ratio), borderRadius: square ? 0 : undefined }}>
+    <div className="rpm-m-frame" data-kind={kind} style={{ aspectRatio: aspectRatioValue(ratio), borderRadius: square ? "var(--esp-primitive-media-radius, 0px)" : undefined }}>
       {children}
     </div>
   )

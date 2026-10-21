@@ -103,7 +103,7 @@ function PaymentRefundForm({ pending, submit }: { pending: boolean; submit: (rea
   const form = useForm<PaymentRefundValues>({ resolver: zodResolver(paymentRefundSchema(t)), defaultValues: { accepted: false } })
   const accepted = form.watch("accepted")
   return <form className="grid gap-4 border-t border-border pt-4" onSubmit={form.handleSubmit((values) => { if (!pending && values.accepted) submit(values.reason) })}>
-    <h3 className="text-lg font-semibold">{t("refundTitle")}</h3><p>{t("refundLead")}</p>
+    <h3 className="font-display text-base font-bold leading-snug">{t("refundTitle")}</h3><p>{t("refundLead")}</p>
     <Field id="payment-refund-reason" label={t("refundReason")} error={form.formState.errors.reason?.message}><select id="payment-refund-reason" className={SHOP_SELECT_CLASS} disabled={pending} {...form.register("reason")}><option value="">{t("validationRefundReason")}</option>{PAYMENT_REFUND_REASONS.map((reason) => <option key={reason} value={reason}>{t(`refundReasons.${reason}`)}</option>)}</select></Field>
     <label className="flex min-h-11 items-start gap-3 text-sm"><input type="checkbox" className="mt-1 size-5 shrink-0 accent-primary" disabled={pending} {...form.register("accepted")} />{t("refundConsent")}</label>{form.formState.errors.accepted ? <p role="alert" className="text-sm text-destructive">{form.formState.errors.accepted.message}</p> : null}
     <Button type="submit" pending={pending} disabled={!accepted}>{t("requestRefund")}</Button><p className="text-sm text-muted-foreground">{t("refundNoGuarantee")}</p>

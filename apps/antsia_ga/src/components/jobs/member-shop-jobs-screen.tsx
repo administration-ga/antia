@@ -33,7 +33,7 @@ function ShopJobsWindow({ handle, preview = false }: { handle: string; preview?:
   return <div className="grid gap-3" aria-busy={query.isFetching || undefined}>
     {query.data.page.length > 0 ? <JobCards jobs={query.data.page} audience="member" locale={i18n.resolvedLanguage ?? "fr"} t={translate} /> : <p className="text-sm text-muted-foreground">{t("shop.empty")}</p>}
     {preview ? <ShopLink href={routes.shopJobs(handle)}>{t("shop.openAll")}</ShopLink>
-      : !query.data.isDone ? <Button variant="outline" className="justify-self-start" onClick={() => setCursors((current) => [...current, query.data?.continueCursor ?? null])}>{t("directory.more")}</Button> : null}
+      : !query.data.isDone ? <Button variant="outline" className="w-full sm:w-auto sm:justify-self-start" onClick={() => setCursors((current) => [...current, query.data?.continueCursor ?? null])}>{t("directory.more")}</Button> : null}
   </div>
 }
 
@@ -47,7 +47,7 @@ export function MemberShopJobsPreview({ handle }: { handle: string }) {
 function ShopJobsHeading({ id, label, handle }: { id: string; label: string; handle: string }) {
   const { networkId } = useNetwork()
   const query = useAuthenticatedConvexQuery(api.modules.shops.jobs.listForShop, { networkId, handle, paginationOpts: { cursor: null, numItems: 3 } })
-  return query.data && query.data.page.length > 0 ? <h2 id={id} className="text-xl font-semibold">{label}</h2> : null
+  return query.data && query.data.page.length > 0 ? <h2 id={id} className="antsia-subtitle">{label}</h2> : null
 }
 
 /** La fiche membre : contenu public allowlisté, état de MA candidature, formulaire si l'offre reçoit des candidatures. */
@@ -63,7 +63,7 @@ function MemberJobQuery({ handle, jobRef }: { handle: string; jobRef: string }) 
   return <ShopFrame title={t("details.title")}><ShopLink href={routes.shopJobs(handle)}>{t("details.backToJobs")}</ShopLink>
     {query.isError ? <ShopQueryFailure href={routes.storefront(handle)} retry={() => { void query.refetch() }} />
       : query.data === undefined ? <CenteredStatus label={t("details.loading")} />
-        : query.data === null ? <Card><div className="grid gap-2"><h2 className="text-lg font-semibold">{t("details.unavailableTitle")}</h2><p>{t("details.unavailableBody")}</p><ShopLink href={routes.storefront(handle)}>{t("shop.backToShop")}</ShopLink></div></Card>
+        : query.data === null ? <Card><div className="grid gap-2"><h2 className="antsia-subtitle">{t("details.unavailableTitle")}</h2><p>{t("details.unavailableBody")}</p><ShopLink href={routes.storefront(handle)}>{t("shop.backToShop")}</ShopLink></div></Card>
           : <JobDetails key={`${query.data.jobRef}:${query.data.revision}`} job={query.data} locale={i18n.resolvedLanguage ?? "fr"} t={(key, options) => t(key, options)} employerHref={routes.storefront(query.data.shopHandle)} heading="h2" actionSlot={<JobApplicationSlot job={query.data} />} />}
   </ShopFrame>
 }
@@ -77,5 +77,5 @@ function JobApplicationSlot({ job }: { job: JobDto }) {
     return <div className="grid gap-2 border-t border-border pt-4"><p>{t("details.alreadyApplied")}</p><ShopLink href={routes.myApplications()}>{t("details.seeApplication")}</ShopLink></div>
   }
   if (!job.actions.apply) return job.status === "open" ? <p className="border-t border-border pt-4 text-sm text-muted-foreground">{t("details.applicationsClosed")}</p> : null
-  return <div className="grid gap-4 border-t border-border pt-4">{open ? <JobApplicationForm job={job} /> : <Button type="button" variant="commerce" className="justify-self-start" onClick={() => setOpen(true)}>{t("details.apply")}</Button>}</div>
+  return <div className="grid gap-4 border-t border-border pt-4">{open ? <JobApplicationForm job={job} /> : <Button type="button" variant="commerce" className="w-full sm:w-auto sm:justify-self-start" onClick={() => setOpen(true)}>{t("details.apply")}</Button>}</div>
 }

@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { ArrowRight, Hash } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { useId } from "react"
+import { Suspense, useId } from "react"
 import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 
@@ -14,6 +14,7 @@ import { MemberServiceDirectory, useServicesDiscoverable } from "@/components/se
 import { MemberShopDirectory } from "@/components/shops/member-shop-directory"
 import { Button, Field, TextInput } from "@/components/shared/controls"
 import { routes } from "@/lib/routes"
+import { MediaDiscoveryScreen } from "./media-discovery-screen"
 import {
   discoverContentEntries,
   discoverJobEntry,
@@ -30,10 +31,10 @@ import {
 } from "./discover-model"
 
 const ENTRY_LINK =
-  "flex min-h-11 items-start justify-between gap-3 rounded-xl border border-border bg-card p-4 text-card-foreground hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+  "flex min-h-11 items-start justify-between gap-3 rounded-[var(--ui2-card-radius)] border border-[color:var(--esp-surface-border)] bg-card p-[var(--esp-card-padding,16px)] text-card-foreground shadow-[var(--esp-surface-shadow)] hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
 
 const CHIP_LINK =
-  "inline-flex min-h-11 items-center rounded-full border border-border bg-card px-4 text-sm font-medium text-card-foreground hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+  "inline-flex min-h-11 items-center rounded-[var(--esp-chip-radius)] border border-transparent bg-card px-4 text-sm font-medium text-card-foreground hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
 
 /** Une entrée de Découvrir : un lien d'une seule pièce, libellé puis phrase. */
 function EntryLink({ entry }: { entry: DiscoverEntry }) {
@@ -109,12 +110,14 @@ export function MemberDiscoverScreen() {
 
   return (
     <MemberPage>
-      <div className="mx-auto flex w-full max-w-3xl min-w-0 flex-col gap-8">
+      <div className="antsia-page mx-auto w-full max-w-6xl">
         <header className="flex flex-col gap-2">
-          <h1 className="text-2xl font-semibold tracking-tight">{t("nav.discover")}</h1>
-          <p className="text-base text-muted-foreground">{t("discoverHub.lead")}</p>
+          <h1 className="antsia-title ">{t("nav.discover")}</h1>
+          <p className="antsia-copy text-muted-foreground">{t("discoverHub.lead")}</p>
           <p className="text-sm text-muted-foreground">{t("discovery.memberScope")}</p>
         </header>
+
+        <Suspense fallback={<p role="status">{t("socialExperience:loading")}</p>}><MediaDiscoveryScreen mode="explore" /></Suspense>
 
         {showsDiscoverTabs(discoverData) ? <nav aria-label={t("commerce.sections")} className="flex flex-wrap gap-2">
           {servedDiscoverTabs(discoverData).map((tab) => {
@@ -124,7 +127,7 @@ export function MemberDiscoverScreen() {
         </nav> : null}
 
         <section aria-labelledby={contentTitle} className="flex flex-col gap-4">
-          <h2 id={contentTitle} className="text-lg font-semibold">{t("discoverHub.contentTitle")}</h2>
+          <h2 id={contentTitle} className="antsia-subtitle ">{t("discoverHub.contentTitle")}</h2>
           <ul className="grid gap-3">
             {discoverContentEntries().map((entry) => (
               <li key={entry.id}>
@@ -148,7 +151,7 @@ export function MemberDiscoverScreen() {
         </section>
 
         <section aria-labelledby={networkTitle} className="flex flex-col gap-4">
-          <h2 id={networkTitle} className="text-lg font-semibold">{t("discoverHub.networkTitle")}</h2>
+          <h2 id={networkTitle} className="antsia-subtitle ">{t("discoverHub.networkTitle")}</h2>
           <ul className="grid gap-3 sm:grid-cols-2">
             {discoverNetworkEntries().map((entry) => (
               <li key={entry.id} className="flex">
@@ -165,7 +168,7 @@ export function MemberDiscoverScreen() {
         <MemberJobDirectory />
 
         <section aria-labelledby={publicTitle} className="flex flex-col gap-4">
-          <h2 id={publicTitle} className="text-lg font-semibold">{t("discoverHub.publicTitle")}</h2>
+          <h2 id={publicTitle} className="antsia-subtitle ">{t("discoverHub.publicTitle")}</h2>
           <EntryLink entry={publicEntry} />
         </section>
       </div>
