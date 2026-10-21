@@ -10,6 +10,7 @@
 
 import type * as betterAuth_auth from "../betterAuth/auth.js";
 import type * as betterAuth_delivery from "../betterAuth/delivery.js";
+import type * as betterAuth_nativeIdn from "../betterAuth/nativeIdn.js";
 import type * as betterAuth_settings from "../betterAuth/settings.js";
 import type * as crons from "../crons.js";
 import type * as health from "../health.js";
@@ -423,6 +424,7 @@ import type {
 declare const fullApi: ApiFromModules<{
   "betterAuth/auth": typeof betterAuth_auth;
   "betterAuth/delivery": typeof betterAuth_delivery;
+  "betterAuth/nativeIdn": typeof betterAuth_nativeIdn;
   "betterAuth/settings": typeof betterAuth_settings;
   crons: typeof crons;
   health: typeof health;

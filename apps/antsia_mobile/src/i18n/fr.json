@@ -2,9 +2,9 @@
   "mobile.locale": "fr",
   "mobile.configuration.missing": "ANTSIA sur téléphone attend sa configuration de connexion. Les adresses de ce client doivent être renseignées avant son utilisation.",
   "mobile.entry.welcome": "Retrouvez votre réseau, vos publications et vos conversations.",
-  "mobile.entry.idnPending": "Le retour Identité.ga dans cette application reste à raccorder.",
-  "mobile.entry.webIdn": "S’inscrire ou se connecter sur le site",
-  "mobile.entry.webSeparate": "La connexion sur le site reste dans votre navigateur. Pour cette application, utilisez un code e-mail ou SMS.",
+  "mobile.entry.idnPending": "Identifiez-vous avec Identité.ga pour revenir dans ANTSIA sur ce téléphone.",
+  "mobile.entry.webIdn": "Se connecter avec Identité.ga",
+  "mobile.entry.webSeparate": "La connexion revient dans cette application. Vous gardez le contrôle de votre inscription et de votre adhésion.",
   "mobile.entry.email": "E-mail",
   "mobile.entry.phone": "Téléphone au format international",
   "mobile.entry.invalidContact": "Vérifiez l’adresse e-mail ou le numéro au format international.",
@@ -147,5 +147,6 @@
   "mobile.messages.invalidText": "Écrivez un message de 1 à 4 000 caractères.",
   "mobile.messages.retryExact": "Reprendre cet envoi",
   "mobile.messages.send": "Envoyer",
-  "mobile.messages.conversationTitle": "Conversation"
+  "mobile.messages.conversationTitle": "Conversation",
+  "mobile.entry.webRegistration": "Terminer mon inscription sur le site"
 }

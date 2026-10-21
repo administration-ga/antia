@@ -1,11 +1,11 @@
 /** P17b : bearer Better Auth déjà émis par le moteur ; aucune adoption de cookie Web. */
 import { convexClient } from "@convex-dev/better-auth/client/plugins"
-import { emailOTPClient, phoneNumberClient } from "better-auth/client/plugins"
+import { emailOTPClient, genericOAuthClient, phoneNumberClient } from "better-auth/client/plugins"
 import { createAuthClient } from "better-auth/react"
 
 import { nativeAuthBaseURL, type SessionCredentialVault } from "./secure-storage"
 
-const VERIFY_PATHS = new Set(["/sign-in/email-otp", "/phone-number/verify"])
+const VERIFY_PATHS = new Set(["/sign-in/email-otp", "/phone-number/verify", "/native-idn/exchange"])
 const REQUEST_TIMEOUT_MS = 10_000
 
 function authenticatingBody(data: unknown): boolean {
@@ -22,7 +22,7 @@ export function buildNativeAuthClient(baseURL: string, vault: SessionCredentialV
   return createAuthClient({
     baseURL: endpoint,
     disableDefaultFetchPlugins: true,
-    plugins: [convexClient(), emailOTPClient(), phoneNumberClient()],
+    plugins: [convexClient(), emailOTPClient(), genericOAuthClient(), phoneNumberClient()],
     fetchOptions: {
       credentials: "omit",
       redirect: "error",

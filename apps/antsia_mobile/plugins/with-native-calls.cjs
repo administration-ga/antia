@@ -4,6 +4,26 @@ const { statSync } = require("node:fs")
 const { resolve } = require("node:path")
 
 module.exports = function withNativeCalls(config, options = {}) {
+  // Le module reste autolié, y compris quand les appels système sont désactivés.
+  config = withGradleProperties(config, (mod) => {
+    const property = mod.modResults.find((entry) => entry.type === "property" && entry.key === "android.minSdkVersion")
+    if (property) {
+      const version = Number(property.value)
+      if (!Number.isInteger(version)) throw new Error("Native Android minimum SDK is invalid")
+      property.value = String(Math.max(version, 26))
+    } else mod.modResults.push({ type: "property", key: "android.minSdkVersion", value: "26" })
+    return mod
+  })
+  // Apple exige ces mentions pour les bibliothèques autoliées, même appels désactivés.
+  const french = require("../modules/antsia-call-system/locales/fr.json")
+  const english = require("../modules/antsia-call-system/locales/en.json")
+  config.locales ??= {}
+  for (const [language, messages] of [["fr", french], ["en", english]]) {
+    const existing = config.locales[language]
+    if (typeof existing === "string") throw new Error("Native call permission localization conflicts with a file-based locale")
+    config.locales[language] = { ...existing, ios: { ...existing?.ios, ...messages.ios } }
+  }
+  config = withInfoPlist(config, (mod) => { Object.assign(mod.modResults, french.ios); return mod })
   if (options.enabled !== true) {
     // Fermer aussi les marqueurs d'un prebuild incrémental précédemment activé.
     config = withInfoPlist(config, (mod) => { mod.modResults.AntsiaNativeCallsEnabled = false; return mod })
@@ -21,26 +41,9 @@ module.exports = function withNativeCalls(config, options = {}) {
   const firebasePath = resolve(config._internal?.projectRoot ?? __dirname + "/..", options.firebaseConfigPath)
   if (!statSync(firebasePath).isFile()) throw new Error("Native Firebase configuration is unavailable")
   config.android.googleServicesFile = firebasePath
-  const french = require("../modules/antsia-call-system/locales/fr.json")
-  const english = require("../modules/antsia-call-system/locales/en.json")
-  config.locales ??= {}
-  for (const [language, messages] of [["fr", french], ["en", english]]) {
-    const existing = config.locales[language]
-    if (typeof existing === "string") throw new Error("Native call permission localization conflicts with a file-based locale")
-    config.locales[language] = { ...existing, ios: { ...existing?.ios, ...messages.ios } }
-  }
   config = AndroidConfig.GoogleServices.withClassPath(config)
   config = AndroidConfig.GoogleServices.withApplyPlugin(config)
   config = AndroidConfig.GoogleServices.withGoogleServicesFile(config)
-  config = withGradleProperties(config, (mod) => {
-    const property = mod.modResults.find((entry) => entry.type === "property" && entry.key === "android.minSdkVersion")
-    if (property) {
-      const version = Number(property.value)
-      if (!Number.isInteger(version)) throw new Error("Native Android minimum SDK is invalid")
-      property.value = String(Math.max(version, 26))
-    } else mod.modResults.push({ type: "property", key: "android.minSdkVersion", value: "26" })
-    return mod
-  })
   const blocked = new Set(config.android.blockedPermissions ?? [])
   for (const permission of ["android.permission.RECORD_AUDIO", "android.permission.CAMERA", "android.permission.POST_NOTIFICATIONS"]) blocked.delete(permission)
   config.android.blockedPermissions = [...blocked]

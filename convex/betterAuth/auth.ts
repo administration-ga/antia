@@ -22,6 +22,7 @@ import type { DataModel } from "../_generated/dataModel"
 import authConfig from "../auth.config"
 import { devToolsAllowed } from "../lib/devTools"
 import { deliverOtp, type OtpRequest } from "./delivery"
+import { isNativeIdnOAuth, nativeIdn } from "./nativeIdn"
 import { authenticationConfiguration, idnConfiguration, idnProfileProof, isE164Phone, trustedOrigins } from "./settings"
 
 export { parseOriginList, trustedOrigins } from "./settings"
@@ -193,12 +194,30 @@ export const createAuth = (ctx: GenericCtx<DataModel>, requestOrigin?: string | 
   const allowedOrigins = trustedOrigins()
   const isLocalDev = devToolsAllowed()
   const idnOptions = idnConfiguration()
+  const browserSession = crossDomain({ siteUrl: resolveSiteUrl(requestOrigin, allowedOrigins, siteUrl) })
+  const skipBrowserAfter = createAuthMiddleware(async () => {})
+  // Le retour natif délivre son propre code S256. Ne jamais lui ajouter l'OTT Web.
+  browserSession.hooks.after = browserSession.hooks.after.map((hook) => ({
+    ...hook,
+    // Le handler est déjà un middleware Better Call : conserver son enveloppe
+    // { response, headers }. L'envelopper une seconde fois remplace le corps
+    // OAuth/OTP par cet objet d'en-têtes dans le transport crossDomain.
+    handler: async (hookCtx) => {
+      // Les champs de route sont fournis par le répartiteur Better Auth, mais
+      // absents du type générique des entrées de middleware Better Call.
+      const route = hookCtx as typeof hookCtx & { path?: string; params?: { providerId?: string } }
+      if ((route.path === "/oauth2/callback/idn" || route.path === "/oauth2/callback/:providerId" && route.params?.providerId === "idn") && await isNativeIdnOAuth()) return skipBrowserAfter(hookCtx)
+      return hook.handler(hookCtx)
+    },
+  }))
   // Propre à CETTE requête : seul le profil du callback OIDC peut sceller
   // la nouvelle session. Un lien de compte ou un OTP ne le peuvent pas.
   let idnLoginProof: ReturnType<typeof idnProfileProof> | null = null
   type OAuthConfig = Parameters<typeof genericOAuth>[0]["config"][number]
   const idnProvider: OAuthConfig[] = idnOptions ? [{
     ...idn({ ...idnOptions, scopes: ["openid", "profile", "email"] }),
+    // Une nouvelle entrée doit permettre une autre identité, même si IDN garde son SSO.
+    prompt: "login",
     // Callback central stable, aussi pendant l'échange sans en-tête Origin.
     redirectURI: `${siteUrl}/api/auth/oauth2/callback/idn`,
     mapProfileToUser: async (profile: Record<string, unknown>) => {
@@ -257,7 +276,8 @@ export const createAuth = (ctx: GenericCtx<DataModel>, requestOrigin?: string | 
         }] },
       },
       convex({ authConfig, jwt: { expirationSeconds: 60 * 30 } }) as unknown as BetterAuthPlugin,
-      crossDomain({ siteUrl: resolveSiteUrl(requestOrigin, allowedOrigins, siteUrl) }),
+      browserSession,
+      nativeIdn({ redirectUri: process.env.NATIVE_AUTH_REDIRECT_URI, siteUrl }),
       oneTimeToken({ expiresIn: 3, storeToken: "plain" }),
       bearer(),
       ...(idnProvider.length ? [genericOAuth({ config: idnProvider })] : []),
