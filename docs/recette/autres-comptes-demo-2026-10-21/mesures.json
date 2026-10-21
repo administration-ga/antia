@@ -1,0 +1,529 @@
+[
+  {
+    "format": "ordinateur",
+    "actor": "verifie",
+    "stage": "login",
+    "automaticDestination": "/demo/fil",
+    "identityVerified": true,
+    "newcomerConsentUntouched": null,
+    "metrics": {
+      "alerts": [],
+      "height": 1000,
+      "overflow": false,
+      "width": 1440
+    },
+    "startedAt": "2026-10-21T08:58:06.554Z",
+    "observedAt": "2026-10-21T08:58:15.265Z",
+    "manualReload": false,
+    "forcedFeedNavigation": false
+  },
+  {
+    "format": "ordinateur",
+    "actor": "verifie",
+    "stage": "logout",
+    "automaticDestination": "/demo/entrer",
+    "incomplete": false,
+    "manualReload": false,
+    "forcedFeedNavigation": false,
+    "observedAt": "2026-10-21T08:58:19.676Z"
+  },
+  {
+    "format": "ordinateur",
+    "actor": "commercant",
+    "stage": "login",
+    "automaticDestination": "/demo/fil",
+    "identityVerified": true,
+    "newcomerConsentUntouched": null,
+    "metrics": {
+      "alerts": [],
+      "height": 1000,
+      "overflow": false,
+      "width": 1440
+    },
+    "startedAt": "2026-10-21T08:58:37.803Z",
+    "observedAt": "2026-10-21T08:58:46.210Z",
+    "manualReload": false,
+    "forcedFeedNavigation": false
+  },
+  {
+    "format": "ordinateur",
+    "actor": "commercant",
+    "stage": "logout",
+    "automaticDestination": "/demo/entrer",
+    "incomplete": false,
+    "manualReload": false,
+    "forcedFeedNavigation": false,
+    "observedAt": "2026-10-21T08:58:50.677Z"
+  },
+  {
+    "format": "ordinateur",
+    "actor": "association",
+    "stage": "login",
+    "automaticDestination": "/demo/fil",
+    "identityVerified": true,
+    "newcomerConsentUntouched": null,
+    "metrics": {
+      "alerts": [],
+      "height": 1000,
+      "overflow": false,
+      "width": 1440
+    },
+    "startedAt": "2026-10-21T08:58:50.680Z",
+    "observedAt": "2026-10-21T08:58:57.937Z",
+    "manualReload": false,
+    "forcedFeedNavigation": false
+  },
+  {
+    "format": "ordinateur",
+    "actor": "association",
+    "stage": "logout",
+    "automaticDestination": "/demo/entrer",
+    "incomplete": false,
+    "manualReload": false,
+    "forcedFeedNavigation": false,
+    "observedAt": "2026-10-21T08:59:02.263Z"
+  },
+  {
+    "format": "ordinateur",
+    "actor": "administration",
+    "stage": "login",
+    "automaticDestination": "/demo/fil",
+    "identityVerified": true,
+    "newcomerConsentUntouched": null,
+    "metrics": {
+      "alerts": [],
+      "height": 1000,
+      "overflow": false,
+      "width": 1440
+    },
+    "startedAt": "2026-10-21T08:59:09.219Z",
+    "observedAt": "2026-10-21T08:59:17.683Z",
+    "manualReload": false,
+    "forcedFeedNavigation": false
+  },
+  {
+    "format": "ordinateur",
+    "actor": "administration",
+    "stage": "logout",
+    "automaticDestination": "/demo/entrer",
+    "incomplete": false,
+    "manualReload": false,
+    "forcedFeedNavigation": false,
+    "observedAt": "2026-10-21T08:59:24.322Z"
+  },
+  {
+    "format": "ordinateur",
+    "actor": "moderateur",
+    "stage": "login",
+    "automaticDestination": "/demo/fil",
+    "identityVerified": true,
+    "newcomerConsentUntouched": null,
+    "metrics": {
+      "alerts": [],
+      "height": 1000,
+      "overflow": false,
+      "width": 1440
+    },
+    "startedAt": "2026-10-21T08:59:24.323Z",
+    "observedAt": "2026-10-21T08:59:35.273Z",
+    "manualReload": false,
+    "forcedFeedNavigation": false
+  },
+  {
+    "format": "ordinateur",
+    "actor": "moderateur",
+    "stage": "logout",
+    "automaticDestination": "/demo/entrer",
+    "incomplete": false,
+    "manualReload": false,
+    "forcedFeedNavigation": false,
+    "observedAt": "2026-10-21T08:59:39.736Z"
+  },
+  {
+    "format": "ordinateur",
+    "actor": "nouveau",
+    "stage": "login",
+    "automaticDestination": "/demo/bienvenue",
+    "identityVerified": null,
+    "newcomerConsentUntouched": true,
+    "metrics": {
+      "alerts": [],
+      "height": 1000,
+      "overflow": false,
+      "width": 1440
+    },
+    "startedAt": "2026-10-21T08:59:50.965Z",
+    "observedAt": "2026-10-21T08:59:57.059Z",
+    "manualReload": false,
+    "forcedFeedNavigation": false
+  },
+  {
+    "format": "ordinateur",
+    "actor": "nouveau",
+    "stage": "logout",
+    "automaticDestination": "/demo/entrer",
+    "incomplete": false,
+    "manualReload": false,
+    "forcedFeedNavigation": false,
+    "observedAt": "2026-10-21T09:00:01.011Z"
+  },
+  {
+    "stage": "real_checkpoint",
+    "format": "ordinateur",
+    "sameIdentity": true
+  },
+  {
+    "format": "tablette",
+    "actor": "verifie",
+    "stage": "login",
+    "automaticDestination": "/demo/fil",
+    "identityVerified": true,
+    "newcomerConsentUntouched": null,
+    "metrics": {
+      "alerts": [],
+      "height": 1112,
+      "overflow": false,
+      "width": 834
+    },
+    "startedAt": "2026-10-21T09:00:01.051Z",
+    "observedAt": "2026-10-21T09:00:12.020Z",
+    "manualReload": false,
+    "forcedFeedNavigation": false
+  },
+  {
+    "format": "tablette",
+    "actor": "verifie",
+    "stage": "logout",
+    "automaticDestination": "/demo/entrer",
+    "incomplete": false,
+    "manualReload": false,
+    "forcedFeedNavigation": false,
+    "observedAt": "2026-10-21T09:00:16.811Z"
+  },
+  {
+    "format": "tablette",
+    "actor": "commercant",
+    "stage": "login",
+    "automaticDestination": "/demo/fil",
+    "identityVerified": true,
+    "newcomerConsentUntouched": null,
+    "metrics": {
+      "alerts": [],
+      "height": 1112,
+      "overflow": false,
+      "width": 834
+    },
+    "startedAt": "2026-10-21T09:00:22.733Z",
+    "observedAt": "2026-10-21T09:00:32.077Z",
+    "manualReload": false,
+    "forcedFeedNavigation": false
+  },
+  {
+    "format": "tablette",
+    "actor": "commercant",
+    "stage": "logout",
+    "automaticDestination": "/demo/entrer",
+    "incomplete": false,
+    "manualReload": false,
+    "forcedFeedNavigation": false,
+    "observedAt": "2026-10-21T09:00:36.352Z"
+  },
+  {
+    "format": "tablette",
+    "actor": "association",
+    "stage": "login",
+    "automaticDestination": "/demo/fil",
+    "identityVerified": true,
+    "newcomerConsentUntouched": null,
+    "metrics": {
+      "alerts": [
+        "1 invitation en attenteVoir les demandes"
+      ],
+      "height": 1112,
+      "overflow": false,
+      "width": 834
+    },
+    "observedAt": "2026-10-21T09:01:29.389Z",
+    "resumedReadOnly": true,
+    "manualReload": false,
+    "forcedFeedNavigation": false
+  },
+  {
+    "format": "tablette",
+    "actor": "association",
+    "stage": "logout",
+    "automaticDestination": "/demo/entrer",
+    "incomplete": false,
+    "manualReload": false,
+    "forcedFeedNavigation": false,
+    "observedAt": "2026-10-21T09:01:33.371Z"
+  },
+  {
+    "format": "tablette",
+    "actor": "administration",
+    "stage": "login",
+    "automaticDestination": "/demo/fil",
+    "identityVerified": true,
+    "newcomerConsentUntouched": null,
+    "metrics": {
+      "alerts": [],
+      "height": 1112,
+      "overflow": false,
+      "width": 834
+    },
+    "startedAt": "2026-10-21T09:01:52.409Z",
+    "observedAt": "2026-10-21T09:01:59.384Z",
+    "manualReload": false,
+    "forcedFeedNavigation": false
+  },
+  {
+    "format": "tablette",
+    "actor": "administration",
+    "stage": "logout",
+    "automaticDestination": "/demo/entrer",
+    "incomplete": false,
+    "manualReload": false,
+    "forcedFeedNavigation": false,
+    "observedAt": "2026-10-21T09:02:03.017Z"
+  },
+  {
+    "format": "tablette",
+    "actor": "moderateur",
+    "stage": "login",
+    "automaticDestination": "/demo/fil",
+    "identityVerified": true,
+    "newcomerConsentUntouched": null,
+    "metrics": {
+      "alerts": [],
+      "height": 1112,
+      "overflow": false,
+      "width": 834
+    },
+    "startedAt": "2026-10-21T09:02:03.019Z",
+    "observedAt": "2026-10-21T09:02:09.697Z",
+    "manualReload": false,
+    "forcedFeedNavigation": false
+  },
+  {
+    "format": "tablette",
+    "actor": "moderateur",
+    "stage": "logout",
+    "automaticDestination": "/demo/entrer",
+    "incomplete": false,
+    "manualReload": false,
+    "forcedFeedNavigation": false,
+    "observedAt": "2026-10-21T09:02:13.352Z"
+  },
+  {
+    "format": "tablette",
+    "actor": "nouveau",
+    "stage": "login",
+    "automaticDestination": "/demo/bienvenue",
+    "identityVerified": null,
+    "newcomerConsentUntouched": true,
+    "metrics": {
+      "alerts": [],
+      "height": 1112,
+      "overflow": false,
+      "width": 834
+    },
+    "startedAt": "2026-10-21T09:02:29.432Z",
+    "observedAt": "2026-10-21T09:02:34.412Z",
+    "manualReload": false,
+    "forcedFeedNavigation": false
+  },
+  {
+    "format": "tablette",
+    "actor": "nouveau",
+    "stage": "logout",
+    "automaticDestination": "/demo/entrer",
+    "incomplete": false,
+    "manualReload": false,
+    "forcedFeedNavigation": false,
+    "observedAt": "2026-10-21T09:02:38.004Z"
+  },
+  {
+    "stage": "real_checkpoint",
+    "format": "tablette",
+    "sameIdentity": true
+  },
+  {
+    "format": "telephone",
+    "actor": "verifie",
+    "stage": "login",
+    "automaticDestination": "/demo/fil",
+    "identityVerified": true,
+    "newcomerConsentUntouched": null,
+    "metrics": {
+      "alerts": [],
+      "height": 844,
+      "overflow": false,
+      "width": 390
+    },
+    "startedAt": "2026-10-21T09:02:38.035Z",
+    "observedAt": "2026-10-21T09:02:48.547Z",
+    "manualReload": false,
+    "forcedFeedNavigation": false
+  },
+  {
+    "format": "telephone",
+    "actor": "verifie",
+    "stage": "logout",
+    "automaticDestination": "/demo/entrer",
+    "incomplete": false,
+    "manualReload": false,
+    "forcedFeedNavigation": false,
+    "observedAt": "2026-10-21T09:02:52.469Z"
+  },
+  {
+    "format": "telephone",
+    "actor": "commercant",
+    "stage": "login",
+    "automaticDestination": "/demo/fil",
+    "identityVerified": true,
+    "newcomerConsentUntouched": null,
+    "metrics": {
+      "alerts": [],
+      "height": 844,
+      "overflow": false,
+      "width": 390
+    },
+    "observedAt": "2026-10-21T09:03:51.680Z",
+    "manualReload": false,
+    "forcedFeedNavigation": false
+  },
+  {
+    "format": "telephone",
+    "actor": "commercant",
+    "stage": "logout",
+    "automaticDestination": "/demo/entrer",
+    "incomplete": false,
+    "manualReload": false,
+    "forcedFeedNavigation": false,
+    "observedAt": "2026-10-21T09:03:55.636Z"
+  },
+  {
+    "format": "telephone",
+    "actor": "association",
+    "stage": "login",
+    "automaticDestination": "/demo/fil",
+    "identityVerified": true,
+    "newcomerConsentUntouched": null,
+    "metrics": {
+      "alerts": [],
+      "height": 844,
+      "overflow": false,
+      "width": 390
+    },
+    "observedAt": "2026-10-21T09:04:10.808Z",
+    "manualReload": false,
+    "forcedFeedNavigation": false
+  },
+  {
+    "format": "telephone",
+    "actor": "association",
+    "stage": "logout",
+    "automaticDestination": "/demo/entrer",
+    "incomplete": false,
+    "manualReload": false,
+    "forcedFeedNavigation": false,
+    "observedAt": "2026-10-21T09:04:14.556Z"
+  },
+  {
+    "format": "telephone",
+    "actor": "administration",
+    "stage": "login",
+    "automaticDestination": "/demo/fil",
+    "identityVerified": true,
+    "newcomerConsentUntouched": null,
+    "metrics": {
+      "alerts": [],
+      "height": 844,
+      "overflow": false,
+      "width": 390
+    },
+    "observedAt": "2026-10-21T09:04:22.491Z",
+    "manualReload": false,
+    "forcedFeedNavigation": false
+  },
+  {
+    "format": "telephone",
+    "actor": "administration",
+    "stage": "logout",
+    "automaticDestination": "/demo/entrer",
+    "incomplete": false,
+    "manualReload": false,
+    "forcedFeedNavigation": false,
+    "observedAt": "2026-10-21T09:04:26.086Z"
+  },
+  {
+    "format": "telephone",
+    "actor": "moderateur",
+    "stage": "login",
+    "automaticDestination": "/demo/fil",
+    "identityVerified": true,
+    "newcomerConsentUntouched": null,
+    "metrics": {
+      "alerts": [],
+      "height": 844,
+      "overflow": false,
+      "width": 390
+    },
+    "observedAt": "2026-10-21T09:04:42.895Z",
+    "manualReload": false,
+    "forcedFeedNavigation": false
+  },
+  {
+    "format": "telephone",
+    "actor": "moderateur",
+    "stage": "logout",
+    "automaticDestination": "/demo/entrer",
+    "incomplete": false,
+    "manualReload": false,
+    "forcedFeedNavigation": false,
+    "observedAt": "2026-10-21T09:04:46.971Z"
+  },
+  {
+    "format": "telephone",
+    "actor": "nouveau",
+    "stage": "login",
+    "automaticDestination": "/demo/bienvenue",
+    "identityVerified": null,
+    "newcomerConsentUntouched": true,
+    "metrics": {
+      "alerts": [],
+      "height": 844,
+      "overflow": false,
+      "width": 390
+    },
+    "observedAt": "2026-10-21T09:04:51.371Z",
+    "manualReload": false,
+    "forcedFeedNavigation": false
+  },
+  {
+    "format": "telephone",
+    "actor": "nouveau",
+    "stage": "logout",
+    "automaticDestination": "/demo/entrer",
+    "incomplete": false,
+    "manualReload": false,
+    "forcedFeedNavigation": false,
+    "observedAt": "2026-10-21T09:04:54.890Z"
+  },
+  {
+    "stage": "real_checkpoint",
+    "format": "telephone",
+    "sameIdentity": true
+  },
+  {
+    "stage": "final",
+    "initialDemoRestored": true,
+    "realSameIdentity": true,
+    "consoleWarningsOrErrors": 2,
+    "phone": {
+      "height": 844,
+      "overflow": false,
+      "width": 390
+    }
+  }
+]

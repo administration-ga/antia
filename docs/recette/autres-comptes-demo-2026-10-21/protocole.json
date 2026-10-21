@@ -1,0 +1,61 @@
+{
+  "origin": "https://antsia.vercel.app",
+  "demoPath": "/demo",
+  "actors": [
+    {
+      "actor": "verifie",
+      "handle": "verifie.demo",
+      "label": "Membre vérifié Jean-Rémy NDONG · Identité IDN fictive : badge Vérifié."
+    },
+    {
+      "actor": "commercant",
+      "handle": "commercant.demo",
+      "label": "Commerçant Patrick MOUSSAVOU · Une boutique publiée et sa page d’entreprise."
+    },
+    {
+      "actor": "association",
+      "handle": "association.demo",
+      "label": "Association Clarisse ELLA · Présidente d’une association."
+    },
+    {
+      "actor": "administration",
+      "handle": "administration.demo",
+      "label": "Administration Paul-Henri NZE · Agent signataire de la page officielle d’une mairie."
+    },
+    {
+      "actor": "moderateur",
+      "handle": "moderation.demo",
+      "label": "Modération Nadège KOUMBA · Modératrice du réseau."
+    },
+    {
+      "actor": "nouveau",
+      "handle": null,
+      "label": "Nouvel arrivant Compte neuf : l’accueil reste à remplir."
+    }
+  ],
+  "formats": [
+    {
+      "name": "ordinateur",
+      "width": 1440,
+      "height": 1000
+    },
+    {
+      "name": "tablette",
+      "width": 834,
+      "height": 1112
+    },
+    {
+      "name": "telephone",
+      "width": 390,
+      "height": 844
+    }
+  ],
+  "expectedCycles": 18,
+  "manualReloadAllowed": false,
+  "forcedFeedNavigationAllowed": false,
+  "realSignOutAllowed": false,
+  "newcomerOnboardingMayRemainIncomplete": true,
+  "acceptTermsAllowed": false,
+  "initialDemoHref": "/demo/profil/presse.demo",
+  "otherSessionObservedOnLocalhost": true
+}

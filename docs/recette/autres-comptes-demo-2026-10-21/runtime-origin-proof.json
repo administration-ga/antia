@@ -1,0 +1,10 @@
+{
+  "key": "ANTSIA_DEMO_RUNTIME_ORIGIN",
+  "target": [
+    "production"
+  ],
+  "oldOrigin": "https://antsia-demo-8ep07aj8t-okatechs-projects-f0102678.vercel.app",
+  "newOrigin": "https://antsia-demo-91sv96f1i-okatechs-projects-f0102678.vercel.app",
+  "updated": true,
+  "secretsUnchanged": true
+}

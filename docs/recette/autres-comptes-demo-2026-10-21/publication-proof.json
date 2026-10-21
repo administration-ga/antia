@@ -1,0 +1,55 @@
+{
+  "staged": {
+    "main": {
+      "health": {
+        "status": "ok",
+        "application": "antsia-ga",
+        "version": "demo-sortie-20261021-production-8a590ef4bca4e6b9",
+        "backend": "configured"
+      },
+      "backendCspCorrect": true,
+      "noRelayTokenInHeaders": true
+    },
+    "demo": {
+      "health": {
+        "status": "ok",
+        "application": "antsia-ga",
+        "version": "demo-sortie-20261021-demo-34f8d07b9ca175a6",
+        "backend": "configured"
+      },
+      "backendCspCorrect": true,
+      "noRelayTokenInHeaders": true
+    }
+  },
+  "previousMainVersion": "demo-path-20261021-production-282e26b0a9e64f29",
+  "public": {
+    "main": {
+      "health": {
+        "status": "ok",
+        "application": "antsia-ga",
+        "version": "demo-sortie-20261021-production-8a590ef4bca4e6b9",
+        "backend": "configured"
+      },
+      "backendCspCorrect": true,
+      "noRelayTokenInHeaders": true,
+      "deployment": "dpl_Drh4aAGxTqiZc6bwh1Q9GAjdBXYX",
+      "commit": "d76d559ae9d932876a8748bcf172ce5c1ac52db6"
+    },
+    "demo": {
+      "health": {
+        "status": "ok",
+        "application": "antsia-ga",
+        "version": "demo-sortie-20261021-demo-34f8d07b9ca175a6",
+        "backend": "configured"
+      },
+      "backendCspCorrect": true,
+      "noRelayTokenInHeaders": true,
+      "deployment": "dpl_6qVSUcBNPXwEYuEnUDKvdXXrn6Ft",
+      "commit": "0af6d49ce0b9b44dbba10f447f034a7967058d66"
+    }
+  },
+  "oldDomainHttpStatus": 404,
+  "publishedAt": "2026-10-21T09:25:54.072379+00:00",
+  "mainPromoted": true,
+  "childPrivate": true
+}

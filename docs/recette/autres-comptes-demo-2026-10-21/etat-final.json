@@ -1,0 +1,13 @@
+{
+  "stage": "finalAfterPublication",
+  "restoredActor": "presse.demo",
+  "realSameIdentity": true,
+  "consoleWarningsOrErrors": 0,
+  "phone": {
+    "height": 844,
+    "overflow": false,
+    "width": 390
+  },
+  "manualReload": false,
+  "observedAt": "2026-10-21T09:30:41.773Z"
+}

@@ -1,0 +1,23 @@
+{
+  "sharedVerifyExitCode": 1,
+  "sharedVerifyFailure": {
+    "workspace": "@diasporale/features",
+    "file": "src/styles/engine-theme-contrast.test.ts",
+    "failedTests": 4,
+    "unrelatedToken": "--esp-social-action-radius",
+    "reservedSourcesPreserved": true
+  },
+  "targetedTests": 77,
+  "targetedSharedTests": 77,
+  "publishedBaselineTypecheck": true,
+  "changedFilesLint": true,
+  "publicationChecksPassed": true,
+  "publishedAppTests": 987,
+  "sharedLintExitCode": 0,
+  "sharedLintWorkspaces": 11,
+  "sharedTypecheckWorkspaces": 12,
+  "serverTests": 2853,
+  "ratchetTests": 144,
+  "sharedSocialFeaturesTests": 4159,
+  "releaseScopeExcludesOtherSessionThemeChanges": true
+}

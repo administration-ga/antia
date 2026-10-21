@@ -1,0 +1,22 @@
+[
+  {
+    "kind": "Completion",
+    "identifier": "modules/posts/feedMaterialization:prepareMyFeed",
+    "timestamp": 1792573755.9627614,
+    "executionTimestamp": 1792573755.815,
+    "executionTime": 0.142788124,
+    "success": null,
+    "error": null,
+    "requestId": "40be8ff23e9d9170"
+  },
+  {
+    "kind": "Completion",
+    "identifier": "modules/posts/feedMaterialization:prepareMyFeed",
+    "timestamp": 1792573768.0408883,
+    "executionTimestamp": 1792573768.01,
+    "executionTime": 0.033277441,
+    "success": null,
+    "error": "Uncaught ConvexError: {\"code\":\"unauthenticated\"}\n    at fail (../../convex/lib/errors.ts:14:0)\n    at requirePerson (../../convex/lib/access.ts:33:27)\n    at async requireMembership (../../convex/lib/access.ts:86:6)\n    at async input (../../convex/lib/functions.ts:72:4)\n    at async handler (../../node_modules/.bun/convex-helpers@0.1.120+84db4ee5455417bf/node_modules/convex-helpers/server/customFunctions.js:265:30)\n",
+    "requestId": "3ea681f4ab418955"
+  }
+]

@@ -1,0 +1,16 @@
+[
+  {
+    "format": "ordinateur",
+    "actor": "verifie",
+    "loginObservedAt": "2026-10-21T09:09:27.214Z",
+    "logoutStartedAt": "2026-10-21T09:09:27.214Z",
+    "logoutObservedAt": "2026-10-21T09:09:31.013Z"
+  },
+  {
+    "format": "tablette",
+    "actor": "verifie",
+    "loginObservedAt": "2026-10-21T09:09:37.542Z",
+    "logoutStartedAt": "2026-10-21T09:09:37.542Z",
+    "logoutObservedAt": "2026-10-21T09:09:41.315Z"
+  }
+]

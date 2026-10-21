@@ -1,0 +1,27 @@
+{
+  "production": {
+    "branch": "codex/demo-sortie-principal-20261021",
+    "releaseCommit": "d76d559ae9d932876a8748bcf172ce5c1ac52db6",
+    "parent": "58de1ebcd24b356da8905df37e0c3acd4172af2f",
+    "changedPaths": [
+      "packages/social-features/src/features/reseau-personnel/FeedPages.tsx",
+      "packages/social-features/src/features/reseau-personnel/FeedPages.test.tsx"
+    ],
+    "version": "demo-sortie-20261021-production-8a590ef4bca4e6b9"
+  },
+  "demo": {
+    "branch": "codex/demo-sortie-integree-20261021",
+    "releaseCommit": "0af6d49ce0b9b44dbba10f447f034a7967058d66",
+    "parent": "71c7dacf93a28bed26ad3a1fe77fb1eaefe62960",
+    "changedPaths": [
+      "packages/social-features/src/features/reseau-personnel/FeedPages.tsx",
+      "packages/social-features/src/features/reseau-personnel/FeedPages.test.tsx"
+    ],
+    "version": "demo-sortie-20261021-demo-34f8d07b9ca175a6"
+  },
+  "preservation": {
+    "head": "c4d36f345707f87f20dbd970b2850c683c8581be",
+    "indexSha256": "1b61c3bd9283b1b44dccd3c669fb2260c661ddc9736095bd3e408dc16fcc0bb8",
+    "sharedHeadAndIndexPreserved": true
+  }
+}
