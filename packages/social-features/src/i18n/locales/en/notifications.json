@@ -15,15 +15,26 @@
     "empty": "No activity yet. Reactions, comments, invitations and mentions will appear here.",
     "loadMore": "Show more activity",
     "loadingMore": "Loading earlier activity…",
-    "seeAll": "See all"
+    "seeAll": "See all",
+    "filters": "Filter notifications",
+    "all": "All",
+    "unread": "Unread",
+    "filterScope": "This filter covers loaded notifications. Later pages may contain more.",
+    "emptyUnread": "No unread notifications among those loaded.",
+    "groups": {
+      "new": "New",
+      "earlier": "Earlier"
+    }
   },
   "reseauNotificationRow": {
     "markRead": "Mark as read",
-    "accept": "Accept",
+    "accept": "Confirm",
     "decline": "Decline",
     "accepted": "Connection accepted.",
     "declined": "Invitation declined.",
-    "alreadyHandled": "Invitation already handled."
+    "alreadyHandled": "Invitation already handled.",
+    "unread": "Unread notification.",
+    "decisionFailed": "Your response could not be saved. Try again."
   },
   "notificationCenterTabs": {
     "unread_one": "{{count}} unread notification",

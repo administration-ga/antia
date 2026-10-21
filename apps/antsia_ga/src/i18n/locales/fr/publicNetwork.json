@@ -164,7 +164,7 @@
       },
       "publication": {
         "title": "État de validation",
-        "body": "Chaque auteur est responsable du contenu qu’il partage et de l’audience qu’il choisit. Les signalements et recours passent par les commandes du service ; le contact de l’éditeur reste accessible pour les demandes qui ne peuvent pas être traitées dans votre compte. Ces informations ne constituent pas une attestation de l’APDPVP ni une certification de localisation des données."
+        "body": "Chaque auteur est responsable du contenu qu’il partage et de l’audience qu’il choisit. Les signalements et recours passent par les commandes du service ; le contact de l’éditeur reste accessible pour les demandes qui ne peuvent pas être traitées dans votre compte. Ces informations ne constituent pas une attestation de l’APDPVP ni une validation officielle de la localisation des données."
       }
     },
     "privacy": {
@@ -192,7 +192,7 @@
       },
       "recipients": {
         "title": "Qui peut recevoir vos données",
-        "body": "Les destinataires de vos contenus dépendent de l’audience et du contexte que vous choisissez : public, réseau, groupe ou conversation. Les personnes habilitées à l’exploitation et à la modération accèdent aux informations nécessaires à leur mission.\nVercel fournit l’hébergement de l’application web ; Convex fournit le backend, l’authentification applicative et le stockage. Identité.ga intervient lorsque vous choisissez cette connexion. Les services d’envoi de codes ou de notifications interviennent selon le canal utilisé et vos préférences. Ces services cloud peuvent traiter des données hors du Gabon. Le partage d’un éditeur avec une autre application ne rend pas vos données accessibles à cette application."
+        "body": "Les destinataires de vos contenus dépendent de l’audience et du contexte que vous choisissez : public, réseau, groupe ou conversation. Les personnes habilitées à l’exploitation et à la modération accèdent aux informations nécessaires à leur mission.\nVercel fournit l’infrastructure de l’application web ; Convex fournit le backend, l’authentification applicative et le stockage. Identité.ga intervient lorsque vous choisissez cette connexion. Les services d’envoi de codes ou de notifications interviennent selon le canal utilisé et vos préférences. Ces services cloud peuvent traiter des données hors du Gabon. Le partage d’un éditeur avec une autre application ne rend pas vos données accessibles à cette application."
       },
       "retention": {
         "title": "Conservation et effacement",

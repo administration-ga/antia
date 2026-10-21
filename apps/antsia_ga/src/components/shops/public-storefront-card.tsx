@@ -3,10 +3,10 @@ import Image from "next/image"
 import Link from "next/link"
 import type { ReactNode } from "react"
 
-import { PUBLIC_LINK } from "@/components/public/public-shell"
 import { getAppT } from "@/i18n/server"
 import type { PublicStorefront } from "@/lib/public-shops-data"
 import { routes } from "@/lib/routes"
+import { SHOP_ACTION_CLASS } from "./offer-experience-styles"
 
 /** SSR : identité et catalogue admis ; aucun état privé du lecteur. */
 export function PublicStorefrontCard({ storefront, locale, catalog }: { storefront: PublicStorefront; locale: Locale; catalog?: ReactNode }) {
@@ -18,22 +18,24 @@ export function PublicStorefrontCard({ storefront, locale, catalog }: { storefro
   ] as const
 
   return <article className="mx-auto w-full max-w-5xl overflow-hidden rounded-[var(--ui2-card-radius)] border border-[color:var(--esp-surface-border)] bg-card text-card-foreground [overflow-wrap:anywhere]">
-    {storefront.bannerUrl ? <div className="p-[var(--esp-card-padding,16px)] pb-0"><Image unoptimized src={storefront.bannerUrl} width={1200} height={400} alt="" loading="lazy" className="max-h-64 w-full rounded-[var(--esp-media-radius)] object-cover" /></div> : null}
+    {storefront.bannerUrl ? <div className="bg-muted"><Image unoptimized src={storefront.bannerUrl} width={1200} height={400} alt="" loading="lazy" className="aspect-[3/1] max-h-96 w-full object-cover" /></div> : null}
     <div className="flex flex-col gap-6 p-[var(--esp-card-padding,16px)]">
       <header className="flex flex-col gap-4">
         <p className="text-sm font-medium text-primary">{t("shops:publicStorefront.title", { name: storefront.name })}</p>
         <div className="flex items-start gap-4">
-          {storefront.logoUrl ? <Image unoptimized src={storefront.logoUrl} width={72} height={72} alt="" loading="lazy" className="size-18 shrink-0 rounded-[var(--esp-avatar-page-radius)] object-contain" /> : <span aria-hidden="true" className="flex size-16 shrink-0 items-center justify-center rounded-[var(--esp-avatar-page-radius)] bg-muted text-2xl font-semibold">{storefront.name.slice(0, 1)}</span>}
+          {storefront.logoUrl ? <Image unoptimized src={storefront.logoUrl} width={88} height={88} alt="" loading="lazy" className="size-20 shrink-0 rounded-[var(--esp-avatar-page-radius)] border border-border bg-background p-1 object-contain sm:size-22" /> : <span aria-hidden="true" className="flex size-20 shrink-0 items-center justify-center rounded-[var(--esp-avatar-page-radius)] bg-muted text-2xl font-semibold">{storefront.name.slice(0, 1)}</span>}
           <div className="flex min-w-0 flex-col gap-2">
             <h1 className="antsia-title break-words">{storefront.name}</h1>
             <p className="break-all text-sm text-muted-foreground">@{storefront.handle}</p>
-            <p className="text-sm font-medium">{t(`shops:badges.${storefront.badge}`)}</p>
+            <p className="self-start rounded-[var(--esp-social-action-radius,var(--ui2-button-radius))] bg-muted px-2 py-1 text-xs font-semibold">{t(`shops:badges.${storefront.badge}`)}</p>
           </div>
         </div>
-        <p className="text-sm text-muted-foreground">{t(`shops:models.${storefront.model}`)}</p>
+        <div className="flex min-w-0 flex-wrap items-center justify-between gap-3 rounded-[var(--ui2-card-radius)] bg-muted p-[var(--esp-card-padding,16px)]">
+          <div className="grid min-w-0 flex-1 gap-1"><p className="text-sm font-semibold text-[color:var(--role-commerce-ink,var(--foreground))]">{t(`shops:models.${storefront.model}`)}</p>{storefront.specialty ? <p className="break-words text-sm text-muted-foreground">{storefront.specialty}</p> : null}</div>
+          {storefront.blocks.includes("catalog") || storefront.blocks.includes("services") ? <Link href={routes.publicShopCatalog(storefront.handle)} prefetch={false} className={SHOP_ACTION_CLASS}>{t("shops:catalog.openCatalog")}</Link> : null}
+        </div>
         <p className="border-l-2 border-primary pl-3 text-sm text-muted-foreground">{t("shops:publicStorefront.origin", { name: storefront.origin.name })}</p>
         <p className="text-xs text-muted-foreground">{t("shops:publicStorefront.publicAudience")}</p>
-        {storefront.blocks.includes("catalog") || storefront.blocks.includes("services") ? <Link href={routes.publicShopCatalog(storefront.handle)} prefetch={false} className={`${PUBLIC_LINK} self-start`}>{t("commerceExperience:storefront.offers")}</Link> : null}
       </header>
 
       <section aria-labelledby="public-storefront-about" className="flex flex-col gap-4 border-t border-border pt-6">
@@ -48,7 +50,7 @@ export function PublicStorefrontCard({ storefront, locale, catalog }: { storefro
       </section>
 
       {catalog}
-      <Link href={routes.storefront(storefront.handle)} prefetch={false} className={`${PUBLIC_LINK} self-start`}>{t("shops:publicStorefront.memberLink")}</Link>
+      <Link href={routes.storefront(storefront.handle)} prefetch={false} className={`${SHOP_ACTION_CLASS} self-start`}>{t("shops:publicStorefront.memberLink")}</Link>
     </div>
   </article>
 }
