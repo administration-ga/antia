@@ -137,7 +137,11 @@ describe("MP07b — préparation privée du titulaire PRO", () => {
 
   it("préserve le constat de politique et le libellé vérifié, avec une cible explicitement absente", async () => {
     const policy = { textVersion: "financial-terms-fixture-v1", revision: 2, platformRevision: 3, mode: "default_90", platformBps: 1000, sellerBps: 9000, accepted: false, acceptanceRevision: null }
-    const f = await fixture(), p = peer({ mutate: body => { body.policy = policy; body.beneficiary = { state: "verified", label: "Activité de recette" }; body.target = null } })
+    // Un bénéficiaire vérifié suppose un rail qualifié pour la vérification (règle du contrat) ; l'encaissement reste fermé.
+    const rails = COMMERCE_PAYMENT_PREPARATION_RAILS.map((rail, index) => index === 0
+      ? { rail, qualified: true, capabilities: { collect: false, lookup: true, refund: false, payout: false }, missing: [] }
+      : { rail, qualified: false, capabilities: { collect: false, lookup: false, refund: false, payout: false }, missing: ["adapter_missing"] })
+    const f = await fixture(), p = peer({ mutate: body => { body.policy = policy; body.beneficiary = { state: "verified", label: "Activité de recette" }; body.target = null; body.countryScope = { platformCountry: "GA", sellerCountry: "GA" }; body.rails = rails } })
     expect(await f.owner.action(read, f.args)).toMatchObject({ outcome: "ready", preparation: { policy, beneficiary: { state: "verified", label: "Activité de recette" }, target: null, collection: { state: "closed" } } })
     expect(p.failures).toEqual([])
   })

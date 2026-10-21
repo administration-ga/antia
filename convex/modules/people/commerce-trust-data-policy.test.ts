@@ -36,6 +36,8 @@ const COMMERCE_TABLES = [
   "commerceServiceFollowupNotices",
   // DG-011–016 — catalogue de page, demandes personnelles, propositions, rendez-vous et avis.
   "serviceOffers", "serviceRequests", "serviceProposals", "serviceBookings", "serviceReviews", "serviceReviewReplies",
+  // MP04 — état collectif de construction de l'index marketplace : ni titulaire personnel ni secret.
+  "commerceCatalogIndexes",
 ] as const
 
 const OWNER = "owner_person", STRANGER = "stranger_person"

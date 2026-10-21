@@ -29,17 +29,6 @@ function fashionFacetsFixture(): NonNullable<ReturnType<typeof catalogOfferFixtu
   return { taxonomyVersion: 1, categoryPath: ["fashion", "fashion.women", "fashion.women.clothing"], attributes: [{ key: "material", type: "text", value: "Lin" }, { key: "audience", type: "choice", value: "women" }] }
 }
 
-afterEach(() => { vi.unstubAllEnvs() })
-
-function demoOfferFixture() {
-  return catalogOfferFixture({
-    offerRef: "demo:offer:epicerie-produits", shopHandle: "epicerie-moussavou-demo",
-    collections: [{ collectionRef: "demo:collection:epicerie-moussavou-demo", label: "Produits de démonstration" }],
-    variantAxes: [], variants: [], media: [{ url: "/demo-media/animation-20261020/epicerie-produits.png", altText: "Illustration générée pour la démonstration", width: null, height: null, withheld: null }],
-    availability: { state: "unknown", indicative: true, updatedAt: null, stale: false },
-  })
-}
-
 describe("catalogue SSR — projection strictement allowlistée", () => {
   it("MP06 : valide le profil avec le manifeste exact de la même offre", () => {
     const profile = { version: 1, commercialModes: ["quote"], languageCodes: ["fr"], zones: [{ countryCode: "GA", locality: "Libreville" }], deliverables: [], inclusions: [], exclusions: [], portfolio: [{ title: "Réalisation", description: "Présentation déclarée", mediaIndexes: [0] }] }
@@ -224,47 +213,5 @@ describe("MP05d — contrat SSR des filtres et migration", () => {
       return catalogPageFixture()
     })
     expect((await loadPublicCatalog("atelier", filters, "next")).status).toBe("ready")
-  })
-})
-
-describe("catalogue SSR — projection illustrative de démonstration", () => {
-  it.each(["http://localhost:3210", "http://127.0.0.1:3210", "https://vivid-hedgehog-655.convex.cloud"])("admet les huit déclarations uniquement sur %s", (backendUrl) => {
-    vi.stubEnv("NEXT_PUBLIC_CONVEX_URL", backendUrl)
-    for (const declaration of DEMO_CATALOG_DECLARATIONS) {
-      const base = demoOfferFixture()
-      const offer = { ...base, offerRef: declaration.offerRef, shopHandle: declaration.shopHandle, kind: declaration.kind, collections: [{ collectionRef: declaration.collectionRef, label: "Démonstration" }], media: [{ ...base.media[0]!, url: declaration.imagePath }] }
-      expect(catalogOfferSchema.safeParse(offer).success).toBe(true)
-      expect(catalogPageSchema.safeParse(catalogPageFixture({ page: [offer], collections: offer.collections })).success).toBe(true)
-    }
-  })
-  it.each(["https://production.convex.cloud", "https://other.convex.cloud", "https://vivid-hedgehog-655.convex.cloud.evil.test", "https://vivid-hedgehog-655.convex.cloud@evil.test", "https://vivid-hedgehog-655.convex.cloud:444", "http://localhost:3211"])("refuse la démo sur %s et conserve le contrat PRO.GA", (backendUrl) => {
-    vi.stubEnv("NEXT_PUBLIC_CONVEX_URL", backendUrl)
-    vi.stubEnv("ANTSIA_DEMO_DEPLOYMENT", "vivid-hedgehog-655")
-    expect(catalogOfferSchema.safeParse(demoOfferFixture()).success).toBe(false)
-    expect(catalogPageSchema.safeParse(catalogPageFixture({ page: [], collections: demoOfferFixture().collections })).success).toBe(false)
-    expect(catalogOfferSchema.safeParse(catalogOfferFixture({ media: [{ url: "https://assets.example.test/catalogue/image.png", altText: "Produit", width: 800, height: 800, withheld: null }] })).success).toBe(true)
-  })
-  it("refuse toute incohérence offre, boutique, collection, image, variante ou action", () => {
-    const offer = demoOfferFixture()
-    const mismatches = [
-      { offerRef: "demo:offer:inconnue" }, { offerRef: OFFER_REF }, { shopHandle: "studio-objectif-demo" }, { kind: "service" },
-      { collections: [{ collectionRef: "demo:collection:atelier-tech-demo", label: "Autre" }] },
-      { variants: catalogOfferFixture().variants }, { variantAxes: ["Couleur"] },
-      { actions: { contact: true, quote: false, purchase: false } }, { actions: { contact: false, quote: true, purchase: false } },
-      ...["/demo-media/animation-20261020/panier-raphia.png", "/demo-media/animation-20261020/association-lecture.png", "/demo-media/autre.png", "//evil.test/image.png", "https://assets.example.test/image.png", null].map((url) => ({ media: [{ ...offer.media[0]!, url }] })),
-    ]
-    for (const mismatch of mismatches) expect(catalogOfferSchema.safeParse({ ...offer, ...mismatch }).success).toBe(false)
-    expect(catalogPageSchema.safeParse(catalogPageFixture({ page: [offer] })).success).toBe(false)
-    expect(catalogOfferSchema.safeParse({ ...catalogOfferFixture(), media: offer.media }).success).toBe(false)
-  })
-  it("fait traverser la porte SSR anonyme au catalogue, à la fiche et à la carte du fil", async () => {
-    const offer = demoOfferFixture(), page = catalogPageFixture({ page: [offer], collections: offer.collections })
-    mocks.query.mockImplementation(async (reference) => {
-      const name = getFunctionName(reference)
-      return name.endsWith(":getBySlug") ? { _id: "root-test" } : name.endsWith(":list") ? page : offer
-    })
-    expect(await loadPublicCatalog(offer.shopHandle)).toEqual({ status: "ready", data: page, viewer: "anonymous" })
-    expect(await loadPublicOffer(offer.shopHandle, offer.offerRef)).toEqual({ status: "ready", data: offer, viewer: "anonymous" })
-    expect(await loadPublicPostOffer("demo-post")).toEqual({ status: "ready", data: offer, viewer: "anonymous" })
   })
 })

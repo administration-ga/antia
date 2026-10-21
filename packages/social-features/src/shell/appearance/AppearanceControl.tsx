@@ -12,11 +12,6 @@ const LABEL = "grid gap-1.5 px-2.5 py-2 text-sm font-semibold text-foreground"
    contrôle à 3:1 (`--input`, correctifs P18b), gardé par décision du propriétaire. */
 const SELECT = "min-h-11 w-full rounded-[var(--esp-field-radius,var(--radius))] border border-input bg-card px-3 text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none"
 
-const LABEL = "grid gap-1.5 px-2.5 py-2 text-sm font-semibold text-foreground"
-/* Un champ du système épuré : angle des champs (14 px dans les thèmes ANTSIA), contour de
-   contrôle à 3:1 (`--input`, correctifs P18b), gardé par décision du propriétaire. */
-const SELECT = "min-h-11 w-full rounded-[var(--esp-field-radius,var(--radius))] border border-input bg-card px-3 text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none"
-
 /** Le nuancier complet des réglages possède déjà son choix de thème. */
 export function AppearanceControl({ showTheme = true }: { showTheme?: boolean } = {}) {
   const appearance = useOptionalAppearance()
