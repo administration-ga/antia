@@ -42,19 +42,20 @@ function textField(value: unknown, key: string): string {
   return field
 }
 
-async function request(t: T, path: string, { method = "POST", body, token, origin = PRIMARY_ORIGIN, acceptLanguage }: { method?: "GET" | "POST"; body?: Record<string, unknown>; token?: string; origin?: string; acceptLanguage?: string } = {}) {
+async function request(t: T, path: string, { method = "POST", body, token, origin = PRIMARY_ORIGIN, acceptLanguage, browserCookie }: { method?: "GET" | "POST"; body?: Record<string, unknown>; token?: string; origin?: string; acceptLanguage?: string; browserCookie?: string } = {}) {
   const response = await t.action(async (ctx) => {
     const { createAuth } = await import("./auth")
     const headers = new Headers({ Origin: origin })
     if (body) headers.set("Content-Type", "application/json")
     if (token) headers.set("Authorization", `Bearer ${token}`)
     if (acceptLanguage) headers.set("Accept-Language", acceptLanguage)
+    if (browserCookie !== undefined) headers.set("Better-Auth-Cookie", browserCookie)
     const result = await createAuth(ctx, origin).handler(new Request(`${PRIMARY_ORIGIN}/api/auth${path}`, {
       method,
       headers,
       ...(body ? { body: JSON.stringify(body) } : {}),
     }))
-    return { status: result.status, body: await result.text(), tokenHeader: result.headers.get("set-auth-token") }
+    return { status: result.status, body: await result.text(), tokenHeader: result.headers.get("set-auth-token"), hasBrowserCookie: result.headers.has("set-better-auth-cookie") }
   })
   return { ...response, data: response.body ? JSON.parse(response.body) as unknown : null }
 }
@@ -144,6 +145,19 @@ describe("connexion légère e-mail et SMS réelle dans Better Auth", () => {
     expect(person?.handle).toBeUndefined()
     expect(person?.publishedAt).toBeUndefined()
     expect(await t.run((ctx) => ctx.db.query("networkMemberships").first())).toBeNull()
+  })
+
+  it.each(["email", "phone"] as const)("le transport navigateur %s conserve le corps de session et son cookie", async (channel) => {
+    const t = testConvex({ automaticSessions: false })
+    const code = await issueCode(t, channel)
+    const result = await request(t, channel === "email" ? "/sign-in/email-otp" : "/phone-number/verify", {
+      body: channel === "email" ? { email: EMAIL, otp: code.code } : { phoneNumber: PHONE, code: code.code },
+      browserCookie: "",
+    })
+    expect(result.status).toBe(200)
+    expect(textField(result.data, "token")).toBeTruthy()
+    expect(textField(record(result.data).user, "id")).toBeTruthy()
+    expect(result.hasBrowserCookie).toBe(true)
   })
 
   it.each(["email", "phone"] as const)("un code %s consommé ne peut ouvrir une deuxième session", async (channel) => {
@@ -518,9 +532,34 @@ describe("composition du fournisseur d'identité", () => {
       const options = record(plugin.options)
       if (!Array.isArray(options.config) || options.config.length !== 1) throw new Error("Fournisseur IDN absent")
       const provider = record(options.config[0])
-      return { providerId: provider.providerId, pkce: provider.pkce, scopes: provider.scopes, redirectURI: provider.redirectURI }
+      return { providerId: provider.providerId, pkce: provider.pkce, scopes: provider.scopes, redirectURI: provider.redirectURI, prompt: provider.prompt }
     })
-    expect(config).toEqual({ providerId: "idn", pkce: true, scopes: ["openid", "profile", "email"], redirectURI: `${PRIMARY_ORIGIN}/api/auth/oauth2/callback/idn` })
+    expect(config).toEqual({ providerId: "idn", pkce: true, scopes: ["openid", "profile", "email"], redirectURI: `${PRIMARY_ORIGIN}/api/auth/oauth2/callback/idn`, prompt: "login" })
+  })
+
+  it.each([
+    { transport: "HTTP", browserCookie: undefined },
+    { transport: "SDK navigateur", browserCookie: "" },
+  ])("la vraie demande OAuth ($transport) conserve redirection, PKCE, état et callback", async ({ browserCookie }) => {
+    vi.stubEnv("IDN_CLIENT_ID", "sandbox-client-fixture")
+    vi.stubEnv("IDN_CLIENT_SECRET", "fictional-idn-secret-for-tests")
+    vi.stubEnv("IDN_ISSUER", "https://idn.example.test")
+    const issuer = "https://idn.example.test"
+    const discovery = vi.fn(async () => new Response(JSON.stringify({ issuer, authorization_endpoint: `${issuer}/api/auth/oauth2/authorize`, token_endpoint: `${issuer}/api/auth/oauth2/token` }), { headers: { "Content-Type": "application/json" } }))
+    vi.stubGlobal("fetch", discovery)
+    const t = testConvex({ automaticSessions: false })
+    const result = await request(t, "/sign-in/oauth2", { body: { providerId: "idn", callbackURL: `${PEER_ORIGIN}/bienvenue` }, origin: PEER_ORIGIN, browserCookie })
+    expect(result.status).toBe(200)
+    const url = new URL(textField(result.data, "url"))
+    expect(url.origin).toBe(issuer)
+    expect(url.searchParams.get("prompt")).toBe("login")
+    expect(url.searchParams.get("client_id")).toBe("sandbox-client-fixture")
+    expect(url.searchParams.get("redirect_uri")).toBe(`${PRIMARY_ORIGIN}/api/auth/oauth2/callback/idn`)
+    expect(url.searchParams.get("code_challenge_method")).toBe("S256")
+    expect(url.searchParams.get("code_challenge")).toBeTruthy()
+    expect(url.searchParams.get("state")).toBeTruthy()
+    expect(record(result.data).redirect).toBe(true)
+    expect(result.hasBrowserCookie).toBe(browserCookie !== undefined)
   })
 })
 

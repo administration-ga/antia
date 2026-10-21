@@ -50,7 +50,7 @@ class NativeBoundary extends Component<{ children: ReactNode; onFailure: () => v
 function AnonymousTransport({ controller, env }: { controller: NativeSessionController; env: NativeEnvironment }) {
   const [client] = useState(() => new ConvexReactClient(env.convexUrl, { unsavedChangesWarning: false }))
   useEffect(() => () => { void client.close() }, [client])
-  return <ConvexProvider client={client}><ScrollView keyboardShouldPersistTaps="handled"><NativeEntry controller={controller} webUrl={env.webUrl} /></ScrollView></ConvexProvider>
+  return <ConvexProvider client={client}><ScrollView keyboardShouldPersistTaps="handled"><NativeEntry controller={controller} webUrl={env.webUrl} scheme={env.scheme} /></ScrollView></ConvexProvider>
 }
 
 function MemberTransport({ controller, env, onMemberConfirmed }: { controller: NativeSessionController; env: NativeEnvironment; onMemberConfirmed: (member: MemberCallContext) => void }) {

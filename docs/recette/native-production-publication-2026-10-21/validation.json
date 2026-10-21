@@ -1,0 +1,36 @@
+{
+  "checkedAt": "2026-10-21T13:34:14.463884+00:00",
+  "command": "bun run verify",
+  "exitCode": 0,
+  "baseCommit": "952affaffab2f5ee3101499c2c474639976b1909",
+  "testsPassed": 14483,
+  "suiteTotals": [
+    2713,
+    144,
+    899,
+    65,
+    243,
+    54,
+    2178,
+    4045,
+    877,
+    81,
+    970,
+    84,
+    1389
+  ],
+  "bunTotals": [
+    44,
+    697
+  ],
+  "exactCandidateSourcesVerified": true,
+  "isolatedLocalBackend": true,
+  "productionConvexCommands": false,
+  "productionDataChanges": false,
+  "webDependencyUpgrades": false,
+  "sharedHeadAndIndexPreserved": true,
+  "iosSimulatorUiVerified": false,
+  "iosPhoneAuthVerified": false,
+  "androidSimulatorAuth": "Owner confirmed return with profile in the preceding assisted test",
+  "iosSimulatorBlocker": "Downloaded iOS 17.0.1 runtime rejected by current Apple signature checks; newer runtime and more disk space required"
+}

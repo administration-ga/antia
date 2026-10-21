@@ -30,6 +30,18 @@ beforeEach(() => { vi.useFakeTimers(); vi.stubGlobal("fetch", vi.fn(async () => 
 afterEach(() => { vi.clearAllTimers(); vi.useRealTimers(); vi.unstubAllGlobals(); vi.restoreAllMocks() })
 
 describe("P17b — bearer OTP natif", () => {
+  it("capture le bearer du seul échange natif armé et ignore celui du départ OAuth", async () => {
+    vi.stubGlobal("fetch", vi.fn(async () => reply(TOKEN, { user: USER, session: { id: "native-session", userId: USER.id } })))
+    const { vault, client, items } = await fixture()
+    await client.signIn.oauth2({ providerId: "idn", disableRedirect: true, callbackURL: `${SERVER}/api/auth/native/return` })
+    expect(items.size).toBe(0)
+    await expect(client.$fetch("/native-idn/exchange", { method: "POST", body: { code: "C".repeat(43), verifier: "V".repeat(43) } })).rejects.toThrow("nativeAuthLoginRequired")
+    vault.beginLogin()
+    await client.$fetch("/native-idn/exchange", { method: "POST", body: { code: "C".repeat(43), verifier: "V".repeat(43) } })
+    expect(await vault.readToken()).toBe(TOKEN)
+    expect([...items.values()]).toEqual([TOKEN])
+  })
+
   it("persiste uniquement set-auth-token après une vérification e-mail réussie et authentifiante", async () => {
     vi.stubGlobal("fetch", vi.fn(async () => reply(TOKEN)))
     const { vault, client, items } = await fixture()

@@ -12,7 +12,8 @@
     "android": "expo run:android",
     "typecheck": "tsgo --noEmit -p tsconfig.json",
     "test": "vitest run --passWithNoTests",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "eas-build-post-install": "node scripts/prepare-ios-signing.mjs"
   },
   "dependencies": {
     "@antsia/api": "workspace:*",
@@ -26,6 +27,7 @@
     "convex": "catalog:",
     "expo": "catalog:",
     "expo-crypto": "catalog:",
+    "expo-web-browser": "catalog:",
     "expo-secure-store": "catalog:",
     "expo-system-ui": "catalog:",
     "expo-video": "catalog:",

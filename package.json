@@ -91,7 +91,8 @@
       "@config-plugins/react-native-webrtc": "15.0.2",
       "expo-modules-core": "~57.0.14",
       "expo-dev-client": "~57.0.16",
-      "@expo/config-plugins": "~57.0.9"
+      "@expo/config-plugins": "~57.0.9",
+      "expo-web-browser": "~57.0.2"
     }
   },
   "scripts": {

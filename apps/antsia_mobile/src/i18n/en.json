@@ -2,9 +2,9 @@
   "mobile.locale": "en",
   "mobile.configuration.missing": "ANTSIA on your phone needs its connection settings. This client’s addresses must be configured before use.",
   "mobile.entry.welcome": "Find your network, posts and conversations.",
-  "mobile.entry.idnPending": "Returning from Identité.ga to this app still needs to be connected.",
-  "mobile.entry.webIdn": "Sign up or sign in on the website",
-  "mobile.entry.webSeparate": "Signing in on the website stays in your browser. Use an email or SMS code for this app.",
+  "mobile.entry.idnPending": "Sign in with Identité.ga to return to ANTSIA on this phone.",
+  "mobile.entry.webIdn": "Sign in with Identité.ga",
+  "mobile.entry.webSeparate": "Sign-in returns to this app. You remain in control of your registration and membership.",
   "mobile.entry.email": "Email",
   "mobile.entry.phone": "Phone number in international format",
   "mobile.entry.invalidContact": "Check the email address or international phone number.",
@@ -147,5 +147,6 @@
   "mobile.messages.invalidText": "Write a message between 1 and 4,000 characters.",
   "mobile.messages.retryExact": "Resume this send",
   "mobile.messages.send": "Send",
-  "mobile.messages.conversationTitle": "Conversation"
+  "mobile.messages.conversationTitle": "Conversation",
+  "mobile.entry.webRegistration": "Complete registration on the website"
 }
