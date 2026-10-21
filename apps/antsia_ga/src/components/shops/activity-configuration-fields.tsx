@@ -46,7 +46,7 @@ export function ActivityConfigurationFields({ value, onChange, disabled = false 
     <fieldset disabled={disabled} className="grid gap-3">
       <legend className="mb-2 font-medium">{t("capabilities.label")}</legend>
       <p className="text-sm text-muted-foreground">{t("capabilities.hint")}</p>
-      <div className="grid gap-3 sm:grid-cols-3">{ACTIVITY_CAPABILITIES.map(capability => <label key={capability} className="flex min-h-11 cursor-pointer items-start gap-3 rounded-[var(--ui2-card-radius)] border border-[color:var(--esp-surface-border)] p-[var(--esp-card-padding,16px)]">
+      <div className="grid gap-3 sm:grid-cols-3">{ACTIVITY_CAPABILITIES.map(capability => <label key={capability} className="flex min-h-11 cursor-pointer items-start gap-3 rounded-[var(--ui2-card-radius)] border border-[color:var(--esp-surface-border)] p-4">
         <input type="checkbox" className="mt-1 size-4 accent-primary" checked={value.capabilities.includes(capability)} disabled={disabled || value.capabilities.length === 1 && value.capabilities.includes(capability)} onChange={event => toggleCapability(capability, event.target.checked)} />
         <span><span className="block font-medium">{t(`capabilities.${capability}`)}</span><span className="text-sm text-muted-foreground">{t(`capabilityHints.${capability}`)}</span></span>
       </label>)}</div>

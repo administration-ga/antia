@@ -19,8 +19,8 @@ type MediaCard = FunctionReturnType<typeof api.modules.editorial.directory.list>
 export function MemberEditorialDirectory() {
   const { networkId, personId } = useNetwork()
   const { t } = useTranslation("editorial")
-  return <MemberPage><div className="antsia-page antsia-copy mx-auto grid w-full min-w-0 max-w-6xl gap-5 pb-24 [overflow-wrap:anywhere]">
-    <header className="antsia-page-header min-w-0"><h1 className="antsia-title">{t("directory.title")}</h1><p className="text-muted-foreground">{t("directory.lead")}</p><Link href={routes.mediaHome()} className={`${SHOP_ACTION_CLASS} justify-self-start`}>{t("directory.myMedia")}</Link></header>
+  return <MemberPage><div className="mp-page mp-copy mx-auto grid w-full min-w-0 max-w-6xl gap-5 pb-24 [overflow-wrap:anywhere]">
+    <header className="mp-page-header min-w-0"><h1 className="mp-title">{t("directory.title")}</h1><p className="text-muted-foreground">{t("directory.lead")}</p><Link href={routes.mediaHome()} className={`${SHOP_ACTION_CLASS} justify-self-start`}>{t("directory.myMedia")}</Link></header>
     <DirectoryWindow key={JSON.stringify([networkId, personId])} />
   </div></MemberPage>
 }
@@ -48,7 +48,7 @@ function DirectoryWindow() {
 function DirectoryCard({ media }: { media: MediaCard }) {
   const { t } = useTranslation("editorial")
   return <Card className="h-full"><article className="grid min-w-0 gap-3">
-    <header><h2 className="antsia-subtitle break-words">{media.name}</h2><p className="break-all text-sm text-muted-foreground">@{media.handle}</p></header>
+    <header><h2 className="mp-subtitle break-words">{media.name}</h2><p className="break-all text-sm text-muted-foreground">@{media.handle}</p></header>
     {media.description ? <p className="whitespace-pre-wrap break-words text-sm">{media.description}</p> : null}
     {media.sections.length ? <ul aria-label={t("directory.sections")} className="flex min-w-0 flex-wrap gap-2">{media.sections.map(section => <li key={section.key} className="rounded-full bg-muted px-3 py-1 text-sm">{section.label}</li>)}</ul> : null}
     <Link href={routes.memberMedia(media.handle)} className={`${SHOP_ACTION_CLASS} justify-self-start`}>{t("directory.view")}</Link>

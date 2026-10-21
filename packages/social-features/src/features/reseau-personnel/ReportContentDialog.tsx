@@ -92,12 +92,12 @@ export function ReportContentDialog({ kind, onClose, onSubmit, allowNote = true 
         }}
         style={{
           width: "min(520px, 100%)",
-          padding: "var(--esp-card-padding, 24px)",
-          border: "1px solid var(--esp-raised-border, var(--border))",
-          borderRadius: "var(--esp-primitive-card-radius, 12px)",
+          padding: "24px",
+          border: "1px solid var(--border)",
+          borderRadius: "12px",
           background: "var(--esp-surface-raised, var(--card))",
           color: "var(--foreground)",
-          boxShadow: "var(--esp-surface-shadow, var(--shadow-xl))",
+          boxShadow: "var(--shadow-xl)",
           display: "grid",
           gap: 14,
         }}
@@ -124,9 +124,9 @@ export function ReportContentDialog({ kind, onClose, onSubmit, allowNote = true 
               setReason(event.target.value as ReportReason)
             }
             style={{
-              minHeight: "var(--esp-control-min-size, 40px)",
+              minHeight: "40px",
               border: "1px solid var(--input)",
-              borderRadius: "var(--esp-input-radius, 8px)",
+              borderRadius: "8px",
               background: "var(--card)",
               color: "var(--foreground)",
               padding: "0 10px",

@@ -53,7 +53,7 @@ function OfferCartSelection({ offer, initialSelection }: { offer: CatalogOffer; 
   const [message, setMessage] = useState<string | null>(null)
   const { form, values, selection } = useOfferSelection(offer, initialSelection)
   if (offer.price.mode === "quote" || !offer.variants.length && !["fixed", "unit"].includes(offer.price.mode)) return <p className="text-sm text-muted-foreground">{t("quoteClosed")}</p>
-  return <form className="grid w-full gap-3 rounded-[var(--ui2-card-radius)] border border-[color:var(--esp-surface-border)] bg-background p-[var(--esp-card-padding,16px)]" onSubmit={form.handleSubmit((values) => {
+  return <form className="grid w-full gap-3 rounded-[var(--ui2-card-radius)] border border-[color:var(--esp-surface-border)] bg-background p-4" onSubmit={form.handleSubmit((values) => {
     if (!cart.ready) return
     const current = resolveOfferVariantSelection(offer, values)
     if (!current.canAdd) { form.setError("variantRef", { message: shopT(`variantSelection.states.${current.status}`) }); return }

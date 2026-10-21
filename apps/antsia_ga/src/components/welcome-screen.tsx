@@ -122,15 +122,15 @@ export function WelcomeScreen({ publicPostId, notificationReference, shopContact
 
   const errors = form.formState.errors
   return (
-    <main id="contenu" className="antsia-page antsia-copy mx-auto min-h-dvh w-full max-w-5xl content-center px-4 py-8 sm:px-6 sm:py-12">
-      <header className="antsia-page-header max-w-2xl">
-        <h1 className="antsia-title">{t("antsia:welcome.title")}</h1>
+    <main id="contenu" className="mp-page mp-copy mx-auto min-h-dvh w-full max-w-5xl content-center px-4 py-8 sm:px-6 sm:py-12">
+      <header className="mp-page-header max-w-2xl">
+        <h1 className="mp-title">{t("antsia:welcome.title")}</h1>
         <p className="text-muted-foreground">{t("antsia:welcome.lead")}</p>
         <Button variant="ghost" className="self-start" pending={signingOut} onClick={async () => { setSigningOut(true); await signOutAndRedirect() }}>{t("antsia:nav.signOut")}</Button>
       </header>
       <div className="grid min-w-0 items-start gap-6 min-[960px]:grid-cols-[minmax(0,1fr)_312px]">
         <Card>
-          <form onSubmit={onSubmit} noValidate className="antsia-form-grid">
+          <form onSubmit={onSubmit} noValidate className="mp-form-grid">
             <Field id="displayName" label={t("antsia:welcome.displayNameLabel")} hint={t("antsia:welcome.displayNameHint")} error={errors.displayName?.message}>
               <TextInput
                 id="displayName"
@@ -216,8 +216,8 @@ export function WelcomeScreen({ publicPostId, notificationReference, shopContact
             </Button>
           </form>
         </Card>
-        <aside aria-labelledby="welcome-preview-title" className="antsia-panel antsia-page min-w-0 min-[960px]:sticky min-[960px]:top-6">
-          <header className="antsia-page-header"><h2 id="welcome-preview-title" className="antsia-subtitle">{t("antsia:welcome.previewTitle")}</h2><p className="text-sm text-muted-foreground">{t("antsia:welcome.previewLead")}</p></header>
+        <aside aria-labelledby="welcome-preview-title" className="mp-panel mp-page min-w-0 min-[960px]:sticky min-[960px]:top-6">
+          <header className="mp-page-header"><h2 id="welcome-preview-title" className="mp-subtitle">{t("antsia:welcome.previewTitle")}</h2><p className="text-sm text-muted-foreground">{t("antsia:welcome.previewLead")}</p></header>
           <div className="flex min-w-0 items-center gap-3 rounded-[var(--esp-media-radius)] bg-muted p-4">
             <span aria-hidden="true" className="flex size-12 shrink-0 items-center justify-center rounded-full bg-card font-display text-xl font-bold">{draftDisplayName.trim().slice(0, 1) || <AtSign className="size-5" />}</span>
             <div className="min-w-0"><p className="break-words font-semibold">{draftDisplayName.trim() || t("antsia:welcome.displayNameLabel")}</p><p className="break-all text-sm text-muted-foreground">{draftHandle.trim() ? `@${draftHandle.trim()}` : t("antsia:welcome.handleLabel")}</p></div>

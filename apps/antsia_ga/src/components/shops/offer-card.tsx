@@ -21,11 +21,11 @@ export function OfferMedia({ media, title, t, className = "aspect-square", eager
 export function OfferCard({ offer, audience, locale, t, compact = false, eager = false }: { offer: CatalogOffer; audience: CatalogAudience; locale: string; t: CatalogTranslate; compact?: boolean; eager?: boolean }) {
   const href = offer.kind === "service" ? audience === "public" ? routes.publicProviderOffer(offer.shopHandle, offer.offerRef) : routes.providerOffer(offer.shopHandle, offer.offerRef) : audience === "public" ? routes.publicShopOffer(offer.shopHandle, offer.offerRef) : routes.shopOffer(offer.shopHandle, offer.offerRef)
   const storefront = offer.kind === "service" ? audience === "public" ? routes.publicProvider(offer.shopHandle) : routes.provider(offer.shopHandle) : audience === "public" ? routes.publicStorefront(offer.shopHandle) : routes.storefront(offer.shopHandle)
-  return <article data-offer-card data-offer-compact={compact || undefined} className="flex h-full min-w-0 flex-col overflow-hidden rounded-[var(--ui2-card-radius)] border border-[color:var(--esp-surface-border)] bg-card text-card-foreground shadow-[var(--esp-surface-shadow)] [overflow-wrap:anywhere]">
+  return <article data-offer-card data-offer-compact={compact || undefined} className="flex h-full min-w-0 flex-col overflow-hidden rounded-[var(--ui2-card-radius)] border border-[color:var(--esp-surface-border)] bg-card text-card-foreground shadow-none [overflow-wrap:anywhere]">
     <style>{OFFER_CARD_CSS}</style>
     <Link href={href} prefetch={false} className="block min-w-0 p-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring" aria-label={t("catalog.openOfferNamed", { title: offer.title })}><OfferMedia media={offer.media[0]} title={offer.title} t={t} eager={eager} className={compact ? "aspect-[16/10]" : "aspect-[4/3]"} /></Link>
     {offer.media.length > 1 ? <ul aria-label={t("catalog.offerPhotos")} className="flex min-w-0 snap-x gap-2 overflow-x-auto overscroll-x-contain px-2 pb-2">{offer.media.slice(1).map((media, index) => <li key={index} className="w-24 shrink-0 snap-start"><Link href={href} prefetch={false} aria-label={t("catalog.openOfferPhoto", { title: offer.title, index: index + 2 })} className="block min-h-11 rounded-[var(--esp-media-radius)] border border-border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"><OfferMedia media={media} title={offer.title} t={t} /></Link></li>)}</ul> : null}
-    <div className="flex min-w-0 flex-1 flex-col gap-3 p-[var(--esp-card-padding,16px)]">
+    <div className="flex min-w-0 flex-1 flex-col gap-3 p-4">
       <div className="flex min-w-0 flex-wrap items-center justify-between gap-x-3 gap-y-1">
         <Link href={storefront} prefetch={false} className="inline-flex min-h-11 min-w-0 items-center gap-2 rounded text-sm font-medium text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"><Store className="size-4 shrink-0 text-[color:var(--role-commerce-ink,var(--primary))]" aria-hidden /><span className="break-words">{t("catalog.soldBy", { handle: offer.shopHandle })}</span></Link>
         <span className="rounded-[var(--esp-social-action-radius,var(--ui2-button-radius))] bg-muted px-2 py-1 text-xs font-semibold">{t(`catalog.kinds.${offer.kind}`)}</span>
@@ -38,7 +38,7 @@ export function OfferCard({ offer, audience, locale, t, compact = false, eager =
         {offer.availability.updatedAt !== null ? <p className="text-xs text-muted-foreground">{t("catalog.availability.updated", { date: catalogDate(offer.availability.updatedAt, locale) })}</p> : null}
       </div>
     </div>
-    <div className="offer-card-band mt-auto border-t border-border bg-muted p-[var(--esp-card-padding,16px)]">
+    <div className="offer-card-band mt-auto border-t border-border bg-muted p-4">
       <div className="grid min-w-0 gap-1">
         <h3 className="break-words font-display text-base font-bold leading-snug"><Link href={href} prefetch={false} className="rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">{offer.title}</Link></h3>
         <p className="line-clamp-2 whitespace-pre-wrap break-words text-sm text-muted-foreground">{offer.description || t("catalog.noDescription")}</p>
@@ -55,7 +55,7 @@ export function OfferDetails({ offer, audience, locale, t, providerT, actionSlot
   return <div data-offer-detail-frame><style>{OFFER_DETAIL_CSS}</style><article className="offer-detail-layout min-w-0 gap-6 rounded-2xl border border-border bg-card p-5 text-card-foreground sm:p-7 [overflow-wrap:anywhere]">
     <header className="offer-detail-heading grid min-w-0 gap-3">
       <p className="text-sm font-medium text-muted-foreground">{t(`catalog.kinds.${offer.kind}`)}</p>
-      <Heading className="antsia-title break-words">{offer.title}</Heading>
+      <Heading className="mp-title break-words">{offer.title}</Heading>
       <Link href={storefront} prefetch={false} className={`${linkClass} justify-self-start`}>{t("catalog.soldBy", { handle: offer.shopHandle })}</Link>
       <p className="break-words text-2xl font-semibold">{catalogPrice(offer.price, locale, t)}</p>
       <p className="text-sm text-muted-foreground">{t("catalog.displayedPriceHint")}</p>

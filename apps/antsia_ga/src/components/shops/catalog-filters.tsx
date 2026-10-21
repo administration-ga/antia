@@ -47,7 +47,7 @@ export function CatalogFiltersForm({ handle, filters: search, collections, audie
     onApply(next)
   })
   const categories = COMMERCE_CATALOG_CATEGORIES.filter(category => !current.type || category.kind === current.type)
-  return <details className="min-w-0 rounded-[var(--ui2-card-radius)] border border-border bg-card p-[var(--esp-card-padding,16px)]"><summary className="min-h-11 cursor-pointer font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">{t("filters.title")}</summary><form className="grid min-w-0 gap-5 pt-4 md:grid-cols-2" onSubmit={submit} noValidate>
+  return <details className="min-w-0 rounded-[var(--ui2-card-radius)] border border-border bg-card p-4"><summary className="min-h-11 cursor-pointer font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">{t("filters.title")}</summary><form className="grid min-w-0 gap-5 pt-4 md:grid-cols-2" onSubmit={submit} noValidate>
     <Field id={`${id}-query`} label={t("filters.query")} hint={t("filters.queryHint")} error={form.formState.errors.query?.message}>
       <TextInput id={`${id}-query`} type="search" maxLength={MARKETPLACE_QUERY_MAX} aria-describedby={`${id}-query-hint`} aria-invalid={!!form.formState.errors.query || undefined} {...form.register("query")} />
     </Field>

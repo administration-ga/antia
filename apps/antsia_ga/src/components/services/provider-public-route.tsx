@@ -36,5 +36,5 @@ export async function PublicProviderScreen(props: PublicStorefrontProps) {
   if (!shop.data || !effectiveActivityConfiguration(shop.data.activityConfiguration, shop.data.model).capabilities.includes("services")) notFound()
   const catalog = await loadPublicCatalog(handle, { kind: "service" }, null, handoff)
   if (catalog.status !== "ready") return <PublicShell viewer={catalog.status}><PublicStatus status={catalog.status} locale={locale} /></PublicShell>
-  return <PublicShell viewer={catalog.viewer} specialized={{ kind: "provider", handle }}><div className="antsia-page antsia-copy mx-auto w-full max-w-5xl"><PublicProviderContent storefront={shop.data} catalog={catalog.data} locale={locale} viewer={catalog.viewer} /></div></PublicShell>
+  return <PublicShell viewer={catalog.viewer} specialized={{ kind: "provider", handle }}><div className="mp-page mp-copy mx-auto w-full max-w-5xl"><PublicProviderContent storefront={shop.data} catalog={catalog.data} locale={locale} viewer={catalog.viewer} /></div></PublicShell>
 }

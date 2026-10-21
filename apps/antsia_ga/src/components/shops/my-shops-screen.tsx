@@ -28,7 +28,7 @@ function MyShopsContent() {
   return <ShopFrame title={t("list.title")} lead={t("list.lead")}>
     <ShopLink href={routes.me()}>{t("common.profile")}</ShopLink>
     {shops.isError ? <ShopQueryFailure href={routes.me()} retry={() => void shops.refetch()} /> : shops.data === undefined ? <CenteredStatus label={t("common.loading")} /> : <>
-      {shops.data.items.length === 0 ? <Card><p>{t("list.empty")}</p></Card> : <ul className="grid gap-3">{shops.data.items.map((shop) => <li key={shop.shopId}><Card><div className="flex min-w-0 flex-wrap items-start gap-4"><ShopLogo url={shop.logoUrl} name={shop.name ?? t("list.untitled")} /><div className="grid min-w-0 flex-1 gap-2"><h2 className="antsia-subtitle">{shop.name ?? t("list.untitled")}</h2><p className="text-sm text-muted-foreground">{t(`models.${shop.model}`)} · {t(`states.${shop.storefront}`)}</p><div className="flex flex-wrap gap-2"><ShopLink href={routes.shopEditor(String(shop.shopId))}>{t("list.manage")}</ShopLink>{shop.pageHandle && shop.storefront === "published" ? <ShopLink href={routes.storefront(shop.pageHandle)}>{t("storefront.viewStorefront")}</ShopLink> : null}</div></div></div></Card></li>)}</ul>}
+      {shops.data.items.length === 0 ? <Card><p>{t("list.empty")}</p></Card> : <ul className="grid gap-3">{shops.data.items.map((shop) => <li key={shop.shopId}><Card><div className="flex min-w-0 flex-wrap items-start gap-4"><ShopLogo url={shop.logoUrl} name={shop.name ?? t("list.untitled")} /><div className="grid min-w-0 flex-1 gap-2"><h2 className="mp-subtitle">{shop.name ?? t("list.untitled")}</h2><p className="text-sm text-muted-foreground">{t(`models.${shop.model}`)} · {t(`states.${shop.storefront}`)}</p><div className="flex flex-wrap gap-2"><ShopLink href={routes.shopEditor(String(shop.shopId))}>{t("list.manage")}</ShopLink>{shop.pageHandle && shop.storefront === "published" ? <ShopLink href={routes.storefront(shop.pageHandle)}>{t("storefront.viewStorefront")}</ShopLink> : null}</div></div></div></Card></li>)}</ul>}
       {shops.data.truncated ? <p role="status" className="text-sm text-muted-foreground">{t("list.truncated")}</p> : null}
     </>}
     <StartShopForm />
@@ -47,11 +47,11 @@ function StartShopForm() {
   const pageId = useWatch({ control: form.control, name: "pageId" })
   const configuration = useWatch({ control: form.control, name: "activityConfiguration" })
   useShopDirtyGuard(form.formState.isDirty)
-  return <Card><form noValidate aria-labelledby={`${id}-title`} className="antsia-form-grid" onSubmit={form.handleSubmit(async (values) => {
+  return <Card><form noValidate aria-labelledby={`${id}-title`} className="mp-form-grid" onSubmit={form.handleSubmit(async (values) => {
     if (values.pageId && (pages.isError || !pages.data?.items.some((page) => page.pageId === values.pageId))) { form.setError("pageId", { message: t("start.pageUnavailable") }); return }
     await action.run(() => start({ networkId, model: values.model, activityConfiguration: values.activityConfiguration, ...(values.pageId ? { pageId: values.pageId as Id<"pages"> } : { name: values.name }) }), (created) => router.push(routes.shopEditor(String(created.shopId))))
   })}>
-    <h2 id={`${id}-title`} className="antsia-subtitle">{t("start.title")}</h2>
+    <h2 id={`${id}-title`} className="mp-subtitle">{t("start.title")}</h2>
     <p className="text-sm text-muted-foreground">{t("start.lead")}</p>
     <ActivityConfigurationFields value={effectiveActivityConfiguration(configuration, "products")} disabled={action.pending} onChange={(next) => {
       form.setValue("activityConfiguration", next, { shouldDirty: true, shouldValidate: true })

@@ -63,7 +63,7 @@ export function SignInCard({ compact = false, intent = "sign-in", signOutIncompl
   if (session.status === "loading" || (!signOutIncomplete && (session.status === "restricted" || session.status === "member" || session.status === "welcome"))) return <CenteredStatus label={t("session.checking")} />
 
   return (
-    <div className={compact ? "antsia-panel antsia-copy [&_h2]:font-display [&_h2]:text-xl [&_h2]:font-bold [&_h2]:leading-[1.2]" : "antsia-copy"}>
+    <div className={compact ? "mp-panel mp-copy [&_h2]:font-display [&_h2]:text-xl [&_h2]:font-bold [&_h2]:leading-[1.2]" : "mp-copy"}>
       {signOutIncomplete ? <p role="alert" className="mb-6 rounded-[var(--ui2-card-radius)] border border-transparent bg-muted p-4 text-sm">{tIdentity("signOutIncomplete")}</p> : null}
       <IdentityEntry
         key={intent}

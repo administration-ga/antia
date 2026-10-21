@@ -55,10 +55,10 @@ export function AccessHomeScreen({ intent = "sign-in", signOutIncomplete = false
       </header>
       <main id="contenu" tabIndex={-1} className="flex flex-1 flex-col focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring">
         <div className="mx-auto grid w-full max-w-[1080px] flex-1 content-start items-start gap-6 px-4 py-8 sm:px-6 sm:py-12 min-[960px]:grid-cols-[minmax(0,1fr)_400px] min-[960px]:content-center min-[960px]:items-center min-[960px]:gap-16 min-[960px]:py-16">
-          <header className="antsia-page-header mx-auto max-w-md text-center min-[960px]:mx-0 min-[960px]:max-w-lg min-[960px]:text-left">
+          <header className="mp-page-header mx-auto max-w-md text-center min-[960px]:mx-0 min-[960px]:max-w-lg min-[960px]:text-left">
             <p className="text-sm font-semibold text-primary">{tPublic("home.eyebrow")}</p>
-            <h1 className="antsia-title">{t("access.headline")}</h1>
-            <p className="antsia-copy text-muted-foreground">{t("access.lead")}</p>
+            <h1 className="mp-title">{t("access.headline")}</h1>
+            <p className="mp-copy text-muted-foreground">{t("access.lead")}</p>
           </header>
           <div className="mx-auto w-full min-w-0 max-w-[420px]">
             <SessionProviders>

@@ -69,7 +69,7 @@ export function ReportDecision({ reportId }: { reportId: Id<"reports"> }) {
       <Field id={`${id}-reason`} label={t("moderation.reason")} error={form.formState.errors.reason?.message}><TextArea id={`${id}-reason`} maxLength={DECISION_REASON_MAX} aria-invalid={!!form.formState.errors.reason} aria-describedby={form.formState.errors.reason ? `${id}-reason-error` : undefined} {...form.register("reason")} /></Field>
       <Button type="submit" variant={action === "removal" || action === "suspension" ? "danger" : action === "dismissed" ? "success" : "primary"} pending={pending} disabled={!preview.data?.available && action !== "dismissed"}>{t(`moderation.submit.${action}`)}</Button>
     </fieldset>
-    {error ? <p ref={errorRef} role="alert" tabIndex={-1} className="rounded-[var(--ui2-card-radius)] border border-destructive p-[var(--esp-card-padding,16px)] text-destructive focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">{error}</p> : null}
+    {error ? <p ref={errorRef} role="alert" tabIndex={-1} className="rounded-[var(--ui2-card-radius)] border border-destructive p-4 text-destructive focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">{error}</p> : null}
   </form>
 }
 
@@ -96,7 +96,7 @@ export function PendingDecision({ targetKind, targetId }: { targetKind: Moderati
       <Field id={`${id}-reason`} label={t("moderation.reason")} error={form.formState.errors.reason?.message}><TextArea id={`${id}-reason`} maxLength={DECISION_REASON_MAX} aria-invalid={!!form.formState.errors.reason} aria-describedby={form.formState.errors.reason ? `${id}-reason-error` : undefined} {...form.register("reason")} /></Field>
       <Button type="submit" variant={decision === "approve" ? "success" : "danger"} pending={pending}>{t(decision === "approve" ? "moderation.submit.approve" : "moderation.submit.reject")}</Button>
     </fieldset>
-    {error ? <p ref={errorRef} role="alert" tabIndex={-1} className="rounded-[var(--ui2-card-radius)] border border-destructive p-[var(--esp-card-padding,16px)] text-destructive focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">{error}</p> : null}
+    {error ? <p ref={errorRef} role="alert" tabIndex={-1} className="rounded-[var(--ui2-card-radius)] border border-destructive p-4 text-destructive focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">{error}</p> : null}
   </form>
 }
 
@@ -113,12 +113,12 @@ export function AppealDecision({ appealId, canDecide }: { appealId: Id<"appeals"
     if (!canDecide) return
     return run(() => review({ networkId, appealId, overturn: value.decision === "overturn", reason: value.reason }), () => form.reset(), () => window.confirm(t(`moderation.confirm.${value.decision}`)))
   })}>
-    {!canDecide ? <p id={`${id}-independence`} role="status" className="rounded-[var(--ui2-card-radius)] border border-transparent bg-muted p-[var(--esp-card-padding,16px)] text-sm">{t("moderation.anotherDecider")}</p> : null}
+    {!canDecide ? <p id={`${id}-independence`} role="status" className="rounded-[var(--ui2-card-radius)] border border-transparent bg-muted p-4 text-sm">{t("moderation.anotherDecider")}</p> : null}
     <fieldset disabled={pending || !canDecide} aria-describedby={!canDecide ? `${id}-independence` : undefined} className="flex min-w-0 flex-col gap-3">
       <Field id={`${id}-decision`} label={t("moderation.action")}><select id={`${id}-decision`} {...form.register("decision")} className="min-h-11 w-full rounded-[var(--esp-field-radius)] border border-input bg-muted px-3 text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"><option value="uphold">{t("moderation.uphold")}</option><option value="overturn">{t("moderation.overturn")}</option></select></Field>
       <Field id={`${id}-reason`} label={t("moderation.reason")} error={form.formState.errors.reason?.message}><TextArea id={`${id}-reason`} maxLength={DECISION_REASON_MAX} aria-invalid={!!form.formState.errors.reason} aria-describedby={form.formState.errors.reason ? `${id}-reason-error` : undefined} {...form.register("reason")} /></Field>
       <Button type="submit" variant={decision === "overturn" ? "outline" : "success"} pending={pending}>{t(`moderation.submit.${decision}`)}</Button>
     </fieldset>
-    {error ? <p ref={errorRef} role="alert" tabIndex={-1} className="rounded-[var(--ui2-card-radius)] border border-destructive p-[var(--esp-card-padding,16px)] text-destructive focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">{error}</p> : null}
+    {error ? <p ref={errorRef} role="alert" tabIndex={-1} className="rounded-[var(--ui2-card-radius)] border border-destructive p-4 text-destructive focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">{error}</p> : null}
   </form>
 }

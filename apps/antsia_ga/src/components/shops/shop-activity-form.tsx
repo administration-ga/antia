@@ -43,8 +43,8 @@ export function ShopActivityForm({ shop, onDirty, onNext }: { shop: ShopEditorDa
       if (advance) onNext()
     })
   })
-  return <form noValidate className="antsia-form-grid" onSubmit={save(false)}>
-    <h2 className="antsia-subtitle">{tShops("steps.activity")}</h2>
+  return <form noValidate className="mp-form-grid" onSubmit={save(false)}>
+    <h2 className="mp-subtitle">{tShops("steps.activity")}</h2>
     <p>{t("lead")}</p>
     <Controller control={form.control} name="activityConfiguration" render={({ field }) => <ActivityConfigurationFields value={field.value} disabled={action.pending} onChange={value => { setSaved(false); field.onChange(value) }} />} />
     <p className="text-sm text-muted-foreground">{shop.page ? tShops("activity.existingPage", { handle: shop.page.handle }) : tShops("activity.draftPage")}</p>

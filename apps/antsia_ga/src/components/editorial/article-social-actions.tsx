@@ -82,7 +82,7 @@ function CurrentArticleSocialActions({ context, handle, articleKey, refresh }: {
     if (result?.confirmed && action.current()) await refresh()
   }
   return <section aria-label={t("socialActions")} className="mx-auto mt-6 grid max-w-[76ch] gap-4 rounded-[var(--ui2-card-radius)] border border-border bg-card p-4 text-card-foreground">
-    <h2 className="antsia-subtitle">{t("discussion")}</h2>
+    <h2 className="mp-subtitle">{t("discussion")}</h2>
     <div className="flex flex-wrap gap-3"><Link prefetch={false} href={routes.page(handle)} className={LINK}>{t("socialPage")}</Link><Button type="button" variant="outline" disabled={action.pending} onClick={() => {
       void action.run(async () => { try { await navigator.clipboard.writeText(new URL(browserAppPath(routes.memberArticle(handle, articleKey)), window.location.origin).href); return "copied" as const } catch { return "copyError" as const } }).then(value => { if (value && action.current()) setCopyStatus(value) })
     }}>{t("copy")}</Button><Button type="button" variant="outline" disabled={locked || reported} onClick={() => setReportOpen(true)}>{t(reported ? "reported" : "report")}</Button></div>

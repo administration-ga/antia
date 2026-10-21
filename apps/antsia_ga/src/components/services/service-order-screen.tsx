@@ -115,10 +115,10 @@ export function ServiceOrderForm({ handle, offerRef, fixedOrder, existingRequest
       else setFailure(result.outcome === "refused" ? "order.refused" : "common.unavailable")
     })
   })
-  return <Card><form noValidate className="antsia-form-grid" onSubmit={submit} aria-busy={action.pending || undefined}>
+  return <Card><form noValidate className="mp-form-grid" onSubmit={submit} aria-busy={action.pending || undefined}>
     <ServiceReviewNotice review={review} onReview={reread} />
     <section className="grid min-w-0 gap-4" aria-label={t("order.publishedConditions")}>
-      <h2 className="antsia-subtitle">{t("order.publishedConditions")}</h2>
+      <h2 className="mp-subtitle">{t("order.publishedConditions")}</h2>
       {catalog.isPending || action.pending || catalog.isFetching ? <p role="status">{t("order.conditionsLoading")}</p> : qualification !== null || catalog.isError ? <p role="status" className="text-sm text-muted-foreground">{t(`order.conditions.${catalog.isError ? "unavailable" : qualification ?? "unavailable"}`)}</p> : offer ? <><p className="text-sm">{t("order.publicRevision", { version: offer.revision })}</p><ServiceProfileDetails offer={offer} locale={locale} t={(key, values) => providerT(key, values)} /></> : null}
       <Button type="button" variant="outline" pending={action.pending || catalog.isFetching} disabled={!review.online || intent.locked} onClick={() => { void review.refresh(reread) }}>{t("order.rereadConditions")}</Button>
     </section>

@@ -48,7 +48,7 @@ export async function PublicShell({ children, viewer = "anonymous", specialized 
         <Link href={provider ? routes.publicProviderCatalog(specializedHandle) : routes.publicShopCatalog(specializedHandle)} className={PUBLIC_LINK} aria-current={specialized.kind === "catalog" || specialized.kind === "provider_catalog" ? "page" : undefined}>{appT(provider ? "specializedSpaces:nav.services" : "specializedSpaces:nav.catalog")}</Link>
       </> : null}
     </nav> : null}
-    <main id="contenu" tabIndex={-1} className="antsia-copy mx-auto w-full min-w-0 max-w-7xl px-4 py-6 focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring sm:px-6 sm:py-8">{children}</main>
+    <main id="contenu" tabIndex={-1} className="mp-copy mx-auto w-full min-w-0 max-w-7xl px-4 py-6 focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring sm:px-6 sm:py-8">{children}</main>
     <footer className="border-t border-border">
       <nav aria-label={t("nav.footer")} className="mx-auto flex max-w-7xl flex-wrap items-center gap-x-2 gap-y-1 px-4 py-6 text-muted-foreground sm:px-6">
         <Link href={routes.home()} className={PUBLIC_LINK}>{BRAND_NAME}</Link>

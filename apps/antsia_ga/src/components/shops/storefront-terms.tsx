@@ -4,8 +4,8 @@ import { parseCommerceStorefrontTerms } from "@antsia/social-domain/commerce/sto
 export function StorefrontTerms({ value, locale, t }: { value: unknown; locale: string; t: (key: string, options?: Record<string, unknown>) => string }) {
   const terms = parseCommerceStorefrontTerms(value)
   const money = (amount: number) => new Intl.NumberFormat(locale, { style: "currency", currency: "XAF", currencyDisplay: "code", maximumFractionDigits: 0 }).format(amount)
-  return <section aria-labelledby="storefront-terms-title" className="grid min-w-0 gap-4 rounded-[var(--ui2-card-radius)] border border-border bg-card p-[var(--esp-card-padding,16px)] text-card-foreground [overflow-wrap:anywhere]">
-    <h2 id="storefront-terms-title" className="antsia-subtitle">{t("storefrontTerms.title")}</h2>
+  return <section aria-labelledby="storefront-terms-title" className="grid min-w-0 gap-4 rounded-[var(--ui2-card-radius)] border border-border bg-card p-4 text-card-foreground [overflow-wrap:anywhere]">
+    <h2 id="storefront-terms-title" className="mp-subtitle">{t("storefrontTerms.title")}</h2>
     <p className="text-sm text-muted-foreground">{t("storefrontTerms.declared")}</p>
     <dl className="grid min-w-0 gap-4 sm:grid-cols-2">
       <div><dt className="font-medium">{t("storefrontTerms.pickup")}</dt><dd>{terms?.pickup ? <ul>{terms.pickup.points.map(point => <li key={point.establishmentRef}>{point.label}</li>)}</ul> : t("storefrontTerms.unknown")}</dd></div>

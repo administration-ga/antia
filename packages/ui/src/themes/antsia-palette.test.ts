@@ -207,7 +207,7 @@ const INHERITED_IN_DARK = new Set([
   "--esp-tone-rose", "--esp-tone-rose-bg", "--esp-tone-green", "--esp-tone-green-bg",
   // Valeurs de la base posées sur les primitives réaccordées (le fond de la barre
   // flottante est désormais propre au thème, ADR-0027).
-  "--esp-shadow-card", "--border-light",
+  "--esp-mobilebar-shadow", "--esp-shadow-card", "--border-light",
   // Sélecteur de comptes de l'espace agent : absent du réseau.
   "--esp-segment-on", "--esp-segment-on-fg",
 ])
@@ -370,7 +370,7 @@ describe("charte ANTSIA servie par le moteur — cascade base + thème", () => {
   })
 
   it("corps de texte à 16 px dans les deux thèmes (03 §3), interligne de la couche de base inchangé", () => {
-    for (const mode of MODES) expect(value(mode, "--body-font-size"), mode).toBe("15px")
+    for (const mode of MODES) expect(value(mode, "--body-font-size"), mode).toBe("16px")
     expect(read("../styles/theme.css")).toMatch(/font-size: var\(--body-font-size, 15px\);\s*line-height: 1\.5;/)
   })
 

@@ -90,9 +90,9 @@ const COMMENTS_SURFACE_CSS = `
           flex-direction: column;
           overflow: hidden;
           outline: none;
-          border-radius: var(--esp-primitive-card-radius, 18px) var(--esp-primitive-card-radius, 18px) 0 0;
+          border-radius: 18px 18px 0 0;
           background: var(--esp-surface-raised, var(--ink-0));
-          box-shadow: var(--esp-surface-shadow, var(--shadow-xl));
+          box-shadow: var(--shadow-xl);
           animation: rp-comments-sheet-in 180ms ease-out both;
         }
         .rp-comments-surface button:focus-visible,
@@ -118,8 +118,8 @@ const COMMENTS_SURFACE_CSS = `
             width: clamp(380px, 32vw, 420px);
             height: var(--vv-height, 100dvh);
             max-height: none;
-            border-radius: var(--esp-primitive-card-radius, 16px) 0 0 var(--esp-primitive-card-radius, 16px);
-            box-shadow: var(--esp-surface-shadow, var(--shadow-xl));
+            border-radius: 16px 0 0 16px;
+            box-shadow: var(--shadow-xl);
             animation-name: rp-comments-drawer-in;
           }
         }
@@ -283,11 +283,11 @@ function CommentsSurfaceContent({
               style={{
                 margin: 0,
                 color: "var(--ink-900)",
-                fontFamily: "var(--esp-heading-font-family, inherit)",
-                fontSize: "var(--esp-section-title-size, 17px)",
-                fontWeight: "var(--esp-heading-font-weight, inherit)",
-                lineHeight: "var(--esp-section-title-leading, 1.25)",
-                letterSpacing: "var(--esp-section-title-tracking, normal)",
+                fontFamily: "inherit",
+                fontSize: "17px",
+                fontWeight: "inherit",
+                lineHeight: "1.25",
+                letterSpacing: "normal",
               }}
             >
               {t("commentsSurface.title")}
@@ -314,7 +314,7 @@ function CommentsSurfaceContent({
               display: "inline-grid",
               placeItems: "center",
               border: "none",
-              borderRadius: "var(--esp-primitive-button-radius, 10px)",
+              borderRadius: "10px",
               background: "transparent",
               color: "var(--ink-700)",
               cursor: "pointer",
@@ -392,7 +392,7 @@ function CommentsSurfaceContent({
               <Button
                 variant="outline"
                 size="sm"
-                style={themedActionStyle("cancel", "link", { minHeight: "var(--esp-control-min-size, 32px)" })}
+                style={themedActionStyle("cancel", "link", { minHeight: "32px" })}
                 onClick={() => setReplyTo(null)}
               >
                 {t("commentsSurface.cancel")}
@@ -838,7 +838,7 @@ function CommentAction({
         minHeight: 44,
         padding: "8px 7px",
         border: "none",
-        borderRadius: "var(--esp-primitive-button-radius, 8px)",
+        borderRadius: "8px",
         background: "transparent",
         color: "var(--primary-600)",
         fontFamily: "inherit",

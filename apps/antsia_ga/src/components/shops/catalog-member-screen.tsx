@@ -40,11 +40,11 @@ function MemberCatalogWindow({ handle, search, preview = false, provider = false
   const { t, i18n } = useTranslation("shops")
   const filters = catalogFilters(search)
   const query = useAuthenticatedConvexQuery(api.modules.shops.catalog.list, { networkId, handle, ...filters, paginationOpts: { cursor: search.cursor, numItems: CATALOG_PAGE_SIZE } })
-  if (query.isError) return <div role="alert" className="grid gap-3 rounded-[var(--ui2-card-radius)] border border-[color:var(--esp-surface-border)] bg-card p-[var(--esp-card-padding,16px)] "><p>{t("catalog.unavailable")}</p><Button variant="outline" pending={query.isFetching} onClick={() => { void query.refetch() }}>{t("common.retry")}</Button></div>
+  if (query.isError) return <div role="alert" className="grid gap-3 rounded-[var(--ui2-card-radius)] border border-[color:var(--esp-surface-border)] bg-card p-4 "><p>{t("catalog.unavailable")}</p><Button variant="outline" pending={query.isFetching} onClick={() => { void query.refetch() }}>{t("common.retry")}</Button></div>
   if (query.isPending || !query.data) return <p role="status" className="text-sm text-muted-foreground">{t("catalog.loading")}</p>
   const page: CatalogPage = query.data
   const translate = (key: string, options?: Record<string, unknown>) => t(key, options)
-  return <div className="antsia-page" aria-busy={query.isFetching || undefined}>
+  return <div className="mp-page" aria-busy={query.isFetching || undefined}>
     {!preview ? <CatalogFiltersForm handle={handle} filters={filters} collections={page.collections} audience="member" provider={provider} /> : null}
     {page.indexStatus === "building" ? <p role="status" className="text-sm text-muted-foreground">{t("catalog.indexBuilding")}</p> : null}
     {page.indexStatus !== "building" || page.page.length ? <CatalogGrid page={page} audience="member" locale={i18n.resolvedLanguage ?? "fr"} t={translate} /> : null}
@@ -56,7 +56,7 @@ function MemberCatalogWindow({ handle, search, preview = false, provider = false
 export function MemberCatalogPreview({ handle, kind }: { handle: string; kind?: "product" | "service" }) {
   const { networkId, personId } = useNetwork()
   const { t } = useTranslation("shops")
-  return <section aria-labelledby={`member-shop-catalog-${kind ?? "all"}`} className="grid gap-4"><h2 id={`member-shop-catalog-${kind ?? "all"}`} className="antsia-subtitle">{t(kind === "service" ? "blocks.services" : "catalog.title")}</h2><MemberCatalogWindow key={JSON.stringify([networkId, personId, handle])} handle={handle} search={{ cursor: null, ...(kind ? { kind } : {}) }} preview /></section>
+  return <section aria-labelledby={`member-shop-catalog-${kind ?? "all"}`} className="grid gap-4"><h2 id={`member-shop-catalog-${kind ?? "all"}`} className="mp-subtitle">{t(kind === "service" ? "blocks.services" : "catalog.title")}</h2><MemberCatalogWindow key={JSON.stringify([networkId, personId, handle])} handle={handle} search={{ cursor: null, ...(kind ? { kind } : {}) }} preview /></section>
 }
 
 export function MemberOfferScreen({ handle, offerRef, initialSelection, provider = false }: { handle: string; offerRef: string; initialSelection?: OfferInitialSelection; provider?: boolean }) {

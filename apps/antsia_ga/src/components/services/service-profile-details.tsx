@@ -16,8 +16,8 @@ export function ServiceProfileDetails({ offer, locale, t }: { offer: CatalogOffe
   if (offer.kind !== "service") return null
   const profile = serviceProfileOf(offer)
   const duration = offer.facets?.attributes.find(attribute => attribute.key === "durationMinutes")
-  return <section className="offer-detail-full grid min-w-0 gap-4 rounded-[var(--ui2-card-radius)] border border-border p-[var(--esp-card-padding,16px)]" data-service-profile>
-    <h2 className="antsia-subtitle">{t("profile.title")}</h2>
+  return <section className="offer-detail-full grid min-w-0 gap-4 rounded-[var(--ui2-card-radius)] border border-border p-4" data-service-profile>
+    <h2 className="mp-subtitle">{t("profile.title")}</h2>
     {!profile ? <p className="text-sm text-muted-foreground">{t("profile.unknown")}</p> : <>
       <p className="text-xs text-muted-foreground">{t("profile.declared")}</p>
       <dl className="grid min-w-0 gap-4 sm:grid-cols-2">

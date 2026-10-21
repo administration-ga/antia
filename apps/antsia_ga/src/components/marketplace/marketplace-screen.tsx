@@ -40,8 +40,8 @@ function MarketplaceContent({ search: initialSearch }: { search: MarketplaceSear
   const heading = useRef<HTMLHeadingElement>(null)
   const router = useRouter()
   const apply = (next: MarketplaceSearch) => { router.push(routes.marketplace(next), { scroll: false }); heading.current?.focus() }
-  return <div className="antsia-page mx-auto w-full min-w-0 max-w-7xl [overflow-wrap:anywhere]" data-marketplace>
-    <header className="antsia-page-header min-w-0"><h1 ref={heading} tabIndex={-1} className="antsia-title focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">{t("title")}</h1><p className="text-sm text-muted-foreground">{t("lead")}</p><div className="flex min-w-0 flex-wrap gap-2"><Link href={routes.myShops()} className={SHOP_ACTION_CLASS}>{t("manageActivity")}</Link><Link href={routes.cart()} className={SHOP_ACTION_CLASS}>{t("carts")}</Link></div></header>
+  return <div className="mp-page mx-auto w-full min-w-0 max-w-7xl [overflow-wrap:anywhere]" data-marketplace>
+    <header className="mp-page-header min-w-0"><h1 ref={heading} tabIndex={-1} className="mp-title focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">{t("title")}</h1><p className="text-sm text-muted-foreground">{t("lead")}</p><div className="flex min-w-0 flex-wrap gap-2"><Link href={routes.myShops()} className={SHOP_ACTION_CLASS}>{t("manageActivity")}</Link><Link href={routes.cart()} className={SHOP_ACTION_CLASS}>{t("carts")}</Link></div></header>
     {search ? <>
       <nav aria-label={t("views.label")} className="flex min-w-0 flex-wrap gap-2">{(["products", "shops", "services"] as const).map(view => <Link key={view} href={routes.marketplace(view === search.view ? search : { view, ...(search.query ? { query: search.query } : {}), cursor: null })} prefetch={false} aria-current={view === search.view ? "page" : undefined} className={`${SHOP_ACTION_CLASS} aria-[current=page]:border-primary aria-[current=page]:bg-muted`}>{t(`views.${view}`)}</Link>)}</nav>
       <div className="grid min-w-0 items-start gap-6 lg:grid-cols-[minmax(0,16rem)_minmax(0,1fr)]">
@@ -70,7 +70,7 @@ function FilterPanel({ search, onApply }: { search: MarketplaceSearch; onApply: 
   const { t } = useTranslation("marketplace")
   const wide = useSyncExternalStore(subscribeWidth, wideSnapshot, () => false)
   const [expanded, setExpanded] = useState(false)
-  return <aside aria-label={t("filters.title")} className="min-w-0 rounded-[var(--ui2-card-radius)] border border-[color:var(--esp-surface-border)] bg-card p-[var(--esp-card-padding,16px)] text-card-foreground"><details open={wide || expanded} onToggle={event => { if (!wide) setExpanded(event.currentTarget.open) }} data-marketplace-filter-panel><summary className="min-h-11 cursor-pointer font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring lg:hidden">{t("filters.open")}</summary><div className="min-w-0 pt-3 lg:pt-0"><MarketplaceFilters search={search} onApply={onApply} /></div></details></aside>
+  return <aside aria-label={t("filters.title")} className="min-w-0 rounded-[var(--ui2-card-radius)] border border-[color:var(--esp-surface-border)] bg-card p-4 text-card-foreground"><details open={wide || expanded} onToggle={event => { if (!wide) setExpanded(event.currentTarget.open) }} data-marketplace-filter-panel><summary className="min-h-11 cursor-pointer font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring lg:hidden">{t("filters.open")}</summary><div className="min-w-0 pt-3 lg:pt-0"><MarketplaceFilters search={search} onApply={onApply} /></div></details></aside>
 }
 
 function QueryFailure({ retry, pending }: { retry: () => void; pending: boolean }) {
@@ -148,5 +148,5 @@ function DemoSelection({ search }: { search: MarketplaceSearch }) {
   const id = useId()
   const query = useAuthenticatedConvexQuery(api.modules.shops.marketplace.demoSelection, { networkId, ...offerFilters(search) })
   if (!query.isError && !query.isPending && query.data?.length === 0) return null
-  return <section aria-labelledby={id} className="grid min-w-0 gap-4 border-t border-border pt-6" data-marketplace-demo><h2 id={id} className="antsia-subtitle">{t("demo.title")}</h2><p className="text-sm text-muted-foreground">{t("demo.notice")}</p>{query.isError ? <p role="status">{t("demo.unavailable")}</p> : query.isPending || !query.data ? <p role="status">{t("demo.loading")}</p> : <ul className={gridClass}>{query.data.map((offer, index) => <li key={offer.offerRef} className="min-w-0"><OfferCard offer={offer} eager={index === 0} audience="member" locale={i18n.resolvedLanguage ?? "fr"} t={(key, options) => shopT(key, options)} /></li>)}</ul>}</section>
+  return <section aria-labelledby={id} className="grid min-w-0 gap-4 border-t border-border pt-6" data-marketplace-demo><h2 id={id} className="mp-subtitle">{t("demo.title")}</h2><p className="text-sm text-muted-foreground">{t("demo.notice")}</p>{query.isError ? <p role="status">{t("demo.unavailable")}</p> : query.isPending || !query.data ? <p role="status">{t("demo.loading")}</p> : <ul className={gridClass}>{query.data.map((offer, index) => <li key={offer.offerRef} className="min-w-0"><OfferCard offer={offer} eager={index === 0} audience="member" locale={i18n.resolvedLanguage ?? "fr"} t={(key, options) => shopT(key, options)} /></li>)}</ul>}</section>
 }
