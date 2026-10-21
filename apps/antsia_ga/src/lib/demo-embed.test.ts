@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest"
 
 import { appBasePath } from "./app-path"
-import { demoEntryEnabled } from "./demo-embed"
+import { DEMO_BANNER_HEIGHT_PROPERTY, demoEntryEnabled, demoWorkspaceHeight } from "./demo-embed"
 
 afterEach(() => vi.unstubAllEnvs())
 
@@ -38,5 +38,33 @@ describe("entrée publique de démonstration", () => {
     vi.stubEnv("NEXT_PUBLIC_DEMO_ENTRY_ENABLED", "false")
     expect(appBasePath()).toBe("/demo")
     expect(demoEntryEnabled()).toBe(false)
+  })
+})
+
+describe("hauteur du workspace sous le bandeau démo", () => {
+  it("ne modifie pas la hauteur du site principal", () => {
+    vi.stubEnv("NEXT_PUBLIC_APP_BASE_PATH", "")
+    vi.stubEnv("NEXT_PUBLIC_CONVEX_URL", "https://diligent-avocet-585.convex.cloud")
+    expect(demoWorkspaceHeight()).toBeUndefined()
+  })
+
+  it("retranche la hauteur mesurée uniquement dans le build démo exact", () => {
+    vi.stubEnv("NEXT_PUBLIC_APP_BASE_PATH", "/demo")
+    vi.stubEnv("NEXT_PUBLIC_CONVEX_URL", "https://vivid-hedgehog-655.convex.cloud")
+    expect(DEMO_BANNER_HEIGHT_PROPERTY).toBe("--antsia-demo-banner-height")
+    expect(demoWorkspaceHeight()).toBe("calc(100dvh - var(--antsia-demo-banner-height, 0px))")
+  })
+
+  it.each([
+    ["/demo/", "https://vivid-hedgehog-655.convex.cloud"],
+    ["/demo", "https://diligent-avocet-585.convex.cloud"],
+    ["/demo", "https://vivid-hedgehog-655.convex.cloud/"],
+    ["/demo", "https://vivid-hedgehog-655.convex.cloud:443"],
+    ["/demo", "https://vivid-hedgehog-655.convex.cloud.evil.test"],
+    ["/demo", "http://localhost:3210"],
+  ])("reste sans effet pour une configuration refusée (%s, %s)", (basePath, backend) => {
+    vi.stubEnv("NEXT_PUBLIC_APP_BASE_PATH", basePath)
+    vi.stubEnv("NEXT_PUBLIC_CONVEX_URL", backend)
+    expect(demoWorkspaceHeight()).toBeUndefined()
   })
 })
