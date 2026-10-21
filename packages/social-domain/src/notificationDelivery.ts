@@ -5,7 +5,7 @@ import en from "./i18n/locales/en/notificationDelivery.json"
 
 export const NOTIFICATION_CATEGORIES = ["social", "messages", "calls", "network", "moderation", "files"] as const
 export type NotificationCategory = (typeof NOTIFICATION_CATEGORIES)[number]
-export const PUSH_PROVIDERS = ["web", "expo", "fcm", "apns"] as const
+export const PUSH_PROVIDERS = ["web", "expo", "fcm", "apns", "apns_voip"] as const
 export type PushProvider = (typeof PUSH_PROVIDERS)[number]
 export const DEFAULT_WEEKLY_NOTIFICATION_LIMIT = 35
 export const MAX_WEEKLY_NOTIFICATION_LIMIT = 100

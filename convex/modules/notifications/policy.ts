@@ -1,5 +1,4 @@
 /** PA5 — admission et relecture identiques avant le transport différé. */
-import { isConsentInForce, type ConsentPurpose } from "@antsia/social-domain/consent"
 import { notificationCategory } from "@antsia/social-domain/notificationDelivery"
 import { COMMERCE_NOTIFICATION_CATEGORY, isCommerceNotificationKind } from "@antsia/social-domain/commerceNotifications"
 import { isContextualNotificationKind } from "@antsia/social-domain/contextualMessaging"
@@ -21,16 +20,13 @@ import { liveSignatoryRole } from "../pages/access"
 import { serviceNoticeVisible } from "../diaspora/serviceNotifications"
 import { communityNoticeVisible } from "../diaspora/communityNotifications"
 import { commerceNoticeVisible } from "./commerceAccess"
+import { notificationConsent } from "./consent"
 import { deliveryPreferences } from "./preferences"
 import { isDiasporaCommunityNotificationKind, isDiasporaServiceNotificationKind } from "./tables"
 
 type ReadCtx = Pick<QueryCtx, "db">
 
-export async function notificationConsent(ctx: ReadCtx, networkId: Id<"networks">, personId: Id<"persons">, purpose: ConsentPurpose): Promise<boolean> {
-  const rows = await ctx.db.query("consents").withIndex("by_person_and_purpose", (q) => q.eq("personId", personId).eq("purpose", purpose)).take(101)
-  // Une troncature ne devient jamais un accord ; portée EXACTE du réseau.
-  return rows.length <= 100 && isConsentInForce(rows.filter((row) => row.networkId === networkId), purpose)
-}
+export { notificationConsent } from "./consent"
 
 /**
  * Exception étroite : seule sa propre décision, aucun accès aux contenus du réseau. P16 : un
