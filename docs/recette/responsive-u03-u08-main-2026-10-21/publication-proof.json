@@ -1,0 +1,38 @@
+{
+  "mainCommit": "5851d025af929bb8e2f2fa12c5137b5b6a155412",
+  "sourceFingerprint": "3604667479cddee9cbc4e33a87fc5b5db0e1030900c37dd44f1b1cb5d52d8ae7",
+  "sourceFiles": 2886,
+  "promotedAt": "2026-10-21T17:08:38Z",
+  "production": {
+    "id": "dpl_9Ga4gMfBVAzkh656teP4Vo2Ei8ix",
+    "url": "https://antsia-kcpanvsq4-okatechs-projects-f0102678.vercel.app",
+    "version": "main-5851d025af92-production",
+    "readyState": "READY",
+    "durationSeconds": 132.3
+  },
+  "demo": {
+    "id": "dpl_4Hx7Day2T2jvBbsGuEe6L53VsxVZ",
+    "url": "https://antsia-demo-f3fsnoyd2-okatechs-projects-f0102678.vercel.app",
+    "version": "main-5851d025af92-demo",
+    "readyState": "READY",
+    "durationSeconds": 131.7
+  },
+  "serverSecretsInheritedWithoutReading": true,
+  "convexDeployed": false,
+  "prePromotion": {
+    "childDirect": "302 vers le SSO Vercel",
+    "productionDirect": "302 vers le SSO Vercel",
+    "oldDemoAlias": 404,
+    "publicVersionBefore": "main-086cd43b8686-production",
+    "originMainBefore": "5851d025af929bb8e2f2fa12c5137b5b6a155412"
+  },
+  "publicHealth": {
+    "production": "200 main-5851d025af92-production",
+    "demo": "200 main-5851d025af92-demo"
+  },
+  "csp": {
+    "production": "diligent-avocet-585",
+    "demoPages": "vivid-hedgehog-655"
+  },
+  "rollbackTarget": "https://antsia-m1kry4rya-okatechs-projects-f0102678.vercel.app (main-086cd43b8686-production)"
+}
