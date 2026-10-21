@@ -62,8 +62,9 @@ Aucun `--auto-submit`. Le profil iOS interne exige un compte Apple Developer et 
 préenregistré ; choisir `testflight` uniquement pour un test via App Store Connect, avec une
 soumission distincte. Le réglage local de signature App Store est réservé à `testflight`
 par `NATIVE_IOS_APP_STORE_BUILD=true` ; le profil interne conserve la sélection EAS.
-La version est `0.1.0`, build iOS `2` (mentions de permissions incluses), Android `1` ; les
-incrémenter explicitement avant une nouvelle distribution qui l'exige.
+La version est `0.1.0`, build iOS `3`, Android `2` : ces builds embarquent le correctif du plantage
+qui suivait la confirmation de connexion (PR33). Les builds iOS `2` et Android `1` contiennent ce
+défaut. Incrémenter ces numéros explicitement avant toute nouvelle distribution qui l'exige.
 
 ## Exécution dans le simulateur iOS
 
