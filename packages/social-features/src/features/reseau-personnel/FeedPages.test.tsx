@@ -13,10 +13,12 @@ const state = vi.hoisted(() => ({
   data: undefined as Feed | undefined,
   isLoading: false,
   isError: false,
+  signingOut: false,
   refetch: vi.fn(async () => undefined),
   prepare: vi.fn(),
 }))
 vi.mock("@antsia/api/hooks", () => ({ useAuthenticatedConvexQuery: () => state, useConvexMutationQuery: () => ({ mutate: state.prepare }) }))
+vi.mock("@antsia/api/sign-out-everywhere", () => ({ isSigningOutEverywhere: () => state.signingOut }))
 vi.mock("./PostCard", () => ({ PostCard: ({ post }: { post: { body: string } }) => <p>{post.body}</p> }))
 vi.mock("./PagesSuggestionsRail", () => ({ PagesSuggestionsRail: () => <p>Carrousel des pages</p> }))
 vi.mock("./SuggestionsPanel", () => ({ SuggestionsPanel: () => <p>Carrousel des personnes</p> }))
@@ -32,7 +34,7 @@ function mount(first = true, options: { postPresentation?: EnginePostPresentatio
   return { onTail, onBoundaryShift, rerender: () => view.rerender(element()) }
 }
 
-beforeEach(() => { vi.clearAllMocks(); state.data = undefined; state.isLoading = false; state.isError = false })
+beforeEach(() => { vi.clearAllMocks(); state.data = undefined; state.isLoading = false; state.isError = false; state.signingOut = false })
 
 describe("FeedPage — vérité des états", () => {
   it("prépare une seule fois la première page admise et annonce la préparation", () => {
@@ -48,6 +50,29 @@ describe("FeedPage — vérité des états", () => {
     mount(false)
     expect(state.prepare).not.toHaveBeenCalled()
     expect(screen.queryByText(/Votre fil se prépare/)).toBeNull()
+  })
+
+  it("n'amorce aucun travail si la première réponse arrive pendant la déconnexion", () => {
+    const view = mount()
+    state.signingOut = true
+    state.data = { items: [], nextCursor: null, lacunar: true, preparing: true, preparationKey: "a".repeat(64) }
+    view.rerender()
+    expect(state.prepare).not.toHaveBeenCalled()
+  })
+
+  it("ne prépare pas une nouvelle génération pendant la sortie et ne consomme pas sa clé", () => {
+    state.data = { items: [], nextCursor: null, lacunar: true, preparing: true, preparationKey: "a".repeat(64) }
+    const view = mount()
+    expect(state.prepare).toHaveBeenCalledOnce()
+    state.signingOut = true
+    state.data = { ...state.data, preparationKey: "b".repeat(64) }
+    view.rerender()
+    expect(state.prepare).toHaveBeenCalledTimes(1)
+    // Une prochaine admission réarme la même clé ; le refus local ne l'a pas marquée préparée.
+    const deferredPage = state.data
+    state.data = undefined; view.rerender()
+    state.signingOut = false; state.data = deferredPage; view.rerender()
+    expect(state.prepare).toHaveBeenCalledTimes(2)
   })
 
   it("réveille une version manquante une seule fois et réarme après une erreur d'accès", () => {
