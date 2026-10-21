@@ -37,8 +37,30 @@ Faite dans un candidat isolé (`main` + DIASPORALE `fab55ef`, `bun install --fro
 
 Total : 11 877 tests réussis. Une première passe a été coupée par un disque plein (ENOSPC) : elle a été rejouée.
 
+## Publication — 21 octobre 2026
+
+Publication autorisée par le propriétaire. `main` `5851d02` (PR 29) est en ligne depuis 17 h 08 UTC :
+
+- production : `main-5851d025af92-production` (`dpl_9Ga4gMfBVAzkh656teP4Vo2Ei8ix`) ;
+- démo sous `/demo` : `main-5851d025af92-demo` (`dpl_4Hx7Day2T2jvBbsGuEe6L53VsxVZ`).
+
+Le contexte publié contient les seuls fichiers suivis de `main` et de DIASPORALE `fab55ef`. Les secrets serveur sont hérités des projets, sans lecture. Aucun backend Convex n'a été déployé.
+
+- **Avant promotion.** Enfant et principal directs redirigés vers le SSO Vercel ; ancien alias démo en 404 ; version publique encore `086cd43` ; `main` inchangé.
+- **Après promotion.** Santés HTTP 200 sur les versions exactes. La CSP du principal vise `diligent-avocet-585`, celle des pages démo `vivid-hedgehog-655`.
+- **Recette en ligne.** Compte démo fictif Awa MBA, à 390, 834 et 1 440 px : Réseau, Explorer, Clips, Messages, Moi, Actus, profil, vitrine et fiche d'offre, ainsi que les pages publiques du principal. Aucun débordement horizontal et aucune alerte. Console vide, sans erreur ni avertissement.
+- **Ce que la recette confirme.** Barre basse au téléphone (Accueil, Clips, Messages, Explorer, Profil). Rail compact à 834 px. Rail complet et colonne iCom à 1 440 px. Messages en espace borné, sans défilement du document, avec le bandeau démo retranché. Explorer en grille de médias, images chargées.
+
+Preuve : [`publication-proof.json`](../../../recette/responsive-u03-u08-main-2026-10-21/publication-proof.json). Retour arrière possible : promouvoir `antsia-m1kry4rya` (`main-086cd43b8686`).
+
+### Observations, sans retour arrière
+
+- **Clé brute dans les actus.** La visionneuse affiche la clé `fileScanUnavailable` pour un média dont l'analyse est indisponible. Ce défaut existait déjà dans `main` `086cd43` : les backends renvoient ce motif, absent du contrat front de `main` (`MediaWithheld`, `errors.json`). Correctif à part.
+- **Fiche d'offre à une colonne.** Le cadre boutique de `main` fait 768 px, sous le seuil de 832 px de la mise en page à deux colonnes de U07. Le cadre de 1 024 px venait de l'ancien design (`3507e4a`), pas de U.
+- **Onglet coupé.** À 390 px, l'onglet « Conversations » de Messages se coupe en fin de mot.
+
 ## Limites
 
 - Les suites Convex (`test:convex`) ne sont pas rejouées : `convex/` est identique à `main`.
 - Aucune recette visuelle locale : elle demanderait les secrets d'authentification du poste.
-- La recette en ligne aux trois largeurs suit la publication.
+- La recette en ligne utilise l'émulation de taille du navigateur, pas des appareils physiques. Elle n'a pas joué de conversation ni publié de contenu.
