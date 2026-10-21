@@ -274,19 +274,17 @@ describe("StoriesTray — médaillons déclarés par l'application (ADR-0027)", 
 		expect(onOpen).toHaveBeenCalledTimes(1)
 	})
 
-	it("le ton suit chaque auteur lorsque l'ordre et l'état vu changent", () => {
+	it("l'ordre suit l'état vu de chaque auteur", () => {
 		const awa = group("awa", { unseenCount: 1, author: { ...group("awa").author, displayName: "Awa NDONG" } })
 		const eloise = group("eloise", { author: { ...group("eloise").author, displayName: "Éloïse MBA" } })
 		mocks.byInstant.set(BASE, { groups: [awa, eloise], truncated: false })
 		const view = renderWithEngine(ringsTray())
-		const initialTone = screen.getByRole("button", { name: /Awa NDONG/ }).querySelector(".st-tray-fallback")!.getAttribute("style")
 		expect([...document.querySelectorAll(".st-ring-name")].map((name) => name.textContent)).toEqual(["Vous", "Awa", "Éloïse"])
 
 		mocks.byInstant.set(BASE, { groups: [{ ...awa, unseenCount: 0 }, { ...eloise, unseenCount: 1 }], truncated: false })
 		view.rerender(ringsTray())
 		expect([...document.querySelectorAll(".st-ring-name")].map((name) => name.textContent)).toEqual(["Vous", "Éloïse", "Awa"])
 		const seenAwa = screen.getByRole("button", { name: /Awa NDONG/ })
-		expect(seenAwa.querySelector(".st-tray-fallback")).toHaveAttribute("style", initialTone)
 		expect(seenAwa.querySelector(".esp-story-ring-seen")).not.toBeNull()
 		expect(screen.getByRole("button", { name: /Éloïse MBA/ }).querySelector(".esp-story-ring")).not.toBeNull()
 	})
@@ -302,13 +300,12 @@ describe("StoriesTray — médaillons déclarés par l'application (ADR-0027)", 
 		fireEvent.error(create.querySelector("img")!)
 		expect(create.querySelector("img")).toBeNull()
 		expect(create.querySelector(".st-tray-disc svg")).not.toBeNull()
-		expect(create.querySelector(".st-tray-fallback")).toBeNull()
 		view.rerender(ringsTray(vi.fn(), vi.fn(), "/new-portrait"))
 		expect(create.querySelector("img")).toHaveAttribute("src", "/new-portrait")
 		expect([...document.querySelectorAll(".st-ring-name")].map((name) => name.textContent)).toEqual(["Vous"])
 	})
 
-	it("les médaillons emploient le portrait publié et gardent un auteur sans nom neutre", () => {
+	it("les médaillons emploient le portrait publié et gardent une silhouette à un auteur sans nom", () => {
 		mocks.byInstant.set(BASE, {
 			groups: [
 				group("awa", { author: { ...group("awa").author, displayName: "Awa NDONG", avatarUrl: "/awa-portrait" } }),
@@ -319,9 +316,7 @@ describe("StoriesTray — médaillons déclarés par l'application (ADR-0027)", 
 		renderWithEngine(ringsTray())
 		const awa = screen.getByRole("button", { name: /Awa NDONG/ })
 		expect(awa.querySelector("img")).toHaveAttribute("src", "/awa-portrait")
-		expect(awa.querySelector(".st-tray-fallback")).toBeNull()
 		const unknown = screen.getByRole("button", { name: /Membre du réseau/ })
-		expect(unknown.querySelector(".st-tray-fallback")?.getAttribute("style")).toContain("--esp-avatar-neutral-bg")
 		expect(unknown.querySelector("svg")).not.toBeNull()
 	})
 

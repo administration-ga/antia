@@ -20,7 +20,6 @@
 import { Icon } from "@antsia/ui"
 import { useState, type ReactNode } from "react"
 import { initialsOf } from "../reseau-personnel/Avatar"
-import { identityToneStyle } from "../reseau-personnel/avatar-presentation"
 import type { StoryRingState } from "./stories-tray"
 
 const RING_CLASS: Record<StoryRingState, string> = {
