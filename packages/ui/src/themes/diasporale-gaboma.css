@@ -87,14 +87,14 @@
   --role-danger-on: #ffffff;
   --role-danger-ink: #b50e29;
   --role-message-soft: #d9e1ed; /* fond tonal du bouton Écrire */
-  --role-react-soft: #f7efde; /* fond de l'action réagie */
+  --role-react-soft: color-mix(in srgb, var(--role-react-fill) 18%, var(--card)); /* fond de l'action réagie */
   --primary-fill: #2f67b5; /* aplat d'identité : bouton Publier, Créer, interrupteur */
   --primary-fill-hover: #2a5da3;
   --primary-fill-on: #ffffff; /* texte posé sur l'aplat d'identité */
   --ui2-button-secondary-bg: #d9e1ed; /* bouton secondaire tonal, sans filet */
   --ui2-button-secondary-fg: #2a5fa8;
-  --esp-mobilebar-bg: rgb(247 247 247 / 0.9); /* barre flottante, translucide au-dessus du fil */
-  --esp-fab-shadow: 0 10px 20px -8px rgb(47 103 181 / 0.55);
+  --esp-mobilebar-bg: rgb(247 247 247 / 0.88); /* barre flottante, translucide au-dessus du fil */
+  --esp-fab-shadow: 0 10px 20px -8px color-mix(in srgb, var(--primary-fill) 75%, transparent);
   --esp-tab-active-bg: #d7e0ec; /* onglet actif : pastille tonale */
   --esp-tab-active-fg: #2a5fa8;
 
@@ -103,7 +103,7 @@
   --rp-surface-radius: 24px; /* cartes du fil et surfaces de premier niveau */
   --esp-inline-link-decoration: underline;
   --esp-sticky-header-inset: 4rem; /* barre de membre collante (P18b, A13) */
-  --body-font-size: 16px;
+  --body-font-size: 15px;
   --font-sans: "Inter Variable", "Inter", system-ui, sans-serif; /* Inter embarquée (`styles.css`) */
   --font-display: var(--font-familjen-grotesk, "Familjen Grotesk Variable"), "Inter", system-ui, sans-serif;
 
@@ -270,14 +270,14 @@
   --role-danger-on: #2a0509;
   --role-danger-ink: #ff8592;
   --role-message-soft: #222935; /* fond tonal du bouton Écrire */
-  --role-react-soft: #332b1b; /* fond de l'action réagie */
+  --role-react-soft: color-mix(in srgb, var(--role-react-fill) 18%, var(--card)); /* fond de l'action réagie */
   --primary-fill: #6fa2f0; /* aplat d'identité : bouton Publier, Créer, interrupteur */
   --primary-fill-hover: #80adf2;
   --primary-fill-on: #06142e; /* texte posé sur l'aplat d'identité */
   --ui2-button-secondary-bg: #222935; /* bouton secondaire tonal, sans filet */
   --ui2-button-secondary-fg: #86b2f4;
-  --esp-mobilebar-bg: rgb(20 20 20 / 0.9); /* barre flottante, translucide au-dessus du fil */
-  --esp-fab-shadow: 0 10px 20px -8px rgb(111 162 240 / 0.45);
+  --esp-mobilebar-bg: rgb(20 20 20 / 0.88); /* barre flottante, translucide au-dessus du fil */
+  --esp-fab-shadow: 0 10px 20px -8px color-mix(in srgb, var(--primary-fill) 75%, transparent);
   --esp-tab-active-bg: #232b37; /* onglet actif : pastille tonale */
   --esp-tab-active-fg: #86b2f4;
 
@@ -330,7 +330,7 @@
   --esp-surface-card: var(--card);
   --esp-surface-raised: var(--popover);
   --esp-surface-border: transparent; /* la carte se distingue du fond : aucun contour */
-  --esp-story-ring-fill: conic-gradient(from 210deg, var(--esp-theme-swatch-1), var(--esp-theme-swatch-2), var(--esp-theme-swatch-3), var(--esp-theme-swatch-1)); /* l'anneau « à voir » des actus : les trois couleurs du thème, celles du sélecteur */
+  --esp-story-ring-fill: conic-gradient(from 200deg, var(--esp-theme-swatch-1), var(--esp-theme-swatch-2), var(--esp-theme-swatch-3), var(--esp-theme-swatch-1)); /* l'anneau « à voir » des actus : les trois couleurs du thème, celles du sélecteur */
   --esp-neutral-chip: var(--muted);
   --esp-neutral-hover: var(--muted);
   --esp-mobilebar-border: transparent;

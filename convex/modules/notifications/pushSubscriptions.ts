@@ -21,7 +21,7 @@ function validateCredential(credential: PushCredential): void {
   if (credential.provider === "web") {
     let url: URL
     try { url = new URL(credential.endpoint) } catch { return fail("invalidArgument", { field: "endpoint" }) }
-    const allowed = (process.env.WEB_PUSH_ALLOWED_ORIGINS ?? "").split(",").map((origin) => origin.trim()).filter(Boolean)
+    const allowed = (process.env.WEB_PUSH_ALLOWED_ORIGINS ?? "").split(",").map((origin: string) => origin.trim()).filter(Boolean)
     if (url.protocol !== "https:" || url.username || url.password || url.hash || !allowed.includes(url.origin) || credential.endpoint.length > 4096) return fail("invalidArgument", { field: "endpoint" })
     if (!/^[A-Za-z0-9_-]{80,100}$/u.test(credential.keys.p256dh) || !/^[A-Za-z0-9_-]{20,30}$/u.test(credential.keys.auth)) return fail("invalidArgument", { field: "keys" })
   } else if (credential.provider === "expo") {

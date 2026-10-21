@@ -157,7 +157,7 @@ function ReadyMember({ networkId, personId, handle, canWrite, controller, online
   useEffect(() => {
     const listener = BackHandler.addEventListener("hardwareBackPress", () => {
       if (route.name === "feed") return false
-      setRoute({ name: route.name === "conversation" ? "messages" : "feed" })
+      setRoute(route.name === "conversation" ? { name: "messages" } : { name: "feed" })
       return true
     })
     return () => listener.remove()

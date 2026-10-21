@@ -9,6 +9,7 @@ import { createCallFence, incomingPayloadForBinding, type NativeCallFailure, typ
 import { createDeviceBindingStore, parseStoredCallBinding, type StoredCallBinding } from "./device-binding"
 import { createNativeCallRoom, type NativeCallRoom } from "./native-room"
 import { ownedStoredBindingId } from "./binding-model"
+import { watchNativeQuery } from "./query-watch"
 import { callOwner, EMPTY_CALL, type NativeCallAuthority, type NativeCallEnvironment, type NativeCallSnapshot } from "./types"
 
 type Call = { callId: Id<"calls">; uuid: string; media: NativeCallMedia; incoming: boolean; expiresAt: number; answered: boolean; answerRequested: boolean }
@@ -85,7 +86,7 @@ export function createNativeCallController(getAuthority: () => NativeCallAuthori
   }
   function watchCall(target: Call) {
     callWatch?.()
-    callWatch = backend.client.onUpdate(api.modules.calls.lifecycle.getCall, { networkId: authority().networkId, callId: target.callId }, result => {
+    callWatch = watchNativeQuery(backend.client.watchQuery(api.modules.calls.lifecycle.getCall, { networkId: authority().networkId, callId: target.callId }), result => {
       if (!current() || call !== target) return
       if (!result || result.status !== "active" || ["ended", "missed", "declined"].includes(result.callStatus)) { void finish(null, false); return }
       const held = result.callStatus === "on_hold"
@@ -107,8 +108,7 @@ export function createNativeCallController(getAuthority: () => NativeCallAuthori
     const token = await nativeRequest(() => fresh.action(nativeCalls.requestToken, { ...bound(), callId: target.callId }), 12_000)
     if (!stillCurrent() || call !== target) return
     if (token.media !== target.media) throw new Error("nativeCallMismatch")
-    let ownedRoom: NativeCallRoom
-    ownedRoom = await createNativeCallRoom({
+    const ownedRoom: NativeCallRoom = await createNativeCallRoom({
       current: () => stillCurrent() && call === target,
       changed: () => { if (stillCurrent() && call === target) update({ room: ownedRoom.room }) },
       connected: () => {
@@ -174,7 +174,7 @@ export function createNativeCallController(getAuthority: () => NativeCallAuthori
       update({ phase: "ringing", incoming: true, media: target.media, peer: incoming.caller?.displayName ?? incoming.caller?.handle ?? null, camera: false, muted: true, held: false })
       watchCall(target); armRing(target)
       incomingWatch?.()
-      incomingWatch = backend.client.onUpdate(nativeCalls.resolveIncoming, { ...bound(), reference: admitted.reference as Id<"notificationDeliveryJobs"> }, resolved => {
+      incomingWatch = watchNativeQuery(backend.client.watchQuery(nativeCalls.resolveIncoming, { ...bound(), reference: admitted.reference as Id<"notificationDeliveryJobs"> }), resolved => {
         if (call === target && !target.answered && !target.answerRequested && resolved === null) void finish(null, false)
       }, () => { if (call === target && !target.answered && !target.answerRequested) void finish("session", false) })
       if (pendingAnswers.delete(target.uuid)) await acceptIncoming()
@@ -306,7 +306,7 @@ export function createNativeCallController(getAuthority: () => NativeCallAuthori
     } catch { if (current()) { update({ available: false, failure: "unavailable" }); if (binding) await NativeSystemCalls.clear({ bindingId: binding.bindingId }).catch(() => undefined) } }
     finally {
       if (current() && state.available) {
-        sessionWatch = backend.client.onUpdate(api.modules.platform.authentication.mySession, {}, live => { if (live !== true) void close(true).catch(() => undefined) }, () => { void close(true).catch(() => undefined) })
+        sessionWatch = watchNativeQuery(backend.client.watchQuery(api.modules.platform.authentication.mySession, {}), live => { if (live !== true) void close(true).catch(() => undefined) }, () => { void close(true).catch(() => undefined) })
         heartbeatTimer = setInterval(() => { void heartbeat() }, PRESENCE_HEARTBEAT_INTERVAL_MS)
         void heartbeat()
         expiryTimer = setTimeout(() => { void close(true).catch(() => undefined) }, Math.max(0, Math.min(2_147_483_647, authority().expiresAt - Date.now())))

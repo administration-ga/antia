@@ -26,7 +26,7 @@ async function sendWeb(credential: Extract<PushCredential, { provider: "web" }>,
   const subject = process.env.VAPID_SUBJECT?.trim(), publicKey = process.env.VAPID_PUBLIC_KEY?.trim(), secret = process.env.VAPID_PRIVATE_KEY?.trim()
   if (!subject || !publicKey || !secret) return { status: "unavailable" }
   // Une ancienne souscription ne contourne pas une origine retirée de l'allowlist.
-  const allowed = (process.env.WEB_PUSH_ALLOWED_ORIGINS ?? "").split(",").map((value) => value.trim())
+  const allowed = (process.env.WEB_PUSH_ALLOWED_ORIGINS ?? "").split(",").map((value: string) => value.trim())
   if (!allowed.includes(new URL(credential.endpoint).origin)) return { status: "invalid" }
   if (!(await guard())) return { status: "cancelled" }
   try {

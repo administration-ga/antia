@@ -4,7 +4,15 @@ import react from "@antsia/eslint-config/react"
 import { crossProductRestrictions } from "@antsia/eslint-config/next"
 
 export default defineConfig([
-  ...react,
+  ...react.map((config) => "ignores" in config && Object.keys(config).every((key) => key === "ignores" || key === "name") ? config : {
+    ...config,
+    files: config.files ?? ["**/*.{js,jsx,mjs,ts,tsx,mts,cts}"],
+  }),
+  {
+    files: ["**/*.cjs"],
+    languageOptions: { sourceType: "commonjs", globals: { __dirname: "readonly", process: "readonly" } },
+    rules: { "no-undef": "error", "no-unused-vars": "warn" },
+  },
   {
     files: ["**/*.ts", "**/*.tsx"],
     rules: {
