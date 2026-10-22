@@ -11,6 +11,7 @@ import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 
 import { Button, Card, Field, TextArea, TextInput } from "@/components/shared/controls"
+import { SCREEN_SECTIONS } from "@/components/shared/screen-layout"
 import { SHOP_SELECT_CLASS, ShopFrame, ShopLink, useShopAction } from "@/components/shops/shop-ui"
 import { routes } from "@/lib/routes"
 import { bookingSchema, contactNameOf, EMPTY_BOOKING, serviceDurationMinutes, type BookingValues } from "./service-model"
@@ -72,9 +73,9 @@ function BookingFlow({ handle, offerRef, services, review, onReview }: { handle:
       else setFailure(result.outcome === "refused" ? "booking.refused" : "common.unavailable")
     })
   })
-  return <div className="grid min-w-0 gap-6">
-    <ServiceReviewNotice review={review} onReview={onReview} />
-    <ServiceIntentRecovery intent={intent} onStopped={() => { form.setValue("consent", false); review.invalidate() }} />
+  return <div className={`${SCREEN_SECTIONS} gap-y-6`}>
+    <div className="col-span-full empty:hidden"><ServiceReviewNotice review={review} onReview={onReview} /></div>
+    <div className="col-span-full empty:hidden"><ServiceIntentRecovery intent={intent} onStopped={() => { form.setValue("consent", false); review.invalidate() }} /></div>
     <Card><div className="grid gap-3">
       <Field id={`${id}-service`} label={t("booking.service")}><select id={`${id}-service`} className={SHOP_SELECT_CLASS} disabled={locked} value={serviceRef} onChange={(event) => { setServiceRef(event.target.value); setSlot(null); form.setValue("consent", false) }}>{services.map((item) => <option key={item.serviceRef} value={item.serviceRef}>{t("booking.serviceOption", { label: item.label, duration: serviceDurationMinutes(item.durationMinutes, t) })}</option>)}</select></Field>
       {service?.description ? <p className="text-sm text-muted-foreground">{service.description}</p> : null}

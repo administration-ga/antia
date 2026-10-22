@@ -9,6 +9,7 @@ import { useTranslation } from "react-i18next"
 import { MemberPage } from "@/components/member-chrome"
 import { useCartConnectivity } from "@/components/cart/use-cart-draft"
 import { Button, Card, Field, TextArea, TextInput } from "@/components/shared/controls"
+import { SCREEN_SUBMIT } from "@/components/shared/screen-layout"
 import { SHOP_SELECT_CLASS, ShopLink, useShopAction } from "@/components/shops/shop-ui"
 import { editorialErrorKey, newEditorialBlock, type EditorialDraftValues } from "@/lib/editorial-form"
 import { routes } from "@/lib/routes"
@@ -43,8 +44,9 @@ export function EditorialOperationStatus({ operation }: { operation: ReturnType<
   return <>{!operation.online ? <p role="status">{t("status.offline")}</p> : operation.needsReview ? <p role="status">{t("status.reviewRequired")}</p> : null}{operation.failure ? <p role="alert" className="text-sm text-destructive">{t(operation.failure)}</p> : null}</>
 }
 
+/** Le bureau, la configuration, l'équipe et l'éditeur d'article occupent toute la colonne de l'espace (`shared/screen-layout`). */
 export function EditorialFrame({ title, lead, children }: { title: string; lead?: string; children: ReactNode }) {
-  return <MemberPage><div className="mp-page mp-copy mx-auto grid w-full min-w-0 max-w-6xl gap-5 pb-24 [overflow-wrap:anywhere]"><header className="mp-page-header"><h1 className="mp-title">{title}</h1>{lead ? <p className="text-muted-foreground">{lead}</p> : null}</header>{children}</div></MemberPage>
+  return <MemberPage><div className={`mp-page mp-copy grid w-full min-w-0 gap-5 pb-24 [overflow-wrap:anywhere] ${SCREEN_SUBMIT}`}><header className="mp-page-header"><h1 className="mp-title">{title}</h1>{lead ? <p className="text-muted-foreground">{lead}</p> : null}</header>{children}</div></MemberPage>
 }
 export function EditorialLinks({ pageId, handle, canConfigure = false, canManageGrants = false }: { pageId?: string; handle?: string; canConfigure?: boolean; canManageGrants?: boolean }) {
   const { t } = useTranslation("editorial")

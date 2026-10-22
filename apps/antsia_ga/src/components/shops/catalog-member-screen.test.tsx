@@ -22,6 +22,7 @@ import { MemberCatalogScreen, MemberOfferScreen } from "./catalog-member-screen"
 import { OFFER_DETAIL_CSS } from "./offer-experience-styles"
 import { OfferPostSlot } from "./offer-post-slot"
 import { ShopFrame } from "./shop-ui"
+import { SCREEN_SUBMIT } from "@/components/shared/screen-layout"
 
 const i18n = createAppI18n({ locale: "fr", appResources, defaultNS: "shops" })
 function html(children: ReactNode) { return renderToStaticMarkup(<I18nextProvider i18n={i18n}>{children}</I18nextProvider>) }
@@ -86,7 +87,7 @@ describe("MP05d — catalogue membre filtré", () => {
   })
 })
 
-describe("pleine colonne des espaces spécialisés (décision du propriétaire du 22/10/2026)", () => {
+describe("pleine largeur des écrans de boutique (décisions du propriétaire du 22/10/2026)", () => {
   it("le catalogue, l'offre et la présentation du prestataire occupent toute la colonne, retour aligné sur le titre", () => {
     mocks.query.mockReturnValue({ data: undefined, isError: true, isPending: false, isFetching: false, refetch: vi.fn() })
     for (const screen of [<MemberCatalogScreen key="catalog" handle="atelier" search={{ cursor: null }} />, <MemberOfferScreen key="offer" handle="atelier" offerRef={OFFER_REF} />, <MemberProviderScreen key="provider" handle="atelier" />]) {
@@ -95,10 +96,11 @@ describe("pleine colonne des espaces spécialisés (décision du propriétaire d
       expect(centeringClasses(classes)).toEqual([])
     }
   })
-  it("par défaut, les formulaires et la gestion gardent leur largeur de lecture centrée", () => {
+  it("les formulaires aussi : toute la colonne, et dès 768 px leur bouton d'envoi garde sa largeur", () => {
     const classes = frameClasses(html(<ShopFrame title="Contacter la boutique"><p>Formulaire</p></ShopFrame>))
-    expect(centeringClasses(classes)).toEqual(["mx-auto", "max-w-3xl"])
-    expect(classes).not.toContain("min-[768px]:[&>a]:self-start")
+    expect(centeringClasses(classes)).toEqual([])
+    expect(classes).toContain("min-[768px]:[&>a]:self-start")
+    expect(classes).toContain(SCREEN_SUBMIT)
   })
   it("en deux colonnes, l'en-tête de la fiche reste groupé en haut au lieu de s'étirer sur la hauteur du média", () => {
     expect(OFFER_DETAIL_CSS).toMatch(/\.offer-detail-heading \{ grid-column: 2; grid-row: 1; align-content: start; \}/)

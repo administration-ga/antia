@@ -10,6 +10,7 @@ import { MemberPage } from "@/components/member-chrome"
 import { DemoEntryLink } from "@/components/demo-embed"
 import { useMemberSession } from "@/components/network-shell"
 import { Button, buttonClassName } from "@/components/shared/controls"
+import { SCREEN_SECTIONS } from "@/components/shared/screen-layout"
 import { routes } from "@/lib/routes"
 import { signOutAndRedirect } from "@/lib/sign-out"
 import { meActivityEntries, meEntriesIn, type MeEntry, type MeSection } from "./me-model"
@@ -56,8 +57,8 @@ export function MemberMeScreen() {
 
   return (
     <MemberPage>
-      <div className="mx-auto flex w-full max-w-3xl min-w-0 flex-col gap-8">
-        <header className="flex flex-col gap-2">
+      <div className={`${SCREEN_SECTIONS} gap-y-8`}>
+        <header className="col-span-full flex flex-col gap-2">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <h1 className="text-2xl font-semibold tracking-tight">{t("me.title")}</h1>
             {/* Les paramètres (affichage, thème, langue) à portée dès l'arrivée : au
@@ -71,7 +72,7 @@ export function MemberMeScreen() {
         </header>
 
         {handle !== null ? (
-          <section className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-border bg-card p-4 text-card-foreground">
+          <section className="col-span-full flex flex-wrap items-center justify-between gap-4 rounded-xl border border-border bg-card p-4 text-card-foreground">
             <div className="flex min-w-0 flex-1 items-start gap-3">
               <UserRound aria-hidden="true" className="mt-1 size-6 shrink-0 text-muted-foreground" />
               <div className="min-w-0">

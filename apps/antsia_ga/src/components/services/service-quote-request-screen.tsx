@@ -12,6 +12,7 @@ import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 
 import { Button, Card, Field, TextArea, TextInput } from "@/components/shared/controls"
+import { FORM_FIELDS, SCREEN_SECTIONS } from "@/components/shared/screen-layout"
 import { ShopFrame, ShopLink, ShopQueryFailure, useShopAction } from "@/components/shops/shop-ui"
 import { routes } from "@/lib/routes"
 import { EMPTY_QUOTE_REQUEST, quoteRequestSchema, serviceToday, type QuoteRequestValues } from "./service-model"
@@ -93,9 +94,11 @@ function QuoteRequestForm({ handle, offerRef, offerTitle, threadId, attachments,
     <fieldset disabled={locked} className="grid min-w-0 gap-4">
     <h2 className="text-lg font-semibold">{offerTitle}</h2>
     <p className="text-sm text-muted-foreground">{t("quote.formLead")}</p>
-    <Field id={`${id}-need`} label={t("quote.need")} hint={t("quote.needHint", { max: COMMERCE_SERVICE_LIMITS.quoteNeedMax })} error={errors.need?.message}><TextArea id={`${id}-need`} aria-invalid={errors.need ? true : undefined} aria-describedby={`${id}-need-hint`} {...form.register("need")} /></Field>
-    <Field id={`${id}-constraints`} label={t("quote.constraints")} hint={t("quote.constraintsHint")} error={errors.constraints?.message}><TextArea id={`${id}-constraints`} aria-invalid={errors.constraints ? true : undefined} {...form.register("constraints")} /></Field>
-    <div className="grid gap-4 sm:grid-cols-2">
+    <div className={`${SCREEN_SECTIONS} gap-y-4`}>
+      <Field id={`${id}-need`} label={t("quote.need")} hint={t("quote.needHint", { max: COMMERCE_SERVICE_LIMITS.quoteNeedMax })} error={errors.need?.message}><TextArea id={`${id}-need`} aria-invalid={errors.need ? true : undefined} aria-describedby={`${id}-need-hint`} {...form.register("need")} /></Field>
+      <Field id={`${id}-constraints`} label={t("quote.constraints")} hint={t("quote.constraintsHint")} error={errors.constraints?.message}><TextArea id={`${id}-constraints`} aria-invalid={errors.constraints ? true : undefined} {...form.register("constraints")} /></Field>
+    </div>
+    <div className={`${FORM_FIELDS} gap-y-4`}>
       <Field id={`${id}-date`} label={t("quote.desiredDate")} hint={t("quote.desiredDateHint")} error={errors.desiredDate?.message}><TextInput id={`${id}-date`} type="date" min={serviceToday()} aria-invalid={errors.desiredDate ? true : undefined} {...form.register("desiredDate")} /></Field>
       <Field id={`${id}-quantity`} label={t("quote.quantity")} error={errors.quantity?.message}><TextInput id={`${id}-quantity`} inputMode="numeric" autoComplete="off" aria-invalid={errors.quantity ? true : undefined} {...form.register("quantity")} /></Field>
     </div>

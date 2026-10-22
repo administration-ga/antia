@@ -14,6 +14,7 @@ import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 
 import { Button, Card, CenteredStatus } from "@/components/shared/controls"
+import { SCREEN_SECTIONS } from "@/components/shared/screen-layout"
 import { ShopFrame, ShopLink } from "@/components/shops/shop-ui"
 import { routes } from "@/lib/routes"
 import { useJobApplicationAnnouncement } from "./job-application-announcement"
@@ -41,7 +42,7 @@ function MyApplicationsWindow() {
   if (query.isError) return <Card><div role="alert" className="grid gap-3"><p>{t("applications.unavailable")}</p><Button variant="outline" className="w-full sm:w-auto sm:justify-self-start" onClick={() => { void query.refetch() }}>{t("directory.retry")}</Button></div></Card>
   if (query.isPending || !query.data) return <CenteredStatus label={t("applications.loading")} />
   return <div className="grid gap-3" aria-busy={query.isFetching || undefined}>
-    {query.data.page.length === 0 ? <Card><p>{t("applications.empty")}</p></Card> : <ul className="grid gap-3">{query.data.page.map((application) => <li key={application.applicationId}><ApplicationCard application={application} /></li>)}</ul>}
+    {query.data.page.length === 0 ? <Card><p>{t("applications.empty")}</p></Card> : <ul className={`${SCREEN_SECTIONS} gap-y-3`}>{query.data.page.map((application) => <li key={application.applicationId}><ApplicationCard application={application} /></li>)}</ul>}
     {!query.data.isDone ? <Button variant="outline" className="w-full sm:w-auto sm:justify-self-start" onClick={() => setCursors((current) => [...current, query.data?.continueCursor ?? null])}>{t("applications.more")}</Button> : null}
   </div>
 }

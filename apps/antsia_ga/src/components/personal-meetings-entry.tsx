@@ -20,7 +20,7 @@ export function PersonalMeetingsEntry() {
   const confirmed = query.data?.version === 1 && query.data.state === "closed" && query.data.reason === PERSONAL_MEETINGS_CLOSED_REASON &&
     query.data.participation === false && query.data.discovery === false && query.data.interests === false && query.data.contact === false
   const titleId = useId()
-  return <section aria-labelledby={titleId} className="mx-auto grid w-full max-w-4xl gap-6 px-4 py-6 sm:px-6 sm:py-8 lg:gap-8">
+  return <section aria-labelledby={titleId} className="grid w-full gap-6 px-4 py-6 sm:max-[768px]:px-6 sm:py-8 lg:gap-8 min-[768px]:px-0">
     <header className="grid gap-3">
       <h1 id={titleId} className="mp-title">{t("title")}</h1>
       <p className="max-w-prose text-muted-foreground">{t("lead")}</p>

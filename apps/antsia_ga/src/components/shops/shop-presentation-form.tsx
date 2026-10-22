@@ -10,6 +10,7 @@ import { useEffect, useId, useRef, useState } from "react"
 import { useForm, useWatch } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { Button, Field, TextArea, TextInput } from "@/components/shared/controls"
+import { SCREEN_SECTIONS } from "@/components/shared/screen-layout"
 import { presentationSchema, presentationValues, SHOP_FORM_LIMITS, type PresentationValues, type ShopEditorData } from "./shop-model"
 import { ShopLogo, useShopAction } from "./shop-ui"
 
@@ -30,7 +31,7 @@ export function ShopPresentationForm({ shop, onDirty }: { shop: ShopEditorData; 
     receivedVersion.current = shop.updatedAt
     if (!form.formState.isDirty) form.reset(presentationValues(shop))
   }, [form, shop])
-  return <div className="grid min-w-0 gap-6 xl:grid-cols-2">
+  return <div className={`${SCREEN_SECTIONS} gap-y-6`}>
     <form noValidate className="mp-form-grid" aria-labelledby={`${id}-title`} onSubmit={form.handleSubmit(async (values) => {
       setSaved(false)
       await action.run(() => update({ networkId, shopId: shop.shopId, ...values }), () => { form.reset(values); setSaved(true) })
@@ -86,7 +87,7 @@ function ShopLogoForm({ shop, onDirty }: { shop: ShopEditorData; onDirty: (dirty
       setResultNote(result.withheld ? t(`errors:${result.withheld}`) : t("presentation.logoSaved"))
     })
   }
-  return <section aria-labelledby={`${id}-title`} className="grid min-w-0 gap-3 border-t border-border pt-4 xl:col-span-2">
+  return <section aria-labelledby={`${id}-title`} className="col-span-full grid min-w-0 gap-3 border-t border-border pt-4">
     <h3 id={`${id}-title`} className="font-display text-base font-bold leading-snug">{t("presentation.logo")}</h3>
     <ShopLogo url={shop.logo.url} name={shop.name ?? ""} />
     {shop.logo.withheld ? <p role="status" className="text-sm">{t(`errors:${shop.logo.withheld}`)}</p> : shop.logo.present && !shop.logo.url ? <p className="text-sm">{t("presentation.logoUnavailable")}</p> : null}

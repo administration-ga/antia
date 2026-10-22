@@ -32,14 +32,14 @@ function ModerationContent({ search }: { search: ModerationSearch }) {
   const capacity = useAuthenticatedConvexQuery(api.modules.moderation.cases.myCapacity, { networkId })
   if (capacity.error) return <div role="alert"><h1 className="text-2xl font-semibold">{t("moderation.title")}</h1><p>{t("common.failed")}</p><Button variant="outline" onClick={() => void capacity.refetch()}>{t("common.retry")}</Button></div>
   if (!capacity.data) return <p role="status">{t("common.loading")}</p>
-  if (!capacity.data.networkWide && capacity.data.teams.length === 0) return <div className="mx-auto flex max-w-3xl flex-col gap-4"><h1 className="text-2xl font-semibold">{t("moderation.title")}</h1><p role="status">{t("moderation.noCapacity")}</p><Link href={routes.feed()} className="inline-flex min-h-11 items-center self-start rounded-lg px-3 underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">{t("discovery.back")}</Link></div>
+  if (!capacity.data.networkWide && capacity.data.teams.length === 0) return <div className="flex flex-col gap-4"><h1 className="text-2xl font-semibold">{t("moderation.title")}</h1><p role="status">{t("moderation.noCapacity")}</p><Link href={routes.feed()} className="inline-flex min-h-11 items-center self-start rounded-lg px-3 underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">{t("discovery.back")}</Link></div>
   const window = moderationWindow(search, capacity.data)
   const team = capacity.data.teams.find((item) => item.teamId === window.team)
   const navigate = (view: ModerationView, teamId?: string, cursor?: string) => { if (guard.canLeave()) router.push(routes.moderationView(view, teamId, cursor)) }
   const views: ModerationView[] = ["reports", "pending"]
   if (capacity.data.canReviewAppeals) views.push("appeals")
 
-  return <div className="mx-auto flex max-w-4xl flex-col gap-5 pb-[env(safe-area-inset-bottom)]">
+  return <div className="flex flex-col gap-5 pb-[env(safe-area-inset-bottom)]">
     <header className="flex flex-col gap-2"><h1 className="text-2xl font-semibold">{t("moderation.title")}</h1><p className="text-sm text-muted-foreground">{t("moderation.lead")}</p></header>
     {window.view !== "appeals" ? <Field id={id} label={t("moderation.team")}>
       <select id={id} value={window.team ?? ""} disabled={guard.pending} className="min-h-11 w-full rounded-lg border border-input bg-background px-3 text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" onChange={(event) => navigate(window.view, event.target.value || undefined)}>

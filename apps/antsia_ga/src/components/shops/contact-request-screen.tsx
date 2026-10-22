@@ -81,7 +81,7 @@ function ContactRequest({ handle, offerRef }: { handle: string; offerRef?: strin
     <Field id={id} label={t("contact.request.text")} hint={t("contact.request.hint")} error={form.formState.errors.text ? t("contact.validation.message") : undefined}><TextArea id={id} maxLength={COMMERCIAL_TEXT_MAX} disabled={action.pending} readOnly={frozenText !== null} aria-invalid={!!form.formState.errors.text} aria-describedby={`${id}-hint${form.formState.errors.text ? ` ${id}-error` : ""}`} {...form.register("text")} /></Field>
     {!connectivity.online ? <p role="status" className="text-sm text-muted-foreground">{ux("contact.offline")}</p> : reviewRequired ? <p role="status" className="text-sm text-muted-foreground">{ux("contact.review")}</p> : null}
     {uncertain ? <p role="status" className="text-sm text-muted-foreground">{ux("contact.uncertain")}</p> : null}
-    {reviewRequired || uncertain ? <Button type="button" variant="outline" pending={action.pending} disabled={!connectivity.online || admitted} onClick={refresh}>{ux("contact.refresh")}</Button> : null}
+    {reviewRequired || uncertain ? <Button type="button" variant="outline" className="min-[768px]:justify-self-start" pending={action.pending} disabled={!connectivity.online || admitted} onClick={refresh}>{ux("contact.refresh")}</Button> : null}
     {action.error ? <p role="alert" className="text-sm text-destructive">{action.error}</p> : null}
     <Button type="submit" variant="send" pending={action.pending} disabled={!connectivity.online || reviewRequired || admitted || uncertain && !lookedUp} className="justify-self-start">{uncertain ? ux("contact.retrySame") : t("contact.request.send")}</Button>
   </form></Card>}</ShopFrame>

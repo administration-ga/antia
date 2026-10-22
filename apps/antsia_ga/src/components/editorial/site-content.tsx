@@ -7,10 +7,11 @@ export type EditorialReadingLabels = { all: string; read: string; empty: string;
 const LINK = "inline-flex min-h-11 items-center rounded-[var(--ui2-button-radius)] px-3 py-2 text-sm font-medium underline-offset-4 hover:bg-muted hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring"
 const date = (at: number, locale: string) => new Intl.DateTimeFormat(locale, { dateStyle: "long", timeZone: "Africa/Libreville" }).format(at)
 
-/** La une ne classe que les versions réellement publiées, dans l'ordre du serveur. */
+/** La une ne classe que les versions réellement publiées, dans l'ordre du serveur. Côté membre, elle occupe toute
+ * la colonne de l'espace (`shared/screen-layout`) ; la page publique garde sa largeur. */
 export function EditorialMediaContent({ media, locale, labels, section, cursor, publicView = false }: { media: EditorialPublishedMedia; locale: string; labels: EditorialReadingLabels; section?: string; cursor?: string | null; publicView?: boolean }) {
   const home = (nextSection?: string, nextCursor?: string | null) => publicView ? routes.publicMedia(media.handle, nextSection, nextCursor) : routes.memberMedia(media.handle, nextSection, nextCursor)
-  return <div className="mx-auto grid min-w-0 max-w-6xl gap-7 [overflow-wrap:anywhere]">
+  return <div className={`grid min-w-0 gap-7 [overflow-wrap:anywhere]${publicView ? " mx-auto max-w-6xl" : ""}`}>
     <header className="grid gap-3 border-b border-border pb-6"><p className="text-sm font-medium text-muted-foreground">{labels.publicNotice}</p><h1 className="mp-title">{media.name}</h1>{media.description ? <p className="max-w-3xl whitespace-pre-wrap text-base leading-relaxed text-muted-foreground">{media.description}</p> : null}</header>
     <nav aria-label={labels.contents} className="flex min-w-0 flex-wrap gap-2"><Link prefetch={false} href={home()} aria-current={!section ? "page" : undefined} className={`${LINK} border border-border aria-[current=page]:bg-muted`}>{labels.all}</Link>{media.sections.map(item => <Link key={item.key} prefetch={false} href={home(item.key)} aria-current={section === item.key ? "page" : undefined} className={`${LINK} border border-border aria-[current=page]:bg-muted`}>{item.label}</Link>)}</nav>
     <section className="grid min-w-0 gap-5 sm:grid-cols-2 lg:grid-cols-3" aria-label={labels.all}>
