@@ -153,6 +153,8 @@ export const storefrontCardValidator = v.object({
   logoUrl: v.union(v.string(), v.null()),
   bannerUrl: v.union(v.string(), v.null()),
   model: shopModelValidator,
+  /** Le gabarit d'activité effectif : il range la boutique dans son univers (« Alimentation et restauration » pour `food`). */
+  template: literals(ACTIVITY_TEMPLATES),
   specialty: v.union(v.string(), v.null()),
   serviceArea: v.union(v.string(), v.null()),
   badge: badgeValidator,

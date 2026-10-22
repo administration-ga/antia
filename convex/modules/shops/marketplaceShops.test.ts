@@ -147,6 +147,17 @@ describe("MP04 — gardes de l'annuaire en réseau", () => {
     expect(JSON.stringify(cards)).not.toContain(storageId)
   })
 
+  it("la carte dit le gabarit effectif de la boutique : l'univers Alimentation et restauration la retrouve", async () => {
+    const f = await fixture()
+    const food = await addShop(f, 1)
+    const general = await addShop(f, 2)
+    await f.t.run(async ctx => { await ctx.db.patch(food.shopId, { activityConfiguration: { version: 1, capabilities: ["products"], template: "food", blocks: ["catalog", "publications", "about"] } }) })
+    const cards = (await read(f)).page
+    expect(cards.find(item => item.handle === food.handle)?.template).toBe("food")
+    // Sans configuration enregistrée, le gabarit est celui du modèle historique (« Boutique généraliste »).
+    expect(cards.find(item => item.handle === general.handle)?.template).toBe("general")
+  })
+
   it("relit habilitation, suspension racine, état de page et politique à chaque lecture", async () => {
     const f = await fixture()
     const shop = await addShop(f, 1)

@@ -150,6 +150,8 @@ export const routes = {
   memberDiscover: () => "/explorer",
   /** L'accueil de la marketplace (boutiques en grandes cartes, moments qui défilent) : l'adresse sans paramètre. */
   marketplaceHome: () => "/marketplace",
+  /** L'univers « Alimentation et restauration » (étude des sept univers, § 5.4 et § 12) : ses adresses et ce qu'on y commande. */
+  foodUniverse: () => "/restauration",
   /** Les résultats de la marketplace : une vue (produits par défaut), une recherche, des filtres. */
   marketplace: (search: Partial<MarketplaceSearch> = {}) => {
     const query = marketplaceSearchParams({ ...search, view: search.view ?? "products", cursor: search.cursor ?? null })
@@ -497,6 +499,7 @@ export function memberDestinationFor(
 ): ReseauDestinationMatch | null | undefined {
   if (pathname === routes.feed() && search.get("portee") !== null) return { id: "decouvrir", current: "section" }
   if (pathname === routes.marketplace().split("?")[0]) return { id: "decouvrir", current: "section" }
+  if (pathname === routes.foodUniverse()) return { id: "decouvrir", current: "section" }
   if (pathname.startsWith(routes.storefront("")) && pathname.length > routes.storefront("").length) return { id: "decouvrir", current: "section" }
   if (pathname.startsWith(routes.provider("")) && pathname.length > routes.provider("").length) return { id: "decouvrir", current: "section" }
   if (pathname === routes.myShops() || pathname.startsWith(`${routes.myShops()}/`)) return { id: "profil", current: "section" }
