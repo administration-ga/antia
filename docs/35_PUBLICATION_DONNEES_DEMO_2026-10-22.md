@@ -368,7 +368,37 @@ Autres contrôles :
   - 1 440 px : colonne unique, cartes de 784 px à l'angle de 16 px, médias bord à bord (784 px), aucun débordement ;
   - le paquet servi contient le code des formules (`data-offer-formula`) et l'enveloppe du moteur (`rp-charte-offer`).
   - Aucune des 76 publications de la démo n'est liée à une offre (`commerceOffer`). La formule ne s'y voit donc pas
-    tant qu'une boutique ne publie pas une offre ; elle est vérifiée sur le commit publié (ci-dessus).
+    tant qu'une boutique ne publie pas une offre ; elle est vérifiée sur le commit publié (ci-dessus). Trois liaisons
+    ont ensuite été posées sur la démo, à la demande du propriétaire (section suivante).
 - Variables : aucune modifiée.
 - Suite : la prochaine publication de `main` embarque le lot 3, déjà fusionné : d'abord le backend de la PR 65, puis
   les fronts.
+
+### Formules des boutiques visibles sur la démo : trois publications liées à leur offre
+
+- Demande du propriétaire, le 22/10 : « pose sur la démo quelques publications de boutiques liées à leurs offres, pour voir
+  les formules en ligne ».
+- Posé par l'interface de la démo, avec ses comptes de démonstration (panneau de `/demo/entrer`, un clic, aucun identifiant
+  saisi). Chaque changement de compte passe par « Se déconnecter », qui révoque les sessions du compte partagé : parcours
+  normal de l'application.
+  - Patrick MOUSSAVOU (Commerçant) :
+    - nouvelle publication sans photo au nom d'Épicerie Moussavou Démo (« Démo — Le riz parfumé est de retour en rayon… »,
+      `k57jyma47gb51331zqtyk77x3n8graf3`), liée à `demo:offer:riz-parfume` ;
+    - publication existante du poisson fumé (`k57j90f1dxarrbpryktszhbt598gp48y`), liée à `demo:offer:poisson-fume`.
+  - Jean-Rémy NDONG (Membre vérifié, Studio Objectif Démo) : publication existante du mariage
+    (`k57psh971fyqyvegrsanqg8gds8gp5c1`), liée à `demo:offer:reportage-mariage`.
+- Liaisons faites depuis la gestion de la boutique, étape « 3. Mes offres », bloc « Une offre dans une publication ».
+  On les retire au même endroit (« Retirer l'offre associée ») ; la publication du riz se supprime depuis son menu.
+- Recette en ligne, vue de Jean-Rémy :
+
+| Contrôle | 390 | 1 440 |
+|---|---|---|
+| Riz : photo de l'offre bord à bord, `cover`, sans bandes | ✓ (390 × 488 px) | ✓ (353 × 441 px, panneau prix à droite) |
+| Riz : titre, description, 6 500 XAF, bandeau « Acheter » | ✓ | ✓ |
+| Poisson fumé : bandeau « Acheter » (3 500 XAF) collé sous la photo de la publication | ✓ | — |
+| Mariage : bandeau « Obtenir un devis » (sur devis) | ✓ | — |
+| Colonne unique, carte de 784 px | — | ✓ |
+| Débordement horizontal | aucun | aucun |
+
+- Captures : `docs/etudes/2026-10-22-fil-sans-cadre/recette/lot3-en-ligne-*.jpg`.
+- Production : rien de posé.
