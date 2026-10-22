@@ -12,8 +12,13 @@ import { shopErrorText } from "./shop-model"
 export const SHOP_LINK_CLASS = "inline-flex min-h-11 items-center justify-center gap-2 rounded-lg px-3 text-sm font-medium text-primary underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
 export const SHOP_SELECT_CLASS = "min-h-11 w-full rounded-lg border border-input bg-background px-3 py-2 text-base text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
 
-export function ShopFrame({ title, lead, children }: { title: string; lead?: string; children: ReactNode }) {
-  return <MemberPage><div className="mx-auto flex w-full min-w-0 max-w-3xl flex-col gap-5 pb-24 [overflow-wrap:anywhere]"><header className="grid gap-2"><h1 className="text-2xl font-semibold tracking-tight">{title}</h1>{lead ? <p className="text-muted-foreground">{lead}</p> : null}</header>{children}</div></MemberPage>
+/**
+ * `width="column"` : la vitrine, le catalogue et les offres occupent toute la colonne de leur espace, bords et
+ * écarts sur la gouttière (décision du propriétaire du 22/10/2026) ; dès 768 px, le lien de retour s'aligne sur
+ * le titre (au téléphone, inchangé). Par défaut, les formulaires et la gestion gardent leur largeur de lecture centrée.
+ */
+export function ShopFrame({ title, lead, width = "reading", children }: { title: string; lead?: string; width?: "column" | "reading"; children: ReactNode }) {
+  return <MemberPage><div className={`flex w-full min-w-0 flex-col gap-5 pb-24 [overflow-wrap:anywhere] ${width === "reading" ? "mx-auto max-w-3xl" : "min-[768px]:[&>a]:self-start"}`}><header className="grid gap-2"><h1 className="text-2xl font-semibold tracking-tight">{title}</h1>{lead ? <p className="text-muted-foreground">{lead}</p> : null}</header>{children}</div></MemberPage>
 }
 /** Un lien de boutique ; avec `variant`, il prend la facture d'un bouton (« Poser une question » en tonal des messages, ADR-0027),
  * à sa largeur même dans une grille. */

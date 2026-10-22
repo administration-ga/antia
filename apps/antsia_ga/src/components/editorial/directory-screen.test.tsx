@@ -53,6 +53,14 @@ describe("MP13 — annuaire lecteur de presse", () => {
     expect(container.querySelector("form,input,textarea")).toBeNull()
   })
 
+  it("occupe toute la colonne de l'espace, sans largeur maximale centrée (décision du 22/10/2026)", async () => {
+    mocks.query.mockReturnValue(query(last))
+    await render()
+    const frame = container.querySelector("main > div")
+    expect(frame).not.toBeNull()
+    expect([...frame!.classList].filter(name => name === "mx-auto" || name.startsWith("max-w-"))).toEqual([])
+  })
+
   it("conserve une continuation après une fenêtre vide filtrée puis revient à la précédente", async () => {
     mocks.query.mockReturnValue(query({ page: [], isDone: false, continueCursor: "page-2", filteredWindow: true }))
     await render()

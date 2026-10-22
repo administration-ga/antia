@@ -23,8 +23,9 @@ export const PROFESSIONAL_LANGUAGES = ["fr", "en", "es", "pt", "ar", "de", "zh"]
 const CHECK_CLASS = "flex min-h-11 items-center gap-3 rounded-lg px-2 py-1 text-sm focus-within:ring-2 focus-within:ring-ring"
 export type ManagedProfessionalActivity = { pageId: string; handle: string; name: string }
 
-export function ProfessionalFrame({ title, lead, children }: { title: string; lead?: string; children: ReactNode }) {
-  return <MemberPage><div className="mp-page mp-copy mx-auto grid w-full min-w-0 max-w-5xl gap-5 pb-24 [overflow-wrap:anywhere]"><header className="mp-page-header"><h1 className="mp-title">{title}</h1>{lead ? <p className="text-muted-foreground">{lead}</p> : null}</header>{children}</div></MemberPage>
+/** `width="column"` : l'annuaire occupe toute la colonne de l'espace ; la fiche, l'éditeur et les collaborations gardent leur largeur de lecture. */
+export function ProfessionalFrame({ title, lead, width = "reading", children }: { title: string; lead?: string; width?: "column" | "reading"; children: ReactNode }) {
+  return <MemberPage><div className={`mp-page mp-copy grid w-full min-w-0 gap-5 pb-24 [overflow-wrap:anywhere]${width === "reading" ? " mx-auto max-w-5xl" : ""}`}><header className="mp-page-header"><h1 className="mp-title">{title}</h1>{lead ? <p className="text-muted-foreground">{lead}</p> : null}</header>{children}</div></MemberPage>
 }
 
 export function ProfessionalReportButton({ target }: { target: { kind: "professionalProfile"; id: Id<"professionalProfiles"> } | { kind: "professionalCollaboration"; id: Id<"professionalCollaborations"> } }) {

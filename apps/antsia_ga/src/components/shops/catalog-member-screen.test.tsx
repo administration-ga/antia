@@ -5,9 +5,10 @@ import { createAppI18n } from "@antsia/social-features/i18n"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { appResources } from "@/i18n/resources"
 import { catalogOfferFixture, catalogPageFixture, OFFER_REF } from "./__tests__/catalog-fixtures"
+import { centeringClasses, frameClasses } from "./__tests__/frame-classes"
 
 const mocks = vi.hoisted(() => ({ query: vi.fn() }))
-vi.mock("@antsia/api/engine", () => ({ api: { modules: { shops: { catalog: { list: "list", offer: "offer", postOffer: "postOffer" } } } } }))
+vi.mock("@antsia/api/engine", () => ({ api: { modules: { shops: { catalog: { list: "list", offer: "offer", postOffer: "postOffer" }, shops: { storefront: "storefront" } } } } }))
 vi.mock("@antsia/api/network", () => ({ useNetwork: () => ({ networkId: "root", personId: "reader" }) }))
 vi.mock("@antsia/api/hooks", () => ({ useAuthenticatedConvexQuery: mocks.query }))
 vi.mock("@/components/member-chrome", () => ({ MemberPage: ({ children }: { children: ReactNode }) => <main>{children}</main> }))
@@ -16,8 +17,11 @@ vi.mock("convex/react", () => ({ useConvexAuth: () => ({ isAuthenticated: true }
 vi.mock("@antsia/api/sign-out-everywhere", () => ({ isSigningOutEverywhere: () => false }))
 
 import type { Id } from "@antsia/api/engine"
+import { MemberProviderScreen } from "../services/provider-screen"
 import { MemberCatalogScreen, MemberOfferScreen } from "./catalog-member-screen"
+import { OFFER_DETAIL_CSS } from "./offer-experience-styles"
 import { OfferPostSlot } from "./offer-post-slot"
+import { ShopFrame } from "./shop-ui"
 
 const i18n = createAppI18n({ locale: "fr", appResources, defaultNS: "shops" })
 function html(children: ReactNode) { return renderToStaticMarkup(<I18nextProvider i18n={i18n}>{children}</I18nextProvider>) }
@@ -79,5 +83,24 @@ describe("MP05d — catalogue membre filtré", () => {
     const value = html(<MemberCatalogScreen handle="atelier" search={{ category: ["fashion"], cursor: null }} />)
     expect(value).toContain("en cours d’indexation")
     expect(value).not.toContain("Aucune offre disponible")
+  })
+})
+
+describe("pleine colonne des espaces spécialisés (décision du propriétaire du 22/10/2026)", () => {
+  it("le catalogue, l'offre et la présentation du prestataire occupent toute la colonne, retour aligné sur le titre", () => {
+    mocks.query.mockReturnValue({ data: undefined, isError: true, isPending: false, isFetching: false, refetch: vi.fn() })
+    for (const screen of [<MemberCatalogScreen key="catalog" handle="atelier" search={{ cursor: null }} />, <MemberOfferScreen key="offer" handle="atelier" offerRef={OFFER_REF} />, <MemberProviderScreen key="provider" handle="atelier" />]) {
+      const classes = frameClasses(html(screen))
+      expect(classes).toContain("min-[768px]:[&>a]:self-start")
+      expect(centeringClasses(classes)).toEqual([])
+    }
+  })
+  it("par défaut, les formulaires et la gestion gardent leur largeur de lecture centrée", () => {
+    const classes = frameClasses(html(<ShopFrame title="Contacter la boutique"><p>Formulaire</p></ShopFrame>))
+    expect(centeringClasses(classes)).toEqual(["mx-auto", "max-w-3xl"])
+    expect(classes).not.toContain("min-[768px]:[&>a]:self-start")
+  })
+  it("en deux colonnes, l'en-tête de la fiche reste groupé en haut au lieu de s'étirer sur la hauteur du média", () => {
+    expect(OFFER_DETAIL_CSS).toMatch(/\.offer-detail-heading \{ grid-column: 2; grid-row: 1; align-content: start; \}/)
   })
 })

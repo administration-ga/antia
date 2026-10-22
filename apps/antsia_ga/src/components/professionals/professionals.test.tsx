@@ -295,3 +295,16 @@ describe("MP09 — décisions privées et iCom contextualisé", () => {
     expect(container.textContent).not.toContain("professionals:")
   })
 })
+
+describe("pleine colonne des espaces spécialisés (décision du propriétaire du 22/10/2026)", () => {
+  const centering = () => [...(container.querySelector("main > div")?.classList ?? [])].filter(name => name === "mx-auto" || name.startsWith("max-w-"))
+  it("l'annuaire occupe toute la colonne ; la fiche et l'éditeur gardent leur largeur de lecture", async () => {
+    await render(<MemberProfessionalDirectory />)
+    expect(container.querySelector("main > div")).not.toBeNull()
+    expect(centering()).toEqual([])
+    await render(<MemberProfessionalProfile handle="pro.demo" />)
+    expect(centering()).toEqual(["mx-auto", "max-w-5xl"])
+    await render(<ProfessionalProfileEditor />)
+    expect(centering()).toEqual(["mx-auto", "max-w-5xl"])
+  })
+})

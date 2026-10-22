@@ -18,7 +18,7 @@ export const OFFER_DETAIL_CSS = `
 [data-offer-detail-frame] .offer-detail-layout { display: grid; grid-template-columns: minmax(0, 1fr); }
 @container offer-detail (min-width: 832px) {
   [data-offer-detail-frame] .offer-detail-layout { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  [data-offer-detail-frame] .offer-detail-heading { grid-column: 2; grid-row: 1; }
+  [data-offer-detail-frame] .offer-detail-heading { grid-column: 2; grid-row: 1; align-content: start; }
   [data-offer-detail-frame] .offer-detail-media { grid-column: 1; grid-row: 1; }
   [data-offer-detail-frame] .offer-detail-full { grid-column: 1 / -1; }
 }
