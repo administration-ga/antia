@@ -213,6 +213,7 @@ export async function cardOf(ctx: ReadCtx, shop: Doc<"shops">, page: Doc<"pages"
     logoUrl,
     bannerUrl,
     model: shop.model,
+    template: effectiveActivityConfiguration(shop.activityConfiguration, shop.model).template,
     specialty: shop.specialty ?? null,
     serviceArea: shop.serviceArea ?? null,
     badge: computePageBadge(page.trust),

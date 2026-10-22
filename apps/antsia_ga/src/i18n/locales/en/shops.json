@@ -523,7 +523,9 @@
     "empty": "You have not prepared a storefront yet.",
     "untitled": "Activity in preparation",
     "manage": "Prepare and manage",
-    "truncated": "This list may be incomplete. Some activities you manage may not appear."
+    "truncated": "This list may be incomplete. Some activities you manage may not appear.",
+    "viewPage": "View my page",
+    "clients": "My customers"
   },
   "start": {
     "title": "Prepare a storefront",
@@ -750,5 +752,8 @@
     },
     "models": "Models of {{title}}",
     "actionLabel": "{{action}}: {{title}}"
+  },
+  "nav": {
+    "myShop": "My shop"
   }
 }

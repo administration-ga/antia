@@ -112,5 +112,16 @@
     "noShops": "No storefront has been published in your network yet.",
     "sectionFailed": "This section cannot be loaded right now.",
     "sellerLead": "Do you offer products or services?"
+  },
+  "food": {
+    "title": "Food and restaurants",
+    "lead": "Restaurants, caterers and grocers in the network. Order from a place, then pay on handover.",
+    "allMarketplace": "The whole marketplace",
+    "retry": "Retry",
+    "empty": "No food or restaurant place is open in this network yet.",
+    "openActivity": "Open my business",
+    "shops": "Places",
+    "offers": "To order",
+    "demoOffers": "To order — demo selection"
   }
 }

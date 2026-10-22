@@ -125,6 +125,10 @@
       "conference": {
         "label": "Conference",
         "description": "Prepare a broadcast in this network."
+      },
+      "activite": {
+        "label": "My business",
+        "description": "Create or manage your shop and your services."
       }
     }
   },

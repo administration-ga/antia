@@ -160,6 +160,12 @@ describe("reseauCreationChoices — « Créer » ouvre un choix réel", () => {
 		expect(byKind.album).toMatch(/^\/personne\/awa\.ndong/)
 	})
 
+	it("offre « Mon activité » quand l'application sert la gestion des activités, avec son adresse", () => {
+		const choices = reseauCreationChoices({ handle: null, liveAvailable: false }, { ...ROUTES, myActivity: () => "/mes-activites-test" })
+		expect(choices.map((choice) => choice.entry.kind)).toEqual(["publication", "actu", "evenement", "activite"])
+		expect(choices.find((choice) => choice.entry.kind === "activite")?.href).toBe("/mes-activites-test")
+	})
+
 	it("retire la conférence quand l'application ne sert pas le direct, l'album sans identifiant publié", () => {
 		const kinds = reseauCreationChoices({ handle: null, liveAvailable: false }, ROUTES).map((choice) => choice.entry.kind)
 		expect(kinds).toEqual(["publication", "actu", "evenement"])

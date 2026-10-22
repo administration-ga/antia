@@ -112,5 +112,16 @@
     "noShops": "Aucune vitrine n’est encore publiée dans votre réseau.",
     "sectionFailed": "Cette section ne peut pas être chargée pour le moment.",
     "sellerLead": "Vous proposez des produits ou des services ?"
+  },
+  "food": {
+    "title": "Alimentation et restauration",
+    "lead": "Restaurants, traiteurs et épiceries du réseau. Commandez auprès d'une adresse, puis réglez à la remise.",
+    "allMarketplace": "Toute la marketplace",
+    "retry": "Réessayer",
+    "empty": "Aucune adresse d'alimentation ou de restauration n'est encore ouverte dans ce réseau.",
+    "openActivity": "Ouvrir mon activité",
+    "shops": "Les adresses",
+    "offers": "À commander",
+    "demoOffers": "À commander — sélection de démonstration"
   }
 }

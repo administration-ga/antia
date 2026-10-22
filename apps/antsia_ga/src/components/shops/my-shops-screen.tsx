@@ -15,7 +15,8 @@ import { Button, Card, CenteredStatus, Field, TextInput } from "@/components/sha
 import { SCREEN_SECTIONS } from "@/components/shared/screen-layout"
 import { routes } from "@/lib/routes"
 import { SHOP_FORM_LIMITS, startShopSchema, type StartShopValues } from "./shop-model"
-import { ShopFrame, ShopLink, ShopLogo, ShopQueryFailure, SHOP_SELECT_CLASS, useShopAction, useShopDirtyGuard } from "./shop-ui"
+import { ShopDashboardCard } from "./shop-dashboard-card"
+import { ShopFrame, ShopLink, ShopQueryFailure, SHOP_SELECT_CLASS, useShopAction, useShopDirtyGuard } from "./shop-ui"
 
 export function MyShopsScreen() {
   const { networkId, personId } = useNetwork()
@@ -31,7 +32,7 @@ function MyShopsContent() {
     <div className={`${SCREEN_SECTIONS} gap-y-5`}>
       <div className="grid min-w-0 content-start gap-5">
         {shops.isError ? <ShopQueryFailure href={routes.me()} retry={() => void shops.refetch()} /> : shops.data === undefined ? <CenteredStatus label={t("common.loading")} /> : <>
-          {shops.data.items.length === 0 ? <Card><p>{t("list.empty")}</p></Card> : <ul className={`${SCREEN_SECTIONS} gap-y-3`}>{shops.data.items.map((shop) => <li key={shop.shopId}><Card><div className="flex min-w-0 flex-wrap items-start gap-4"><ShopLogo url={shop.logoUrl} name={shop.name ?? t("list.untitled")} /><div className="grid min-w-0 flex-1 gap-2"><h2 className="mp-subtitle">{shop.name ?? t("list.untitled")}</h2><p className="text-sm text-muted-foreground">{t(`models.${shop.model}`)} · {t(`states.${shop.storefront}`)}</p><div className="flex flex-wrap gap-2"><ShopLink href={routes.shopEditor(String(shop.shopId))}>{t("list.manage")}</ShopLink>{shop.pageHandle && shop.storefront === "published" ? <ShopLink href={routes.storefront(shop.pageHandle)}>{t("storefront.viewStorefront")}</ShopLink> : null}</div></div></div></Card></li>)}</ul>}
+          {shops.data.items.length === 0 ? <Card><p>{t("list.empty")}</p></Card> : <ul className={`${SCREEN_SECTIONS} gap-y-3`}>{shops.data.items.map((shop) => <li key={shop.shopId}><ShopDashboardCard shop={{ ...shop, shopId: String(shop.shopId) }} t={(key, options) => t(key, options)} /></li>)}</ul>}
           {shops.data.truncated ? <p role="status" className="text-sm text-muted-foreground">{t("list.truncated")}</p> : null}
         </>}
       </div>

@@ -88,7 +88,7 @@ function OfferRail({ kind, title, href }: { kind: CatalogOffer["kind"]; title: s
   return <OfferCards title={title} href={href} linkLabel={t("home.seeAll")} offers={query.data.page} />
 }
 
-function OfferCards({ title, href, linkLabel, offers, level }: { title: string; href?: string; linkLabel?: string; offers: CatalogOffer[]; level?: 2 | 3 }) {
+export function OfferCards({ title, href, linkLabel, offers, level }: { title: string; href?: string; linkLabel?: string; offers: CatalogOffer[]; level?: 2 | 3 }) {
   const { t: shopT, i18n } = useTranslation("shops")
   return <Rail size="product" title={title} href={href} linkLabel={linkLabel} level={level}>{offers.map((offer, index) => <OfferCard key={offer.offerRef} offer={offer} audience="member" locale={i18n.resolvedLanguage ?? "fr"} t={(key, options) => shopT(key, options)} eager={index === 0} action={<OfferQuickAdd offer={offer} />} />)}</Rail>
 }

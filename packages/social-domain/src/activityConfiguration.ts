@@ -1,7 +1,8 @@
 /** MP02 : présentation d'une activité, sans permission commerciale ni donnée économique. */
 export const ACTIVITY_CONFIGURATION_VERSION = 1 as const
 export const ACTIVITY_CAPABILITIES = ["products", "services", "media"] as const
-export const ACTIVITY_TEMPLATES = ["general", "fashion", "artisan", "local", "expert", "media"] as const
+/** `food` : l'univers « Alimentation et restauration » (étude des sept univers, § 5.4 et § 7.4), distinct de la mode. */
+export const ACTIVITY_TEMPLATES = ["general", "fashion", "food", "artisan", "local", "expert", "media"] as const
 export const ACTIVITY_BLOCKS = ["catalog", "services", "publications", "about"] as const
 export type ActivityCapability = typeof ACTIVITY_CAPABILITIES[number]
 export type ActivityTemplate = typeof ACTIVITY_TEMPLATES[number]
