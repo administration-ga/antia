@@ -17,6 +17,7 @@ vi.mock("@antsia/api/network", () => ({ useNetwork: () => { if (mocks.forbidPriv
 vi.mock("convex/react", () => ({ useConvexAuth: () => ({ isAuthenticated: true }) }))
 vi.mock("@antsia/api/sign-out-everywhere", () => ({ isSigningOutEverywhere: () => false }))
 vi.mock("@/components/member-chrome", () => ({ MemberPage: ({ children }: { children: ReactNode }) => children }))
+vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }) }))
 import { OfferCartActions, OfferShareButton, PublicOfferSelection } from "./offer-cart-actions"
 const i18n = createAppI18n({ locale: "fr", appResources, defaultNS: "cart" })
 let root: Root, container: HTMLDivElement

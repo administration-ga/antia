@@ -71,7 +71,8 @@ export function MarketplaceFilters({ search, onApply }: { search: MarketplaceSea
       <Field id={`${id}-sort`} label={t("filters.sort")}><select id={`${id}-sort`} className={SHOP_SELECT_CLASS} {...form.register("sort")}>{(hasQuery ? ["relevance"] as const : ["newest", "price_asc", "price_desc"] as const).map(sort => <option key={sort} value={sort}>{t(`sorts.${sort}`)}</option>)}</select></Field>
     </> : null}
     {form.formState.errors.root?.message ? <p role="alert" className="text-sm text-destructive">{form.formState.errors.root.message}</p> : null}
-    <div className="flex flex-wrap gap-2"><Button type="submit" variant="commerce">{t("filters.apply")}</Button><Button type="button" variant="outline" onClick={() => onApply({ view: search.view, cursor: null })}>{t("filters.reset")}</Button></div>
+    {/* Dans le tiroir, la validation reste visible en bas pendant que les filtres défilent. */}
+    <div className="sticky bottom-0 z-10 -mx-4 flex flex-wrap gap-2 border-t border-border bg-popover px-4 py-3" data-filter-actions><Button type="submit" variant="commerce">{t("filters.apply")}</Button><Button type="button" variant="outline" onClick={() => onApply({ view: search.view, cursor: null })}>{t("filters.reset")}</Button></div>
   </form>
 }
 

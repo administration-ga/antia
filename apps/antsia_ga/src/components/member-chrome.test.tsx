@@ -24,6 +24,8 @@ vi.mock("@/components/network-shell", () => ({ useMemberSession: () => ({ person
 vi.mock("@antsia/social-features/notifications", () => ({ NotificationBell: () => <span data-bell="" /> }))
 vi.mock("@/components/identity-tools", () => ({ IdentityTools: ({ account }: { account?: boolean }) => <span data-identity={account ? "account" : ""} /> }))
 vi.mock("@/lib/sign-out", () => ({ signOutAndRedirect: vi.fn() }))
+// La marque de l'activité dans l'en-tête de l'espace lit sa vitrine : hors sujet ici.
+vi.mock("./specialized-space-identity", () => ({ SpaceIdentity: ({ fallback }: { fallback: string }) => <span>{fallback}</span>, SpaceCartCount: () => null, useCartLines: () => 0 }))
 vi.mock("@antsia/social-features/reseau-personnel", () => ({
   ReseauCreateAction: () => <button type="button" data-create-action="">Créer</button>,
   ReseauMenuRail: (props: { activeTab: unknown; current?: unknown; onCreate?: (kind: "publication") => void; onSelectTab?: unknown }) => (

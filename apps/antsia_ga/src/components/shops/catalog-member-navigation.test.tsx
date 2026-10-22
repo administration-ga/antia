@@ -25,7 +25,8 @@ const collectionRef = `demo:collection:${handle}`
 const offers: CatalogOffer[] = [["epicerie-produits", "Panier du marché", 1500], ["panier-raphia", "Panier en raphia", 8500], ["savon-artisanal", "Savon artisanal", 2500], ["sac-wax", "Sac en wax", 12000]].map(([ref, title, amount]) => catalogOfferFixture({ offerRef: `demo:offer:${ref}`, shopHandle: handle, title: String(title), price: { mode: "fixed", currency: "XAF", amount: Number(amount) }, collections: [{ collectionRef, label: "Produits démo" }], variants: [], variantAxes: [], actions: { contact: false, quote: false, purchase: false } }))
 let root: Root, container: HTMLDivElement
 async function navigate(search: string) { await act(async () => { mocks.search = search; window.history.pushState(window.history.state, "", `/boutique/${handle}/catalogue${search}`); for (const listener of mocks.listeners) listener() }) }
-async function input(name: string, value: string) { const field = container.querySelector<HTMLInputElement>(`input[name="${name}"]`)!; await act(async () => { Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")!.set!.call(field, value); field.dispatchEvent(new Event("input", { bubbles: true })); field.dispatchEvent(new Event("change", { bubbles: true })) }) }
+/** Les filtres vivent dans la feuille « Filtrer », portée hors de l'écran : on les cherche dans le document. */
+async function input(name: string, value: string) { const field = document.querySelector<HTMLInputElement>(`[role="dialog"] input[name="${name}"]`)!; await act(async () => { Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")!.set!.call(field, value); field.dispatchEvent(new Event("input", { bubbles: true })); field.dispatchEvent(new Event("change", { bubbles: true })) }) }
 const titles = () => [...container.querySelectorAll("[data-offer-card]")].map(card => card.querySelector("h3")?.textContent)
 beforeEach(() => {
   ;(globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true
@@ -42,16 +43,18 @@ describe("MP05d — navigation catalogue vivante", () => {
     const initialSearch = { cursor: null }
     await act(async () => root.render(<I18nextProvider i18n={createAppI18n({ locale: "fr", appResources, defaultNS: "shops" })}><MemberCatalogScreen handle={handle} search={initialSearch} /></I18nextProvider>))
     expect(container.querySelectorAll("[data-offer-card]")).toHaveLength(4)
-    await act(async () => container.querySelector("summary")!.click())
+    await act(async () => [...container.querySelectorAll("button")].find(button => button.textContent === "Filtrer")!.click())
     await input("minPrice", "2500")
-    const sort = container.querySelector<HTMLSelectElement>('select[name="sort"]')!
+    const sort = document.querySelector<HTMLSelectElement>('[role="dialog"] select[name="sort"]')!
     await act(async () => { sort.value = "price_desc"; sort.dispatchEvent(new Event("change", { bubbles: true })) })
-    await act(async () => container.querySelector("form")!.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true })))
+    await act(async () => document.querySelector('[role="dialog"] form')!.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true })))
     expect(window.location.search).toBe("?prixMin=2500&tri=price_desc")
     expect(mocks.query).toHaveBeenLastCalledWith("list", { networkId: "root", handle, minPrice: 2500, sort: "price_desc", paginationOpts: { cursor: null, numItems: 12 } })
     expect(container.querySelectorAll("[data-offer-card]")).toHaveLength(3)
     expect(titles()).toEqual(["Sac en wax", "Panier en raphia", "Savon artisanal"])
-    expect(container.querySelector<HTMLDetailsElement>("details")?.open).toBe(false)
+    // La recherche appliquée referme la feuille ; le filtre actif se lit dans la barre et s'y retire.
+    expect(document.querySelector('[role="dialog"]')).toBeNull()
+    expect(container.querySelector('[aria-label="Filtres actifs"]')?.textContent).toContain("2500")
     expect(initialSearch).toEqual({ cursor: null })
     // Le retour d'historique retrouve l'ancienne sélection sans réadopter les résultats filtrés.
     await navigate("")

@@ -19,13 +19,16 @@ type FormValues = { type: "" | "product" | "service"; collection: string; query:
 const textFacetParams = MARKETPLACE_FACET_PARAMS
 const choiceClass = "flex min-h-11 min-w-0 items-center gap-3 text-sm"
 
-/** Un seul formulaire sans accès privé, réutilisé par la page membre et le SSR. */
-export function CatalogFiltersForm({ handle, filters: search, collections, audience, provider = false }: { handle: string; filters: CatalogFilters; collections: CatalogPage["collections"]; audience: CatalogAudience; provider?: boolean }) {
+/**
+ * Un seul formulaire sans accès privé, réutilisé par la page membre et le SSR. `variant="sheet"` : le formulaire
+ * seul, dans la feuille « Filtrer » du catalogue membre ; `onApplied` la referme une fois la recherche appliquée.
+ */
+export function CatalogFiltersForm({ handle, filters: search, collections, audience, provider = false, variant = "details", onApplied }: { handle: string; filters: CatalogFilters; collections: CatalogPage["collections"]; audience: CatalogAudience; provider?: boolean; variant?: "details" | "sheet"; onApplied?: () => void }) {
   const { t: shopT } = useTranslation("shops")
   const t = (key: string, options?: Record<string, unknown>) => shopT(`catalog.${key}`, options)
   const { t: marketplaceT } = useTranslation("marketplace")
   const router = useRouter()
-  const onApply = (filters: CatalogFilters) => router.push(provider ? audience === "public" ? routes.publicProviderCatalog(handle, { ...filters, kind: "service" }) : routes.providerCatalog(handle, { ...filters, kind: "service" }) : audience === "public" ? routes.publicShopCatalog(handle, filters) : routes.shopCatalog(handle, filters))
+  const onApply = (filters: CatalogFilters) => { router.push(provider ? audience === "public" ? routes.publicProviderCatalog(handle, { ...filters, kind: "service" }) : routes.providerCatalog(handle, { ...filters, kind: "service" }) : audience === "public" ? routes.publicShopCatalog(handle, filters) : routes.shopCatalog(handle, filters)); onApplied?.() }
   const id = useId()
   const values = z.array(z.string()).max(MARKETPLACE_FACET_MAX, t("filters.facetInvalid"))
   const schema = z.object({ type: z.enum(["", "product", "service"]), collection: z.string().max(200), query: z.string().max(MARKETPLACE_QUERY_MAX, t("filters.queryInvalid")).refine(value => !/[\p{Cc}\uD800-\uDFFF]/u.test(value) && marketplaceQueryWordCount(value) <= MARKETPLACE_QUERY_WORDS_MAX, t("filters.queryInvalid")), category: values, brand: values, material: values, color: values, audience: values, serviceMode: values, commercialMode: values, languageCode: values, serviceZone: values, minDurationMinutes: z.string().regex(/^\d*$/u, marketplaceT("filters.durationInvalid")), maxDurationMinutes: z.string().regex(/^\d*$/u, marketplaceT("filters.durationInvalid")), minPrice: z.string().regex(/^\d*$/u, t("filters.priceInvalid")), maxPrice: z.string().regex(/^\d*$/u, t("filters.priceInvalid")), sort: z.enum(MARKETPLACE_SORTS) })
@@ -47,7 +50,7 @@ export function CatalogFiltersForm({ handle, filters: search, collections, audie
     onApply(next)
   })
   const categories = COMMERCE_CATALOG_CATEGORIES.filter(category => !current.type || category.kind === current.type)
-  return <details className="min-w-0 rounded-[var(--ui2-card-radius)] border border-border bg-card p-4"><summary className="min-h-11 cursor-pointer font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">{t("filters.title")}</summary><form className="grid min-w-0 gap-5 pt-4 md:grid-cols-2" onSubmit={submit} noValidate>
+  const body = <form className={variant === "sheet" ? "grid min-w-0 gap-5" : "grid min-w-0 gap-5 pt-4 md:grid-cols-2"} onSubmit={submit} noValidate>
     <Field id={`${id}-query`} label={t("filters.query")} hint={t("filters.queryHint")} error={form.formState.errors.query?.message}>
       <TextInput id={`${id}-query`} type="search" maxLength={MARKETPLACE_QUERY_MAX} aria-describedby={`${id}-query-hint`} aria-invalid={!!form.formState.errors.query || undefined} {...form.register("query")} />
     </Field>
@@ -74,8 +77,11 @@ export function CatalogFiltersForm({ handle, filters: search, collections, audie
       <Field id={`${id}-sort`} label={t("filters.sort")}><select id={`${id}-sort`} className={SHOP_SELECT_CLASS} {...form.register("sort")}>{(hasQuery ? ["relevance"] as const : ["newest", "price_asc", "price_desc"] as const).map(sort => <option key={sort} value={sort}>{t(`sorts.${sort}`)}</option>)}</select></Field>
     </>
     {form.formState.errors.root?.message ? <p role="alert" className="text-sm text-destructive">{form.formState.errors.root.message}</p> : null}
-    <div className="flex flex-wrap gap-2"><Button type="submit" variant="commerce">{t("filters.apply")}</Button><Button type="button" variant="outline" onClick={() => onApply(provider ? { kind: "service" } : {})}>{t("filters.reset")}</Button></div>
-  </form></details>
+    {/* Dans le tiroir, la validation reste visible en bas pendant que les filtres défilent. */}
+    <div className={variant === "sheet" ? "sticky bottom-0 z-10 -mx-4 flex flex-wrap gap-2 border-t border-border bg-popover px-4 py-3" : "flex flex-wrap gap-2"} data-filter-actions><Button type="submit" variant="commerce">{t("filters.apply")}</Button><Button type="button" variant="outline" onClick={() => onApply(provider ? { kind: "service" } : {})}>{t("filters.reset")}</Button></div>
+  </form>
+  if (variant === "sheet") return body
+  return <details className="min-w-0 rounded-[var(--ui2-card-radius)] border border-border bg-card p-4"><summary className="min-h-11 cursor-pointer font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">{t("filters.title")}</summary>{body}</details>
 }
 
 function TextFacet({ facet, values, onChange }: { facet: "brand" | "material" | "color" | "languageCode" | "serviceZone"; values: string[]; onChange: (values: string[]) => void }) {

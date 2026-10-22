@@ -18,8 +18,9 @@ export const SHOP_SELECT_CLASS = "min-h-11 w-full rounded-lg border border-input
  * gouttière (décisions du propriétaire du 22/10/2026, `shared/screen-layout`) ; dès 768 px, le lien de retour
  * s'aligne sur le titre (au téléphone, inchangé).
  */
-export function ShopFrame({ title, lead, children }: { title: string; lead?: string; children: ReactNode }) {
-  return <MemberPage><div className={`flex w-full min-w-0 flex-col gap-5 pb-24 [overflow-wrap:anywhere] min-[768px]:[&>a]:self-start ${SCREEN_SUBMIT}`}><header className="grid gap-2"><h1 className="text-2xl font-semibold tracking-tight">{title}</h1>{lead ? <p className="text-muted-foreground">{lead}</p> : null}</header>{children}</div></MemberPage>
+export function ShopFrame({ title, lead, header, children }: { title: string; lead?: string; header?: ReactNode; children: ReactNode }) {
+  // `header` remplace l'en-tête simple ; `null` quand l'écran porte lui-même son titre (`h1`), comme la vitrine.
+  return <MemberPage><div className={`flex w-full min-w-0 flex-col gap-5 pb-24 [overflow-wrap:anywhere] min-[768px]:[&>a]:self-start ${SCREEN_SUBMIT}`}>{header === undefined ? <header className="grid gap-2"><h1 className="text-2xl font-semibold tracking-tight">{title}</h1>{lead ? <p className="text-muted-foreground">{lead}</p> : null}</header> : header}{children}</div></MemberPage>
 }
 /** Un lien de boutique ; avec `variant`, il prend la facture d'un bouton (« Poser une question » en tonal des messages, ADR-0027),
  * à sa largeur même dans une grille. */

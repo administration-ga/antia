@@ -75,7 +75,8 @@ describe("vitrine publique rendue sans fournisseur membre", () => {
     expect(container.querySelector("h1")?.textContent).toBe(value.name)
     expect(container.textContent).toContain(value.description)
     expect(container.textContent).toContain(getAppT("fr").t("shops:publicStorefront.origin", { name: value.origin.name }))
-    expect(container.querySelector("script, img, svg, [onerror], [onload]")).toBeNull()
+    // Les seuls SVG admis sont les icônes de l'interface (Lucide) ; aucun balisage venu des textes usagers.
+    expect(container.querySelector("script, img, svg:not(.lucide), [onerror], [onload]")).toBeNull()
     expect(html).toContain("&lt;script&gt;")
   })
 })

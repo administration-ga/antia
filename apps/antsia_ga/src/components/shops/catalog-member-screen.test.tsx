@@ -34,7 +34,9 @@ describe("catalogue membre et slot reliés aux projections réelles", () => {
     const value = html(<MemberCatalogScreen handle="atelier" search={{ kind: "product", query: "sac", cursor: "page-2" }} />)
     expect(mocks.query).toHaveBeenCalledWith("list", { networkId: "root", handle: "atelier", kind: "product", query: "sac", paginationOpts: { cursor: "page-2", numItems: 12 } })
     expect(value).toContain("Sac artisanal")
-    expect(value).toContain("name=\"query\"")
+    // Le formulaire complet s'ouvre dans la feuille « Filtrer » ; la recherche en cours se lit et se retire dans la barre.
+    expect(value).toContain(">Filtrer</button>")
+    expect(value).toContain("aria-label=\"Retirer sac\"")
     expect(value).toContain("Première page")
   })
   it("un refus ne conserve aucune offre provenant d'un DTO précédent", () => {

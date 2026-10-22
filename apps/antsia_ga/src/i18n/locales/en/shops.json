@@ -449,7 +449,16 @@
     "indexBuilding": "The catalogue is being indexed. Existing offers remain available without filters; filtering will be available after this update.",
     "card": {
       "outOfStock": "Currently unavailable"
-    }
+    },
+    "layout": {
+      "label": "Offer layout",
+      "grid": "Show as a grid",
+      "list": "Show as rows"
+    },
+    "seeCollection": "See the collection",
+    "sameShop": "From the same shop",
+    "choosePhoto": "Choose a photo",
+    "showPhoto": "Show photo {{index}}"
   },
   "link": {
     "title": "My PRO.GA activity",
@@ -676,7 +685,8 @@
     "publicVersion": "View version without an account",
     "publicationsHint": "Find the actual posts from this activity on its social page.",
     "socialPage": "Open social page",
-    "viewNamed": "Open the shop {{name}}"
+    "viewNamed": "Open the shop {{name}}",
+    "facts": "What the shop declares"
   },
   "badges": {
     "official": "Official",

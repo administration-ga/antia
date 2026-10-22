@@ -12,6 +12,7 @@ import { z } from "zod"
 
 import { useCartDraft } from "@/components/cart/use-cart-draft"
 import { useMemberSession } from "@/components/network-shell"
+import { FloatingLayer } from "@/components/shared/floating-layer"
 import { useMinWidth } from "@/components/shared/use-min-width"
 import { MARKETPLACE_QUERY_MAX, MARKETPLACE_QUERY_WORDS_MAX, marketplaceQueryWordCount, marketplaceSearch, type MarketplaceSearch } from "@/lib/marketplace-search"
 import { routes } from "@/lib/routes"
@@ -129,8 +130,8 @@ export function activeMarketplacePill(search: MarketplaceSearch): MarketplacePil
 
 /**
  * Le bouton « Filtrer » et sa feuille (en bas au téléphone, à droite dès 768 px) : le formulaire de filtres de la
- * marketplace, inchangé. Au téléphone et à la tablette, le bouton flotte au-dessus de la barre d'onglets ; dès
- * 1 024 px, il prend place dans la barre d'outils de l'écran.
+ * marketplace, inchangé. Au téléphone et à la tablette, le bouton flotte au-dessus de la barre d'onglets (couche
+ * portée, jamais cadrée par un conteneur) ; dès 1 024 px, il prend place dans la barre d'outils de l'écran.
  */
 export function MarketplaceFilterSheet({ search, count, onApply, onApplied }: { search: MarketplaceSearch; count: number; onApply: (search: MarketplaceSearch) => void; onApplied?: () => void }) {
   const { t } = useTranslation("marketplace")
@@ -141,11 +142,11 @@ export function MarketplaceFilterSheet({ search, count, onApply, onApplied }: { 
   const label = count ? t("home.filterCount", { count }) : t("home.filter")
   const trigger = <button type="button" aria-haspopup="dialog" onClick={() => setOpen(true)} className={desktop ? "inline-flex min-h-11 items-center gap-2 rounded-[var(--ui2-button-radius)] bg-[var(--esp-chip-bg,var(--muted))] px-4 text-sm font-semibold hover:brightness-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" : FLOAT_CLASS}><SlidersHorizontal aria-hidden className="size-4" />{label}</button>
   return <Sheet open={open} onOpenChange={setOpen}>
-    {desktop ? trigger : <div className="pointer-events-none fixed inset-x-0 bottom-[calc(var(--esp-reseau-tabbar-inset)_+_env(safe-area-inset-bottom,0px)_+_0.75rem)] z-20 flex justify-center px-16 min-[768px]:bottom-6" data-marketplace-filter-float>{trigger}</div>}
+    {desktop ? trigger : <FloatingLayer><div className="pointer-events-none fixed inset-x-0 bottom-[calc(var(--esp-reseau-tabbar-inset)_+_env(safe-area-inset-bottom,0px)_+_0.75rem)] z-20 flex justify-center px-16 min-[768px]:bottom-6" data-marketplace-filter-float>{trigger}</div></FloatingLayer>}
     {/* Fermée par une recherche appliquée, la feuille rend le focus à l'écran (son titre) plutôt qu'au bouton ; fermée sans choix, au bouton. */}
     <SheetContent side={wide ? "right" : "bottom"} closeLabel={t("home.close")} className="sm:max-w-md" onCloseAutoFocus={event => { if (!applied.current) return; applied.current = false; event.preventDefault(); onApplied?.() }}>
       <SheetHeader><SheetTitle>{t("filters.title")}</SheetTitle></SheetHeader>
-      <SheetBody className="overflow-y-auto overscroll-contain px-4 pb-6"><MarketplaceFilters search={search} onApply={next => { applied.current = true; setOpen(false); onApply(next) }} /></SheetBody>
+      <SheetBody className="overflow-y-auto overscroll-contain px-4 pb-0"><MarketplaceFilters search={search} onApply={next => { applied.current = true; setOpen(false); onApply(next) }} /></SheetBody>
     </SheetContent>
   </Sheet>
 }
@@ -162,7 +163,7 @@ export function MarketplaceBackToTop() {
     return () => window.removeEventListener("scroll", update)
   }, [])
   if (!visible) return null
-  return <div className="pointer-events-none fixed bottom-[calc(var(--esp-reseau-tabbar-inset)_+_env(safe-area-inset-bottom,0px)_+_0.75rem)] right-3 z-20 min-[768px]:bottom-6 min-[768px]:right-[var(--spacing-gutter)]">
+  return <FloatingLayer><div className="pointer-events-none fixed bottom-[calc(var(--esp-reseau-tabbar-inset)_+_env(safe-area-inset-bottom,0px)_+_0.75rem)] right-3 z-20 min-[768px]:bottom-6 min-[768px]:right-[var(--spacing-gutter)]">
     <button type="button" aria-label={t("home.backToTop")} onClick={() => window.scrollTo({ top: 0, behavior: reduce ? "auto" : "smooth" })} className={`${FLOAT_CLASS} size-12 px-0`}><ChevronUp aria-hidden className="size-5" /></button>
-  </div>
+  </div></FloatingLayer>
 }
