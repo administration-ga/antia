@@ -23,7 +23,7 @@ function hrefsOf(html: string): string[] {
 }
 
 /** MP09, MP10 et MP13 : espaces professionnel, presse et rencontres avant la marketplace, puis le hub. */
-const EXPECTED_HREFS = [routes.professionals(), routes.press(), routes.personalMeetings(), routes.marketplace(), routes.memberDiscover(), routes.shopDirectory(), ...discoverHrefs().filter((href) => href !== routes.shopDirectory())]
+const EXPECTED_HREFS = [routes.professionals(), routes.press(), routes.personalMeetings(), routes.marketplaceHome(), routes.memberDiscover(), routes.shopDirectory(), ...discoverHrefs().filter((href) => href !== routes.shopDirectory())]
 
 describe("Découvrir — l'écran rend chaque entrée du modèle, et rien d'autre", () => {
   const html = renderToStaticMarkup(<MemberDiscoverScreen />)

@@ -143,11 +143,15 @@ export const storefrontValidator = v.object({
 })
 export type Storefront = Infer<typeof storefrontValidator>
 
-/** Une carte de l'annuaire des boutiques du réseau. */
+/**
+ * Une carte de l'annuaire des boutiques du réseau. La bannière est celle de la page (même garde des fichiers que
+ * le logo) : la marketplace en fait la photo de ses grandes cartes (décision du propriétaire du 22/10/2026).
+ */
 export const storefrontCardValidator = v.object({
   handle: v.string(),
   name: v.string(),
   logoUrl: v.union(v.string(), v.null()),
+  bannerUrl: v.union(v.string(), v.null()),
   model: shopModelValidator,
   specialty: v.union(v.string(), v.null()),
   serviceArea: v.union(v.string(), v.null()),

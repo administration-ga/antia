@@ -85,5 +85,32 @@
     "pt": "Portuguese",
     "ar": "Arabic",
     "zh": "Chinese"
+  },
+  "home": {
+    "greeting": "Hello {{name}}",
+    "cart_one": "My baskets: {{count}} line",
+    "cart_other": "My baskets: {{count}} lines",
+    "searchLabel": "Search for products in the marketplace",
+    "searchSuggestion": "I’m looking for “{{term}}”",
+    "pills": {
+      "label": "Marketplace departments",
+      "home": "Home"
+    },
+    "filter": "Filter",
+    "filterCount": "Filter ({{count}})",
+    "close": "Close",
+    "backToTop": "Back to the top of the page",
+    "seeAll": "See all",
+    "sections": {
+      "shops": "Shops",
+      "providers": "Service providers",
+      "newOffers": "New arrivals",
+      "services": "Services",
+      "demoProducts": "Demo products",
+      "demoServices": "Demo services"
+    },
+    "noShops": "No storefront has been published in your network yet.",
+    "sectionFailed": "This section cannot be loaded right now.",
+    "sellerLead": "Do you offer products or services?"
   }
 }

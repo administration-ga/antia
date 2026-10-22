@@ -206,10 +206,12 @@ async function storefrontOf(ctx: ReadCtx, shop: Doc<"shops">, page: Doc<"pages">
 }
 
 export async function cardOf(ctx: ReadCtx, shop: Doc<"shops">, page: Doc<"pages">): Promise<StorefrontCard> {
+  const [logoUrl, bannerUrl] = await Promise.all([logoUrlOf(ctx, page.logoStorageId), logoUrlOf(ctx, page.bannerStorageId)])
   return {
     handle: page.handle,
     name: page.name,
-    logoUrl: await logoUrlOf(ctx, page.logoStorageId),
+    logoUrl,
+    bannerUrl,
     model: shop.model,
     specialty: shop.specialty ?? null,
     serviceArea: shop.serviceArea ?? null,

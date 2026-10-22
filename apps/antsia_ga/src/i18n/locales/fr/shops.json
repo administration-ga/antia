@@ -446,7 +446,10 @@
       "price_desc": "Prix décroissant",
       "relevance": "Pertinence"
     },
-    "indexBuilding": "Le catalogue est en cours d’indexation. Les offres héritées restent consultables sans filtre ; les filtres seront disponibles après cette mise à jour."
+    "indexBuilding": "Le catalogue est en cours d’indexation. Les offres héritées restent consultables sans filtre ; les filtres seront disponibles après cette mise à jour.",
+    "card": {
+      "outOfStock": "Indisponible pour le moment"
+    }
   },
   "link": {
     "title": "Mon activité PRO.GA",
@@ -672,7 +675,8 @@
     "manage": "Gérer mes boutiques",
     "publicVersion": "Voir la version sans compte",
     "publicationsHint": "Retrouvez les publications réelles de cette activité sur sa page sociale.",
-    "socialPage": "Ouvrir la page sociale"
+    "socialPage": "Ouvrir la page sociale",
+    "viewNamed": "Ouvrir la boutique {{name}}"
   },
   "badges": {
     "official": "Officiel",

@@ -448,5 +448,9 @@
   "account": {
     "menu": "Mon compte",
     "appearance": "Apparence"
+  },
+  "carousel": {
+    "previous": "Défiler vers la gauche",
+    "next": "Défiler vers la droite"
   }
 }

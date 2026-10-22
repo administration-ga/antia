@@ -448,5 +448,9 @@
   "account": {
     "menu": "My account",
     "appearance": "Appearance"
+  },
+  "carousel": {
+    "previous": "Scroll left",
+    "next": "Scroll right"
   }
 }

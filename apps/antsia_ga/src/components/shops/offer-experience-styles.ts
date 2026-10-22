@@ -1,17 +1,6 @@
 /** Actions complémentaires du commerce : liens réels, surface neutre et cible tactile. */
 export const SHOP_ACTION_CLASS = "inline-flex min-h-11 items-center justify-center gap-2 rounded-[var(--esp-social-action-radius,var(--ui2-button-radius))] border border-[color:var(--ui2-button-outline-border,var(--border))] bg-[var(--ui2-button-outline-bg,var(--card))] px-4 py-2 text-center text-sm font-semibold text-foreground hover:brightness-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
 
-/** Le bandeau suit la largeur de la carte, y compris dans un fil à trois colonnes. */
-export const OFFER_CARD_CSS = `
-[data-offer-card] { container: offer-card / inline-size; }
-[data-offer-card] .offer-card-band { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
-[data-offer-card] .offer-card-action { justify-self: start; }
-@container offer-card (min-width: 352px) {
-  [data-offer-card] .offer-card-band { grid-template-columns: minmax(0, 1fr) auto; align-items: center; }
-  [data-offer-card] .offer-card-action { justify-self: end; }
-}
-`
-
 /** U05/U07 : deux colonnes seulement quand la fiche dispose elle-même de 832px. */
 export const OFFER_DETAIL_CSS = `
 [data-offer-detail-frame] { container: offer-detail / inline-size; min-width: 0; }

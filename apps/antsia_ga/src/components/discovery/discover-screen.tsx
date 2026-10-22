@@ -119,7 +119,7 @@ export function MemberDiscoverScreen() {
           <Link href={routes.professionals()} className={`${CHIP_LINK} self-start`}>{t("specializedSpaces:professionalSpace")}<ArrowRight aria-hidden="true" className="ml-3 size-4" /></Link>
           <Link href={routes.press()} className={`${CHIP_LINK} self-start`}>{t("specializedSpaces:editorialSpace")}<ArrowRight aria-hidden="true" className="ml-3 size-4" /></Link>
           <Link href={routes.personalMeetings()} className={`${CHIP_LINK} self-start`}>{t("personalMeetings:entryLabel")}<ArrowRight aria-hidden="true" className="ml-3 size-4" /></Link>
-          <Link href={routes.marketplace()} className={`${CHIP_LINK} self-start`}><span>{t("marketplace:title")}</span><ArrowRight aria-hidden="true" className="ml-3 size-4" /></Link>
+          <Link href={routes.marketplaceHome()} className={`${CHIP_LINK} self-start`}><span>{t("marketplace:title")}</span><ArrowRight aria-hidden="true" className="ml-3 size-4" /></Link>
         </header>
 
         <Suspense fallback={<p role="status">{t("socialExperience:loading")}</p>}><MediaDiscoveryScreen mode="explore" /></Suspense>

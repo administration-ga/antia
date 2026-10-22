@@ -85,5 +85,32 @@
     "pt": "Portugais",
     "ar": "Arabe",
     "zh": "Chinois"
+  },
+  "home": {
+    "greeting": "Bonjour {{name}}",
+    "cart_one": "Mes paniers : {{count}} ligne",
+    "cart_other": "Mes paniers : {{count}} lignes",
+    "searchLabel": "Rechercher des produits dans la marketplace",
+    "searchSuggestion": "Je cherche « {{term}} »",
+    "pills": {
+      "label": "Rayons de la marketplace",
+      "home": "Accueil"
+    },
+    "filter": "Filtrer",
+    "filterCount": "Filtrer ({{count}})",
+    "close": "Fermer",
+    "backToTop": "Revenir en haut de la page",
+    "seeAll": "Voir tout",
+    "sections": {
+      "shops": "Boutiques",
+      "providers": "Prestataires de services",
+      "newOffers": "Nouveautés",
+      "services": "Services",
+      "demoProducts": "Produits de démonstration",
+      "demoServices": "Services de démonstration"
+    },
+    "noShops": "Aucune vitrine n’est encore publiée dans votre réseau.",
+    "sectionFailed": "Cette section ne peut pas être chargée pour le moment.",
+    "sellerLead": "Vous proposez des produits ou des services ?"
   }
 }

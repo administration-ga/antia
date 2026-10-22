@@ -8,6 +8,8 @@ export function generateMetadata(): Metadata {
   return { title: t("marketplace:title") }
 }
 
+/** Sans paramètre : l'accueil de la marketplace ; sinon, les résultats de la recherche portée par l'URL. */
 export default async function MarketplacePage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
-  return <MarketplaceScreen search={marketplaceSearch(await searchParams)} />
+  const params = await searchParams
+  return <MarketplaceScreen search={marketplaceSearch(params)} home={Object.keys(params).length === 0} />
 }
