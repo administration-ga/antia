@@ -15,7 +15,7 @@ Autorisation : le propriétaire a validé les décisions D01 à D08 le 21 octobr
 |---|---|---|
 | SU00 | Terminé — documentaire | ADR-0035 (D01–D08 acceptées, D09–D12 proposées) ; index des ADR mis à jour ; étude passée en version 1.1 |
 | SU01 | Analyse livrée ; mise en œuvre par sous-lots | exigences article par article, état du code, écarts, arbitrages juridiques, sous-lots SU01a à SU01j et calendrier ; à faire valider par un juriste avant toute mise en œuvre de l'identification et de l'âge |
-| SU01d | En ligne depuis le 22/10 (backend `9927c9c`, fronts `26f3024` puis `bca19af`) ; restes livrés en source le 22/10, à déployer | voir [SU01d — signalements réglementés](#su01d--signalements-réglementés) |
+| SU01d | En ligne, restes compris, depuis le 22/10 (backend de `f574c75`, front `880d1aa`) ; restent la console et le bureau de DIASPORALE | voir [SU01d — signalements réglementés](#su01d--signalements-réglementés) |
 | SU02 | À faire | Découvrir par piliers ; dépend de SU00 et MP01 |
 | SU03 | À faire | types d'offre bien immobilier et véhicule ; dépend de MP03 |
 | SU04 à SU16 | À faire | voir l'étude, § 15 |
@@ -56,8 +56,13 @@ Ordonnance n° 0011/PR/2026, art. 24, 32 et 33.
 **Mise en ligne**
 - Backend déployé le 22/10/2026 vers 1 h, démo puis production, avec l'accord écrit du propriétaire : `9927c9c` (3 index sur `reports`, `deadlineQueue` et `myReports`), puis `bca19af`.
 - Fronts publiés depuis `main` : `26f3024`, puis `bca19af` (docs/35). La production répond `main-bca19af78116`, qui contient SU01d.
+- Restes en ligne le 22/10/2026 vers 10 h 40 :
+  - backend de `main` `f574c75`, identique sous `convex/` à `880d1aa`, sur la démo (vivid-hedgehog-655) puis la production (diligent-avocet-585), avec l'accord écrit du propriétaire ;
+  - aperçus `--dry-run` sains : aucun index supprimé, schéma validé. Seule ligne affichée : « version Node des actions », un artefact `null`/`undefined` de la CLI, sans valeur de part et d'autre ;
+  - la production portait déjà ce backend (1 034 fonctions, signatures identiques à la démo), déployé en même temps que le front `880d1aa`. Elle n'a pas été poussée une seconde fois ;
+  - contrôles en lecture seule sur les deux : `transparencyDeadlines` répond (seuil 5, douze périodes, aucune encore publiée), `transparency` garde sa forme, `/transparence` dit les délais (front `main-880d1aadf525`).
 
-**Restes livrés en source le 22/10/2026 (non déployés)**
+**Restes livrés le 22/10/2026 (en ligne le jour même)**
 
 *Délais tenus sur `/transparence`* (moteur et antsia.ga) :
 - Le passage quotidien de transparence compte, pour chaque jour UTC, les échéances légales **tombées** ce jour-là. Il le fait dans un second passage, `aggregateNetworkDeadlines`.
@@ -126,9 +131,9 @@ Ordonnance n° 0011/PR/2026, art. 24, 32 et 33.
     - console : des 401 pendant les changements de compte, et le rechargement à chaud perdu en passant d'une application à l'autre sur le même port.
 
 **Ce qui reste de SU01d**
-- Déployer le backend de ces restes (index, champs facultatifs, second passage, projection), puis les fronts. C'est au propriétaire.
-- La console d'exploitation n'expose pas encore les délais légaux : ni l'export de transparence des opérateurs (`platform/console`), ni une alerte de retard. À décider.
-- Le bureau de modération de DIASPORALE (`/moderation`) ne montre encore ni l'échéance légale ni la file prioritaire des délais, que montre celui d'antsia.ga.
+- La console d'exploitation n'expose pas encore les délais légaux : ni l'export de transparence des opérateurs (`platform/console`), ni une alerte de retard. Session lancée le 22/10.
+- Le bureau de modération de DIASPORALE (`/moderation`) ne montre encore ni l'échéance légale ni la file prioritaire des délais, que montre celui d'antsia.ga. Session lancée le 22/10.
+- Premiers chiffres : le passage quotidien de 04 h 10 UTC mesure la veille. Une journée ne se publie qu'à partir de 5 échéances sur 5 auteurs.
 
 ## Conditions externes
 
