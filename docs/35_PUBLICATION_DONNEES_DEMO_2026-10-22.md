@@ -446,3 +446,31 @@ Autres contrôles :
   - 390 px : fiche en colonne (photo puis description), aucun débordement.
 - Capture : `docs/etudes/2026-10-22-fil-sans-cadre/recette/lot3-en-ligne-panneau-deux-tiers-1440.jpg`.
 - Production : aucune donnée posée. Variables : aucune modifiée.
+
+## Mise à jour — `main` a0d26d0 en ligne : la marketplace façon ventes privées (lots 1 à 4) publiée
+
+- Décision du propriétaire, le 22/10 : « publie d'abord la marketplace déjà faite (backend de la PR 65 puis fronts) ».
+  Entrent en ligne les PR 65, 69, 70 et 73 (accueil en grandes cartes, boutique, panier et remise, pages qui vendent
+  selon leur nature), avec tout `main` (lot 3 et panneau prix compris). La session marketplace a été prévenue.
+- Backend : export propre (`git archive` d'ANTSIA `a0d26d0` et de DIASPORALE `367c2bd`, sans `.env.local`, connexion CLI
+  du Mac, aucune clé). Seul changement depuis `3253a10` : `bannerUrl` des cartes d'annuaire (PR 65).
+
+| Étape | Résultat |
+|---|---|
+| Aperçus `--dry-run`, démo et production | aucun index supprimé, schéma validé ; seule ligne : « version Node des actions », artefact connu |
+| Convex démo `vivid-hedgehog-655` | 1 035 fonctions avant et après ; deux signatures changées, `shops:directory` et `marketplaceShops:search` (`bannerUrl`) |
+| Convex production `diligent-avocet-585` | idem ; relevé des fonctions identique à la démo |
+| Front, enfant démo | `dpl_5bn2vvuauhDHYLUMoMh6PToig5F9` (antsia-demo-qr9euc0gt), version `main-a0d26d0e657e-demo`, READY en 130 s, 302 SSO, promu |
+| Front, principal | `dpl_7LjNpLT4emEjjLREJHjDwn3pDCYU` (antsia-efvqokxab), version `main-a0d26d0e657e-production`, READY en 157 s, 302 SSO, promu |
+
+- Contexte figé : 3 288 fichiers, empreinte `ba571431…`. Le code (hors documentation) est celui de `676a6cf`, vérifié par
+  `bun run verify` (15 496 tests).
+- Retour arrière des fronts : antsia-1bj5ooe7n (principal) et antsia-demo-psc3q7y5q (enfant), versions `release-a7a5d78bce90`.
+  Le backend `a0d26d0` reste compatible avec eux : il n'ajoute qu'un champ de réponse.
+- Santé : `main-a0d26d0e657e-production` et `main-a0d26d0e657e-demo`. Pages en 200, CSP sur le backend de chaque site :
+  `/`, `/entrer`, `/fil`, `/marketplace`, `/marketplace?view=services`, `/mes-boutiques`, `/transparence`, `/demo/entrer`,
+  `/demo/fil`, `/demo/marketplace`, `/demo/boutique/epicerie-moussavou-demo`, `/demo/page/epicerie-moussavou-demo`.
+- Recette en ligne (démo, compte Commerçant Patrick MOUSSAVOU) : accueil de la marketplace à 1 440 et 390 px. On y voit les
+  grandes cartes des boutiques et des prestataires avec leur bannière, les pastilles Produits, Mode, Alimentation, Services
+  et Boutiques. 36 images, aucune cassée, aucun débordement.
+- Variables : aucune modifiée.
