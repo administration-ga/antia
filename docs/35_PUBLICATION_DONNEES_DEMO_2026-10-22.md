@@ -173,3 +173,35 @@ Autres contrôles :
 - Non publiés : PR 54 (transparence, restes de SU01d ; touche `convex/modules/moderation` et
   `convex/modules/public`) et diasporale#25, fusionnés après 94f6506 : déploiement Convex puis
   accord du propriétaire.
+
+## Mise à jour — backend `d7f4784` et console (délais légaux de SU01d)
+
+- Contenu : PR 58, la console des délais légaux (export étendu, requête `legalDeadlineAlert`).
+  - Le backend de `main` `d7f4784` est identique à celui de 597e1b6 sous `convex/` et dans les paquets
+    du moteur ; la PR 59 ne touche que le front d'antsia.ga.
+  - Écart avec le backend `f574c75` en ligne : `convex/modules/platform/console.ts` et
+    `packages/social-domain/src/moderationPolicy.ts`. `@diasporale/domain` est identique depuis 56098a5.
+- Accord écrit du propriétaire, le 22/10, pour : démo, puis production, puis la console.
+- Contexte : `git archive` d'ANTSIA `d7f4784` et de DIASPORALE `d18dd20`, sans `.env.local` ;
+  connexion CLI du Mac, aucune clé.
+
+| Étape | Résultat |
+|---|---|
+| Aperçus `--dry-run`, démo et production | aucun index supprimé, schéma validé ; seule ligne : « version Node des actions », artefact connu de la CLI |
+| Convex démo `vivid-hedgehog-655` | 1 034 → 1 035 fonctions : `modules/platform/console.js:legalDeadlineAlert` ajoutée, aucune retirée |
+| Convex production `diligent-avocet-585` | idem ; signatures identiques à la démo |
+| Console `antsia-admin` | `dpl_EKFVB2iJerWY4up3KgLyRbNWUc5U` (antsia-admin-3smpcs4kx), publiée sans bascule, contrôlée (READY, 302 SSO), puis promue |
+
+- Console en ligne :
+  - santé `{"status":"ok","version":"d7f4784","backend":"configured"}` ;
+  - `/`, `/entrer` et `/sante-fonctionnelle` en 200 ;
+  - CSP sur `diligent-avocet-585`, HSTS, `X-Frame-Options: DENY` ;
+  - l'entrée IDN s'affiche (bouton actif, « IDN niveau 2 minimum »), sans erreur dans la console du navigateur.
+- Variables : aucune modifiée. `NEXT_PUBLIC_BUILD_SHA` n'a été passé qu'au build.
+- Retour arrière : `dpl_CiJGfViWVpxnaKHZDEn8R9jdxgHW` (antsia-admin-b0ap9n83e, version 4ab6a4f du 19/10).
+- antsia.ga : fronts inchangés (`main-880d1aadf525`). `/` et `/transparence` en 200, comme `/demo`
+  et `/demo/transparence`.
+- Restes, au propriétaire :
+  - recette connectée de la console : un client IDN de niveau 2 qui connaisse l'adresse de retour
+    de la console, et un premier opérateur ;
+  - fronts d'antsia.ga de `main` `d7f4784` (PR 59) : non publiés par cette session.
