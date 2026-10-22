@@ -205,3 +205,46 @@ Autres contrôles :
   - recette connectée de la console : un client IDN de niveau 2 qui connaisse l'adresse de retour
     de la console, et un premier opérateur ;
   - fronts d'antsia.ga de `main` `d7f4784` (PR 59) : non publiés par cette session.
+
+## Mise à jour — publication de `main` 6db0a29 (fil sans cadre, Suivre ou Ajouter ; ADR-0037)
+
+- Contenu par rapport aux fronts `880d1aa` en ligne :
+  - PR 59 : média bord à bord dans la carte, carte pleine largeur au téléphone ;
+  - angles des sept thèmes (16, 12 et 6 px) ;
+  - actions compactes de 25 px, barre des destinations en verre ;
+  - PR 62 : Suivre, Suivre en retour ou Ajouter sur chaque suggestion, carrousel « Personnes à découvrir » ;
+  - PR 62 encore : retour à la colonne unique au bureau, la grille de la PR 59 étant retirée à la demande du propriétaire ;
+  - PR 60 et 61 (registre, comptes de démonstration DIASPORALE) entrent aussi.
+- Publication demandée par le propriétaire le 22/10 : « commit, pousse et déploie ».
+- Contexte : `git archive` d'ANTSIA `6db0a29` et de DIASPORALE `fcde290`, sans `.env.local`, connexion CLI du Mac, aucune clé.
+  `@diasporale/domain` est identique à `d18dd20`.
+
+| Étape | Résultat |
+|---|---|
+| Aperçus `--dry-run`, démo et production | aucun index supprimé, schéma validé ; seule ligne : « version Node des actions », artefact connu |
+| Convex démo `vivid-hedgehog-655` | 1 035 fonctions avant et après, signatures identiques (`followsYou` est un champ de réponse de `suggestions.paginate`) ; la logique de la PR 61 part avec, fermée hors de la démonstration déclarée |
+| Convex production `diligent-avocet-585` | idem ; relevé des fonctions identique à la démo |
+| Front, enfant démo | `dpl_2sneRNRxMoQ5fLQEtC1P2Ww7MouR` (antsia-demo-9o837ytn1), version `main-6db0a2917abd-demo`, READY, 302 SSO, promu |
+| Front, principal | `dpl_7pRfdCa6dYVkyQDyQyajdhpt8JK1` (antsia-gxx0we8lv), version `main-6db0a2917abd-production`, READY, 302 SSO, promu |
+
+- Contexte figé : 3 270 fichiers, empreinte `d101b26f…`.
+- Retour arrière : antsia-cklu264gn (principal) et antsia-demo-74l9c4xz8 (enfant), versions `880d1aa`.
+- Santé : `main-6db0a2917abd-production` et `main-6db0a2917abd-demo`.
+- Pages en 200, CSP sur `diligent-avocet-585`, HSTS et `X-Frame-Options: DENY` :
+  - `/`, `/entrer`, `/fil`, `/moi`, `/messages`, `/marketplace`, `/transparence` ;
+  - `/demo`, `/demo/entrer`, `/demo/fil`, `/demo/transparence`.
+- Recette en ligne, en lecture seule (démo partagée, compte Membre Awa MBA) :
+
+| Contrôle | 1440 | 390 |
+|---|---|---|
+| Fil en colonne unique (aucune grille), carte de 784 px à l'angle de 16 px | ✓ | — |
+| Média sur toute la largeur de la carte (784 × 523 px, photo 3:2) | ✓ | ✓ |
+| Carte pleine largeur au téléphone (`x = 0`, 390 px, angle 0) | — | ✓ |
+| Barre basse en verre, 54 px | — | ✓ |
+| Suggestions : Suivre et Ajouter, ou Répondre à l'invitation | ✓ (colonne droite) | ✓ (carrousel) |
+| Débordement horizontal | aucun | aucun |
+
+- Variables : aucune modifiée.
+- Restes :
+  - lot 3 de l'ADR-0037 (formules des boutiques), non commencé dans le code ;
+  - publication DIASPORALE sur la démonstration (ADR-0038, PR 61) : à faire, avec l'accord du propriétaire.
