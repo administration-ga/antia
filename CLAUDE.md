@@ -168,6 +168,10 @@ d'effacement dérivé du schéma est vérifiée par `convex/modules/people/erasu
   balayer AUCUN fichier — mesuré au lot F1 (aucune classe des paquets dans la feuille). Chemins EXPLICITES par
   paquet dans le `globals.css` de chaque application. Et dans un commentaire CSS, `*/` (« packages/*/src »)
   ferme le commentaire : la feuille entière casse.
+- **Tailwind 4, `sm:` contre `min-[…px]:`** : les seuils nommés (en rem) sont émis APRÈS les seuils arbitraires
+  en px. Sur une même propriété, `sm:px-6` l'emporte donc sur `min-[768px]:px-…` à toutes les largeurs (le
+  `min-[1200px]:px-8` des espaces spécialisés n'a jamais pris effet, constaté le 22/10). Borner la variante
+  nommée (`sm:max-[768px]:`) ou rester en px.
 - **Frontière serveur/client de Next** : une page serveur n'appelle aucune fonction exportée d'un module
   `"use client"` (« Attempted to call … from the server ») ; un analyseur d'adresse vit dans un module pur
   (`apps/antsia_ga/src/lib/messages-route.ts`).

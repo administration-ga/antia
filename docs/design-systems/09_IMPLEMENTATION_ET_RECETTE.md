@@ -136,6 +136,53 @@ production. Mesures prises dans la page (`getBoundingClientRect`), sur `/fil` :
 
 ![Fil au téléphone, 390 px](recette/gouttiere-fil-390.jpg)
 
+### Gouttière des espaces spécialisés (22/10/2026)
+
+Boutique, prestataire, professionnels et média ont leur propre cadre
+(`specialized-page.tsx`). Il suit désormais la même règle : dès 768 px, le
+jeton `--spacing-gutter` fait la marge extérieure, l'écart entre le rail de
+l'espace et son contenu, et le retrait de la barre de l'espace. Le cadre de
+1 440 px centré est retiré. Le téléphone ne change pas : barre basse fixe,
+retraits de 12 px, puis 24 px de 640 à 767 px.
+
+Même candidat et même méthode que ci-dessus. Mesures prises sur
+`/boutique/epicerie-moussavou-demo`, `/prestataire/studio-objectif-demo`,
+`/professionnels`, `/media/gabon-actu-demo` et `/presse`. Les quatre espaces
+donnent les mêmes valeurs :
+
+| Largeur | Marge gauche | Écart rail / contenu | Marge droite | Barre de l'espace (gauche / droite) | Colonne de contenu |
+|---|---|---|---|---|---|
+| 1 024 px | 16 | 16 | 16 | 16 / 16 | 880 |
+| 1 280 px | 24 | 24 | 24 | 24 / 24 | 1 000 |
+| 1 440 px | 24 | 24 | 24 | 24 / 24 | 1 160 |
+| 1 920 px | 24 | 24 | 24 | 24 / 24 | 1 640 |
+
+- La marge gauche se mesure aux destinations du rail. Le rail n'a plus de
+  retrait intérieur : le fond de la destination active touche la gouttière.
+- Téléphone **390 px** : barre basse fixe d'un bord à l'autre, contenu et barre
+  de l'espace à 12 px, sans défilement horizontal. À 700 et 767 px : 24 px,
+  comme avant. À 768 px : 16 / 16 / 16.
+- Piège corrigé : Tailwind 4 émet `sm:` (en rem) après `min-[768px]:` (en px).
+  Le `min-[1200px]:px-8` du contenu ne s'appliquait donc jamais. Le `sm:` est
+  désormais borné au téléphone (`sm:max-[768px]:`).
+- Reste hors de ce lot : plusieurs écrans se centrent eux-mêmes dans la colonne,
+  avec leur propre largeur maximale :
+  - la vitrine, le catalogue, les offres et les formulaires de boutique ou de
+    prestataire (`ShopFrame` de `shop-ui.tsx`, 768 px). À 1 920 px, la vitrine
+    laisse 436 px de chaque côté de son bloc ;
+  - l'annuaire des professionnels (1 024 px) ;
+  - l'annuaire presse (1 152 px).
+
+![Boutique à 1 440 px : 24 px aux bords comme entre le rail et le contenu](recette/gouttiere-boutique-1440.jpg)
+
+![Boutique à 1 920 px : la vitrine reste centrée dans sa colonne](recette/gouttiere-boutique-1920.jpg)
+
+![Boutique à 1 280 px](recette/gouttiere-boutique-1280.jpg)
+
+![Boutique à 1 024 px, rail compact](recette/gouttiere-boutique-1024.jpg)
+
+![Boutique au téléphone, 390 px](recette/gouttiere-boutique-390.jpg)
+
 ## Limites de preuve et état Git
 
 Le `verify` global avec l’ensemble des tests backend et des espaces de travail voisins n’a pas été relancé : la validation est ciblée sur les surfaces modifiées et leurs contrats.
