@@ -23,7 +23,7 @@ vi.mock("react-i18next", () => ({ useTranslation: () => ({ t: (key: string) => {
 import { routes, specializedShopRoute, type SpecializedShopRoute } from "@/lib/routes"
 import { specializedReturnKey, writeSpecializedReturn } from "@/lib/specialized-navigation"
 import { SpecializedNavigationBoundary } from "./specialized-navigation"
-import { SpecializedPage, SpecializedProfessionalPage } from "./specialized-page"
+import { SpecializedEditorialPage, SpecializedPage, SpecializedProfessionalPage } from "./specialized-page"
 
 const owner = { networkId: "network-a", personId: "person-a" }
 let host: HTMLDivElement | undefined
@@ -285,5 +285,59 @@ describe("MP01 — coque spécialisée de boutique", () => {
     const container = await render(<SpecializedNavigationBoundary owner={owner}><SpecializedPage space={{ handle: "atelier", section: "home" }}><p>Vitrine</p></SpecializedPage></SpecializedNavigationBoundary>)
     expect(Array.from(container.querySelectorAll("a")).find(link => link.textContent === "Retour à ANTSIA")?.getAttribute("href")).toBe(routes.feed())
     expect(window.sessionStorage.getItem(specializedReturnKey(owner))).toBeNull()
+  })
+})
+
+/** Une classe Tailwind : ses variantes (`min-[768px]`, `sm:max-[768px]`…) et son utilitaire. */
+function splitClass(name: string): { variants: string; utility: string } {
+  const parts = name.split(/:(?![^[]*\])/u)
+  return { variants: parts.slice(0, -1).join(":"), utility: parts.at(-1)! }
+}
+
+const classNames = (element: Element | null | undefined) => element?.getAttribute("class")?.split(/\s+/u).filter(Boolean) ?? []
+
+/** Les retraits horizontaux d'un élément, rangés par variantes (`""` : sans variante). */
+function inlinePaddings(element: Element | null | undefined): Record<string, string[]> {
+  const paddings: Record<string, string[]> = {}
+  for (const name of classNames(element)) {
+    const { variants, utility } = splitClass(name)
+    if (/^(?:p|px|pl|pr|ps|pe)-/u.test(utility)) (paddings[variants] ??= []).push(utility)
+  }
+  return paddings
+}
+
+/**
+ * Gouttière unique (règle des pages de membre du 22/10/2026, member-navigation-styles.test) :
+ * dès 768 px, la marge extérieure, l'écart entre le rail et le contenu et le retrait de la
+ * barre de l'espace valent le jeton `--spacing-gutter`, sans largeur maximale centrée. Les
+ * largeurs rendues se mesurent dans le navigateur ; ici, la structure qui les garantit.
+ */
+describe("gouttière unique des espaces spécialisés", () => {
+  it.each([
+    ["boutique", <SpecializedPage key="shop" space={{ handle: "atelier", section: "home" }}><p>Vitrine</p></SpecializedPage>],
+    ["prestataire", <SpecializedPage key="provider" space={{ handle: "atelier", section: "catalog", provider: true }}><p>Prestations</p></SpecializedPage>],
+    ["professionnels", <SpecializedProfessionalPage key="professional"><p>Annuaire</p></SpecializedProfessionalPage>],
+    ["média", <SpecializedEditorialPage key="media"><p>Presse</p></SpecializedEditorialPage>],
+  ] as const)("%s : bords, écart et barre sur le jeton dès 768 px, sans cadre centré ; téléphone inchangé", (_, page) => {
+    const host = document.createElement("div")
+    host.innerHTML = renderToStaticMarkup(page)
+    const frame = host.querySelector("[data-specialized-space]")
+    const bar = frame?.querySelector(":scope > header > div")
+    const grid = frame?.querySelector(":scope > div")
+    const rail = grid?.querySelector(":scope > nav")
+    const main = grid?.querySelector(":scope > main")
+    for (const element of [bar, grid, rail, main]) {
+      expect(element).toBeTruthy()
+      expect(classNames(element).map(name => splitClass(name).utility).filter(utility => utility === "mx-auto" || utility.startsWith("max-w-"))).toEqual([])
+    }
+    // Le rail et le contenu se partagent le cadre ; le jeton fait les bords et l'écart.
+    expect(inlinePaddings(grid)).toEqual({ "min-[768px]": ["px-gutter"] })
+    expect(classNames(grid).filter(name => splitClass(name).utility.startsWith("gap-"))).toEqual(["min-[768px]:gap-gutter"])
+    // Les destinations du rail commencent à la gouttière ; au téléphone, la barre basse garde ses 8 px.
+    expect(inlinePaddings(rail)).toEqual({ "": ["px-2"], "min-[768px]": ["px-0"] })
+    // Téléphone : 12 px, puis 24 px dès `sm`. Ce `sm:` reste borné sous 768 px : Tailwind 4
+    // l'émet après `min-[768px]:` (rem après px), il l'emporterait sinon à toutes les largeurs.
+    expect(inlinePaddings(bar)).toEqual({ "": ["px-3"], "sm:max-[768px]": ["px-6"], "min-[768px]": ["px-gutter"] })
+    expect(inlinePaddings(main)).toEqual({ "": ["px-3"], "sm:max-[768px]": ["px-6"], "min-[768px]": ["px-0"] })
   })
 })
