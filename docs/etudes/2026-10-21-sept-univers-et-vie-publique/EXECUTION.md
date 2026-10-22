@@ -15,7 +15,7 @@ Autorisation : le propriétaire a validé les décisions D01 à D08 le 21 octobr
 |---|---|---|
 | SU00 | Terminé — documentaire | ADR-0035 (D01–D08 acceptées, D09–D12 proposées) ; index des ADR mis à jour ; étude passée en version 1.1 |
 | SU01 | Analyse livrée ; mise en œuvre par sous-lots | exigences article par article, état du code, écarts, arbitrages juridiques, sous-lots SU01a à SU01j et calendrier ; à faire valider par un juriste avant toute mise en œuvre de l'identification et de l'âge |
-| SU01d | En ligne, restes compris, depuis le 22/10 (backend de `f574c75`, front `880d1aa`) ; délais légaux de la console en ligne le 22/10 (backend et console `d7f4784`) ; bureau de DIASPORALE (diasporale#26) livré en source, à publier | voir [SU01d — signalements réglementés](#su01d--signalements-réglementés) |
+| SU01d | En ligne, restes compris, depuis le 22/10 (backend de `f574c75`, front `880d1aa`) ; délais légaux de la console en ligne le 22/10 (backend et console `d7f4784`) ; bureau de DIASPORALE (diasporale#26) en ligne sur la démonstration seulement (https://diasporale-demo.vercel.app, 22/10) | voir [SU01d — signalements réglementés](#su01d--signalements-réglementés) |
 | SU02 | À faire | Découvrir par piliers ; dépend de SU00 et MP01 |
 | SU03 | À faire | types d'offre bien immobilier et véhicule ; dépend de MP03 |
 | SU04 à SU16 | À faire | voir l'étude, § 15 |
@@ -130,7 +130,7 @@ Ordonnance n° 0011/PR/2026, art. 24, 32 et 33.
     - en anglais : « My reports », « Content removed » ;
     - console : des 401 pendant les changements de compte, et le rechargement à chaud perdu en passant d'une application à l'autre sur le même port.
 
-**Bureau de modération de DIASPORALE (livré en source le 22/10/2026 : diasporale#26, `d18dd20` ; non publié)**
+**Bureau de modération de DIASPORALE (livré le 22/10/2026 : diasporale#26, `d18dd20` ; en ligne sur la démonstration seulement)**
 - `/moderation` d'`apps/diasporale_com` ouvre l'onglet « File » sur une voie « Délais légaux », lue dans `cases.deadlineQueue`. Cette requête est en ligne depuis `9927c9c` et `cases.ts` n'a pas changé depuis.
   - L'échéance la plus proche d'abord, 50 au plus.
   - Pour chaque dossier : fondement (heures lues par `personalReportDelayHours`), chronomètre (reste ou retard, rafraîchi toutes les 30 s sans relire la base), échéance, accusé de réception.
@@ -199,7 +199,7 @@ Périmètre tranché par le propriétaire le 22/10/2026 : l'export suit la règl
 
 **Ce qui reste de SU01d**
 - Console en ligne le 22/10, avec l'accord écrit du propriétaire : backend de `main` `d7f4784` sur la démo puis la production, puis la console `d7f4784` promue ([docs/35](../../35_PUBLICATION_DONNEES_DEMO_2026-10-22.md)). Sa recette connectée attend le propriétaire : un client IDN de niveau 2 qui connaisse l'adresse de retour de la console, et un premier opérateur.
-- Publier le front DIASPORALE du bureau (diasporale#26) : aucun backend nouveau. C'est au propriétaire.
+- DIASPORALE, bureau compris, est en ligne sur la démonstration seulement, depuis le 22/10 (https://diasporale-demo.vercel.app ; ADR-0038, [docs/35](../../35_PUBLICATION_DONNEES_DEMO_2026-10-22.md)). Sa production attend le propriétaire : décision d'hébergement A10, textes légaux relus, domaine diasporale.com, réseau créé par la console.
 - Premiers chiffres : le passage quotidien de 04 h 10 UTC mesure la veille. Une journée ne se publie qu'à partir de 5 échéances sur 5 auteurs.
 
 ## Conditions externes

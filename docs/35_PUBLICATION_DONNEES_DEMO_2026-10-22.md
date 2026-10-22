@@ -248,3 +248,48 @@ Autres contrôles :
 - Restes :
   - lot 3 de l'ADR-0037 (formules des boutiques), non commencé dans le code ;
   - publication DIASPORALE sur la démonstration (ADR-0038, PR 61) : à faire, avec l'accord du propriétaire.
+
+## Mise à jour — DIASPORALE sur la démonstration (ADR-0038)
+
+- Demande du propriétaire, le 22/10 : publier DIASPORALE. Choix « Chantier backend démo », puis accord écrit
+  « Tout, dans cet ordre » pour cinq étapes : fonctions sur la démo, graine, site, origine de confiance, recette.
+- Code : antsia#61 (`4feeea0`, ADR-0038 : comptes de démonstration DIASPORALE sur la démonstration déclarée) ;
+  diasporale#27 (`fcde290`, texte du panneau).
+- Contexte : `git archive` d'ANTSIA `4feeea0` et de DIASPORALE `fcde290`, sans `.env.local`, connexion CLI du Mac, aucune clé.
+
+| Étape | Résultat |
+|---|---|
+| Aperçu `--dry-run`, démo | cible `okatech:antsia-demo:demo` ; aucun index supprimé, schéma validé ; seule ligne : « version Node des actions », artefact connu |
+| Convex démo `vivid-hedgehog-655` | fonctions de `4feeea0`, 1 035 avant et après ; `modules/diaspora/demoAccounts:catalogue` rend les 20 comptes |
+| Production `diligent-avocet-585` | non touchée par cette publication ; catalogue `[]`, réseau `diasporale` absent |
+| Graine | `ANTSIA_SEEDS_ALLOWED=true`, `modules/diaspora/seed:run` (réseau `diasporale` créé, hub FR), puis variable retirée |
+| Site | projet Vercel `diasporale-demo` (`prj_ZJN43UbhX5PHO64qL80pa2mAmUnq`) ; déploiement `dpl_AHPTXYChXkVMRYwFtFwHhDVQaaTo` (diasporale-demo-ocsgzkrcs), READY en 191 s, version `diasporale-fcde2902a42b-antsia-4feeea0a773f-demo` |
+| Origine de confiance | `TRUSTED_ORIGINS=https://diasporale-demo.vercel.app` sur la démo (neuf variables) |
+
+- Réglages du projet : dossier racine `DIASPORALE/apps/diasporale_com`, Node 24, installation
+  `cd ../../../ANTSIA && npx --yes bun@1.4.2 install --frozen-lockfile`, construction `npx --yes bun@1.4.2 run build`.
+- Variables publiques passées au build et à l'exécution du déploiement seulement :
+  - `NEXT_PUBLIC_DIASPORALE_DATA_SOURCE=engine` ;
+  - `NEXT_PUBLIC_SITE_URL` ;
+  - `NEXT_PUBLIC_CONVEX_URL` et `CONVEX_SITE_URL` (démo) ;
+  - `NEXT_PUBLIC_BUILD_SHA`.
+  Aucun secret.
+- Contexte figé : 3 273 fichiers, empreinte `aafb4565…`.
+- Accès : https://diasporale-demo.vercel.app est public (200 sur `/`, `/entrer`, `/sante-fonctionnelle`). La protection
+  Vercel standard couvre les autres adresses du projet.
+- Recette en ligne, avec les comptes de démonstration :
+  - Patrice MBOUMBA publie un texte fictif, que Sandrine ONDO signale pour harcèlement ;
+  - dans `/moderation`, Ruth ALLOGHO voit « Délais légaux » : « Art. 24 : décision notifiée sous 72 h »,
+    « Reste 71 h 59 min », échéance le 25/10 à 12:17, accusé de réception envoyé le 22/10 à 13:17 ;
+  - la file ordinaire dit « Aucun autre dossier ouvert » ;
+  - à 390 px, aucun débordement ;
+  - console du navigateur : un 401 au changement de compte, déjà connu.
+- Le dossier de recette est laissé ouvert : la voie se voit en entrant comme Ruth.
+- Une autre session a ensuite publié `main` `6db0a29` sur les deux backends (section précédente). Vérifié après coup :
+  le catalogue, le réseau, `TRUSTED_ORIGINS` et la voie de Ruth fonctionnent toujours ; la production reste fermée.
+- Retour arrière : retirer `TRUSTED_ORIGINS` de la démo ferme toute connexion depuis le site ; retirer le projet
+  Vercel `diasporale-demo` le met hors ligne (au propriétaire).
+- Restes, au propriétaire :
+  - DIASPORALE en production : décision d'hébergement A10, textes légaux relus par un juriste, domaine
+    diasporale.com, réseau créé par la console ;
+  - republier le site de démonstration à chaque publication du moteur (`docs/23` § 6).
