@@ -6,6 +6,8 @@
 - **Date** : 2026-10-20
 - **Complète** : la double garde des outils de développement (`convex/lib/devTools.ts`), sans
   l'élargir.
+- **Complété par** : ADR-0038 (22/10/2026) — les comptes de démonstration de DIASPORALE et leur
+  domaine réservé `demo.diasporale.test` s'ouvrent aussi sur la démonstration déclarée.
 - **État d'exécution** : code et tests dans les sources (`convex/lib/devTools.ts`,
   `convex/modules/platform/{demoAccounts,devTools,authentication}.ts`,
   `convex/betterAuth/{delivery,settings}.ts`, `apps/antsia_ga`). Aucun déploiement de démonstration
