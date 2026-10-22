@@ -328,3 +328,47 @@ Autres contrôles :
   - `TRUSTED_ORIGINS` contient `https://antsia-admin.vercel.app`.
 - Variables : aucune modifiée.
 - Reste : la recette connectée, quand le propriétaire se connecte avec IDN sur https://antsia-admin.vercel.app.
+
+## Mise à jour — formules des boutiques en ligne (ADR-0037, lot 3) : front seul, sur la base en ligne
+
+- Demande du propriétaire, le 22/10, après avoir vu le rendu : « fusionne la PR 67 et publie le lot 3 (fronts enfant
+  puis principal) », puis « commit, pousse et déploie en ligne ».
+- PR 67 fusionnée dans `main` (`0c7150c`) :
+  - `bun run verify` vert sur `main` `ff8954e` + lot 3 : 741 s, 15 483 tests, lint sans erreur ;
+  - la PR 70 est entrée entre-temps : typage d'antsia.ga, tests boutique, panier et remise (253) et cliquets (150)
+    verts sur `main` `2ae6c6f` + lot 3.
+- Ce qui part : le lot 3 SEUL, sur la base en ligne.
+  - `main` porte aussi les lots 1 à 3 de la marketplace (PR 65, 69 et 70), non publiés. La PR 65 attend son backend :
+    `bannerUrl` des cartes d'annuaire, absent de `shops:directory` et de `marketplaceShops:search` en démo comme en
+    production (relevé juste avant l'envoi). Publier `main` les aurait mis en ligne sans ce backend.
+  - Commit publié : `998b598`, branche `release/front-lot3-3253a10` (poussée). Il vaut `3253a10` (backend en ligne :
+    `6db0a29` + ADR-0039) plus le diff du lot 3 (`daeca1e`), mêmes seize fichiers. `convex/` est identique à
+    `3253a10` : aucun backend à envoyer.
+  - Versions étiquetées `release-998b59872cd4-*` (et non `main-…`), méta `antsiaReleaseBranch=release/front-lot3-3253a10`.
+  - Sessions voisines prévenues avant l'envoi (marketplace ; console, dont le correctif IDN est dans identite.ga).
+- Vérification du commit publié : `bun run verify` vert (714 s, 15 469 tests, lint sans erreur) ; rendu contrôlé sur un
+  backend local isolé, à 390 et 1 440 px : fiche du riz bord à bord, panneau prix à 1 440 px, « Obtenir un devis »,
+  « Acheter », aucun débordement.
+- Contexte : `git archive` d'ANTSIA `998b598` et de DIASPORALE `fcde290`, sans `.env.local` ; 3 272 fichiers, empreinte `c13d7193…`.
+
+| Étape | Résultat |
+|---|---|
+| Front, enfant démo | `dpl_3xpobDuJCG7V92ug8rLj5QQwsQJU` (antsia-demo-bblosaang), version `release-998b59872cd4-demo`, READY en 162 s, 302 SSO, promu |
+| Front, principal | `dpl_3bEibVz37nUwCUN417eWLwUUVUKh` (antsia-letiizofb), version `release-998b59872cd4-production`, READY en 191 s, 302 SSO, promu |
+
+- Retour arrière : antsia-gxx0we8lv (principal) et antsia-demo-9o837ytn1 (enfant), versions `6db0a29`.
+- Santé : `release-998b59872cd4-production` et `release-998b59872cd4-demo`.
+- Pages en 200, CSP sur le backend de chaque site, HSTS et `X-Frame-Options: DENY` :
+  - `/`, `/entrer`, `/fil`, `/moi`, `/messages`, `/marketplace`, `/transparence` ;
+  - `/demo/entrer`, `/demo/fil`, `/demo/transparence`.
+  - `/demo` (accueil de l'enfant) répond 200 sans CSP ni `X-Frame-Options`. Les règles d'en-têtes sont inchangées
+    depuis `6db0a29` : ce n'est pas un effet de cet envoi.
+- Recette en ligne, en lecture seule (démo partagée, compte Membre Awa MBA) :
+  - 390 px : 20 publications, aucun débordement, aucune erreur dans la console ;
+  - 1 440 px : colonne unique, cartes de 784 px à l'angle de 16 px, médias bord à bord (784 px), aucun débordement ;
+  - le paquet servi contient le code des formules (`data-offer-formula`) et l'enveloppe du moteur (`rp-charte-offer`).
+  - Aucune des 76 publications de la démo n'est liée à une offre (`commerceOffer`). La formule ne s'y voit donc pas
+    tant qu'une boutique ne publie pas une offre ; elle est vérifiée sur le commit publié (ci-dessus).
+- Variables : aucune modifiée.
+- Suite : la prochaine publication de `main` embarque le lot 3, déjà fusionné : d'abord le backend de la PR 65, puis
+  les fronts.
