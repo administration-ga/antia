@@ -75,6 +75,8 @@ describe("formules des boutiques — la mise en scène (ADR-0037)", () => {
     const value = html(catalogOfferFixture({ media: [photo(1)] }), NO_MEDIA)
     expect(value).toContain('data-offer-formula="sheet"')
     expect(value).toContain("aspect-ratio:0.8")
+    // Panneau prix (carte d'au moins 480 px) : la photo sur les deux tiers, la description sur le tiers restant.
+    expect(value).toContain(".opf-sheet { grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);")
   })
 
   it("la location se réserve depuis le bandeau collé au média, le devis reste offert", () => {
