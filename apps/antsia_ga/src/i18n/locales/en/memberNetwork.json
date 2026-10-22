@@ -48,7 +48,19 @@
     "tagSubmit": "See the posts",
     "networkTitle": "In the network",
     "publicTitle": "Public view",
-    "publicLead": "What someone without an account can read. This view opens outside your member space."
+    "publicLead": "What someone without an account can read. This view opens outside your member space.",
+    "pillars": {
+      "label": "ANTSIA's pillars",
+      "business": "Business",
+      "publicLife": "Public life",
+      "entertainment": "Entertainment"
+    },
+    "universes": {
+      "shops": "Shops",
+      "services": "Services and craftspeople",
+      "food": "Food and restaurants",
+      "clips": "Clips"
+    }
   },
   "moderation": {
     "title": "National moderation",
