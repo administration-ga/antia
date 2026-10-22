@@ -41,4 +41,4 @@ réservent contre `origin/main` et les PR ouvertes de ce dépôt.
 | [0036](0036-icom-et-icom-pro.md) | iCom et iCom Pro : deux espaces de messagerie, une bascule en pilule, contacts pro dérivés des échanges | Accepté par le propriétaire le 22/10/2026 ; lot ICP-1 (front) |
 | [0037](0037-fil-sans-cadre-et-formules-des-boutiques.md) | Fil sans cadre, deux formules de relation et formules des boutiques | Accepté par le propriétaire le 22/10/2026 ; lots 1 (socle et publications, grille du bureau retirée) et 2 (suggestions et relations) |
 | [0038](0038-comptes-de-demonstration-diasporale.md) | Les comptes de démonstration de DIASPORALE sur la démonstration déclarée | Accepté par le propriétaire le 22/10/2026 ; code et tests verts, publication sur la démonstration à suivre |
-| [0039](0039-console-idn-niveau-1.md) | La console d'exploitation admet une connexion IDN de niveau 1 | Accepté par le propriétaire le 22/10/2026 ; code et tests verts |
+| [0039](0039-console-idn-niveau-1.md) | La console d'exploitation admet une connexion IDN de niveau 1 | Accepté par le propriétaire le 22/10/2026 ; publié le 22/10 (backend et console `3253a10`) |

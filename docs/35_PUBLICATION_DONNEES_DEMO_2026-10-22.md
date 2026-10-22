@@ -293,3 +293,38 @@ Autres contrôles :
   - DIASPORALE en production : décision d'hébergement A10, textes légaux relus par un juriste, domaine
     diasporale.com, réseau créé par la console ;
   - republier le site de démonstration à chaque publication du moteur (`docs/23` § 6).
+
+## Mise à jour — ADR-0039 : console admise au niveau IDN 1 (backend et console `3253a10`)
+
+- Contenu : PR 63 (ADR-0039). Les gardes de la console lisent `CONSOLE_MIN_LOA = 1` ; la console
+  affiche « IDN niveau 1 minimum ».
+- Décisions du propriétaire, le 22/10 : « Abaisser au niveau 1 », puis le périmètre « Seulement l'ADR-0039 ».
+- Backend : `main` `3253a10` = le backend en ligne `6db0a29` plus l'ADR-0039, rien d'autre.
+  - La PR 65 (`ffe016a`, marketplace, `bannerUrl` des cartes d'annuaire) est fusionnée après la PR 63
+    et volontairement non embarquée.
+  - Juste avant chaque envoi : `shops:directory` et `marketplaceShops:search` sans `bannerUrl`, donc la
+    PR 65 n'est pas en ligne et rien ne lui est retiré.
+  - Sa session est prévenue : publier `ffe016a` après cet envoi, puisqu'il contient déjà l'ADR-0039.
+- Contexte : `git archive` d'ANTSIA `3253a10` et de DIASPORALE `fcde290`, sans `.env.local` ;
+  connexion CLI du Mac, aucune clé.
+
+| Étape | Résultat |
+|---|---|
+| Aperçu `--dry-run`, démo | aucun index supprimé, schéma validé |
+| Convex démo `vivid-hedgehog-655` | 1 035 → 1 035 fonctions, signatures identiques (seule la logique des gardes change) |
+| Convex production `diligent-avocet-585` | idem ; signatures identiques à la démo |
+| Console `antsia-admin` | `dpl_3rhQmzyR9KA2w1UguE2n1jkbHfZ8` (antsia-admin-nta6qmgwi), contrôlée (READY, 302 SSO), puis promue |
+
+- Console en ligne : santé `{"status":"ok","version":"3253a10","backend":"configured"}`. `/entrer` dit
+  « IDN niveau 1 minimum », sans erreur dans la console du navigateur.
+- Retour arrière : `dpl_EKFVB2iJerWY4up3KgLyRbNWUc5U` (antsia-admin-3smpcs4kx, `d7f4784`).
+- Premier opérateur : à la demande du propriétaire, une ligne `operators` (`platform_admin`) pour sa
+  propre personne, la seule en production.
+  - Posée par import en ajout sur `diligent-avocet-585` ; aucune autre donnée touchée.
+  - Le code n'en crée toujours aucune (ADR-0011).
+- Départ IDN contrôlé depuis la console, sans saisie :
+  - redirection vers `identite.ga/sign-in`, client `antsia_prd_dnWDNoy7` ;
+  - retour central `https://antsia.vercel.app/api/auth/oauth2/callback/idn`, `prompt=login`, PKCE ;
+  - `TRUSTED_ORIGINS` contient `https://antsia-admin.vercel.app`.
+- Variables : aucune modifiée.
+- Reste : la recette connectée, quand le propriétaire se connecte avec IDN sur https://antsia-admin.vercel.app.

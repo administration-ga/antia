@@ -198,7 +198,7 @@ Périmètre tranché par le propriétaire le 22/10/2026 : l'export suit la règl
   - captures : [`recette/su01d-console-banc-*.jpg`](recette/).
 
 **Ce qui reste de SU01d**
-- Console en ligne le 22/10, avec l'accord écrit du propriétaire : backend de `main` `d7f4784` sur la démo puis la production, puis la console `d7f4784` promue ([docs/35](../../35_PUBLICATION_DONNEES_DEMO_2026-10-22.md)). Sa recette connectée attend le propriétaire : un client IDN de niveau 2 qui connaisse l'adresse de retour de la console, et un premier opérateur.
+- Console en ligne le 22/10, avec l'accord écrit du propriétaire ([docs/35](../../35_PUBLICATION_DONNEES_DEMO_2026-10-22.md)) : backend et console `d7f4784`, puis `3253a10` (ADR-0039 : l'IDN de niveau 1 suffit). Le premier opérateur, le propriétaire, est posé ; reste sa recette connectée.
 - DIASPORALE, bureau compris, est en ligne sur la démonstration seulement, depuis le 22/10 (https://diasporale-demo.vercel.app ; ADR-0038, [docs/35](../../35_PUBLICATION_DONNEES_DEMO_2026-10-22.md)). Sa production attend le propriétaire : décision d'hébergement A10, textes légaux relus, domaine diasporale.com, réseau créé par la console.
 - Premiers chiffres : le passage quotidien de 04 h 10 UTC mesure la veille. Une journée ne se publie qu'à partir de 5 échéances sur 5 auteurs.
 
