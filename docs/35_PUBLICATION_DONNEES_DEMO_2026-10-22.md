@@ -111,3 +111,38 @@ Autres contrôles :
      `seeds/demoConversations:run`, après déploiement Convex) ;
   2. coquille relevée en ligne : « les messages de Atelier Tech Démo » (élision), corrigée dans
      ICP-2 avec « Voir le profil de {{name}} ».
+
+## Mise à jour — Convex et front `main` bca19af (conversations de démonstration, ICP-2)
+
+- Backend (session des déploiements, accord écrit du propriétaire) : Convex bca19af sur
+  vivid-hedgehog-655 puis diligent-avocet-585, aperçu `--dry-run` d'abord, schéma validé, aucun
+  index ajouté ni retiré, 1 032 fonctions identiques des deux côtés.
+- Graine `seeds/demoConversations:run` sur la démo seule : mandats 3, réglages 3, 11 échanges
+  iCom (25 messages), 8 fils boutique (15 messages). Aucune politique du canal boutique n'existait
+  sur la racine de la démo : la graine l'a ouvert (`channelOpened: true`). Rien en production.
+- Fronts promus (accord écrit du propriétaire) :
+  - enfant démo : `dpl_BpRereVWQ8zhgR1y5euHFzWYpaQe` (antsia-demo-8hbfvxcy0), version `main-bca19af78116-demo` ;
+  - principal : `dpl_8rCFPmjTZNoy3bZMTyQSQzFRqJMm` (antsia-ojavnpvwd), version `main-bca19af78116-production`.
+  - Contexte : ANTSIA bca19af et DIASPORALE 214831c, 3 256 fichiers, empreinte `a3087c28…`.
+  - Retour arrière : antsia-jqoi0thyr (principal) et antsia-demo-7ljagkvjb (enfant).
+  - Contenu par rapport à 26f3024 : élision des libellés iCom Pro et PR 49 (gouttière unique
+    dans les espaces spécialisés). Les PR 51 et 52, fusionnées après bca19af, ne sont pas publiées.
+- Recette (compte Membre de la démo, Awa MBA) :
+
+| Contrôle | 1440 | 834 | 390 |
+|---|---|---|---|
+| Fil : carte iCom avec la pilule (1440), rail « iCom » avec 4 non lus | ✓ | ✓ | ✓ |
+| iCom : 4 conversations, 4 non lus | ✓ | — | ✓ |
+| iCom Pro : 3 fils clients d'Atelier Tech Démo (close, en attente, acceptée) | ✓ | — | ✓ |
+| iCom Pro, contacts : 3 clients, boutique contactée | — | ✓ | — |
+| Marketplace | ✓ | ✓ | — |
+| Vitrine de l'Épicerie (couverture décodée, 13 images) | — | — | ✓ |
+| Débordement horizontal, ressources en erreur | aucun | aucun | aucun |
+
+- Avant la publication, constaté sur 26f3024 avec le nouveau backend : la conversation de boutique
+  avec Kévin MOUNGUENGUI s'ouvre (messages, accord d'appel, actions) ; « Mes achats et démarches »
+  montre l'échange avec l'Épicerie. Aucune conversation non lue n'a été ouverte (la démo est
+  partagée : l'ouvrir la marquerait lue pour les visiteurs suivants).
+- Site principal : `/`, `/entrer`, `/fil`, `/messages`, `/messages?espace=pro`, `/marketplace`
+  en 200 ; santé des deux sites aux versions ci-dessus.
+- Restes : publication des PR 51 et 52 (accord du propriétaire) ; ICP-3 (réglages pro).
