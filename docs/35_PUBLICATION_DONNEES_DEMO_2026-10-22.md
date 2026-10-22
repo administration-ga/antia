@@ -402,3 +402,47 @@ Autres contrôles :
 
 - Captures : `docs/etudes/2026-10-22-fil-sans-cadre/recette/lot3-en-ligne-*.jpg`.
 - Production : rien de posé.
+
+## Mise à jour — panneau prix en deux tiers, bouton d'achat sur chaque publication des boutiques de la démo
+
+- Demande du propriétaire, le 22/10, devant la fiche produit en ligne : « la place réservée normalement à l'image photo doit
+  prendre les 2/3 de l'espace, et le 1/3 l'espace de description ». Il signale aussi des produits sans bouton d'achat.
+  Puis : « finaliser ça et puis tu mets en ligne, tu déploies ».
+- Code : PR 74 (`676a6cf`), grille du panneau prix `2fr / 1fr` dès 480 px de carte, test de la fiche complété.
+  `bun run verify` vert sur `main` `d37f51d` + ce changement : 564 s, 15 496 tests, lint sans erreur.
+- Publication, front seul, sur la base en ligne :
+  - `a7a5d78`, branche `release/front-lot3-3253a10` en avance rapide : `998b598` + ce changement seul. Les lots de la
+    marketplace (PR 65, 69, 70 et 73) restent hors ligne : `bannerUrl` toujours absent du backend.
+  - Typage d'antsia.ga et 160 tests boutique verts sur `a7a5d78`.
+  - Contexte : 3 272 fichiers, empreinte `009adb81…`, DIASPORALE `fcde290`.
+
+| Étape | Résultat |
+|---|---|
+| Front, enfant démo | `dpl_4utjMBGK78kxEMheWqNJgnakCGtM` (antsia-demo-psc3q7y5q), version `release-a7a5d78bce90-demo`, READY en 186 s, 302 SSO, promu |
+| Front, principal | `dpl_45wDHqELEQuUSBMJRDr89RB2tECq` (antsia-1bj5ooe7n), version `release-a7a5d78bce90-production`, READY en 204 s, 302 SSO, promu |
+
+- Retour arrière : antsia-letiizofb (principal) et antsia-demo-bblosaang (enfant), versions `998b598`.
+- Boutons d'achat : les cinq autres publications des boutiques de la démo sont liées à leur offre, par l'interface (comptes de
+  démonstration), comme les trois premières. Les huit publications des trois boutiques ont désormais leur bouton :
+
+| Boutique (compte) | Publication | Offre | Bouton |
+|---|---|---|---|
+| Épicerie Moussavou Démo (Patrick MOUSSAVOU) | Riz, sans photo | `demo:offer:riz-parfume` | fiche, « Acheter » |
+| Épicerie Moussavou Démo | Poisson fumé | `demo:offer:poisson-fume` | « Acheter », 3 500 XAF |
+| Épicerie Moussavou Démo | Panier en raphia | `demo:offer:panier-raphia` | « Acheter », 8 500 XAF |
+| Épicerie Moussavou Démo | Boissons au bissap et au gingembre | `demo:offer:epicerie-produits` (Panier du marché) | « Acheter », 1 500 XAF |
+| Studio Objectif Démo (Jean-Rémy NDONG) | Mariage | `demo:offer:reportage-mariage` | « Obtenir un devis » |
+| Studio Objectif Démo | Portraits, photos de produits, reportages | `demo:offer:reportage-photo` | « Obtenir un devis » |
+| Atelier Tech Démo (Awa MBA) | Formation bureautique | `demo:offer:formation-bureautique` | « Voir l'offre », 20 000 XAF |
+| Atelier Tech Démo | Diagnostic, entretien | `demo:offer:diagnostic-informatique` | « Voir l'offre », 5 000 XAF |
+
+- Les deux prestations à prix fixe de l'Atelier n'ont aucun mode de commande déclaré : leur page n'offre ni commande ni
+  réservation. Le bouton dit donc honnêtement « Voir l'offre ». Un produit dit « Acheter », une offre sur devis « Obtenir un
+  devis ».
+- Recette en ligne :
+  - 1 440 px, fil : carte de 784 px, photo du riz 523 × 653 px (2/3), description 261 px (1/3), « Acheter » dessous,
+    aucun débordement ;
+  - pages des trois boutiques : huit formules ;
+  - 390 px : fiche en colonne (photo puis description), aucun débordement.
+- Capture : `docs/etudes/2026-10-22-fil-sans-cadre/recette/lot3-en-ligne-panneau-deux-tiers-1440.jpg`.
+- Production : aucune donnée posée. Variables : aucune modifiée.
