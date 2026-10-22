@@ -14,6 +14,7 @@ import { z } from "zod"
 
 import { useCartConnectivity } from "@/components/cart/use-cart-draft"
 import { Button, Card, Field, TextArea } from "@/components/shared/controls"
+import { SCREEN_SECTIONS } from "@/components/shared/screen-layout"
 import { SHOP_SELECT_CLASS, ShopLink, useShopAction, useShopDirtyGuard } from "@/components/shops/shop-ui"
 import { professionalErrorKey } from "@/lib/professional-form"
 import { routes } from "@/lib/routes"
@@ -39,14 +40,14 @@ function ProfileQuery({ handle }: { handle: string }) {
 
 export function ProfessionalProfileContent({ profile, refreshing = false }: { profile: MemberProfile; refreshing?: boolean }) {
   const { t } = useTranslation("professionals")
-  return <div className="grid min-w-0 gap-5">
-    <Card><div className="grid gap-3"><header><h2 className="mp-subtitle">{profile.displayName}</h2><p className="text-sm text-muted-foreground">@{profile.handle}</p></header><p className="text-lg font-medium">{profile.title}</p><p>{t(`availability.${profile.availability}`)}{profile.zone ? <span> · {profile.zone}</span> : null}</p><p className="text-sm text-muted-foreground">{t("status.declared")}</p><div className="flex flex-wrap gap-2"><ShopLink href={routes.profile(profile.handle)}>{t("actions.socialProfile")}</ShopLink>{profile.isMe ? <ShopLink href={routes.professionalEditor()}>{t("actions.edit")}</ShopLink> : <ProfessionalReportButton target={{ kind: "professionalProfile", id: profile.profileId }} />}</div></div></Card>
+  return <div className={`${SCREEN_SECTIONS} gap-y-5`}>
+    <Card className="col-span-full"><div className="grid gap-3"><header><h2 className="mp-subtitle">{profile.displayName}</h2><p className="text-sm text-muted-foreground">@{profile.handle}</p></header><p className="text-lg font-medium">{profile.title}</p><p>{t(`availability.${profile.availability}`)}{profile.zone ? <span> · {profile.zone}</span> : null}</p><p className="text-sm text-muted-foreground">{t("status.declared")}</p><div className="flex flex-wrap gap-2"><ShopLink href={routes.profile(profile.handle)}>{t("actions.socialProfile")}</ShopLink>{profile.isMe ? <ShopLink href={routes.professionalEditor()}>{t("actions.edit")}</ShopLink> : <ProfessionalReportButton target={{ kind: "professionalProfile", id: profile.profileId }} />}</div></div></Card>
     <Card><div className="grid gap-3"><h2 className="mp-subtitle">{t("profile.about")}</h2><p className="whitespace-pre-wrap">{profile.bio || t("profile.emptyAbout")}</p></div></Card>
     <div className="grid min-w-0 gap-4 md:grid-cols-2"><Card><div className="grid gap-3"><h2 className="mp-subtitle">{t("profile.skills")}</h2><ul className="flex flex-wrap gap-2">{profile.skills.map(skill => <li key={skill} className="rounded-full bg-muted px-3 py-1 text-sm">{skill}</li>)}</ul></div></Card><Card><div className="grid gap-3"><h2 className="mp-subtitle">{t("profile.languages")}</h2><ul>{profile.languageCodes.map(code => <li key={code}>{PROFESSIONAL_LANGUAGES.some(item => item === code) ? t(`languages.${code}`) : code}</li>)}</ul></div></Card></div>
     <Card><div className="grid gap-4"><h2 className="mp-subtitle">{t("profile.portfolio")}</h2>{profile.portfolio.length ? profile.portfolio.map((item, index) => <article key={index} className="grid gap-2 border-t border-border pt-3"><h3 className="font-medium">{item.title}</h3><p className="whitespace-pre-wrap text-sm">{item.description}</p></article>) : <p className="text-sm text-muted-foreground">{t("profile.emptyPortfolio")}</p>}</div></Card>
     <Card><div className="grid gap-3"><h2 className="mp-subtitle">{t("profile.activities")}</h2>{profile.activities.length ? <ul className="grid gap-2 sm:grid-cols-2">{profile.activities.map(activity => <li key={`${activity.kind}:${activity.handle}`}><ShopLink href={activity.kind === "shop" ? routes.storefront(activity.handle) : routes.page(activity.handle)}>{activity.name}</ShopLink></li>)}</ul> : <p className="text-sm text-muted-foreground">{t("profile.emptyActivities")}</p>}</div></Card>
     <Card><div className="grid gap-3"><h2 className="mp-subtitle">{t("profile.collaborations")}</h2>{profile.collaborationTypes.length ? <ul className="flex flex-wrap gap-2">{profile.collaborationTypes.map(value => <li key={value} className="rounded-full bg-muted px-3 py-1 text-sm">{t(`collaborationTypes.${value}`)}</li>)}</ul> : <p>{t("profile.noCollaboration")}</p>}{profile.canPropose ? <ProfessionalProposalForm profile={profile} disabled={refreshing} /> : !profile.isMe ? <p className="text-sm text-muted-foreground">{t("profile.proposalUnavailable")}</p> : null}</div></Card>
-    <ShopLink href={routes.professionals()}>{t("actions.directory")}</ShopLink>
+    <div className="col-span-full grid"><ShopLink href={routes.professionals()}>{t("actions.directory")}</ShopLink></div>
   </div>
 }
 

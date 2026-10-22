@@ -9,6 +9,7 @@ import { useState } from "react"
 import { useTranslation } from "react-i18next"
 
 import { Button, Card } from "@/components/shared/controls"
+import { SCREEN_SECTIONS } from "@/components/shared/screen-layout"
 import { ShopFrame, ShopLink, useShopAction } from "@/components/shops/shop-ui"
 import { routes } from "@/lib/routes"
 import { BookingPanel, OrderPanel, QuotePanel } from "./service-request-panels"
@@ -37,7 +38,7 @@ function RequestsWindow() {
   const result = query.data
   return <div className="grid gap-4" aria-busy={query.isFetching || undefined}>
     <p className="text-sm text-muted-foreground">{t("requests.scope", { count: SERVICE_REQUESTS_PAGE_SIZE })}</p>
-    {result.page.length ? <ul className="grid gap-3">{result.page.map((request) => <li key={request.requestRowId}><RequestCard request={request} /></li>)}</ul> : <Card><p>{t("requests.empty")}</p></Card>}
+    {result.page.length ? <ul className={`${SCREEN_SECTIONS} gap-y-3`}>{result.page.map((request) => <li key={request.requestRowId}><RequestCard request={request} /></li>)}</ul> : <Card><p>{t("requests.empty")}</p></Card>}
     {cursors.length > 1 || !result.isDone ? <nav aria-label={t("requests.pagination")} className="flex flex-wrap gap-3">
       {cursors.length > 1 ? <Button variant="outline" onClick={() => setCursors((items) => items.slice(0, -1))}>{t("common.previous")}</Button> : null}
       {!result.isDone ? <Button variant="outline" onClick={() => setCursors((items) => [...items, result.continueCursor])}>{t("common.next")}</Button> : null}
@@ -79,7 +80,7 @@ function RequestDetail({ request }: { request: ServiceRequestDto }) {
   const { t, i18n } = useTranslation("services")
   const locale = i18n.resolvedLanguage ?? "fr"
   const status = serviceRequestStatus(request)
-  return <div className="mp-page">
+  return <div className={`${SCREEN_SECTIONS} gap-y-6`}>
     <Card><div className="grid gap-2">
       <h2 className="mp-subtitle break-words">{request.offerTitle}</h2>
       <p className="text-sm text-muted-foreground">{t(`modes.${request.mode}`)}</p>
@@ -98,7 +99,7 @@ function RequestDetail({ request }: { request: ServiceRequestDto }) {
     {request.mode === "quote" ? <QuotePanel request={request} /> : null}
     {request.mode === "booking" ? <BookingPanel request={request} /> : null}
     {request.mode === "fixed_order" ? <OrderPanel request={request} /> : null}
-    <p className="text-xs text-muted-foreground">{t("common.noPayment")}</p>
+    <p className="col-span-full text-xs text-muted-foreground">{t("common.noPayment")}</p>
   </div>
 }
 

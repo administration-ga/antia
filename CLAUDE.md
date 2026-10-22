@@ -100,7 +100,9 @@ Cliquets en place (`tests/ratchets/`) : `no-cross-product-imports`, `no-any-vali
 internes contrôlés également pour les extensions PA5), `sign-out-everywhere` (PA4 : sorties SDK uniquement par la porte partagée, purge
 nominale et navigation complète), `rate-limited-writes` (PA5 : admission de débit des
 écritures publiques vérifiée par AST), `notification-payload-content` (PA5 : aucune copie
-de contenu social ni contact dans les jobs et transports). La couverture de l'inventaire
+de contenu social ni contact dans les jobs et transports), `member-screens-full-width` (22/10 :
+aucun écran de membre ne se borne puis se centre ; colonnes responsives de
+`components/shared/screen-layout.ts`, exceptions nommées). La couverture de l'inventaire
 d'effacement dérivé du schéma est vérifiée par `convex/modules/people/erasure.test.ts`.
 
 ## Pièges déjà payés

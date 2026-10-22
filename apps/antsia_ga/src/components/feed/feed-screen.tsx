@@ -35,7 +35,7 @@ export function FeedScreen({ filter = { kind: "personal" } }: { filter?: MemberF
   if (filter.kind === "national") return <MemberDiscoveryFeed filter={filter} />
   if (filter.kind === "invalid") {
     const invalid = <><h1 className="text-2xl font-semibold">{t("discovery.invalidTitle")}</h1><p role="alert">{t("discovery.invalidFilter")}</p><Link href={routes.nationalFeed()} className="inline-flex min-h-11 items-center self-start rounded-[var(--ui2-button-radius)] px-3 underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">{t("discovery.nationalTitle")}</Link></>
-    if (destinations) return <MemberPage><div className="mx-auto flex w-full max-w-3xl flex-col gap-4">{invalid}</div></MemberPage>
+    if (destinations) return <MemberPage><div className="flex w-full flex-col gap-4">{invalid}</div></MemberPage>
     return <div className="min-h-dvh bg-background"><MemberTopBar /><main id="contenu" className="mx-auto flex max-w-3xl flex-col gap-4 p-6">{invalid}</main></div>
   }
   return (

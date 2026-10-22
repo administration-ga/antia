@@ -15,6 +15,7 @@ import { toast } from "sonner"
 import { z } from "zod"
 
 import { Button, Card, Field, TextArea, TextInput } from "@/components/shared/controls"
+import { FORM_FIELDS, SCREEN_SECTIONS } from "@/components/shared/screen-layout"
 import { SHOP_SELECT_CLASS } from "@/components/shops/shop-ui"
 import { JobIntentRecovery, JobReviewNotice, useJobAction, useJobEntryIntent, useJobIntent, useJobReview } from "./job-guards"
 import { JOB_FILE_ACCEPT, JOB_FILE_MAX_BYTES, jobApplicationSchema, jobCivilNamePreview, jobFileSizeKb, selectableJobFiles, type JobApplicationInput, type JobApplicationValues, type JobDto, type JobFileDto } from "./job-model"
@@ -163,10 +164,10 @@ function JobApplicationFields({ job, sourceAvailable = true, onReview, initialDr
     }, (result) => { if (result && action.current()) { toast.success(t("apply.sent")); intent.complete(result.applicationId) } })
   })
 
-  return <Card><section className="grid gap-5" aria-labelledby={`${ids.first}-title`}><JobReviewNotice review={review} onReview={reread} /><JobIntentRecovery intent={intent} onStopped={() => { setValue("consent", false); review.invalidate() }} /><form id={ids.form} noValidate onSubmit={(event) => { void submit(event) }} className="grid min-w-0 gap-4">
+  return <Card><section className="grid gap-5" aria-labelledby={`${ids.first}-title`}><JobReviewNotice review={review} onReview={reread} /><JobIntentRecovery intent={intent} onStopped={() => { setValue("consent", false); review.invalidate() }} /><div className={`${SCREEN_SECTIONS} gap-y-5`}><form id={ids.form} noValidate onSubmit={(event) => { void submit(event) }} className="grid min-w-0 gap-4">
     <fieldset disabled={locked || form.formState.isSubmitting} className="grid min-w-0 gap-4">
     <header className="grid min-w-0 gap-2"><h2 id={`${ids.first}-title`} className="text-lg font-semibold">{t("apply.title")}</h2><p className="text-sm text-muted-foreground">{t("apply.lead")}</p></header>
-    <div className="grid gap-4 sm:grid-cols-2">
+    <div className={`${FORM_FIELDS} gap-y-4`}>
       <Field id={ids.last} label={t("apply.lastName")} error={errors.lastName?.message}><TextInput id={ids.last} autoComplete="family-name" aria-invalid={errors.lastName ? true : undefined} aria-describedby={errors.lastName ? `${ids.last}-error` : undefined} {...form.register("lastName")} /></Field>
       <Field id={ids.first} label={t("apply.firstName")} error={errors.firstName?.message}><TextInput id={ids.first} autoComplete="given-name" aria-invalid={errors.firstName ? true : undefined} aria-describedby={errors.firstName ? `${ids.first}-error` : undefined} {...form.register("firstName")} /></Field>
     </div>
@@ -180,7 +181,7 @@ function JobApplicationFields({ job, sourceAvailable = true, onReview, initialDr
     </fieldset>
   </form>
     {/* HORS du formulaire de candidature : le dépôt de pièce a son propre formulaire (A19). */}
-    <JobFilesManager files={filesReady ? filesQuery.data ?? [] : []} disabled={locked} onReview={reread} />
+    <JobFilesManager files={filesReady ? filesQuery.data ?? [] : []} disabled={locked} onReview={reread} /></div>
     <section className="grid gap-2 rounded-[var(--ui2-card-radius)] border border-border p-4"><h3 className="font-display text-base font-bold leading-snug">{t("apply.consentTitle")}</h3><p className="text-sm">{t("apply.consentText")}</p>
       <label htmlFor={ids.consent} className="flex min-h-11 items-center gap-3"><input id={ids.consent} form={ids.form} type="checkbox" disabled={locked || form.formState.isSubmitting} aria-invalid={errors.consent ? true : undefined} {...form.register("consent")} /><span>{t("apply.consentLabel")}</span></label>
       {errors.consent?.message ? <p role="alert" className="text-sm text-destructive">{errors.consent.message}</p> : null}

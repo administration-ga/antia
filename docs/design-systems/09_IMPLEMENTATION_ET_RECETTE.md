@@ -204,7 +204,8 @@ vitrine, le catalogue, les offres et les annuaires occupent toute la colonne
 - Par défaut, `width="reading"` : les formulaires et les pages de gestion gardent
   leur largeur de lecture centrée, en attendant l'arbitrage. Cela vaut pour le
   contact, le devis, la préparation, la fiche et l'éditeur du profil pro, et les
-  collaborations.
+  collaborations. L'arbitrage est venu le même jour : tous les écrans passent en
+  pleine largeur et `width` disparaît (section suivante).
 - Les grilles étaient déjà fluides. À 1 920 px, le catalogue
   (`auto-fill, minmax(18rem, 1fr)`) passe à cinq colonnes. La fiche d'offre se
   met sur deux colonnes, média et en-tête, dès que son conteneur atteint 832 px.
@@ -240,6 +241,89 @@ horizontal. Le lien de retour garde toute la largeur (366 px).
 ![Offre à 1 920 px : média et en-tête sur deux colonnes, en-tête groupé en haut](recette/colonne-offre-1920.jpg)
 
 ![Présentation du prestataire à 1 920 px](recette/colonne-prestataire-1920.jpg)
+
+### Pleine largeur de tous les écrans de membre (22/10/2026)
+
+Décision du propriétaire, après les captures d'arbitrage des formulaires :
+« le design doit être uniforme, s'adapter à tous les formats (responsive) et
+les écarts cohérents. en plein largeur. »
+
+- Plus aucune largeur de lecture centrée dans les trois gabarits : `ShopFrame`,
+  `ProfessionalFrame` et `EditorialFrame`. Tous leurs écrans occupent la colonne,
+  formulaires compris.
+- Les autres écrans de membre centrés font de même :
+  - Réglages et Mon espace ;
+  - Découvrir, le fil national et les préférences du fil ;
+  - Marketplace, Modération et Rencontres ;
+  - le site d'un média côté membre.
+
+  Rencontres perd aussi ses retraits latéraux en double dès 768 px.
+- Colonnes responsives partagées (`components/shared/screen-layout.ts`) :
+  - `SCREEN_SECTIONS` sert aux sections, aux cartes et aux zones de texte.
+    Chaque colonne fait 32rem au moins : une colonne jusqu'à 1 280 px de
+    fenêtre, deux à 1 440 px, trois à 1 920 px ;
+  - `FORM_FIELDS` sert aux champs courts, avec 16rem au moins. Deux champs
+    tiennent côte à côte dès 528 px, comme avec `sm:grid-cols-2`.
+
+  Entre deux colonnes, l'écart vaut la gouttière ; l'écart vertical de chaque
+  écran est gardé. `SCREEN_SUBMIT` fait que, dès 768 px, le bouton d'envoi
+  garde sa largeur au lieu de traverser la colonne.
+- Les écrans réorganisés en colonnes :
+  - les formulaires :
+    - le profil pro (profil d'un côté ; réalisations, activités et visibilité
+      de l'autre) ;
+    - le devis, le rendez-vous et la prestation ;
+    - la préparation de commande (champs et récapitulatif côte à côte) ;
+    - la candidature (champs et pièces côte à côte) ;
+  - les listes de commandes, d'achats, de paiements, de candidatures, de
+    demandes, de boutiques, d'offres d'emploi et de lignes de panier ;
+  - les détails d'un achat, d'un paiement, d'une préparation et d'une demande ;
+  - la fiche pro, les collaborations et la présentation de l'éditeur de
+    boutique ;
+  - Réglages, Mon espace, et les contenus de Découvrir.
+- Le cliquet `member-screens-full-width` interdit qu'un écran de membre se
+  borne puis se centre. Il nomme les exceptions, qui ne sont pas des écrans de
+  membre :
+  - les pages publiques ;
+  - la lecture d'un article (76ch) ;
+  - les cartes d'état (session, notification, erreur) et l'accueil d'un nouveau
+    compte ;
+  - la page autonome des données personnelles ;
+  - la coque des réseaux sans destinations.
+
+Mesures prises dans la page, sur dix écrans :
+- Réglages, Mon espace, Mes boutiques, Découvrir, Marketplace, Rencontres ;
+- Ma rédaction, l'éditeur du profil pro, la vitrine et le fil national.
+
+Le bloc de chaque écran va du rail, plus la gouttière, jusqu'à la gouttière du
+bord droit. Le cadre de membre a un rail de 96 puis 248 px, celui des espaces de
+96 puis 208 px.
+
+| Largeur | Écart rail / écran | Bloc (membre) | Bloc (espace) | Colonnes de sections |
+|---|---|---|---|---|
+| 1 024 px | 16 | 128 / 16, 880 px | 128 / 16, 880 px | 1 |
+| 1 280 px | 24 | 296 / 24, 960 px | 256 / 24, 1 000 px | 1 |
+| 1 440 px | 24 | 296 / 24, 1 120 px | 256 / 24, 1 160 px | 2 |
+| 1 920 px | 24 | 296 / 24, 1 600 px | 256 / 24, 1 640 px | 3 (2 pour Mes boutiques et le profil pro) |
+
+- Les paires de champs du profil pro restent côte à côte à toutes ces largeurs.
+- Téléphone (390 px) : les dix écrans restent à 12 / 12 px, sans défilement
+  horizontal. Les retraits propres de Rencontres (16 px) ne changent pas.
+- Laissés tels quels :
+  - la liste d'équipe de la Modération, un filtre de tête sur toute la largeur ;
+  - les listes de la rédaction (`md:grid-cols-2`) et les trois choix d'activité
+    (`sm:grid-cols-3`), déjà en colonnes ;
+  - les grilles internes des composants, qui gardent leurs écarts de 8 à 16 px.
+
+![Réglages à 1 920 px : trois colonnes](recette/largeur-reglages-1920.jpg)
+
+![Réglages à 1 440 px : deux colonnes](recette/largeur-reglages-1440.jpg)
+
+![Mon espace à 1 920 px](recette/largeur-mon-espace-1920.jpg)
+
+![Mes boutiques à 1 920 px : la liste et la préparation côte à côte](recette/largeur-mes-boutiques-1920.jpg)
+
+![Profil pro à 1 920 px : deux groupes, champs en paires, bouton à sa largeur](recette/largeur-profil-pro-1920.jpg)
 
 ## Limites de preuve et état Git
 

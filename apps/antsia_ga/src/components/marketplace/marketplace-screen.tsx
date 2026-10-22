@@ -40,7 +40,7 @@ function MarketplaceContent({ search: initialSearch }: { search: MarketplaceSear
   const heading = useRef<HTMLHeadingElement>(null)
   const router = useRouter()
   const apply = (next: MarketplaceSearch) => { router.push(routes.marketplace(next), { scroll: false }); heading.current?.focus() }
-  return <div className="mp-page mx-auto w-full min-w-0 max-w-7xl [overflow-wrap:anywhere]" data-marketplace>
+  return <div className="mp-page w-full min-w-0 [overflow-wrap:anywhere]" data-marketplace>
     <header className="mp-page-header min-w-0"><h1 ref={heading} tabIndex={-1} className="mp-title focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">{t("title")}</h1><p className="text-sm text-muted-foreground">{t("lead")}</p><div className="flex min-w-0 flex-wrap gap-2"><Link href={routes.myShops()} className={SHOP_ACTION_CLASS}>{t("manageActivity")}</Link><Link href={routes.cart()} className={SHOP_ACTION_CLASS}>{t("carts")}</Link></div></header>
     {search ? <>
       <nav aria-label={t("views.label")} className="flex min-w-0 flex-wrap gap-2">{(["products", "shops", "services"] as const).map(view => <Link key={view} href={routes.marketplace(view === search.view ? search : { view, ...(search.query ? { query: search.query } : {}), cursor: null })} prefetch={false} aria-current={view === search.view ? "page" : undefined} className={`${SHOP_ACTION_CLASS} aria-[current=page]:border-primary aria-[current=page]:bg-muted`}>{t(`views.${view}`)}</Link>)}</nav>

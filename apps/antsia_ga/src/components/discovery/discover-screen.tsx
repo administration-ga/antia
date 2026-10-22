@@ -3,6 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { ArrowRight, Hash } from "lucide-react"
 import Link from "next/link"
+import { SCREEN_SECTIONS } from "@/components/shared/screen-layout"
 import { useRouter } from "next/navigation"
 import { Suspense, useId } from "react"
 import { useForm } from "react-hook-form"
@@ -110,7 +111,7 @@ export function MemberDiscoverScreen() {
 
   return (
     <MemberPage>
-      <div className="mx-auto flex w-full max-w-6xl min-w-0 flex-col gap-8">
+      <div className="flex w-full min-w-0 flex-col gap-8">
         <header className="flex flex-col gap-2">
           <h1 className="text-2xl font-semibold tracking-tight">{t("nav.discover")}</h1>
           <p className="text-base text-muted-foreground">{t("discoverHub.lead")}</p>
@@ -132,7 +133,7 @@ export function MemberDiscoverScreen() {
 
         <section aria-labelledby={contentTitle} className="flex flex-col gap-4">
           <h2 id={contentTitle} className="text-lg font-semibold">{t("discoverHub.contentTitle")}</h2>
-          <ul className="grid gap-3">
+          <ul className={`${SCREEN_SECTIONS} gap-y-3`}>
             {discoverContentEntries().map((entry) => (
               <li key={entry.id}>
                 <EntryLink entry={entry} />

@@ -11,6 +11,7 @@ import { useTranslation } from "react-i18next"
 
 import { useCartConnectivity } from "@/components/cart/use-cart-draft"
 import { Button, Card } from "@/components/shared/controls"
+import { SCREEN_SECTIONS } from "@/components/shared/screen-layout"
 import { ShopLink, useShopAction } from "@/components/shops/shop-ui"
 import { professionalErrorKey } from "@/lib/professional-form"
 import { routes } from "@/lib/routes"
@@ -38,7 +39,7 @@ function CollaborationList({ direction }: { direction: Direction }) {
   const query = useAuthenticatedConvexQuery(direction === "received" ? api.modules.professionals.collaborations.listIncoming : api.modules.professionals.collaborations.listMine, { networkId, paginationOpts: { cursor, numItems: 12 } })
   if (query.isError) return <div className="grid gap-3"><p role="alert">{t("status.unavailable")}</p><Button variant="outline" onClick={() => { void query.refetch() }}>{t("actions.retry")}</Button></div>
   if (query.isPending || query.data === undefined) return <p role="status">{t("status.loading")}</p>
-  return <section className="grid min-w-0 gap-4" aria-busy={query.isFetching || undefined}>{query.isFetching ? <p role="status">{t("status.refreshing")}</p> : null}{query.data.page.length ? query.data.page.map(row => <ProfessionalCollaborationCard key={row.collaborationId} row={row} refreshing={query.isFetching} reread={async () => { const result = await query.refetch(); return !result.isError && result.data !== undefined }} />) : <p role="status">{t(query.data.filteredWindow && !query.data.isDone ? "collaborations.filteredWindow" : "collaborations.empty")}</p>}<div className="flex flex-wrap gap-2">{!query.data.isDone && query.data.continueCursor ? <Button variant="outline" disabled={query.isFetching} onClick={() => setCursor(query.data!.continueCursor)}>{t("actions.next")}</Button> : null}{cursor ? <Button variant="outline" disabled={query.isFetching} onClick={() => setCursor(null)}>{t("actions.first")}</Button> : null}</div></section>
+  return <section className={`${SCREEN_SECTIONS} gap-y-4`} aria-busy={query.isFetching || undefined}>{query.isFetching ? <p role="status" className="col-span-full">{t("status.refreshing")}</p> : null}{query.data.page.length ? query.data.page.map(row => <ProfessionalCollaborationCard key={row.collaborationId} row={row} refreshing={query.isFetching} reread={async () => { const result = await query.refetch(); return !result.isError && result.data !== undefined }} />) : <p role="status" className="col-span-full">{t(query.data.filteredWindow && !query.data.isDone ? "collaborations.filteredWindow" : "collaborations.empty")}</p>}<div className="col-span-full flex flex-wrap gap-2">{!query.data.isDone && query.data.continueCursor ? <Button variant="outline" disabled={query.isFetching} onClick={() => setCursor(query.data!.continueCursor)}>{t("actions.next")}</Button> : null}{cursor ? <Button variant="outline" disabled={query.isFetching} onClick={() => setCursor(null)}>{t("actions.first")}</Button> : null}</div></section>
 }
 
 export function ProfessionalCollaborationCard({ row, refreshing = false, reread }: { row: Collaboration; refreshing?: boolean; reread: () => Promise<boolean> }) {

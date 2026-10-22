@@ -11,6 +11,7 @@ import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 
 import { Button, Card, Field } from "@/components/shared/controls"
+import { SCREEN_SECTIONS } from "@/components/shared/screen-layout"
 import { SHOP_SELECT_CLASS, ShopFrame, ShopLink, useShopAction } from "@/components/shops/shop-ui"
 import { routes } from "@/lib/routes"
 import { PAYMENT_REFUND_REASONS, paymentRefundSchema, type PaymentRefundReason, type PaymentRefundValues } from "./payment-model"
@@ -39,7 +40,7 @@ function PaymentAttemptReader({ paymentAttemptId }: { paymentAttemptId: string }
   if (closed || query.data === null) return <PaymentFailure />
   if (query.isError) return <PaymentFailure retry={() => { void query.refetch() }} />
   if (query.isPending || query.data === undefined) return <p role="status">{t("loading")}</p>
-  return <div className="grid gap-4"><PaymentStatusCard attempt={query.data} /><PaymentOperations attempt={query.data} refetch={() => { void query.refetch() }} close={() => setClosed(true)} /></div>
+  return <div className={`${SCREEN_SECTIONS} gap-y-4`}><PaymentStatusCard attempt={query.data} /><PaymentOperations attempt={query.data} refetch={() => { void query.refetch() }} close={() => setClosed(true)} /></div>
 }
 
 function PaymentOperations({ attempt, refetch, close }: { attempt: PaymentAttempt; refetch: () => void; close: () => void }) {
@@ -123,5 +124,5 @@ function PaymentListReader() {
   const query = useAuthenticatedConvexQuery(api.modules.shops.payment.listMy, { networkId, paginationOpts: { cursor, numItems: PAGE_SIZE } })
   if (query.isError) return <PaymentFailure retry={() => { void query.refetch() }} />
   if (query.isPending || !query.data) return <p role="status">{t("loading")}</p>
-  return <div className="grid gap-4"><p className="text-sm text-muted-foreground">{t("pageScope", { count: PAGE_SIZE })}</p>{query.data.page.length ? <ul className="grid gap-4">{query.data.page.map((attempt) => <li key={attempt.paymentAttemptId}><PaymentStatusCard attempt={attempt} compact /></li>)}</ul> : <Card><p>{t("empty")}</p></Card>}<nav aria-label={t("pagination")} className="flex flex-wrap gap-3">{cursors.length > 1 ? <Button variant="outline" onClick={() => setCursors((previous) => previous.slice(0, -1))}>{t("previous")}</Button> : null}{!query.data.isDone && query.data.continueCursor ? <Button variant="outline" onClick={() => setCursors((previous) => [...previous, query.data!.continueCursor])}>{t("next")}</Button> : null}</nav></div>
+  return <div className="grid gap-4"><p className="text-sm text-muted-foreground">{t("pageScope", { count: PAGE_SIZE })}</p>{query.data.page.length ? <ul className={`${SCREEN_SECTIONS} gap-y-4`}>{query.data.page.map((attempt) => <li key={attempt.paymentAttemptId}><PaymentStatusCard attempt={attempt} compact /></li>)}</ul> : <Card><p>{t("empty")}</p></Card>}<nav aria-label={t("pagination")} className="flex flex-wrap gap-3">{cursors.length > 1 ? <Button variant="outline" onClick={() => setCursors((previous) => previous.slice(0, -1))}>{t("previous")}</Button> : null}{!query.data.isDone && query.data.continueCursor ? <Button variant="outline" onClick={() => setCursors((previous) => [...previous, query.data!.continueCursor])}>{t("next")}</Button> : null}</nav></div>
 }

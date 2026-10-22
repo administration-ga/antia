@@ -11,6 +11,7 @@ import { useTranslation } from "react-i18next"
 import { CheckoutPreparationForm, type CheckoutCartLine, type CheckoutOptions, type CheckoutPrepareInput } from "@/components/checkout/checkout-form"
 import { checkoutAmount } from "@/components/checkout/checkout-model"
 import { Button, Card, TextInput } from "@/components/shared/controls"
+import { SCREEN_SECTIONS } from "@/components/shared/screen-layout"
 import { ShopFrame, ShopLink, useShopAction } from "@/components/shops/shop-ui"
 import { cartIntentDigest, cartItemKey, type CartDraft, type CartItem } from "@/lib/cart-draft"
 import { routes } from "@/lib/routes"
@@ -88,14 +89,14 @@ function CartContents({ draft, save }: { draft: CartDraft; save: (draft: CartDra
     {!connectivity.online ? <p role="status">{t("offline")}</p> : null}
     {recover && submitted ? <Card><p>{t("recoverHint")}</p><SubmittedCart draft={draft} save={save} onRecover={() => setRecover(true)} onStopped={stopped} recovery /></Card> : null}
     {submitted && !recover ? <SubmittedCart draft={draft} save={save} onRecover={() => setRecover(true)} onStopped={stopped} recovery /> : null}
-    <ul className="grid gap-3">{draft.items.map((item) => {
+    <ul className={`${SCREEN_SECTIONS} gap-y-3`}>{draft.items.map((item) => {
       const current = context?.items.find((entry) => entry.offerRef === item.offerRef && (entry.variantRef ?? undefined) === item.variantRef)
       return <li key={cartItemKey(item)}><CartLine item={item} offer={current?.offer ?? null} available={current?.available === true} locked={!!submitted} locale={i18n.resolvedLanguage ?? "fr"} update={(quantity) => edit(draft.items.map((entry) => cartItemKey(entry) === cartItemKey(item) ? { ...entry, quantity } : entry))} remove={() => edit(draft.items.filter((entry) => cartItemKey(entry) !== cartItemKey(item)))} /></li>
     })}</ul>
-    {!submitted ? <Button variant="danger" onClick={() => edit([])}>{t("clear")}</Button> : null}
+    {!submitted ? <Button variant="danger" className="min-[768px]:justify-self-start" onClick={() => edit([])}>{t("clear")}</Button> : null}
     {query.isPending ? <p role="status">{t("loading")}</p> : null}
     {query.isError || context && !context.available ? <p role="alert">{t("unavailable")}</p> : null}
-    <Button variant="outline" pending={action.pending} disabled={!connectivity.online} onClick={refresh}>{t("refresh")}</Button>
+    <Button variant="outline" className="min-[768px]:justify-self-start" pending={action.pending} disabled={!connectivity.online} onClick={refresh}>{t("refresh")}</Button>
     {context?.pending && !submitted ? <Card><p>{t("found")}</p><ShopLink href={routes.checkoutAttempt(context.pending.attemptId)}>{t("openAttempt")}</ShopLink></Card> : null}
     {options && first && lines.length === draft.items.length && context && (!context.pending || !!submitted) ? <CheckoutPreparationForm offer={first.offer} cartLines={lines} options={options} consentTextVersion={context.consentTextVersion} consentEpoch={JSON.stringify([stamp, options.policyVersion, lines.map((line) => [line.offer.revision, line.offer.price, line.offer.variants])])} suspended={suspended || !context.available || context.reason !== null || query.isError} recoveredRequestId={recover ? submitted?.clientRequestId : undefined} beforeResume={beforeResume} onIntent={persistIntent} prepare={(input) => prepare({ networkId, handle: draft.handle, ...input })} onAttempt={(attemptId) => {
       const original = draft.submitted

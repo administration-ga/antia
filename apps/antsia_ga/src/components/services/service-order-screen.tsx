@@ -12,6 +12,7 @@ import { useForm, useWatch } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 
 import { Button, Card, Field, TextArea, TextInput } from "@/components/shared/controls"
+import { FORM_FIELDS, SCREEN_SECTIONS } from "@/components/shared/screen-layout"
 import { ShopFrame, ShopLink, useShopAction } from "@/components/shops/shop-ui"
 import type { CatalogOffer } from "@/components/shops/catalog-model"
 import { routes } from "@/lib/routes"
@@ -115,18 +116,18 @@ export function ServiceOrderForm({ handle, offerRef, fixedOrder, existingRequest
       else setFailure(result.outcome === "refused" ? "order.refused" : "common.unavailable")
     })
   })
-  return <Card><form noValidate className="mp-form-grid" onSubmit={submit} aria-busy={action.pending || undefined}>
-    <ServiceReviewNotice review={review} onReview={reread} />
+  return <Card><form noValidate className={`${SCREEN_SECTIONS} gap-y-4`} onSubmit={submit} aria-busy={action.pending || undefined}>
+    <div className="col-span-full empty:hidden"><ServiceReviewNotice review={review} onReview={reread} /></div>
     <section className="grid min-w-0 gap-4" aria-label={t("order.publishedConditions")}>
       <h2 className="mp-subtitle">{t("order.publishedConditions")}</h2>
       {catalog.isPending || action.pending || catalog.isFetching ? <p role="status">{t("order.conditionsLoading")}</p> : qualification !== null || catalog.isError ? <p role="status" className="text-sm text-muted-foreground">{t(`order.conditions.${catalog.isError ? "unavailable" : qualification ?? "unavailable"}`)}</p> : offer ? <><p className="text-sm">{t("order.publicRevision", { version: offer.revision })}</p><ServiceProfileDetails offer={offer} locale={locale} t={(key, values) => providerT(key, values)} /></> : null}
       <Button type="button" variant="outline" pending={action.pending || catalog.isFetching} disabled={!review.online || intent.locked} onClick={() => { void review.refresh(reread) }}>{t("order.rereadConditions")}</Button>
     </section>
-    <ServiceIntentRecovery intent={intent} onStopped={() => { form.setValue("consent", false); review.invalidate() }} />
+    <div className="col-span-full empty:hidden"><ServiceIntentRecovery intent={intent} onStopped={() => { form.setValue("consent", false); review.invalidate() }} /></div>
     <fieldset disabled={locked} className="grid min-w-0 gap-4">
     <p className="text-lg font-semibold">{displayed.unit ? t("offer.fixedPriceUnit", { amount: serviceAmount(displayed.unitAmount.amount, locale), unit: displayed.unit }) : t("offer.fixedPrice", { amount: serviceAmount(displayed.unitAmount.amount, locale) })}</p>
     {displayed.leadTimeDays !== null ? <p className="text-sm text-muted-foreground">{t("order.leadTime", { count: displayed.leadTimeDays })}</p> : <p className="text-sm text-muted-foreground">{t("order.noPublishedLeadTime")}</p>}
-    <div className="grid gap-4 sm:grid-cols-2">
+    <div className={`${FORM_FIELDS} gap-y-4`}>
       <Field id={`${id}-quantity`} label={t("order.quantity")} hint={t("order.quantityHint", { max: displayed.quantityMax })} error={errors.quantity?.message}><TextInput id={`${id}-quantity`} inputMode="numeric" autoComplete="off" aria-invalid={errors.quantity ? true : undefined} {...form.register("quantity")} /></Field>
       <Field id={`${id}-date`} label={t("order.desiredDate")} hint={t("order.desiredDateHint")} error={errors.desiredDate?.message}><TextInput id={`${id}-date`} type="date" min={serviceToday()} aria-invalid={errors.desiredDate ? true : undefined} {...form.register("desiredDate")} /></Field>
     </div>
@@ -143,7 +144,7 @@ export function ServiceOrderForm({ handle, offerRef, fixedOrder, existingRequest
     {/* Commander : couleur du commerce (ADR-0027). */}
     <Button type="submit" variant="commerce" pending={action.pending}>{t(existingRequestRowId ? "order.reconfirm" : "order.submit")}</Button>
     </fieldset>
-    {failure ? <p role="alert">{t(failure)}</p> : null}
-    {action.error ? <p role="alert">{action.error}</p> : null}
+    {failure ? <p role="alert" className="col-span-full">{t(failure)}</p> : null}
+    {action.error ? <p role="alert" className="col-span-full">{action.error}</p> : null}
   </form></Card>
 }

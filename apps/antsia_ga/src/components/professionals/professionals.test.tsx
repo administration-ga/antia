@@ -30,6 +30,7 @@ import { MemberProfessionalDirectory } from "./directory-screen"
 import { ProfessionalCollaborationCard } from "./collaborations-screen"
 import { ProfessionalEditorForm, ProfessionalProfileEditor } from "./profile-editor"
 import { MemberProfessionalProfile } from "./profile-screen"
+import { SCREEN_SECTIONS } from "@/components/shared/screen-layout"
 
 type Editor = NonNullable<FunctionReturnType<typeof api.modules.professionals.profiles.myProfile>>
 type Profile = NonNullable<FunctionReturnType<typeof api.modules.professionals.read.getByHandle>>
@@ -296,15 +297,20 @@ describe("MP09 — décisions privées et iCom contextualisé", () => {
   })
 })
 
-describe("pleine colonne des espaces spécialisés (décision du propriétaire du 22/10/2026)", () => {
+describe("pleine largeur des écrans de membre (décisions du propriétaire du 22/10/2026)", () => {
   const centering = () => [...(container.querySelector("main > div")?.classList ?? [])].filter(name => name === "mx-auto" || name.startsWith("max-w-"))
-  it("l'annuaire occupe toute la colonne ; la fiche et l'éditeur gardent leur largeur de lecture", async () => {
+  it("l'annuaire, la fiche et l'éditeur occupent toute la colonne ; l'éditeur range ses deux groupes en colonnes responsives", async () => {
     await render(<MemberProfessionalDirectory />)
     expect(container.querySelector("main > div")).not.toBeNull()
     expect(centering()).toEqual([])
     await render(<MemberProfessionalProfile handle="pro.demo" />)
-    expect(centering()).toEqual(["mx-auto", "max-w-5xl"])
+    expect(centering()).toEqual([])
     await render(<ProfessionalProfileEditor />)
-    expect(centering()).toEqual(["mx-auto", "max-w-5xl"])
+    expect(centering()).toEqual([])
+    // Le profil d'un côté, réalisations, activités et visibilité de l'autre : deux sections de 28rem au moins.
+    const fields = container.querySelector("form > fieldset")
+    expect(fields?.className).toContain(SCREEN_SECTIONS)
+    expect(fields?.children).toHaveLength(2)
+    expect(container.querySelector(`form > fieldset > div > div[class*="16rem"]`)).not.toBeNull()
   })
 })
