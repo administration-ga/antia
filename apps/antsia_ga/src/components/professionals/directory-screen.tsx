@@ -22,7 +22,7 @@ type ProfileCard = FunctionReturnType<typeof api.modules.professionals.read.sear
 export function MemberProfessionalDirectory() {
   const { networkId, personId } = useNetwork()
   const { t } = useTranslation("professionals")
-  return <ProfessionalFrame title={t("title")} lead={t("lead")}><ProfessionalDirectory key={JSON.stringify([networkId, personId])} /></ProfessionalFrame>
+  return <ProfessionalFrame width="column" title={t("title")} lead={t("lead")}><ProfessionalDirectory key={JSON.stringify([networkId, personId])} /></ProfessionalFrame>
 }
 
 function ProfessionalDirectory() {

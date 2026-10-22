@@ -173,6 +173,9 @@ donnent les mêmes valeurs :
   - l'annuaire des professionnels (1 024 px) ;
   - l'annuaire presse (1 152 px).
 
+  La vitrine, le catalogue, les offres et les annuaires occupent désormais toute
+  la colonne : voir la section suivante.
+
 ![Boutique à 1 440 px : 24 px aux bords comme entre le rail et le contenu](recette/gouttiere-boutique-1440.jpg)
 
 ![Boutique à 1 920 px : la vitrine reste centrée dans sa colonne](recette/gouttiere-boutique-1920.jpg)
@@ -182,6 +185,61 @@ donnent les mêmes valeurs :
 ![Boutique à 1 024 px, rail compact](recette/gouttiere-boutique-1024.jpg)
 
 ![Boutique au téléphone, 390 px](recette/gouttiere-boutique-390.jpg)
+
+### Pleine colonne des écrans des espaces (22/10/2026)
+
+Décision du propriétaire, après la capture de la boutique à 1 920 px : « que la
+vitrine, le catalogue, les offres et les annuaires occupent toute la colonne
+(formulaires à arbitrer sur capture) ».
+
+- `ShopFrame` (`shop-ui.tsx`) et `ProfessionalFrame` (`profile-fields.tsx`)
+  prennent `width="column"`. Dans ce mode, l'écran n'a plus de largeur maximale
+  ni de centrage. Il est passé par :
+  - la vitrine de la boutique ;
+  - le catalogue et les offres, de la boutique comme du prestataire ;
+  - la présentation du prestataire ;
+  - l'annuaire des professionnels.
+
+  L'annuaire presse perd son propre `max-w-6xl`.
+- Par défaut, `width="reading"` : les formulaires et les pages de gestion gardent
+  leur largeur de lecture centrée, en attendant l'arbitrage. Cela vaut pour le
+  contact, le devis, la préparation, la fiche et l'éditeur du profil pro, et les
+  collaborations.
+- Les grilles étaient déjà fluides. À 1 920 px, le catalogue
+  (`auto-fill, minmax(18rem, 1fr)`) passe à cinq colonnes. La fiche d'offre se
+  met sur deux colonnes, média et en-tête, dès que son conteneur atteint 832 px.
+- Deux retouches, visibles seulement en pleine colonne :
+  - dès 768 px, le lien de retour s'aligne sur le titre au lieu de flotter au
+    centre. Au téléphone, il garde toute la largeur ;
+  - en deux colonnes, l'en-tête de l'offre reste groupé en haut
+    (`align-content: start`). Avant, il s'étirait sur la hauteur du média
+    (779 px à 1 920 px) et ses lignes s'écartaient.
+
+Mesures prises dans la page, sur huit écrans :
+- boutique : vitrine, catalogue et offre ;
+- prestataire : présentation, prestations et offre ;
+- les annuaires des professionnels et de la presse.
+
+Les huit écrans donnent les mêmes valeurs. Le bloc de l'écran va du rail, plus
+la gouttière, jusqu'à la gouttière du bord droit :
+
+| Largeur | Écart rail / écran | Bloc de l'écran (gauche / droite) | Largeur de l'écran |
+|---|---|---|---|
+| 1 024 px | 16 | 128 / 16 | 880 |
+| 1 280 px | 24 | 256 / 24 | 1 000 |
+| 1 440 px | 24 | 256 / 24 | 1 160 |
+| 1 920 px | 24 | 256 / 24 | 1 640 |
+
+Au téléphone (390 px), les huit écrans restent à 12 / 12 px, sans défilement
+horizontal. Le lien de retour garde toute la largeur (366 px).
+
+![Vitrine à 1 920 px : toute la colonne, catalogue sur cinq colonnes](recette/colonne-vitrine-1920.jpg)
+
+![Catalogue à 1 920 px](recette/colonne-catalogue-1920.jpg)
+
+![Offre à 1 920 px : média et en-tête sur deux colonnes, en-tête groupé en haut](recette/colonne-offre-1920.jpg)
+
+![Présentation du prestataire à 1 920 px](recette/colonne-prestataire-1920.jpg)
 
 ## Limites de preuve et état Git
 

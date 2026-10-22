@@ -17,6 +17,7 @@ import { MemberStorefront, MemberStorefrontScreen } from "./member-storefront-sc
 import { ShopPublicationForm } from "./shop-publication-form"
 import { PresentationPreview } from "./shop-presentation-form"
 import { editorFixture, storefrontFixture } from "./__tests__/fixtures"
+import { centeringClasses, frameClasses } from "./__tests__/frame-classes"
 
 beforeEach(() => { state.data = null; state.isError = false })
 describe("Surfaces membre boutiques", () => {
@@ -56,6 +57,12 @@ describe("Surfaces membre boutiques", () => {
     expect(html).toContain("common.unavailableTitle")
     expect(html).not.toContain("Atelier des rives")
     expect(html).not.toContain("Une présentation autorisée.")
+  })
+  it("la vitrine occupe toute la colonne de l'espace, retour aligné sur le titre (décision du 22/10/2026)", () => {
+    state.data = storefrontFixture()
+    const classes = frameClasses(renderToStaticMarkup(<MemberStorefrontScreen handle="atelier" />))
+    expect(classes).toContain("min-[768px]:[&>a]:self-start")
+    expect(centeringClasses(classes)).toEqual([])
   })
   it("une boutique avec catalogue donne une entrée offres réelle sans créer de contact général", () => {
     const shop = { ...storefrontFixture(), blocks: ["catalog", "about"] as ReturnType<typeof storefrontFixture>["blocks"], viewer: { following: false, manages: true } }

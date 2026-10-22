@@ -25,7 +25,7 @@ function StorefrontQuery({ handle }: { handle: string }) {
   const { networkId } = useNetwork()
   const query = useAuthenticatedConvexQuery(api.modules.shops.shops.storefront, { networkId, handle })
   const directory = routes.marketplace({ view: "shops" })
-  return <ShopFrame title={query.isError ? t("storefront.title") : query.data?.name ?? t("storefront.title")}>
+  return <ShopFrame width="column" title={query.isError ? t("storefront.title") : query.data?.name ?? t("storefront.title")}>
     <ShopLink href={directory}>{t("directory.title")}</ShopLink>
     {query.isError ? <ShopQueryFailure href={directory} retry={() => void query.refetch()} /> : query.data === undefined ? <CenteredStatus label={t("common.loading")} /> : query.data === null ? <ShopQueryFailure href={directory} /> : <MemberStorefront shop={query.data} />}
   </ShopFrame>

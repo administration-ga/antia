@@ -15,11 +15,12 @@ import { routes } from "@/lib/routes"
 
 type MediaCard = FunctionReturnType<typeof api.modules.editorial.directory.list>["page"][number]
 
-/** Annuaire lecteur distinct du bureau de rédaction et remis à zéro par identité/réseau. */
+/** Annuaire lecteur distinct du bureau de rédaction et remis à zéro par identité/réseau. Il occupe toute la
+ * colonne de l'espace, bords et écarts sur la gouttière (décision du propriétaire du 22/10/2026). */
 export function MemberEditorialDirectory() {
   const { networkId, personId } = useNetwork()
   const { t } = useTranslation("editorial")
-  return <MemberPage><div className="mp-page mp-copy mx-auto grid w-full min-w-0 max-w-6xl gap-5 pb-24 [overflow-wrap:anywhere]">
+  return <MemberPage><div className="mp-page mp-copy grid w-full min-w-0 gap-5 pb-24 [overflow-wrap:anywhere]">
     <header className="mp-page-header min-w-0"><h1 className="mp-title">{t("directory.title")}</h1><p className="text-muted-foreground">{t("directory.lead")}</p><Link href={routes.mediaHome()} className={`${SHOP_ACTION_CLASS} justify-self-start`}>{t("directory.myMedia")}</Link></header>
     <DirectoryWindow key={JSON.stringify([networkId, personId])} />
   </div></MemberPage>
