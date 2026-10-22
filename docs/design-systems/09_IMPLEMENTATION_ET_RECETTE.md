@@ -512,6 +512,99 @@ Limites :
   (`/demo-media/…`), que le schéma SSR des adresses refuse. Constat antérieur à
   ce lot, sans rapport avec lui ; leur grille est couverte par les tests.
 
+### Marketplace sur le modèle des ventes privées, lot 3 : le panier et la remise (22/10/2026)
+
+Même demande, troisième lot : le panier et l'étape de remise dans l'esprit des
+ventes privées. Toutes les gardes restent : brouillon local, relecture des
+prix, disponibilités et modes de remise, intention conservée et reprise,
+accord explicite. « Demander la préparation » ne déclenche toujours aucun
+paiement.
+
+- Panier (`/panier`) :
+  - une boutique par panier, en pastilles qui défilent ;
+  - la boutique (logo et nom de sa vitrine) et le retour vers elle ;
+  - chaque ligne : photo et nom vers la fiche, variante, prix exact, et le
+    montant de la ligne s'il diffère du prix unitaire. Quantité en − / +
+    (ou saisie, validée en quittant le champ), corbeille. Deux lignes par
+    rangée quand leur colonne dépasse 56 rem ;
+  - récapitulatif : nombre d'articles et montant au prix exact. Les frais et
+    le total ne sont annoncés qu'avec le mode de remise ;
+  - « Valider mon panier » relit prix, disponibilités et modes de remise
+    (l'ancien « Relire les prix et les frais »), puis conduit à l'étape de
+    remise, qui reçoit le focus. Ensuite, et en reprise, le bouton reste
+    « Relire les prix et les frais » ;
+  - les conditions déclarées par la boutique, en une carte compacte ;
+  - « Continuez vos achats » : d'autres produits de la même boutique, absents
+    du panier, avec l'ajout rapide.
+- Au téléphone, une barre « N articles · montant · Valider mon panier » reste
+  collée au-dessus des onglets tant que les lignes défilent, puis se pose
+  après elles. Dès 1 024 px, le récapitulatif tient la colonne de droite,
+  collé sous l'en-tête.
+- Étape de remise (formulaire de préparation, aussi pour une offre seule) :
+  - les modes de remise sont des cartes choisies d'un geste : le retrait (son
+    établissement, ou leur nombre) et la livraison (libellé et frais du
+    vendeur). Aucun mode n'est coché d'office ;
+  - les établissements de retrait ne s'affichent qu'au retrait, aucun choisi
+    d'office ;
+  - adresse, accord et montants attendus inchangés ;
+  - dans le panier, au téléphone, le total et « Demander la préparation »
+    restent collés au bas de l'écran pendant la saisie.
+
+Mesures. Faute d'offre réelle sur le backend local (les offres de
+démonstration refusent le panier par conception), la recette visuelle passe
+par un banc local du candidat, jamais commité. Il monte la vraie mise en page
+(`CartLayout`, `CartLine`, `CartSummary`, `CartBar`) et le vrai formulaire de
+préparation, avec trois produits de test aux photos de démonstration. La vraie
+page `/panier` a été ouverte aussi (panier vide en local, sans erreur).
+
+| Largeur | Bloc | Colonnes du panier | Lignes | « Continuez vos achats » | Défilement horizontal |
+|---|---|---|---|---|---|
+| 390 px | 12 / 12, 366 px | 1 (barre collée à 80 px du bas) | 1 colonne | cartes de 152 px, écart 12 | aucun |
+| 1 024 px | 128 / 16, 880 px | 512 + 352, écart 16 | 1 colonne | 224 px, écart 16 | aucun |
+| 1 280 px | 296 / 24, 960 px | 584 + 352, écart 24 | 1 colonne | 224 px, écart 24 | aucun |
+| 1 440 px | 296 / 24, 1 120 px | 744 + 352, écart 24 | 1 colonne | 224 px, écart 24 | aucun |
+| 1 920 px | 296 / 24, 1 600 px | 1 224 + 352, écart 24 | 2 colonnes de 600 px | 224 px, écart 24 | aucun |
+
+Au téléphone (390 × 844), la barre se tient à 694–764 px, 14 px au-dessus des
+onglets, pendant que les lignes défilent. Elle reprend sa place après elles
+(503 px à 400 px de défilement). Dans l'étape de remise, le total et l'envoi se
+tiennent au même endroit ; total vérifié : 13 500 + 200 + 1 500 = 15 200 XAF
+avec la livraison.
+
+Défauts trouvés et corrigés pendant la recette :
+
+- le nom de l'article avait la couleur des liens : couleur du texte, comme les
+  cartes d'offres ;
+- « Montant de la ligne » répétait le prix unitaire pour une quantité de 1 :
+  il n'est dit qu'au-delà ;
+- les conditions de la boutique faisaient 700 px de haut au téléphone en cinq
+  cartes : une carte compacte (416 px) ;
+- à 1 920 px, une ligne de panier s'étirait sur 1 224 px : deux lignes par
+  rangée ;
+- le bouton radio choisi était bleu sous une carte cerclée de safran : encre
+  du commerce, qui garde le contraste.
+
+![Panier au téléphone : la barre de validation au-dessus des onglets](recette/panier-barre-390.jpg)
+
+![L'étape de remise au téléphone : total et envoi collés](recette/panier-remise-390.jpg)
+
+![Panier à 1 024 px : le récapitulatif à droite](recette/panier-1024.jpg)
+
+![L'étape de remise à 1 024 px](recette/panier-remise-1024.jpg)
+
+![Panier à 1 280 px](recette/panier-1280.jpg)
+
+![Panier à 1 440 px](recette/panier-1440.jpg)
+
+![Panier à 1 920 px : deux lignes par rangée](recette/panier-1920.jpg)
+
+Limites : les captures du panier rempli viennent du banc ; sur le backend local,
+le vrai panier reste vide. Les tests de composants prouvent la page réelle
+(`cart-screen.test.tsx`) : lignes et liens, montant exact, − / +, corbeille,
+« Continuez vos achats » sans les articles déjà au panier, validation qui relit
+puis ouvre la remise sans rien envoyer. Ils couvrent aussi les cartes de remise
+et la barre collée (`checkout-form.test.tsx`).
+
 ## Limites de preuve et état Git
 
 Le `verify` global avec l’ensemble des tests backend et des espaces de travail voisins n’a pas été relancé : la validation est ciblée sur les surfaces modifiées et leurs contrats.
