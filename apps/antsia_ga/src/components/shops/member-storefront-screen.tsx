@@ -37,21 +37,30 @@ function StorefrontQuery({ handle }: { handle: string }) {
 
 /**
  * La vitrine d'une boutique, sur le modèle des ventes privées (décision du propriétaire du 22/10/2026) : l'en-tête
- * de la boutique (bannière de sa page, logo, nom, badge calculé, spécialité et zone, actions), puis ses blocs dans
- * l'ordre configuré — offres (collections qui défilent et grille), présentation, publications —, ses conditions
- * déclarées et ses offres d'emploi.
+ * de la boutique (bannière de sa page, logo, nom, badge calculé, spécialité et zone, actions), puis son corps.
  */
 export function MemberStorefront({ shop }: { shop: StorefrontData }) {
-  const { t, i18n } = useTranslation("shops")
-  const { t: ux } = useTranslation("commerceExperience")
   const configuration = effectiveActivityConfiguration(shop.activityConfiguration, shop.model)
   return <div className="grid min-w-0 gap-8" data-activity-template={configuration.template}>
-    <StorefrontHero shop={shop} capabilities={configuration.capabilities.map(capability => t(`activityConfiguration:capabilities.${capability}`))} />
+    <StorefrontHero shop={shop} />
+    <StorefrontBody shop={shop} />
+  </div>
+}
+
+/**
+ * Le corps de la vitrine : ses blocs dans l'ordre configuré — offres (collections qui défilent et grille),
+ * présentation, publications —, ses conditions déclarées et ses offres d'emploi. `publications={false}` quand le
+ * mur de la page suit déjà (une page d'entreprise présentée comme sa boutique). À poser dans une grille à `gap-8`.
+ */
+export function StorefrontBody({ shop, publications = true }: { shop: StorefrontData; publications?: boolean }) {
+  const { t, i18n } = useTranslation("shops")
+  const { t: ux } = useTranslation("commerceExperience")
+  return <>
     {shop.viewer.manages ? <p className="-mt-4 text-sm text-muted-foreground">{ux("storefront.manageHint")}</p> : null}
-    {shop.blocks.map((block) => block === "catalog" || block === "services" ? <MemberCatalogPreview key={block} handle={shop.handle} kind={block === "catalog" ? "product" : "service"} /> : block === "about" ? <Card key={block}><div className="grid gap-4"><h2 className="mp-subtitle">{t("storefront.about")}</h2>{shop.description ? <p className="whitespace-pre-wrap">{shop.description}</p> : null}<dl className="grid gap-4 sm:grid-cols-2">{(["specialty", "serviceArea", "hours"] as const).map((field) => shop[field] ? <div key={field}><dt className="text-sm font-medium text-muted-foreground">{t(`storefront.${field}`)}</dt><dd className="whitespace-pre-wrap">{shop[field]}</dd></div> : null)}</dl></div></Card> : block === "publications" ? <Card key={block}><div className="grid justify-items-start gap-3"><h2 className="mp-subtitle">{t("blocks.publications")}</h2><p className="text-sm text-muted-foreground">{t("storefront.publicationsHint")}</p><ShopLink href={routes.page(shop.handle)}>{t("storefront.socialPage")}</ShopLink></div></Card> : null)}
+    {shop.blocks.map((block) => block === "catalog" || block === "services" ? <MemberCatalogPreview key={block} handle={shop.handle} kind={block === "catalog" ? "product" : "service"} /> : block === "about" ? <Card key={block}><div className="grid gap-4"><h2 className="mp-subtitle">{t("storefront.about")}</h2>{shop.description ? <p className="whitespace-pre-wrap">{shop.description}</p> : null}<dl className="grid gap-4 sm:grid-cols-2">{(["specialty", "serviceArea", "hours"] as const).map((field) => shop[field] ? <div key={field}><dt className="text-sm font-medium text-muted-foreground">{t(`storefront.${field}`)}</dt><dd className="whitespace-pre-wrap">{shop[field]}</dd></div> : null)}</dl></div></Card> : block === "publications" && publications ? <Card key={block}><div className="grid justify-items-start gap-3"><h2 className="mp-subtitle">{t("blocks.publications")}</h2><p className="text-sm text-muted-foreground">{t("storefront.publicationsHint")}</p><ShopLink href={routes.page(shop.handle)}>{t("storefront.socialPage")}</ShopLink></div></Card> : null)}
     <StorefrontTerms value={shop.storefrontTerms} locale={i18n.resolvedLanguage === "en" ? "en" : "fr"} t={t} />
     <MemberShopJobsPreview handle={shop.handle} />
-  </div>
+  </>
 }
 
 const HERO_TAG = "inline-flex min-h-8 items-center gap-1.5 rounded-[var(--esp-chip-radius,var(--radius-md))] bg-[var(--esp-chip-bg,var(--muted))] px-3 text-xs font-semibold"
@@ -59,10 +68,12 @@ const HERO_TAG = "inline-flex min-h-8 items-center gap-1.5 rounded-[var(--esp-ch
 /**
  * L'en-tête de la boutique : la bannière de sa page en photo (le nom et le logo posés dessus, lisibles grâce au
  * voile), sinon une carte neutre ; puis les mentions réelles et les actions (offres, suivi de la page, échange déjà
- * ouvert, gestion, version publique). Le nom est le titre de l'écran.
+ * ouvert, gestion, version publique). Le nom est le titre de l'écran — aussi sur la fiche d'une page d'entreprise
+ * présentée comme sa boutique.
  */
-function StorefrontHero({ shop, capabilities }: { shop: StorefrontData; capabilities: string[] }) {
+export function StorefrontHero({ shop }: { shop: StorefrontData }) {
   const { t } = useTranslation("shops")
+  const capabilities = effectiveActivityConfiguration(shop.activityConfiguration, shop.model).capabilities.map(capability => t(`activityConfiguration:capabilities.${capability}`))
   const { t: ux } = useTranslation("commerceExperience")
   const { networkId } = useNetwork()
   const follow = useMutation(api.modules.pages.pages.follow)

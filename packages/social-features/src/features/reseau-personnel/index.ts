@@ -62,7 +62,7 @@ export { PrivacyLists } from "./PrivacyLists"
 
 // ── Pages (réécrites sur les pages du moteur) ──────────────────────────────
 // La fiche d'UNE page (`useRoutes().page(handle)`).
-export { ProfilPagePage } from "./ProfilPagePage"
+export { ProfilPagePage, type PageCommerce } from "./ProfilPagePage"
 export { PagesPanel } from "./PagesPanel"
 export { PageFollowButton } from "./PageFollowButton"
 export { PagesSuggestionsRail } from "./PagesSuggestionsRail"
