@@ -14,7 +14,7 @@
     },
     "emptyState": "Aucune conversation dans cet état parmi celles chargées.",
     "windowNote": "L'état se filtre parmi les conversations chargées.",
-    "noShopMandate": "Pour lire les messages de {{shop}}, ouvrez l'équipe de la boutique et donnez-vous le droit de lecture.",
+    "noShopMandate": "Pour lire les messages de la boutique « {{shop}} », ouvrez son équipe et donnez-vous le droit de lecture.",
     "openTeam": "Ouvrir l'équipe de la boutique"
   },
   "contacts": {
@@ -31,7 +31,7 @@
     "person": "Personne",
     "lastExchange": "Dernier échange : {{date}}",
     "openConversation": "Ouvrir la conversation avec {{name}}",
-    "openProfile": "Voir le profil de {{name}}",
+    "openProfile": "Voir le profil : {{name}}",
     "openShop": "Voir la boutique {{name}}",
     "unavailable": "Impossible de charger ces contacts pour le moment.",
     "loading": "Chargement…",
