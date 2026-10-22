@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/PostCard.tsx @ 25398f565 — adaptations : la carte est la PROJECTION du moteur (`PostCardPost` = `FunctionReturnType<typeof api.modules.posts.posts.getPost>`, rendue telle quelle par le fil, la recherche, les murs, les groupes et les pages : `_id`, `isMine`, `author.personId`, `page`, réactions `counts`) au lieu du DTO du socle (`postId`, `authorUserId`, `authorKind`, `signedBy`, `page.orgId`) ; identité d'auteur par `PostIdentityLines` (nom, badges CALCULÉS par le serveur — ni fonction ni administration) et `author-link` (lien, forme de pastille, signature) avec les adresses INJECTÉES (`useRoutes()` : profil d'une personne, `page(handle)` d'une page) ; une publication de PAGE parle sous l'identité de la page (nom, logo, badge de confiance), son auteur n'en est que le signataire ; nom neutre traduit pour un profil non publié ; annonce du direct branchée sur sa projection vivante et la route de conférence injectée ; gestes du moteur avec le réseau courant (`engagement.engagement.toggleReaction`, `posts.posts.{edit, remove, pinOnMyWall}`, `pages.pages.removePagePost` pour une publication de page, `moderation.moderation.{reportPost, reportComment}`) ; l'épinglage personnel n'est pas offert sur une publication de page ; libellés, toasts et noms accessibles par l'i18n (clés `reseau:postCard.*`) ; refus du moteur dit par son code (`postEngineErrorText`) ; partage cité avec la page de l'original quand c'est une page qui parle, ses mots-dièse et mentions suivant les gestionnaires de la carte. ; PA6 : dates de publication et citation dans la préférence du lecteur, origine réseau attribuée sans lien, carte de l’évènement annoncé avec dates/statut/réponse réellement projetés et sans droits inventés ; P03 (étude social-commerce du 18/10/2026) : présentation « media » déclarée par l'application (`useNetwork().postPresentation`) — auteur → média (photo, galerie, vidéo, citation, direct, évènement) → actions (réagir avec choix explicite, commenter, partager et copier le lien, enregistrer) → légende bornée « Lire la suite » → offre liée facultative (`offer`, emplacement typé vide jusqu'au lot P09) ; texte seul à hauteur naturelle ; la présentation historique reste le défaut, à l'identique ; ADR-0028 : présentation « charte », l'écran des chartes de la série 3 à la lettre — en-tête (nom, badges en signes : coche Vérifié, Officiel, Agent public ; `@identifiant` ou « Page », date), texte, média POSÉ dans la carte (angle des photos), direct, évènement annoncé (titre et dates en une phrase, Participer à la couleur du commerce et Plus tard en gris quand le lecteur est invité, `events.events.respond` sur l'identifiant de SA ligne), citation, puis une rangée d'icônes avec leurs décomptes (réagir, commenter, partager ; enregistrer à droite).
+// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/PostCard.tsx @ 25398f565 — adaptations : la carte est la PROJECTION du moteur (`PostCardPost` = `FunctionReturnType<typeof api.modules.posts.posts.getPost>`, rendue telle quelle par le fil, la recherche, les murs, les groupes et les pages : `_id`, `isMine`, `author.personId`, `page`, réactions `counts`) au lieu du DTO du socle (`postId`, `authorUserId`, `authorKind`, `signedBy`, `page.orgId`) ; identité d'auteur par `PostIdentityLines` (nom, badges CALCULÉS par le serveur — ni fonction ni administration) et `author-link` (lien, forme de pastille, signature) avec les adresses INJECTÉES (`useRoutes()` : profil d'une personne, `page(handle)` d'une page) ; une publication de PAGE parle sous l'identité de la page (nom, logo, badge de confiance), son auteur n'en est que le signataire ; nom neutre traduit pour un profil non publié ; annonce du direct branchée sur sa projection vivante et la route de conférence injectée ; gestes du moteur avec le réseau courant (`engagement.engagement.toggleReaction`, `posts.posts.{edit, remove, pinOnMyWall}`, `pages.pages.removePagePost` pour une publication de page, `moderation.moderation.{reportPost, reportComment}`) ; l'épinglage personnel n'est pas offert sur une publication de page ; libellés, toasts et noms accessibles par l'i18n (clés `reseau:postCard.*`) ; refus du moteur dit par son code (`postEngineErrorText`) ; partage cité avec la page de l'original quand c'est une page qui parle, ses mots-dièse et mentions suivant les gestionnaires de la carte. ; PA6 : dates de publication et citation dans la préférence du lecteur, origine réseau attribuée sans lien, carte de l’évènement annoncé avec dates/statut/réponse réellement projetés et sans droits inventés ; P03 (étude social-commerce du 18/10/2026) : présentation « media » déclarée par l'application (`useNetwork().postPresentation`) — auteur → média (photo, galerie, vidéo, citation, direct, évènement) → actions (réagir avec choix explicite, commenter, partager et copier le lien, enregistrer) → légende bornée « Lire la suite » → offre liée facultative (`offer`, emplacement typé vide jusqu'au lot P09) ; texte seul à hauteur naturelle ; la présentation historique reste le défaut, à l'identique ; ADR-0028 : présentation « charte », l'écran des chartes de la série 3 à la lettre — en-tête (nom, badges en signes : coche Vérifié, Officiel, Agent public ; `@identifiant` ou « Page », date), texte, média POSÉ dans la carte (angle des photos), direct, évènement annoncé (titre et dates en une phrase, Participer à la couleur du commerce et Plus tard en gris quand le lecteur est invité, `events.events.respond` sur l'identifiant de SA ligne), citation, puis une rangée d'icônes avec leurs décomptes (réagir, commenter, partager ; enregistrer à droite) ; étude du 22/10/2026 (fil sans cadre) : sous la présentation « charte », média de la publication bord à bord dans la carte, sans angle, recadré au centre dans son ratio borné ; carte pleine largeur au téléphone ; marge de 12 px quand le média ouvre la lecture.
 "use client"
 
 /**
@@ -636,7 +636,7 @@ function PostCardContent({ post, now, onTag, onMention, offer }: PostCardProps) 
     ) : null
     const saved = post.viewer.bookmarked
     return (
-      <Card padded={false} style={POST_SURFACE_STYLE}>
+      <Card padded={false} style={POST_SURFACE_STYLE} className="rp-charte-card">
         <article data-post-presentation="charte" data-post-layout={mediaFirst ? "media-first" : undefined} className="rp-charte-post">
           <header className="rp-charte-head">
             <Avatar
@@ -966,17 +966,40 @@ function PostCardContent({ post, now, onTag, onMention, offer }: PostCardProps) 
  * La feuille de la présentation « charte » (ADR-0028), hors du JSX : un
  * littéral enfant de `<style>` passerait pour une chaîne d'interface (cliquet
  * `no-hardcoded-strings`). Jetons de la charte seulement : 16 px dans la
- * carte, 12 px entre ses blocs, l'encre atténuée pour la ligne d'appoint et
- * les décomptes, l'encre des relations pour la coche Vérifié.
+ * carte (12 px quand le média ouvre la lecture), 12 px entre ses blocs, l'encre
+ * atténuée pour la ligne d'appoint et les décomptes, l'encre des relations pour
+ * la coche Vérifié.
+ *
+ * Fil sans cadre (étude du 22/10/2026) : le média de la publication traverse la
+ * carte bord à bord, sans angle, et la remplit (`cover`, dans le ratio borné de
+ * `post-media-frame.ts`) — plus aucune bande sur les côtés ; la visionneuse
+ * garde l'image entière. Seuls l'en-tête, les actions et la légende gardent leur
+ * marge : le cadre des zones d'écriture et d'information. Au téléphone (coquille
+ * de moins de 600 px), la carte elle-même passe pleine largeur et perd son angle.
+ * ⚠️ `!important` sur ce seul angle : la surface partagée le pose en style en ligne.
  */
 const CHARTE_POST_CSS = `
   .rp-charte-post {
+    --rp-charte-pad: 16px;
     display: flex;
     flex-direction: column;
     gap: 12px;
-    padding: 16px;
+    padding: var(--rp-charte-pad);
     min-width: 0;
     font-size: 15px;
+  }
+  .rp-charte-post[data-post-layout="media-first"] {
+    --rp-charte-pad: 12px;
+    gap: 10px;
+  }
+  .rp-charte-post > .rpm-m { margin-inline: calc(-1 * var(--rp-charte-pad)); }
+  .rp-charte-post > .rpm-m[data-inset] > .rpm-m-frame { border-radius: 0; }
+  .rp-charte-post > .rpm-m .rpm-m-media { object-fit: cover; }
+  @container rm-scroll (max-width: 599px) {
+    .rp-charte-card {
+      margin-inline: -12px;
+      border-radius: 0 !important;
+    }
   }
   .rp-charte-head {
     display: flex;
@@ -1046,7 +1069,7 @@ const CHARTE_POST_CSS = `
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: 4px;
+    gap: 0;
     margin-inline-start: -7px;
     margin-inline-end: -7px;
   }
