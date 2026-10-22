@@ -6,6 +6,9 @@ import {
   isTerminalReportStatus,
   REPORT_ACKNOWLEDGEMENT_DELAY_MS,
   REPORT_DECISION_DELAY_MS,
+  REPORT_DEADLINES_ORDINANCE,
+  reportDeadlineOutcome,
+  reportDecisionDelayHours,
   reportDecisionDueAt,
   reportLegalBasis,
   reportOutcome,
@@ -50,6 +53,36 @@ describe("SU01d — motifs et délais de l'ordonnance n° 0011/PR/2026", () => {
     // Avertissement ou mise en sourdine : une mesure, le contenu reste.
     expect(reportOutcome("actioned", false)).toBe("actioned")
     expect(reportOutcome("actioned", undefined)).toBe("actioned")
+  })
+})
+
+describe("SU01d — issue d'une échéance légale (indicateurs de /transparence)", () => {
+  const dueAt = Date.UTC(2026, 9, 24, 20, 0)
+
+  it("tenue : tranchée à l'échéance ou avant, classement comme suite donnée", () => {
+    expect(reportDeadlineOutcome({ status: "actioned", dueAt, decidedAt: dueAt - HOUR }, dueAt + HOUR)).toBe("met")
+    expect(reportDeadlineOutcome({ status: "dismissed", dueAt, decidedAt: dueAt }, dueAt + HOUR)).toBe("met")
+    // Tenue même si l'échéance n'est pas encore passée : la décision est acquise.
+    expect(reportDeadlineOutcome({ status: "actioned", dueAt, decidedAt: dueAt - 2 * HOUR }, dueAt - HOUR)).toBe("met")
+  })
+
+  it("manquée : tranchée après l'échéance, ou encore ouverte ou en examen une fois l'échéance passée", () => {
+    expect(reportDeadlineOutcome({ status: "actioned", dueAt, decidedAt: dueAt + 1 }, dueAt + HOUR)).toBe("missed")
+    expect(reportDeadlineOutcome({ status: "open", dueAt, decidedAt: null }, dueAt)).toBe("missed")
+    // Une mise en examen n'est pas une décision.
+    expect(reportDeadlineOutcome({ status: "reviewing", dueAt, decidedAt: dueAt - HOUR }, dueAt + HOUR)).toBe("missed")
+  })
+
+  it("à venir : ni tranchée ni échue", () => {
+    expect(reportDeadlineOutcome({ status: "open", dueAt, decidedAt: null }, dueAt - 1)).toBe("pending")
+    expect(reportDeadlineOutcome({ status: "reviewing", dueAt, decidedAt: dueAt - HOUR }, dueAt - 1)).toBe("pending")
+  })
+
+  it("dit les délais en heures et le texte qui les fixe, lus depuis la règle", () => {
+    expect(reportDecisionDelayHours("art24")).toBe(72)
+    expect(reportDecisionDelayHours("art32")).toBe(24)
+    expect(reportDecisionDelayHours("art33")).toBe(24)
+    expect(REPORT_DEADLINES_ORDINANCE).toBe("0011/PR/2026")
   })
 })
 

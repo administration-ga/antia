@@ -226,3 +226,70 @@ describe("SU01d — la cloche du déclarant", () => {
     expect(mine.page[0]).toMatchObject({ outcome: "pending", legalBasis: null, dueAt: null })
   })
 })
+
+describe("SU01d — délais tenus publiés sur /transparence", () => {
+  const DAY = 86_400_000
+  const DEADLINES = api.modules.public.projections.transparencyDeadlines
+
+  /** Mesure la période comme le passage quotidien (`aggregateTransparency`), second passage compris. */
+  async function measure(f: Awaited<ReturnType<typeof fixture>>, periodStart: number) {
+    await f.t.mutation(internal.modules.moderation.maintenance.aggregateNetwork, { networkId: f.root, periodStart, periodEnd: periodStart + DAY, cursor: null, cases: 0, distinctAuthors: 0, actioned: 0, dismissed: 0 })
+    await f.t.finishAllScheduledFunctions(vi.runAllTimers)
+    return await f.t.run(async (ctx) => await ctx.db.query("moderationTransparency").withIndex("by_network_period", (q) => q.eq("networkId", f.root).eq("periodStart", periodStart)).unique())
+  }
+
+  it("compte chaque échéance le jour où elle tombe, tenue ou manquée, et ne publie que des nombres d'au moins cinq, jamais leur base", async () => {
+    const f = await fixture()
+    const second = await enter(f.t, f.root, "seconde")
+    const authors = [f.author]
+    for (const name of ["auteur2", "auteur3", "auteur4", "auteur5", "auteur6"]) authors.push(await enter(f.t, f.root, name))
+    vi.useFakeTimers()
+    const start = Math.ceil(Date.now() / DAY) * DAY + 10 * HOUR
+    vi.setSystemTime(start)
+    const posts = [f.postId]
+    for (const author of authors.slice(1)) posts.push((await author.as.mutation(P.publish, { networkId: f.root, body: "Publication signalée" })).postId)
+    const harassment: Id<"reports">[] = []
+    for (const postId of posts.slice(0, 5)) harassment.push((await f.reader.as.mutation(M.report, { networkId: f.root, target: { kind: "post", id: postId }, reason: "harassment" })).reportId)
+    harassment.push((await second.as.mutation(M.report, { networkId: f.root, target: { kind: "post", id: posts[5]! }, reason: "harassment" })).reportId)
+    // Un hypertrucage échoit au bout de 24 h, un autre jour ; une désinformation n'a pas d'échéance légale.
+    await second.as.mutation(M.report, { networkId: f.root, target: { kind: "post", id: posts[1]! }, reason: "deepfake_of_me" })
+    await second.as.mutation(M.report, { networkId: f.root, target: { kind: "post", id: posts[2]! }, reason: "misinformation" })
+    vi.setSystemTime(start + HOUR)
+    for (const [n, reportId] of harassment.slice(0, 5).entries()) {
+      await f.moderator.as.mutation(M.decide, n < 2
+        ? { networkId: f.root, reportId, decision: "dismissed", reason: "Aucun manquement constaté.", sanctions: [] }
+        : { networkId: f.root, reportId, decision: "actioned", reason: "Avertissement donné.", sanctions: [{ kind: "warning" }] })
+    }
+    // Le sixième harcèlement reste ouvert au-delà de son échéance de 72 h : manquée.
+    const dueDay = Math.floor((start + 72 * HOUR) / DAY) * DAY
+    vi.setSystemTime(dueDay + DAY + 4 * HOUR + 10 * 60_000)
+    expect(await measure(f, dueDay)).toMatchObject({ cases: 0, legalMet: 5, legalMissed: 1, legalAuthors: 5 })
+    const deepfakeDay = Math.floor((start + 24 * HOUR) / DAY) * DAY
+    expect(await measure(f, deepfakeDay)).toMatchObject({ legalMet: 0, legalMissed: 1, legalAuthors: 1 })
+
+    const published = await f.t.query(DEADLINES, { networkId: f.root })
+    expect(published.threshold).toBe(5)
+    expect(published.periods).toHaveLength(12)
+    expect(published.periods[0]).toEqual({ periodStart: dueDay, periodEnd: dueDay + DAY, legal: { met: 5, missed: null } })
+    // Une échéance seule ne se publie pas ; aucune autre période n'a d'échéances.
+    expect(published.periods.filter((period) => period.legal !== null)).toHaveLength(1)
+    const text = JSON.stringify(published)
+    for (const hidden of [f.reader.personId, second.personId, f.author.personId, f.moderator.personId, "harassment", "deepfake"]) expect(text).not.toContain(hidden)
+  })
+
+  it("ne publie pas les échéances d'un seul auteur, même tenues", async () => {
+    const f = await fixture()
+    const reporters = [f.reader]
+    for (const name of ["declarant2", "declarant3", "declarant4", "declarant5", "declarant6"]) reporters.push(await enter(f.t, f.root, name))
+    vi.useFakeTimers()
+    const start = Math.ceil(Date.now() / DAY) * DAY + 10 * HOUR
+    vi.setSystemTime(start)
+    const filed: Id<"reports">[] = []
+    for (const reporter of reporters) filed.push((await reporter.as.mutation(M.report, { networkId: f.root, target: { kind: "post", id: f.postId }, reason: "harassment" })).reportId)
+    for (const reportId of filed) await f.moderator.as.mutation(M.decide, { networkId: f.root, reportId, decision: "dismissed", reason: "Aucun manquement constaté.", sanctions: [] })
+    const dueDay = Math.floor((start + 72 * HOUR) / DAY) * DAY
+    vi.setSystemTime(dueDay + DAY + 4 * HOUR)
+    expect(await measure(f, dueDay)).toMatchObject({ legalMet: 6, legalMissed: 0, legalAuthors: 1 })
+    expect((await f.t.query(DEADLINES, { networkId: f.root })).periods.every((period) => period.legal === null)).toBe(true)
+  })
+})

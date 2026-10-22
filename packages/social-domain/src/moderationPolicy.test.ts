@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 
-import { contentNeedsReview, isSanctionLive, normalizeBlockedTerm, validSanctionDuration } from "./moderationPolicy"
+import { contentNeedsReview, isSanctionLive, legalDeadlineDisclosure, normalizeBlockedTerm, TRANSPARENCY_MIN_CASES, validSanctionDuration } from "./moderationPolicy"
 
 describe("modération PA5 — règles pures", () => {
   it("normalise sans accents et sans ambiguïté de casse", () => {
@@ -30,5 +30,28 @@ describe("modération PA5 — règles pures", () => {
     expect(contentNeedsReview({ ...base, text: "MENÁCE", blockedTerms: ["menace"] })).toBe(true)
     expect(contentNeedsReview({ ...base, text: "www.a www.b www.c" })).toBe(true)
     expect(contentNeedsReview({ ...base, recentWrites: 10 })).toBe(true)
+  })
+})
+
+describe("SU01d — échéances légales publiées sur /transparence", () => {
+  const closed = { periodEnd: 1_000, generatedAt: 2_000 }
+
+  it("publie une période close d'au moins cinq échéances sur cinq auteurs, chaque nombre sous le seuil dit « moins de »", () => {
+    expect(TRANSPARENCY_MIN_CASES).toBe(5)
+    expect(legalDeadlineDisclosure({ ...closed, legalMet: 12, legalMissed: 0, legalAuthors: 5 })).toEqual({ met: 12, missed: null })
+    expect(legalDeadlineDisclosure({ ...closed, legalMet: 7, legalMissed: 6, legalAuthors: 5 })).toEqual({ met: 7, missed: 6 })
+    expect(legalDeadlineDisclosure({ ...closed, legalMet: 3, legalMissed: 3, legalAuthors: 5 })).toEqual({ met: null, missed: null })
+  })
+
+  it("ne publie rien d'une petite cohorte, d'une cohorte d'un ou deux auteurs, ni d'une période calculée avant sa fin", () => {
+    expect(legalDeadlineDisclosure({ ...closed, legalMet: 2, legalMissed: 2, legalAuthors: 5 })).toBeNull()
+    expect(legalDeadlineDisclosure({ ...closed, legalMet: 40, legalMissed: 0, legalAuthors: 4 })).toBeNull()
+    // Calculée avant la fin de la période, une échéance pouvait encore venir : rien ne se publie.
+    expect(legalDeadlineDisclosure({ periodEnd: 2_000, generatedAt: 1_999, legalMet: 40, legalMissed: 0, legalAuthors: 5 })).toBeNull()
+  })
+
+  it("une période mesurée avant SU01d n'a pas d'échéances à publier", () => {
+    expect(legalDeadlineDisclosure(closed)).toBeNull()
+    expect(legalDeadlineDisclosure({ ...closed, legalMet: 9, legalMissed: 0 })).toBeNull()
   })
 })

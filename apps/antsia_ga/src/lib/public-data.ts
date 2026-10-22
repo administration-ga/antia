@@ -1,5 +1,5 @@
 import { browserAppPath } from "./app-path"
-import type { PublicNetworkSnapshot, PublicPage, PublicPagination, PublicPost, PublicProfile, PublicTransparency } from "@antsia/social-contracts/publicNetwork"
+import type { PublicNetworkSnapshot, PublicPage, PublicPagination, PublicPost, PublicProfile, PublicTransparency, PublicTransparencyDeadlines } from "@antsia/social-contracts/publicNetwork"
 import { engineErrorCode } from "@antsia/social-contracts/errors"
 import { BADGES } from "@antsia/social-domain/badges"
 import { ROOT_NETWORK_SLUG } from "@antsia/social-domain/network"
@@ -30,6 +30,7 @@ export const publicProfileSchema: z.ZodType<PublicProfile> = z.object({ handle: 
 export const publicPageSchema: z.ZodType<PublicPage> = z.object({ id: shortText, handle: shortText, name: shortText, shortName: shortText.nullable(), description: text.nullable(), logoUrl: assetUrl.nullable(), bannerUrl: assetUrl.nullable(), badge: z.literal("official"), origin }).strict()
 export const publicSnapshotSchema: z.ZodType<PublicNetworkSnapshot> = z.object({ generatedAt: timestamp.nullable(), periodStart: timestamp.nullable(), periodEnd: timestamp.nullable(), publishedPosts: count.nullable(), officialPages: count.nullable(), networks: z.array(origin).max(100), trends: z.array(z.object({ tag: shortText, posts: count }).strict()).max(100), bounded: z.boolean() }).strict()
 export const publicTransparencySchema: z.ZodType<PublicTransparency> = z.object({ periods: z.array(z.object({ periodStart: timestamp, periodEnd: timestamp, cases: count.nullable() }).strict()).max(12), threshold: z.number().int().positive() }).strict()
+export const publicTransparencyDeadlinesSchema: z.ZodType<PublicTransparencyDeadlines> = z.object({ periods: z.array(z.object({ periodStart: timestamp, periodEnd: timestamp, legal: z.object({ met: count.nullable(), missed: count.nullable() }).strict().nullable() }).strict()).max(12), threshold: z.number().int().positive() }).strict()
 export const publicPostsPageSchema: z.ZodType<PublicPagination<PublicPost>> = z.object({ page: z.array(publicPostSchema).max(50), isDone: z.boolean(), continueCursor: z.string().max(8192) }).strict()
 
 export type PublicResult<T> = { status: "ready"; data: T; viewer: "anonymous" | "authenticated" } | { status: "refused" | "unavailable" | "handoff" }
@@ -76,6 +77,8 @@ export const loadOfficialPage = cache((handle: string, handoff = false) => proje
 export const loadPublicPosts = cache((cursor: string | null = null, tag?: string, province?: ProvinceSlug, handoff = false) => projected(api.modules.public.projections.listRootPosts, { paginationOpts: { cursor, numItems: 12 }, ...(tag ? { tag } : {}), ...(province ? { province } : {}) }, publicPostsPageSchema, handoff))
 export const loadOfficialPagePosts = cache((handle: string, cursor: string | null = null, handoff = false) => projected(api.modules.public.projections.pagePosts, { handle, paginationOpts: { cursor, numItems: 12 } }, publicPostsPageSchema, handoff))
 export const loadPublicTransparency = cache((handoff = false) => projected(api.modules.public.projections.transparency, {}, publicTransparencySchema, handoff))
+/** SU01d : projection à part, que les écrans antérieurs ignorent ; indisponible, la page reste lisible sans elle. */
+export const loadPublicTransparencyDeadlines = cache((handoff = false) => projected(api.modules.public.projections.transparencyDeadlines, {}, publicTransparencyDeadlinesSchema, handoff))
 
 export function publicMetadata(title: string, description: string, path: string, admitted = true): Metadata {
   const origin = configuredMetadataOrigin()

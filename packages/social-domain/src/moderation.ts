@@ -72,6 +72,28 @@ export function reportDecisionDueAt(reason: string, createdAt: number): number |
   return basis === null ? null : createdAt + REPORT_DECISION_DELAY_MS[basis]
 }
 
+/** Le délai de décision d'un fondement, en heures : pour le dire (`/transparence`), jamais pour le calculer. */
+export function reportDecisionDelayHours(basis: ReportLegalBasis): number {
+  return REPORT_DECISION_DELAY_MS[basis] / HOUR_MS
+}
+
+/** Le texte qui fixe ces délais, cité tel quel sur les surfaces publiques. */
+export const REPORT_DEADLINES_ORDINANCE = "0011/PR/2026"
+
+/**
+ * SU01d — l'issue d'une échéance légale, pour les indicateurs publiés de `/transparence` : tenue
+ * si le dossier est tranché (classé ou suivi d'effet) à l'échéance ou avant ; manquée si
+ * l'échéance est passée sans décision à temps ; à venir sinon. La décision part au déclarant
+ * dans la même transaction : sa date est celle de l'avis.
+ */
+export const REPORT_DEADLINE_OUTCOMES = ["met", "missed", "pending"] as const
+export type ReportDeadlineOutcome = (typeof REPORT_DEADLINE_OUTCOMES)[number]
+
+export function reportDeadlineOutcome(report: { status: ContentReportStatus; dueAt: number; decidedAt: number | null }, now: number): ReportDeadlineOutcome {
+  if (isTerminalReportStatus(report.status) && report.decidedAt !== null && report.decidedAt <= report.dueAt) return "met"
+  return report.dueAt <= now ? "missed" : "pending"
+}
+
 /**
  * Ce que le DÉCLARANT apprend d'un dossier : l'effet sur le contenu, jamais la sanction ni le
  * motif écrit par la modération (ils regardent l'auteur seul).

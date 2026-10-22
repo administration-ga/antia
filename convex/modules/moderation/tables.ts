@@ -69,6 +69,8 @@ export const moderationTables = {
     // SU01d : la file des délais légaux, l'échéance la plus proche d'abord ; `dueAt` absent = file ordinaire.
     .index("by_network_status_dueAt", ["networkId", "status", "dueAt"])
     .index("by_team_status_dueAt", ["teamId", "status", "dueAt"])
+    // SU01d : les échéances tombées pendant une période, tous statuts mêlés, pour la transparence publiée.
+    .index("by_network_dueAt", ["networkId", "dueAt"])
     // SU01d : « Mes signalements », le plus récent d'abord.
     .index("by_reporter_createdAt", ["reporterPersonId", "createdAt"])
     .index("by_owner_createdAt", ["ownerPersonId", "createdAt"])
@@ -109,7 +111,10 @@ export const moderationTables = {
     .index("by_network_status_updatedAt", ["networkId", "status", "updatedAt"])
     .index("by_network_owner_updatedAt", ["networkId", "ownerPersonId", "updatedAt"])
     .index("by_network_page_updatedAt", ["networkId", "ownerPageId", "updatedAt"]),
-  moderationTransparency: defineTable({ networkId: v.id("networks"), periodStart: v.number(), periodEnd: v.number(), cases: v.number(), distinctAuthors: v.number(), actioned: v.number(), dismissed: v.number(), generatedAt: v.number() })
+  moderationTransparency: defineTable({ networkId: v.id("networks"), periodStart: v.number(), periodEnd: v.number(), cases: v.number(), distinctAuthors: v.number(), actioned: v.number(), dismissed: v.number(), generatedAt: v.number(),
+    // SU01d : les échéances légales TOMBÉES pendant la période, tenues ou manquées, et la borne inférieure de
+    // leurs auteurs distincts ; absentes d'une période mesurée avant SU01d.
+    legalMet: v.optional(v.number()), legalMissed: v.optional(v.number()), legalAuthors: v.optional(v.number()) })
     .index("by_network_period", ["networkId", "periodStart"]),
   contentReports: defineTable({
     networkId: v.id("networks"),

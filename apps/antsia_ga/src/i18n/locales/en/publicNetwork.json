@@ -125,7 +125,13 @@
     "suppressed": "Total not published",
     "cases_one": "{{count}} case",
     "cases_other": "{{count}} cases",
-    "empty": "No aggregated period is available yet."
+    "empty": "No aggregated period is available yet.",
+    "legalLead": "Legal deadlines (ordinance No. {{ordinance}}): a decision within {{decisionHours}} h for harassment or content harmful to a minor, removal within {{removalHours}} h for a deepfake or prohibited AI content. Each period counts the deadlines that fell on that day; it publishes them only from {{count}} deadlines and {{count}} distinct authors, and a number below {{count}} is not given.",
+    "legalLine": "Legal deadlines: {{met}} · {{missed}}",
+    "legalMet": "{{value}} met",
+    "legalMetFew": "fewer than {{threshold}} met",
+    "legalMissed": "{{value}} missed",
+    "legalMissedFew": "fewer than {{threshold}} missed"
   },
   "legal": {
     "eyebrow": "Understanding {{brand}}",
