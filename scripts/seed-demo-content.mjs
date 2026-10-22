@@ -5,7 +5,8 @@
  *   ANTSIA_CONVEX_DEMO_DEPLOY_KEY='…' node scripts/seed-demo-content.mjs [--dry-run]
  *
  * 1. comptes OTP : sept acteurs puis dix figurants (vrai parcours, `prepare-demo-content`) ;
- * 2. `seeds/demoContent:run` puis `:runFigurants` (fonctions internes, clé de la démo) ;
+ * 2. `seeds/demoContent:run` puis `:runFigurants`, puis `seeds/demoConversations:run` (iCom et
+ *    iCom Pro, ADR-0036) — fonctions internes, clé de la démo ;
  * 3. images : chaque cible planifiée par le serveur reçoit les octets du dépôt ; le serveur
  *    n'accepte que la taille et l'empreinte de son manifeste.
  *
@@ -70,9 +71,11 @@ export async function seedDemoContent({ key, dryRun = false, log = console.log, 
   log(`Contenus des acteurs : ${content.postsCreated} publications créées, ${content.postsExisting} déjà en place.`)
   const figurants = await call("seeds/demoContent:runFigurants", args)
   log(`Figurants : ${figurants.figurants} prêts, ${figurants.postsCreated} publications, ${figurants.connections} relations, ${figurants.requests} demandes en attente.`)
+  const conversations = await call("seeds/demoConversations:run", args)
+  log(`Conversations : ${conversations.directMessages} messages iCom, ${conversations.shopMessages} messages iCom Pro${conversations.channelEnabled ? "" : " (canal boutique fermé par décision : aucun fil de boutique)"}.`)
   const media = await seedMedia(call, { log })
   log(`Images : ${media.attached} posées, ${media.remaining} restantes.`)
-  return { content, figurants, media }
+  return { content, figurants, conversations, media }
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {

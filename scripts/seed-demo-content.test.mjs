@@ -75,12 +75,13 @@ describe("enchaînement des graines", () => {
       order.push(name)
       if (name === "seeds/demoContent:run") return { postsCreated: 52, postsExisting: 0 }
       if (name === "seeds/demoContent:runFigurants") return { figurants: 10, postsCreated: 20, connections: 30, requests: 16 }
+      if (name === "seeds/demoConversations:run") return { directMessages: 25, shopMessages: 15, channelEnabled: true }
       if (name === "seeds/demoContent:mediaTargets") return []
       throw new Error(`Fonction inattendue : ${name}`)
     })
     const log = mock(() => {})
     const report = await seedDemoContent({ key: DEMO_KEY, client: { call }, prepare, log })
-    expect(order).toEqual(["acteurs:demo:true", "figurants:demo:true", "seeds/demoContent:run", "seeds/demoContent:runFigurants", "seeds/demoContent:mediaTargets", "seeds/demoContent:mediaTargets"])
+    expect(order).toEqual(["acteurs:demo:true", "figurants:demo:true", "seeds/demoContent:run", "seeds/demoContent:runFigurants", "seeds/demoConversations:run", "seeds/demoContent:mediaTargets", "seeds/demoContent:mediaTargets"])
     expect(report.media).toEqual({ attached: 0, remaining: 0 })
     const output = JSON.stringify({ report, logs: log.mock.calls, console: consoleSpies.flatMap(spy => spy.mock.calls) })
     expect(output).not.toContain("cle-secrete-de-test")

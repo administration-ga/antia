@@ -21,6 +21,8 @@ import { testConvex } from "../test.setup"
 import { DEMO_CONTENT_PAGES, DEMO_CONTENT_PERSONAS, DEMO_CONTENT_POSTS, DEMO_FIGURANT_POSTS, DEMO_FIGURANT_TIES, type DemoMediaTarget } from "./demoContent"
 import { DEMO_CONTENT_CONFIRMATION } from "./demoContentConfig"
 import { DEMO_FIGURANTS, demoFigurantEmailOf } from "./demoFigurants"
+import { DEMO_DIRECT_CONVERSATIONS, DEMO_SHOP_CONVERSATIONS } from "./demoConversations"
+import { readPersonalUnreadTotal } from "../modules/messaging/threads"
 import { demoMediaAsset } from "./demoMediaManifest"
 import { SEED_CONFIRMATION } from "./foundations"
 
@@ -418,5 +420,73 @@ it("les figurants ont chacun deux publications et des liens déclarés cohérent
     expect(ties?.figurantFriends.every(slot => slot < figurant.slot)).toBe(true)
     expect(new Set([...(ties?.friends ?? []), ...(ties?.requests ?? []), ...(ties?.requestedBy ?? [])]).size).toBe((ties?.friends.length ?? 0) + (ties?.requests.length ?? 0) + (ties?.requestedBy.length ?? 0))
   }
+})
+
+describe("ICP-2 — conversations de démonstration (iCom et iCom Pro)", () => {
+  async function seeded() {
+    const f = await fixture()
+    await seedActors(f)
+    await withFigurants(f)
+    await f.t.mutation(internal.seeds.demoContent.runFigurants, args)
+    return f
+  }
+
+  it("ouvre le canal boutique jamais décidé, mandate les propriétaires et anime iCom et iCom Pro", async () => {
+    const f = await seeded()
+    const result = await f.t.mutation(internal.seeds.demoConversations.run, args)
+    expect(result).toEqual({ mandates: 3, settings: 3, channelOpened: true, channelEnabled: true, directThreads: 11, directMessages: 25, shopThreads: 8, shopMessages: 15 })
+    expect(DEMO_DIRECT_CONVERSATIONS).toHaveLength(11)
+    expect(DEMO_SHOP_CONVERSATIONS).toHaveLength(8)
+    // Chacun lit avant de répondre : Awa garde un message non lu par échange qui se termine par l'autre.
+    expect(await f.t.run(async ctx => await readPersonalUnreadTotal(ctx, f.root, personOf(f.people, "membre")))).toBe(4)
+    const shops = await f.t.run(async ctx => {
+      const rows = await ctx.db.query("commercialThreads").take(50)
+      const mandates = await ctx.db.query("shopContactMandates").take(10)
+      const audits = await ctx.db.query("engineAudit").take(200)
+      return { states: rows.map(row => row.state).sort(), assigned: rows.filter(row => row.assignedRespondentPersonId !== undefined).length, mandates: mandates.map(row => [row.canRead, row.canReply, row.canDecide, row.acceptedAt !== undefined]), auditActions: audits.map(row => row.action).filter(action => action.startsWith("commercial.")).sort() }
+    })
+    expect(shops.states).toEqual(["accepted", "accepted", "accepted", "accepted", "closed", "requested", "requested", "requested"])
+    expect(shops.assigned).toBe(5)
+    expect(shops.mandates).toEqual([[true, true, true, true], [true, true, true, true], [true, true, true, true]])
+    expect(shops.auditActions).toEqual(["commercial.mandate_grant", "commercial.mandate_grant", "commercial.mandate_grant", "commercial.policy_set", "commercial.shop_settings_set", "commercial.shop_settings_set", "commercial.shop_settings_set"])
+    // Awa est cliente de l'épicerie : son côté « Mes achats » existe.
+    const awaPurchases = await f.t.run(async ctx => await ctx.db.query("commercialThreads").withIndex("by_requester", q => q.eq("requesterPersonId", personOf(f.people, "membre"))).take(5))
+    expect(awaPurchases).toHaveLength(1)
+    expect(await f.t.mutation(internal.seeds.demoConversations.run, args)).toEqual({ mandates: 0, settings: 0, channelOpened: false, channelEnabled: true, directThreads: 0, directMessages: 0, shopThreads: 0, shopMessages: 0 })
+  })
+
+  it("ne touche jamais une décision existante : canal fermé, mandat ou réglage déjà posés", async () => {
+    const f = await seeded()
+    const epicerie = await f.t.run(async ctx => {
+      await ctx.db.insert("commercialNetworkPolicies", { networkId: f.root, enabled: false, updatedAt: T0 })
+      const page = await ctx.db.query("pages").withIndex("by_handle", q => q.eq("handle", "epicerie-moussavou-demo")).unique()
+      const shop = page ? await ctx.db.query("shops").withIndex("by_page", q => q.eq("pageId", page._id)).unique() : null
+      if (!shop) throw new Error("Boutique de fixture absente")
+      await ctx.db.insert("shopContactSettings", { networkId: f.root, shopId: shop._id, acceptRequests: false, updatedAt: T0 })
+      return shop._id
+    })
+    const result = await f.t.mutation(internal.seeds.demoConversations.run, args)
+    expect(result).toMatchObject({ channelOpened: false, channelEnabled: false, shopThreads: 0, settings: 2, directThreads: 11 })
+    const after = await f.t.run(async ctx => ({
+      policy: (await ctx.db.query("commercialNetworkPolicies").take(2)).map(row => row.enabled),
+      settings: (await ctx.db.query("shopContactSettings").withIndex("by_shop", q => q.eq("shopId", epicerie)).take(2)).map(row => row.acceptRequests),
+      threads: (await ctx.db.query("commercialThreads").take(1)).length,
+    }))
+    expect(after).toEqual({ policy: [false], settings: [false], threads: 0 })
+  })
+
+  it("une relation rompue fait sauter l'échange, sans en recréer une", async () => {
+    const f = await seeded()
+    const awa = personOf(f.people, "membre")
+    await f.t.run(async ctx => {
+      for (const row of await ctx.db.query("connections").take(200)) {
+        const pair = [row.personIdLow, row.personIdHigh]
+        if (pair.includes(awa) && row.status === "accepted") await ctx.db.delete(row._id)
+      }
+    })
+    const result = await f.t.mutation(internal.seeds.demoConversations.run, args)
+    expect(result.directThreads).toBe(7)
+    expect(await f.t.run(async ctx => (await ctx.db.query("connections").take(200)).filter(row => [row.personIdLow, row.personIdHigh].includes(awa) && row.status === "accepted").length)).toBe(0)
+  })
 })
 

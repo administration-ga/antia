@@ -79,3 +79,35 @@ Autres contrôles :
   - aucun débordement horizontal, aucune ressource en erreur.
 - Reste : la démo n'a encore aucune conversation, donc iCom affiche « Aucune conversation » pour
   les comptes de démonstration.
+
+## Mise à jour — publication de `main` 26f3024 (iCom et iCom Pro, ADR-0036, ICP-1)
+
+- PR 48 : deux espaces de messagerie, iCom (relations, réseau) et iCom Pro (clients des boutiques,
+  achats et démarches, mises en relation, partenaires), reliés par une pilule « iCom | iCom Pro ».
+  La pilule n'apparaît qu'en présence d'une activité pro (capacité `icomPro`, ANTSIA seul ;
+  DIASPORALE inchangé). Front seul : les fonctions lues existaient déjà côté backend.
+- Fronts promus (accord écrit du propriétaire) :
+  - enfant démo : `dpl_9enxa1jfp5N7kKuhgdYdFL9ph18e` (antsia-demo-7ljagkvjb), version `main-26f30241dcd6-demo` ;
+  - principal : `dpl_DZPsAskwLLXSrkZc5B2sQDNpR6eJ` (antsia-jqoi0thyr), version `main-26f30241dcd6-production`.
+  - Contexte : ANTSIA 26f3024 et DIASPORALE 214831c, 3 255 fichiers, empreinte `a986a77d…`.
+  - Retour arrière : antsia-fl8eoqzvl (principal) et antsia-demo-g8bhjmocb (enfant).
+- Recette (compte Membre de la démo, Awa MBA) :
+
+| Contrôle | 1440 | 834 | 390 |
+|---|---|---|---|
+| Rail : entrée « iCom » | ✓ | ✓ | ✓ |
+| `/messages` : pilule, iCom courant, lien vers `?espace=pro` | ✓ | ✓ | ✓ |
+| `?espace=pro` : puces Atelier Tech Démo · Mes achats et démarches · Mises en relation | ✓ | ✓ | ✓ |
+| Contacts : « Mon réseau » (iCom) ; clients, partenaires, boutiques contactées (iCom Pro) | ✓ | ✓ | ✓ |
+| Appels : journal (iCom et iCom Pro à 1440, iCom à 834) | ✓ | ✓ | — |
+| Débordement horizontal | aucun | aucun | aucun |
+
+- Autres contrôles : la carte iCom de la colonne droite porte la pilule (1440) ; la boutique sans
+  mandat de lecture renvoie vers son équipe (`/demo/mes-boutiques/<id>`) ; aucune ressource en
+  erreur sur le fil ni sur iCom Pro ; site principal : `/`, `/entrer`, `/messages`,
+  `/messages?espace=pro` en 200 ; santé des deux sites aux versions ci-dessus.
+- Restes :
+  1. la démo n'a encore aucune conversation (iCom comme iCom Pro) : objet du lot ICP-2 (graine
+     `seeds/demoConversations:run`, après déploiement Convex) ;
+  2. coquille relevée en ligne : « les messages de Atelier Tech Démo » (élision), corrigée dans
+     ICP-2 avec « Voir le profil de {{name}} ».
