@@ -8,12 +8,14 @@ const mocks = vi.hoisted(() => ({
   query: { data: undefined as unknown, isLoading: false, isError: false, error: null, refetch: vi.fn() },
   send: vi.fn(),
   dismiss: vi.fn(),
+  follow: vi.fn(),
+  unfollow: vi.fn(),
   request: { disabled: false, waitLabel: null as string | null, pendingHandle: null as string | null },
 }))
 
-vi.mock("@antsia/api/engine", () => ({ api: { modules: { suggestions: { suggestions: { paginate: "paginate", dismiss: "dismiss" } } } } }))
+vi.mock("@antsia/api/engine", () => ({ api: { modules: { suggestions: { suggestions: { paginate: "paginate", dismiss: "dismiss" } }, graph: { follows: { follow: "follow", unfollow: "unfollow" } } } } }))
 vi.mock("@antsia/api/hooks", () => ({ useAuthenticatedConvexQuery: () => mocks.query }))
-vi.mock("convex/react", () => ({ useMutation: () => mocks.dismiss }))
+vi.mock("convex/react", () => ({ useMutation: (ref: string) => (ref === "follow" ? mocks.follow : ref === "unfollow" ? mocks.unfollow : mocks.dismiss) }))
 vi.mock("./use-connection-request", () => ({ useConnectionRequest: () => ({ ...mocks.request, send: mocks.send }) }))
 vi.mock("sonner", () => ({ toast: { error: vi.fn(), success: vi.fn() } }))
 
@@ -26,6 +28,8 @@ beforeEach(() => {
   mocks.query = { data: pageOf([elise]), isLoading: false, isError: false, error: null, refetch: vi.fn() }
   mocks.send.mockReset().mockResolvedValue(true)
   mocks.dismiss.mockReset().mockResolvedValue({})
+  mocks.follow.mockReset().mockResolvedValue({ targetPersonId: elise.personId, following: true })
+  mocks.unfollow.mockReset().mockResolvedValue({ following: false })
   mocks.request = { disabled: false, waitLabel: null, pendingHandle: null }
 })
 
@@ -100,5 +104,41 @@ describe("SuggestionsPanel — découverte et états serveur", () => {
     renderWithEngine(<SuggestionsPanel />)
     expect(screen.getByRole("button", { name: "Réessayez dans 20 s." })).toBeDisabled()
     expect(mocks.send).not.toHaveBeenCalled()
+  })
+})
+
+describe("SuggestionsPanel — suivre ou être ami (ADR-0037)", () => {
+  it("chaque carte offre les deux formules : Suivre et Ajouter", () => {
+    renderWithEngine(<SuggestionsPanel presentation="carousel" />)
+    expect(screen.getByRole("button", { name: "Suivre Élise NDONG" })).toHaveTextContent("Suivre")
+    expect(screen.getByRole("button", { name: "Ajouter" })).not.toBeDisabled()
+  })
+
+  it("Suivre en retour quand la personne vous suit déjà", () => {
+    mocks.query.data = pageOf([{ ...elise, followsYou: true }])
+    renderWithEngine(<SuggestionsPanel />)
+    expect(screen.getByRole("button", { name: "Suivre Élise NDONG en retour" })).toHaveTextContent("Suivre en retour")
+  })
+
+  it("une personne suivie garde sa carte quand le catalogue l'écarte, dit « Suivi » et laisse revenir sur le geste", async () => {
+    const view = renderWithEngine(<SuggestionsPanel presentation="carousel" />)
+    await act(async () => { fireEvent.click(screen.getByRole("button", { name: "Suivre Élise NDONG" })) })
+    expect(mocks.follow).toHaveBeenCalledExactlyOnceWith({ networkId: TEST_NETWORK_ID, handle: elise.handle })
+    // Le serveur écarte désormais la personne suivie : la carte reste à sa place.
+    mocks.query.data = pageOf([])
+    view.rerender(<SuggestionsPanel presentation="carousel" />)
+    const following = screen.getByRole("button", { name: "Vous suivez Élise NDONG : ne plus suivre" })
+    expect(following).toHaveTextContent("Suivi")
+    await act(async () => { fireEvent.click(following) })
+    expect(mocks.unfollow).toHaveBeenCalledExactlyOnceWith({ networkId: TEST_NETWORK_ID, targetPersonId: elise.personId })
+    expect(screen.getByRole("button", { name: "Suivre Élise NDONG" })).toBeTruthy()
+  })
+
+  it("un suivi refusé ne prétend rien : la carte garde « Suivre »", async () => {
+    mocks.follow.mockRejectedValueOnce(new Error("refused"))
+    renderWithEngine(<SuggestionsPanel presentation="carousel" />)
+    await act(async () => { fireEvent.click(screen.getByRole("button", { name: "Suivre Élise NDONG" })) })
+    expect(screen.getByRole("button", { name: "Suivre Élise NDONG" })).not.toBeDisabled()
+    expect(screen.queryByRole("button", { name: "Vous suivez Élise NDONG : ne plus suivre" })).toBeNull()
   })
 })

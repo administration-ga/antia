@@ -360,16 +360,6 @@
     "discard": "Abandonner le brouillon",
     "close": "Fermer"
   },
-  "feedSuggestion": {
-    "label": "Personne à découvrir : {{name}}",
-    "profileOf": "Profil de {{name}}",
-    "follow": "Suivre",
-    "followLabel": "Suivre {{name}}",
-    "followed": "Vous suivez {{name}}.",
-    "followFailed": "L'abonnement n'a pas pu être enregistré.",
-    "write": "Écrire",
-    "writeLabel": "Écrire à {{name}}"
-  },
   "feedClips": {
     "title": "Clips du fil",
     "hide": "Masquer les aperçus de clips",

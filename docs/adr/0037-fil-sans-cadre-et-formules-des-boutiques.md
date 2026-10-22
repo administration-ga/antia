@@ -1,4 +1,4 @@
-# ADR-0037 : Fil sans cadre, grille du bureau, deux formules de relation et formules des boutiques
+# ADR-0037 : Fil sans cadre, deux formules de relation et formules des boutiques
 
 - **Statut** : Accepté par le propriétaire le 2026-10-22 (demande et réponses du jour).
 - **Date** : 2026-10-22
@@ -10,7 +10,7 @@ Le 22/10/2026, le propriétaire envoie vingt captures d'un fil social de référ
 
 - une publication épouse le format de son média : aucun cadre sur les côtés, les cadres réservés
   aux zones d'écriture et d'information (en-tête, actions, légende) ;
-- au bureau, une grille de « 3 ou 4 » colonnes de publications ;
+- au bureau, « 3 ou 4 » (réponse à une question sur la pose du bureau) ;
 - des arrondis plus discrets, des boutons de suivi deux fois moins hauts (« 25 px ») ;
 - une barre de menu translucide, large et basse ;
 - deux formules de relation : suivre sans être ami, ou être ami (ce qui vaut suivre) ;
@@ -24,13 +24,17 @@ Nous allons, sous la présentation « charte » d'antsia.ga (ADR-0028) :
 
 1. faire traverser la carte au média de la publication, bord à bord, sans angle, recadré au centre
    dans son ratio borné (plus aucune bande) ; au téléphone, la carte passe pleine largeur ;
-2. ranger le fil du bureau en grille de deux à quatre colonnes, en maçonnerie, l'ordre du DOM restant
-   l'ordre chronologique (`FeedMasonryGrid`) ;
+2. garder au bureau la colonne unique du fil, à sa largeur d'avant. Une grille de trois à quatre
+   colonnes, livrée au lot 1 (PR 59), a été retirée le jour même à la demande du propriétaire :
+   « l'affichage des posts ne change pas, il faut garder l'ancienne architecture, c'est juste qu'il
+   n'y a pas de bordure sur les côtés. Prends l'exemple d'Instagram et Facebook » ;
 3. réduire les angles des sept thèmes (cartes 24 → 16 px, médias 16 → 12 px, actions compactes
    8 → 6 px) et ramener les actions sociales compactes à 25 px de haut ;
 4. passer la barre des destinations en verre (flou et saturation), 52 px, icônes seules ;
 5. proposer partout où l'on rencontre une personne suggérée les deux formules, Suivre (ou Suivre en
-   retour) et Ajouter (lot 2) ;
+   retour, d'après le champ `followsYou` du catalogue) et Ajouter ; la carte de suggestion unique de
+   tête (ADR-0028) laisse place au carrousel « Personnes à découvrir », placé comme dans la référence
+   (après la troisième publication, ou au-dessus de l'état vide) (lot 2) ;
 6. déduire la formule d'une publication de boutique de son offre et de son média (lot 3).
 
 ## Conséquences
@@ -38,7 +42,8 @@ Nous allons, sous la présentation « charte » d'antsia.ga (ADR-0028) :
 ### Positives
 
 - Les photos et les vidéos occupent toute la largeur au téléphone, sans bandes.
-- Le bureau montre trois à quatre fois plus de publications par écran.
+- Au bureau, la publication garde sa place et sa largeur ; seul son média change : il occupe
+  toute la largeur de la carte, comme chez Instagram et Facebook.
 - Les boutons de relation cessent d'écraser les cartes de suggestion.
 
 ### Négatives
@@ -46,7 +51,11 @@ Nous allons, sous la présentation « charte » d'antsia.ga (ADR-0028) :
 - Un média hors des bornes de ratio est recadré dans le fil ; la visionneuse garde l'image entière.
 - Les actions compactes de 25 px passent sous la cible de 44 px voulue jusqu'ici ; elles restent
   au-dessus du minimum de 24 px des cibles (WCAG 2.2, 2.5.8).
-- La grille mesure ses cartes (`ResizeObserver`) : sans lui, elle garde des rangées automatiques.
+- Au bureau, la carte est large (784 px à 1 440 px) : une photo en hauteur, plafonnée aux trois
+  quarts de la hauteur visible, y est davantage recadrée qu'au téléphone.
+- La carte de suggestion de tête et son bouton « Écrire » quittent le fil ; écrire reste offert sur
+  le profil.
+- « Suivre en retour » attend le déploiement du backend : sans lui, la carte dit « Suivre ».
 
 ### Neutres
 
@@ -54,14 +63,14 @@ Nous allons, sous la présentation « charte » d'antsia.ga (ADR-0028) :
 
 ## Alternatives considérées
 
-### Colonnes CSS (`columns`)
+### Grille de trois à quatre colonnes au bureau
 
-Ordre de lecture par colonnes, et des cartes qui sautent d'une colonne à l'autre à chaque page
-chargée. Écarté.
+Livrée au lot 1 (`FeedMasonryGrid`, maçonnerie), puis retirée le 22/10/2026 à la demande du
+propriétaire : la page garde son architecture, seule la bordure autour du média disparaît.
 
-### Grille à rangées égales
+### Bandes de fond autour du média (`contain`)
 
-Des trous sous chaque carte plus courte que sa voisine. Écarté.
+C'est le « cadre sur les côtés » que le propriétaire demande de retirer. Écarté.
 
 ## Références
 

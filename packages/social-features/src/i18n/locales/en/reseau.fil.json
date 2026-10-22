@@ -360,16 +360,6 @@
     "discard": "Discard the draft",
     "close": "Close"
   },
-  "feedSuggestion": {
-    "label": "Someone to discover: {{name}}",
-    "profileOf": "Profile of {{name}}",
-    "follow": "Follow",
-    "followLabel": "Follow {{name}}",
-    "followed": "You follow {{name}}.",
-    "followFailed": "The follow could not be saved.",
-    "write": "Write",
-    "writeLabel": "Write to {{name}}"
-  },
   "feedClips": {
     "title": "Videos from your feed",
     "hide": "Hide video previews",
