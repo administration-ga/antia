@@ -1,4 +1,7 @@
-/** U05 : profils ANTSIA sur le document, sans changer la pose des réseaux historiques. */
+/** U05 : profils ANTSIA sur le document, sans changer la pose des réseaux historiques.
+ * ADR-0037 : la rangée d'actions (Ajouter, Suivre, Écrire, Clips…) passe à 25 px de haut,
+ * comme les actions sociales compactes ; le libellé peut toujours passer à la ligne.
+ * ⚠️ `!important` : chaque bouton pose sa géométrie en style en ligne (44 px pour le neutre). */
 export const PROFILE_ADAPTIVE_CSS = `
   .rp-profile-frame[data-profile-layout="adaptive"] { min-width: 0; }
   .rp-profile-frame[data-profile-layout="adaptive"] .pp-identity { background: var(--card); color: var(--card-foreground); }
@@ -14,7 +17,9 @@ export const PROFILE_ADAPTIVE_CSS = `
   .rp-profile-frame[data-profile-layout="adaptive"] .pp-actions { align-items: stretch; gap: 8px; }
   .rp-profile-frame[data-profile-layout="adaptive"] .pp-actions > button,
   .rp-profile-frame[data-profile-layout="adaptive"] .pp-actions > a {
-    max-width: 100%; white-space: normal; overflow-wrap: anywhere; height: auto; min-height: 44px;
+    max-width: 100%; white-space: normal; overflow-wrap: anywhere; height: auto; min-height: 25px !important;
+    padding-block: 3px !important; border-radius: var(--esp-social-action-radius, 6px) !important;
+    font-size: 13px !important; line-height: 1.25 !important;
   }
   .rp-profile-frame[data-profile-layout="adaptive"] .pp-self-note { align-items: flex-start; }
   .rp-profile-frame[data-profile-layout="adaptive"] .pp-self-note > svg { flex: 0 0 auto; margin-top: 3px; }

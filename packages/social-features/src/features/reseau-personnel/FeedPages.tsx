@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/FeedPages.tsx @ ad2e7fdc2 — adaptations : fil `posts.posts.myFeed` du moteur avec le réseau courant (`useNetwork().networkId`), portées du domaine (sans « mon_administration ») ; cartes rendues avec la projection du moteur (clé `_id`) ; le rail des pages à suivre est celui que le lot des pages réécrit sur le moteur (`./PagesSuggestionsRail`, mêmes nom et props qu'au socle) ; état vide du kit d'espace de `@antsia/ui/espace-kit` ; commentaires rapportés à la page réseau (« personnes » au lieu d'« agents ») ; P04 (18/10/2026) : sous le lecteur immersif (`ImmersiveFeedReader`), la MÊME page — même requête, même curseur — rend chaque publication dans un créneau, déclare son état au lecteur (chargement, erreur, lacune, préparation, nouvelles publications retenues en tête) et se tait sur l'entrelacement des suggestions ; hors lecteur, quand l'application déclare le fil immersif, chaque carte reçoit une enveloppe d'ancre de retour (`display: contents`) ; sans cette déclaration, rendu historique à l'identique ; ADR-0028 : sous la présentation « charte », la carte de suggestion des chartes (`FeedSuggestionCard`, Suivre et Écrire) ouvre la première page au téléphone, à la place des deux carrousels intercalés.
+// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/FeedPages.tsx @ ad2e7fdc2 — adaptations : fil `posts.posts.myFeed` du moteur avec le réseau courant (`useNetwork().networkId`), portées du domaine (sans « mon_administration ») ; cartes rendues avec la projection du moteur (clé `_id`) ; le rail des pages à suivre est celui que le lot des pages réécrit sur le moteur (`./PagesSuggestionsRail`, mêmes nom et props qu'au socle) ; état vide du kit d'espace de `@antsia/ui/espace-kit` ; commentaires rapportés à la page réseau (« personnes » au lieu d'« agents ») ; P04 (18/10/2026) : sous le lecteur immersif (`ImmersiveFeedReader`), la MÊME page — même requête, même curseur — rend chaque publication dans un créneau, déclare son état au lecteur (chargement, erreur, lacune, préparation, nouvelles publications retenues en tête) et se tait sur l'entrelacement des suggestions ; hors lecteur, quand l'application déclare le fil immersif, chaque carte reçoit une enveloppe d'ancre de retour (`display: contents`) ; sans cette déclaration, rendu historique à l'identique ; ADR-0028 : sous la présentation « charte », la carte de suggestion des chartes (`FeedSuggestionCard`, Suivre et Écrire) ouvre la première page au téléphone, à la place des deux carrousels intercalés ; étude du 22/10/2026 (ADR-0037) : la carte de tête cède la place au carrousel « Personnes à découvrir » (Suivre et Ajouter) — au-dessus de l'état vide d'un fil vide, sinon après la 3ᵉ publication ou la dernière d'un fil plus court.
 "use client"
 
 /**
@@ -33,7 +33,6 @@ import {
   type ImmersivePageReport,
 } from "../feed-immersion/ImmersiveFeedReader"
 import { FeedClipsRail } from "./FeedClipsRail"
-import { FeedSuggestionCard } from "./FeedSuggestionCard"
 import { PostCard } from "./PostCard"
 import { PagesSuggestionsRail } from "./PagesSuggestionsRail"
 import { SuggestionsPanel } from "./SuggestionsPanel"
@@ -228,14 +227,17 @@ export function FeedPage({
     )
   }
 
-  /* La carte de suggestion des chartes : au téléphone seulement (le rail droit
-     du bureau porte déjà les suggestions — `.rp-feed-inline` y est masqué),
-     en tête de la première page, fil vide compris. */
-  const leadingSuggestion = charte && isFirst ? (
-    <div className="rp-feed-inline" style={{ flexDirection: "column" }}>
-      <FeedSuggestionCard />
+  /* Les personnes à découvrir des chartes (ADR-0037, d'après la référence des
+     captures du 22/10/2026) : au téléphone (`.rp-feed-inline` — le rail droit du
+     bureau porte les mêmes données), au-dessus de l'état vide d'un fil vide : un
+     nouvel arrivant trouve d'abord qui suivre. */
+  const discovery = (
+    <div className="rp-feed-inline" style={{ flexDirection: "column", gap: 12 }}>
+      <SuggestionsPanel presentation="carousel" />
+      <PagesSuggestionsRail presentation="carousel" />
     </div>
-  ) : null
+  )
+  const emptyDiscovery = charte && isFirst && tag === undefined ? discovery : null
 
   if (page.isLoading) {
     return (
@@ -253,16 +255,17 @@ export function FeedPage({
   const lacuna = page.data?.lacunar ? <p role="status" className="rounded-xl border border-border bg-muted p-3 text-sm text-muted-foreground">{t("feedPages.incomplete")}</p> : null
   const preparation = isFirst && page.data?.preparing ? <p role="status" className="text-sm text-muted-foreground">{t("feedPages.preparing")}</p> : null
   const history = isFirst && page.data?.materializedSince !== undefined ? <p className="text-sm text-muted-foreground">{t("feedPages.historySince", { date: new Intl.DateTimeFormat(i18n.resolvedLanguage ?? i18n.language, { dateStyle: "medium" }).format(page.data.materializedSince) })}</p> : null
-  if (items.length === 0) return <>{preparation}{history}{lacuna}{leadingSuggestion}{isFirst && !page.data?.lacunar && nextCursor === null ? emptyFallback : null}</>
+  if (items.length === 0) return <>{preparation}{history}{lacuna}{emptyDiscovery}{isFirst && !page.data?.lacunar && nextCursor === null ? emptyFallback : null}</>
 
-  const interleaveIndex = interleaveAfter ? interleaveAfter(items.length) : null
+  /* Sous la charte, un fil plus court que l'intercalage montre quand même les
+     personnes à découvrir, après sa dernière publication. */
+  const interleaveIndex = interleaveAfter ? (interleaveAfter(items.length) ?? (charte && isFirst && tag === undefined ? items.length : null)) : null
 
   return (
     <>
       {preparation}
       {history}
       {lacuna}
-      {leadingSuggestion}
       {items.map((post, index) => (
         <Fragment key={post._id}>
           {/* P04 : l'enveloppe d'ancre (`display: contents`, aucune boîte) permet
@@ -282,15 +285,7 @@ export function FeedPage({
               Le bureau masque cette pile car son rail droit porte les mêmes
               données en vertical. */}
           {charte && isFirst && tag === undefined && index === Math.min(4, items.length - 1) ? <FeedClipsRail posts={items} /> : null}
-          {index + 1 === interleaveIndex ? (
-            <div
-              className="rp-feed-inline"
-              style={{ flexDirection: "column", gap: 12 }}
-            >
-              <SuggestionsPanel presentation="carousel" />
-              <PagesSuggestionsRail presentation="carousel" />
-            </div>
-          ) : null}
+          {index + 1 === interleaveIndex ? discovery : null}
         </Fragment>
       ))}
     </>

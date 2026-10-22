@@ -501,6 +501,16 @@ describe("PeoplePanel — catalogue de suggestions (R-05)", () => {
     expect(screen.getByRole("link", { name: "Répondre" }).getAttribute("href")).toBe("/fil?tab=relations&vue=invitations")
   })
 
+  it("Suivre est offert à côté d'Ajouter, et suit par l'identifiant (ADR-0037)", async () => {
+    mocks.queries.suggestionsPaginate = ok(pageOf([suggestion("bea", "Béa Moussavou", { followsYou: true })]))
+    monter("vue=suggestions")
+    const suivre = screen.getByRole("button", { name: "Suivre Béa Moussavou en retour" })
+    expect(suivre.textContent).toContain("Suivre en retour")
+    expect(screen.getByRole("button", { name: "Ajouter" })).toBeTruthy()
+    await act(async () => { fireEvent.click(suivre) })
+    expect(mocks.mutations.follow).toHaveBeenCalledWith({ networkId: TEST_NETWORK_ID, handle: "bea" })
+  })
+
   it("masquer appelle la mutation PERSISTANTE, pas un état local", () => {
     mocks.queries.suggestionsPaginate = ok(pageOf([suggestion("bea", "Béa Moussavou")]))
     monter("vue=suggestions")
