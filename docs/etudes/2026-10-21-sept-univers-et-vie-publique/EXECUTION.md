@@ -15,7 +15,7 @@ Autorisation : le propriétaire a validé les décisions D01 à D08 le 21 octobr
 |---|---|---|
 | SU00 | Terminé — documentaire | ADR-0035 (D01–D08 acceptées, D09–D12 proposées) ; index des ADR mis à jour ; étude passée en version 1.1 |
 | SU01 | Analyse livrée ; mise en œuvre par sous-lots | exigences article par article, état du code, écarts, arbitrages juridiques, sous-lots SU01a à SU01j et calendrier ; à faire valider par un juriste avant toute mise en œuvre de l'identification et de l'âge |
-| SU01d | En source dans `main` (21/10) ; backend à déployer | voir [SU01d — signalements réglementés](#su01d--signalements-réglementés) |
+| SU01d | En ligne depuis le 22/10 (backend `9927c9c`, fronts `26f3024` puis `bca19af`) ; restes livrés en source le 22/10, à déployer | voir [SU01d — signalements réglementés](#su01d--signalements-réglementés) |
 | SU02 | À faire | Découvrir par piliers ; dépend de SU00 et MP01 |
 | SU03 | À faire | types d'offre bien immobilier et véhicule ; dépend de MP03 |
 | SU04 à SU16 | À faire | voir l'étude, § 15 |
@@ -53,10 +53,82 @@ Ordonnance n° 0011/PR/2026, art. 24, 32 et 33.
   - à 390 px : pas de défilement horizontal, l'ancre `#mes-signalements` reçoit le focus ; aucune erreur dans la console.
   - Limite : le navigateur intégré bloque les dialogues natifs ; la confirmation du retrait a donc été acceptée en remplaçant `window.confirm` dans l'onglet.
 
-**Reste**
-- Déploiement du backend, avec celui de la marketplace : `scripts/convex-deploy-demo-production.sh`, lancé par le propriétaire.
-- Indicateurs publiés (délais tenus) sur `/transparence`.
-- Côté DIASPORALE : les libellés des motifs sont faits (diasporale#24) ; restent les phrases propres aux deux avis (aujourd'hui « nouvelle activité ») et l'offre des nouveaux motifs dans son menu de signalement.
+**Mise en ligne**
+- Backend déployé le 22/10/2026 vers 1 h, démo puis production, avec l'accord écrit du propriétaire : `9927c9c` (3 index sur `reports`, `deadlineQueue` et `myReports`), puis `bca19af`.
+- Fronts publiés depuis `main` : `26f3024`, puis `bca19af` (docs/35). La production répond `main-bca19af78116`, qui contient SU01d.
+
+**Restes livrés en source le 22/10/2026 (non déployés)**
+
+*Délais tenus sur `/transparence`* (moteur et antsia.ga) :
+- Le passage quotidien de transparence compte, pour chaque jour UTC, les échéances légales **tombées** ce jour-là. Il le fait dans un second passage, `aggregateNetworkDeadlines`.
+  - Une échéance est **tenue** si le dossier est classé ou suivi d'effet à l'échéance ou avant.
+  - Elle est **manquée** sinon : décidée après, ou encore ouverte ou en examen une fois l'échéance passée.
+  - Le passage mesure la veille : toutes ses échéances sont passées et chaque issue est définitive.
+  - Règle pure `reportDeadlineOutcome` ; nouvel index `reports.by_network_dueAt`, sans statut, pour que la borne des auteurs distincts couvre tous les statuts d'un même lot.
+- Règle de publication (`legalDeadlineDisclosure`), celle des petites cohortes de la transparence et de l'ADR-0011 :
+  - une période ne publie ses échéances que si elle était close au calcul et compte au moins 5 échéances sur 5 auteurs distincts ;
+  - chaque nombre sous 5 se dit « moins de 5 », zéro compris ;
+  - la base n'est jamais publiée, ce qui empêche toute inférence par différence.
+- Une projection publique **à part**, `transparencyDeadlines`. Les écrans déjà publiés lisent `transparency` en schéma strict : sa forme ne change pas.
+  - Sans cette projection (ancien backend), la page garde ses totaux et ne dit rien des délais.
+  - L'ordre de déploiement est donc libre.
+- La page dit les délais de l'ordonnance, lus depuis la règle (72 h, 24 h, n° 0011/PR/2026), puis, par période publiée, « Échéances légales : N dans le délai · moins de 5 hors délai ». Aucun chiffre n'est écrit en dur dans les textes (cliquet `public-communication`).
+
+*DIASPORALE* :
+- Le menu de signalement suit le moteur : `REPORT_REASONS` vaut `CONTENT_REPORT_REASONS`, soit les douze motifs dans son ordre, dans les deux feuilles (publication, et contenus de la vague H).
+- Servies par le moteur, les deux feuilles annoncent l'accusé de réception puis la décision. La démonstration ne promet rien.
+- La cloche dit les deux avis par des phrases propres au lieu de « nouvelle activité » :
+  - « Votre signalement a bien été reçu. La décision vous sera communiquée. » ;
+  - « Une décision a été prise sur votre signalement. ».
+  Chacun mène à « Mes signalements » ; jamais vers le contenu signalé.
+- « Mes signalements » dans `/parametres#mes-signalements` (section « Mes données ») :
+  - issue pour le contenu, motif, transmission, accusé de réception, fondement et échéance légale, date de décision ;
+  - ni auteur, ni sanction, ni motif de modération ;
+  - ouverte depuis la cloche, la rubrique se place et prend le focus une fois lue ;
+  - lecture de `cases.myReports` par l'adaptateur du moteur. Le fournisseur de démonstration ne la sert pas : la rubrique n'y apparaît pas.
+
+**Preuves des restes**
+- Tests du domaine : issue d'une échéance (tenue, manquée, à venir) ; règle de publication (seuils, auteurs, période close, période antérieure).
+- Test du moteur de bout en bout, horloge simulée, dans `reporterNotices.test.ts` :
+  - six harcèlements visant six auteurs, cinq tranchés à temps, un laissé ouvert ;
+  - un hypertrucage qui échoit un autre jour et une désinformation sans échéance ;
+  - le passage mesure 5 tenues, 1 manquée, 5 auteurs ; la projection publie `{ met: 5, missed: null }` pour ce seul jour, sans aucun identifiant ni motif ;
+  - six échéances d'un seul auteur, même tenues, ne se publient pas.
+- Test de la projection : période antérieure à SU01d, période calculée avant sa fin ; la forme de `transparency` est inchangée.
+- Test de la route `/transparence` (rendu serveur) : délais lus depuis la règle, lignes par période, projection indisponible, OTT.
+- DIASPORALE :
+  - la cloche dit les deux genres et mène à « Mes signalements » ; aucun lien sans route ;
+  - l'adaptateur projette `myReports` et ferme une autre personne ou une session absente ;
+  - la rubrique : rendu, état vide, refus, ancre et focus ;
+  - les feuilles : douze motifs, suite annoncée hors démonstration ;
+  - les motifs sont égaux à ceux du moteur.
+- `bun run verify` vert sur le candidat composé depuis `main` :
+  - 3 224 tests du moteur, 150 de cliquets, 1 767 d'antsia.ga, plus ceux de DIASPORALE ;
+  - aucune erreur de lint.
+- Recette navigateur du 22/10/2026 :
+  - backend local isolé du candidat, avec les trois mêmes variables posées avec l'accord du propriétaire ;
+  - comptes de démonstration ;
+  - captures dans [`recette/`](recette/), et pour DIASPORALE dans `docs/recette/su01d-avis-et-motifs-2026-10-22/` de son dépôt.
+  - `/transparence`, visiteur anonyme :
+    - le vrai passage a mesuré deux jours passés, sans aucune échéance réelle ;
+    - leurs accumulateurs ont ensuite été posés **à la main**, par un appel direct du second passage : 7 tenues, 0 manquée, 5 auteurs ; puis 3, 6, 5. Sans horloge simulée, aucune échéance réelle ne peut échoir dans la journée ;
+    - la projection rend `{ met: 7, missed: null }` et `{ met: null, missed: 6 }` ;
+    - la page dit les délais (n° 0011/PR/2026, 72 h, 24 h), puis « Échéances légales : 7 dans le délai · moins de 5 hors délai » et « … moins de 5 dans le délai · 6 hors délai », et rien pour les dix autres jours ;
+    - à 390 px : aucun défilement horizontal (`scrollWidth` 390), la ligne passe sur deux lignes dans sa carte.
+  - DIASPORALE, servi par le moteur :
+    - Patrice MBOUMBA, membre vérifié, publie un texte fictif ;
+    - Sandrine ONDO, membre parrainée, ouvre « Signaler » : douze motifs dans l'ordre du moteur, et la suite annoncée ;
+    - elle signale un harcèlement. L'accusé arrive aussitôt dans sa cloche (« Votre signalement a bien été reçu. La décision vous sera communiquée. »), avec « Voir mes signalements » ;
+    - ce lien ouvre la rubrique. Elle se place et prend le focus, puis dit : « En cours d'examen », l'accusé de 10:15, et « Art. 24 : décision notifiée sous 72 h — échéance : 25 oct. 2026, 09:15 ». L'heure d'hiver du 25/10 est comprise ;
+    - Ruth ALLOGHO, modératrice, retire le contenu à 10:17 dans `/moderation`. Dans le moteur, la décision et l'avis au déclarant portent la même seconde ;
+    - Sandrine lit « Une décision a été prise sur votre signalement. ». À 390 px, sans défilement horizontal, la rubrique dit « Contenu retiré » et « Décision le 22 oct. 2026, 10:17 » ;
+    - en anglais : « My reports », « Content removed » ;
+    - console : des 401 pendant les changements de compte, et le rechargement à chaud perdu en passant d'une application à l'autre sur le même port.
+
+**Ce qui reste de SU01d**
+- Déployer le backend de ces restes (index, champs facultatifs, second passage, projection), puis les fronts. C'est au propriétaire.
+- La console d'exploitation n'expose pas encore les délais légaux : ni l'export de transparence des opérateurs (`platform/console`), ni une alerte de retard. À décider.
+- Le bureau de modération de DIASPORALE (`/moderation`) ne montre encore ni l'échéance légale ni la file prioritaire des délais, que montre celui d'antsia.ga.
 
 ## Conditions externes
 

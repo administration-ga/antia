@@ -177,6 +177,13 @@ d'effacement dérivé du schéma est vérifiée par `convex/modules/people/erasu
 - **Frontière serveur/client de Next** : une page serveur n'appelle aucune fonction exportée d'un module
   `"use client"` (« Attempted to call … from the server ») ; un analyseur d'adresse vit dans un module pur
   (`apps/antsia_ga/src/lib/messages-route.ts`).
+- **Projections publiques en schéma strict** : antsia.ga lit chaque DTO public avec un schéma Zod `.strict()`
+  (`apps/antsia_ga/src/lib/public-data.ts`). Ajouter un champ à une projection publique existante casse donc les
+  fronts déjà en ligne dès le déploiement du backend : publier une projection À PART (SU01d : `transparencyDeadlines`
+  à côté de `transparency`), que le nouveau front lit et dont l'absence ne casse pas la page.
+- **Borne des auteurs distincts par lot** (transparence) : elle se calcule lot par lot, sans identité transmise entre
+  lots. Un parcours statut par statut la sous-estime (six auteurs répartis sur trois statuts donnent 3). Parcourir un
+  index sans le statut (`reports.by_network_dueAt`, `by_network_createdAt`).
 - **Coque des pages de membre** : montée UNE fois dans le gabarit `(membre)` d'antsia.ga ; remontée à chaque
   page, elle coupait un appel en cours et faisait déborder le seau de présence (8 par minute).
 - **Tests du moteur** : toujours avec `--config convex/vitest.config.ts` (depuis la racine :

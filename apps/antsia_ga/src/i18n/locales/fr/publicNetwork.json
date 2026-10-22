@@ -125,7 +125,13 @@
     "suppressed": "Total non publié",
     "cases_one": "{{count}} dossier",
     "cases_other": "{{count}} dossiers",
-    "empty": "Aucune période agrégée disponible pour le moment."
+    "empty": "Aucune période agrégée disponible pour le moment.",
+    "legalLead": "Délais légaux (ordonnance n° {{ordinance}}) : une décision sous {{decisionHours}} h pour un harcèlement ou un contenu préjudiciable à un mineur, un retrait sous {{removalHours}} h pour un hypertrucage ou un contenu d’IA interdit. Chaque période compte les échéances tombées ce jour-là ; elle ne les publie qu’à partir de {{count}} échéances et {{count}} auteurs distincts, et un nombre inférieur à {{count}} n’est pas donné.",
+    "legalLine": "Échéances légales : {{met}} · {{missed}}",
+    "legalMet": "{{value}} dans le délai",
+    "legalMetFew": "moins de {{threshold}} dans le délai",
+    "legalMissed": "{{value}} hors délai",
+    "legalMissedFew": "moins de {{threshold}} hors délai"
   },
   "legal": {
     "eyebrow": "Comprendre {{brand}}",
