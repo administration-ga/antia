@@ -15,7 +15,7 @@ Autorisation : le propriétaire a validé les décisions D01 à D08 le 21 octobr
 |---|---|---|
 | SU00 | Terminé — documentaire | ADR-0035 (D01–D08 acceptées, D09–D12 proposées) ; index des ADR mis à jour ; étude passée en version 1.1 |
 | SU01 | Analyse livrée ; mise en œuvre par sous-lots | exigences article par article, état du code, écarts, arbitrages juridiques, sous-lots SU01a à SU01j et calendrier ; à faire valider par un juriste avant toute mise en œuvre de l'identification et de l'âge |
-| SU01d | En ligne, restes compris, depuis le 22/10 (backend de `f574c75`, front `880d1aa`) ; restent la console et le bureau de DIASPORALE | voir [SU01d — signalements réglementés](#su01d--signalements-réglementés) |
+| SU01d | En ligne, restes compris, depuis le 22/10 (backend de `f574c75`, front `880d1aa`) ; délais légaux de la console livrés en source le 22/10, à déployer ; reste le bureau de DIASPORALE | voir [SU01d — signalements réglementés](#su01d--signalements-réglementés) |
 | SU02 | À faire | Découvrir par piliers ; dépend de SU00 et MP01 |
 | SU03 | À faire | types d'offre bien immobilier et véhicule ; dépend de MP03 |
 | SU04 à SU16 | À faire | voir l'étude, § 15 |
@@ -130,8 +130,47 @@ Ordonnance n° 0011/PR/2026, art. 24, 32 et 33.
     - en anglais : « My reports », « Content removed » ;
     - console : des 401 pendant les changements de compte, et le rechargement à chaud perdu en passant d'une application à l'autre sur le même port.
 
+**Console d'exploitation : les délais légaux (22/10/2026, en source, non déployée)**
+
+Périmètre tranché par le propriétaire le 22/10/2026 : l'export suit la règle de `/transparence` ; une alerte en direct dans « Santé du réseau », sans cron ni écriture ; une recette par les tests et par un banc visuel.
+
+*Export agrégé* (`platform/console.aggregateExport`, panneau « Export agrégé ») :
+- Chaque période ajoute `legalStatus`, `legalMet` et `legalMissed`. Les nombres viennent de `legalDeadlineDisclosure`, la règle publique :
+  - période close au calcul, au moins 5 échéances sur 5 auteurs distincts ;
+  - chaque nombre sous 5 vaut `null` (« moins de 5 ») ;
+  - ni la base ni la borne des auteurs ne sortent.
+- L'état (`legalDeadlineStatus`) distingue une période **non mesurée** d'une période **masquée**, sans ajouter de nombre. Non mesurée : avant SU01d, avant le second passage, ou calculée avant sa fin.
+- Ces chiffres ne dépendent pas du masque des dossiers de la période : les deux populations diffèrent (dossiers transmis, échéances tombées).
+- JSON et CSV : trois colonnes ajoutées **à la fin** (`legalStatus,legalMet,legalMissed`). La construction fermée de l'écran remasque tout nombre sous le seuil et refuse un état inconnu ; la réponse d'un moteur antérieur se lit « non mesurée ».
+
+*Alerte d'exploitation* (`platform/console.legalDeadlineAlert`, bloc « Délais légaux des signalements » en tête de « Santé du réseau ») :
+- Lecture opérateur bornée : les 50 échéances les plus proches de chaque statut, ouvert ou en examen (`reports.by_network_status_dueAt`), avec leur seul fondement. Ni dossier, ni cible, ni motif, ni personne.
+- L'écran compte à son heure, rafraîchie chaque minute, car une requête n'est pas relue quand le temps passe :
+  - en retard (échéance atteinte, comme `reportDeadlineOutcome`), échéance dans les 24 h, en cours ;
+  - retards par fondement (art. 24, 32, 33) et plus ancienne échéance dépassée.
+- Au-delà de la borne, `horizon` (la plus proche échéance non lue) dit quels comptes sont des minimums : « au moins N », ou « non déterminé ».
+- En retard : bloc bordé de rouge et message `role="alert"` ; sinon, un simple état. Aucune notification externe : la file prioritaire des modérateurs reste le lieu du traitement.
+- Ni cron ni écriture : les cliquets `operator-audit` et `crons-contract` n'ont rien de nouveau à garder.
+
+*Preuves*
+- Domaine : `legalDeadlineStatus` (publiée, masquée, non mesurée).
+- Moteur, `console.test.ts` :
+  - la règle de l'export, période par période ;
+  - de bout en bout avec les deux passages réels et l'horloge simulée : 5 tenues, 1 manquée, 5 auteurs, donc `legalMet: 5` et `legalMissed: null` ;
+  - l'alerte : statuts, file ordinaire, réseau voisin, aucun identifiant ni motif ; sa borne et son horizon ; le refus d'un membre non opérateur et d'un réseau archivé.
+- Écran :
+  - export fermé : remasque, état inconnu, moteur antérieur, colonnes CSV ;
+  - comptes de l'alerte : bascule à l'échéance, exactitude selon l'horizon ;
+  - rendu des deux panneaux ; un dossier passe en retard une minute plus tard, sans relire la base.
+- `bun run verify` vert sur le candidat tiré de `main` `4a6741a`, DIASPORALE compris : 3 228 tests du moteur, 150 de cliquets, 97 de la console, 1 767 d'antsia.ga ; aucune erreur de lint.
+- Recette : la console n'admet qu'une session IDN de niveau 2, impossible en local sans client IDN, et le rapport PA7 exclut tout contournement. Un banc jetable, jamais commité, a monté les vrais `ExportPanel` et `HealthPanel`, avec `convex/react` simulé par des données fictives et la feuille compilée depuis `globals.css` de la console :
+  - à 1 280 px, l'export dit « 7 · moins de 5 », « moins de 5 · 6 », « masquées » et « non mesurées », et masque les compléments des dossiers ; l'alerte dit 3 retards (2 au titre de l'art. 24, 1 de l'art. 33), 2 échéances dans les 24 h et 6 dossiers en cours ;
+  - lecture bornée : « au moins 50 » en retard et en cours, « non déterminé » pour les 24 h à venir ;
+  - à 390 px : aucun défilement horizontal (`scrollWidth` 390), aucun élément hors de l'écran ;
+  - captures : [`recette/su01d-console-banc-*.jpg`](recette/).
+
 **Ce qui reste de SU01d**
-- La console d'exploitation n'expose pas encore les délais légaux : ni l'export de transparence des opérateurs (`platform/console`), ni une alerte de retard. Session lancée le 22/10.
+- Console : mettre en ligne le backend (export étendu, `legalDeadlineAlert`) avant la console elle-même ; aucun déploiement n'a été fait. Sa recette connectée attend un client IDN de bac à sable (PA7).
 - Le bureau de modération de DIASPORALE (`/moderation`) ne montre encore ni l'échéance légale ni la file prioritaire des délais, que montre celui d'antsia.ga. Session lancée le 22/10.
 - Premiers chiffres : le passage quotidien de 04 h 10 UTC mesure la veille. Une journée ne se publie qu'à partir de 5 échéances sur 5 auteurs.
 

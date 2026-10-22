@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 
-import { contentNeedsReview, isSanctionLive, legalDeadlineDisclosure, normalizeBlockedTerm, TRANSPARENCY_MIN_CASES, validSanctionDuration } from "./moderationPolicy"
+import { contentNeedsReview, isSanctionLive, LEGAL_DEADLINE_STATUSES, legalDeadlineDisclosure, legalDeadlineStatus, normalizeBlockedTerm, TRANSPARENCY_MIN_CASES, validSanctionDuration } from "./moderationPolicy"
 
 describe("modération PA5 — règles pures", () => {
   it("normalise sans accents et sans ambiguïté de casse", () => {
@@ -53,5 +53,27 @@ describe("SU01d — échéances légales publiées sur /transparence", () => {
   it("une période mesurée avant SU01d n'a pas d'échéances à publier", () => {
     expect(legalDeadlineDisclosure(closed)).toBeNull()
     expect(legalDeadlineDisclosure({ ...closed, legalMet: 9, legalMissed: 0 })).toBeNull()
+  })
+})
+
+describe("SU01d — état des échéances légales dans l'export de la console", () => {
+  const closed = { periodEnd: 1_000, generatedAt: 2_000 }
+
+  it("publiée exactement quand /transparence publie, nombres sous le seuil compris", () => {
+    expect(LEGAL_DEADLINE_STATUSES).toEqual(["unmeasured", "suppressed", "disclosed"])
+    expect(legalDeadlineStatus({ ...closed, legalMet: 12, legalMissed: 0, legalAuthors: 5 })).toBe("disclosed")
+    expect(legalDeadlineStatus({ ...closed, legalMet: 3, legalMissed: 3, legalAuthors: 5 })).toBe("disclosed")
+  })
+
+  it("masquée pour une petite cohorte ou trop peu d'auteurs, sans dire laquelle", () => {
+    expect(legalDeadlineStatus({ ...closed, legalMet: 2, legalMissed: 2, legalAuthors: 5 })).toBe("suppressed")
+    expect(legalDeadlineStatus({ ...closed, legalMet: 0, legalMissed: 0, legalAuthors: 0 })).toBe("suppressed")
+    expect(legalDeadlineStatus({ ...closed, legalMet: 40, legalMissed: 0, legalAuthors: 4 })).toBe("suppressed")
+  })
+
+  it("non mesurée avant le second passage, avant SU01d ou calculée avant la fin de la période", () => {
+    expect(legalDeadlineStatus(closed)).toBe("unmeasured")
+    expect(legalDeadlineStatus({ ...closed, legalMet: 9, legalMissed: 0 })).toBe("unmeasured")
+    expect(legalDeadlineStatus({ periodEnd: 2_000, generatedAt: 1_999, legalMet: 40, legalMissed: 0, legalAuthors: 5 })).toBe("unmeasured")
   })
 })
