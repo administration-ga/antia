@@ -167,11 +167,13 @@ Périmètre tranché par le propriétaire le 22/10/2026 : l'export suit la règl
 - JSON et CSV : trois colonnes ajoutées **à la fin** (`legalStatus,legalMet,legalMissed`). La construction fermée de l'écran remasque tout nombre sous le seuil et refuse un état inconnu ; la réponse d'un moteur antérieur se lit « non mesurée ».
 
 *Alerte d'exploitation* (`platform/console.legalDeadlineAlert`, bloc « Délais légaux des signalements » en tête de « Santé du réseau ») :
-- Lecture opérateur bornée : les 50 échéances les plus proches de chaque statut, ouvert ou en examen (`reports.by_network_status_dueAt`), avec leur seul fondement. Ni dossier, ni cible, ni motif, ni personne.
+- Lecture opérateur bornée : les 50 échéances les plus proches de chaque statut, ouvert ou en examen (`reports.by_network_status_dueAt`), arrondies à la minute inférieure, avec leur seul fondement légal (la classe du motif, jamais le motif). Ni dossier, ni cible, ni personne.
+- C'est une donnée d'exploitation, hors de la règle des petites cohortes, qui vise ce qui se publie ou s'exporte : les opérateurs décident déjà en dernier ressort sur tout dossier (`decideAsOperator`) et lisent le journal des décisions. L'arrondi à la minute ne fait sortir que le nécessaire ; un retard s'annonce au plus tôt, jamais en retard.
 - L'écran compte à son heure, rafraîchie chaque minute, car une requête n'est pas relue quand le temps passe :
-  - en retard (échéance atteinte, comme `reportDeadlineOutcome`), échéance dans les 24 h, en cours ;
+  - en retard (échéance atteinte, comme `reportDeadlineOutcome`), échéance dans les 24 h, total à délai légal ;
   - retards par fondement (art. 24, 32, 33) et plus ancienne échéance dépassée.
-- Au-delà de la borne, `horizon` (la plus proche échéance non lue) dit quels comptes sont des minimums : « au moins N », ou « non déterminé ».
+- Au-delà de la borne, `horizon` (la plus proche échéance non lue) dit quels comptes sont des minimums : « au moins N », ou « non déterminé » ; les retards par fondement suivent l'exactitude des retards.
+- Une lecture en échec (moteur pas encore publié, panne) ne retire que ce bloc : sa frontière d'erreur laisse « Santé du réseau » lisible et propose « Réessayer ». `ConsoleQueryBoundary` passe dans les contrôles partagés de la console, et son ancien chemin d'import reste valable.
 - En retard : bloc bordé de rouge et message `role="alert"` ; sinon, un simple état. Aucune notification externe : la file prioritaire des modérateurs reste le lieu du traitement.
 - Ni cron ni écriture : les cliquets `operator-audit` et `crons-contract` n'ont rien de nouveau à garder.
 
@@ -180,20 +182,23 @@ Périmètre tranché par le propriétaire le 22/10/2026 : l'export suit la règl
 - Moteur, `console.test.ts` :
   - la règle de l'export, période par période ;
   - de bout en bout avec les deux passages réels et l'horloge simulée : 5 tenues, 1 manquée, 5 auteurs, donc `legalMet: 5` et `legalMissed: null` ;
-  - l'alerte : statuts, file ordinaire, réseau voisin, aucun identifiant ni motif ; sa borne et son horizon ; le refus d'un membre non opérateur et d'un réseau archivé.
+  - l'alerte : statuts, file ordinaire, réseau voisin, échéances à la minute, aucun identifiant ni motif ; sa borne ; le refus d'un membre non opérateur et d'un réseau archivé ;
+  - l'horizon quand l'un ou l'autre statut est tronqué le premier (`Math.max` ou une simple affectation à la place de `Math.min` font échouer le test).
 - Écran :
   - export fermé : remasque, état inconnu, moteur antérieur, colonnes CSV ;
   - comptes de l'alerte : bascule à l'échéance, exactitude selon l'horizon ;
-  - rendu des deux panneaux ; un dossier passe en retard une minute plus tard, sans relire la base.
-- `bun run verify` vert sur le candidat tiré de `main` `4a6741a`, DIASPORALE compris : 3 228 tests du moteur, 150 de cliquets, 97 de la console, 1 767 d'antsia.ga ; aucune erreur de lint.
+  - rendu des deux panneaux ; un dossier passe en retard une minute plus tard, sans relire la base ;
+  - lecture bornée : aucun compte, fondements compris, ne se dit zéro ;
+  - lecture en échec : seul le bloc tombe, « Réessayer » le relance.
+- `bun run verify` vert sur la branche à jour de `main` `3e6c50d`, DIASPORALE compris : 3 229 tests du moteur, 150 de cliquets, 98 de la console, 1 767 d'antsia.ga, 1 405 de diasporale.com ; aucune erreur de lint.
 - Recette : la console n'admet qu'une session IDN de niveau 2, impossible en local sans client IDN, et le rapport PA7 exclut tout contournement. Un banc jetable, jamais commité, a monté les vrais `ExportPanel` et `HealthPanel`, avec `convex/react` simulé par des données fictives et la feuille compilée depuis `globals.css` de la console :
-  - à 1 280 px, l'export dit « 7 · moins de 5 », « moins de 5 · 6 », « masquées » et « non mesurées », et masque les compléments des dossiers ; l'alerte dit 3 retards (2 au titre de l'art. 24, 1 de l'art. 33), 2 échéances dans les 24 h et 6 dossiers en cours ;
-  - lecture bornée : « au moins 50 » en retard et en cours, « non déterminé » pour les 24 h à venir ;
+  - à 1 280 px, l'export dit « 7 · moins de 5 », « moins de 5 · 6 », « masquées » et « non mesurées », et masque les compléments des dossiers ; l'alerte dit 3 retards (2 au titre de l'art. 24, 1 de l'art. 33), 2 échéances dans les 24 h et 6 dossiers au total ;
+  - lecture bornée : « au moins 50 » en retard et au total, « non déterminé » pour les 24 h à venir ; par fondement, « au moins 40 », « non déterminé », « au moins 10 » ;
   - à 390 px : aucun défilement horizontal (`scrollWidth` 390), aucun élément hors de l'écran ;
   - captures : [`recette/su01d-console-banc-*.jpg`](recette/).
 
 **Ce qui reste de SU01d**
-- Console : mettre en ligne le backend (export étendu, `legalDeadlineAlert`) avant la console elle-même ; aucun déploiement n'a été fait. Sa recette connectée attend un client IDN de bac à sable (PA7).
+- Console : mettre en ligne le backend (export étendu, `legalDeadlineAlert`), puis la console. Avant le backend, son bloc d'alerte dit seulement qu'il ne peut pas lire. Aucun déploiement n'a été fait. Sa recette connectée attend un client IDN de bac à sable (PA7).
 - Publier le front DIASPORALE du bureau (diasporale#26) : aucun backend nouveau. C'est au propriétaire.
 - Premiers chiffres : le passage quotidien de 04 h 10 UTC mesure la veille. Une journée ne se publie qu'à partir de 5 échéances sur 5 auteurs.
 

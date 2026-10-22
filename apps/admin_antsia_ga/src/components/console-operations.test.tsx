@@ -190,14 +190,31 @@ describe("raccords des opérations de console", () => {
     await render({ section: "health", networkId: networkA, canAdmin: false })
     expect(container.querySelector('[role="alert"]')?.textContent).toContain("Délai légal dépassé : au moins 50 dossier(s)")
     expect(container.textContent).toContain("Lecture bornée aux 50 échéances les plus proches de chaque statut")
-    // Au-delà de la borne, aucun minimum utile pour les 24 h à venir : ni « 0 », ni « au moins 0 ».
-    const metrics = Array.from(container.querySelectorAll("section section dl:first-of-type dd")).map((element) => element.textContent)
-    expect(metrics.slice(0, 3)).toEqual(["au moins 50", "Non déterminé", "au moins 50"])
+    // Au-delà de la borne, aucun compte ne se dit zéro : ni « 0 », ni « au moins 0 », retards par fondement compris.
+    const legal = Array.from(container.querySelectorAll("section")).find((element) => element.querySelector("h3")?.textContent === "Délais légaux des signalements")
+    expect(Array.from(legal?.querySelectorAll("dd") ?? []).map((element) => element.textContent)).toEqual(["au moins 50", "Non déterminé", "au moins 50", "au moins 50", "Non déterminé", "Non déterminé"])
     state.data["modules/platform/console:legalDeadlineAlert"] = { limit: 50, horizon: null, deadlines: [{ dueAt: now + 48 * 3_600_000, basis: "art24" }] }
     await render({ section: "health", networkId: networkB, canAdmin: false })
     expect(container.querySelector('[role="alert"]')).toBeNull()
     expect(container.textContent).toContain("Aucun délai légal dépassé parmi les dossiers ouverts ou en examen.")
     expect(container.textContent).not.toContain("Retards par fondement")
+  })
+  it("une lecture des délais en échec ne retire que son bloc ; « Réessayer » la relance", async () => {
+    vi.spyOn(console, "error").mockImplementation(() => undefined)
+    let failing = true
+    state.data["modules/platform/console:legalDeadlineAlert"] = () => {
+      if (failing) throw new Error("Could not find public function for 'modules/platform/console:legalDeadlineAlert'")
+      return { limit: 50, horizon: null, deadlines: [] }
+    }
+    state.data["modules/platform/console:getMetrics"] = { status: "ready", generatedAt: 1000, counts: { members: 12, openReports: 3, openAppeals: 0, pendingFiles: 0, deadLetters: 0 } }
+    await render({ section: "health", networkId: networkA, canAdmin: false })
+    expect(container.querySelector('[role="alert"]')?.textContent).toBe("Les délais légaux n’ont pas pu être lus. Les autres indicateurs de cette page restent valables.")
+    // « Santé du réseau » reste lisible : ses compteurs s'affichent toujours.
+    expect(Array.from(container.querySelectorAll("dd")).map((element) => element.textContent)).toContain("12")
+    failing = false
+    await act(async () => button("Réessayer").click())
+    expect(container.querySelector('[role="alert"]')).toBeNull()
+    expect(container.textContent).toContain("Aucun délai légal dépassé parmi les dossiers ouverts ou en examen.")
   })
   it("un acteur humain masqué n'est pas présenté comme le système", async () => {
     state.data["modules/platform/audit:paginateAudit"] = page([

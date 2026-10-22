@@ -252,16 +252,17 @@
     },
     "legal": {
       "title": "Report legal deadlines",
-      "lead": "Cases subject to the deadlines of ordinance No. {{ordinance}}, still open or under review, read live. No case, reason or person appears here: the moderators' priority queue handles them.",
+      "lead": "Cases subject to the deadlines of ordinance No. {{ordinance}}, still open or under review, read live and counted by legal basis. No case or person appears here: the moderators' priority queue handles them.",
       "overdue": "Legal deadline exceeded: {{value}} case(s) still open or under review.",
       "oldest": "Oldest missed deadline:",
       "noneOverdue": "No legal deadline exceeded among open or in-review cases.",
+      "failed": "Legal deadlines could not be read. The other indicators on this page remain valid.",
       "atLeast": "at least {{value}}",
       "undetermined": "Undetermined",
       "metrics": {
         "overdue": "Overdue",
         "dueSoon": "Due within 24 h",
-        "open": "Open with a legal deadline"
+        "open": "Total with a legal deadline"
       },
       "byBasis": "Overdue by legal basis",
       "basis": {

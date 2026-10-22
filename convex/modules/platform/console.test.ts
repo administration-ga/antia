@@ -293,6 +293,7 @@ describe("SU01d / délais légaux dans la console", () => {
   const HOUR = 3_600_000
   type LegalCounts = Partial<Pick<Doc<"moderationTransparency">, "legalMet" | "legalMissed" | "legalAuthors">>
   type ReportExtra = Partial<Pick<Doc<"reports">, "legalBasis" | "dueAt" | "reviewedAt">>
+  const minute = (at: number) => Math.floor(at / 60_000) * 60_000
 
   /** Un dossier de fixture : la cible et son auteur ne doivent jamais ressortir de la console. */
   async function report(t: T, networkId: Id<"networks">, ownerPersonId: Id<"persons">, status: Doc<"reports">["status"], extra: ReportExtra, at = Date.now()) {
@@ -345,10 +346,13 @@ describe("SU01d / délais légaux dans la console", () => {
     expect((await f.actor.as.query(C.legalDeadlineAlert, { networkId: f.root })).deadlines).toEqual([{ dueAt, basis: "art24" }])
   })
 
-  it("l'alerte rend les échéances ouvertes ou en examen, la plus proche d'abord, sans dossier, motif ni personne", async () => {
+  it("l'alerte rend les échéances ouvertes ou en examen, la plus proche d'abord, à la minute, sans dossier, motif ni personne", async () => {
     const f = await fixture()
     const owner = await person(f.t, f.root, "auteur-alerte")
-    const now = Date.now()
+    vi.useFakeTimers({ toFake: ["Date"] })
+    // Une transmission à la seconde près : l'échéance sort à la minute inférieure.
+    const now = Date.UTC(2026, 9, 22, 8, 17, 42, 512)
+    vi.setSystemTime(now)
     await report(f.t, f.root, owner, "open", { legalBasis: "art24", dueAt: now + 72 * HOUR })
     await report(f.t, f.root, owner, "reviewing", { legalBasis: "art33", dueAt: now - HOUR })
     await report(f.t, f.root, owner, "open", { legalBasis: "art32", dueAt: now + 2 * HOUR })
@@ -359,13 +363,13 @@ describe("SU01d / délais légaux dans la console", () => {
     await report(f.t, f.other, owner, "open", { legalBasis: "art24", dueAt: now - 4 * HOUR })
     const alert = await f.actor.as.query(C.legalDeadlineAlert, { networkId: f.root })
     expect(alert).toEqual({ limit: 50, horizon: null, deadlines: [
-      { dueAt: now - HOUR, basis: "art33" },
-      { dueAt: now + 2 * HOUR, basis: "art32" },
-      { dueAt: now + 72 * HOUR, basis: "art24" },
+      { dueAt: Date.UTC(2026, 9, 22, 7, 17), basis: "art33" },
+      { dueAt: Date.UTC(2026, 9, 22, 10, 17), basis: "art32" },
+      { dueAt: Date.UTC(2026, 9, 25, 8, 17), basis: "art24" },
     ] })
     const text = JSON.stringify(alert)
-    for (const hidden of [owner, "harassment", "person", f.actor.personId]) expect(text).not.toContain(hidden)
-    expect(await f.actor.as.query(C.legalDeadlineAlert, { networkId: f.other })).toEqual({ limit: 50, horizon: null, deadlines: [{ dueAt: now - 4 * HOUR, basis: "art24" }] })
+    for (const hidden of [owner, "harassment", "person", f.actor.personId, String(now + 2 * HOUR)]) expect(text).not.toContain(hidden)
+    expect(await f.actor.as.query(C.legalDeadlineAlert, { networkId: f.other })).toEqual({ limit: 50, horizon: null, deadlines: [{ dueAt: minute(now - 4 * HOUR), basis: "art24" }] })
   })
 
   it("l'alerte est bornée par statut et dit son horizon ; seul un opérateur vivant la lit, jamais pour un réseau archivé", async () => {
@@ -377,14 +381,32 @@ describe("SU01d / délais légaux dans la console", () => {
     const alert = await f.actor.as.query(C.legalDeadlineAlert, { networkId: f.root })
     // Cinquante ouverts lus, le cinquante et unième fixe l'horizon ; le dossier en examen est lu à part.
     expect(alert.deadlines).toHaveLength(51)
-    expect(alert.horizon).toBe(now + 50 * HOUR)
-    expect(alert.deadlines.slice(0, 50).every((item, n) => item.dueAt === now + n * HOUR && item.basis === "art24")).toBe(true)
-    expect(alert.deadlines[50]).toEqual({ dueAt: now + 100 * HOUR, basis: "art33" })
+    expect(alert.horizon).toBe(minute(now + 50 * HOUR))
+    expect(alert.deadlines.slice(0, 50).every((item, n) => item.dueAt === minute(now + n * HOUR) && item.basis === "art24")).toBe(true)
+    expect(alert.deadlines[50]).toEqual({ dueAt: minute(now + 100 * HOUR), basis: "art33" })
 
     // Un membre du réseau, même auteur des dossiers, n'est pas un opérateur.
     const member = f.t.withIdentity({ subject: "console-auteur-borne" })
     expect(await errorCode(member.query(C.legalDeadlineAlert, { networkId: f.root }))).toBe("operatorRequired")
     await f.t.run(async (ctx) => await ctx.db.patch(f.other, { status: "archived" }))
     expect(await errorCode(f.actor.as.query(C.legalDeadlineAlert, { networkId: f.other }))).toBe("notFound")
+  })
+
+  it("l'horizon est la plus proche des échéances non lues, quel que soit le statut tronqué le plus tôt", async () => {
+    const f = await fixture()
+    const owner = await person(f.t, f.root, "auteur-horizon")
+    const now = Date.now()
+    // Racine : la file ouverte est tronquée la première ; réseau voisin : la file en examen.
+    for (let n = 0; n <= 50; n++) {
+      await report(f.t, f.root, owner, "open", { legalBasis: "art24", dueAt: now + n * HOUR })
+      await report(f.t, f.root, owner, "reviewing", { legalBasis: "art33", dueAt: now + (100 + n) * HOUR })
+      await report(f.t, f.other, owner, "open", { legalBasis: "art24", dueAt: now + (100 + n) * HOUR })
+      await report(f.t, f.other, owner, "reviewing", { legalBasis: "art33", dueAt: now + n * HOUR })
+    }
+    for (const networkId of [f.root, f.other]) {
+      const alert = await f.actor.as.query(C.legalDeadlineAlert, { networkId })
+      expect(alert.horizon).toBe(minute(now + 50 * HOUR))
+      expect(alert.deadlines).toHaveLength(100)
+    }
   })
 })

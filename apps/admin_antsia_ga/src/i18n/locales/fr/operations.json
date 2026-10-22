@@ -252,16 +252,17 @@
     },
     "legal": {
       "title": "Délais légaux des signalements",
-      "lead": "Dossiers soumis aux délais de l’ordonnance n° {{ordinance}}, encore ouverts ou en examen, lus en direct. Aucun dossier, motif ni personne n’apparaît ici : la file prioritaire des modérateurs les traite.",
+      "lead": "Dossiers soumis aux délais de l’ordonnance n° {{ordinance}}, encore ouverts ou en examen, lus en direct et comptés par fondement légal. Aucun dossier ni personne n’apparaît ici : la file prioritaire des modérateurs les traite.",
       "overdue": "Délai légal dépassé : {{value}} dossier(s) encore ouvert(s) ou en examen.",
       "oldest": "Plus ancienne échéance dépassée :",
       "noneOverdue": "Aucun délai légal dépassé parmi les dossiers ouverts ou en examen.",
+      "failed": "Les délais légaux n’ont pas pu être lus. Les autres indicateurs de cette page restent valables.",
       "atLeast": "au moins {{value}}",
       "undetermined": "Non déterminé",
       "metrics": {
         "overdue": "En retard",
         "dueSoon": "Échéance dans les 24 h",
-        "open": "À délai légal en cours"
+        "open": "Total à délai légal"
       },
       "byBasis": "Retards par fondement",
       "basis": {

@@ -27,6 +27,7 @@ const TEAM_PROJECTION_LIMIT = 500
 const METRIC_BATCH = 50
 // SU01d : échéances lues par statut pour l'alerte, la même borne que la file prioritaire des modérateurs.
 const LEGAL_ALERT_LIMIT = 50
+const minuteOf = (at: number) => Math.floor(at / 60_000) * 60_000
 const emptyCounts = (): Counts => ({ members: 0, openReports: 0, openAppeals: 0, pendingFiles: 0, deadLetters: 0 })
 const motiveOf = (reason: string) => checked(() => assertDecisionReason(reason, 3))
 
@@ -259,10 +260,12 @@ export const aggregateExport = operatorQuery({
 /**
  * SU01d (ordonnance n° 0011/PR/2026, art. 24, 32, 33) — l'alerte d'exploitation des délais légaux :
  * les échéances des dossiers encore ouverts ou en examen, la plus proche d'abord, avec leur seul
- * fondement. Ni dossier, ni cible, ni motif, ni personne : la file prioritaire des modérateurs les
- * traite. L'écran compte les retards avec son horloge, car une requête n'est pas relue quand le
- * temps passe. `horizon` est l'échéance la plus proche restée hors lecture : avant elle, les
- * comptes de l'écran sont exacts ; à partir d'elle, ce sont des minimums.
+ * fondement légal (qui dit la classe du motif, jamais le motif). Ni dossier, ni cible, ni personne :
+ * la file prioritaire des modérateurs les traite. L'écran compte les retards avec son horloge, car
+ * une requête n'est pas relue quand le temps passe. `horizon` est l'échéance la plus proche restée
+ * hors lecture : avant elle, les comptes de l'écran sont exacts ; à partir d'elle, des minimums.
+ * Échéances et horizon sont arrondis à la minute inférieure : l'écran compte à la minute, l'heure
+ * exacte d'une transmission n'a pas à sortir, et un retard s'annonce au plus tôt, jamais en retard.
  */
 export const legalDeadlineAlert = operatorQuery({
   args: { networkId: v.id("networks") },
@@ -275,8 +278,8 @@ export const legalDeadlineAlert = operatorQuery({
       // borné : les LEGAL_ALERT_LIMIT + 1 échéances les plus proches de chaque statut ; `dueAt` absent est exclu par la borne basse.
       const batch = await ctx.db.query("reports").withIndex("by_network_status_dueAt", (q) => q.eq("networkId", network._id).eq("status", status).gte("dueAt", 0)).take(LEGAL_ALERT_LIMIT + 1)
       const beyond = batch[LEGAL_ALERT_LIMIT]?.dueAt
-      if (beyond !== undefined) horizon = horizon === null ? beyond : Math.min(horizon, beyond)
-      for (const row of batch.slice(0, LEGAL_ALERT_LIMIT)) if (row.dueAt !== undefined && row.legalBasis !== undefined) deadlines.push({ dueAt: row.dueAt, basis: row.legalBasis })
+      if (beyond !== undefined) horizon = horizon === null ? minuteOf(beyond) : Math.min(horizon, minuteOf(beyond))
+      for (const row of batch.slice(0, LEGAL_ALERT_LIMIT)) if (row.dueAt !== undefined && row.legalBasis !== undefined) deadlines.push({ dueAt: minuteOf(row.dueAt), basis: row.legalBasis })
     }
     deadlines.sort((a, b) => a.dueAt - b.dueAt)
     return { limit: LEGAL_ALERT_LIMIT, horizon, deadlines }
