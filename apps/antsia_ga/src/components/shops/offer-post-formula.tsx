@@ -19,7 +19,8 @@ import { OfferMedia } from "./offer-card"
  *  · FICHE PRODUIT / PANNEAU PRIX : publication sans média, une ou deux photos —
  *    la photo dans son propre format (borné de 4:5 à 1,91:1, recadrée au centre,
  *    jamais de bandes sur les côtés), puis titre, description et prix ; dès 480 px
- *    de carte, la photo à gauche et ce panneau à droite ;
+ *    de carte, la photo à gauche sur les deux tiers et ce panneau sur le tiers
+ *    restant (décision du propriétaire du 22/10/2026) ;
  *  · VIDÉO ET MODÈLES : publication vidéo dont l'offre a des variantes — la
  *    rangée défilante des modèles, chacun avec son prix exact, sous le bandeau.
  *
@@ -124,7 +125,7 @@ const FORMULA_CSS = `
 }
 [data-offer-formula] .opf-price { margin: 0; font-size: 15px; font-weight: 700; color: var(--role-commerce-ink, var(--foreground)); }
 @container offer-formula (min-width: 480px) {
-  [data-offer-formula] .opf-sheet { grid-template-columns: minmax(0, 45%) minmax(0, 1fr); align-items: center; }
+  [data-offer-formula] .opf-sheet { grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); align-items: center; }
 }
 [data-offer-formula] .opf-cta {
   display: flex;
