@@ -158,7 +158,7 @@ describe("FeedPage — écran des chartes (ADR-0028, ADR-0037)", () => {
     expect(follows("Carrousel des personnes", "Un")).toBe(false)
     expect(follows("Trois", "Carrousel des personnes")).toBe(true)
     expect(follows("Carrousel des personnes", "Quatre")).toBe(true)
-    // Au téléphone et sur la grille sans colonne droite (`.rp-feed-inline`).
+    // Au téléphone seulement (`.rp-feed-inline`) : le rail droit du bureau porte les mêmes données.
     expect(screen.getByText("Carrousel des personnes").closest(".rp-feed-inline")).not.toBeNull()
     expect(screen.getByText("Carrousel des pages")).toBeTruthy()
     expect(follows("Quatre", "Aperçus vidéos")).toBe(true)

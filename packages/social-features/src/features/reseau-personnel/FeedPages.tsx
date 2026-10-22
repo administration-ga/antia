@@ -228,9 +228,9 @@ export function FeedPage({
   }
 
   /* Les personnes à découvrir des chartes (ADR-0037, d'après la référence des
-     captures du 22/10/2026) : au téléphone et sur la grille du bureau privée de
-     sa colonne droite (`.rp-feed-inline`), au-dessus de l'état vide d'un fil
-     vide — un nouvel arrivant trouve d'abord qui suivre. */
+     captures du 22/10/2026) : au téléphone (`.rp-feed-inline` — le rail droit du
+     bureau porte les mêmes données), au-dessus de l'état vide d'un fil vide : un
+     nouvel arrivant trouve d'abord qui suivre. */
   const discovery = (
     <div className="rp-feed-inline" style={{ flexDirection: "column", gap: 12 }}>
       <SuggestionsPanel presentation="carousel" />
