@@ -37,7 +37,7 @@ import { DEMO_FIGURANTS, demoFigurantEmailOf } from "./demoFigurants"
 import { demoMediaAsset } from "./demoMediaManifest"
 
 type ReadCtx = Pick<QueryCtx, "db" | "runQuery">
-type Actor = "membre" | "verifie" | "presse" | "commercant" | "association" | "administration" | "moderateur"
+export type Actor = "membre" | "verifie" | "presse" | "commercant" | "association" | "administration" | "moderateur"
 type ActorSpec = { actor: Actor; handle: string; givenNames: string; familyName: string; originalHeadline: string; headline: string; asset: string; story: string }
 
 /** L'identité est celle du catalogue OTP ; le huitième acteur, « nouveau », est exclu. */
@@ -212,7 +212,7 @@ async function eligiblePerson(ctx: ReadCtx, root: Doc<"networks">, handle: strin
 }
 
 /** Toutes les préconditions sont relues AVANT la première écriture. */
-async function demoContext(ctx: ReadCtx, confirmation: string) {
+export async function demoContext(ctx: ReadCtx, confirmation: string) {
   assertDemoContentAllowed(confirmation)
   const root = await getRootNetwork(ctx)
   if (!root || root.slug !== "antsia" || root.kind !== "root" || root.status !== "active" || root.managedBy !== undefined) return fail("policyRefused")
@@ -227,7 +227,7 @@ async function demoContext(ctx: ReadCtx, confirmation: string) {
 }
 
 /** Les figurants prêts (inscrits par OTP, publiés, membres) ; un figurant absent est simplement ignoré. */
-async function readyFigurants(ctx: ReadCtx, root: Doc<"networks">): Promise<Map<number, Doc<"persons">>> {
+export async function readyFigurants(ctx: ReadCtx, root: Doc<"networks">): Promise<Map<number, Doc<"persons">>> {
   const ready = new Map<number, Doc<"persons">>()
   for (const figurant of DEMO_FIGURANTS) {
     const person = await eligiblePerson(ctx, root, figurant.handle, expectedName(figurant), demoFigurantEmailOf(figurant.slot))
@@ -242,7 +242,7 @@ async function readyFigurants(ctx: ReadCtx, root: Doc<"networks">): Promise<Map<
   return ready
 }
 
-function actorPerson(people: Map<Actor, Doc<"persons">>, actor: Actor): Doc<"persons"> {
+export function actorPerson(people: Map<Actor, Doc<"persons">>, actor: Actor): Doc<"persons"> {
   const person = people.get(actor)
   if (!person) throw new Error("Acteur de démonstration absent.")
   return person
@@ -258,7 +258,7 @@ async function availablePage(ctx: Pick<QueryCtx, "db">, root: Doc<"networks">, p
   return signatory?.role === "admin" && signatory.acceptedAt !== undefined ? page : null
 }
 
-async function livePages(ctx: Pick<QueryCtx, "db">, root: Doc<"networks">, people: Map<Actor, Doc<"persons">>): Promise<Map<string, Doc<"pages">>> {
+export async function livePages(ctx: Pick<QueryCtx, "db">, root: Doc<"networks">, people: Map<Actor, Doc<"persons">>): Promise<Map<string, Doc<"pages">>> {
   const pages = new Map<string, Doc<"pages">>()
   for (const spec of DEMO_CONTENT_PAGES) {
     const page = await availablePage(ctx, root, actorPerson(people, spec.actor), spec)
