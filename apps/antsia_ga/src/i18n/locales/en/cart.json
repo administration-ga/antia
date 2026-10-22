@@ -13,5 +13,6 @@
   "stopIntent": "Abandon this intention", "stopHint": "The server must first confirm that this key is closed. An existing preparation remains accessible and is not cancelled by this choice.", "stopped": "This intention is closed. You can unlock the draft and review conditions before making a new request.",
   "backToShop": "Back to storefront", "myPurchases": "My purchases", "shareOffer": "Share public offer", "copyOffer": "Copy public link", "copied": "Public link copied.", "shareUnavailable": "The public link cannot currently be shared.", "shareNotice": "Only the public offer is shared, never your cart, order or address.", "loading": "Loading cart…",
   "quantityLess": "One less", "quantityMore": "One more",
+  "validate": "Confirm my basket", "summaryTitle": "Summary", "articles_one": "{{count}} item", "articles_other": "{{count}} items", "feesLater": "Final fees and total come with the fulfillment method, before you agree.", "continueShopping": "Keep shopping", "removeNamed": "Remove “{{title}}” from the basket", "linesLabel": "Basket lines",
   "quickAdd": { "add": "To basket", "addNamed": "Add “{{title}}” to the basket", "choose": "Choose", "chooseNamed": "Choose options for “{{title}}”", "chooseLead": "Choose a variant that is actually offered and the quantity, then add it to the basket.", "close": "Close" }
 }
