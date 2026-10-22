@@ -8,6 +8,7 @@ import { useId } from "react"
 import { useTranslation } from "react-i18next"
 
 import { OfferCards, SHOWCASE_GRID } from "@/components/marketplace/marketplace-home"
+import { MemberPage } from "@/components/member-chrome"
 import { ShopShowcaseCard, type ShowcaseStorefront } from "@/components/marketplace/shop-showcase-card"
 import { Button } from "@/components/shared/controls"
 import { SHOP_ACTION_CLASS } from "@/components/shops/offer-experience-styles"
@@ -33,9 +34,14 @@ export function useFoodStorefronts() {
  * L'univers « Alimentation et restauration » (étude des sept univers, § 5.4) : restaurants, traiteurs et épiceries,
  * séparés de la mode. Ses adresses en grandes cartes, puis ce qu'on y commande ; la commande passe par le panier de
  * la boutique et « Demander la préparation », sans paiement en ligne : on règle à la remise. Les offres de la
- * démonstration restent à part, avec leur mention.
+ * démonstration restent à part, avec leur mention. Monté dans la coque du membre, comme la marketplace.
  */
 export function FoodUniverseScreen() {
+  const { networkId, personId } = useNetwork()
+  return <MemberPage><FoodUniverseContent key={JSON.stringify([networkId, personId])} /></MemberPage>
+}
+
+function FoodUniverseContent() {
   const { t } = useTranslation("marketplace")
   const { networkId } = useNetwork()
   const titleId = useId()
