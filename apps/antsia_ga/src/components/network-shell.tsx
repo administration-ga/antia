@@ -2,6 +2,8 @@
 
 import { demoStorageNamespace } from "@/lib/demo-storage"
 
+import { api } from "@antsia/api/engine"
+import { useAuthenticatedConvexQuery } from "@antsia/api/hooks"
 import { NetworkProvider } from "@antsia/api/network"
 import { NextRouterAdapter } from "@antsia/api/routing/next"
 import { BRAND_NAME } from "@antsia/social-contracts/brand"
@@ -90,6 +92,9 @@ export function NetworkShell({ children }: { children: ReactNode }) {
   const router = useRouter()
   const session = useSessionState()
   const appearance = useOptionalAppearance()
+  // « Ma boutique » au rail, seulement pour qui gère déjà une boutique : la même liste que /mes-boutiques.
+  const myShops = useAuthenticatedConvexQuery(api.modules.shops.shops.myShops, session.status === "member" ? { networkId: session.root._id } : "skip")
+  const managesShop = (myShops.data?.items.length ?? 0) > 0
 
   useEffect(() => {
     // Seule cette porte possède une continuation de push. Elle transporte une
@@ -107,7 +112,7 @@ export function NetworkShell({ children }: { children: ReactNode }) {
 
   return (
     <NextRouterAdapter>
-      <NetworkProvider networkId={session.root._id} slug={session.root.slug} storageNamespace={demoStorageNamespace()} personId={session.person._id} charte={appearance?.charte ?? CHARTE} routes={engineRoutes} liveAvailable navigation="destinations" navigationLayout="adaptive" icomPro navigationLabels={{ shops: t("marketplace:title"), clips: t("socialExperience:clips") }} postPresentation="charte" feedPresentation="immersive" storiesPresentation="rings" wordmark={BRAND_NAME} PostOfferRenderer={OfferPostSlot} PostArticleRenderer={ArticlePostSlot}>
+      <NetworkProvider networkId={session.root._id} slug={session.root.slug} storageNamespace={demoStorageNamespace()} personId={session.person._id} charte={appearance?.charte ?? CHARTE} routes={engineRoutes} liveAvailable navigation="destinations" navigationLayout="adaptive" icomPro navigationLabels={{ shops: t("marketplace:title"), clips: t("socialExperience:clips"), ...(managesShop ? { myShop: t("shops:nav.myShop") } : {}) }} postPresentation="charte" feedPresentation="immersive" storiesPresentation="rings" wordmark={BRAND_NAME} PostOfferRenderer={OfferPostSlot} PostArticleRenderer={ArticlePostSlot}>
         <MemberSessionContext.Provider value={session}>
           <PostHogProvider configuration={usageConfiguration} consented={!permission.paused && session.person.consentsInForce.includes("usage_analytics")} screen={usageScreenForPath(pathname)} networkSlug={session.root.slug} locale={i18n.resolvedLanguage === "en" ? "en" : "fr"}>
             <MemberNavigationStyles />

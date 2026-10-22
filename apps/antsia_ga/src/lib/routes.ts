@@ -464,6 +464,8 @@ export const engineRoutes: EngineRoutes = {
   discover: routes.memberDiscover,
   me: routes.me,
   shops: routes.marketplaceHome,
+  // « Créer → Mon activité » et, pour qui gère déjà une boutique, « Ma boutique » dans le rail (étude des sept univers, § 12).
+  myActivity: routes.myShops,
   clips: routes.clips,
   // P14B : destinations typées des avis (cloche, ouverture d'une notification poussée).
   serviceRequest: routes.serviceRequest,

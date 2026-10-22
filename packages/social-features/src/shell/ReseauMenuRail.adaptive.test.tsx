@@ -75,6 +75,7 @@ function rail(ui: ReactElement, options: {
   layout?: EngineNavigationLayout
   routes?: EngineRoutes
   shopsLabel?: string | null
+  myShopLabel?: string
   clipsLabel?: string
 } = {}): ReactElement {
   const i18n = createAppI18n({ locale: "fr", appResources: { fr: {}, en: {} }, defaultNS: "social" })
@@ -83,7 +84,7 @@ function rail(ui: ReactElement, options: {
       <AppearanceProvider storagePrefix="test:adaptive-rail">
         <NetworkProvider networkId={TEST_NETWORK_ID} personId={TEST_PERSON_ID} slug="test" charte="antsia"
           routes={options.routes ?? ROUTES} navigation={options.navigation ?? "destinations"} navigationLayout={options.layout ?? "adaptive"}
-          navigationLabels={options.shopsLabel === null ? undefined : { shops: options.shopsLabel ?? "Boutiques", clips: options.clipsLabel }} liveAvailable>
+          navigationLabels={options.shopsLabel === null ? undefined : { shops: options.shopsLabel ?? "Boutiques", clips: options.clipsLabel, myShop: options.myShopLabel }} liveAvailable>
           {ui}
         </NetworkProvider>
       </AppearanceProvider>
@@ -103,6 +104,20 @@ describe("ReseauMenuRail — capacité adaptative U02", () => {
     expect(create).toHaveBeenCalledWith("actu")
     expect(document.activeElement).toBe(trigger)
   })
+  it("« Ma boutique » suit Boutiques pour qui gère déjà une boutique, et seulement avec sa route", () => {
+    const routes = { ...ROUTES, myActivity: () => "/mes-activites-test" }
+    const managing = render(rail(<ReseauMenuRail activeTab="fil" />, { routes, myShopLabel: "Ma boutique" }))
+    const primary = screen.getByRole("navigation", { name: "Navigation principale" })
+    expect(within(primary).getByRole("link", { name: "Ma boutique" }).getAttribute("href")).toBe("/mes-activites-test")
+    managing.unmount()
+    // Sans libellé (la personne ne gère aucune boutique) ou sans route servie : aucune entrée.
+    const none = render(rail(<ReseauMenuRail activeTab="fil" />, { routes }))
+    expect(screen.queryByRole("link", { name: "Ma boutique" })).toBeNull()
+    none.unmount()
+    render(rail(<ReseauMenuRail activeTab="fil" />, { myShopLabel: "Ma boutique" }))
+    expect(screen.queryByRole("link", { name: "Ma boutique" })).toBeNull()
+  })
+
   it("U09 : ne garde que les destinations, Boutiques, Créer et Réglages, sans doublon", () => {
     const { container } = render(rail(<ReseauMenuRail activeTab="groupes" onSelectTab={vi.fn()} onCreate={vi.fn()} />))
     expect(container.querySelector('[data-reseau-menu-layout="adaptive"]')).toBeTruthy()

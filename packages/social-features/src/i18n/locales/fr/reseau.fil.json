@@ -125,6 +125,10 @@
       "conference": {
         "label": "Conférence",
         "description": "Préparer un direct dans ce réseau."
+      },
+      "activite": {
+        "label": "Mon activité",
+        "description": "Créer ou gérer votre boutique et vos prestations."
       }
     }
   },

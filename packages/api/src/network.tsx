@@ -67,6 +67,12 @@ export interface EngineRoutes {
   me?: () => string
   /** Annuaire des boutiques servi par l'application ; absent : aucun raccourci de rail inventé. */
   shops?: () => string
+  /**
+   * La gestion des activités de la personne (« Ma boutique » : créer, préparer, gérer). Présente, « Créer » offre
+   * « Mon activité » ; le rail montre « Ma boutique » quand l'application en fournit le libellé (`navigationLabels.myShop`),
+   * c'est-à-dire à qui gère déjà une boutique. Absente : aucune entrée inventée.
+   */
+  myActivity?: () => string
   /** U04 : vrai lecteur vidéo ; le filtre auteur reste jugé par le serveur. */
   clips?: (handle?: string) => string
   /**
@@ -190,7 +196,7 @@ export interface NetworkContextValue {
   /** U02 : absent dans les consommateurs historiques ; téléphone <768, rail compact <1200 sur opt-in. */
   navigationLayout?: EngineNavigationLayout
   /** Libellés d'entrées optionnelles traduits par l'application qui sert leurs routes. */
-  navigationLabels?: Readonly<{ shops?: string; clips?: string }>
+  navigationLabels?: Readonly<{ shops?: string; clips?: string; myShop?: string }>
   /** ADR-0036 : l'application sert l'espace iCom Pro (boutiques, mises en relation) à côté d'iCom. */
   icomPro: boolean
   /** La présentation des publications déclarée par l'application, `"classic"` sauf opt-in explicite. */
@@ -304,7 +310,7 @@ export function NetworkProvider(props: {
   navigation?: EngineNavigation
   /** U02 : géométrie à trois formats, seulement sous destinations ; absent = seuil historique 960. */
   navigationLayout?: EngineNavigationLayout
-  navigationLabels?: Readonly<{ shops?: string; clips?: string }>
+  navigationLabels?: Readonly<{ shops?: string; clips?: string; myShop?: string }>
   /** ADR-0036 : opt-in de l'espace iCom Pro ; absent = messagerie unique (comportement historique). */
   icomPro?: boolean
   /** Opt-in de la présentation média ou charte des publications ; absent = `"classic"` (comportement historique). */

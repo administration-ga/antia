@@ -523,7 +523,9 @@
     "empty": "Vous n’avez pas encore préparé de boutique.",
     "untitled": "Activité en préparation",
     "manage": "Préparer et gérer",
-    "truncated": "Cette liste peut être incomplète. Certaines activités que vous gérez peuvent ne pas apparaître."
+    "truncated": "Cette liste peut être incomplète. Certaines activités que vous gérez peuvent ne pas apparaître.",
+    "viewPage": "Voir ma page",
+    "clients": "Mes clients"
   },
   "start": {
     "title": "Préparer une boutique",
@@ -750,5 +752,8 @@
     },
     "models": "Modèles de {{title}}",
     "actionLabel": "{{action}} : {{title}}"
+  },
+  "nav": {
+    "myShop": "Ma boutique"
   }
 }

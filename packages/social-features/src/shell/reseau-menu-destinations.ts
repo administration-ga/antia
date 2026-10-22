@@ -76,7 +76,7 @@ export interface ReseauDestinationRoutes extends CreationRoutes {
 export function destinationRoutesOf(routes: EngineRoutes): ReseauDestinationRoutes | null {
 	const { discover, me } = routes
 	if (discover === undefined || me === undefined) return null
-	return { home: routes.home, discover, messages: routes.messages, me, profile: routes.profile }
+	return { home: routes.home, discover, messages: routes.messages, me, profile: routes.profile, ...(routes.myActivity === undefined ? {} : { myActivity: routes.myActivity }) }
 }
 
 export interface ReseauDestination {
@@ -278,7 +278,7 @@ export function reseauCreationChoices(
 	context: { handle: string | null; liveAvailable: boolean },
 	routes: CreationRoutes,
 ): ReseauCreationChoice[] {
-	return creationEntries({ mobile: true, handle: context.handle })
+	return creationEntries({ mobile: true, handle: context.handle, activity: routes.myActivity !== undefined })
 		.filter((entry) => entry.kind !== "conference" || context.liveAvailable)
 		.map((entry) => {
 			const launch = creationLaunchFor(entry.kind, { handle: context.handle }, routes)

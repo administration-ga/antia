@@ -1,4 +1,4 @@
-// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/ReseauMenuRail.tsx @ ad2e7fdc2 — adaptations : déplacé dans la coque (`shell/`) ; branché sur le moteur — ma fiche par `people.persons.getMyPerson` (sans réseau ; identité montrée seulement si le profil est publié, portrait servi par la garde des fichiers), mes groupes par `thematicGroups.thematicGroups.myGroups`, mes pages suivies par la première page de `pages.pages.paginateMyPageFollows` (pages GÉNÉRIQUES du moteur, au lieu des pages d'organisation), réseau courant par `useNetwork()` ; adresses par la table des routes INJECTÉE (`useRoutes()` : volets sur `home()`, mon profil sur `profile(handle)`, fiche d'une page sur `page(handle)`, réglages sur `settings?.()`) — `personal-nav` et ses URL de l'espace retirés, une destination absente RETIRE son entrée (et « Voir plus » disparaît quand il n'a plus rien à déplier) ; volets SERVIS seuls (`menuItemsFor(counts, home)`) ; libellés par l'i18n (`reseau:reseauMenuRail.*`, libellé du volet par sa clé, pastille par `menuBadgeLabel(item, t)`) ; « iRéseau » devient « réseau » ; liens par `Link` de `@antsia/api/routing`, d'UNE seule pièce (un lien à la facture du bouton fantôme au lieu d'un bouton DANS un lien : deux arrêts de tabulation pour un geste) ; rendu, ordre et styles inchangés ; P02 (18/10/2026) : monté aussi HORS de la page réseau (`activeTab` nul, volets rendus en liens quand aucun `onSelectTab` n'est fourni) et, sous la navigation par destinations déclarée par l'application, coiffé des cinq destinations Fil · Découvrir · Créer · Messages · Profil (« Créer » ouvre la carte de choix partagée) — le volet Fil et « Voir plus » cèdent alors leur place aux destinations Fil et Profil ; les paramètres (`settings?.()`) gardent alors une entrée au pied du rail, courante sur leur page. ; système épuré (ADR-0027) : destination active en pastille tonale sans filet (`--esp-tab-active-*`, `--esp-chip-border`) et angle des puces (`--esp-chip-radius`), facture d'origine en repli. Pastilles de décompte aux couleurs des réactions (`--role-react-*`), ton d'origine en repli.
+// Dupliqué de socle/packages/agent-features/src/features/reseau-personnel/ReseauMenuRail.tsx @ ad2e7fdc2 — adaptations : déplacé dans la coque (`shell/`) ; branché sur le moteur — ma fiche par `people.persons.getMyPerson` (sans réseau ; identité montrée seulement si le profil est publié, portrait servi par la garde des fichiers), mes groupes par `thematicGroups.thematicGroups.myGroups`, mes pages suivies par la première page de `pages.pages.paginateMyPageFollows` (pages GÉNÉRIQUES du moteur, au lieu des pages d'organisation), réseau courant par `useNetwork()` ; adresses par la table des routes INJECTÉE (`useRoutes()` : volets sur `home()`, mon profil sur `profile(handle)`, fiche d'une page sur `page(handle)`, réglages sur `settings?.()`) — `personal-nav` et ses URL de l'espace retirés, une destination absente RETIRE son entrée (et « Voir plus » disparaît quand il n'a plus rien à déplier) ; volets SERVIS seuls (`menuItemsFor(counts, home)`) ; libellés par l'i18n (`reseau:reseauMenuRail.*`, libellé du volet par sa clé, pastille par `menuBadgeLabel(item, t)`) ; « iRéseau » devient « réseau » ; liens par `Link` de `@antsia/api/routing`, d'UNE seule pièce (un lien à la facture du bouton fantôme au lieu d'un bouton DANS un lien : deux arrêts de tabulation pour un geste) ; rendu, ordre et styles inchangés ; P02 (18/10/2026) : monté aussi HORS de la page réseau (`activeTab` nul, volets rendus en liens quand aucun `onSelectTab` n'est fourni) et, sous la navigation par destinations déclarée par l'application, coiffé des cinq destinations Fil · Découvrir · Créer · Messages · Profil (« Créer » ouvre la carte de choix partagée) — le volet Fil et « Voir plus » cèdent alors leur place aux destinations Fil et Profil ; les paramètres (`settings?.()`) gardent alors une entrée au pied du rail, courante sur leur page. ; système épuré (ADR-0027) : destination active en pastille tonale sans filet (`--esp-tab-active-*`, `--esp-chip-border`) et angle des puces (`--esp-chip-radius`), facture d'origine en repli. Pastilles de décompte aux couleurs des réactions (`--role-react-*`), ton d'origine en repli. ; sept univers (22/10/2026) : « Ma boutique » suit Boutiques quand l'application en fournit le libellé (`navigationLabels.myShop`) et la route `myActivity`.
 "use client"
 
 /**
@@ -24,7 +24,7 @@ import { useAuthenticatedConvexQuery, useAuthenticatedPaginatedQuery } from "@an
 import { useNetwork, useNetworkNavigationLayout, useRoutes } from "@antsia/api/network"
 import { Link, usePathname, useSearchParams } from "@antsia/api/routing"
 import { Badge, Button, Card, Icon } from "@antsia/ui"
-import { Store } from "lucide-react"
+import { BriefcaseBusiness, Store } from "lucide-react"
 import { type CSSProperties, type ReactNode, useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 
@@ -197,6 +197,9 @@ export function ReseauMenuRail({
 	const settingsHref = routes.settings?.() ?? null
 	const shopsLabel = navigationLabels?.shops?.trim() ?? ""
 	const shopsHref = adaptive && shopsLabel.length > 0 ? routes.shops?.() ?? null : null
+	/* « Ma boutique » : l'application n'en donne le libellé qu'à qui gère déjà une boutique. */
+	const myShopLabel = navigationLabels?.myShop?.trim() ?? ""
+	const myShopHref = adaptive && myShopLabel.length > 0 ? routes.myActivity?.() ?? null : null
 	const pathname = usePathname()
 	/* U09 — épure (opt-in adaptatif d'ANTSIA) : le rail ne garde que les
 	   destinations, Boutiques, Créer et Réglages. « Dans le réseau » vit dans
@@ -240,6 +243,7 @@ export function ReseauMenuRail({
 					identity={epure ? null : identity}
 					profileAvatar={epure ? { displayName, avatarUrl: person?.avatar?.url ?? null } : null}
 					shops={epure && shopsHref !== null ? { href: shopsHref, label: shopsLabel } : null}
+					myShop={epure && myShopHref !== null ? { href: myShopHref, label: myShopLabel } : null}
 					handle={handle}
 					onSelectTab={onSelectTab}
 					onCreate={onCreate}
@@ -458,6 +462,7 @@ function RailDestinations({
 	identity,
 	profileAvatar = null,
 	shops = null,
+	myShop = null,
 	handle,
 	onSelectTab,
 	onCreate,
@@ -469,6 +474,8 @@ function RailDestinations({
 	profileAvatar?: { displayName: string; avatarUrl: string | null } | null
 	/** U09 : Boutiques suit les destinations, avant Créer. */
 	shops?: { href: string; label: string } | null
+	/** « Ma boutique » suit Boutiques, pour qui gère déjà une boutique. */
+	myShop?: { href: string; label: string } | null
 	handle: string | null
 	onSelectTab?: (tab: ReseauAgentTabId) => void
 	onCreate?: (kind: CreationKind) => void
@@ -566,6 +573,12 @@ function RailDestinations({
 				<Link href={shops.href} style={{ ...LINK_ITEM_STYLE, marginTop: 2 }} className="rmr-item focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" title={adaptive ? shops.label : undefined}>
 					<Store size={18} aria-hidden="true" />
 					<span className="rmr-label" style={{ flex: 1, fontSize: 13.5, fontWeight: 600 }}>{shops.label}</span>
+				</Link>
+			) : null}
+			{myShop !== null ? (
+				<Link href={myShop.href} aria-current={pathname === myShop.href || pathname.startsWith(`${myShop.href}/`) ? "page" : undefined} style={{ ...(pathname === myShop.href || pathname.startsWith(`${myShop.href}/`) ? SELECTED_LINK_ITEM_STYLE : LINK_ITEM_STYLE), marginTop: 2 }} className="rmr-item focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" title={adaptive ? myShop.label : undefined}>
+					<BriefcaseBusiness size={18} aria-hidden="true" />
+					<span className="rmr-label" style={{ flex: 1, fontSize: 13.5, fontWeight: 600 }}>{myShop.label}</span>
 				</Link>
 			) : null}
 			{routes.clips !== undefined ? <Button ref={triggerRef} className="rmr-item" title={t("reseauDestinations.creer")} variant="ghost" aria-haspopup="dialog" aria-expanded={open} onClick={() => setOpen(true)} style={{ ...ITEM_STYLE, marginTop: 8 }}>
