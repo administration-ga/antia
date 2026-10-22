@@ -12,6 +12,8 @@ vi.mock("next/link", () => ({
 }))
 vi.mock("@antsia/api/sign-out-everywhere", () => ({ isSigningOutEverywhere: () => state.signingOut }))
 vi.mock("@antsia/social-features/shell/appearance", () => ({ AppearanceToggle: () => <button type="button" aria-label="Apparence">Apparence</button> }))
+// La marque de l'activité et le nombre de lignes du panier ont leurs propres tests : ici, le libellé de l'espace et aucun panier.
+vi.mock("./specialized-space-identity", () => ({ SpaceIdentity: ({ fallback }: { fallback: string }) => <span>{fallback}</span>, SpaceCartCount: () => null, useCartLines: () => 0 }))
 vi.mock("react-i18next", () => ({ useTranslation: () => ({ t: (key: string) => {
   const labels: Record<string, string> = {
     returnToAntsia: "Retour à ANTSIA", shopSpace: "Espace boutique", serviceSpace: "Espace services",

@@ -11,7 +11,9 @@
     "social": "Page sociale",
     "providerHome": "Présentation",
     "services": "Prestations",
-    "requests": "Mes demandes"
+    "requests": "Mes demandes",
+    "cartCount_one": "Panier : {{count}} ligne",
+    "cartCount_other": "Panier : {{count}} lignes"
   },
   "openMemberSpace": "Ouvrir mon espace",
   "professionalSpace": "Réseau pro",

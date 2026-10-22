@@ -8,6 +8,7 @@ import { catalogAvailability, catalogDate, catalogPrice, catalogVariantPrice, ty
 import { OFFER_DETAIL_CSS } from "./offer-experience-styles"
 import { OfferFacets } from "./offer-facets"
 import { OfferMedia } from "./offer-media"
+import { OfferGallery } from "./offer-gallery"
 import { OfferMediaCarousel } from "./offer-media-carousel"
 import { ServiceProfileDetails } from "../services/service-profile-details"
 
@@ -60,9 +61,11 @@ export function OfferCard({ offer, audience, locale, t, compact = false, eager =
     <div className="grid min-w-0 gap-0.5 pr-2">
       {brand ? <p className="truncate text-xs font-bold">{brand}</p> : null}
       <h3 className="line-clamp-2 text-sm font-semibold leading-snug">{offer.title}</h3>
+      {detail ? <p className="truncate text-xs text-muted-foreground">{detail}</p> : null}
       <p className="break-words font-bold text-[color:var(--role-commerce-ink,var(--foreground))]">{price}</p>
       <div className="flex min-w-0 flex-wrap items-center gap-x-3">{shop}<Link href={href} prefetch={false} className={linkClass}>{t("catalog.openOffer")}<ArrowUpRight className="ml-1 size-4 shrink-0" aria-hidden /></Link></div>
     </div>
+    {action ? <div className="col-span-full grid min-w-0 px-1 pb-1 empty:hidden" data-offer-card-action>{action}</div> : null}
   </article>
   return <article data-offer-card className="flex h-full min-w-0 flex-col gap-3 rounded-[var(--ui2-card-radius)] bg-card p-2 pb-3 text-card-foreground [overflow-wrap:anywhere]">
     <OfferMediaCarousel media={offer.media} title={offer.title} href={href} t={t} eager={eager} />
@@ -79,21 +82,31 @@ export function OfferCard({ offer, audience, locale, t, compact = false, eager =
   </article>
 }
 
-/** Toutes les variantes actives restent dans le HTML, avec leur montant exact. */
-export function OfferDetails({ offer, audience, locale, t, providerT, actionSlot, publicActionSlot }: { offer: CatalogOffer; audience: CatalogAudience; locale: string; t: CatalogTranslate; providerT?: CatalogTranslate; actionSlot?: ReactNode; publicActionSlot?: ReactNode }) {
-  const storefront = offer.kind === "service" ? audience === "public" ? routes.publicProvider(offer.shopHandle) : routes.provider(offer.shopHandle) : audience === "public" ? routes.publicStorefront(offer.shopHandle) : routes.storefront(offer.shopHandle)
-  const Heading = audience === "public" ? "h1" : "h2"
-  return <div data-offer-detail-frame><style>{OFFER_DETAIL_CSS}</style><article className="offer-detail-layout min-w-0 gap-6 rounded-2xl border border-border bg-card p-5 text-card-foreground sm:p-7 [overflow-wrap:anywhere]">
+/**
+ * La fiche d'une offre (modèle des ventes privées, 22/10/2026) : la galerie d'abord, puis la marque, le nom, la
+ * couleur ou les variantes, le prix exact et le vendeur, avec l'action du lecteur ; ensuite la description, les
+ * caractéristiques publiées, les variantes, la disponibilité et la remise. Toutes les variantes actives restent
+ * dans le HTML, avec leur montant exact. `titleAs` : le niveau du nom, `h1` quand la fiche porte le titre de
+ * l'écran (publique, ou membre sans en-tête générique).
+ */
+export function OfferDetails({ offer, audience, locale, t, providerT, actionSlot, publicActionSlot, titleAs }: { offer: CatalogOffer; audience: CatalogAudience; locale: string; t: CatalogTranslate; providerT?: CatalogTranslate; actionSlot?: ReactNode; publicActionSlot?: ReactNode; titleAs?: "h1" | "h2" }) {
+  const storefront = offerStorefrontHref(offer, audience)
+  const Heading = titleAs ?? (audience === "public" ? "h1" : "h2")
+  const { brand, color } = offerAttributes(offer)
+  const detail = color ?? (offer.variants.length ? t("catalog.hasVariants", { count: offer.variants.length }) : null)
+  return <div data-offer-detail-frame><style>{OFFER_DETAIL_CSS}</style><article className="offer-detail-layout min-w-0 gap-6 rounded-[var(--ui2-card-radius)] bg-card p-4 text-card-foreground min-[768px]:p-6 [overflow-wrap:anywhere]">
+    <div className="offer-detail-media min-w-0"><OfferGallery media={offer.media} title={offer.title} t={t} /></div>
     <header className="offer-detail-heading grid min-w-0 gap-3">
-      <p className="text-sm font-medium text-muted-foreground">{t(`catalog.kinds.${offer.kind}`)}</p>
+      {brand ? <p className="text-sm font-bold uppercase tracking-wide">{brand}</p> : null}
       <Heading className="mp-title break-words">{offer.title}</Heading>
-      <Link href={storefront} prefetch={false} className={`${linkClass} justify-self-start`}>{t("catalog.soldBy", { handle: offer.shopHandle })}</Link>
-      <p className="break-words text-2xl font-semibold">{catalogPrice(offer.price, locale, t)}</p>
-      <p className="text-sm text-muted-foreground">{t("catalog.displayedPriceHint")}</p>
+      {detail ? <p className="text-sm text-muted-foreground">{detail}</p> : null}
+      {offer.kind === "service" ? <p className={`${TAG_CLASS} justify-self-start`}>{t("catalog.kinds.service")}</p> : null}
+      <p className="break-words font-display text-3xl font-bold leading-tight text-[color:var(--role-commerce-ink,var(--foreground))]">{catalogPrice(offer.price, locale, t)}</p>
+      <p className="text-xs text-muted-foreground">{t("catalog.displayedPriceHint")}</p>
+      <Link href={storefront} prefetch={false} className={`${linkClass} justify-self-start`}><Store aria-hidden className="mr-1.5 size-4 shrink-0" />{t("catalog.soldBy", { handle: offer.shopHandle })}</Link>
       {audience === "member" && actionSlot ? <div data-offer-actions className="grid min-w-0 gap-3">{actionSlot}</div> : null}
       {audience === "public" && publicActionSlot ? <div data-public-offer-actions className="grid min-w-0 gap-3">{publicActionSlot}</div> : null}
     </header>
-    <div className="offer-detail-media grid min-w-0 gap-3">{offer.media.length ? offer.media.map((media, index) => <OfferMedia key={index} media={media} title={offer.title} t={t} eager={index === 0} />) : <OfferMedia media={undefined} title={offer.title} t={t} />}</div>
     <section className="offer-detail-full grid min-w-0 gap-3"><h2 className="text-lg font-semibold">{t("catalog.description")}</h2><p className="whitespace-pre-wrap break-words leading-relaxed">{offer.description || t("catalog.noDescription")}</p></section>
     <OfferFacets facets={offer.facets} t={t} />
     {offer.kind === "service" && providerT ? <ServiceProfileDetails offer={offer} locale={locale} t={providerT} /> : null}

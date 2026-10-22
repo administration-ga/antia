@@ -11,7 +11,9 @@
     "social": "Social page",
     "providerHome": "Overview",
     "services": "Services",
-    "requests": "My requests"
+    "requests": "My requests",
+    "cartCount_one": "Cart: {{count}} line",
+    "cartCount_other": "Cart: {{count}} lines"
   },
   "openMemberSpace": "Open member space",
   "professionalSpace": "Professional network",

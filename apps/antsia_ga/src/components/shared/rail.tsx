@@ -30,7 +30,7 @@ export function Rail({ title, href, linkLabel, size, label, level = 2, children 
     const node = scroller.current
     if (!node) return
     const reduce = typeof window.matchMedia === "function" && window.matchMedia("(prefers-reduced-motion: reduce)").matches
-    node.scrollBy({ left: direction * Math.max(node.clientWidth * 0.85, 1), behavior: reduce ? "auto" : "smooth" })
+    if (typeof node.scrollBy === "function") node.scrollBy({ left: direction * Math.max(node.clientWidth * 0.85, 1), behavior: reduce ? "auto" : "smooth" })
   }
   const items = Children.toArray(children)
   if (!items.length) return null

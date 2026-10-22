@@ -45,7 +45,7 @@ async function setInput(node: HTMLInputElement, value: string) {
 }
 /** Le formulaire de filtres vit dans la feuille « Filtrer » : l'ouvrir d'abord. */
 async function openFilters() {
-  await click([...container.querySelectorAll("button")].find(node => node.textContent?.startsWith("Filtrer") || node.textContent?.startsWith("Filter")))
+  await click([...document.querySelectorAll("button")].find(node => node.textContent?.startsWith("Filtrer") || node.textContent?.startsWith("Filter")))
   const sheet = dialog()
   if (!sheet) throw new Error("Feuille de filtres absente")
   return sheet
@@ -202,8 +202,10 @@ describe("MP04 — résultats de la marketplace : vues, rayons, recherche et fen
     width = nextWidth
     await render()
     expect(container.querySelectorAll("[data-member-page]")).toHaveLength(1)
-    expect([...container.querySelectorAll("button")].filter(node => node.textContent?.startsWith("Filtrer"))).toHaveLength(1)
-    expect(container.querySelector("[data-marketplace-filter-float]") !== null).toBe(nextWidth < 1024)
+    expect([...document.querySelectorAll("button")].filter(node => node.textContent?.startsWith("Filtrer"))).toHaveLength(1)
+    // Flottant, le bouton vit dans une couche portée hors de l'écran (jamais cadré par un conteneur de requêtes).
+    expect(document.querySelector("[data-marketplace-filter-float]") !== null).toBe(nextWidth < 1024)
+    expect(container.querySelector("[data-marketplace-filter-float]")).toBeNull()
     // Le seul formulaire de l'écran est la recherche : les filtres attendent l'ouverture de leur feuille.
     expect(container.querySelectorAll("form")).toHaveLength(1)
     expect(container.querySelector("[data-offer-card]")).not.toBeNull()
@@ -211,10 +213,10 @@ describe("MP04 — résultats de la marketplace : vues, rayons, recherche et fen
 
   it("le déclencheur suit un changement de format sans se doubler", async () => {
     await render()
-    expect(container.querySelector("[data-marketplace-filter-float]")).not.toBeNull()
+    expect(document.querySelector("[data-marketplace-filter-float]")).not.toBeNull()
     await act(async () => { width = 1440; widthListeners.forEach(listener => listener()) })
-    expect(container.querySelector("[data-marketplace-filter-float]")).toBeNull()
-    expect([...container.querySelectorAll("button")].filter(node => node.textContent?.startsWith("Filtrer"))).toHaveLength(1)
+    expect(document.querySelector("[data-marketplace-filter-float]")).toBeNull()
+    expect([...document.querySelectorAll("button")].filter(node => node.textContent?.startsWith("Filtrer"))).toHaveLength(1)
   })
 
   it("applique les choix hiérarchiques, plusieurs marques et les prix puis rend le focus au titre", async () => {

@@ -404,6 +404,114 @@ Limite : en local, aucune offre réelle (pas de PRO.GA). Les carrousels
 « Nouveautés » et « Services » et l'ajout au panier se prouvent par les tests ;
 les offres de démonstration refusent le panier par conception.
 
+### Marketplace sur le modèle des ventes privées, lot 2 : la boutique (22/10/2026)
+
+Suite de la même demande : l'expérience à l'intérieur d'une boutique, de la
+vitrine à la fiche, toujours sans rien inventer.
+
+- Vitrine (`/boutique/:handle`) :
+  - en-tête de la boutique : la bannière de sa page en photo (16:9 au
+    téléphone, 3:1 dès 768 px, 22 rem de haut au plus), le logo, le nom (titre
+    de l'écran) et l'identifiant posés sur un voile ; sans bannière, une carte
+    neutre ;
+  - mentions réelles : badge calculé, capacités de l'activité, spécialité,
+    zone ; puis « Voir les offres », suivre ou ne plus suivre la page, l'échange
+    déjà ouvert, la gestion et la version sans compte ;
+  - blocs dans l'ordre configuré. Les offres : une collection qui défile par
+    collection non vide (dès deux, quatre au plus), puis la première page en
+    grille avec l'ajout rapide. En aperçu, seulement des rangées complètes (à
+    cinq colonnes, dix des douze offres). Puis la présentation et les
+    publications ;
+  - conditions déclarées : cinq cartes à icône quand la boutique en a publié ;
+    sinon une seule carte où chaque rubrique dit « Non renseigné ».
+- En-tête de l'espace : la marque de la boutique (logo et nom) au centre mène à
+  la vitrine ; au téléphone, le retour à ANTSIA se réduit à sa flèche (son nom
+  accessible reste). « Panier » porte le nombre de lignes du panier.
+- Catalogue (`/boutique/:handle/catalogue`) :
+  - barre d'outils : « Filtrer » ouvre les filtres existants dans une feuille
+    (en bas au téléphone, à droite dès 768 px). « Voir les résultats » reste
+    visible en bas de la feuille pendant que les filtres défilent, ici comme
+    sur la marketplace ;
+  - grille ou lignes, au choix, retenu par ce navigateur ;
+  - collections en pastilles et filtres appliqués en puces qu'on retire ;
+  - grille de 2 à 6 colonnes et lignes de 1 à 3 colonnes, selon la place
+    réelle ; ajout rapide sur chaque carte.
+- Fiche (`/boutique/:handle/offres/:offerRef`) :
+  - galerie à points au téléphone, à vignettes dès 768 px ;
+  - nom, prix exact, vendeur, puis la sélection réelle ;
+  - à partir de 832 px de fiche, deux colonnes, les informations restant en vue
+    pendant le défilement ;
+  - au téléphone, une barre d'achat fixe au-dessus des onglets de l'espace : la
+    quantité en − / + et « Ajouter au panier ». Elle est reliée au formulaire de
+    sélection par l'attribut `form`, donc les mêmes contrôles et le même envoi ;
+  - suivent les conditions de la boutique et « Dans la même boutique ».
+
+Mesures (backend local du candidat, boutique de démonstration « Épicerie
+Moussavou Démo », douze offres) :
+
+| Largeur | Bloc | Vitrine (colonnes, carte) | Catalogue grille / lignes | Fiche | Défilement horizontal |
+|---|---|---|---|---|---|
+| 390 px | 12 / 12, 366 px | 2 (177 px), écart 12 | 2 / 1 | 1 colonne, photo 334 px | aucun |
+| 1 024 px | 128 / 16, 880 px | 4 (208 px), écart 16 | 4 / 2 | 2 colonnes de 404 px | aucun |
+| 1 280 px | 256 / 24, 1 000 px | 4 (232 px), écart 24 | 4 / 2 | 2 colonnes de 464 px | aucun |
+| 1 440 px | 256 / 24, 1 160 px | 5 (213 px), 2 rangées de 5 | 5 / 2 | 2 colonnes de 544 px | aucun |
+| 1 920 px | 256 / 24, 1 640 px | 6 (253 px), 2 rangées de 6 | 6 / 3 | 2 colonnes de 784 px | aucun |
+
+« Dans la même boutique » : cartes de 152 px (écart 12) au téléphone, de 224 px
+(écart 16 puis 24) ensuite.
+
+Défauts trouvés et corrigés pendant la recette :
+
+- au téléphone, le libellé du retour serrait la marque de la boutique : réduit
+  à sa flèche quand une marque est affichée ;
+- sans conditions publiées, cinq cartes « Non renseigné » prenaient un écran :
+  une seule carte compacte ;
+- « Voir les résultats » attendait au bas d'un formulaire de 2 148 px dans la
+  feuille : barre fixée au bas de la feuille (`sticky`, sans marge dessous) ;
+- à 1 440 px, l'aperçu de douze offres laissait une rangée de deux : l'aperçu
+  ne montre que des rangées complètes ;
+- à 1 920 px, la bannière 3:1 montait à 547 px. Bornée à 22 rem, elle a
+  d'abord perdu sa largeur (1 056 px au lieu de 1 160 : la hauteur maximale se
+  reporte sur la largeur par le rapport). La largeur explicite la garde
+  entière ;
+- le lien « Ouvrir la page sociale » était centré dans sa carte : aligné à
+  gauche.
+
+![Vitrine à 390 px](recette/boutique-vitrine-390.jpg)
+
+![Catalogue à 390 px, en grille](recette/boutique-catalogue-390.jpg)
+
+![Catalogue à 390 px, en lignes](recette/boutique-catalogue-lignes-390.jpg)
+
+![Feuille de filtres : « Voir les résultats » reste en bas](recette/boutique-filtres-390.jpg)
+
+![Fiche à 390 px](recette/boutique-fiche-390.jpg)
+
+![Vitrine à 1 024 px](recette/boutique-vitrine-1024.jpg)
+
+![Fiche à 1 024 px : deux colonnes](recette/boutique-fiche-1024.jpg)
+
+![Vitrine à 1 280 px](recette/boutique-vitrine-1280.jpg)
+
+![Vitrine à 1 440 px : deux rangées complètes de cinq](recette/boutique-vitrine-1440.jpg)
+
+![Vitrine à 1 920 px](recette/boutique-vitrine-1920.jpg)
+
+![Catalogue à 1 920 px : six colonnes](recette/boutique-catalogue-1920.jpg)
+
+![Fiche à 1 920 px](recette/boutique-fiche-1920.jpg)
+
+Limites :
+
+- en local, aucune offre réelle : les offres de démonstration n'ont ni
+  sélection ni panier, par conception. La barre d'achat du téléphone, la
+  feuille « Choisir » et l'ajout rapide se prouvent par les tests de
+  composants (`shop-experience.test.tsx`) ;
+- les pages sans compte des boutiques de démonstration (`/boutiques/…`)
+  restent indisponibles en local. Leurs médias ont des chemins relatifs
+  (`/demo-media/…`), que le schéma SSR des adresses refuse. Constat antérieur à
+  ce lot, sans rapport avec lui ; leur grille est couverte par les tests.
+
 ## Limites de preuve et état Git
 
 Le `verify` global avec l’ensemble des tests backend et des espaces de travail voisins n’a pas été relancé : la validation est ciblée sur les surfaces modifiées et leurs contrats.

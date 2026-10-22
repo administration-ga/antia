@@ -13,17 +13,13 @@ import { MemberPage } from "@/components/member-chrome"
 import { Button } from "@/components/shared/controls"
 import { OfferCard } from "@/components/shops/offer-card"
 import { SHOP_ACTION_CLASS } from "@/components/shops/offer-experience-styles"
+import { OFFER_GRID } from "@/components/shops/offer-grid"
 import { MARKETPLACE_FACETS, MARKETPLACE_PAGE_SIZE, marketplaceSearchFromParams, type MarketplaceSearch } from "@/lib/marketplace-search"
 import { routes } from "@/lib/routes"
 import { activeMarketplacePill, MarketplaceBackToTop, MarketplaceFilterSheet, MarketplaceHeader, MarketplacePills } from "./marketplace-chrome"
 import { MarketplaceHome, SHOWCASE_GRID } from "./marketplace-home"
 import { ShopShowcaseCard } from "./shop-showcase-card"
 
-/**
- * Les cartes d'offres : deux colonnes au téléphone (modèle des ventes privées), jusqu'à six sur grand écran ;
- * l'écart vaut la marge de la page (12 px au téléphone, la gouttière dès 768 px).
- */
-const OFFER_GRID = "grid min-w-0 grid-cols-2 gap-3 min-[768px]:gap-gutter @min-[40rem]:grid-cols-3 @min-[54rem]:grid-cols-4 @min-[70rem]:grid-cols-5 @min-[90rem]:grid-cols-6"
 
 /**
  * `/marketplace` sans paramètre : l'accueil (boutiques en grandes cartes et moments qui défilent). Avec une
