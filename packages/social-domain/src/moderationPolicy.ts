@@ -26,6 +26,21 @@ export function legalDeadlineDisclosure(row: LegalDeadlineCounts): LegalDeadline
   return { met: legalMet >= TRANSPARENCY_MIN_CASES ? legalMet : null, missed: legalMissed >= TRANSPARENCY_MIN_CASES ? legalMissed : null }
 }
 
+/** L'état des échéances légales d'une période dans l'export de la console d'exploitation. */
+export const LEGAL_DEADLINE_STATUSES = ["unmeasured", "suppressed", "disclosed"] as const
+export type LegalDeadlineStatus = (typeof LEGAL_DEADLINE_STATUSES)[number]
+
+/**
+ * SU01d — ce que l'export des opérateurs dit des échéances légales d'une période : « non mesurée »
+ * tant que le second passage n'a pas écrit ses accumulateurs sur une période close au calcul,
+ * « masquée » quand `legalDeadlineDisclosure` ne publie rien, « publiée » sinon. L'état n'ajoute
+ * aucun nombre à la règle de `/transparence` : ses chiffres restent ceux de la disclosure.
+ */
+export function legalDeadlineStatus(row: LegalDeadlineCounts): LegalDeadlineStatus {
+  if (row.legalMet === undefined || row.legalMissed === undefined || row.legalAuthors === undefined || row.generatedAt < row.periodEnd) return "unmeasured"
+  return legalDeadlineDisclosure(row) === null ? "suppressed" : "disclosed"
+}
+
 export function normalizeBlockedTerm(value: string): string {
   return value.normalize("NFKD").replace(/\p{M}/gu, "").toLowerCase().trim().replace(/\s+/g, " ")
 }

@@ -249,6 +249,29 @@
       "openAppeals": "Open appeals",
       "pendingFiles": "Files awaiting scan",
       "deadLetters": "Dead letters"
+    },
+    "legal": {
+      "title": "Report legal deadlines",
+      "lead": "Cases subject to the deadlines of ordinance No. {{ordinance}}, still open or under review, read live and counted by legal basis. No case or person appears here: the moderators' priority queue handles them.",
+      "overdue": "Legal deadline exceeded: {{value}} case(s) still open or under review.",
+      "oldest": "Oldest missed deadline:",
+      "noneOverdue": "No legal deadline exceeded among open or in-review cases.",
+      "failed": "Legal deadlines could not be read. The other indicators on this page remain valid.",
+      "atLeast": "at least {{value}}",
+      "undetermined": "Undetermined",
+      "metrics": {
+        "overdue": "Overdue",
+        "dueSoon": "Due within 24 h",
+        "open": "Total with a legal deadline"
+      },
+      "byBasis": "Overdue by legal basis",
+      "basis": {
+        "art24": "Art. 24: decision within {{hours}} h",
+        "art32": "Art. 32: removal within {{hours}} h",
+        "art33": "Art. 33: removal within {{hours}} h"
+      },
+      "bounded": "Read capped at the {{limit}} nearest deadlines of each status: beyond that, figures are minimums.",
+      "clockHint": "A case becomes overdue by this screen's clock, refreshed every minute. No external notification is sent."
     }
   },
   "export": {
@@ -259,13 +282,22 @@
     "columns": {
       "cases": "Cases",
       "actioned": "Actioned decisions",
-      "dismissed": "Dismissed cases"
+      "dismissed": "Dismissed cases",
+      "legalMet": "Within the deadline",
+      "legalMissed": "Past the deadline"
     },
     "json": "Download aggregate JSON",
     "csv": "Download aggregate CSV",
     "downloaded": "Aggregate export download requested.",
     "failed": "The file could not be downloaded. You can retry.",
-    "invalid": "This aggregate projection cannot be exported; download is blocked."
+    "invalid": "This aggregate projection cannot be exported; download is blocked.",
+    "legal": {
+      "title": "Legal deadlines",
+      "hint": "Legal deadlines (ordinance No. {{ordinance}}): those that fell during the period, met or missed. Same rule as the Transparency page: a period closed when computed, at least {{threshold}} deadlines from as many distinct authors, and no number below {{threshold}}. Their total is never exported.",
+      "lessThan": "Fewer than {{threshold}}",
+      "unmeasured": "Not measured for this period.",
+      "suppressed": "Suppressed: fewer than {{threshold}} deadlines or distinct authors."
+    }
   },
   "commercialContact": {
     "title": "Commercial contact",
