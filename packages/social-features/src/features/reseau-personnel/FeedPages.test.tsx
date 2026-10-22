@@ -23,7 +23,6 @@ vi.mock("./PostCard", () => ({ PostCard: ({ post }: { post: { body: string } }) 
 vi.mock("./PagesSuggestionsRail", () => ({ PagesSuggestionsRail: () => <p>Carrousel des pages</p> }))
 vi.mock("./SuggestionsPanel", () => ({ SuggestionsPanel: () => <p>Carrousel des personnes</p> }))
 vi.mock("./FeedClipsRail", () => ({ FeedClipsRail: () => <p>Aperçus vidéos</p> }))
-vi.mock("./FeedSuggestionCard", () => ({ FeedSuggestionCard: () => <p>Suggestion des chartes</p> }))
 
 import { FeedPage } from "./FeedPages"
 
@@ -147,40 +146,51 @@ describe("FeedPage — vérité des états", () => {
   })
 })
 
-describe("FeedPage — écran des chartes (ADR-0028)", () => {
+describe("FeedPage — écran des chartes (ADR-0028, ADR-0037)", () => {
   const post = (id: string, body: string) => ({ _id: id, body }) as unknown as Feed["items"][number]
   const fourPosts = () => ({ items: [post("posts_1", "Un"), post("posts_2", "Deux"), post("posts_3", "Trois"), post("posts_4", "Quatre")], nextCursor: null, lacunar: false })
   const afterThird = (count: number) => (count > 3 ? 3 : null)
+  const follows = (a: string, b: string) => (screen.getByText(a).compareDocumentPosition(screen.getByText(b)) & Node.DOCUMENT_POSITION_FOLLOWING) !== 0
 
-  it("la suggestion reste en tête et les carrousels complètent le fil après la troisième publication", () => {
+  it("aucune carte en tête : les personnes à découvrir suivent la troisième publication, les clips la cinquième place", () => {
     state.data = fourPosts()
     mount(true, { postPresentation: "charte", interleaveAfter: afterThird })
-    const suggestion = screen.getByText("Suggestion des chartes")
-    expect(suggestion.compareDocumentPosition(screen.getByText("Un")) & Node.DOCUMENT_POSITION_FOLLOWING).not.toBe(0)
-    // Au téléphone seulement : le rail droit du bureau porte déjà les suggestions.
-    expect(suggestion.closest(".rp-feed-inline")).not.toBeNull()
-    expect(screen.getByText("Trois").compareDocumentPosition(screen.getByText("Carrousel des personnes")) & Node.DOCUMENT_POSITION_FOLLOWING).not.toBe(0)
+    expect(follows("Carrousel des personnes", "Un")).toBe(false)
+    expect(follows("Trois", "Carrousel des personnes")).toBe(true)
+    expect(follows("Carrousel des personnes", "Quatre")).toBe(true)
+    // Au téléphone et sur la grille sans colonne droite (`.rp-feed-inline`).
+    expect(screen.getByText("Carrousel des personnes").closest(".rp-feed-inline")).not.toBeNull()
     expect(screen.getByText("Carrousel des pages")).toBeTruthy()
-    expect(screen.getByText("Quatre").compareDocumentPosition(screen.getByText("Aperçus vidéos")) & Node.DOCUMENT_POSITION_FOLLOWING).not.toBe(0)
+    expect(follows("Quatre", "Aperçus vidéos")).toBe(true)
   })
 
-  it("un fil vide garde la suggestion au-dessus de son état vide", () => {
+  it("un fil plus court que l'intercalage montre les personnes à découvrir après sa dernière publication", () => {
+    state.data = { items: [post("posts_1", "Un"), post("posts_2", "Deux")], nextCursor: null, lacunar: false }
+    mount(true, { postPresentation: "charte", interleaveAfter: afterThird })
+    expect(follows("Deux", "Carrousel des personnes")).toBe(true)
+  })
+
+  it("un fil vide montre les personnes à découvrir au-dessus de son état vide", () => {
     state.data = { items: [], nextCursor: null, lacunar: false }
     mount(true, { postPresentation: "charte" })
-    expect(screen.getByText("Suggestion des chartes")).toBeTruthy()
-    expect(screen.getByText("Fil vide")).toBeTruthy()
+    expect(follows("Carrousel des personnes", "Fil vide")).toBe(true)
   })
 
   it("une page suivante n'ouvre rien", () => {
     state.data = fourPosts()
     mount(false, { postPresentation: "charte" })
-    expect(screen.queryByText("Suggestion des chartes")).toBeNull()
+    expect(screen.queryByText("Carrousel des personnes")).toBeNull()
   })
 
   it("sans la charte, les carrousels restent intercalés après la 3ᵉ publication", () => {
     state.data = fourPosts()
     mount(true, { interleaveAfter: afterThird })
-    expect(screen.queryByText("Suggestion des chartes")).toBeNull()
-    expect(screen.getByText("Trois").compareDocumentPosition(screen.getByText("Carrousel des personnes")) & Node.DOCUMENT_POSITION_FOLLOWING).not.toBe(0)
+    expect(follows("Trois", "Carrousel des personnes")).toBe(true)
+  })
+
+  it("sans la charte, un fil court n'intercale rien", () => {
+    state.data = { items: [post("posts_1", "Un")], nextCursor: null, lacunar: false }
+    mount(true, { interleaveAfter: afterThird })
+    expect(screen.queryByText("Carrousel des personnes")).toBeNull()
   })
 })

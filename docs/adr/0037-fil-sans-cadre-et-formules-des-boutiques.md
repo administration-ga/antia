@@ -30,7 +30,9 @@ Nous allons, sous la présentation « charte » d'antsia.ga (ADR-0028) :
    8 → 6 px) et ramener les actions sociales compactes à 25 px de haut ;
 4. passer la barre des destinations en verre (flou et saturation), 52 px, icônes seules ;
 5. proposer partout où l'on rencontre une personne suggérée les deux formules, Suivre (ou Suivre en
-   retour) et Ajouter (lot 2) ;
+   retour, d'après le champ `followsYou` du catalogue) et Ajouter ; la carte de suggestion unique de
+   tête (ADR-0028) laisse place au carrousel « Personnes à découvrir », placé comme dans la référence
+   (après la troisième publication, ou au-dessus de l'état vide) (lot 2) ;
 6. déduire la formule d'une publication de boutique de son offre et de son média (lot 3).
 
 ## Conséquences
@@ -47,6 +49,9 @@ Nous allons, sous la présentation « charte » d'antsia.ga (ADR-0028) :
 - Les actions compactes de 25 px passent sous la cible de 44 px voulue jusqu'ici ; elles restent
   au-dessus du minimum de 24 px des cibles (WCAG 2.2, 2.5.8).
 - La grille mesure ses cartes (`ResizeObserver`) : sans lui, elle garde des rangées automatiques.
+- La carte de suggestion de tête et son bouton « Écrire » quittent le fil ; écrire reste offert sur
+  le profil.
+- « Suivre en retour » attend le déploiement du backend : sans lui, la carte dit « Suivre ».
 
 ### Neutres
 

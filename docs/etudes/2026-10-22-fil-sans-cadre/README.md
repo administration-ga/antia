@@ -83,3 +83,28 @@ Mesures prises dans le navigateur :
 
 Captures : `recette/lot1-telephone-390.jpg`, `recette/lot1-telephone-390-photo.jpg`,
 `recette/lot1-bureau-1440.jpg`, `recette/lot1-bureau-1920.jpg`.
+
+### Lot 2 — suggestions et relations (22/10/2026)
+
+Même banc local. Ce qui change :
+- la carte de suggestion unique de tête (ADR-0028) laisse place au carrousel « Personnes à
+  découvrir », à l'endroit de la référence : après la troisième publication (ou la dernière d'un
+  fil plus court), et au-dessus de l'état vide d'un fil vide ;
+- chaque carte : portrait rond de 80 px, nom, ligne d'appoint, « Suivre » (ou « Suivre en retour »)
+  et « Ajouter », chacun de 25 px, et « × ». Une personne suivie garde sa carte (« Suivi ») ;
+- le rail droit et le catalogue « Voir tout » offrent aussi « Suivre » ;
+- la rangée d'actions du profil passe à 25 px ;
+- les clips du fil passent en cartes 9:16, pleine largeur au téléphone ;
+- sur la grille du bureau sans colonne droite (768 à 1 399 px), la découverte revient pleine largeur.
+
+| Constat | Mesure |
+|---|---|
+| 390 px, carrousel | rangée à `x = 0`, 390 px ; cartes de 168 × 227 px ; Suivre et Ajouter à 25 px |
+| Suivre (Ruth ALLOGHO) | `follows` écrit ; la carte reste et dit « Suivi », nom accessible « Vous suivez Ruth ALLOGHO : ne plus suivre » |
+| Suivre en retour | Nadège KOUMBA suit Jean-Rémy : sa carte chez Jean-Rémy dit « Suivre en retour » (champ `followsYou` lu sur le backend) |
+| Profil, 390 px | Ajouter, Suivre et Clips à 25 px |
+| 1 280 px | grille de 3 colonnes, pas de colonne droite : le carrousel occupe la rangée entière (960 px) |
+
+Captures : `recette/lot2-telephone-390-suggestions.jpg`, `recette/lot2-bureau-1280-suggestions.jpg`.
+Les données de démonstration n'ont aucune vidéo : la rangée des clips n'a pas pu être vue à
+l'écran ; ses tests la couvrent.

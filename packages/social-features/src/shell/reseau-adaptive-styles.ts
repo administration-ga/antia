@@ -74,6 +74,12 @@ export const RESEAU_ADAPTIVE_CSS = `
   .rp-scope[data-navigation-layout="adaptive"] .rp-main .rp-tabs {
     display: none;
   }
+  /* ADR-0037 : la grille du fil (FeedMasonryGrid) privée de sa colonne droite
+     rend ses modules de découverte intercalés (personnes, pages), pleine largeur ;
+     ils se retirent dès que la colonne droite porte les mêmes données. */
+  .rp-scope[data-navigation-layout="adaptive"] .rp-feed-grid > .rp-feed-inline {
+    display: flex;
+  }
   /* Annule aussi la règle historique !important à 1108 px de conteneur. */
   .rp-scope[data-navigation-layout="adaptive"] .rp-desktop-icom-link {
     display: inline-flex !important;
@@ -93,6 +99,9 @@ export const RESEAU_ADAPTIVE_CSS = `
       }
       .rp-scope[data-navigation-layout="adaptive"] .rp-rail-end {
         display: flex;
+      }
+      .rp-scope[data-navigation-layout="adaptive"] .rp-feed-grid > .rp-feed-inline {
+        display: none;
       }
       .rp-scope[data-navigation-layout="adaptive"] .rp-desktop-icom-link {
         display: none !important;
