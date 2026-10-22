@@ -187,6 +187,8 @@ export interface NetworkContextValue {
   navigationLayout?: EngineNavigationLayout
   /** Libellés d'entrées optionnelles traduits par l'application qui sert leurs routes. */
   navigationLabels?: Readonly<{ shops?: string; clips?: string }>
+  /** ADR-0036 : l'application sert l'espace iCom Pro (boutiques, mises en relation) à côté d'iCom. */
+  icomPro: boolean
   /** La présentation des publications déclarée par l'application, `"classic"` sauf opt-in explicite. */
   postPresentation: EnginePostPresentation
   /** La présentation du fil déclarée par l'application, `"list"` sauf opt-in explicite (P04). */
@@ -299,6 +301,8 @@ export function NetworkProvider(props: {
   /** U02 : géométrie à trois formats, seulement sous destinations ; absent = seuil historique 960. */
   navigationLayout?: EngineNavigationLayout
   navigationLabels?: Readonly<{ shops?: string; clips?: string }>
+  /** ADR-0036 : opt-in de l'espace iCom Pro ; absent = messagerie unique (comportement historique). */
+  icomPro?: boolean
   /** Opt-in de la présentation média ou charte des publications ; absent = `"classic"` (comportement historique). */
   postPresentation?: EnginePostPresentation
   /** Opt-in du fil immersif (P04) ; absent = `"list"` (comportement historique). */
@@ -347,6 +351,7 @@ export function NetworkProvider(props: {
     navigation: resolveEngineNavigation(props.navigation, props.routes),
     navigationLayout: resolveEngineNavigationLayout(props.navigationLayout, resolveEngineNavigation(props.navigation, props.routes)),
     navigationLabels: props.navigationLabels,
+    icomPro: props.icomPro === true,
     postPresentation: resolveEnginePostPresentation(props.postPresentation),
     feedPresentation: resolveEngineFeedPresentation(props.feedPresentation),
     storiesPresentation: resolveEngineStoriesPresentation(props.storiesPresentation),

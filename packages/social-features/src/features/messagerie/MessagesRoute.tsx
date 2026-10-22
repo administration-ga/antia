@@ -35,7 +35,7 @@ import { MessagerieDesktopPage } from "./MessagerieDesktopPage"
 import { MessagerieListPage } from "./MessagerieListPage"
 import { MessagerieStyles } from "./messagerie-styles"
 import { CONTEXTUAL_ROUTE_KIND, parseConversationRoute } from "./messagerie-routes"
-import { IcomMessagesPage } from "./IcomMessagesPage"
+import { IcomMessagesPage, type IcomProInjection } from "./IcomMessagesPage"
 import type { ContextualMessagesInjection } from "./contextual-conversation-model"
 import { parseContextualConversationKey } from "./messagerie-dock"
 import { activateListSession, clearListSession } from "./messagerie-list-state"
@@ -67,9 +67,11 @@ export interface MessagesRouteProps {
 	 * dans les deux navigations. Absentes, rien de contextuel n'existe ici.
 	 */
 	contextual?: ContextualMessagesInjection
+	/** ADR-0036 : l'espace iCom Pro de l'application ; sous la navigation par destinations seulement. */
+	pro?: IcomProInjection
 }
 
-export function MessagesRoute({ kind, id, compose, commercial, contextual }: MessagesRouteProps) {
+export function MessagesRoute({ kind, id, compose, commercial, contextual, pro }: MessagesRouteProps) {
 	const { t } = useTranslation("messagerie")
 	const { mobile: isMobile } = useNetworkNavigationLayout()
 	const { navigation } = useNetwork()
@@ -93,7 +95,7 @@ export function MessagesRoute({ kind, id, compose, commercial, contextual }: Mes
 		)
 	}
 
-	if (navigation === "destinations") return <IcomMessagesPage conversationKey={conversationKey} compose={compose} isMobile={isMobile} commercial={commercial} contextual={contextual} />
+	if (navigation === "destinations") return <IcomMessagesPage conversationKey={conversationKey} compose={compose} isMobile={isMobile} commercial={commercial} contextual={contextual} pro={pro} />
 	if (kind === "commerce") return null
 	// CC-5 : une conversation contextuelle se rend EN PAGE, au téléphone comme au bureau — le
 	// téléphone iCom détaché (dock personnel) ne porte jamais un fil d'une autre famille.

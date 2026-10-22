@@ -50,7 +50,7 @@
     "feed": "Home",
     "signOut": "Sign out",
     "home": "Home",
-    "messages": "Messages",
+    "messages": "iCom",
     "myProfile": "My profile",
     "label": "Network navigation",
     "sessionTools": "Notifications, identity and session"
@@ -140,7 +140,7 @@
     "generic": "Something went wrong. Please try again."
   },
   "messages": {
-    "title": "Messages"
+    "title": "iCom"
   },
   "notificationOpen": {
     "title": "Open a notification",
