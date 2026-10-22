@@ -16,7 +16,7 @@ réservent contre `origin/main` et les PR ouvertes de ce dépôt.
 | [0008](0008-preuves-serveur-et-revocation-immediate-des-sessions.md) | Preuves serveur, rattachement explicite et révocation immédiate des sessions | Accepté |
 | [0009](0009-gardes-et-droits-personnels-pa5.md) | Gardes et droits personnels PA5 : modération, débit, données, notifications et fédération | Accepté |
 | [0010](0010-preferences-de-presentation-et-mesure-facultative.md) | Préférences de présentation, cache cohérent et mesure facultative PA6 | Accepté |
-| [0011](0011-console-idn-et-archivage-a-deux-personnes.md) | Console IDN, journal préalable et archivage à deux personnes | Accepté |
+| [0011](0011-console-idn-et-archivage-a-deux-personnes.md) | Console IDN, journal préalable et archivage à deux personnes | Accepté ; garantie IDN de niveau 2 (§ 1) ramenée au niveau 1 par l'ADR-0039 |
 | [0012](0012-projections-publiques-et-session-ssr-antsia.md) | Projections publiques, diffusion choisie et session SSR propre à ANTSIA | Accepté pour la recette locale |
 | [0013](0013-pages-administratives-federees-et-revisions-source.md) | Pages administratives fédérées, révisions source et gestion locale fermée | Proposé ; code PA9A, vérifications différées |
 | [0014](0014-publications-federees-sans-personne-technique.md) | Publications fédérées sans personne technique, retraits et import sous garde | Proposé ; code PA9B, vérifications différées |
@@ -41,3 +41,4 @@ réservent contre `origin/main` et les PR ouvertes de ce dépôt.
 | [0036](0036-icom-et-icom-pro.md) | iCom et iCom Pro : deux espaces de messagerie, une bascule en pilule, contacts pro dérivés des échanges | Accepté par le propriétaire le 22/10/2026 ; lot ICP-1 (front) |
 | [0037](0037-fil-sans-cadre-et-formules-des-boutiques.md) | Fil sans cadre, grille du bureau, deux formules de relation et formules des boutiques | Accepté par le propriétaire le 22/10/2026 ; lot 1 (socle et publications) |
 | [0038](0038-comptes-de-demonstration-diasporale.md) | Les comptes de démonstration de DIASPORALE sur la démonstration déclarée | Accepté par le propriétaire le 22/10/2026 ; code et tests verts, publication sur la démonstration à suivre |
+| [0039](0039-console-idn-niveau-1.md) | La console d'exploitation admet une connexion IDN de niveau 1 | Accepté par le propriétaire le 22/10/2026 ; code et tests verts |
