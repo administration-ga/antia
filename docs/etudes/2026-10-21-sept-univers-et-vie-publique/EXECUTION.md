@@ -15,7 +15,7 @@ Autorisation : le propriétaire a validé les décisions D01 à D08 le 21 octobr
 |---|---|---|
 | SU00 | Terminé — documentaire | ADR-0035 (D01–D08 acceptées, D09–D12 proposées) ; index des ADR mis à jour ; étude passée en version 1.1 |
 | SU01 | Analyse livrée ; mise en œuvre par sous-lots | exigences article par article, état du code, écarts, arbitrages juridiques, sous-lots SU01a à SU01j et calendrier ; à faire valider par un juriste avant toute mise en œuvre de l'identification et de l'âge |
-| SU01d | En ligne, restes compris, depuis le 22/10 (backend de `f574c75`, front `880d1aa`) ; bureau de DIASPORALE (diasporale#26) et délais légaux de la console livrés en source le 22/10, à publier | voir [SU01d — signalements réglementés](#su01d--signalements-réglementés) |
+| SU01d | En ligne, restes compris, depuis le 22/10 (backend de `f574c75`, front `880d1aa`) ; délais légaux de la console en ligne le 22/10 (backend et console `d7f4784`) ; bureau de DIASPORALE (diasporale#26) livré en source, à publier | voir [SU01d — signalements réglementés](#su01d--signalements-réglementés) |
 | SU02 | À faire | Découvrir par piliers ; dépend de SU00 et MP01 |
 | SU03 | À faire | types d'offre bien immobilier et véhicule ; dépend de MP03 |
 | SU04 à SU16 | À faire | voir l'étude, § 15 |
@@ -153,7 +153,7 @@ Ordonnance n° 0011/PR/2026, art. 24, 32 et 33.
   - à 390 px, aucun défilement horizontal ; la démonstration montre l'hypertrucage fictif avant les trois harcèlements fictifs ;
   - captures dans `docs/recette/su01d-bureau-delais-2026-10-22/` du dépôt DIASPORALE.
 
-**Console d'exploitation : les délais légaux (22/10/2026, en source, non déployée)**
+**Console d'exploitation : les délais légaux (22/10/2026, en ligne le jour même)**
 
 Périmètre tranché par le propriétaire le 22/10/2026 : l'export suit la règle de `/transparence` ; une alerte en direct dans « Santé du réseau », sans cron ni écriture ; une recette par les tests et par un banc visuel.
 
@@ -198,7 +198,7 @@ Périmètre tranché par le propriétaire le 22/10/2026 : l'export suit la règl
   - captures : [`recette/su01d-console-banc-*.jpg`](recette/).
 
 **Ce qui reste de SU01d**
-- Console : mettre en ligne le backend (export étendu, `legalDeadlineAlert`), puis la console. Avant le backend, son bloc d'alerte dit seulement qu'il ne peut pas lire. Aucun déploiement n'a été fait. Sa recette connectée attend un client IDN de bac à sable (PA7).
+- Console en ligne le 22/10, avec l'accord écrit du propriétaire : backend de `main` `d7f4784` sur la démo puis la production, puis la console `d7f4784` promue ([docs/35](../../35_PUBLICATION_DONNEES_DEMO_2026-10-22.md)). Sa recette connectée attend le propriétaire : un client IDN de niveau 2 qui connaisse l'adresse de retour de la console, et un premier opérateur.
 - Publier le front DIASPORALE du bureau (diasporale#26) : aucun backend nouveau. C'est au propriétaire.
 - Premiers chiffres : le passage quotidien de 04 h 10 UTC mesure la veille. Une journée ne se publie qu'à partir de 5 échéances sur 5 auteurs.
 
