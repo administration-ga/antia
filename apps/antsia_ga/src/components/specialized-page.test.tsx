@@ -15,7 +15,7 @@ vi.mock("@antsia/social-features/shell/appearance", () => ({ AppearanceToggle: (
 vi.mock("react-i18next", () => ({ useTranslation: () => ({ t: (key: string) => {
   const labels: Record<string, string> = {
     returnToAntsia: "Retour à ANTSIA", shopSpace: "Espace boutique", serviceSpace: "Espace services",
-    navigation: "Navigation de l’activité", messages: "Messages", "nav.home": "Accueil", "nav.catalog": "Catalogue", "nav.cart": "Panier", "nav.social": "Page sociale", "nav.providerHome": "Présentation", "nav.services": "Prestations", "nav.requests": "Mes demandes",
+    navigation: "Navigation de l’activité", messages: "iCom Pro", "nav.home": "Accueil", "nav.catalog": "Catalogue", "nav.cart": "Panier", "nav.social": "Page sociale", "nav.providerHome": "Présentation", "nav.services": "Prestations", "nav.requests": "Mes demandes",
   }
   return labels[key] ?? key
 } }) }))
@@ -130,7 +130,8 @@ describe("MP01 — coque spécialisée de boutique", () => {
     expect(links.map(link => link.getAttribute("aria-label"))).toEqual(names)
     expect(links.map(link => link.getAttribute("href"))).toEqual(destinations)
     expect(container.querySelector('a[aria-current="page"]')?.getAttribute("href")).toBe(routes.storefront("atelier"))
-    expect(container.querySelector('a[aria-label="Messages"]')?.getAttribute("href")).toBe(routes.messages())
+    // ADR-0036 : depuis un espace pro, la messagerie ouvre iCom Pro.
+    expect(container.querySelector('a[aria-label="iCom Pro"]')?.getAttribute("href")).toBe(`${routes.messages()}?espace=pro`)
     expect(container.querySelector('[aria-label="Apparence"]')).not.toBeNull()
     expect(container.querySelector("[data-specialized-space]")?.getAttribute("data-specialized-space")).toBe("shop")
   })

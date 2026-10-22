@@ -50,7 +50,7 @@
     "feed": "Accueil",
     "signOut": "Se déconnecter",
     "home": "Accueil",
-    "messages": "Messages",
+    "messages": "iCom",
     "myProfile": "Mon profil",
     "label": "Navigation du réseau",
     "sessionTools": "Notifications, identité et session"
@@ -140,7 +140,7 @@
     "generic": "Une erreur est survenue. Réessayez."
   },
   "messages": {
-    "title": "Messages"
+    "title": "iCom"
   },
   "notificationOpen": {
     "title": "Ouvrir une notification",

@@ -1,6 +1,7 @@
 "use client"
 
 import { AppearanceToggle } from "@antsia/social-features/shell/appearance"
+import { icomProHref } from "@antsia/social-features/features/messagerie/icom-space"
 import { cn } from "@antsia/ui/lib/cn"
 import { ArrowLeft, House, LayoutGrid, MessageCircle, ShoppingBag, CalendarCheck, UsersRound, UserRound, BriefcaseBusiness, Handshake, type LucideIcon } from "lucide-react"
 import Link from "next/link"
@@ -55,7 +56,7 @@ export function SpecializedEditorialPage({ children }: { children: ReactNode }) 
     { id: "media", label: t("editorialNav.media"), href: routes.mediaHome(), icon: House },
     { id: "discover", label: t("editorialNav.discover"), href: routes.press(), icon: LayoutGrid },
     { id: "activities", label: t("editorialNav.activities"), href: routes.myShops(), icon: BriefcaseBusiness },
-    { id: "messages", label: t("messages"), href: routes.messages(), icon: MessageCircle },
+    { id: "messages", label: t("messages"), href: icomProHref(routes.messages()), icon: MessageCircle },
   ]
   return <SpecializedFrame kind="media" label={t("editorialSpace")} links={links}>{children}</SpecializedFrame>
 }
@@ -71,7 +72,7 @@ function SpecializedFrame({ kind, label, links, children }: { kind: "shop" | "pr
       <div className="mx-auto flex min-h-16 w-full max-w-[1440px] flex-wrap items-center justify-between gap-x-3 gap-y-1 px-3 py-2 sm:px-6">
         <Link href={back.href} scroll={false} onClick={back.prepareReturn} className="inline-flex min-h-11 items-center gap-2 rounded-[var(--ui2-button-radius)] px-2 text-sm font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"><ArrowLeft className="size-4 shrink-0" aria-hidden="true" />{t("returnToAntsia")}</Link>
         <span className="hidden min-w-0 truncate text-sm text-muted-foreground sm:inline">{label}</span>
-        <div className="flex items-center gap-1"><Link href={routes.messages()} aria-label={t("messages")} className={NAV_ITEM}><MessageCircle aria-hidden="true" className="size-5" /></Link><AppearanceToggle /></div>
+        <div className="flex items-center gap-1"><Link href={icomProHref(routes.messages())} aria-label={t("messages")} className={NAV_ITEM}><MessageCircle aria-hidden="true" className="size-5" /></Link><AppearanceToggle /></div>
       </div>
     </header>
     <div className="mx-auto w-full max-w-[1440px] min-[768px]:grid min-[768px]:grid-cols-[96px_minmax(0,1fr)] min-[1200px]:grid-cols-[208px_minmax(0,1fr)]">
