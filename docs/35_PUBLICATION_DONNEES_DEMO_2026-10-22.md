@@ -146,3 +146,30 @@ Autres contrôles :
 - Site principal : `/`, `/entrer`, `/fil`, `/messages`, `/messages?espace=pro`, `/marketplace`
   en 200 ; santé des deux sites aux versions ci-dessus.
 - Restes : publication des PR 51 et 52 (accord du propriétaire) ; ICP-3 (réglages pro).
+
+## Mise à jour — publication de `main` 94f6506 (écrans de membre en pleine largeur)
+
+- Contenu par rapport à bca19af : PR 51 (vitrine, catalogue, offres et annuaires sur toute la
+  colonne), PR 52 (tous les écrans de membre en pleine largeur, sections et champs en colonnes
+  responsives), PR 53 (registre). Aucun changement sous `convex/` : backend bca19af inchangé.
+- Fronts promus (accord écrit du propriétaire) :
+  - enfant démo : `dpl_BWKUKSSy3a6zQBHnw6qgyRtNpWG2` (antsia-demo-h8ppd65uo), version `main-94f6506aa59e-demo` ;
+  - principal : `dpl_8Ecd8htmb6iqePmrp8iTRtPSkWEP` (antsia-mrgyt8eyx), version `main-94f6506aa59e-production`.
+  - Contexte : ANTSIA 94f6506 et DIASPORALE 214831c, 3 259 fichiers, empreinte `504530ff…`.
+  - Retour arrière : antsia-ojavnpvwd (principal) et antsia-demo-8hbfvxcy0 (enfant).
+- Recette (compte Membre de la démo, Awa MBA) :
+
+| Contrôle | 1440 | 834 | 390 |
+|---|---|---|---|
+| Fil (carte iCom avec la pilule à 1440, bandeau des 3 invitations) | ✓ | ✓ | ✓ |
+| Mon espace : contenu sur toute la colonne (1 120 / 690 / 366 px) | ✓ | ✓ | ✓ |
+| Réglages : sections en deux colonnes au bureau, une au téléphone | ✓ | ✓ | ✓ |
+| Vitrine de l'Épicerie : toute la colonne, couverture et images visibles décodées | ✓ | ✓ | ✓ |
+| iCom (4 non lus) et iCom Pro (3 fils clients) | — | ✓ | ✓ |
+| Débordement horizontal, élément hors de l'écran, ressource en erreur | aucun | aucun | aucun |
+
+- Site principal : `/`, `/entrer`, `/fil`, `/moi`, `/parametres`, `/messages`,
+  `/messages?espace=pro`, `/marketplace` en 200 ; santé des deux sites aux versions ci-dessus.
+- Non publiés : PR 54 (transparence, restes de SU01d ; touche `convex/modules/moderation` et
+  `convex/modules/public`) et diasporale#25, fusionnés après 94f6506 : déploiement Convex puis
+  accord du propriétaire.
