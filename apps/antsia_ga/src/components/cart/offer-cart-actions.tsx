@@ -22,17 +22,21 @@ import { useCartDraft } from "./use-cart-draft"
 const demoOffer = (offer: CatalogOffer) => isDemoCatalogOfferRef(offer.offerRef) || offer.offerRef.startsWith("demo:offer:")
 type SelectionValues = { options: string[]; variantRef: string; quantity: string }
 
-export function OfferCartActions({ offer, initialSelection }: { offer: CatalogOffer; initialSelection?: OfferInitialSelection }) {
+/** `onAdded` : la surface qui l'ouvre (feuille d'ajout rapide) se referme une fois la ligne enregistrée. */
+export function OfferCartActions({ offer, initialSelection, onAdded }: { offer: CatalogOffer; initialSelection?: OfferInitialSelection; onAdded?: () => void }) {
   const { t } = useTranslation("shops")
-  if (demoOffer(offer)) return <p className="text-sm text-muted-foreground">{t("publicActions.demoNotice")}</p>
-  return <OwnedOfferCartActions offer={offer} initialSelection={initialSelection} />
+  if (isDemoCartOffer(offer)) return <p className="text-sm text-muted-foreground">{t("publicActions.demoNotice")}</p>
+  return <OwnedOfferCartActions offer={offer} initialSelection={initialSelection} onAdded={onAdded} />
 }
 
-function OwnedOfferCartActions({ offer, initialSelection }: { offer: CatalogOffer; initialSelection?: OfferInitialSelection }) {
+/** Une offre de démonstration n'entre jamais dans un panier. */
+export const isDemoCartOffer = demoOffer
+
+function OwnedOfferCartActions({ offer, initialSelection, onAdded }: { offer: CatalogOffer; initialSelection?: OfferInitialSelection; onAdded?: () => void }) {
   const { networkId, personId } = useCartDraft(offer.shopHandle)
   const stamp = JSON.stringify([networkId, personId, offer.offerRef, offer.revision])
   const [firstStamp] = useState(stamp)
-  return <OfferCartSelection key={JSON.stringify([stamp, initialSelection])} offer={offer} initialSelection={stamp === firstStamp ? initialSelection : undefined} />
+  return <OfferCartSelection key={JSON.stringify([stamp, initialSelection])} offer={offer} initialSelection={stamp === firstStamp ? initialSelection : undefined} onAdded={onAdded} />
 }
 
 function useOfferSelection(offer: CatalogOffer, initialSelection?: OfferInitialSelection) {
@@ -46,7 +50,7 @@ function useOfferSelection(offer: CatalogOffer, initialSelection?: OfferInitialS
   return { form, values, selection }
 }
 
-function OfferCartSelection({ offer, initialSelection }: { offer: CatalogOffer; initialSelection?: OfferInitialSelection }) {
+function OfferCartSelection({ offer, initialSelection, onAdded }: { offer: CatalogOffer; initialSelection?: OfferInitialSelection; onAdded?: () => void }) {
   const { t } = useTranslation("cart")
   const { t: shopT } = useTranslation("shops")
   const cart = useCartDraft(offer.shopHandle)
@@ -58,7 +62,9 @@ function OfferCartSelection({ offer, initialSelection }: { offer: CatalogOffer; 
     const current = resolveOfferVariantSelection(offer, values)
     if (!current.canAdd) { form.setError("variantRef", { message: shopT(`variantSelection.states.${current.status}`) }); return }
     const result = addCartItem(cart.draft, { networkId: String(cart.networkId), personId: String(cart.personId) }, offer.shopHandle, { offerRef: offer.offerRef, ...(current.variant ? { variantRef: current.variant.variantRef } : {}), quantity: Number(values.quantity) }, Date.now())
-    setMessage(result.ok ? cart.save(result.draft) ? "added" : cart.getSaveError() === "drafts_full" ? "drafts_full" : "draftUnavailable" : result.reason)
+    const outcome = result.ok ? cart.save(result.draft) ? "added" : cart.getSaveError() === "drafts_full" ? "drafts_full" : "draftUnavailable" : result.reason
+    setMessage(outcome)
+    if (outcome === "added") onAdded?.()
   })}>
     <OfferSelectionInputs offer={offer} form={form} values={values} selection={selection} />
     {/* Ajouter au panier : couleur du commerce (ADR-0027). */}

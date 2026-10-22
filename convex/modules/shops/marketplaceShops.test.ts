@@ -128,6 +128,25 @@ describe("MP04 — gardes de l'annuaire en réseau", () => {
     expect((await read(f)).page.map(item => item.handle)).toEqual([local.handle])
   })
 
+  it("la carte porte la bannière de la page par la garde des fichiers, et null sans bannière", async () => {
+    const f = await fixture()
+    const illustrated = await addShop(f, 1)
+    const plain = await addShop(f, 2)
+    const storageId = await f.t.run(async ctx => {
+      const id = await ctx.storage.store(new Blob([new Uint8Array(64)], { type: "image/png" }))
+      await ctx.db.patch(illustrated.pageId, { bannerStorageId: id })
+      return id
+    })
+    // Analyse en cours : la garde retient la bannière comme un fichier absent.
+    const scanId = await f.t.run(async ctx => await ctx.db.insert("fileScans", { storageId, status: "pending", source: "page", attempts: 0, createdAt: NOW, updatedAt: NOW }))
+    expect((await read(f)).page.find(item => item.handle === illustrated.handle)?.bannerUrl).toBeNull()
+    await f.t.run(async ctx => { await ctx.db.patch(scanId, { status: "clean", updatedAt: NOW }) })
+    const cards = (await read(f)).page
+    expect(cards.find(item => item.handle === illustrated.handle)?.bannerUrl).toEqual(expect.any(String))
+    expect(cards.find(item => item.handle === plain.handle)?.bannerUrl).toBeNull()
+    expect(JSON.stringify(cards)).not.toContain(storageId)
+  })
+
   it("relit habilitation, suspension racine, état de page et politique à chaque lecture", async () => {
     const f = await fixture()
     const shop = await addShop(f, 1)

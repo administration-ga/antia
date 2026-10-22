@@ -3,7 +3,7 @@ import { renderToStaticMarkup } from "react-dom/server"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { getAppT } from "@/i18n/server"
 import { routes } from "@/lib/routes"
-import { catalogAvailability, catalogVariantPrice } from "./catalog-model"
+import { catalogAvailability, catalogVariantPrice, type CatalogOffer } from "./catalog-model"
 import { OfferCard, OfferDetails } from "./offer-card"
 import { CATALOG_NOW, catalogOfferFixture, catalogVariantFixture } from "./__tests__/catalog-fixtures"
 
@@ -13,15 +13,15 @@ const translate = (locale: "fr" | "en") => (key: string, options?: Record<string
 const dom = (html: string) => { const node = document.createElement("div"); node.innerHTML = html; return node }
 
 describe("cartes et fiches d'offre communes au membre et au SSR", () => {
-  it.each(["fr", "en"] as const)("rend titre, prix XAF, fraîcheur et vraie destination (%s)", (locale) => {
+  it.each(["fr", "en"] as const)("la carte compacte rend titre, prix XAF et vraie destination (%s)", (locale) => {
     const offer = catalogOfferFixture()
     const t = translate(locale)
     const node = dom(renderToStaticMarkup(<OfferCard offer={offer} audience="public" locale={locale} t={t} compact />))
+    const href = routes.publicShopOffer(offer.shopHandle, offer.offerRef)
     expect(node.textContent).toContain(offer.title)
     expect(node.textContent).toContain("XAF")
-    expect(node.textContent).toContain(t("catalog.availability.title"))
-    expect(node.textContent).toContain("2026")
-    expect(node.querySelector("a")?.getAttribute("href")).toBe(routes.publicShopOffer(offer.shopHandle, offer.offerRef))
+    expect(node.querySelector("a")?.getAttribute("href")).toBe(href)
+    expect(Array.from(node.querySelectorAll("a")).find(link => link.textContent === t("catalog.openOffer"))?.getAttribute("href")).toBe(href)
     expect(node.querySelector("button, form")).toBeNull()
   })
   it("une photo retenue ne reçoit jamais de src même si le DTO contient aussi une URL", () => {
@@ -39,11 +39,11 @@ describe("cartes et fiches d'offre communes au membre et au SSR", () => {
     expect(node.querySelector("img")?.getAttribute("alt")).toBe("Sac en tissu")
     expect(node.querySelector("a")?.getAttribute("href")).toBe(routes.shopOffer(offer.shopHandle, offer.offerRef))
   })
-  it.each(["member", "public"] as const)("les vignettes gardent les vrais médias et la même fiche autorisée (%s)", (audience) => {
+  it.each(["member", "public"] as const)("la galerie à points garde les vrais médias et la même fiche autorisée (%s)", (audience) => {
     const photo = { url: "https://media.example/face.jpg", altText: "Vue de face", width: 800, height: 600, withheld: null }
     const offer = catalogOfferFixture({ media: [photo, { ...photo, url: "https://must-never-appear.example/held.jpg", withheld: "fileScanPending" }, { ...photo, url: "https://media.example/back.jpg", altText: "Vue arrière" }] })
     const t = translate("fr")
-    const node = dom(renderToStaticMarkup(<OfferCard offer={offer} audience={audience} locale="fr" t={t} compact />))
+    const node = dom(renderToStaticMarkup(<OfferCard offer={offer} audience={audience} locale="fr" t={t} />))
     const href = audience === "public" ? routes.publicShopOffer(offer.shopHandle, offer.offerRef) : routes.shopOffer(offer.shopHandle, offer.offerRef)
     expect(Array.from(node.querySelectorAll("img")).map((image) => image.getAttribute("src"))).toEqual([photo.url, "https://media.example/back.jpg"])
     expect(node.innerHTML).not.toContain("must-never-appear")
@@ -51,20 +51,35 @@ describe("cartes et fiches d'offre communes au membre et au SSR", () => {
     expect(photos?.querySelectorAll("a")).toHaveLength(2)
     expect(Array.from(photos?.querySelectorAll("a") ?? []).map((link) => link.getAttribute("href"))).toEqual([href, href])
     expect(photos?.textContent).toContain(t("catalog.mediaWithheld"))
-    const action = Array.from(node.querySelectorAll("a")).find((link) => link.textContent === t("catalog.openOffer"))
-    expect(action?.getAttribute("href")).toBe(href)
-    expect(node.textContent).toContain(offer.description)
+    // Un point par photo, décoratif : la galerie se lit déjà par sa liste.
+    expect(node.querySelector("[data-offer-dots]")?.getAttribute("aria-hidden")).toBe("true")
+    expect(node.querySelectorAll("[data-offer-dots] span")).toHaveLength(3)
+    expect(Array.from(node.querySelectorAll("a")).find(link => link.textContent === offer.title)?.getAttribute("href")).toBe(href)
     expect(node.querySelector("button, form, [data-checkout]")).toBeNull()
   })
-  it("une offre sans photo ni description garde son repli et sa destination, sans galerie inventée", () => {
+  it("une offre sans photo garde son repli et sa destination, sans galerie ni points inventés", () => {
     const offer = catalogOfferFixture({ media: [], description: "", variants: [], availability: { state: null, indicative: true, updatedAt: null, stale: false } })
     const t = translate("en")
     const node = dom(renderToStaticMarkup(<OfferCard offer={offer} audience="public" locale="en" t={t} />))
-    expect(node.querySelector("img, ul")).toBeNull()
+    expect(node.querySelector("img, [data-offer-dots]")).toBeNull()
     expect(node.textContent).toContain(t("catalog.noPhoto"))
-    expect(node.textContent).toContain(t("catalog.noDescription"))
-    expect(node.textContent).toContain(t("catalog.availability.notShared"))
     expect(node.querySelector("a")?.getAttribute("href")).toBe(routes.publicShopOffer(offer.shopHandle, offer.offerRef))
+  })
+  it("montre la marque et la couleur publiées (sinon les variantes), une indisponibilité récente et l'action de la surface", () => {
+    const t = translate("fr")
+    const facets: NonNullable<CatalogOffer["facets"]> = { taxonomyVersion: 1, categoryPath: ["fashion"], attributes: [{ key: "brand", type: "text", value: "Maison Nzeng" }, { key: "color", type: "text", value: "Indigo" }] }
+    const offer = catalogOfferFixture({ facets, availability: { state: "out_of_stock", indicative: true, updatedAt: CATALOG_NOW, stale: false } })
+    const node = dom(renderToStaticMarkup(<OfferCard offer={offer} audience="member" locale="fr" t={t} action={<button type="button">Ajouter</button>} />))
+    expect(node.textContent).toContain("Maison Nzeng")
+    expect(node.textContent).toContain("Indigo")
+    expect(node.textContent).toContain(t("catalog.card.outOfStock"))
+    expect(node.querySelector("[data-offer-card-action] button")?.textContent).toBe("Ajouter")
+    // Aucun prix barré ni remise : le moteur n'en porte pas.
+    expect(node.querySelector("s, del")).toBeNull()
+    const plain = dom(renderToStaticMarkup(<OfferCard offer={catalogOfferFixture()} audience="member" locale="fr" t={t} seller={false} />))
+    expect(plain.textContent).toContain(t("catalog.hasVariants", { count: 1 }))
+    expect(plain.textContent).not.toContain(t("catalog.card.outOfStock"))
+    expect(plain.textContent).not.toContain(t("catalog.soldBy", { handle: "atelier" }))
   })
   it("un service sur devis reste explicitement sans montant et sans action de transaction", () => {
     const offer = catalogOfferFixture({ kind: "service", price: { mode: "quote", currency: "XAF" }, variants: [] })

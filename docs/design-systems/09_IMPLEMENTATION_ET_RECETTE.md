@@ -325,6 +325,85 @@ bord droit. Le cadre de membre a un rail de 96 puis 248 px, celui des espaces de
 
 ![Profil pro à 1 920 px : deux groupes, champs en paires, bouton à sa largeur](recette/largeur-profil-pro-1920.jpg)
 
+### Marketplace sur le modèle des ventes privées, lot 1 : l'accueil (22/10/2026)
+
+Demande du propriétaire, avec les captures d'une application de ventes privées :
+des boutiques en grandes cartes, une par ligne au téléphone et trois ou quatre
+par ligne au bureau, et des « moments » qui défilent. Ses décisions du jour :
+rien d'inventé (aucun prix barré, remise, sponsor, minuterie ni total
+d'articles, absents du moteur) ; la bannière de la page s'ajoute à la carte de
+boutique du moteur.
+
+- `/marketplace` sans paramètre devient l'accueil ; toute recherche, vue ou
+  rayon garde les résultats d'avant, sous le même en-tête :
+  - un salut au nom du membre (`displayName`, jamais découpé) ;
+  - ses paniers, avec leur nombre de lignes ;
+  - la recherche des produits. Sa suggestion tourne sur de vrais rayons du
+    registre et reste fixe si le mouvement est réduit.
+- Pastilles qui défilent : Accueil, Produits, les six rayons de premier niveau,
+  Services, Boutiques. Une recherche en cours suit le changement de rayon ; une
+  seule pastille est active.
+- Sections de l'accueil, toutes lues dans le moteur :
+  - « Boutiques » : vitrines de produits en grandes cartes. La bannière fait la
+    photo, avec le nom en haut, la spécialité ou le modèle en bas à gauche, le
+    badge calculé et la zone en bas à droite ;
+  - « Prestataires de services » : vitrines sur devis, en carrousel de grandes
+    cartes ;
+  - « Nouveautés » et « Services » : offres les plus récentes, en carrousel ;
+  - la sélection de démonstration, avec sa mention.
+
+  Une section vide ou un index en préparation disparaît.
+- Carte d'offre commune, au membre comme au SSR :
+  - galerie à points, photo entière sur fond clair ;
+  - marque et couleur publiées (facettes), sinon le nombre de variantes ;
+  - prix exact et lien vers le vendeur ;
+  - indisponibilité récente signalée ;
+  - aucune remise.
+
+  Côté membre, l'action « Au panier » ajoute d'un geste une offre au prix exact
+  sans variante. « Choisir » ouvre une feuille avec la sélection réelle des
+  variantes. La démonstration et les offres à consulter n'ont pas de bouton.
+- « Filtrer » ouvre le formulaire de filtres existant dans une feuille (en bas
+  au téléphone, à droite dès 768 px). Le bouton flotte au-dessus de la barre
+  d'onglets jusqu'à 1 023 px, puis rejoint la barre de l'écran. Une recherche
+  appliquée rend le focus au titre. Un bouton ramène en haut de la page.
+- Écarts : grilles et carrousels à 12 px au téléphone, puis sur la gouttière
+  (`--spacing-gutter`) dès 768 px, comme les marges.
+
+Mesures sur `/marketplace` et `/marketplace?vue=produits` (backend local du
+candidat, contenu de démonstration) :
+
+| Largeur | Bloc | Grandes cartes (colonnes) | Grille d'offres (colonnes) | Défilement horizontal |
+|---|---|---|---|---|
+| 390 px | 12 / 12, 366 px | 1 | 2 (177 px) | aucun |
+| 1 024 px | 128 / 16, 880 px | 3 | 4 | aucun |
+| 1 280 px | 296 / 24, 960 px | 3 | 4 | aucun |
+| 1 440 px | 296 / 24, 1 120 px | 3 | 5 | aucun |
+| 1 920 px | 296 / 24, 1 600 px | 4 | 6 | aucun |
+
+Défaut trouvé et corrigé pendant la recette : le lien du vendeur, aligné à
+gauche dans la grille, prenait sa largeur de contenu (260 px dans une carte de
+177 px) et élargissait la page à 477 px au téléphone. Il est désormais borné à
+la carte.
+
+![Accueil à 390 px](recette/marketplace-accueil-390.jpg)
+
+![Résultats à 390 px : deux colonnes et « Filtrer » flottant](recette/marketplace-produits-390.jpg)
+
+![La feuille de filtres au téléphone](recette/marketplace-filtres-390.jpg)
+
+![Accueil à 1 024 px](recette/marketplace-accueil-1024.jpg)
+
+![Accueil à 1 280 px](recette/marketplace-accueil-1280.jpg)
+
+![Accueil à 1 440 px](recette/marketplace-accueil-1440.jpg)
+
+![Accueil à 1 920 px : quatre grandes cartes par ligne](recette/marketplace-accueil-1920.jpg)
+
+Limite : en local, aucune offre réelle (pas de PRO.GA). Les carrousels
+« Nouveautés » et « Services » et l'ajout au panier se prouvent par les tests ;
+les offres de démonstration refusent le panier par conception.
+
 ## Limites de preuve et état Git
 
 Le `verify` global avec l’ensemble des tests backend et des espaces de travail voisins n’a pas été relancé : la validation est ciblée sur les surfaces modifiées et leurs contrats.

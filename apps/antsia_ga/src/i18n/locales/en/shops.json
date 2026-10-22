@@ -446,7 +446,10 @@
       "price_desc": "Price: high to low",
       "relevance": "Relevance"
     },
-    "indexBuilding": "The catalogue is being indexed. Existing offers remain available without filters; filtering will be available after this update."
+    "indexBuilding": "The catalogue is being indexed. Existing offers remain available without filters; filtering will be available after this update.",
+    "card": {
+      "outOfStock": "Currently unavailable"
+    }
   },
   "link": {
     "title": "My PRO.GA activity",
@@ -672,7 +675,8 @@
     "manage": "Manage my storefronts",
     "publicVersion": "View version without an account",
     "publicationsHint": "Find the actual posts from this activity on its social page.",
-    "socialPage": "Open social page"
+    "socialPage": "Open social page",
+    "viewNamed": "Open the shop {{name}}"
   },
   "badges": {
     "official": "Official",

@@ -5,50 +5,68 @@ import { useAuthenticatedConvexQuery } from "@antsia/api/hooks"
 import { useNetwork } from "@antsia/api/network"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
-import { Suspense, useId, useRef, useState, useSyncExternalStore } from "react"
+import { Suspense, useId, useRef } from "react"
 import { useTranslation } from "react-i18next"
 
+import { OfferQuickAdd } from "@/components/cart/offer-quick-add"
 import { MemberPage } from "@/components/member-chrome"
 import { Button } from "@/components/shared/controls"
-import { DirectoryCard } from "@/components/shops/member-shop-directory"
 import { OfferCard } from "@/components/shops/offer-card"
 import { SHOP_ACTION_CLASS } from "@/components/shops/offer-experience-styles"
-import { MARKETPLACE_FACETS, MARKETPLACE_PAGE_SIZE, marketplaceSearchParams, marketplaceSearchFromParams, type MarketplaceSearch } from "@/lib/marketplace-search"
+import { MARKETPLACE_FACETS, MARKETPLACE_PAGE_SIZE, marketplaceSearchFromParams, type MarketplaceSearch } from "@/lib/marketplace-search"
 import { routes } from "@/lib/routes"
-import { MarketplaceFilters } from "./marketplace-filters"
+import { activeMarketplacePill, MarketplaceBackToTop, MarketplaceFilterSheet, MarketplaceHeader, MarketplacePills } from "./marketplace-chrome"
+import { MarketplaceHome, SHOWCASE_GRID } from "./marketplace-home"
+import { ShopShowcaseCard } from "./shop-showcase-card"
 
-const gridClass = "grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3"
-const wideQuery = "(min-width: 1024px)"
-function subscribeWidth(callback: () => void) {
-  const media = window.matchMedia(wideQuery)
-  media.addEventListener("change", callback)
-  return () => media.removeEventListener("change", callback)
-}
-const wideSnapshot = () => window.matchMedia(wideQuery).matches
+/**
+ * Les cartes d'offres : deux colonnes au téléphone (modèle des ventes privées), jusqu'à six sur grand écran ;
+ * l'écart vaut la marge de la page (12 px au téléphone, la gouttière dès 768 px).
+ */
+const OFFER_GRID = "grid min-w-0 grid-cols-2 gap-3 min-[768px]:gap-gutter @min-[40rem]:grid-cols-3 @min-[54rem]:grid-cols-4 @min-[70rem]:grid-cols-5 @min-[90rem]:grid-cols-6"
 
-export function MarketplaceScreen({ search }: { search: MarketplaceSearch | null }) {
+/**
+ * `/marketplace` sans paramètre : l'accueil (boutiques en grandes cartes et moments qui défilent). Avec une
+ * recherche, une vue ou un rayon : les résultats, en grille, avec les mêmes en-tête, rayons et filtres.
+ */
+export function MarketplaceScreen({ search, home = false }: { search: MarketplaceSearch | null; home?: boolean }) {
   const { networkId, personId } = useNetwork()
   const { t } = useTranslation("marketplace")
-  return <MemberPage><Suspense fallback={<p role="status">{t("results.loading")}</p>}><MarketplaceContent key={JSON.stringify([networkId, personId])} search={search} /></Suspense></MemberPage>
+  return <MemberPage><Suspense fallback={<p role="status">{t("results.loading")}</p>}><MarketplaceContent key={JSON.stringify([networkId, personId])} search={search} home={home} /></Suspense></MemberPage>
 }
 
-function MarketplaceContent({ search: initialSearch }: { search: MarketplaceSearch | null }) {
+/** L'URL courante pilote aussi les transitions SPA, sans attendre un nouveau snapshot serveur. */
+function MarketplaceContent({ search: initialSearch, home: initialHome }: { search: MarketplaceSearch | null; home: boolean }) {
   const params = useSearchParams()
-  const search = params === null ? initialSearch : marketplaceSearchFromParams(params)
+  const home = params === null ? initialHome : [...params.keys()].length === 0
+  if (home) return <MarketplaceHome />
+  return <MarketplaceResults search={params === null ? initialSearch : marketplaceSearchFromParams(params)} />
+}
+
+function appliedCount(search: MarketplaceSearch): number {
+  const facets = MARKETPLACE_FACETS.reduce((sum, facet) => sum + (search[facet]?.length ?? 0), 0)
+  const ranges = (["minPrice", "maxPrice", "minDurationMinutes", "maxDurationMinutes"] as const).filter(field => search[field] !== undefined).length
+  return facets + ranges + (search.sort && search.sort !== "relevance" && search.sort !== "newest" ? 1 : 0)
+}
+
+function MarketplaceResults({ search }: { search: MarketplaceSearch | null }) {
   const { t } = useTranslation("marketplace")
   const { networkId, personId } = useNetwork()
   const heading = useRef<HTMLHeadingElement>(null)
   const router = useRouter()
-  const apply = (next: MarketplaceSearch) => { router.push(routes.marketplace(next), { scroll: false }); heading.current?.focus() }
-  return <div className="mp-page w-full min-w-0 [overflow-wrap:anywhere]" data-marketplace>
-    <header className="mp-page-header min-w-0"><h1 ref={heading} tabIndex={-1} className="mp-title focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">{t("title")}</h1><p className="text-sm text-muted-foreground">{t("lead")}</p><div className="flex min-w-0 flex-wrap gap-2"><Link href={routes.myShops()} className={SHOP_ACTION_CLASS}>{t("manageActivity")}</Link><Link href={routes.cart()} className={SHOP_ACTION_CLASS}>{t("carts")}</Link></div></header>
-    {search ? <>
-      <nav aria-label={t("views.label")} className="flex min-w-0 flex-wrap gap-2">{(["products", "shops", "services"] as const).map(view => <Link key={view} href={routes.marketplace(view === search.view ? search : { view, ...(search.query ? { query: search.query } : {}), cursor: null })} prefetch={false} aria-current={view === search.view ? "page" : undefined} className={`${SHOP_ACTION_CLASS} aria-[current=page]:border-primary aria-[current=page]:bg-muted`}>{t(`views.${view}`)}</Link>)}</nav>
-      <div className="grid min-w-0 items-start gap-6 lg:grid-cols-[minmax(0,16rem)_minmax(0,1fr)]">
-        <FilterPanel key={marketplaceSearchParams(search).toString()} search={search} onApply={apply} />
-        <section className="grid min-w-0 gap-6" aria-label={t("results.title")}><AppliedFilters search={search} onApply={apply} /><MarketplaceWindow key={JSON.stringify(["catalog", networkId, personId, search])} search={search} />{search.view !== "shops" ? <DemoSelection key={JSON.stringify(["demo", networkId, personId, { ...search, cursor: null }])} search={search} /> : null}</section>
-      </div>
-    </> : <div role="alert" className="grid gap-3"><p>{t("results.invalid")}</p><Link href={routes.marketplace()} prefetch={false} className={`${SHOP_ACTION_CLASS} justify-self-start`}>{t("results.restart")}</Link></div>}
+  const navigate = (next: MarketplaceSearch) => router.push(routes.marketplace(next), { scroll: false })
+  const apply = (next: MarketplaceSearch) => { navigate(next); heading.current?.focus() }
+  return <div className="@container grid w-full min-w-0 gap-6 pb-24 [overflow-wrap:anywhere]" data-marketplace>
+    <div className="grid min-w-0 gap-4">
+      <MarketplaceHeader ref={heading} query={search?.query} />
+      {search ? <div className="flex min-w-0 items-center gap-3"><div className="min-w-0 flex-1"><MarketplacePills active={activeMarketplacePill(search)} query={search.query} /></div><MarketplaceFilterSheet key={JSON.stringify(search)} search={search} count={appliedCount(search)} onApply={navigate} onApplied={() => heading.current?.focus()} /></div> : null}
+    </div>
+    {search ? <section className="grid min-w-0 gap-6" aria-label={t("results.title")}>
+      <AppliedFilters search={search} onApply={apply} />
+      <MarketplaceWindow key={JSON.stringify(["catalog", networkId, personId, search])} search={search} />
+      {search.view !== "shops" ? <DemoSelection key={JSON.stringify(["demo", networkId, personId, { ...search, cursor: null }])} search={search} /> : null}
+    </section> : <div role="alert" className="grid gap-3"><p>{t("results.invalid")}</p><Link href={routes.marketplaceHome()} prefetch={false} className={`${SHOP_ACTION_CLASS} justify-self-start`}>{t("results.restart")}</Link></div>}
+    <MarketplaceBackToTop />
   </div>
 }
 
@@ -63,14 +81,7 @@ function AppliedFilters({ search, onApply }: { search: MarketplaceSearch; onAppl
   }
   for (const field of ["minPrice", "maxPrice", "minDurationMinutes", "maxDurationMinutes"] as const) if (search[field] !== undefined) chips.push({ key: field, label: `${t(`filters.${field}`)} : ${search[field]}`, remove: () => onApply({ ...search, [field]: undefined, cursor: null }) })
   if (!chips.length) return null
-  return <ul aria-label={t("filters.active")} className="flex min-w-0 flex-wrap gap-2">{chips.map(chip => <li key={chip.key} className="min-w-0"><button type="button" className="inline-flex min-h-11 max-w-full items-center gap-2 rounded-full border border-border bg-muted px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" aria-label={t("filters.remove", { value: chip.label })} onClick={chip.remove}><span className="break-words">{chip.label}</span><span aria-hidden>×</span></button></li>)}</ul>
-}
-
-function FilterPanel({ search, onApply }: { search: MarketplaceSearch; onApply: (search: MarketplaceSearch) => void }) {
-  const { t } = useTranslation("marketplace")
-  const wide = useSyncExternalStore(subscribeWidth, wideSnapshot, () => false)
-  const [expanded, setExpanded] = useState(false)
-  return <aside aria-label={t("filters.title")} className="min-w-0 rounded-[var(--ui2-card-radius)] border border-[color:var(--esp-surface-border)] bg-card p-4 text-card-foreground"><details open={wide || expanded} onToggle={event => { if (!wide) setExpanded(event.currentTarget.open) }} data-marketplace-filter-panel><summary className="min-h-11 cursor-pointer font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring lg:hidden">{t("filters.open")}</summary><div className="min-w-0 pt-3 lg:pt-0"><MarketplaceFilters search={search} onApply={onApply} /></div></details></aside>
+  return <ul aria-label={t("filters.active")} className="flex min-w-0 flex-wrap gap-2">{chips.map(chip => <li key={chip.key} className="min-w-0"><button type="button" className="inline-flex min-h-11 max-w-full items-center gap-2 rounded-[var(--ui2-button-radius)] bg-[var(--esp-chip-bg,var(--muted))] px-4 text-sm font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" aria-label={t("filters.remove", { value: chip.label })} onClick={chip.remove}><span className="break-words">{chip.label}</span><span aria-hidden>×</span></button></li>)}</ul>
 }
 
 function QueryFailure({ retry, pending }: { retry: () => void; pending: boolean }) {
@@ -114,7 +125,7 @@ function OfferWindow({ search }: { search: MarketplaceSearch }) {
   if (result.indexStatus !== "ready") return <div className="grid gap-3"><p role="status">{t("results.building")}</p><Button variant="outline" className="justify-self-start" pending={query.isFetching} onClick={() => { void query.refetch() }}>{t("results.retry")}</Button></div>
   return <div className="grid min-w-0 gap-4" aria-busy={query.isFetching || undefined}>
     {query.isFetching ? <p role="status" className="text-sm text-muted-foreground">{t("results.refreshing")}</p> : null}
-    {result.page.length ? <ul className={gridClass}>{result.page.map((offer, index) => <li key={offer.offerRef} className="min-w-0"><OfferCard offer={offer} eager={index === 0} audience="member" locale={i18n.resolvedLanguage ?? "fr"} t={(key, options) => shopT(key, options)} /></li>)}</ul> : <p role="status">{t(result.isDone ? "results.empty" : "results.window")}</p>}
+    {result.page.length ? <ul className={OFFER_GRID}>{result.page.map((offer, index) => <li key={offer.offerRef} className="min-w-0"><OfferCard offer={offer} eager={index === 0} audience="member" locale={i18n.resolvedLanguage ?? "fr"} t={(key, options) => shopT(key, options)} action={<OfferQuickAdd offer={offer} />} /></li>)}</ul> : <p role="status">{t(result.isDone ? "results.empty" : "results.window")}</p>}
     {result.filteredWindow ? <p className="text-sm text-muted-foreground">{t("results.filtered")}</p> : null}
     <MarketplacePagination search={search} isDone={result.isDone} cursor={result.continueCursor} />
   </div>
@@ -129,7 +140,7 @@ function ShopWindow({ search }: { search: MarketplaceSearch }) {
   const result = query.data
   return <div className="grid min-w-0 gap-4" aria-busy={query.isFetching || undefined}>
     {query.isFetching ? <p role="status" className="text-sm text-muted-foreground">{t("results.refreshing")}</p> : null}
-    {result.page.length ? <ul className={gridClass}>{result.page.map(storefront => <li key={storefront.handle} className="min-w-0"><DirectoryCard storefront={storefront} /></li>)}</ul> : <p role="status">{t(result.isDone ? "results.empty" : "results.window")}</p>}
+    {result.page.length ? <ul className={SHOWCASE_GRID}>{result.page.map((storefront, index) => <li key={storefront.handle} className="min-w-0"><ShopShowcaseCard storefront={storefront} eager={index < 2} /></li>)}</ul> : <p role="status">{t(result.isDone ? "results.empty" : "results.window")}</p>}
     {result.filteredWindow ? <p className="text-sm text-muted-foreground">{t("results.filtered")}</p> : null}
     <MarketplacePagination search={search} isDone={result.isDone} cursor={result.continueCursor} />
   </div>
@@ -148,5 +159,5 @@ function DemoSelection({ search }: { search: MarketplaceSearch }) {
   const id = useId()
   const query = useAuthenticatedConvexQuery(api.modules.shops.marketplace.demoSelection, { networkId, ...offerFilters(search) })
   if (!query.isError && !query.isPending && query.data?.length === 0) return null
-  return <section aria-labelledby={id} className="grid min-w-0 gap-4 border-t border-border pt-6" data-marketplace-demo><h2 id={id} className="mp-subtitle">{t("demo.title")}</h2><p className="text-sm text-muted-foreground">{t("demo.notice")}</p>{query.isError ? <p role="status">{t("demo.unavailable")}</p> : query.isPending || !query.data ? <p role="status">{t("demo.loading")}</p> : <ul className={gridClass}>{query.data.map((offer, index) => <li key={offer.offerRef} className="min-w-0"><OfferCard offer={offer} eager={index === 0} audience="member" locale={i18n.resolvedLanguage ?? "fr"} t={(key, options) => shopT(key, options)} /></li>)}</ul>}</section>
+  return <section aria-labelledby={id} className="grid min-w-0 gap-4 pt-2" data-marketplace-demo><div className="grid min-w-0 gap-1"><h2 id={id} className="mp-subtitle">{t("demo.title")}</h2><p className="text-sm text-muted-foreground">{t("demo.notice")}</p></div>{query.isError ? <p role="status">{t("demo.unavailable")}</p> : query.isPending || !query.data ? <p role="status">{t("demo.loading")}</p> : <ul className={OFFER_GRID}>{query.data.map((offer, index) => <li key={offer.offerRef} className="min-w-0"><OfferCard offer={offer} eager={index === 0} audience="member" locale={i18n.resolvedLanguage ?? "fr"} t={(key, options) => shopT(key, options)} action={<OfferQuickAdd offer={offer} />} /></li>)}</ul>}</section>
 }

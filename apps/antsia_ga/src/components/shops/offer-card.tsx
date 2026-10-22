@@ -1,50 +1,81 @@
-import { ArrowUpRight, ImageOff, Store } from "lucide-react"
-import Image from "next/image"
-import { browserAppPath } from "@/lib/app-path"
+import { parseCommerceCatalogFacets } from "@antsia/social-domain/commerce/catalogFacets"
+import { ArrowUpRight, Store } from "lucide-react"
 import Link from "next/link"
 import type { ReactNode } from "react"
 
 import { routes } from "@/lib/routes"
 import { catalogAvailability, catalogDate, catalogPrice, catalogVariantPrice, type CatalogAudience, type CatalogOffer, type CatalogTranslate } from "./catalog-model"
-import { OFFER_CARD_CSS, OFFER_DETAIL_CSS, SHOP_ACTION_CLASS } from "./offer-experience-styles"
+import { OFFER_DETAIL_CSS } from "./offer-experience-styles"
 import { OfferFacets } from "./offer-facets"
+import { OfferMedia } from "./offer-media"
+import { OfferMediaCarousel } from "./offer-media-carousel"
 import { ServiceProfileDetails } from "../services/service-profile-details"
 
-const linkClass = "inline-flex min-h-11 items-center rounded-[var(--esp-social-action-radius,var(--ui2-button-radius))] text-sm font-medium text-primary underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+export { OfferMedia }
 
-export function OfferMedia({ media, title, t, className = "aspect-square", eager = false }: { media: CatalogOffer["media"][number] | undefined; title: string; t: CatalogTranslate; className?: string; eager?: boolean }) {
-  if (!media || media.withheld !== null || !media.url) return <div className={`flex flex-col items-center justify-center gap-2 rounded-[var(--esp-media-radius)] bg-muted p-4 text-center text-sm text-muted-foreground ${className}`} role="img" aria-label={t(media?.withheld ? "catalog.mediaWithheld" : "catalog.noPhoto")}><ImageOff className="size-6" aria-hidden /><span>{t(media?.withheld ? "catalog.mediaWithheld" : "catalog.noPhoto")}</span></div>
-  return <Image unoptimized src={media.url.startsWith("/") && !media.url.startsWith("//") ? browserAppPath(media.url) : media.url} alt={media.altText ?? title} width={media.width ?? 800} height={media.height ?? 800} loading={eager ? "eager" : "lazy"} className={`w-full rounded-[var(--esp-media-radius)] bg-muted object-contain ${className}`} />
+const linkClass = "inline-flex min-h-11 items-center rounded-[var(--esp-social-action-radius,var(--ui2-button-radius))] text-sm font-medium text-primary underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+const TAG_CLASS = "rounded-[var(--esp-chip-radius,var(--radius-md))] bg-muted px-2 py-0.5 text-xs font-semibold"
+
+/** La fiche d'une offre : la boutique pour un produit, le prestataire pour un service ; publique ou membre. */
+export function offerHref(offer: Pick<CatalogOffer, "kind" | "shopHandle" | "offerRef">, audience: CatalogAudience): string {
+  if (offer.kind === "service") return audience === "public" ? routes.publicProviderOffer(offer.shopHandle, offer.offerRef) : routes.providerOffer(offer.shopHandle, offer.offerRef)
+  return audience === "public" ? routes.publicShopOffer(offer.shopHandle, offer.offerRef) : routes.shopOffer(offer.shopHandle, offer.offerRef)
 }
 
-/** Présentation commune SSR/membre : aucun hook ni fournisseur de compte requis. */
-export function OfferCard({ offer, audience, locale, t, compact = false, eager = false }: { offer: CatalogOffer; audience: CatalogAudience; locale: string; t: CatalogTranslate; compact?: boolean; eager?: boolean }) {
-  const href = offer.kind === "service" ? audience === "public" ? routes.publicProviderOffer(offer.shopHandle, offer.offerRef) : routes.providerOffer(offer.shopHandle, offer.offerRef) : audience === "public" ? routes.publicShopOffer(offer.shopHandle, offer.offerRef) : routes.shopOffer(offer.shopHandle, offer.offerRef)
-  const storefront = offer.kind === "service" ? audience === "public" ? routes.publicProvider(offer.shopHandle) : routes.provider(offer.shopHandle) : audience === "public" ? routes.publicStorefront(offer.shopHandle) : routes.storefront(offer.shopHandle)
-  return <article data-offer-card data-offer-compact={compact || undefined} className="flex h-full min-w-0 flex-col overflow-hidden rounded-[var(--ui2-card-radius)] border border-[color:var(--esp-surface-border)] bg-card text-card-foreground shadow-none [overflow-wrap:anywhere]">
-    <style>{OFFER_CARD_CSS}</style>
-    <Link href={href} prefetch={false} className="block min-w-0 p-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring" aria-label={t("catalog.openOfferNamed", { title: offer.title })}><OfferMedia media={offer.media[0]} title={offer.title} t={t} eager={eager} className={compact ? "aspect-[16/10]" : "aspect-[4/3]"} /></Link>
-    {offer.media.length > 1 ? <ul aria-label={t("catalog.offerPhotos")} className="flex min-w-0 snap-x gap-2 overflow-x-auto overscroll-x-contain px-2 pb-2">{offer.media.slice(1).map((media, index) => <li key={index} className="w-24 shrink-0 snap-start"><Link href={href} prefetch={false} aria-label={t("catalog.openOfferPhoto", { title: offer.title, index: index + 2 })} className="block min-h-11 rounded-[var(--esp-media-radius)] border border-border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"><OfferMedia media={media} title={offer.title} t={t} /></Link></li>)}</ul> : null}
-    <div className="flex min-w-0 flex-1 flex-col gap-3 p-4">
-      <div className="flex min-w-0 flex-wrap items-center justify-between gap-x-3 gap-y-1">
-        <Link href={storefront} prefetch={false} className="inline-flex min-h-11 min-w-0 items-center gap-2 rounded text-sm font-medium text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"><Store className="size-4 shrink-0 text-[color:var(--role-commerce-ink,var(--primary))]" aria-hidden /><span className="break-words">{t("catalog.soldBy", { handle: offer.shopHandle })}</span></Link>
-        <span className="rounded-[var(--esp-social-action-radius,var(--ui2-button-radius))] bg-muted px-2 py-1 text-xs font-semibold">{t(`catalog.kinds.${offer.kind}`)}</span>
-      </div>
-      <div className="grid min-w-0 gap-2">
-        <p className="break-words text-lg font-semibold text-[color:var(--role-commerce-ink,var(--foreground))]">{catalogPrice(offer.price, locale, t)}</p>
-        {offer.variants.length ? <p className="text-xs text-muted-foreground">{t("catalog.hasVariants", { count: offer.variants.length })}</p> : null}
-        <p className="text-xs font-medium text-muted-foreground">{t("catalog.availability.title")}</p>
-        <p className="text-sm text-muted-foreground">{catalogAvailability(offer.availability, t)}</p>
-        {offer.availability.updatedAt !== null ? <p className="text-xs text-muted-foreground">{t("catalog.availability.updated", { date: catalogDate(offer.availability.updatedAt, locale) })}</p> : null}
-      </div>
+/** La vitrine du vendeur d'une offre : la boutique pour un produit, l'espace prestataire pour un service. */
+export function offerStorefrontHref(offer: Pick<CatalogOffer, "kind" | "shopHandle">, audience: CatalogAudience): string {
+  if (offer.kind === "service") return audience === "public" ? routes.publicProvider(offer.shopHandle) : routes.provider(offer.shopHandle)
+  return audience === "public" ? routes.publicStorefront(offer.shopHandle) : routes.storefront(offer.shopHandle)
+}
+
+/** La marque et la couleur PUBLIÉES par PRO.GA (facettes), jamais déduites du titre. */
+function offerAttributes(offer: CatalogOffer): { brand: string | null; color: string | null } {
+  const attributes = parseCommerceCatalogFacets(offer.facets)?.attributes ?? []
+  const text = (key: "brand" | "color") => { const attribute = attributes.find(entry => entry.key === key); return attribute?.type === "text" ? attribute.value : null }
+  return { brand: text("brand"), color: text("color") }
+}
+
+/** Une indisponibilité RÉCENTE se signale sur la carte ; le reste de la disponibilité se lit sur la fiche. */
+function recentlyOutOfStock(offer: CatalogOffer, nowMs = Date.now()): boolean {
+  const { state, updatedAt, stale } = offer.availability
+  return state === "out_of_stock" && updatedAt !== null && !stale && nowMs - updatedAt <= 15 * 60 * 1000
+}
+
+/**
+ * La carte d'une offre, sur le modèle des ventes privées (décision du propriétaire du 22/10/2026) : galerie à
+ * points, marque, nom, couleur ou nombre de variantes, prix exact et vendeur, puis l'action que la surface lui
+ * passe (l'ajout au panier du membre). Rien d'inventé : ni prix barré ni remise, le moteur n'en porte pas.
+ * `compact` : la carte en ligne d'une publication liée à une offre. Présentation commune SSR/membre : aucun hook
+ * de compte ni fournisseur requis.
+ */
+export function OfferCard({ offer, audience, locale, t, compact = false, eager = false, seller = true, action }: { offer: CatalogOffer; audience: CatalogAudience; locale: string; t: CatalogTranslate; compact?: boolean; eager?: boolean; seller?: boolean; action?: ReactNode }) {
+  const href = offerHref(offer, audience)
+  const { brand, color } = offerAttributes(offer)
+  const detail = color ?? (offer.variants.length ? t("catalog.hasVariants", { count: offer.variants.length }) : null)
+  const price = catalogPrice(offer.price, locale, t)
+  // La boutique s'identifie à part du titre : un lien vers SA vitrine (ou son espace prestataire).
+  const shop = seller ? <Link href={offerStorefrontHref(offer, audience)} prefetch={false} className="inline-flex min-h-11 min-w-0 max-w-full items-center gap-1.5 justify-self-start rounded text-xs font-medium text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"><Store aria-hidden className="size-3.5 shrink-0 text-[color:var(--role-commerce-ink,var(--primary))]" /><span className="truncate">{t("catalog.soldBy", { handle: offer.shopHandle })}</span></Link> : null
+  if (compact) return <article data-offer-card data-offer-compact className="grid min-w-0 grid-cols-[6rem_minmax(0,1fr)] items-center gap-3 rounded-[var(--ui2-card-radius)] bg-card p-2 text-card-foreground [overflow-wrap:anywhere]">
+    <Link href={href} prefetch={false} aria-label={t("catalog.openOfferNamed", { title: offer.title })} className="block rounded-[var(--esp-media-radius)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"><OfferMedia media={offer.media[0]} title={offer.title} t={t} eager={eager} className="aspect-square bg-background" /></Link>
+    <div className="grid min-w-0 gap-0.5 pr-2">
+      {brand ? <p className="truncate text-xs font-bold">{brand}</p> : null}
+      <h3 className="line-clamp-2 text-sm font-semibold leading-snug">{offer.title}</h3>
+      <p className="break-words font-bold text-[color:var(--role-commerce-ink,var(--foreground))]">{price}</p>
+      <div className="flex min-w-0 flex-wrap items-center gap-x-3">{shop}<Link href={href} prefetch={false} className={linkClass}>{t("catalog.openOffer")}<ArrowUpRight className="ml-1 size-4 shrink-0" aria-hidden /></Link></div>
     </div>
-    <div className="offer-card-band mt-auto border-t border-border bg-muted p-4">
-      <div className="grid min-w-0 gap-1">
-        <h3 className="break-words font-display text-base font-bold leading-snug"><Link href={href} prefetch={false} className="rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">{offer.title}</Link></h3>
-        <p className="line-clamp-2 whitespace-pre-wrap break-words text-sm text-muted-foreground">{offer.description || t("catalog.noDescription")}</p>
-      </div>
-      <Link href={href} prefetch={false} className={`${SHOP_ACTION_CLASS} offer-card-action`}>{t("catalog.openOffer")}<ArrowUpRight className="size-4 shrink-0" aria-hidden /></Link>
+  </article>
+  return <article data-offer-card className="flex h-full min-w-0 flex-col gap-3 rounded-[var(--ui2-card-radius)] bg-card p-2 pb-3 text-card-foreground [overflow-wrap:anywhere]">
+    <OfferMediaCarousel media={offer.media} title={offer.title} href={href} t={t} eager={eager} />
+    <div className="grid min-w-0 flex-1 content-start gap-1 px-2">
+      {brand ? <p className="truncate text-sm font-bold">{brand}</p> : null}
+      <h3 className="line-clamp-2 text-sm leading-snug"><Link href={href} prefetch={false} className="rounded text-foreground hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">{offer.title}</Link></h3>
+      {detail ? <p className="truncate text-xs text-muted-foreground">{detail}</p> : null}
+      <p className="mt-1 break-words text-lg font-bold leading-tight text-[color:var(--role-commerce-ink,var(--foreground))]">{price}</p>
+      {offer.kind === "service" || recentlyOutOfStock(offer) ? <p className="flex flex-wrap gap-1.5">{offer.kind === "service" ? <span className={TAG_CLASS}>{t("catalog.kinds.service")}</span> : null}{recentlyOutOfStock(offer) ? <span className={TAG_CLASS}>{t("catalog.card.outOfStock")}</span> : null}</p> : null}
+      {shop}
     </div>
+    {/* Une action qui ne rend rien (offre à consulter) ne laisse ni case ni écart. */}
+    {action ? <div className="grid min-w-0 px-2 empty:hidden" data-offer-card-action>{action}</div> : null}
   </article>
 }
 

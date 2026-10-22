@@ -148,6 +148,9 @@ export const routes = {
    * (`discover`), servie sans compte hors de la coque.
    */
   memberDiscover: () => "/explorer",
+  /** L'accueil de la marketplace (boutiques en grandes cartes, moments qui défilent) : l'adresse sans paramètre. */
+  marketplaceHome: () => "/marketplace",
+  /** Les résultats de la marketplace : une vue (produits par défaut), une recherche, des filtres. */
   marketplace: (search: Partial<MarketplaceSearch> = {}) => {
     const query = marketplaceSearchParams({ ...search, view: search.view ?? "products", cursor: search.cursor ?? null })
     return query.size ? `/marketplace?${query}` : "/marketplace"
@@ -460,7 +463,7 @@ export const engineRoutes: EngineRoutes = {
   // l'application, déclarées avec `NetworkProvider navigation="destinations"`.
   discover: routes.memberDiscover,
   me: routes.me,
-  shops: routes.marketplace,
+  shops: routes.marketplaceHome,
   clips: routes.clips,
   // P14B : destinations typées des avis (cloche, ouverture d'une notification poussée).
   serviceRequest: routes.serviceRequest,
