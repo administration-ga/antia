@@ -265,6 +265,16 @@ describe("déploiement de démonstration déclaré : les comptes réservés seul
     expect(record(record(result.data).user).email).toBe(DEMO_EMAIL)
   })
 
+  it("le code d'un compte de démonstration DIASPORALE se relit de même (ADR-0038)", async () => {
+    declareDemo()
+    const t = testConvex({ automaticSessions: false })
+    const email = "moderateur@demo.diasporale.test"
+    const code = await issueCode(t, "email", email)
+    const result = await signIn(t, "email", code.code, email)
+    expect(result.status).toBe(200)
+    expect(record(record(result.data).user).email).toBe(email)
+  })
+
   it("toute autre adresse exige le vrai service de courriel : aucun code lisible", async () => {
     declareDemo()
     const t = testConvex({ automaticSessions: false })

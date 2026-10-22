@@ -1,5 +1,5 @@
 // @vitest-environment edge-runtime
-/** Comptes de démonstration de DIASPORALE : développement local seulement, vraie session, actes réservés à l'acteur de l'adresse. */
+/** Comptes de démonstration de DIASPORALE : développement local ou démonstration déclarée (ADR-0038), vraie session, actes réservés à l'acteur de l'adresse. */
 import { engineErrorCode } from "@antsia/social-contracts/errors"
 import {
   DAY_MS,
@@ -15,6 +15,7 @@ import { afterEach, describe, expect, it, vi } from "vitest"
 
 import { api, components, internal } from "../../_generated/api"
 import type { Id } from "../../_generated/dataModel"
+import { DIASPORALE_DEMO_EMAIL_DOMAIN } from "../../lib/devTools"
 import { SEED_CONFIRMATION } from "../../seeds/foundations"
 import { createTestSession, testConvex } from "../../test.setup"
 import { liveSignatoryRole } from "../pages/access"
@@ -51,10 +52,18 @@ function openDevTools() {
   vi.stubEnv("CONVEX_CLOUD_URL", "http://127.0.0.1:3210")
 }
 
-/** La garde fermée quoi que le shell de la personne qui lance les tests ait posé. */
+/** La garde fermée quoi que le shell de la personne qui lance les tests ait posé (déclaration de démonstration comprise). */
 function closeDevTools() {
   vi.stubEnv("ANTSIA_DEV_TOOLS", "false")
   vi.stubEnv("ANTIA_DEV_TOOLS", "false")
+  vi.stubEnv("ANTSIA_DEMO_DEPLOYMENT", "")
+}
+
+/** Le déploiement de démonstration déclaré (ADR-0029, ADR-0038) : en nuage, sous son propre nom, sans aucun outil de développement. */
+function declareDemo(name = "demo-antsia-123") {
+  closeDevTools()
+  vi.stubEnv("CONVEX_CLOUD_URL", "https://demo-antsia-123.convex.cloud")
+  vi.stubEnv("ANTSIA_DEMO_DEPLOYMENT", name)
 }
 
 afterEach(() => {
@@ -258,6 +267,38 @@ describe("comptes de démonstration DIASPORALE — garde de développement", () 
     expect(entries).toHaveLength(20)
     expect(entries.map((entry) => entry.actor)).toEqual([...DIASPORALE_DEMO_ACTORS])
     expect(entries).toEqual(DIASPORALE_DEMO_ACTORS.map((actor) => ({ actor, email: `${actor}@${DEMO_EMAIL_DOMAIN}` })))
+  })
+})
+
+describe("comptes de démonstration DIASPORALE — démonstration déclarée (ADR-0038)", () => {
+  it("ouverts sur le déploiement de démonstration déclaré, sans outil de développement : catalogue entier et modératrice équipée", async () => {
+    declareDemo()
+    const { t, diasporale } = await fixture()
+    expect(await t.query(api.modules.diaspora.demoAccounts.catalogue, {})).toEqual(DIASPORALE_DEMO_ACTORS.map((actor) => ({ actor, email: `${actor}@${DEMO_EMAIL_DOMAIN}` })))
+    const { as, personId } = await joinedActor(t, diasporale, "moderateur")
+    expect(await equip(as, "moderateur")).toEqual({ actor: "moderateur", status: "verifiee", role: "network_moderator", pageId: null, pageCreated: false })
+    const team = present((await teamsOf(t, diasporale))[0], "équipe")
+    expect(team.name).toBe(DEMO_TEAM_NAME)
+    expect(await teamMembersOf(t, team._id)).toEqual([expect.objectContaining({ personId, active: true })])
+  })
+
+  it("la déclaration recopiée sur un autre déploiement (la production comprise) n'ouvre rien ; contrôle : sous son nom, si", async () => {
+    declareDemo("demo-antsia-123")
+    vi.stubEnv("CONVEX_CLOUD_URL", "https://production-antsia-456.convex.cloud")
+    const { t, diasporale } = await fixture()
+    expect(await t.query(api.modules.diaspora.demoAccounts.catalogue, {})).toEqual([])
+    const institution = await joinedActor(t, diasporale, "institution")
+    expect(await code(equip(institution.as, "institution"))).toBe("policyRefused")
+    expect(await footprintOf(t, diasporale, institution.personId)).toEqual(UNTOUCHED)
+
+    vi.stubEnv("CONVEX_CLOUD_URL", "https://demo-antsia-123.convex.cloud")
+    expect(await t.query(api.modules.diaspora.demoAccounts.catalogue, {})).toHaveLength(20)
+    expect(await equip(institution.as, "institution")).toMatchObject({ status: "verifiee", pageCreated: true })
+  })
+
+  it("le domaine réservé du moteur est celui des adresses de la tranche", () => {
+    expect(DIASPORALE_DEMO_EMAIL_DOMAIN).toBe(DEMO_EMAIL_DOMAIN)
+    for (const actor of DIASPORALE_DEMO_ACTORS) expect(diasporaleDemoEmailOf(actor).endsWith(`@${DIASPORALE_DEMO_EMAIL_DOMAIN}`)).toBe(true)
   })
 })
 

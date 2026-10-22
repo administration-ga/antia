@@ -1,5 +1,6 @@
 /**
- * Comptes de DÉMONSTRATION de DIASPORALE — développement local seulement.
+ * Comptes de DÉMONSTRATION de DIASPORALE — développement local, ou déploiement
+ * de démonstration déclaré (ADR-0029, ADR-0038), jamais la production.
  *
  * Sur le modèle de `convex/modules/platform/demoAccounts.ts` (comptes de
  * démonstration de la racine), pour le réseau `diasporale`. Le catalogue vient
@@ -37,9 +38,11 @@
  * profil publié), l'équipement l'admet à la racine par la vraie règle
  * d'admission et n'écrit rien dans DIASPORALE.
  *
- * Idempotent : rappelé, il ne recrée rien. Double garde : `devToolsAllowed`
- * (variable `ANTSIA_DEV_TOOLS` ET backend local). Ailleurs, le catalogue est
- * vide et la mutation refuse : aucune production ne peut s'en servir.
+ * Idempotent : rappelé, il ne recrée rien. Garde : `demoAccountsAllowed` — la
+ * double garde du développement local (variable `ANTSIA_DEV_TOOLS` ET backend
+ * local), ou le déploiement de démonstration déclaré par son nom même
+ * (`ANTSIA_DEMO_DEPLOYMENT`), comme les comptes d'ANTSIA. Ailleurs, le catalogue
+ * est vide et la mutation refuse : aucune production ne peut s'en servir.
  */
 import { CONSENT_TEXT_VERSIONS, isConsentInForce, missingConsentsToJoin } from "@antsia/social-domain/consent"
 import { entryStatusFor } from "@antsia/social-domain/membership"
@@ -62,7 +65,7 @@ import { components } from "../../_generated/api"
 import type { Doc, Id } from "../../_generated/dataModel"
 import { type MutationCtx, query } from "../../_generated/server"
 import { getMembership, getRootNetwork, isActiveMember } from "../../lib/access"
-import { devToolsAllowed } from "../../lib/devTools"
+import { demoAccountsAllowed } from "../../lib/devTools"
 import { checked, fail } from "../../lib/errors"
 import { personMutation } from "../../lib/functions"
 import { literals, membershipRoleValidator, membershipStatusValidator } from "../../lib/validators"
@@ -100,15 +103,15 @@ function demoAttestationSubjectOf(actor: DiasporaleDemoActor): string {
 }
 
 /**
- * @publicProjection Outil de développement local seulement : le catalogue des
- * comptes de démonstration de DIASPORALE (acteur et adresse réservée), vide
- * partout ailleurs, production comprise.
+ * @publicProjection Développement local ou démonstration déclarée seulement : le
+ * catalogue des comptes de démonstration de DIASPORALE (acteur et adresse
+ * réservée), vide partout ailleurs, production comprise.
  */
 export const catalogue = query({
   args: {},
   returns: v.array(v.object({ actor: demoActorValidator, email: v.string() })),
   handler: async () => {
-    if (!devToolsAllowed()) return []
+    if (!demoAccountsAllowed()) return []
     return DIASPORALE_DEMO_ACTORS.map((actor) => ({ actor, email: diasporaleDemoEmailOf(actor) }))
   },
 })
@@ -407,7 +410,7 @@ async function admitOutsiderToRoot(ctx: MutationCtx, person: Doc<"persons">): Pr
 }
 
 /**
- * @selfScoped Développement local seulement : équipe le compte de la SESSION en
+ * @selfScoped Développement local ou démonstration déclarée seulement : équipe le compte de la SESSION en
  * l'acteur demandé, si son adresse vérifiée est celle de cet acteur. Exige
  * l'adhésion faite par le vrai accueil (`joinDiasporale`), sauf pour
  * l'utilisateur extérieur au réseau, qui n'en a pas ; idempotente — un second
@@ -425,7 +428,7 @@ export const equipMyDemoAccount = personMutation({
     pageCreated: v.boolean(),
   }),
   handler: async (ctx, { actor }) => {
-    if (!devToolsAllowed()) return fail("policyRefused")
+    if (!demoAccountsAllowed()) return fail("policyRefused")
     const person = ctx.person
     if ((await verifiedEmailOf(ctx, person.authUserId)) !== diasporaleDemoEmailOf(actor)) return fail("policyRefused")
     const spec = DIASPORALE_DEMO_ACTOR_SPECS[actor]

@@ -7,14 +7,21 @@
  * oubliée sur un déploiement en nuage n'ouvre donc rien.
  *
  * Seule exception, plus étroite : le DÉPLOIEMENT DE DÉMONSTRATION déclaré
- * (`demoDeploymentDeclared`) ouvre les comptes de démonstration d'ANTSIA et la
- * lecture de LEURS codes, rien d'autre (ni origines locales, ni codes des autres
- * adresses, ni cookies non sécurisés).
+ * (`demoDeploymentDeclared`) ouvre les comptes de démonstration d'ANTSIA et de
+ * DIASPORALE (ADR-0029, ADR-0038) et la lecture de LEURS codes, rien d'autre (ni
+ * origines locales, ni codes des autres adresses, ni cookies non sécurisés).
  */
 type Env = Record<string, string | undefined>
 
 /** Le domaine réservé des comptes de démonstration d'ANTSIA (RFC 2606 : jamais routable). */
 export const DEMO_EMAIL_DOMAIN = "demo.antsia.test"
+/**
+ * Le domaine réservé des comptes de démonstration de DIASPORALE (ADR-0038), celui
+ * de `diasporaleDemoEmailOf` : le test de la tranche `diaspora` vérifie qu'ils restent égaux.
+ */
+export const DIASPORALE_DEMO_EMAIL_DOMAIN = "demo.diasporale.test"
+/** Les domaines réservés dont le code peut s'afficher sur la démonstration déclarée. */
+export const DEMO_EMAIL_DOMAINS = [DEMO_EMAIL_DOMAIN, DIASPORALE_DEMO_EMAIL_DOMAIN] as const
 
 /** Le déploiement courant tourne-t-il sur la machine (backend local) ? */
 export function isLocalDeployment(env: Env = process.env): boolean {
@@ -51,14 +58,15 @@ export function demoDeploymentDeclared(env: Env = process.env): boolean {
   return Boolean(declared) && name !== null && declared === name
 }
 
-/** Les comptes de démonstration d'ANTSIA sont-ils ouverts ici ? (développement local ou démonstration déclarée) */
+/** Les comptes de démonstration (ANTSIA et DIASPORALE) sont-ils ouverts ici ? (développement local ou démonstration déclarée) */
 export function demoAccountsAllowed(env: Env = process.env): boolean {
   return devToolsAllowed(env) || demoDeploymentDeclared(env)
 }
 
-/** L'adresse est-elle sur le domaine réservé des comptes de démonstration ? */
+/** L'adresse est-elle sur un domaine réservé des comptes de démonstration ? */
 export function isDemoEmail(email: string): boolean {
-  return email.trim().toLowerCase().endsWith(`@${DEMO_EMAIL_DOMAIN}`)
+  const normalized = email.trim().toLowerCase()
+  return DEMO_EMAIL_DOMAINS.some((domain) => normalized.endsWith(`@${domain}`))
 }
 
 /** Le code envoyé à cette adresse peut-il s'afficher à l'écran ici ? */
