@@ -605,6 +605,90 @@ le vrai panier reste vide. Les tests de composants prouvent la page réelle
 puis ouvre la remise sans rien envoyer. Ils couvrent aussi les cartes de remise
 et la barre collée (`checkout-form.test.tsx`).
 
+### Marketplace sur le modèle des ventes privées, lot 4 : les pages du réseau qui vendent (22/10/2026)
+
+Décisions du propriétaire du jour. Une page sert une activité (communication,
+publications), une boutique sert la vente. Une page qui vend se présente
+**selon sa nature** :
+
+- une **entreprise** : la page se présente comme sa boutique ;
+- une **association**, un **média** ou une **communauté** : sa page devient une
+  page-boutique, ses produits en tête ;
+- une **page sans boutique** : inchangée.
+
+- Moteur (`ProfilPagePage`, paquet `@antsia/social-features`) : une prop
+  facultative `commerce` reçoit la présentation que l'application pose. Le
+  moteur ne connaît pas la boutique : aucun import d'un produit, et DIASPORALE
+  ne change pas. Les gestes de la page restent tous : gérer, revendiquer,
+  accepter une invitation, publier en son nom, lire le mur.
+  - `shop` : l'en-tête de l'application (`hero`) remplace l'identité de la
+    page ; il porte le `h1` et l'abonnement. Gérer et revendiquer restent
+    juste dessous ;
+  - `products` : l'identité de la page reste ;
+  - `lead` vient avant le mur ; `interleave(rang)` après chaque troisième
+    publication, le rang continuant d'une fenêtre du mur à l'autre.
+- Application (`PageWithCommerce`) : la fiche lit la page et sa vitrine, et
+  attend de savoir si la page vend. Elle ne change pas de visage sous les
+  yeux.
+  - Entreprise : l'en-tête et le corps de la vitrine du lot 2, sans le bloc
+    « Publications » puisque le mur suit.
+  - Autre nature : « Nos produits » (« Nos offres » s'il y a des
+    prestations). Jusqu'à trois offres en grandes cartes avec l'ajout direct,
+    sinon en carrousel. Toujours « Voir la boutique ».
+  - Au-delà de trois offres, « Dans la boutique » revient toutes les trois
+    publications. Chaque rappel commence plus loin dans le catalogue.
+
+Mesures :
+
+- page d'entreprise `/page/epicerie-moussavou-demo` : l'aperçu de 12 offres
+  et ses 3 publications ;
+- présentation « produits en tête » sur le banc local du candidat, jamais
+  commité, monté sur la vraie fiche du moteur : l'association
+  `jeunes-lambarene-demo` (2 offres de test), puis la page de l'épicerie pour
+  les rappels (6 offres de test). Aucune page d'association, de média ou de
+  communauté ne vend sur le backend local ; celles de démonstration n'ont
+  qu'une publication.
+
+| Largeur | Fiche (bloc) | Aperçu du catalogue (entreprise) | Grandes cartes (association) | Défilement horizontal |
+|---|---|---|---|---|
+| 390 px | 26 / 26, 338 px (cadre des profils) | 2 colonnes, 12 offres | 1 colonne, 338 × 460 px | aucun |
+| 1 024 px | 128 / 16, 880 px | 4 colonnes, 12 offres, écart 16 | — | aucun |
+| 1 280 px | 296 / 24, 960 px | 4 colonnes, 12 offres, écart 24 | — | aucun |
+| 1 440 px | 296 / 24, 1 120 px | 5 colonnes, 10 offres (2 rangées complètes) | 3 colonnes de 357 px | aucun |
+| 1 920 px | 1 120 px centrés (cadre des profils) | 5 colonnes, 10 offres | — | aucun |
+
+À 1 920 px, la fiche reste dans le cadre commun des profils du moteur
+(1 120 px au plus, centré), comme toute fiche de personne ou de page. C'est un
+comportement antérieur, hors du périmètre de ce lot.
+
+![Page d'entreprise au téléphone : présentée comme sa boutique](recette/page-entreprise-390.jpg)
+
+![La même page plus bas : conditions, puis ses publications](recette/page-entreprise-publications-390.jpg)
+
+![Page d'entreprise à 1 440 px](recette/page-entreprise-1440.jpg)
+
+![Association (banc) : ses produits en tête, en grandes cartes](recette/page-association-produits-390.jpg)
+
+![Association (banc) à 1 440 px](recette/page-association-1440.jpg)
+
+![Au-delà de trois offres (banc) : carrousel en tête, rappel après la troisième publication](recette/page-produits-rappels-390.jpg)
+
+Preuves par les tests :
+
+- moteur (`ProfilPagePage.test.tsx`) :
+  - présentée comme sa boutique : un seul `h1` (celui de l'en-tête), pas de
+    second « Suivre », « Gérer la page » qui s'ouvre, la vitrine avant le mur ;
+  - produits en tête : l'identité reste, insertions de rang 1 et 2 après les
+    publications 3 et 6 ;
+- application (`page-commerce.test.tsx`) :
+  - attente sans changement de visage ;
+  - page sans boutique inchangée ;
+  - entreprise présentée comme sa boutique, sans bloc « Publications » en
+    double ;
+  - association en grandes cartes avec l'ajout direct, sans rappel ;
+  - média au-delà de trois offres : carrousel, rappel de niveau 3 qui commence
+    à la quatrième offre.
+
 ## Limites de preuve et état Git
 
 Le `verify` global avec l’ensemble des tests backend et des espaces de travail voisins n’a pas été relancé : la validation est ciblée sur les surfaces modifiées et leurs contrats.

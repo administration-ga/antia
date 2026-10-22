@@ -721,6 +721,12 @@
     "shop_owner_inactive": "La gestion de cette boutique n’est plus disponible avec votre accès.",
     "shop_handle_unavailable": "L’adresse commerciale n’a pas pu être attribuée. Réessayez plus tard."
   },
+  "pageShop": {
+    "products": "Nos produits",
+    "offers": "Nos offres",
+    "seeShop": "Voir la boutique",
+    "inShop": "Dans la boutique"
+  },
   "storefrontTerms": {
     "title": "Conditions de la boutique",
     "declared": "Informations déclarées par le vendeur. Les conditions applicables et les frais seront confirmés avant tout accord.",

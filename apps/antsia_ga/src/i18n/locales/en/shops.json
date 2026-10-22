@@ -721,6 +721,12 @@
     "shop_owner_inactive": "You can no longer manage this storefront with your current access.",
     "shop_handle_unavailable": "A business address could not be assigned. Try again later."
   },
+  "pageShop": {
+    "products": "Our products",
+    "offers": "Our offers",
+    "seeShop": "See the shop",
+    "inShop": "In the shop"
+  },
   "storefrontTerms": {
     "title": "Store terms",
     "declared": "Information declared by the seller. Applicable terms and charges will be confirmed before any agreement.",
