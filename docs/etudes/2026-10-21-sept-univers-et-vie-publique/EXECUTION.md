@@ -271,7 +271,7 @@ et « Commander » ». L'étude (§ 5.4) dit : « menu à jour, plat du jour en 
   désignation par l'éditeur (refus Zod sans choix), vitrine à 1 440 et 390 px, univers, aucun débordement.
 - **En ligne** le 23/10/2026 (backend démo puis production, fronts enfant puis principal, `main-4cea752365fe-*` ;
   registre : `docs/35`). Sur la démo, l'Épicerie Moussavou Démo annonce « Poisson fumé au feu de bois — Démo » pour le
-  23/10, posé par son éditeur. Recette en ligne : éditeur, vitrine, publications « Commander » et `/restauration` à
+  23/10, et ses horaires « Du lundi au samedi, de 7 h à 20 h », posés par son éditeur. Recette en ligne : éditeur, vitrine, publications « Commander » et `/restauration` à
   1 440 px, vitrine et univers à 390 px. Captures : [`recette/en-ligne-su06-*.jpg`](recette/).
 - **Non couvert** : la vitrine publique (lecture sans compte) n'annonce pas le plat du jour ; la page du catalogue garde
   son titre « Catalogue » ; le plat du jour n'est pas publié dans les Stories du réseau (la rangée de l'univers en tient
