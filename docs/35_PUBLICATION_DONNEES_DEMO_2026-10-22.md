@@ -532,8 +532,13 @@ Autres contrôles :
   200 : `/`, `/fil`, `/marketplace`, `/restauration`, `/explorer`, `/mes-boutiques`, `/demo/restauration`,
   `/demo/explorer`, `/demo/mes-boutiques`, `/demo/boutique/epicerie-moussavou-demo`, `/demo/page/epicerie-moussavou-demo`.
 - Donnée de démonstration : le plat du jour de l'Épicerie Moussavou Démo, posé par son éditeur (compte Commerçant) :
-  « Poisson fumé au feu de bois — Démo », pour le 23/10. Il ne vaut que ce jour-là (Libreville). Les horaires de
-  l'épicerie restent vides : leur pose n'était pas demandée. Production : rien de posé.
+  « Poisson fumé au feu de bois — Démo », pour le 23/10. Il ne vaut que ce jour-là (Libreville). Production : rien de
+  posé.
+- Horaires de l'épicerie : vides à la publication (leur pose n'était pas demandée), puis posés le 23/10 vers 23 h 55
+  (heure de Paris) à la demande du propriétaire, par l'éditeur et le compte Commerçant : « Du lundi au samedi, de 7 h à
+  20 h ». Retour « Modifications enregistrées », vitrine toujours publiée. Vérifiés en ligne dans l'en-tête de la
+  vitrine et sous la carte de `/restauration`, à 1 440 et 390 px, sans débordement ni image cassée. Captures
+  `en-ligne-su06-horaires-*.jpg`.
 - Recette en ligne (démo, compte Commerçant), captures dans
   `docs/etudes/2026-10-21-sept-univers-et-vie-publique/recette/en-ligne-su06-*.jpg` :
   - éditeur : « Aujourd'hui : Poisson fumé au feu de bois — Démo » et la confirmation « Plat du jour annoncé. » ;
