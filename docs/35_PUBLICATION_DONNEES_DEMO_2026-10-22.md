@@ -503,3 +503,42 @@ Autres contrôles :
     cassée, aucun débordement ;
   - 390 px : carte de l'adresse à 12 px de marge, aucun débordement, « Mon activité » dans « Créer ».
 - Variables : aucune modifiée.
+
+## Mise à jour — `main` 4cea752 en ligne : menu, horaires, plat du jour et « Commander » (SU06, second volet)
+
+- Demande du propriétaire, le 23/10 : « continue l'univers Alimentation et restauration — menu, horaires, plat du jour et
+  « Commander » ». Puis son accord détaillé de publication : « publie main 4cea752. Backend prod diligent-avocet-585
+  (--dry-run puis déploiement), puis fronts enfant démo puis principal, promus ; retour arrière antsia-k46y2qudx /
+  antsia-demo-rkhg6vy4f. Puis pose le plat du jour de l'épicerie démo et fais la recette en ligne. » Cette entrée couvre
+  la PR 80 : détail dans l'[exécution des sept univers](etudes/2026-10-21-sept-univers-et-vie-publique/EXECUTION.md).
+- Backend : export propre (ANTSIA `4cea752`, DIASPORALE `367c2bd`, sans `.env.local`), connexion CLI du Mac, aucune clé.
+
+| Étape | Résultat |
+|---|---|
+| Aperçus `--dry-run`, démo et production | aucun index supprimé, schéma validé ; seule ligne : « version Node des actions », artefact connu |
+| Convex démo `vivid-hedgehog-655` | 1 035 → 1 036 fonctions. Six signatures changent comme prévu : `catalog:postOffer` (`shopTemplate`), `marketplaceShops:search` et `shops:directory` (cartes : `hours`, `dailySpecial`), `shops:getMyShop` et `shops:storefront` (`dailySpecial`), et la nouvelle `shops:setDailySpecial` |
+| Convex production `diligent-avocet-585` | idem ; relevé des fonctions identique à la démo |
+| Front, enfant démo | `dpl_2nKjUh85YosaKKe1okboKwL9BcaK` (antsia-demo-nztj6rb03), version `main-4cea752365fe-demo`, READY en 164 s, 302 SSO, promu |
+| Front, principal | `dpl_3ZU2j8XX1EotaYB6Piqzdg6iz1Uv` (antsia-j01r1n6se), version `main-4cea752365fe-production`, READY en 114 s, 302 SSO, promu |
+
+- Ordre réel : le backend de la démo est parti juste après la fusion de la PR 80, AVANT l'accord de publication. Il
+  n'ajoutait que des champs et une fonction : les fronts `1956641` sont restés sains (santé et pages contrôlées). La
+  production a attendu l'accord : le contrôle des permissions l'a refusée sans lui.
+- Contexte figé : 3 298 fichiers, empreinte `b4a0fe4c…`. Le code (hors documentation) est celui de la PR 80, vérifié par
+  `bun run verify` (15 516 tests).
+- Retour arrière des fronts : antsia-k46y2qudx (principal) et antsia-demo-rkhg6vy4f (enfant), versions `1956641`. Le
+  backend `4cea752` reste compatible avec eux : il n'ajoute que des champs de réponse et une mutation.
+- Santé : `main-4cea752365fe-production` et `main-4cea752365fe-demo`. CSP : chaque site sur son seul backend. Pages en
+  200 : `/`, `/fil`, `/marketplace`, `/restauration`, `/explorer`, `/mes-boutiques`, `/demo/restauration`,
+  `/demo/explorer`, `/demo/mes-boutiques`, `/demo/boutique/epicerie-moussavou-demo`, `/demo/page/epicerie-moussavou-demo`.
+- Donnée de démonstration : le plat du jour de l'Épicerie Moussavou Démo, posé par son éditeur (compte Commerçant) :
+  « Poisson fumé au feu de bois — Démo », pour le 23/10. Il ne vaut que ce jour-là (Libreville). Les horaires de
+  l'épicerie restent vides : leur pose n'était pas demandée. Production : rien de posé.
+- Recette en ligne (démo, compte Commerçant), captures dans
+  `docs/etudes/2026-10-21-sept-univers-et-vie-publique/recette/en-ligne-su06-*.jpg` :
+  - éditeur : « Aujourd'hui : Poisson fumé au feu de bois — Démo » et la confirmation « Plat du jour annoncé. » ;
+  - 1 440 px : la vitrine (plat du jour en 2:1, « Voir le menu », « Menu ») ; la page de l'épicerie, dont les quatre
+    publications liées disent « Commander » et mènent à la fiche du produit ; `/restauration` et sa rangée « Plats du
+    jour » ;
+  - 390 px : la vitrine (photo de 342 × 257 px) et l'univers (tuile de 240 px), aucun débordement, aucune image cassée.
+- Variables : aucune modifiée.
