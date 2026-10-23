@@ -17,7 +17,7 @@ Autorisation : le propriétaire a validé les décisions D01 à D08 le 21 octobr
 | SU01 | Analyse livrée ; mise en œuvre par sous-lots | exigences article par article, état du code, écarts, arbitrages juridiques, sous-lots SU01a à SU01j et calendrier ; à faire valider par un juriste avant toute mise en œuvre de l'identification et de l'âge |
 | SU01d | En ligne, restes compris, depuis le 22/10 (backend de `f574c75`, front `880d1aa`) ; délais légaux de la console en ligne le 22/10 (backend et console `d7f4784`, puis `3253a10`), recette connectée faite le 23/10 ; bureau de DIASPORALE (diasporale#26) en ligne sur la démonstration seulement (https://diasporale-demo.vercel.app, 22/10) | voir [SU01d — signalements réglementés](#su01d--signalements-réglementés) |
 | SU02 | En ligne depuis le 23/10 (PR 77, fronts `1956641`) | Découvrir rangé par piliers (Business, Vie publique, Divertissement), tuiles des seuls univers ouverts ; voir [SU02 et SU06](#su02-et-su06--découvrir-par-piliers-et-alimentation-et-restauration) |
-| SU06 | Premier volet en ligne depuis le 23/10 (PR 77, `1956641`) ; second volet livré en source le 23/10 | gabarit `food`, espace `/restauration` ; menu, horaires, plat du jour et « Commander » : voir [SU06, second volet](#su06-second-volet--menu-horaires-plat-du-jour-commander) |
+| SU06 | En ligne depuis le 23/10 : premier volet (PR 77, `1956641`), second volet (PR 80, `4cea752`) | gabarit `food`, espace `/restauration` ; menu, horaires, plat du jour et « Commander » : voir [SU06, second volet](#su06-second-volet--menu-horaires-plat-du-jour-commander) ; reste l'index des produits par catégorie `food` |
 | SU03 | À faire | types d'offre bien immobilier et véhicule ; dépend de MP03 |
 | SU04 à SU16 | À faire | voir l'étude, § 15 |
 
@@ -269,6 +269,10 @@ et « Commander » ». L'étude (§ 5.4) dit : « menu à jour, plat du jour en 
   vitrine, éditeur et carte), du domaine (`dailySpecial.test.ts`) et de l'interface (`daily-special.test.tsx`,
   `offer-post-formula.test.tsx`, `food-universe-screen.test.tsx`). Recette locale sur le candidat, compte Commerçant :
   désignation par l'éditeur (refus Zod sans choix), vitrine à 1 440 et 390 px, univers, aucun débordement.
+- **En ligne** le 23/10/2026 (backend démo puis production, fronts enfant puis principal, `main-4cea752365fe-*` ;
+  registre : `docs/35`). Sur la démo, l'Épicerie Moussavou Démo annonce « Poisson fumé au feu de bois — Démo » pour le
+  23/10, posé par son éditeur. Recette en ligne : éditeur, vitrine, publications « Commander » et `/restauration` à
+  1 440 px, vitrine et univers à 390 px. Captures : [`recette/en-ligne-su06-*.jpg`](recette/).
 - **Non couvert** : la vitrine publique (lecture sans compte) n'annonce pas le plat du jour ; la page du catalogue garde
   son titre « Catalogue » ; le plat du jour n'est pas publié dans les Stories du réseau (la rangée de l'univers en tient
   lieu).
