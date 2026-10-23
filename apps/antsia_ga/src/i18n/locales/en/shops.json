@@ -747,6 +747,7 @@
       "book": "Book",
       "quote": "Get a quote",
       "order": "Order",
+      "orderProduct": "Order",
       "buy": "Buy",
       "view": "View offer"
     },
@@ -755,5 +756,28 @@
   },
   "nav": {
     "myShop": "My shop"
+  },
+  "food": {
+    "menu": "Menu",
+    "seeMenu": "See the menu",
+    "hours": "Opening hours",
+    "todaysSpecial": "Today’s special"
+  },
+  "dailySpecial": {
+    "title": "Today’s special",
+    "lead": "Choose a product from your menu: it is featured today on your storefront and in the “Food and restaurants” universe, until midnight.",
+    "label": "Menu product",
+    "choose": "Choose a menu product",
+    "set": "Feature today",
+    "clear": "Remove today’s special",
+    "current": "Today: {{title}}",
+    "currentUnavailable": "Today’s featured dish can no longer be read in your menu.",
+    "none": "No special is featured today.",
+    "emptyMenu": "Your menu has no product yet: it arrives through the link with PRO.GA.",
+    "saved": "Today’s special featured.",
+    "cleared": "Today’s special removed.",
+    "pages": "Menu pages",
+    "previous": "Previous products",
+    "next": "Next products"
   }
 }

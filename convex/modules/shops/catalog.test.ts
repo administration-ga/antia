@@ -365,7 +365,7 @@ describe("P09 — slot et médias révoquables", () => {
     await published(f)
     const postId = await post(f)
     expect(await f.as.mutation(setSlot, { networkId: f.root, shopId: f.shopId, postId, offerRef: OFFER })).toEqual({ changed: true })
-    expect(await f.as.query(slot, { networkId: f.root, postId })).toMatchObject({ offerRef: OFFER, price: { amount: 12_000 } })
+    expect(await f.as.query(slot, { networkId: f.root, postId })).toMatchObject({ offerRef: OFFER, price: { amount: 12_000 }, shopTemplate: "general" })
     await applied(f, offer(2, { price: { mode: "unit", amount: 15_000, currency: "XAF", unit: "pièce" } }))
     expect(await f.as.query(slot, { networkId: f.root, postId })).toMatchObject({ revision: 2, price: { mode: "unit", amount: 15_000 } })
   })

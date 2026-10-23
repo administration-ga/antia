@@ -1,3 +1,4 @@
+import type { ActivityTemplate } from "@antsia/social-domain/activityConfiguration"
 import { ChevronRight } from "lucide-react"
 import Link from "next/link"
 
@@ -13,7 +14,8 @@ import { OfferMedia } from "./offer-card"
  *  · le BANDEAU D'ACTION, toujours : collé au média, bord à bord, titre, prix et
  *    geste — « Réserver » (service sur rendez-vous ; « Obtenir un devis » en
  *    second quand le devis est aussi ouvert), « Obtenir un devis », « Commander »
- *    ou « Acheter » (produit à prix affiché) ;
+ *    ou « Acheter » (produit à prix affiché ; « Commander » pour le menu d'une adresse
+ *    « Alimentation et restauration », gabarit `food`, SU06) ;
  *  · TROIS VUES : publication sans média, offre d'au moins trois photos — une
  *    grande vue et deux petites, le prix et la boutique dessous ;
  *  · FICHE PRODUIT / PANNEAU PRIX : publication sans média, une ou deux photos —
@@ -34,11 +36,14 @@ import { OfferMedia } from "./offer-card"
 /** Ce que la publication montre déjà : la formule ne double jamais ses images. */
 export type PostMediaSummary = { count: number; hasVideo: boolean }
 
-export type OfferPostAction = "book" | "quote" | "order" | "buy" | "view"
+export type OfferPostAction = "book" | "quote" | "order" | "orderProduct" | "buy" | "view"
 export type OfferPostVisual = "three_views" | "sheet" | "models" | null
 
-/** Le geste principal de l'offre, et le second quand un service ouvre aussi le devis. */
-export function offerPostActions(offer: Pick<CatalogOffer, "kind" | "price" | "serviceProfile">): { primary: OfferPostAction; secondary: "quote" | null } {
+/**
+ * Le geste principal de l'offre, et le second quand un service ouvre aussi le devis. Le menu d'une adresse
+ * « Alimentation et restauration » se commande : même fiche, même panier, payé à la remise.
+ */
+export function offerPostActions(offer: Pick<CatalogOffer, "kind" | "price" | "serviceProfile">, template?: ActivityTemplate): { primary: OfferPostAction; secondary: "quote" | null } {
   if (offer.kind === "service") {
     const modes = offer.serviceProfile?.commercialModes ?? []
     if (modes.includes("booking")) return { primary: "book", secondary: modes.includes("quote") ? "quote" : null }
@@ -47,7 +52,8 @@ export function offerPostActions(offer: Pick<CatalogOffer, "kind" | "price" | "s
     return { primary: "view", secondary: null }
   }
   // Un produit « sur devis » n'a pas de montant à payer : sa fiche, pas un achat.
-  return { primary: offer.price.mode === "quote" ? "view" : "buy", secondary: null }
+  if (offer.price.mode === "quote") return { primary: "view", secondary: null }
+  return { primary: template === "food" ? "orderProduct" : "buy", secondary: null }
 }
 
 /** La mise en scène : jamais d'images de l'offre quand la publication a déjà les siennes. */
@@ -194,8 +200,8 @@ const FORMULA_CSS = `
 [data-offer-formula] .opf-model-price { font-size: 13px; font-weight: 700; color: var(--role-commerce-ink, var(--foreground)); }
 `
 
-export function OfferPostFormula({ offer, postMedia, locale, t }: { offer: CatalogOffer; postMedia: PostMediaSummary; locale: string; t: CatalogTranslate }) {
-  const actions = offerPostActions(offer)
+export function OfferPostFormula({ offer, postMedia, locale, t, template }: { offer: CatalogOffer; postMedia: PostMediaSummary; locale: string; t: CatalogTranslate; template?: ActivityTemplate }) {
+  const actions = offerPostActions(offer, template)
   const visual = offerPostVisual(offer, postMedia)
   const price = catalogPrice(offer.price, locale, t)
   const offerHref = offerActionHref(offer, "view")

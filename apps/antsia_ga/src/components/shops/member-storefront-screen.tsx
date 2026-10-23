@@ -7,7 +7,7 @@ import { useAuthenticatedConvexQuery } from "@antsia/api/hooks"
 import { useNetwork } from "@antsia/api/network"
 import { useMutation } from "convex/react"
 import { effectiveActivityConfiguration } from "@antsia/social-domain/activityConfiguration"
-import { MapPin } from "lucide-react"
+import { Clock, MapPin } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import Image from "next/image"
 import { useState } from "react"
@@ -16,6 +16,7 @@ import { routes } from "@/lib/routes"
 import type { StorefrontData } from "./shop-model"
 import { ShopFrame, ShopLink, ShopLogo, ShopQueryFailure, useShopAction } from "./shop-ui"
 import { MemberCatalogPreview } from "./catalog-member-screen"
+import { DailySpecialCard, useTodaysSpecialRef } from "./daily-special"
 import { MemberShopJobsPreview } from "@/components/jobs/member-shop-jobs-screen"
 
 export function MemberStorefrontScreen({ handle }: { handle: string }) {
@@ -51,13 +52,19 @@ export function MemberStorefront({ shop }: { shop: StorefrontData }) {
  * Le corps de la vitrine : ses blocs dans l'ordre configuré — offres (collections qui défilent et grille),
  * présentation, publications —, ses conditions déclarées et ses offres d'emploi. `publications={false}` quand le
  * mur de la page suit déjà (une page d'entreprise présentée comme sa boutique). À poser dans une grille à `gap-8`.
+ * Une adresse « Alimentation et restauration » (SU06) ouvre sur son plat du jour, et son catalogue s'appelle
+ * « Menu » ; ses horaires sont dans l'en-tête.
  */
 export function StorefrontBody({ shop, publications = true }: { shop: StorefrontData; publications?: boolean }) {
   const { t, i18n } = useTranslation("shops")
   const { t: ux } = useTranslation("commerceExperience")
+  const food = effectiveActivityConfiguration(shop.activityConfiguration, shop.model).template === "food"
+  const special = useTodaysSpecialRef(food ? shop.dailySpecial : null)
+  const facts = food ? (["specialty", "serviceArea"] as const) : (["specialty", "serviceArea", "hours"] as const)
   return <>
     {shop.viewer.manages ? <p className="-mt-4 text-sm text-muted-foreground">{ux("storefront.manageHint")}</p> : null}
-    {shop.blocks.map((block) => block === "catalog" || block === "services" ? <MemberCatalogPreview key={block} handle={shop.handle} kind={block === "catalog" ? "product" : "service"} /> : block === "about" ? <Card key={block}><div className="grid gap-4"><h2 className="mp-subtitle">{t("storefront.about")}</h2>{shop.description ? <p className="whitespace-pre-wrap">{shop.description}</p> : null}<dl className="grid gap-4 sm:grid-cols-2">{(["specialty", "serviceArea", "hours"] as const).map((field) => shop[field] ? <div key={field}><dt className="text-sm font-medium text-muted-foreground">{t(`storefront.${field}`)}</dt><dd className="whitespace-pre-wrap">{shop[field]}</dd></div> : null)}</dl></div></Card> : block === "publications" && publications ? <Card key={block}><div className="grid justify-items-start gap-3"><h2 className="mp-subtitle">{t("blocks.publications")}</h2><p className="text-sm text-muted-foreground">{t("storefront.publicationsHint")}</p><ShopLink href={routes.page(shop.handle)}>{t("storefront.socialPage")}</ShopLink></div></Card> : null)}
+    {special ? <DailySpecialCard handle={shop.handle} offerRef={special} /> : null}
+    {shop.blocks.map((block) => block === "catalog" || block === "services" ? <MemberCatalogPreview key={block} handle={shop.handle} kind={block === "catalog" ? "product" : "service"} title={food && block === "catalog" ? t("food.menu") : undefined} /> : block === "about" ? <Card key={block}><div className="grid gap-4"><h2 className="mp-subtitle">{t("storefront.about")}</h2>{shop.description ? <p className="whitespace-pre-wrap">{shop.description}</p> : null}<dl className="grid gap-4 sm:grid-cols-2">{facts.map((field) => shop[field] ? <div key={field}><dt className="text-sm font-medium text-muted-foreground">{t(`storefront.${field}`)}</dt><dd className="whitespace-pre-wrap">{shop[field]}</dd></div> : null)}</dl></div></Card> : block === "publications" && publications ? <Card key={block}><div className="grid justify-items-start gap-3"><h2 className="mp-subtitle">{t("blocks.publications")}</h2><p className="text-sm text-muted-foreground">{t("storefront.publicationsHint")}</p><ShopLink href={routes.page(shop.handle)}>{t("storefront.socialPage")}</ShopLink></div></Card> : null)}
     <StorefrontTerms value={shop.storefrontTerms} locale={i18n.resolvedLanguage === "en" ? "en" : "fr"} t={t} />
     <MemberShopJobsPreview handle={shop.handle} />
   </>
@@ -73,7 +80,10 @@ const HERO_TAG = "inline-flex min-h-8 items-center gap-1.5 rounded-[var(--esp-ch
  */
 export function StorefrontHero({ shop }: { shop: StorefrontData }) {
   const { t } = useTranslation("shops")
-  const capabilities = effectiveActivityConfiguration(shop.activityConfiguration, shop.model).capabilities.map(capability => t(`activityConfiguration:capabilities.${capability}`))
+  const configuration = effectiveActivityConfiguration(shop.activityConfiguration, shop.model)
+  const capabilities = configuration.capabilities.map(capability => t(`activityConfiguration:capabilities.${capability}`))
+  // Une adresse « Alimentation et restauration » montre ses horaires dès l'en-tête : on y vient pour commander.
+  const food = configuration.template === "food"
   const { t: ux } = useTranslation("commerceExperience")
   const { networkId } = useNetwork()
   const follow = useMutation(api.modules.pages.pages.follow)
@@ -103,8 +113,9 @@ export function StorefrontHero({ shop }: { shop: StorefrontData }) {
       {shop.specialty ? <li className={HERO_TAG}>{shop.specialty}</li> : null}
       {shop.serviceArea ? <li className={HERO_TAG}><MapPin aria-hidden className="size-3.5 shrink-0" />{shop.serviceArea}</li> : null}
     </ul>
+    {food && shop.hours ? <p className="flex min-w-0 items-start gap-2 text-sm" data-storefront-hours><Clock aria-hidden className="mt-0.5 size-4 shrink-0" /><span className="min-w-0"><span className="font-semibold">{t("food.hours")}</span> · <span className="whitespace-pre-wrap">{shop.hours}</span></span></p> : null}
     <div className="flex min-w-0 flex-wrap items-center gap-2">
-      {hasCatalog ? <ShopLink variant="commerce" href={routes.shopCatalog(shop.handle)}>{ux("storefront.offers")}</ShopLink> : null}
+      {hasCatalog ? <ShopLink variant="commerce" href={routes.shopCatalog(shop.handle)}>{food ? t("food.seeMenu") : ux("storefront.offers")}</ShopLink> : null}
       <Button type="button" variant="outline" pending={action.pending} aria-pressed={shop.viewer.following} onClick={() => void action.run(async (): Promise<{ following: boolean }> => shop.viewer.following ? await unfollow({ networkId, pageId: shop.pageId }) : await follow({ networkId, handle: shop.handle }))}>{t(shop.viewer.following ? "storefront.unfollow" : "storefront.follow")}</Button>
       <StorefrontExistingContact handle={shop.handle} />
       {shop.viewer.manages ? <ShopLink href={routes.myShops()}>{t("storefront.manage")}</ShopLink> : null}

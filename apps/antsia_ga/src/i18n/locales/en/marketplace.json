@@ -122,6 +122,7 @@
     "openActivity": "Open my business",
     "shops": "Places",
     "offers": "To order",
-    "demoOffers": "To order — demo selection"
+    "demoOffers": "To order — demo selection",
+    "specials": "Today’s specials"
   }
 }

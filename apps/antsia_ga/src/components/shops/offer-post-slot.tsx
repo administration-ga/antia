@@ -21,5 +21,5 @@ function OfferPostQuery({ networkId, postId, postMedia }: { networkId: Id<"netwo
   const query = useAuthenticatedConvexQuery(api.modules.shops.catalog.postOffer, { networkId, postId })
   if (query.isError) return <p role="status" className="px-4 py-3 text-sm text-muted-foreground">{t("catalog.offerUnavailable")}</p>
   if (query.isPending || !query.data) return null
-  return <aside aria-label={t("catalog.attachedOffer")} className="min-w-0"><OfferPostFormula offer={query.data} postMedia={postMedia} locale={i18n.resolvedLanguage ?? "fr"} t={(key, options) => t(key, options)} /></aside>
+  return <aside aria-label={t("catalog.attachedOffer")} className="min-w-0"><OfferPostFormula offer={query.data} template={query.data.shopTemplate} postMedia={postMedia} locale={i18n.resolvedLanguage ?? "fr"} t={(key, options) => t(key, options)} /></aside>
 }

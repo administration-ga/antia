@@ -22,11 +22,18 @@ import {
 } from "./rules"
 
 export const shopModelValidator = literals(SHOP_MODELS)
+/** Le gabarit d'activité : il règle la présentation et range la boutique dans son univers, jamais les droits. */
+export const activityTemplateValidator = literals(ACTIVITY_TEMPLATES)
+/**
+ * Le plat du jour d'une adresse « Alimentation et restauration », daté du jour civil de Libreville où il a été
+ * désigné. Les écrans ne l'annoncent que ce jour-là (`@antsia/social-domain/dailySpecial`).
+ */
+export const dailySpecialValidator = v.union(v.null(), v.object({ offerRef: v.string(), day: v.string() }))
 /** MP02 : configuration de présentation, jamais une permission de publication ou d'encaissement. */
 export const activityConfigurationValidator = v.object({
   version: v.literal(1),
   capabilities: v.array(literals(ACTIVITY_CAPABILITIES)),
-  template: literals(ACTIVITY_TEMPLATES),
+  template: activityTemplateValidator,
   blocks: v.array(literals(ACTIVITY_BLOCKS)),
 })
 export const storefrontStateValidator = literals(STOREFRONT_STATES)
@@ -95,6 +102,7 @@ export const shopEditorValidator = v.object({
   specialty: v.union(v.string(), v.null()),
   serviceArea: v.union(v.string(), v.null()),
   hours: v.union(v.string(), v.null()),
+  dailySpecial: dailySpecialValidator,
   logo: v.object({ present: v.boolean(), url: v.union(v.string(), v.null()), withheld: v.union(withheldCodeValidator, v.null()) }),
   page: v.union(v.null(), v.object({ handle: v.string(), badge: badgeValidator })),
   storefront: v.object({
@@ -135,6 +143,7 @@ export const storefrontValidator = v.object({
   specialty: v.union(v.string(), v.null()),
   serviceArea: v.union(v.string(), v.null()),
   hours: v.union(v.string(), v.null()),
+  dailySpecial: dailySpecialValidator,
   badge: badgeValidator,
   blocks: v.array(shopBlockValidator),
   publishedAt: v.number(),
@@ -154,9 +163,12 @@ export const storefrontCardValidator = v.object({
   bannerUrl: v.union(v.string(), v.null()),
   model: shopModelValidator,
   /** Le gabarit d'activité effectif : il range la boutique dans son univers (« Alimentation et restauration » pour `food`). */
-  template: literals(ACTIVITY_TEMPLATES),
+  template: activityTemplateValidator,
   specialty: v.union(v.string(), v.null()),
   serviceArea: v.union(v.string(), v.null()),
+  /** Les horaires annoncés (texte libre) : l'univers Alimentation les montre sous chaque adresse. */
+  hours: v.union(v.string(), v.null()),
+  dailySpecial: dailySpecialValidator,
   badge: badgeValidator,
   publishedAt: v.number(),
 })
