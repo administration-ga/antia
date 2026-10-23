@@ -747,6 +747,7 @@
       "book": "Réserver",
       "quote": "Obtenir un devis",
       "order": "Commander",
+      "orderProduct": "Commander",
       "buy": "Acheter",
       "view": "Voir l’offre"
     },
@@ -755,5 +756,28 @@
   },
   "nav": {
     "myShop": "Ma boutique"
+  },
+  "food": {
+    "menu": "Menu",
+    "seeMenu": "Voir le menu",
+    "hours": "Horaires",
+    "todaysSpecial": "Plat du jour"
+  },
+  "dailySpecial": {
+    "title": "Plat du jour",
+    "lead": "Choisissez un produit de votre menu : il est annoncé aujourd’hui sur votre vitrine et dans l’univers « Alimentation et restauration », jusqu’à minuit.",
+    "label": "Produit du menu",
+    "choose": "Choisir un produit du menu",
+    "set": "Annoncer aujourd’hui",
+    "clear": "Retirer le plat du jour",
+    "current": "Aujourd’hui : {{title}}",
+    "currentUnavailable": "Le plat annoncé aujourd’hui n’est plus lisible dans votre menu.",
+    "none": "Aucun plat du jour n’est annoncé aujourd’hui.",
+    "emptyMenu": "Votre menu n’a pas encore de produit : il arrive par la liaison avec PRO.GA.",
+    "saved": "Plat du jour annoncé.",
+    "cleared": "Plat du jour retiré.",
+    "pages": "Pages du menu",
+    "previous": "Produits précédents",
+    "next": "Produits suivants"
   }
 }

@@ -33,6 +33,18 @@ describe("formules des boutiques — le geste (ADR-0037)", () => {
     expect(offerPostActions(catalogOfferFixture({ price: { mode: "quote", currency: "XAF" } }))).toEqual({ primary: "view", secondary: null })
   })
 
+  it("le menu d'une adresse « Alimentation et restauration » se commande, à la même fiche ; le devis reste une fiche", () => {
+    expect(offerPostActions(catalogOfferFixture(), "food")).toEqual({ primary: "orderProduct", secondary: null })
+    expect(offerPostActions(catalogOfferFixture(), "fashion")).toEqual({ primary: "buy", secondary: null })
+    expect(offerPostActions(catalogOfferFixture({ price: { mode: "quote", currency: "XAF" } }), "food")).toEqual({ primary: "view", secondary: null })
+    expect(offerPostActions(service(["fixed_order"]), "food")).toEqual({ primary: "order", secondary: null })
+    expect(offerActionHref(catalogOfferFixture(), "orderProduct")).toBe(routes.shopOffer("atelier", catalogOfferFixture().offerRef))
+    const value = renderToStaticMarkup(<I18nextProvider i18n={i18n}><OfferPostFormula offer={catalogOfferFixture()} template="food" postMedia={NO_MEDIA} locale="fr" t={t} /></I18nextProvider>)
+    expect(value).toContain('data-offer-action="orderProduct"')
+    expect(value).toContain(">Commander<")
+    expect(value).not.toContain(">Acheter<")
+  })
+
   it("chaque geste mène à sa vraie page", () => {
     const rental = service(["booking", "quote"])
     expect(offerActionHref(rental, "book")).toBe(routes.serviceBooking("atelier", rental.offerRef))

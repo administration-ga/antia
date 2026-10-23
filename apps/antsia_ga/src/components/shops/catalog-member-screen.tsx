@@ -130,10 +130,11 @@ function CollectionRail({ handle, collection, kind, provider }: { handle: string
   return <Rail size="product" title={collection.label} level={3} href={provider ? routes.providerCatalog(handle, filters) : routes.shopCatalog(handle, filters)} linkLabel={t("catalog.seeCollection")}>{query.data.page.map((offer, index) => <OfferCard key={offer.offerRef} offer={offer} audience="member" locale={i18n.resolvedLanguage ?? "fr"} t={(key, options) => t(key, options)} eager={index === 0} seller={false} action={<OfferQuickAdd offer={offer} />} />)}</Rail>
 }
 
-export function MemberCatalogPreview({ handle, kind }: { handle: string; kind?: "product" | "service" }) {
+/** `title` : le nom du bloc quand le gabarit en donne un (« Menu » d'une adresse « Alimentation et restauration »). */
+export function MemberCatalogPreview({ handle, kind, title }: { handle: string; kind?: "product" | "service"; title?: string }) {
   const { networkId, personId } = useNetwork()
   const { t } = useTranslation("shops")
-  return <section aria-labelledby={`member-shop-catalog-${kind ?? "all"}`} className="grid min-w-0 gap-4"><h2 id={`member-shop-catalog-${kind ?? "all"}`} className="mp-subtitle">{t(kind === "service" ? "blocks.services" : "catalog.title")}</h2><MemberCatalogWindow key={JSON.stringify([networkId, personId, handle])} handle={handle} search={{ cursor: null, ...(kind ? { kind } : {}) }} preview /></section>
+  return <section aria-labelledby={`member-shop-catalog-${kind ?? "all"}`} className="grid min-w-0 gap-4"><h2 id={`member-shop-catalog-${kind ?? "all"}`} className="mp-subtitle">{title ?? t(kind === "service" ? "blocks.services" : "catalog.title")}</h2><MemberCatalogWindow key={JSON.stringify([networkId, personId, handle])} handle={handle} search={{ cursor: null, ...(kind ? { kind } : {}) }} preview /></section>
 }
 
 export function MemberOfferScreen({ handle, offerRef, initialSelection, provider = false }: { handle: string; offerRef: string; initialSelection?: OfferInitialSelection; provider?: boolean }) {

@@ -46,6 +46,8 @@ export const shopsTables = {
     /** Zone approximative choisie par la boutique (jamais une adresse). */
     serviceArea: v.optional(v.string()),
     hours: v.optional(v.string()),
+    /** Le plat du jour d'une adresse « Alimentation et restauration » : une offre de son menu, pour un jour civil de Libreville. */
+    dailySpecial: v.optional(v.object({ offerRef: v.string(), day: v.string() })),
     storefront: storefrontStateValidator,
     /** Motif de la dernière décision de l'équipe de la plateforme (refus, suspension) — rendu aux seuls gérants. */
     decisionReason: v.optional(v.string()),

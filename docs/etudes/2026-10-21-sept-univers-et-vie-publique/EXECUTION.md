@@ -17,7 +17,7 @@ Autorisation : le propriétaire a validé les décisions D01 à D08 le 21 octobr
 | SU01 | Analyse livrée ; mise en œuvre par sous-lots | exigences article par article, état du code, écarts, arbitrages juridiques, sous-lots SU01a à SU01j et calendrier ; à faire valider par un juriste avant toute mise en œuvre de l'identification et de l'âge |
 | SU01d | En ligne, restes compris, depuis le 22/10 (backend de `f574c75`, front `880d1aa`) ; délais légaux de la console en ligne le 22/10 (backend et console `d7f4784`, puis `3253a10`), recette connectée faite le 23/10 ; bureau de DIASPORALE (diasporale#26) en ligne sur la démonstration seulement (https://diasporale-demo.vercel.app, 22/10) | voir [SU01d — signalements réglementés](#su01d--signalements-réglementés) |
 | SU02 | En ligne depuis le 23/10 (PR 77, fronts `1956641`) | Découvrir rangé par piliers (Business, Vie publique, Divertissement), tuiles des seuls univers ouverts ; voir [SU02 et SU06](#su02-et-su06--découvrir-par-piliers-et-alimentation-et-restauration) |
-| SU06 | Premier volet en ligne depuis le 23/10 (PR 77, backend et fronts `1956641`) | gabarit `food` « Alimentation et restauration », espace `/restauration` ; restent menu, horaires et plat du jour (étude, § 5.4) |
+| SU06 | Premier volet en ligne depuis le 23/10 (PR 77, `1956641`) ; second volet livré en source le 23/10 | gabarit `food`, espace `/restauration` ; menu, horaires, plat du jour et « Commander » : voir [SU06, second volet](#su06-second-volet--menu-horaires-plat-du-jour-commander) |
 | SU03 | À faire | types d'offre bien immobilier et véhicule ; dépend de MP03 |
 | SU04 à SU16 | À faire | voir l'étude, § 15 |
 
@@ -238,10 +238,40 @@ Le propriétaire a validé l'ordre : publier la marketplace déjà faite, puis c
   - 390 px : aucun débordement, « Mon activité » dans « Créer ».
   - Captures : [`recette/en-ligne-*.jpg`](recette/).
 - **Démo.** L'Épicerie Moussavou Démo est passée au gabarit « Alimentation et restauration » par son éditeur (compte Commerçant).
-- **Reste de SU06.**
-  - Le menu, les horaires et le plat du jour (en Story).
-  - Le libellé « Commander » sur les formules des publications des adresses `food`.
-  - L'index des produits par catégorie `food`, quand le catalogue de PRO.GA sera reflété.
+- **Reste de SU06** : traité par le [second volet](#su06-second-volet--menu-horaires-plat-du-jour-commander), sauf
+  l'index des produits par catégorie `food`, qui attend le reflet du catalogue de PRO.GA.
+
+## SU06, second volet — menu, horaires, plat du jour, Commander
+
+Demande du propriétaire, le 23/10/2026 : « continue l'univers Alimentation et restauration — menu, horaires, plat du jour
+et « Commander » ». L'étude (§ 5.4) dit : « menu à jour, plat du jour en Story, commande à retirer ou livrée, avis ».
+
+- **Plat du jour.**
+  - Une offre du menu, désignée pour un jour civil de Libreville (UTC+1, sans heure d'été). Le lendemain, plus rien ne
+    l'annonce tant que l'adresse n'en désigne pas un autre. La règle est pure et partagée
+    (`packages/social-domain/src/dailySpecial.ts`) : le serveur date la désignation, l'écran juge si elle vaut aujourd'hui
+    (une requête Convex n'est pas relancée au passage de minuit).
+  - Mutation `shops.setDailySpecial` : limitation de débit `shop.edit`, gérant d'une boutique au gabarit `food` qui a sa
+    page, offre relue comme le gérant la lit et produit seulement. Sinon, le refus indistinct. Une désignation identique
+    le même jour n'écrit rien ; `null` la retire. Rien n'est réécrit dans la présentation : ni modération ni admission
+    rejouées.
+  - Éditeur, étape « Mes offres » : panneau « Plat du jour » (React Hook Form et Zod), produits du menu par fenêtres de
+    dix, retrait possible.
+  - Vitrine : le plat ouvre le corps, photo sur les deux tiers (2:1 au bureau), prix et « Commander ».
+  - Univers `/restauration` : rangée « Plats du jour » en tuiles verticales, façon Story, avant les adresses. Une offre
+    devenue illisible ne laisse ni tuile ni titre.
+- **Horaires** : dans l'en-tête de la vitrine d'une adresse `food` (plus répétés dans la présentation), et sous chaque
+  carte de l'univers. La carte de l'annuaire porte désormais `hours`.
+- **Menu** : sur la vitrine d'une adresse `food`, le catalogue s'appelle « Menu » et le bouton « Voir le menu ».
+- **« Commander »** : `catalog.postOffer` dit le gabarit de la boutique ; la formule d'un produit d'une adresse `food`
+  dit « Commander » et mène à la même fiche, au même panier, réglé à la remise. Un produit sur devis reste une fiche.
+- **Preuves** : tests du moteur (`convex/modules/shops/demoCatalog.test.ts`, deux cas : gardes, datation à Libreville,
+  vitrine, éditeur et carte), du domaine (`dailySpecial.test.ts`) et de l'interface (`daily-special.test.tsx`,
+  `offer-post-formula.test.tsx`, `food-universe-screen.test.tsx`). Recette locale sur le candidat, compte Commerçant :
+  désignation par l'éditeur (refus Zod sans choix), vitrine à 1 440 et 390 px, univers, aucun débordement.
+- **Non couvert** : la vitrine publique (lecture sans compte) n'annonce pas le plat du jour ; la page du catalogue garde
+  son titre « Catalogue » ; le plat du jour n'est pas publié dans les Stories du réseau (la rangée de l'univers en tient
+  lieu).
 
 ## Conditions externes
 

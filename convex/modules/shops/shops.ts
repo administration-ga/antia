@@ -17,7 +17,8 @@ import { readableStorefrontTerms } from "./storefrontTerms"
  */
 import { computePageBadge } from "@antsia/social-domain/badges"
 import { effectiveActivityConfiguration, parseActivityConfiguration, visibleActivityBlocks } from "@antsia/social-domain/activityConfiguration"
-import { catalogStorefrontBlocks } from "./catalogRead"
+import { librevilleDay } from "@antsia/social-domain/dailySpecial"
+import { catalogStorefrontBlocks, resolveCatalogOffer } from "./catalogRead"
 import { paginationOptsValidator, paginationResultValidator, type PaginationResult } from "convex/server"
 import { v } from "convex/values"
 
@@ -142,6 +143,7 @@ async function editorOf(ctx: ReadCtx, managed: ManagedShop, viewer: { personId: 
     specialty: shop.specialty ?? null,
     serviceArea: shop.serviceArea ?? null,
     hours: shop.hours ?? null,
+    dailySpecial: shop.dailySpecial ?? null,
     logo: { present: identity.logoStorageId !== undefined, url: logo?.url ?? null, withheld: logo ? withheldCodeOf(logo.scan) : null },
     page: page ? { handle: page.handle, badge: computePageBadge(page.trust) } : null,
     storefront: {
@@ -196,6 +198,7 @@ async function storefrontOf(ctx: ReadCtx, shop: Doc<"shops">, page: Doc<"pages">
     specialty: shop.specialty ?? null,
     serviceArea: shop.serviceArea ?? null,
     hours: shop.hours ?? null,
+    dailySpecial: shop.dailySpecial ?? null,
     badge: computePageBadge(page.trust),
     blocks: visibleActivityBlocks(configuration, [...await catalogStorefrontBlocks(ctx, rootNetwork, shop, readerPersonId), "publications", "about"]),
     publishedAt: shop.publishedAt ?? shop.updatedAt,
@@ -216,6 +219,8 @@ export async function cardOf(ctx: ReadCtx, shop: Doc<"shops">, page: Doc<"pages"
     template: effectiveActivityConfiguration(shop.activityConfiguration, shop.model).template,
     specialty: shop.specialty ?? null,
     serviceArea: shop.serviceArea ?? null,
+    hours: shop.hours ?? null,
+    dailySpecial: shop.dailySpecial ?? null,
     badge: computePageBadge(page.trust),
     publishedAt: shop.publishedAt ?? shop.updatedAt,
   }
@@ -454,6 +459,36 @@ export const updateShop = networkMutation({
         await moderateContentWrite(ctx, { networkId: page.networkId, ownerPersonId: ctx.person._id, kind: "page", id: page._id, text: shopModerationText(shopIdentityOf(freshShop, freshPage), freshShop) })
       }
     }
+    return { changed: true }
+  },
+})
+
+/**
+ * Le PLAT DU JOUR d'une adresse « Alimentation et restauration » (SU06, étude des sept univers, § 5.4) : une
+ * offre de SON menu, désignée pour aujourd'hui (jour civil de Libreville) ; `null` le retire. Réservé aux gérants
+ * d'une boutique au gabarit `food` qui a sa page. L'offre est relue comme le gérant la lit : absente, retirée,
+ * d'une autre boutique ou d'un autre genre qu'un produit, c'est le refus indistinct. Une désignation identique le
+ * même jour n'écrit rien. Ni la modération ni l'admission ne sont rejouées : rien de nouveau n'est écrit dans la
+ * présentation, seule une référence vers une offre déjà publiée.
+ */
+export const setDailySpecial = networkMutation({
+  args: { shopId: v.id("shops"), offerRef: v.union(v.string(), v.null()) },
+  returns: v.object({ changed: v.boolean() }),
+  handler: async (ctx, args) => {
+    await enforceRateLimit(ctx, "shop.edit", ctx.person._id)
+    const { shop, page } = await requireManagedShop(ctx, { networkId: ctx.networkId, personId: ctx.person._id }, args.shopId)
+    if (!page || effectiveActivityConfiguration(shop.activityConfiguration, shop.model).template !== "food") return notFound()
+    if (args.offerRef === null) {
+      if (shop.dailySpecial === undefined) return { changed: false }
+      await ctx.db.patch(shop._id, { dailySpecial: undefined })
+      return { changed: true }
+    }
+    if (args.offerRef.length > 200) return notFound()
+    const offer = await resolveCatalogOffer(ctx, { root: ctx.rootNetwork, readerPersonId: ctx.person._id, network: ctx.network }, shop._id, args.offerRef)
+    if (!offer || offer.kind !== "product") return notFound()
+    const day = librevilleDay(Date.now())
+    if (shop.dailySpecial?.offerRef === args.offerRef && shop.dailySpecial.day === day) return { changed: false }
+    await ctx.db.patch(shop._id, { dailySpecial: { offerRef: args.offerRef, day } })
     return { changed: true }
   },
 })

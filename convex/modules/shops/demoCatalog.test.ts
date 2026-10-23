@@ -392,3 +392,43 @@ it("le miroir du site déclare chaque offre fictive du moteur avec la même imag
   expect(mirror.match(/offerRef: "demo:offer:/g)).toHaveLength(33)
 })
 
+
+describe("SU06 — plat du jour d'une adresse « Alimentation et restauration »", () => {
+  const setSpecial = (f: Fixture, offerRef: string | null, as = f.as) => as.mutation(api.modules.shops.shops.setDailySpecial, { networkId: f.root, shopId: f.shopId, offerRef })
+  const storefrontOf = async (f: Fixture) => await f.as.query(api.modules.shops.shops.storefront, { networkId: f.root, handle: f.handle })
+  async function refusal(promise: Promise<unknown>) {
+    try { await promise; return null } catch (error) { return engineErrorCode(error) }
+  }
+
+  it("réservé au gabarit food, au gérant et à un produit de son propre menu", async () => {
+    const f = await fixture()
+    expect(await refusal(setSpecial(f, "demo:offer:epicerie-produits"))).toBe("notFound")
+    await f.t.run(async (ctx) => ctx.db.patch(f.shopId, { activityConfiguration: { version: 1, capabilities: ["products"], template: "food", blocks: ["catalog", "publications", "about"] } }))
+    expect(await refusal(setSpecial(f, "demo:offer:inconnue"))).toBe("notFound")
+    expect(await refusal(setSpecial(f, "x".repeat(201)))).toBe("notFound")
+    // Une offre d'une autre boutique n'est pas au menu, et un autre membre ne gère pas celle-ci.
+    expect(await refusal(setSpecial(f, "demo:offer:photo-portrait"))).toBe("notFound")
+    const other = await shopFixture(f.t, f.root, { handle: "studio-objectif-demo", ownerHandle: "verifie.demo", email: "verifie@demo.antsia.test", model: "quote_services" })
+    expect(await refusal(setSpecial(f, "demo:offer:epicerie-produits", other.as))).toBe("notFound")
+    expect(await f.t.run(async (ctx) => (await ctx.db.get(f.shopId))?.dailySpecial ?? null)).toBeNull()
+  })
+
+  it("date le plat à Libreville, le montre à la vitrine, à l'éditeur et à la carte, n'écrit rien deux fois et se retire", async () => {
+    const f = await fixture()
+    await f.t.run(async (ctx) => ctx.db.patch(f.shopId, { activityConfiguration: { version: 1, capabilities: ["products"], template: "food", blocks: ["catalog", "publications", "about"] }, hours: "Du lundi au samedi, de 8 h à 20 h" }))
+    expect(await setSpecial(f, "demo:offer:epicerie-produits")).toEqual({ changed: true })
+    expect(await setSpecial(f, "demo:offer:epicerie-produits")).toEqual({ changed: false })
+    const special = { offerRef: "demo:offer:epicerie-produits", day: "2026-10-20" }
+    expect((await storefrontOf(f))?.dailySpecial).toEqual(special)
+    expect((await f.as.query(api.modules.shops.shops.getMyShop, { networkId: f.root, shopId: f.shopId }))?.dailySpecial).toEqual(special)
+    const card = (await f.as.query(api.modules.shops.marketplaceShops.search, { networkId: f.root, paginationOpts: FIRST })).page.find((item) => item.handle === f.handle)
+    expect(card).toMatchObject({ template: "food", hours: "Du lundi au samedi, de 8 h à 20 h", dailySpecial: special })
+    // Le lendemain, la même désignation se redate ; `null` retire le plat, une seule fois.
+    vi.setSystemTime(NOW + 24 * 60 * 60 * 1000)
+    expect(await setSpecial(f, "demo:offer:epicerie-produits")).toEqual({ changed: true })
+    expect((await storefrontOf(f))?.dailySpecial).toEqual({ ...special, day: "2026-10-21" })
+    expect(await setSpecial(f, null)).toEqual({ changed: true })
+    expect(await setSpecial(f, null)).toEqual({ changed: false })
+    expect((await storefrontOf(f))?.dailySpecial).toBeNull()
+  })
+})
