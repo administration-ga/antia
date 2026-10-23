@@ -474,3 +474,32 @@ Autres contrôles :
   grandes cartes des boutiques et des prestataires avec leur bannière, les pastilles Produits, Mode, Alimentation, Services
   et Boutiques. 36 images, aucune cassée, aucun débordement.
 - Variables : aucune modifiée.
+
+## Mise à jour — `main` 1956641 en ligne : Ma boutique, Découvrir par univers, Alimentation et restauration (SU02, SU06)
+
+- Décision du propriétaire, le 22/10 : « publie d'abord la marketplace déjà faite, puis Ma boutique, Découvrir par univers et
+  l'univers Alimentation et restauration ». La marketplace était en ligne avec `a0d26d0` (PR 76). Cette entrée couvre la
+  PR 77 : détail dans l'[exécution des sept univers](etudes/2026-10-21-sept-univers-et-vie-publique/EXECUTION.md).
+- Backend : export propre (ANTSIA `1956641`, DIASPORALE `367c2bd`, sans `.env.local`), connexion CLI du Mac, aucune clé.
+
+| Étape | Résultat |
+|---|---|
+| Aperçus `--dry-run`, démo et production | aucun index supprimé, schéma validé ; seule ligne : « version Node des actions », artefact connu |
+| Convex démo `vivid-hedgehog-655` | 1 035 fonctions. Sept signatures changent comme prévu : le gabarit `food` élargit la configuration d'activité (getStorefront, getMyShop, startShop, storefront, updateShop), et les cartes de directory et de search portent `template` |
+| Convex production `diligent-avocet-585` | idem ; relevé des fonctions identique à la démo |
+| Front, enfant démo | `dpl_4sT3LWvwNv8nx4RdTKR3VwmopwZf` (antsia-demo-rkhg6vy4f), version `main-1956641d5b31-demo`, READY en 196 s, 302 SSO, promu |
+| Front, principal | `dpl_Bwn7jYpb1NvoRChFXiYimacTPcEF` (antsia-k46y2qudx), version `main-1956641d5b31-production`, READY en 216 s, 302 SSO, promu |
+
+- Retour arrière des fronts : antsia-efvqokxab (principal) et antsia-demo-qr9euc0gt (enfant), versions `a0d26d0`. Le backend
+  `1956641` reste compatible avec eux : il élargit une liste et ajoute un champ de réponse.
+- Santé : `main-1956641d5b31-production` et `main-1956641d5b31-demo`. Pages en 200 : `/`, `/fil`, `/marketplace`,
+  `/restauration`, `/explorer`, `/mes-boutiques`, `/demo/restauration`, `/demo/explorer`, `/demo/mes-boutiques`.
+- Donnée de démonstration : l'Épicerie Moussavou Démo passe au gabarit « Alimentation et restauration », par son éditeur
+  (compte Commerçant). Production : rien de posé.
+- Recette en ligne (démo, compte Commerçant), captures dans
+  `docs/etudes/2026-10-21-sept-univers-et-vie-publique/recette/en-ligne-*.jpg` :
+  - 1 440 px : rail « Ma boutique » ; carte de tableau de bord (gérer, vitrine, page, clients) ; Découvrir et ses trois
+    piliers, tuile Alimentation comprise ; `/restauration` avec l'épicerie et 13 offres de démonstration. Aucune image
+    cassée, aucun débordement ;
+  - 390 px : carte de l'adresse à 12 px de marge, aucun débordement, « Mon activité » dans « Créer ».
+- Variables : aucune modifiée.

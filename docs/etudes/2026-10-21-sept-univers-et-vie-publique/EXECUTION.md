@@ -16,7 +16,8 @@ Autorisation : le propriétaire a validé les décisions D01 à D08 le 21 octobr
 | SU00 | Terminé — documentaire | ADR-0035 (D01–D08 acceptées, D09–D12 proposées) ; index des ADR mis à jour ; étude passée en version 1.1 |
 | SU01 | Analyse livrée ; mise en œuvre par sous-lots | exigences article par article, état du code, écarts, arbitrages juridiques, sous-lots SU01a à SU01j et calendrier ; à faire valider par un juriste avant toute mise en œuvre de l'identification et de l'âge |
 | SU01d | En ligne, restes compris, depuis le 22/10 (backend de `f574c75`, front `880d1aa`) ; délais légaux de la console en ligne le 22/10 (backend et console `d7f4784`) ; bureau de DIASPORALE (diasporale#26) en ligne sur la démonstration seulement (https://diasporale-demo.vercel.app, 22/10) | voir [SU01d — signalements réglementés](#su01d--signalements-réglementés) |
-| SU02 | À faire | Découvrir par piliers ; dépend de SU00 et MP01 |
+| SU02 | En ligne depuis le 23/10 (PR 77, fronts `1956641`) | Découvrir rangé par piliers (Business, Vie publique, Divertissement), tuiles des seuls univers ouverts ; voir [SU02 et SU06](#su02-et-su06--découvrir-par-piliers-et-alimentation-et-restauration) |
+| SU06 | Premier volet en ligne depuis le 23/10 (PR 77, backend et fronts `1956641`) | gabarit `food` « Alimentation et restauration », espace `/restauration` ; restent menu, horaires et plat du jour (étude, § 5.4) |
 | SU03 | À faire | types d'offre bien immobilier et véhicule ; dépend de MP03 |
 | SU04 à SU16 | À faire | voir l'étude, § 15 |
 
@@ -201,6 +202,40 @@ Périmètre tranché par le propriétaire le 22/10/2026 : l'export suit la règl
 - Console en ligne le 22/10, avec l'accord écrit du propriétaire ([docs/35](../../35_PUBLICATION_DONNEES_DEMO_2026-10-22.md)) : backend et console `d7f4784`, puis `3253a10` (ADR-0039 : l'IDN de niveau 1 suffit). Le premier opérateur, le propriétaire, est posé ; reste sa recette connectée.
 - DIASPORALE, bureau compris, est en ligne sur la démonstration seulement, depuis le 22/10 (https://diasporale-demo.vercel.app ; ADR-0038, [docs/35](../../35_PUBLICATION_DONNEES_DEMO_2026-10-22.md)). Sa production attend le propriétaire : décision d'hébergement A10, textes légaux relus, domaine diasporale.com, réseau créé par la console.
 - Premiers chiffres : le passage quotidien de 04 h 10 UTC mesure la veille. Une journée ne se publie qu'à partir de 5 échéances sur 5 auteurs.
+
+## SU02 et SU06 — Découvrir par piliers, et Alimentation et restauration
+
+Demande du propriétaire, le 22/10/2026. Il fallait séparer la marketplace des produits de celle des prestataires,
+la mode de la restauration et de l'épicerie, et donner une vraie place à « Ma boutique ». Réponse tirée de l'étude :
+- une seule marketplace à trois onglets (Produits, Boutiques, Services, ce dernier étant la marketplace des prestataires) ;
+- « Alimentation et restauration » est un univers à part (§ 5.4) ;
+- la gestion vit dans « Mon activité » (§ 12).
+
+Le propriétaire a validé l'ordre : publier la marketplace déjà faite, puis ces trois volets.
+
+- **Ma boutique.**
+  - Le moteur reçoit la route `myActivity`.
+  - « Créer » offre « Mon activité ».
+  - Le rail montre « Ma boutique » à qui gère une boutique.
+  - `/mes-boutiques` présente une carte de tableau de bord par boutique : gérer, vitrine, page, clients dans iCom Pro.
+- **SU06, premier volet.**
+  - Gabarit d'activité `food`, distinct de la mode.
+  - La carte de boutique dit son gabarit (`template`).
+  - Espace `/restauration` : les adresses au gabarit `food`, puis ce qu'on y commande, réglé à la remise.
+- **SU02.**
+  - Business : Boutiques, Services et artisans (avec une offre publiée), Alimentation et restauration (avec une adresse ouverte), réseau pro.
+  - Vie publique : presse.
+  - Divertissement : Clips, rencontres.
+- **Vérification.** `bun run verify` vert (588 s, 15 505 tests), puis recette locale, puis recette en ligne sur la démo :
+  - 1 440 px : rail « Ma boutique », Découvrir et ses trois piliers ;
+  - `/restauration` : l'épicerie et 13 offres de démonstration ;
+  - 390 px : aucun débordement, « Mon activité » dans « Créer ».
+  - Captures : [`recette/en-ligne-*.jpg`](recette/).
+- **Démo.** L'Épicerie Moussavou Démo est passée au gabarit « Alimentation et restauration » par son éditeur (compte Commerçant).
+- **Reste de SU06.**
+  - Le menu, les horaires et le plat du jour (en Story).
+  - Le libellé « Commander » sur les formules des publications des adresses `food`.
+  - L'index des produits par catégorie `food`, quand le catalogue de PRO.GA sera reflété.
 
 ## Conditions externes
 
