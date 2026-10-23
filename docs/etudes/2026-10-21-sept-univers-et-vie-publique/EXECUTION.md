@@ -15,7 +15,7 @@ Autorisation : le propriétaire a validé les décisions D01 à D08 le 21 octobr
 |---|---|---|
 | SU00 | Terminé — documentaire | ADR-0035 (D01–D08 acceptées, D09–D12 proposées) ; index des ADR mis à jour ; étude passée en version 1.1 |
 | SU01 | Analyse livrée ; mise en œuvre par sous-lots | exigences article par article, état du code, écarts, arbitrages juridiques, sous-lots SU01a à SU01j et calendrier ; à faire valider par un juriste avant toute mise en œuvre de l'identification et de l'âge |
-| SU01d | En ligne, restes compris, depuis le 22/10 (backend de `f574c75`, front `880d1aa`) ; délais légaux de la console en ligne le 22/10 (backend et console `d7f4784`) ; bureau de DIASPORALE (diasporale#26) en ligne sur la démonstration seulement (https://diasporale-demo.vercel.app, 22/10) | voir [SU01d — signalements réglementés](#su01d--signalements-réglementés) |
+| SU01d | En ligne, restes compris, depuis le 22/10 (backend de `f574c75`, front `880d1aa`) ; délais légaux de la console en ligne le 22/10 (backend et console `d7f4784`, puis `3253a10`), recette connectée faite le 23/10 ; bureau de DIASPORALE (diasporale#26) en ligne sur la démonstration seulement (https://diasporale-demo.vercel.app, 22/10) | voir [SU01d — signalements réglementés](#su01d--signalements-réglementés) |
 | SU02 | En ligne depuis le 23/10 (PR 77, fronts `1956641`) | Découvrir rangé par piliers (Business, Vie publique, Divertissement), tuiles des seuls univers ouverts ; voir [SU02 et SU06](#su02-et-su06--découvrir-par-piliers-et-alimentation-et-restauration) |
 | SU06 | Premier volet en ligne depuis le 23/10 (PR 77, backend et fronts `1956641`) | gabarit `food` « Alimentation et restauration », espace `/restauration` ; restent menu, horaires et plat du jour (étude, § 5.4) |
 | SU03 | À faire | types d'offre bien immobilier et véhicule ; dépend de MP03 |
@@ -197,9 +197,15 @@ Périmètre tranché par le propriétaire le 22/10/2026 : l'export suit la règl
   - lecture bornée : « au moins 50 » en retard et au total, « non déterminé » pour les 24 h à venir ; par fondement, « au moins 40 », « non déterminé », « au moins 10 » ;
   - à 390 px : aucun défilement horizontal (`scrollWidth` 390), aucun élément hors de l'écran ;
   - captures : [`recette/su01d-console-banc-*.jpg`](recette/).
+- Recette connectée, le 23/10, sur la console en ligne (`3253a10`), en lecture seule. Le propriétaire est entré par IDN (niveau 1, ADR-0039) :
+  - connexion : « Me déconnecter partout », puis IDN, **un seul PIN** (constat du propriétaire). La double saisie venait du portail IDN, qui rejouait `prompt=login` après la saisie. Le correctif, identite.ga#19, est en ligne depuis le 22/10 : Vercel publie le portail depuis le dépôt `ntsagui/idn-gabon`, commit `bd7ed1e` ;
+  - export : deux périodes (du 20 au 21/10 et du 21 au 22/10), cohortes « Masqué », échéances légales « Non mesurées pour cette période ». Les deux ont été calculées par le passage de 04 h 10 UTC, avant le second passage (`f574c75`, fusionné le 22/10 à 08 h 22 UTC). La première période mesurée sera celle du 22 au 23/10 ;
+  - alerte : « Aucun délai légal dépassé parmi les dossiers ouverts ou en examen. », 0 en retard, 0 dans les 24 h, 0 au total, avec le message de l'horloge ;
+  - à 390 px : navigation en liste déroulante, tuiles empilées ; aucun défilement horizontal (`scrollWidth` 390), aucun élément hors de l'écran, dans les deux panneaux ;
+  - ni téléchargement JSON ou CSV, ni « Actualiser les compteurs » (un calcul en base). Aucune capture n'est versée : l'écran réel montre l'opérateur.
 
 **Ce qui reste de SU01d**
-- Console en ligne le 22/10, avec l'accord écrit du propriétaire ([docs/35](../../35_PUBLICATION_DONNEES_DEMO_2026-10-22.md)) : backend et console `d7f4784`, puis `3253a10` (ADR-0039 : l'IDN de niveau 1 suffit). Le premier opérateur, le propriétaire, est posé ; reste sa recette connectée.
+- Console en ligne le 22/10, avec l'accord écrit du propriétaire ([docs/35](../../35_PUBLICATION_DONNEES_DEMO_2026-10-22.md)) : backend et console `d7f4784`, puis `3253a10` (ADR-0039 : l'IDN de niveau 1 suffit). Le premier opérateur, le propriétaire, est posé, et sa recette connectée est faite le 23/10 (ci-dessus).
 - DIASPORALE, bureau compris, est en ligne sur la démonstration seulement, depuis le 22/10 (https://diasporale-demo.vercel.app ; ADR-0038, [docs/35](../../35_PUBLICATION_DONNEES_DEMO_2026-10-22.md)). Sa production attend le propriétaire : décision d'hébergement A10, textes légaux relus, domaine diasporale.com, réseau créé par la console.
 - Premiers chiffres : le passage quotidien de 04 h 10 UTC mesure la veille. Une journée ne se publie qu'à partir de 5 échéances sur 5 auteurs.
 
